@@ -69,7 +69,7 @@ Your server should now be ready. To check if it's running visit http://localhost
 * das hier geht aber (siehe [gistutor.com](http://www.gistutor.com/geoserver/11-beginner-geoserver-tutorials/22-how-to-install-geoserver-202-onto-a-linux-fedora-server-using-the-binary-installer.html)):
 
 
-## Install importer-extension
+#### Install importer-extension
 1. Download extension from http://geoserver.org/release/2.9.1/ (Extensions > Miscellaneous > Importer)
 2. Unzip the extension to the geoserver's webapps lib folder `
 unzip ~/Downloads/geoserver-2.9.1-importer-plugin.zip -d /usr/share/geoserver/geoserver-2.9.1/webapps/geoserver/WEB-INF/lib
