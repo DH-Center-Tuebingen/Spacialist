@@ -20,6 +20,8 @@ The following packages you should be able to install from your package manager:
   - psycopg2
   - getopt
 - unzip
+- php-pgsql
+- libapache2-mod-php
 
 Beside these packages we use a couple of packages you have to install on your own.
 - Lumen (PHP-Framework)
@@ -29,7 +31,7 @@ Beside these packages we use a couple of packages you have to install on your ow
 ### Package installation
 1. Install all the required packages. For debian-based/apt systems you can use the following command
 ```bash
-sudo apt-get install apache2 unzip php composer postgresql postgis imagemagick php-imagick php-memcached php-mbstring ufraw memcached python3 python-pip python-rdflib python-psycopg2
+sudo apt-get install apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring ufraw memcached python3 python-pip python-rdflib python-psycopg2
 ```
 
 ### Lumen installation
