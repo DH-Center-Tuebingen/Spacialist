@@ -13,16 +13,7 @@ Spatialist is devoloped at the eScience-Center of the University of Tuebingen in
   - php-imagick (`apt-get install php-imagick`)
   - ufraw (`apt-get install ufraw`)
 - Lumen (PHP-Framework)
-- GDAL (maybe?)
 - Browser with JavaScript enabled
 
 ### Optional
 - Geoserver
-
-## Project Partners
-- [University of Tuebingen](http://www.uni-tuebingen.de/en.html)
-	- [eScience-Center (Coordination)](http://www.uni-tuebingen.de/en/facilities/informations-kommunikations-und-medienzentrum-ikm/escience-center.html)
-	- [Computer Sciences, Department of Information Services](http://www.uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/fachbereich/struktur/informationsdienste.html)
-	- [Institute of Prehistory, Early History and Medieval Archaeology](http://www.uni-tuebingen.de/en/faculties/faculty-of-humanities/fachbereiche/altertums-und-kunstwissenschaften/ur-und-fruehgeschichte-und-archaeologie-des-mittelalters/institut.html)
-- [State office for the preservation of monuments Baden-Wuerttemberg](http://www.denkmalpflege-bw.de/)
-- [Archeological Institute of the University of Goettingen](https://www.uni-goettingen.de/en/133285.html)
