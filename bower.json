@@ -39,7 +39,8 @@
     "angular-translate-loader-static-files": "^2.12.1",
     "proj4": "^2.3.15",
     "mermaid": "^6.0.0",
-    "world-flags-sprite": "*"
+    "world-flags-sprite": "*",
+    "font-awesome": "fontawesome#^4.6.3"
   },
   "resolutions": {
     "angular": "^1.5.8",
