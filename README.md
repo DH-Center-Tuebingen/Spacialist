@@ -17,3 +17,8 @@ Spatialist is devoloped at the eScience-Center of the University of Tuebingen in
 
 ### Optional
 - Geoserver
+
+### Acknowledgments
+Development of Spacialist is co-funded by the Ministry of Science,
+Research and the Arts Baden-Württemberg, funding programme "E-Science
+Baden-Württemberg".
