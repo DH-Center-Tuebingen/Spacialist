@@ -18,19 +18,19 @@ $app->get('/', function () use ($app) {
     return $app->version();
 });
 
-$app->post('test2', function(Request $request) {
-	return response()->json($request);
-});
-
-$app->post('authtest', 'AuthController@postLogin');
-$app->group(['middleware' => 'auth:api'], function($app) {
-    $app->post('authtest2', 'AuthController@getAuthenticatedUser');
-    $app->get('getauthtest', function() {
-	return response()->json(['message' => 'Hello World!',]);
-    });
-});
-
-$app->post('profile', function(Request $request, $id) {
-	if(Auth::attempt($request)) return Auth::user();
-	else return null;
-});
+$app->get('context/artifacts/get', 'ContextController@getArtifacts');
+$app->get('context/children/get/{id}', 'ContextController@getChildren');
+$app->get('context/get', 'ContextController@get');
+$app->get('context/getAll', 'ContextController@getAll');
+$app->get('context/getAttributes/{id}', 'ContextController@getAttributes');
+$app->get('context/get/type/{id}', 'ContextController@getType');
+$app->get('literature/getAll', 'LiteratureController@getAll');
+$app->get('image/getAll', 'ImageController@getAll');
+$app->get('image/get/{id}', 'ImageController@getImage');
+$app->get('image/getByContext/{id}', 'ImageController@getByContext');
+$app->get('gps/get/markers', 'GpsController@getMarkers');
+$app->get('gps/get/markers/{id}', 'GpsController@getMarker');
+$app->get('context/delete/{id}', 'ContextController@delete');
+$app->post('image/upload', 'ImageController@uploadImage');
+$app->post('context/add', 'ContextController@add');
+$app->post('context/set', 'ContextController@set');
