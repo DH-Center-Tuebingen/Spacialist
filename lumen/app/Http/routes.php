@@ -19,7 +19,7 @@ $app->get('/', function () use ($app) {
 });
 
 $app->get('context/artifacts/get', 'ContextController@getArtifacts');
-$app->get('context/children/get/{id}', 'ContextController@getChildren');
+$app->get('context/get/children/{id}', 'ContextController@getChildren');
 $app->get('context/get', 'ContextController@get');
 $app->get('context/getAll', 'ContextController@getAll');
 $app->get('context/getAttributes/{id}', 'ContextController@getAttributes');
@@ -31,6 +31,12 @@ $app->get('image/getByContext/{id}', 'ImageController@getByContext');
 $app->get('gps/get/markers', 'GpsController@getMarkers');
 $app->get('gps/get/markers/{id}', 'GpsController@getMarker');
 $app->get('context/delete/{id}', 'ContextController@delete');
+$app->get('sources/get/{aid}/{fid}', 'SourceController@getByAttribute');
+$app->get('sources/get/{id}', 'SourceController@getByContext');
+$app->get('sources/delete/{id}', 'SourceController@delete');
+$app->get('sources/delete/attribute/{aid}/{fid}', 'SourceController@deleteByAttribute');
+$app->get('sources/delete/context/{id}', 'SourceController@deleteByContext');
 $app->post('image/upload', 'ImageController@uploadImage');
 $app->post('context/add', 'ContextController@add');
 $app->post('context/set', 'ContextController@set');
+$app->post('sources/add', 'SourceController@add');

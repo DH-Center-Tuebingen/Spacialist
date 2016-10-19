@@ -15,13 +15,13 @@ class CreateAttributesTable extends Migration
     {
         Schema::create('attributes', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('thesaurus_id')->unsigned();
+            $table->string('thesaurus_id', 256);
             $table->string('datatype', 128);
-            $table->integer('thesaurus_root_id')->unsigned()->comment('only for string-sc and string-mc');
+            $table->string('thesaurus_root_id', 256)->comment('only for string-sc and string-mc');
             $table->timestamps();
 
-            $table->foreign('thesaurus_id')->references('id')->on('th_concept');
-            $table->foreign('thesaurus_root_id')->references('id')->on('th_concept');
+            $table->foreign('thesaurus_id')->references('concept_url')->on('th_concept');
+            $table->foreign('thesaurus_root_id')->references('concept_url')->on('th_concept');
         });
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Log;
 use App\User;
 use \DB;
 use Illuminate\Http\Request;
@@ -17,14 +18,15 @@ class ContextController extends Controller {
 
     public function get() {
         return response()->json(
-            DB::select(
-                "SELECT C.th_uri AS index, public.\"getLabelForId\"(C.th_uri, 'de') AS title, CA.c_id AS cId, CA.a_id AS aId, public.\"getLabelForId\"(A.th_uri, 'de') AS val, A.datatype, C.type
-                FROM context_types AS C
-                LEFT JOIN context_attributes AS CA ON C.id = CA.c_id
-                LEFT JOIN attributes AS A ON CA.a_id = A.id
-                WHERE C.type = 0
-                ORDER BY val"
-            )
+            DB::table('context_types as c')
+                ->select('c.th_uri as index', 'ca.c_id as cid', 'ca.a_id as aid', 'a.datatype', 'c.type',
+                    DB::raw("public.\"getLabelForId\"(C.th_uri, 'de') AS title, public.\"getLabelForId\"(A.th_uri, 'de') AS val")
+                )
+                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.c_id')
+                ->leftJoin('attributes as a', 'ca.a_id', '=', 'a.id')
+                ->where('c.type', '=', '0')
+                ->orderBy('val')
+                ->get()
         );
     }
 
@@ -40,14 +42,38 @@ class ContextController extends Controller {
     }
 
     public function getAttributes($id) {
-        $rows = DB::select(
-            "SELECT public.\"getLabelForId\"(C.th_uri, 'de') AS title, CA.c_id AS cId, CA.a_id AS aId, public.\"getLabelForId\"(A.th_uri, 'de') AS val, A.datatype, A.th_root as root
-            FROM context_types AS C
-            LEFT JOIN context_attributes AS CA ON C.id = CA.c_id
-            LEFT JOIN attributes AS A ON CA.a_id = A.id
-            WHERE C.id = $id"
-        );
-        // TODO move to controller and get option attributes
+        $rows = DB::table('context_types as c')
+        ->select('ca.c_id as cid', 'ca.a_id as aid', 'a.datatype', 'a.th_root as root',
+            DB::raw("public.\"getLabelForId\"(C.th_uri, 'de') AS title, public.\"getLabelForId\"(A.th_uri, 'de') AS val")
+        )
+        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.c_id')
+        ->leftJoin('attributes as a', 'ca.a_id', '=', 'a.id')
+        ->where('c.id', '=', $id)
+        ->get();
+        foreach($rows as &$row) {
+            if(!isset($row->root)) continue;
+            $rootId = DB::table('th_concept')
+                ->select('id_th_concept')
+                ->where('concept_url', '=', $row->root)
+                ->first();
+            if(!isset($rootId)) continue;
+            $rootId = $rootId->id_th_concept;
+            $row->choices = DB::select("
+                WITH RECURSIVE
+                top AS (
+                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    FROM th_broaders br
+                    WHERE broader_id = $rootId
+                    UNION
+                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    FROM top t, th_broaders br
+                    WHERE t.narrower_id = br.broader_id
+                )
+                SELECT *
+                FROM top
+            ");
+        }
+        // TODO get option attributes
         /*foreach($rows as &$row) {
             if($row->datatype == "option") {
                 $row->attributes = getOptionsForId($db, $row['root']);
@@ -76,18 +102,23 @@ class ContextController extends Controller {
 
     public function getArtifacts() {
         return response()->json(
-            DB::select(
-                "SELECT C.th_uri AS index, public.\"getLabelForId\"(C.th_uri, 'de') AS title, CA.c_id AS cId, CA.a_id AS aId, public.\"getLabelForId\"(A.th_uri, 'de') AS val, A.datatype, C.type
-                FROM context_types AS C
-                LEFT JOIN context_attributes AS CA ON C.id = CA.c_id
-                LEFT JOIN attributes AS A ON CA.a_id = A.id
-                WHERE C.type = 1
-                ORDER BY val"
-            )
+            DB::table('context_types as c')
+                ->select('c.th_uri as index', 'ca.c_id as cid', 'ca.a_id as aid', 'a.datatype', 'c.type',
+                    DB::raw(
+                        "public.\"getLabelForId\"(C.th_uri, 'de') AS title, public.\"getLabelForId\"(A.th_uri, 'de') AS val"
+                    )
+                )
+                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.c_id')
+                ->leftJoin('attributes as a', 'ca.a_id', '=', 'a.id')
+                ->where('c.type', '=', '1')
+                ->orderBy('val')
+                ->get()
         );
     }
 
     public function getChildren($id) {
+        $intId = filter_var($id, FILTER_VALIDATE_INT);
+        if($intId === false || $intId <= 0) return;
         $rows = DB::select(
             "WITH RECURSIVE
             q AS (
@@ -116,7 +147,7 @@ class ContextController extends Controller {
     }
 
     public function add(Request $request) {
-        $title = $request->get('title');
+        //$title = $request->get('title');
         $lat = $request->get('lat');
         $lng = $request->get('lng');
         $id = $request->get('id');
@@ -141,7 +172,7 @@ class ContextController extends Controller {
                     'lng' => $lng
                 ]);
         }
-        foreach($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid']) as $key => $value) {
+        foreach($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid', 'images']) as $key => $value) {
             $ids = explode("_", $key);
             $aid = $ids[1];
             if(!empty($ids[2])) {
@@ -203,16 +234,16 @@ class ContextController extends Controller {
                 }
             } else {
                 $vals = array(
-                    ['f_id' => $fid],
-                    ['a_id' => $aid]
+                    ['f_id', '=', $fid],
+                    ['a_id', '=', $aid]
                 );
-                if($isOption) $vals[] = ['o_id', $oid];
-                $rows = DB::table($tbl)
+                if($isOption) $vals[] = ['o_id', '=', $oid];
+                $valId = DB::table($tbl)
                     ->where($vals)
-                    ->get();
-                if($id > 0) {
+                    ->value('id');
+                if($valId > 0) {
                     DB::table($tbl)
-                        ->where($vals)
+                        ->where('id', '=', $valId)
                         ->update(['str_val' => $value]);
                 } else {
                     $vals = array(

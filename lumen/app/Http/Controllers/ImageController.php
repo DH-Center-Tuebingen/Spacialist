@@ -131,10 +131,9 @@ class ImageController extends Controller
                     ->select("ph.id as id", "ph.modified as modified", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.create_time as created", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id", "film.id as film_id", "film.modified as film_modified", "film.name as filmname", "film.url as url")
                     ->get();
         foreach($images as &$img) {
-            $img->url = storage_path() . '/' . $img->url;
-            $img->thumb_url = $img->url . $img->thumbname;
-            $img->url = $img->url . $img->filename;
-            $img->filesize = filesize($img->url);
+            $img->thumb_url = storage_path($img-> url . $img->thumbname);
+            $img->url = storage_path(img->url . $img->filename);
+            if(file_exists($img->url) && is_file($img->url)) $img->filesize = filesize($img->url);
             $img->modified = strtotime($img->modified) * 1000;
             $img->created = strtotime($img->created) * 1000;
         }

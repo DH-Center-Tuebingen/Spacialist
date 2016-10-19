@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateContextTypesTable extends Migration
+class CreateThBroadersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,14 @@ class CreateContextTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('context_types', function (Blueprint $table) {
+        Schema::create('th_broaders', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('thesaurus_id', 256);
-            $table->integer('type')->unsigned();
+            $table->integer('broader_id')->unsigned();
+            $table->integer('narrower_id')->unsigned();
             $table->timestamps();
-
-            $table->foreign('thesaurus_id')->references('concept_url')->on('th_concept');
+            
+            $table->foreign('broader_id')->references('id')->on('th_concept');
+            $table->foreign('narrower_id')->references('id')->on('th_concept');
         });
     }
 
@@ -30,6 +31,6 @@ class CreateContextTypesTable extends Migration
      */
     public function down()
     {
-        Schema::drop('context_types');
+        Schema::drop('th_broaders');
     }
 }
