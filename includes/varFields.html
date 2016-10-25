@@ -1,0 +1,29 @@
+<label class="control-label col-md-3" for="a{{ attr.context }}_{{ attr.attr }}">{{ attr.name }}:</label>
+<div class="col-md-9" ng-switch on="attr.type">
+    <input class="form-control" ng-switch-when="string" type="text" placeholder="Text" id="a{{ attr.context }}_{{ attr.attr }}" ng-model="attribData[attribDataType][attr.context+'_'+attr.attr]"/>
+    <input class="form-control" ng-switch-when="double" type="number" step="any" min="0" placeholder="2.0" id="a{{ attr.context }}_{{ attr.attr }}" ng-model="attribData[attribDataType][attr.context+'_'+attr.attr]"/>
+    <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.context }}_{{ attr.attr }}" ng-model="attribData[attribDataType][attr.context+'_'+attr.attr]"></textarea>
+    <p class="input-group" ng-switch-when="date">
+        <input type="text" class="form-control" id="a{{ attr.context }}_{{ attr.attr }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(attribData[attribDataType][attr.context+'_'+attr.attr])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="attribData[attribDataType][attr.context+'_'+attr.attr]"/>
+        <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="open()"><i class="fa fa-calendar"></i></button>
+        </span>
+    </p>
+    <div ng-switch-when="context-mc">
+        <ui-select multiple ng-model="choices" close-on-select="false" on-select="ctrl.onAddToList($item, $model)" on-remove="ctrl.onRemoveFromList($item, $model)">
+            <ui-select-match>{{ $item }}</ui-select-match>
+            <ui-select-choices repeat="ctx in ctxts | filter:$select.search">
+                {{ ctx }}
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div ng-switch-when="context-sc">
+        <ui-select ng-model="type" on-select="ctrl.onSelectCallback($item, $model)" ng-model="attribData[attribDataType][attr.context+'_'+attr.attr]">
+          <ui-select-match placeholder="Select context">{{ $select.selected }}</ui-select-match>
+          <ui-select-choices repeat="item in ctxts | filter: $select.search">
+            <span ng-bind-html="item | highlight: $select.search"></span>
+          </ui-select-choices>
+        </ui-select>
+    </div>
+    <input class="form-control" ng-switch-default type="text" id="a{{ attr.context }}_{{ attr.attr }}" ng-model="attribData[attribDataType][attr.context+'_'+attr.attr]" placeholder="{{ attr.name }}" />
+</div>

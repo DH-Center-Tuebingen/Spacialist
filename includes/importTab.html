@@ -1,0 +1,57 @@
+<h3>{{ 'import data' | translate }}</h3>
+<div ng-hide="subNav.fileImp || subNav.valueImp">
+    <button type="button" class="btn btn-primary col-md-5" ng-click="subNav.triggerFileSelect()"><i class="fa fa-file-text-o"></i> {{ 'import file' | translate }}</button>
+    <input data-upload type="file" name="subNav.values.fileName" accept="text/csv" id="importFile" class="hide"/>
+    <button type="button" class="btn btn-primary col-md-5 col-md-offset-2" ng-click="subNav.setValueImport()"><i class="fa fa-pencil"></i> {{ 'enter values' | translate }}</button>
+</div>
+<div class="col-md-offset-4" ng-show="subNav.fileImp">
+    <p>{{ 'import file' | translate }}: <i>{{ subNav.values.fileName }}</i>?</p>
+    <div ng-show="subNav.fileImp">
+        <form ng-submit="subNav.submitImport()" class="form-horizontal" role="form" name="addPointForm">
+            <button type="button" class="btn btn-danger col-md-5" ng-click="subNav.resetImport()"><i class="fa fa-remove"></i> {{ 'cancel' | translate }}</button>
+            <button type="submit" class="btn btn-success col-md-offset-2 col-md-5"><i class="fa fa-check"></i> {{ 'submit' | translate }}</button>
+        </form>
+    </div>
+</div>
+<div ng-show="subNav.valueImp">
+    <h4>{{ 'create new point' | translate }}</h4>
+    <form ng-submit="subNav.submitImport(addPointForm.$valid)" class="form-horizontal" role="form" name="addPointForm" novalidate>
+        <div class="form-group" ng-class="{ 'has-error': addPointForm.valname.$invalid && (!addPointForm.valname.$pristine || addPointFormSubmitted) }">
+            <label class="control-label col-md-4" for="name">Name:</label>
+            <div class="col-md-8">
+                <input class="form-control" type="text" name="valname" ng-model="subNav.values.name" id="name" required/>
+                <div ng-messages="addPointForm.valname.$error" class="errors help-block" ng-show="addPointForm.valname.$invalid && (!addPointForm.valname.$pristine || addPointFormSubmitted)">
+                    <div ng-messages-include="validations.html"></div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group" ng-class="{ 'has-error': addPointForm.xval.$invalid && (!addPointForm.xval.$pristine || addPointFormSubmitted) }">
+            <label class="control-label col-md-4" for="x">X:</label>
+            <div class="col-md-8">
+                <input class="form-control" type="text" name="xval" ng-model="subNav.values.x" id="x" placeholder="48.21 (WGS84)" required number />
+                <div ng-messages="addPointForm.xval.$error" class="errors help-block" ng-show="addPointForm.xval.$invalid && (!addPointForm.xval.$pristine || addPointFormSubmitted)">
+                    <div ng-messages-include="validations.html"></div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group" ng-class="{ 'has-error': addPointForm.yval.$invalid && (!addPointForm.yval.$pristine || addPointFormSubmitted) }">
+            <label class="control-label col-md-4" for="y">Y:</label>
+            <div class="col-md-8">
+                <input class="form-control" type="text" name="yval" ng-model="subNav.values.y" id="y" placeholder="7.348 (WGS84)" required number />
+                <div ng-messages="addPointForm.yval.$error" class="errors help-block" ng-show="addPointForm.yval.$invalid && (!addPointForm.yval.$pristine || addPointFormSubmitted)">
+                    <div ng-messages-include="validations.html"></div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-4" for="z">Z:</label>
+            <div class="col-md-8">
+                <input class="form-control" type="text" name="zval" ng-model="subNav.values.z" id="z" />
+            </div>
+        </div>
+        <div ng-show="subNav.valueImp">
+            <button type="button" class="btn btn-danger col-md-offset-4 col-md-3" ng-click="subNav.resetImport()"><i class="fa fa-remove"></i> {{ 'cancel' | translate }}</button>
+            <button type="submit" class="btn btn-success col-md-offset-2 col-md-3"><i class="fa fa-check"></i> {{ 'submit' | translate }}</button>
+        </div>
+    </form>
+</div>

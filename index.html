@@ -1,0 +1,106 @@
+<!doctype html>
+<html ng-app="tutorialApp">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/png" href="favicon.png" sizes="32x32">
+        <link rel="stylesheet" type="text/css" href="bower_components/world-flags-sprite/stylesheets/flags16.css" />
+        <link rel="stylesheet" type="text/css" href="bower_components/angular-ui-tree/dist/angular-ui-tree.min.css" />
+        <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
+        <link rel="stylesheet" href="bower_components/leaflet-draw/dist/leaflet.draw.css" />
+        <link rel="stylesheet" href="css/animate.css" />
+        <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.min.css" />
+        <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+        <!--<link href='https://fonts.googleapis.com/css?family=Fira+Sans:400,300italic,300,400italic,500,500italic,700,700italic' rel='stylesheet' type='text/css'>-->
+        <link rel="stylesheet" href="css/style.css" />
+        <title>Spacialist</title>
+    </head>
+    <body>
+        <nav class="navbar navbar-inverse" role="navigation">
+            <div class="container-fluid" ng-controller="headerCtrl">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle"
+                     ng-click="isCollapsed = !isCollapsed" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#/">
+                        <img src="favicon.png" alt="spacialist logo" style="height: 20px; width: 20px; display: inline; vertical-align: top;"/>
+                        Spacialist
+                    </a>
+                </div>
+                <div class="navbar-collapse" id="navbar-collapse" uib-collapse="isCollapsed">
+                    <ul class="nav navbar-nav">
+                        <li ng-class="{ active: isActive('/map') }">
+                            <a href="#/map">
+                                <span class="fa fa-globe link-icon"></span>{{ 'map' | translate }}
+                            </a>
+                        </li>
+                        <li class="dropdown" uib-dropdown>
+                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                {{ 'import_export' | translate }} <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" uib-dropdown-menu>
+                                <li ><a class="nav-link" href="#/file/import"><i class="fa fa-cloud-upload"></i> {{ 'import' | translate }}</a>
+                                </li>
+                                <li ><a class="nav-link" href="#/file/export"><i class="fa fa-cloud-download"></i> {{ 'export' | translate }}</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="col-md-12">
+            <ul ng-controller="LangCtrl" class="list-inline" id="langSwitch">
+              <li>
+                  <a href="" ng-click="switchLang('en_US')">
+                      <flag country="gb" size="16" ng-class="{ activeLang: isLangSet('en') }"></flag>
+                  </a>
+              </li>
+              <li>
+                  <a href="" ng-click="switchLang('de')">
+                      <flag country="de" size="16" ng-class="{ activeLang: isLangSet('de') }"></flag>
+                  </a>
+              </li>
+            </ul>
+        </div>
+        <div ng-view class="col-md-12"></div>
+        <script src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="bower_components/lodash/dist/lodash.min.js"></script>
+        <script src="bower_components/angular/angular.min.js"></script>
+        <script src="bower_components/angular-animate/angular-animate.min.js"></script>
+        <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+        <script src="bower_components/angular-route/angular-route.min.js"></script>
+        <script src="bower_components/angular-messages/angular-messages.min.js"></script>
+        <script src="bower_components/angular-translate/angular-translate.min.js"></script>
+        <script src="bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
+        <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+        <script src="bower_components/ng-file-upload/ng-file-upload-all.min.js"></script>
+        <script src="bower_components/angular-ui-tree/dist/angular-ui-tree.min.js"></script>
+        <script src="bower_components/leaflet/dist/leaflet.js"></script>
+        <script src="bower_components/leaflet-draw/dist/leaflet.draw.js"></script>
+        <script src="bower_components/ui-leaflet/dist/ui-leaflet.min.js"></script>
+        <script src="bower_components/ui-leaflet-draw/dist/ui-leaflet-draw.js"></script>
+        <script src="bower_components/angular-simple-logger/dist/angular-simple-logger.min.js"></script>
+        <script src="bower_components/angular-mousewheel/mousewheel.js"></script>
+        <script src="bower_components/hamsterjs/hamster.js"></script>
+        <script src="bower_components/ng-infinite-scroll-npm-is-better-than-bower/build/ng-infinite-scroll.min.js"></script>
+        <script src="bower_components/angular-ui-select/dist/select.min.js"></script>
+        <script src="bower_components/ng-flags/src/directives/ng-flags.js"></script>
+        <script src="bower_components/proj4/dist/proj4.js"></script>
+        <script src="bower_components/d3/d3.min.js"></script>
+        <script src="bower_components/klayjs-d3/dist/klayjs-d3.min.js"></script>
+        <script src="bower_components/klayjs/klay.js"></script>
+        <script src="app.js"></script>
+        <script src="controllers/langCtrl.js"></script>
+        <script src="controllers/headerCtrl.js"></script>
+        <script src="controllers/mapCtrl.js"></script>
+        <script src="controllers/dateCtrl.js"></script>
+        <script src="controllers/subTreeCtrl.js"></script>
+        <script src="controllers/optionCtrl.js"></script>
+    </body>
+</html>

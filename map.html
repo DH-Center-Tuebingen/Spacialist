@@ -1,0 +1,107 @@
+<div ng-controller="mapCtrl">
+    <div class="col-md-3">
+        <!--<div class="row">
+            <ul class="nav nav-tabs nav-justified">
+                <li role="presentation" ng-class="{active: subNav.impTab}" ng-click="subNav.setImportTab()"><a><i class="fa fa-cloud-upload"></i></a></li>
+                <li role="presentation" ng-class="{active: subNav.expTab}" ng-click="subNav.setExportTab()"><a><i class="fa fa-cloud-download"></i></a></li>
+                <li role="presentation" ng-class="{active: subNav.bibTab}" ng-click="subNav.setBibTab()"><a><i class="fa fa-pencil"></i></a></li>
+            </ul>
+        </div>-->
+        <!--<div class="row" ng-if="subNav.impTab">
+            <ng-include src="'includes/importTab.html'"></ng-include>
+        </div>
+        <div class="row" ng-if="subNav.expTab">
+            <h3>{{ 'export data' | translate }}</h3>
+            <div ng-hide="hasMarkers()">
+                <p>{{ 'no markers' | translate }}. {{ 'export not possible' | translate }}.</p>
+            </div>
+            <div ng-show="hasMarkers()">
+                <div class="list-group">
+                    <button type="button" class="btn btn-success list-group-item" ng-click="write2csv()"><i class="fa fa-text-o"></i> {{ 'write to csv' | translate }}</button>
+                </div>
+            </div>
+        </div>-->
+        <div class="row" ng-if="subNav.bibTab">
+            <div ng-show="markerActive">
+                <ng-include src="'includes/editLib.html'"></ng-include>
+            </div>
+            <div ng-hide="markerActive" style="margin-top: 15px;">
+                <h3>Anlegen</h3>
+                <p ng-show="markerPlaceMode" class="alert alert-info">Platziere den Marker auf der Karte</p>
+                <div ng-hide="markerPlaceMode">
+                    <p class="alert alert-warning">{{ 'no marker selected' | translate }}</p>
+                    <button type="button" class="btn btn-success" ng-click="subNav.triggerCreateMarker()"><i class="fa fa-plus"></i> {{ 'create new lib' | translate }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<div ng-class="{'col-md-9': !sideNav.stuffTab, 'col-md-11 floating-tab-md-11': sideNav.stuffTab}">-->
+    <div class="col-md-9">
+        <div class="col-md-11">
+            <div id="map-container" ng-if="sideNav.mapTab && map">
+                <leaflet bounds="map.bounds" layers="map.layers" lf-draw="map.drawOptions" controls="map.controls" markers="markers" event-broadcast="map.events" height="768px" width="100%">
+                    <layercontrol order="normal" icons="map.layercontrol.icons" auto-hide-opacity="true" show-groups="true" title="" base-title="Base Layers" overlays-title="Overlays"></layercontrol>
+                </leaflet>
+            </div>
+            <div ng-if="sideNav.imageTab">
+                <div ng-if="!markerActive">
+                    <ng-include src="'includes/allImages.html'" />
+                </div>
+                <div ng-if="markerActive">
+                    <ng-include src="'includes/linkedImages.html'" />
+                </div>
+            </div>
+            <div ng-if="sideNav.listTab">
+                <ng-include src="'includes/listTab.html'" />
+            </div>
+            <div ng-if="sideNav.stuffTab">
+                <ng-include src="'includes/stuffTab.html'"></ng-include>
+            </div>
+            <div ng-if="sideNav.optionAttributes">
+                <h3>{{ sideNav.activeOptionTab.name }}</h3>
+                <form class="form-horizontal" role="form">
+                    <form-field fields="sideNav.optionAttributes" output="output">
+                    </form-field>
+                </form>
+            </div>
+            <div ng-if="sideNav.sourcesTab">
+                <h3>Quellennachweise <small>{{ markerValues.name }}</small></h3>
+                <p class="alert alert-warning" ng-if="markerValues.sources.length == 0">
+                    Noch keine Quellen hinzugefügt.
+                    <br/>
+                    Um Quellen hinzuzufügen klicken Sie auf das <sup><i class="fa fa-bookmark source-link" aria-hidden="true"></i></sup>-Symbol neben den Element-Eigenschaften.
+                </p>
+                <table ng-if="markerValues.sources.length > 0" class="table table-striped table-bordered table-hover">
+                    <tr ng-repeat="entry in markerValues.sources" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
+                        <td>
+                            <a ng-click="openSourceModal(entry.attribute_name, entry.attribute_id)" style="cursor: pointer;">{{ entry.attribute_name }}</a>
+                        </td>
+                        <td class="td-50 word-break">
+                            {{ entry.literature.title }}<span ng-if="entry.literature.year"> - <i>{{ entry.literature.year}}</i></span>
+                            <br/>
+                            <strong>{{ entry.literature.author }}</strong><span ng-if="entry.literature.isbn"> ({{ entry.literature.isbn }})</span>
+                        </td>
+                        <td class="td-50 word-break">
+                            <span class="delete-icon" ng-class="{'hidden-del': !hovered}" ng-click="deleteSourceEntry($index, markerValues.sources)">
+                                &times;
+                            </span>
+                            <span class="deletable">
+                                {{ entry.description }}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-1 tabs-right">
+            <ul class="nav nav-tabs">
+                <li ng-if="map" role="presentation" ng-class="{active: sideNav.mapTab}" ng-click="sideNav.setMapTab()"><a><i class="fa fa-fw fa-map-marker"></i></a></li>
+                <li role="presentation" ng-class="{active: sideNav.imageTab}" ng-click="sideNav.setImageTab()"><a><i class="fa fa-fw fa-picture-o"></i></a></li>
+                <li ng-show="markerActive" role="presentation" ng-class="{active: sideNav.listTab}" ng-click="sideNav.setListTab()"><a><i class="fa fa-fw fa-list-alt"></i></a></li>
+                <li ng-show="markerActive" role="presentation" ng-class="{active: sideNav.stuffTab}" ng-click="sideNav.setStuffTab()"><a><i class="fa fa-fw fa-object-group"></i></a></li>
+                <li ng-if="markerActive" role="presentation" ng-class="{ active: sideNav.activeOptionTab.index == optField.aid }" ng-click="sideNav.setOptionTab(optField.aid)" ng-repeat="optField in optionFields"><a title="{{ optField.val}}"><i class="fa fa-fw fa-dashboard"></i></a></li>
+                <li ng-if="markerActive" role="presentation" ng-class="{active: sideNav.sourcesTab}" ng-click="sideNav.setSourcesTab()"><a><i class="fa fa-fw fa-book"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
