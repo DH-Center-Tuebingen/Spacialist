@@ -1,0 +1,65 @@
+<div ng-controller="optionCtrl">
+    <div class="form-group" ng-repeat="attr in fields">
+        <label class="control-label col-md-2" for="a{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}">{{ attr.name }}:</label>
+        <div class="col-md-6" ng-switch on="attr.type">
+            <input class="form-control" ng-switch-when="string" type="text" placeholder="{{ attr.name }}" id="a{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]"/>
+            <input class="form-control" ng-switch-when="double" type="number" step="any" min="0" placeholder="2.0" id="a{{ attr.context }}_{{ attr.attr }}" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]"/>
+            <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]"></textarea>
+            <p class="input-group" ng-switch-when="date">
+                <input type="text" class="form-control" id="a{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(output[attr.context+'_'+attr.attr+'_'+attr.option])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]"/>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="open()"><i class="fa fa-calendar"></i></button>
+                </span>
+            </p>
+            <div ng-switch-when="context-mc">
+                <ui-select multiple ng-model="choices" close-on-select="false" on-select="ctrl.onAddToList($item, $model)" on-remove="ctrl.onRemoveFromList($item, $model)">
+                    <ui-select-match>{{ $item }}</ui-select-match>
+                    <ui-select-choices repeat="ctx in attr.options | filter:$select.search">
+                        {{ ctx }}
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div ng-switch-when="context-sc">
+                <ui-select ng-model="type" on-select="ctrl.onSelectCallback($item, $model)" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]">
+                  <ui-select-match placeholder="Select context">{{ $select.selected }}</ui-select-match>
+                  <ui-select-choices repeat="item in attr.options | filter: $select.search">
+                    <span ng-bind-html="item | highlight: $select.search"></span>
+                  </ui-select-choices>
+                </ui-select>
+            </div>
+
+            <div ng-switch-when="list">
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" ng-click="toggleList(attr.context, attr.attr)">
+                            <i class="fa fa-caret-down" style="font-size: 0.9em; top: 0;" ng-show="hideLists[attr.context+'_'+attr.attr+'_'+attr.option]"></i>
+                            <i class="fa fa-caret-up" style="font-size: 0.9em" ng-hide="hideLists[attr.context+'_'+attr.attr+'_'+attr.option]"></i>
+                        </button>
+                    </span>
+                    <input class="form-control" type="text" id="{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" ng-model="input[attr.context+'_'+attr.attr+'_'+attr.option]" placeholder="weiteren Punkt anlegen"/>
+                    <span class="input-group-btn">
+                        <button class="btn btn-success" type="button" ng-click="addListEntry(attr.context, attr.attr, attr.option)" ng-disabled="!input[attr.context+'_'+attr.attr+'_'+attr.option]">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </span>
+                </div>
+                <div ng-hide="hideLists[attr.context+'_'+attr.attr+'_'+attr.option]" class="col-md-12 hideable-list">
+                    <ol class="list-group inline-list">
+                        <li ng-repeat="li in output[attr.context+'_'+attr.attr+'_'+attr.option] track by $index" class="list-group-item animated-item" ng-mouseenter="hovered = true;" ng-mouseleave="hovered = false;">
+                            <span class="delete-icon" ng-show="hovered && !editEntry[attr.context+'_'+attr.attr+'_'+attr.option][$index]" ng-click="removeListItem(attr.context, attr.attr, attr.option, $index)">
+                                <i class="fa fa-remove"></i>
+                            </span>
+                            <span ng-hide="editEntry[attr.context+'_'+attr.attr+'_'+attr.option][$index]" ng-click="editListEntry(attr.context, attr.attr, attr.option, $index, li)">{{ li.name }}</span>
+                            <div class="item-edit-tab" ng-show="editEntry[attr.context+'_'+attr.attr+'_'+attr.option][$index]">
+                                <input type="text" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option][$index].name" class="list-item-edit" />
+                                <button type="button" class="btn btn-success" ng-click="storeEditListEntry()"><i class="fa fa-check"></i></button>
+                                <button type="button" class="btn btn-danger" ng-click="cancelEditListEntry()"><i class="fa fa-ban"></i></button>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            <input class="form-control" ng-switch-default type="text" id="a{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]" placeholder="{{ attr.name }}" />
+        </div>
+    </div>
+</div>

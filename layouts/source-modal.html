@@ -1,0 +1,66 @@
+<div class="modal-header">
+    <h4>Quellenangaben <small>{{ sourceModalFields.name }}</small></h4>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <tr ng-repeat="entry in sourceModalFields.addedSources" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
+                <td class="td-50 word-break">
+                    {{ entry.src.title }}<span ng-if="entry.src.year"> - <i>{{ entry.src.year}}</i></span>
+                    <br/>
+                    <strong>{{ entry.src.author }}</strong><span ng-if="entry.src.isbn"> ({{ entry.src.isbn }})</span>
+                </td>
+                <td class="td-50 word-break">
+                    <span class="delete-icon" ng-class="{'hidden-del': !hovered}" ng-click="deleteSourceEntry($index, sourceModalFields.addedSources)">
+                        &times;
+                    </span>
+                    <span class="deletable">
+                        {{ entry.desc }}
+                    </span>
+                </td>
+            </tr>
+        </table>
+        <div class="col-md-6">
+            <ui-select id="lit{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" ng-model="sourceModalFields.currentSource" close-on-select="true">
+                <ui-select-match>
+                    {{ $select.selected.title | truncate:80:true }}
+                </ui-select-match>
+                <ui-select-choices repeat="lit in sourceModalFields.literature | filter:$select.search">
+                    <div ng-switch on="lit.type">
+                        <div ng-switch-when="0">
+                            <div>
+                                {{ lit.title | truncate:80:true }} <small><i style="color:gray; align: right;">{{ lit.author | truncate:80:true }}</i></small>
+                            </div>
+                            <small>{{ lit.year }}</small><small ng-show="lit.journal"> - {{ lit.journal }}</small><small ng-show="lit.volume && lit.number"> ({{ lit.volume}}/{{ lit.number }})</small>
+                        </div>
+                        <div ng-switch-when="1">
+                            <div>
+                                {{ lit.title | truncate:80:true }} <small><i style="color:gray; align: right;">{{ lit.author | truncate:80:true }}</i></small>
+                            </div>
+                            <small>{{ lit.year }}</small><small ng-show="lit.publisher"> - {{ lit.publisher }}</small>
+                        </div>
+                        <div ng-switch-when="2">
+                            <div>
+                                {{ lit.title | truncate:80:true }} <small><i style="color:gray; align: right;">{{ lit.author | truncate:80:true }}</i></small>
+                            </div>
+                            <small>{{ lit.year }}</small><small ng-show="lit.booktitle"> - {{ lit.booktitle }}</small><small ng-show="lit.publisher"> - {{ lit.publisher }}</small>
+                        </div>
+                    </div>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+        <div class="col-md-6">
+            <textarea class="form-control" ng-model="sourceModalFields.currentDesc"></textarea>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="col-md-1">
+            <button type="button" class="btn btn-success" ng-click="addSource(sourceModalFields.currentSource, sourceModalFields.currentDesc, sourceModalFields.id)" ng-disabled="!sourceModalFields.currentSource || !sourceModalFields.currentDesc"><i class="fa fa-plus" aria-hidden="true"></i> {{ 'create' | translate }}</button>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <!--<button type="button" class="btn btn-success" ng-click="saveSources()">{{ 'Save' | translate }}</button>-->
+    <button type="button" class="btn btn-default"
+      ng-click="cancel()">{{ 'close' | translate }}</button>
+</div>

@@ -1,0 +1,15 @@
+<div ui-tree-handle>
+    <a ng-click="toggle(this)" ng-if="parent.children && parent.children.length > 0" class="expandable-toggle"><span class="fa fa-fw" ng-class="{ 'fa-chevron-right': collapsed, 'fa-chevron-down': !collapsed}" aria-hidden="true"></span></a>
+    <span ng-click="!parent.clickable || setEditContext(parent)" ng-class="{ 'selected-leaf': currentContext.id == parent.id }" ng-disabled="!parent.clickable" ng-class="{ disabled: !parent.clickable }">
+        <i class="fa fa-university fa-fw fa-light" aria-hidden="true" ng-if="parent.typeId == 0"></i>
+        <i class="fa fa-tag fa-fw fa-light" aria-hidden="true" ng-if="parent.typeId == 1"></i>
+        <span ng-if="parent.typeLabel">[{{ parent.typeLabel}}]&nbsp;</span><span ng-style="getColorForId(parent.contextType)" ng-class="{ 'selected-leaf-child': currentContext.id == parent.id }">{{ parent.title }}</span>
+    </span>
+    <span ng-if="getRecLength(parent) > 0" class="badge" style="float: right;">
+        {{ getRecLength(parent) }}
+    </span>
+</div>
+<ul ui-tree-nodes="" ng-model="parent.children" ng-class="{ hidden: collapsed }">
+    <li ng-repeat="parent in parent.children" ui-tree-node ng-include="'includes/tree.html'">
+    </li>
+</ul>

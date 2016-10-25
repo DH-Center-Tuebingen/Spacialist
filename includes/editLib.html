@@ -1,0 +1,98 @@
+<h2>{{ 'edit library' | translate }} <small>{{ markerValues.name }}</small></h2>
+<form class="form-horizontal" role="form" ng-submit="storeLib()">
+    <div class="form-group">
+        <label class="control-label col-md-4" for="name">
+            Name:
+        </label>
+        <div class="col-md-8">
+            <input class="form-control" type="text" id="name" placeholder="Name" ng-blur="updateInput($event)" ng-model="markerValues.name" />
+        </div>
+    </div>
+    <div class="form-group" ng-repeat="field in fields">
+        <label class="control-label col-md-4" for="{{ field.cid }}_{{ field.aid }}">
+            {{ field.val }}: <sup><i class="fa fa-bookmark source-link" aria-hidden="true" ng-click="openSourceModal(field.val, field.aid)"></i></sup>
+        </label>
+        <div class="col-md-8" ng-switch on="field.datatype">
+            <input class="form-control" id="{{ field.cid }}_{{ field.aid }}" ng-switch-when="string" type="text" placeholder="{{ field.val }}" ng-blur="updateInput($event)" ng-model="markerValues[field.cid+'_'+field.aid]"/>
+            <input class="form-control" id="{{ field.cid }}_{{ field.aid }}" ng-switch-when="double" type="number" step="any" min="0" placeholder="0.0" ng-blur="updateInput($event)" ng-model="markerValues[field.cid+'_'+field.aid]"/>
+            <textarea class="form-control" id="{{ field.cid }}_{{ field.aid }}" ng-switch-when="stringf" ng-blur="updateInput($event)" ng-model="markerValues[field.cid+'_'+field.aid]"></textarea>
+            <p class="input-group" ng-switch-when="date">
+                <input type="text" id="{{ field.cid }}_{{ field.aid }}" class="form-control" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-model="markerValues[field.cid+'_'+field.aid]" ng-change="getCurrentDate(markerValues[field.cid+'_'+field.aid])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" />
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="open()"><i class="fa fa-calendar"></i></button>
+                </span>
+            </p>
+            <div ng-switch-when="string-mc">
+                <ui-select multiple ng-model="markerValues[field.cid+'_'+field.aid]" close-on-select="false" name="{{ field.cid }}_{{ field.aid }}" id="{{ field.cid }}_{{ field.aid }}" on-select="updateMSelectInput($select)" on-remove="updateMSelectInput($select)">
+                    <ui-select-match>{{$item.narr}}</ui-select-match>
+                    <ui-select-choices repeat="choice in markerChoices[field.cid+'_'+field.aid] | filter:$select.search">
+                        {{choice.narr}}
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div ng-switch-when="string-sc">
+                <ui-select ng-model="markerValues[field.cid+'_'+field.aid]"
+                name="{{ field.cid }}_{{ field.aid }}" id="{{ field.cid }}_{{ field.aid }}"
+                on-select="updateSelectInput($select.ngModel)">
+                  <ui-select-match placeholder="{{ field.val }}">{{ $select.selected.narr }}</ui-select-match>
+                  <ui-select-choices repeat="choice in markerChoices[field.cid+'_'+field.aid] | filter: $select.search">
+                    <span ng-bind-html="choice.narr | highlight: $select.search"></span>
+                  </ui-select-choices>
+                </ui-select>
+            </div>
+            <div ng-switch-when="epoch">
+                <div class="input-group">
+                    <div class="input-group-btn" uib-dropdown>
+                        <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">v. Chr. <span class="caret"></span></button>
+                        <ul uib-dropdown-menu class="dropdown-menu">
+                            <li><a href="">v. Chr.</a></li>
+                            <li><a href="">n. Chr.</a></li>
+                        </ul>
+                    </div>
+                    <input type="text" class="form-control" aria-label="">
+                    <span class="input-group-addon">-</span>
+                    <input type="text" class="form-control" aria-label="">
+                    <div class="input-group-btn" uib-dropdown>
+                        <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">n. Chr. <span class="caret"></span></button>
+                        <ul uib-dropdown-menu class="dropdown-menu">
+                            <li><a href="">v. Chr.</a></li>
+                            <li><a href="">n. Chr.</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <input class="form-control" id="{{ field.cid }}_{{ field.aid }}" ng-switch-default type="text" placeholder="{{ field.value }}" ng-blur="updateInput($event)" ng-model="markerValues[field.cid+'_'+field.aid]"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-4" for="lat">Latitude:</label>
+        <div class="col-md-8">
+            <p class="form-control-static">{{ markerValues.lat }}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-4" for="lng">Longitude:</label>
+        <div class="col-md-8">
+            <p class="form-control-static">{{ markerValues.lng }}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-4" for="lock-position">Position sperren:</label>
+        <div class="col-md-8">
+            <input type="checkbox" id="lock-position" ng-model="markerValues.locked" ng-change="togglePositionLock()"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="btn-group btn-group-justified" role="group">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-danger" ng-click="removeEntry()"><i class="fa fa-trash"></i> {{ 'delete' | translate }}</button>
+            </div>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-warning" ng-click="resetEntry()"><i class="fa fa-refresh"></i> {{ 'reset' | translate }}</button>
+            </div>
+            <div class="btn-group" role="group">
+                <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> {{ 'Save' | translate }}</button>
+            </div>
+        </div>
+    </div>
+</form>

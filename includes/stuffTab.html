@@ -1,0 +1,159 @@
+<div ng-controller="subTreeCtrl as ctrl">
+    <div class="col-md-4">
+        <h4>Elemente in <small>{{ markerValues.name }}</small></h4>
+        <div style="max-height: 500px; overflow: auto;" ui-tree data-nodrop-enabled="true" data-drag-enabled="false" ng-show="sideNav.contextHistory[0].children && sideNav.contextHistory[0].children.length > 0">
+            <ul ui-tree-nodes ng-model="sideNav.contextHistory" style="margin-bottom: 8px;">
+                <li ng-repeat="parent in sideNav.contextHistory" ui-tree-node ng-include="'includes/tree.html'">
+                </li>
+            </ul>
+            <!--<button type="button" class="btn btn-primary" ng-click="storeSubElements()"><i class="fa fa-floppy-o"></i> Speichern</button>-->
+        </div>
+        <div ng-hide="sideNav.contextHistory[0].children && sideNav.contextHistory[0].children.length > 0" class="alert alert-warning">
+            <p>Noch keine Elemente hinzugefügt.</p>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <ul class="nav nav-tabs">
+            <li role="presentation" ng-class="{active: stuffNav.newTab}" ng-click="stuffNav.setNewTab()"><a><i class="fa fa-plus-circle"></i> Neues Element</a></li>
+            <li role="presentation" ng-class="{active: stuffNav.editTab}" ng-click="stuffNav.setEditTab()"><a><i class="fa fa-pencil"></i> Editieren</a></li>
+            <li role="presentation" ng-class="{active: stuffNav.harrisTab}" ng-click="stuffNav.setHarrisTab()"><a><i class="fa fa-object-group"></i> Harris-Matrix</a></li>
+        </ul>
+        <div class="col-md-12" ng-if="stuffNav.newTab">
+            <!--<div ng-show="contextData.name">-->
+            <h4>Neues Element hinzufügen</h4>
+            <div ng-if="!currentContext || currentContext.typeId != 1">
+                <div ng-hide="addArtifact || addContext">
+                    <div class="add-button col-md-5">
+                        <button type="button" class="btn btn-success" ng-click="openContextDiv()"><i class="fa fa-plus"></i> Neuer Kontext</button>
+                    </div>
+                    <div class="add-button col-md-offset-2 col-md-5">
+                        <button type="button" class="btn btn-success" ng-click="openArtifactDiv()"><i class="fa fa-plus"></i> Neuer Fund</button>
+                    </div>
+                </div>
+                <div class="add-artifact" ng-show="addArtifact || addContext">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label class="control-label col-md-3" for="type">Art:</label>
+                            <div class="col-md-9">
+                                <ui-select ng-model="aType" on-select="ctrl.onSelectElementCallback($elem, $model, addContext)">
+                                  <ui-select-match placeholder="Select type">{{ $select.selected.title }}</ui-select-match>
+                                  <ui-select-choices repeat="elem in selection | filter: $select.search">
+                                    <span ng-bind-html="elem.title | highlight: $select.search"></span>
+                                  </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="typeFields">
+                            <label class="control-label col-md-3" for="artifactName">Name:</label>
+                            <div class="col-md-9">
+                                <input class="form-control" type="text" ng-model="attribData['new'].name" id="artifactName" placeholder="Name" />
+                            </div>
+                        </div>
+                        <div my-set-index new class="form-group" ng-repeat="attr in typeFields">
+                            <!--<ng-include src="'includes/varFields.html'"></ng-include>-->
+                        </div>
+                        <div class="col-md-offset-3 col-md-9">
+                            <button type="button" class="btn btn-danger col-md-5" ng-click="cancelArtifact()"><i class="fa fa-remove"></i> {{ 'cancel' | translate}}</button>
+                            <button ng-hide="activeIndex >= 0" type="button" class="btn btn-success col-md-5 col-md-offset-2" ng-click="saveElement('new')" ng-disabled="!attribData['new'].name || attribData['new'].name.length == 0"><i class="fa fa-plus"></i> {{ 'add' | translate }}</button>
+                            <button ng-show="activeIndex >= 0" type="button" class="btn btn-success col-md-5 col-md-offset-2" ng-click="updateArtifact()"><i class="fa fa-floppy-o"></i> {{ 'Save' | translate }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div ng-if="currentContext.typeId == 1">
+                <div id="no-ctx-info" ng-if="closedAlerts['no-ctx-info']" uib-alert type="info" close="closeAlert($event)">
+                    {{ $id }}
+                    <p>
+                        <strong>{{ currentContext.title }}</strong> ist kein Kontext.
+                    </p>
+                    <p>
+                        Nur Kontexte können weitere Elemente enthalten.
+                    </p>
+                </div>
+            </div>
+            <!--</div>-->
+        </div>
+        <div class="col-md-12" ng-if="stuffNav.editTab && currentContext">
+            <div ng-if="currentContext.typeId == 0">
+                <h4><span ng-if="currentContext.typeLabel">[{{currentContext.typeLabel}}]&nbsp;</span>Aktuell ausgewählter Kontext <small>{{ currentContext.title }}</small></h4>
+                <div id="new-ctx-info" ng-if="!closedAlerts['new-ctx-info']" uib-alert type="info" close="closeAlert($event)">
+                    <p>
+                        Neue Kontexte bzw. Funde werden dem Kontext <strong>{{ currentContext.title }}</strong> hinzugefügt.
+                    </p>
+                    <p>
+                        Um einen anderen Kontext auszuwählen, klicken Sie bitte auf der rechten Seite auf das entsprechende Element.
+                    </p>
+                </div>
+            </div>
+            <div ng-if="currentContext.typeId == 1">
+                <h4><span ng-if="currentContext.typeLabel">[{{currentContext.typeLabel}}]&nbsp;</span>Aktuell ausgewählter Fund <small>{{ currentContext.title }}</small></h4>
+            </div>
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label class="control-label col-md-3" for="artifactName">Name:</label>
+                    <div class="col-md-9">
+                        <input class="form-control" type="text" ng-model="attribData['edit'].name" id="artifactName" placeholder="Name" />
+                    </div>
+                </div>
+                <div class="form-group" ng-repeat="attr in currentContext.fields" my-set-index edit>
+                    <!--<ng-include src="'includes/varFields.html'"></ng-include>-->
+                </div>
+                <div>
+                    <button type="button" class="btn btn-danger col-md-5" ng-click="deleteElement()"><i class="fa fa-trash"></i> {{ 'delete' | translate }}</button>
+                    <button type="button" class="btn btn-success col-md-offset-2 col-md-5" ng-click="updateElement()"><i class="fa fa-floppy-o"></i> {{ 'Save' | translate }}</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-12" ng-if="stuffNav.harrisTab">
+            <div ng-if="harrisRelation">
+                <h3>Neue Beziehung</h3>
+                <div class="input-group">
+                    <div class="input-group-btn" uib-dropdown>
+                        <button class="btn btn-default" type="button" ng-click="hideRelations = !hideRelations" ng-init="hideRelations = false">
+                            <i class="fa fa-caret-down" style="font-size: 0.9em" ng-show="hideRelations"></i>
+                            <i class="fa fa-caret-up" style="font-size: 0.9em" ng-hide="hideRelations"></i>
+                        </button>
+                        <!--<div class="dropdown" uib-dropdown>-->
+                        <ul class="dropdown-menu" uib-dropdown-menu>
+                            <li ng-repeat="matrix in harrisRelation.options" ng-click="setMatrix(matrix)">
+                                <a href="">{{ matrix.name }}</a>
+                            </li>
+                        </ul>
+                        <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{ selectedMatrix.name }} <span class="caret"></span>
+                        </button>
+                        <!--</div>-->
+                    </div>
+                    <ui-select ng-model="selectedContext"
+                    name="contextDd" id="contextDd"
+                    on-select="setRelationContext($select)">
+                      <ui-select-match>{{ $select.selected.name }}</ui-select-match>
+                      <ui-select-choices repeat="ctx in contexts">
+                        <span ng-bind-html="ctx.name | highlight: $select.search"></span>
+                      </ui-select-choices>
+                    </ui-select>
+                    <span class="input-group-btn">
+                        <button class="btn btn-success" type="button"  ng-click="addRelation(selectedMatrix, selectedContext, harrisRelation.context+'_'+harrisRelation.attr+'_'+harrisRelation.option)" ng-disabled="!selectedContext || !selectedMatrix"><i class="fa fa-plus"></i></button>
+                    </span>
+                </div>
+                <div class="col-md-12 hideable-list" ng-hide="hideRelations">
+                    <ul class="list-group inline-list">
+                        <li class="list-group-item" ng-repeat="rel in output[harrisRelation.context+'_'+harrisRelation.attr+'_'+harrisRelation.option]"><strong>{{ rel.type.name }}</strong>: <i>{{ rel.context.name }}</i></li>
+                    </ul>
+                </div>
+            </div>
+            <h3>Harris-Matrix</h3>
+            <div ng-hide="graphLoaded">
+                <spinner/>
+            </div>
+            <button ng-click="addStuff()">DONT PRESS ME!</button>
+            <div id="d3test" class="d3test" ng-init="initD3Graph()">
+            </div>
+            <!--<div ng-show="graphScript.length > 0" class="mermaid" ng-bind-html="getGraph()" ng-init="refreshGraph()" ng-class="{ 'almost-hidden': !graphLoaded }">
+            </div>
+            <p ng-if="graphScript.length == 0" class="alert alert-warning">
+                Keine Elemente vorhanden.
+            </p>-->
+        </div>
+    </div>
+</div>

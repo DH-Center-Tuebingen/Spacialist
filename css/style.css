@@ -1,0 +1,483 @@
+#langSwitch {
+    text-align: right;
+}
+
+.activeLang {
+    filter: grayscale(0.75);
+}
+
+#navigation {
+    padding-bottom: 20px;
+}
+
+.link-icon {
+    color: #333;
+    margin-right: 10px;
+}
+
+.navbar-inverse .link-icon {
+    color: #9d9d9d;
+}
+
+.marker-point {
+    border-radius: 50%;
+    background-color: rgba(255, 0, 0, 0.5);
+}
+
+.ui-select-bootstrap > .ui-select-choices, .ui-select-bootstrap > .ui-select-no-choice {
+    min-width: 100%;
+    width: auto;
+}
+
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+.uib-datepicker-popup.dropdown-menu {
+    padding: 10px;
+}
+
+.list-group-item {
+    word-wrap: break-word;
+}
+
+.list-item-edit {
+    width: 60%;
+}
+
+.item-edit-tab {
+    display: inline;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.inline-list {
+    margin-bottom: 0;
+    margin-top: 8px;
+}
+
+ol li.list-group-item {
+    list-style: decimal inside;
+    display: list-item;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.nowrap {
+    white-space: nowrap;
+    overflow-x: hidden;
+}
+
+.unlinked-item.ng-enter {
+    animation: zoomIn 0.75s;
+}
+
+.unlinked-item.ng-leave {
+    animation: zoomOut 0.5s;
+}
+
+.hideable-list.ng-hide-add {
+    animation: fadeOut 0.5s;
+}
+
+.hideable-list.ng-hide-remove {
+    animation: fadeIn 0.5s;
+}
+
+.animated-item.ng-enter {
+    animation: fadeInDown 0.5s;
+}
+
+.animated-item.ng-leave {
+    animation: fadeOutUp 0.5s;
+}
+
+.spinner-container {
+    width: 25px;
+    height: 25px; /*added*/
+}
+
+.spinner-container::before {
+    content: '';
+    display: block;
+    /*padding-top: 100%;*/
+}
+
+.circle-img-path {
+    animation: rotate 2s infinite linear;
+    height: 25px;
+    width: 25px;
+    transform-origin: center center;
+}
+
+.circle-path {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+    animation: dash 1.5s ease-in-out infinite, color 6s ease-in-out infinite;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dash {
+    0% {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+    }
+    50% {
+        stroke-dasharray: 89, 200;
+        stroke-dashoffset: -35px;
+    }
+    100% {
+        stroke-dasharray: 89, 200;
+        stroke-dashoffset: -124px;
+    }
+}
+
+@keyframes color {
+    100%,
+    0% {
+        stroke: red;
+    }
+    40% {
+        stroke: blue;
+    }
+    66% {
+        stroke: green;
+    }
+    80%,
+    90% {
+        stroke: orange;
+    }
+}
+
+.wide-modal .modal-dialog {
+    width: 70%;
+}
+
+.left {
+    text-align: left;
+}
+
+.modal-list {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /*text-align: left;*/
+}
+
+.thumb-wrapper {
+    position: relative;
+    height: 225px;
+}
+
+.thumb {
+    display: block;
+}
+
+.overlay {
+  background: rgba(51, 123, 184, 0.5);
+  bottom: 0;
+  font-size: 1.5em;
+  left: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding-top: 3em;
+  position: absolute;
+  text-align: center;
+  top: 0;
+  right: 0;
+  cursor: pointer;
+}
+
+.overlay:hover {
+    opacity: 1;
+    animation: fadeIn 0.5s;
+}
+
+.overlay-icon {
+    color: #FFFFFF;
+    font-size: 2em;
+}
+
+.vertical-slider {
+    -webkit-appearance: slider-vertical;
+    margin: 0 10px;
+}
+
+#width-25 {
+    vertical-align: middle;
+    width: 25px;
+    height: auto;
+}
+
+#modalImage {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    cursor: grab;
+}
+
+.vertical-slider-val {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.delete-icon {
+    color: gray;
+    font-size: 0.75em;
+    cursor: pointer;
+    float: right;
+    padding-top: 2px;
+    margin-left: -12px;
+}
+
+.hidden-del {
+    display: none;
+}
+
+.deletable {
+    padding-right: 15px;
+}
+
+.pages {
+    float: right;
+    margin-right: 20px;
+}
+
+.navbar {
+    border-radius: 0;
+}
+
+.ui-select-container, .ui-select-multiple.ui-select-bootstrap {
+    height: 34px;
+    font-size: 14px;
+    line-height: 1.42857;
+}
+
+.thumb-wrapper {
+    max-height: 225px;
+    overflow: hidden;
+}
+
+.thumbnail img {
+    width: 100%;
+}
+
+.source-link {
+    cursor: pointer;
+    /*color: #337ab7;*/
+    color: rgba(255, 0, 0, 0.75);
+}
+
+.td-50 {
+    width: 50%;
+}
+
+.word-break {
+    word-wrap: break-word;
+}
+
+/* leaflet layer hack */
+.leaflet-control-layers {
+    visibility: hidden !important;
+}
+
+/* leaflet layer manager */
+.angular-leaflet-control-layers {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 3px;
+    z-index: 100;
+    left: 10px;
+    top: 100px;
+    width: 225px;
+    box-shadow: 1px 1px 5px rgba(51, 51, 51, 0.5);
+    padding: 5px 5px 5px 10px;
+}
+
+label.lf-icon-bl, label.lf-icon-ol {
+    font-weight: normal;
+    padding-left: 5px;
+}
+
+.angular-leaflet-control-layers .lf-row label {
+    cursor: pointer;
+    width: 70%;
+}
+.angular-leaflet-control-layers .lf-row .lf-icon {
+    cursor: pointer;
+    float: left;
+    margin-right: 5px;
+    padding-top: 2px;
+}
+
+.angular-leaflet-control-layers .lf-row label .lf-text {
+    float: left;
+}
+
+.angular-leaflet-control-layers .lf-row .lf-icon-ol-group {
+    color: #00650a;
+}
+
+.angular-leaflet-control-layers .lf-row .lf-icons {
+    float: right;
+}
+
+/* use the 'Open Sans' font */
+/*h1, h2, h3, h4, h5, h6, p, div*/body, .leaflet-container, text {
+    font-family: 'Segoe UI', 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* use mozilla's 'Fira Sans' font */
+/*h1, h2, h3, h4, h5, h6 {
+    font-family: 'Fira Sans';
+    text-transform: uppercase;
+    font-weight: 400;
+}
+p, div {
+    font-family: 'Fira Sans';
+}*/
+
+/* right-side nav */
+.tabs-right > .nav-tabs {
+  border-bottom: 0;
+}
+
+.tabs-right > .nav-tabs > li {
+  float: none;
+}
+
+.tabs-right > .nav-tabs > li > a {
+  min-width: 74px;
+  margin-right: 0;
+  margin-bottom: 3px;
+}
+
+.tabs-right > .nav-tabs {
+  float: right;
+  margin-left: 19px;
+  border-left: 1px solid #ddd;
+}
+
+.tabs-right > .nav-tabs > li > a {
+  margin-left: -1px;
+  -webkit-border-radius: 0 4px 4px 0;
+     -moz-border-radius: 0 4px 4px 0;
+          border-radius: 0 4px 4px 0;
+}
+
+.tabs-right > .nav-tabs > li > a:hover,
+.tabs-right > .nav-tabs > li > a:focus {
+  border-color: #eeeeee #eeeeee #eeeeee #dddddd;
+}
+
+.tabs-right > .nav-tabs .active > a,
+.tabs-right > .nav-tabs .active > a:hover,
+.tabs-right > .nav-tabs .active > a:focus {
+  border-color: #ddd #ddd #ddd transparent;
+  *border-left-color: #ffffff;
+}
+
+/* modal */
+.modal-header {
+    text-align: center;
+    padding: 0;
+}
+
+.modal-body {
+    padding: 5px;
+    text-align: center;
+}
+
+.modal-footer {
+    border: none;
+}
+
+.selected-leaf, .selected-leaf-child {
+    /*color: red !important;*/
+    font-weight: 700;
+}
+
+.angular-ui-tree-handle {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.expandable-toggle {
+    cursor: zoom-in;
+}
+
+.disabled {
+    cursor: not-allowed;
+}
+
+.floating-tab-md-11 {
+    position: absolute;
+    background-color: white;
+    height: 100%;
+    margin-left: 6.78%; /* hacky */
+    box-shadow: -15px 0 15px -10px rgba(50, 50, 50, 0.5);
+}
+
+/* font awesome styles */
+.fa-light {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.9em;
+}
+
+g.leaf > rect {
+  stroke: #ff0000;
+  stroke-width: 0.25px;
+  fill: green;
+  opacity: .5;
+}
+
+g.leaf > text {
+  fill: #000;
+}
+
+g.compound > rect {
+  opacity: 0.5;
+  fill: transparent;
+}
+
+.node {
+}
+
+.link {
+  stroke: #000;
+  stroke-width: 0.5px;
+  stroke-opacity: 1;
+  fill: none;
+}
+/* mermaid styles */
+.almost-hidden {
+    color: transparent;
+}
+
+.mermaid .label {
+    font-weight: 500;
+    color: rgba(25, 25, 25, 1);
+}
+
+.mermaid rect {
+    stroke: none;
+}
+
+.mermaidContext rect {
+    fill: #0f0;
+}
+
+.mermaidFound rect {
+    fill: #f00;
+}
+
+.mermaidFound .label {
+    color: #fff;
+}
