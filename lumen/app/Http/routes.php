@@ -36,6 +36,7 @@ $app->get('sources/get/{id}', 'SourceController@getByContext');
 $app->get('sources/delete/{id}', 'SourceController@delete');
 $app->get('sources/delete/attribute/{aid}/{fid}', 'SourceController@deleteByAttribute');
 $app->get('sources/delete/context/{id}', 'SourceController@deleteByContext');
+$app->get('sources/delete/literature/{aid}/{fid}/{lid}', 'SourceController@deleteByLiterature');
 $app->post('image/upload', 'ImageController@uploadImage');
 $app->post('context/add', 'ContextController@add');
 $app->post('context/set', 'ContextController@set');

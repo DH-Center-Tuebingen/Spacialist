@@ -78,4 +78,14 @@ class SourceController extends Controller {
             ])
             ->delete();
     }
+
+    public function deleteByLiterature($aid, $fid, $lid) {
+        DB::table('sources')
+            ->where([
+                ['attribute_id', $aid],
+                ['find_id', $fid],
+                ['literature_id', $lid]
+            ])
+            ->delete();
+    }
 }

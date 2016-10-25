@@ -93,6 +93,13 @@ class ContextController extends Controller {
             foreach($attribs as &$attr) {
                 if($attr->datatype == 'literature') {
                     $attr->literature_info = DB::table('bib_tex')->where('id', $attr->str_val)->first();
+                } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
+                    $attr->val = DB::table('th_concept')
+                        ->select('id_th_concept as narrower_id',
+                            DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
+                        )
+                        ->where('concept_url', '=', $attr->th_val)
+                        ->first();
                 }
             }
             $find->attributes = $attribs;
@@ -131,7 +138,7 @@ class ContextController extends Controller {
                 JOIN    finds fc
                 ON      fc.root = q.id
             )
-            SELECT  q.*, ct.type, ct.th_uri AS typename
+            SELECT  q.*, ct.type, ct.th_uri AS typename, public.\"getLabelForId\"(ct.th_uri, 'de') as typelabel
             FROM    q
             JOIN context_types AS ct
             ON q.c_id = ct.id
@@ -172,7 +179,7 @@ class ContextController extends Controller {
                     'lng' => $lng
                 ]);
         }
-        foreach($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid', 'images']) as $key => $value) {
+        foreach($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid']) as $key => $value) {
             $ids = explode("_", $key);
             $aid = $ids[1];
             if(!empty($ids[2])) {
@@ -183,8 +190,12 @@ class ContextController extends Controller {
                 $tbl = 'context_values';
                 $isOption = false;
             }
-            $jsonArr = json_decode($value, true);
-            if(is_array($jsonArr)) {
+            $datatype = DB::table('attributes')
+                ->where('id', '=', $aid)
+                ->value('datatype');
+            $jsonArr = json_decode($value);
+            if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
+            if(is_array($jsonArr)) { //only string-sc and string-mc should be arrays
                 if($id > 0) {
                     $dbEntries = array(
                         ['f_id', $fid],
@@ -197,10 +208,11 @@ class ContextController extends Controller {
                     foreach($rows as $row) {
                         $alreadySet = false;
                         foreach($jsonArr as $k => $v) {
-                            if(isset($v['name'])) $set = $v['name'];
-                            else if(isset($v['shorttitle'])) $set = $v['id'];
-                            else continue;
-                            if($row->str_val === $set) {
+                            $url = DB::table('th_concept')
+                                ->where('id_th_concept', '=', $v->narrower_id)
+                                ->value('concept_url');
+                            $set = $url;
+                            if($row->th_val === $set) {
                                 unset($jsonArr[$k]);
                                 $alreadySet = true;
                                 break;
@@ -210,7 +222,7 @@ class ContextController extends Controller {
                             $del = array(
                                 ['f_id', $fid],
                                 ['a_id', $aid],
-                                ['str_val', $row->str_val]
+                                ['th_val', $row->th_val]
                             );
                             if($isOption) $del[] = ['o_id', $oid];
                             DB::table($tbl)
@@ -220,13 +232,14 @@ class ContextController extends Controller {
                     }
                 }
                 foreach($jsonArr as $v) {
-                    if(isset($v['name'])) $set = $v['name'];
-                    else if(isset($v['shorttitle'])) $set = $v['id'];
-                    else continue;
+                    $url = DB::table('th_concept')
+                        ->where('id_th_concept', '=', $v->narrower_id)
+                        ->value('concept_url');
+                    $set = $url;
                     $vals = array(
                         'f_id' => $fid,
                         'a_id' => $aid,
-                        'str_val' => $set
+                        'th_val' => $set
                     );
                     if($isOption) $vals['o_id'] = $oid;
                     DB::table($tbl)
@@ -316,10 +329,12 @@ class ContextController extends Controller {
                     ]);
             }
         }
-        foreach($currAttrs as $currAttr) {
-            DB::table('context_values')
-                ->where('id', $currAttr->id)
-                ->delete();
+        if(isset($currAttrs) && count($currAttrs) > 0) {
+            foreach($currAttrs as $currAttr) {
+                DB::table('context_values')
+                    ->where('id', $currAttr->id)
+                    ->delete();
+            }
         }
         return response()->json(['fid' => $fid]);
     }
