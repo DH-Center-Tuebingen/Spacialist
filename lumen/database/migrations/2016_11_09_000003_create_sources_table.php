@@ -21,9 +21,9 @@ class CreateSourcesTable extends Migration
             $table->string('description', 1024);
             $table->timestamps();
 
-            $table->foreign('find_id')->references('id')->on('finds');
-            $table->foreign('attribute_id')->references('id')->on('attributes');
-            $table->foreign('literature_id')->references('id')->on('bib_tex');
+            $table->foreign('find_id')->references('id')->on('finds')->onDelete('cascade');
+            $table->foreign('attribute_id')->references('id')->on('attributes')->onDelete('cascade');
+            $table->foreign('literature_id')->references('id')->on('bib_tex')->onDelete('cascade');
         });
     }
 

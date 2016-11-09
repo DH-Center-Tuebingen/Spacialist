@@ -22,11 +22,13 @@ class CreateContextValuesTable extends Migration
             $table->double('dbl_val');
             $table->timestampTz('dt_val');
             $table->integer('find_val')->unsigned();
+            $table->text('th_val');
             $table->timestamps();
 
-            $table->foreign('find_id')->references('id')->on('finds');
-            $table->foreign('attribute_id')->references('id')->on('attributes');
-            $table->foreign('find_val')->references('id')->on('finds');
+            $table->foreign('find_id')->references('id')->on('finds')->onDelete('cascade');
+            $table->foreign('attribute_id')->references('id')->on('attributes')->onDelete('cascade');
+            $table->foreign('find_val')->references('id')->on('finds')->onDelete('cascade');
+            $table->foreign('th_val')->references('concept_url')->on('th_concept');
         });
     }
 
