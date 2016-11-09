@@ -22,8 +22,8 @@ class CreateFindsTable extends Migration
 			$table->integer('root')->default(-1);
             $table->timestamps();
 
-			$table->foreign('context_id')->references('id')->on('context_types');
-			$table->foreign('root')-references('id')->on('finds');
+			$table->foreign('context_id')->references('id')->on('context_types')->onDelete('cascade');
+			$table->foreign('root')->references('id')->on('finds')->onDelete('cascade');
         });
     }
 

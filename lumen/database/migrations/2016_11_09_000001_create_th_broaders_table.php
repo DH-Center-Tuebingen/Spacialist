@@ -18,9 +18,9 @@ class CreateThBroadersTable extends Migration
             $table->integer('broader_id')->unsigned();
             $table->integer('narrower_id')->unsigned();
             $table->timestamps();
-            
-            $table->foreign('broader_id')->references('id')->on('th_concept');
-            $table->foreign('narrower_id')->references('id')->on('th_concept');
+
+            $table->foreign('broader_id')->references('id')->on('th_concept')->onDelete('cascade');
+            $table->foreign('narrower_id')->references('id')->on('th_concept')->onDelete('cascade');
         });
     }
 

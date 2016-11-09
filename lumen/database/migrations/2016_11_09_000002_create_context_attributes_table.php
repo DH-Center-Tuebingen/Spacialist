@@ -19,8 +19,8 @@ class CreateContextAttributesTable extends Migration
             $table->integer('attribute_id')->unsigned();
             $table->timestamps();
 
-            $table->foreign('context_id')->references('id')->on('context_types');
-            $table->foreign('attribute_id')->references('id')->on('attributes');
+            $table->foreign('context_id')->references('id')->on('context_types')->onDelete('cascade');
+            $table->foreign('attribute_id')->references('id')->on('attributes')->onDelete('cascade');
         });
     }
 

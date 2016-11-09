@@ -15,9 +15,9 @@ class CreateThConceptTable extends Migration
     {
         Schema::create('th_concept', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('concept_url', 256);
+            $table->string('concept_url', 256)->unique();
             $table->string('concept_scheme', 256);
-            $talbe->string('lasteditor', 64);
+            $table->string('lasteditor', 64);
             $table->timestamps();
         });
     }
