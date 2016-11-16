@@ -19,11 +19,11 @@ class ContextController extends Controller {
     public function get() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.th_uri as index', 'ca.c_id as cid', 'ca.a_id as aid', 'a.datatype', 'c.type',
-                    DB::raw("public.\"getLabelForId\"(C.th_uri, 'de') AS title, public.\"getLabelForId\"(A.th_uri, 'de') AS val")
+                ->select('c.thesaurus_id as index', 'ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
+                    DB::raw("public.\"getLabelForId\"(C.thesaurus_id, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_id, 'de') AS val")
                 )
-                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.c_id')
-                ->leftJoin('attributes as a', 'ca.a_id', '=', 'a.id')
+                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_id')
+                ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
                 ->where('c.type', '=', '0')
                 ->orderBy('val')
                 ->get()
@@ -43,21 +43,21 @@ class ContextController extends Controller {
 	        JOIN    finds fc
 	        ON      fc.root = q.id
         )
-        SELECT  q.*, ct.type as typeid, ct.th_uri AS typename, public.\"getLabelForId\"(ct.th_uri, 'de') as typelabel
+        SELECT  q.*, ct.type as typeid, ct.thesaurus_id AS typename, public.\"getLabelForId\"(ct.thesaurus_id, 'de') as typelabel
         FROM    q
         JOIN context_types AS ct
-        ON q.c_id = ct.id
+        ON q.context_id = ct.id
         ORDER BY reclevel DESC
         ");
         $children = [];
         foreach($rootFields as $key => $field) {
-            $rootFields[$key]->data =  DB::table('context_values as cv')->select('cv.*', 'a.datatype', 'a.th_root')->join('attributes as a', 'cv.a_id', '=', 'a.id')->where('f_id', $field->id)->get();
+            $rootFields[$key]->data =  DB::table('context_values as cv')->select('cv.*', 'a.datatype', 'a.th_root')->join('attributes as a', 'cv.attribute_id', '=', 'a.id')->where('find_id', $field->id)->get();
             foreach($rootFields[$key]->data as &$attr) {
                 if($attr->datatype == 'literature') {
                     $attr->literature_info = DB::table('bib_tex')->where('id', $attr->str_val)->first();
                 } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
                     $attr->val = DB::table('th_concept')
-                        ->select('id_th_concept as narrower_id',
+                        ->select('id as narrower_id',
                             DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
                         )
                         ->where('concept_url', '=', $attr->th_val)
@@ -78,7 +78,7 @@ class ContextController extends Controller {
             [
                 'finds' =>
                     DB::table('finds')
-                    ->select('name', 'c_id as cid, id')
+                    ->select('name', 'context_id as cid, id')
                     ->get()
             ]
         );
@@ -86,22 +86,22 @@ class ContextController extends Controller {
 
     public function getAttributes($id) {
         $rows = DB::table('context_types as c')
-        ->select('ca.c_id as cid', 'ca.a_id as aid', 'a.datatype', 'a.th_root as root',
-            DB::raw("public.\"getLabelForId\"(C.th_uri, 'de') AS title, public.\"getLabelForId\"(A.th_uri, 'de') AS val")
+        ->select('ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'a.th_root as root',
+            DB::raw("public.\"getLabelForId\"(C.thesaurus_id, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_id, 'de') AS val")
         )
-        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.c_id')
-        ->leftJoin('attributes as a', 'ca.a_id', '=', 'a.id')
+        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_id')
+        ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
         //->where('c.id', '=', $id)
         ->orderBy('val')
         ->get();
         foreach($rows as &$row) {
             if(!isset($row->root)) continue;
             $rootId = DB::table('th_concept')
-                ->select('id_th_concept')
+                ->select('id')
                 ->where('concept_url', '=', $row->root)
                 ->first();
             if(!isset($rootId)) continue;
-            $rootId = $rootId->id_th_concept;
+            $rootId = $rootId->id;
             $row->choices = DB::select("
                 WITH RECURSIVE
                 top AS (
@@ -131,8 +131,8 @@ class ContextController extends Controller {
         $finds = DB::table('finds')->get();
         foreach($finds as &$find) {
             $attribs = DB::table('context_values as CV')
-                    ->join('attributes as A', 'CV.a_id', 'A.id')
-                    ->where('f_id', $find->id)
+                    ->join('attributes as A', 'CV.attribute_id', 'A.id')
+                    ->where('find_id', $find->id)
                     ->select('CV.*', 'A.datatype', 'A.th_root')
                     ->get();
             foreach($attribs as &$attr) {
@@ -140,7 +140,7 @@ class ContextController extends Controller {
                     $attr->literature_info = DB::table('bib_tex')->where('id', $attr->str_val)->first();
                 } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
                     $attr->val = DB::table('th_concept')
-                        ->select('id_th_concept as narrower_id',
+                        ->select('id as narrower_id',
                             DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
                         )
                         ->where('concept_url', '=', $attr->th_val)
@@ -155,13 +155,13 @@ class ContextController extends Controller {
     public function getArtifacts() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.th_uri as index', 'ca.c_id as cid', 'ca.a_id as aid', 'a.datatype', 'c.type',
+                ->select('c.thesaurus_id as index', 'ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
                     DB::raw(
-                        "public.\"getLabelForId\"(C.th_uri, 'de') AS title, public.\"getLabelForId\"(A.th_uri, 'de') AS val"
+                        "public.\"getLabelForId\"(C.thesaurus_id, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_id, 'de') AS val"
                     )
                 )
-                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.c_id')
-                ->leftJoin('attributes as a', 'ca.a_id', '=', 'a.id')
+                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_id')
+                ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
                 ->where('c.type', '=', '1')
                 ->orderBy('val')
                 ->get()
@@ -183,16 +183,16 @@ class ContextController extends Controller {
                 JOIN    finds fc
                 ON      fc.root = q.id
             )
-            SELECT  q.*, ct.type, ct.th_uri AS typename, public.\"getLabelForId\"(ct.th_uri, 'de') as typelabel
+            SELECT  q.*, ct.type, ct.thesaurus_id AS typename, public.\"getLabelForId\"(ct.thesaurus_id, 'de') as typelabel
             FROM    q
             JOIN context_types AS ct
-            ON q.c_id = ct.id
+            ON q.context_id = ct.id
             ORDER BY id ASC"
         );
         $roots = array();
         foreach($rows as $row) {
             if(empty($row)) continue;
-            $row->data = DB::table('context_values as cv')->select('cv.*', 'a.datatype')->join('attributes as a', 'cv.a_id', '=', 'a.id')->where('f_id', $row->id)->get();
+            $row->data = DB::table('context_values as cv')->select('cv.*', 'a.datatype')->join('attributes as a', 'cv.attribute_id', '=', 'a.id')->where('find_id', $row->id)->get();
             if(!empty($row->root)) $roots[$row->root][] = $row;
         }
         return response()->json($roots);
@@ -219,7 +219,7 @@ class ContextController extends Controller {
         } else {
             $ins = [
                     'name' => $name,
-                    'c_id' => $cid,
+                    'context_id' => $cid,
                     'lat' => $lat,
                     'lng' => $lng
             ];
@@ -242,12 +242,12 @@ class ContextController extends Controller {
                 ->where('id', $realId)
                 ->update(['name' => $name]);
             $fid = $realId;
-            $currAttrs = DB::table('context_values')->where('f_id', $realId)->get();
+            $currAttrs = DB::table('context_values')->where('find_id', $realId)->get();
         } else {
             $fid = DB::table('finds')
                 ->insertGetId([
                     'name' => $name,
-                    'c_id' => $cid,
+                    'context_id' => $cid,
                     'root' => $root
                 ]);
         }
@@ -261,8 +261,8 @@ class ContextController extends Controller {
         $possibility = $request->get('possibility');
 
         $where = array(
-            ['f_id', '=', $fid],
-            ['a_id', '=', $aid]
+            ['find_id', '=', $fid],
+            ['attribute_id', '=', $aid]
         );
         $isSet = DB::table('context_values')
             ->where($where)
@@ -270,8 +270,8 @@ class ContextController extends Controller {
         if($isSet == null) { //insert
             DB::table('context_values')
                 ->insert([
-                    'f_id' => $fid,
-                    'a_id' => $aid,
+                    'find_id' => $fid,
+                    'attribute_id' => $aid,
                     'possibility' => $possibility
                 ]);
         } else { //update
@@ -296,7 +296,7 @@ class ContextController extends Controller {
                 from finds as f
                 inner join deletes p on f.root = p.id
             )
-            delete from context_values where f_id in (select id from deletes)
+            delete from context_values where find_id in (select id from deletes)
         ");
         DB::select("
             with recursive deletes as
@@ -316,7 +316,7 @@ class ContextController extends Controller {
     }
 
     public function updateOrInsert($request, $fid, $isUpdate) {
-        $currAttrs = DB::table('context_values')->where('f_id', $fid)->get();
+        $currAttrs = DB::table('context_values')->where('find_id', $fid)->get();
         foreach($request as $key => $value) {
             $ids = explode("_", $key);
             $aid = $ids[0];
@@ -336,10 +336,10 @@ class ContextController extends Controller {
             if(is_array($jsonArr)) { //only string-sc and string-mc should be arrays
                 if($isUpdate) {
                     $dbEntries = array(
-                        ['f_id', $fid],
-                        ['a_id', $aid]
+                        ['find_id', $fid],
+                        ['attribute_id', $aid]
                     );
-                    if($isOption) $dbEntries[] = ['o_id', $oid];
+                    if($isOption) $dbEntries[] = ['ooption_id', $oid];
                     $rows = DB::table($tbl)
                         ->where($dbEntries)
                         ->get();
@@ -351,7 +351,7 @@ class ContextController extends Controller {
                                 $val = $row->str_val;
                             } else {
                                 $set = DB::table('th_concept')
-                                ->where('id_th_concept', '=', $v->narrower_id)
+                                ->where('id', '=', $v->narrower_id)
                                 ->value('concept_url');
                                 $val = $row->th_val;
                             }
@@ -363,12 +363,12 @@ class ContextController extends Controller {
                         }
                         if(!$alreadySet) {
                             $del = array(
-                                ['f_id', $fid],
-                                ['a_id', $aid]
+                                ['find_id', $fid],
+                                ['attribute_id', $aid]
                             );
                             if($datatype === 'list') $del[] = ['str_val', $row->str_val];
                             else $del[] = ['th_val', $row->th_val];
-                            if($isOption) $del[] = ['o_id', $oid];
+                            if($isOption) $del[] = ['option_id', $oid];
                             DB::table($tbl)
                                 ->where($del)
                                 ->delete();
@@ -377,28 +377,28 @@ class ContextController extends Controller {
                 }
                 foreach($jsonArr as $v) {
                     $vals = array(
-                        'f_id' => $fid,
-                        'a_id' => $aid
+                        'find_id' => $fid,
+                        'attribute_id' => $aid
                     );
                     if($datatype === 'list') {
                         $set = $v->name;
                         $vals['str_val'] = $set;
                     } else {
                         $set = DB::table('th_concept')
-                            ->where('id_th_concept', '=', $v->narrower_id)
+                            ->where('id', '=', $v->narrower_id)
                             ->value('concept_url');
                         $vals['th_val'] = $set;
                     }
-                    if($isOption) $vals['o_id'] = $oid;
+                    if($isOption) $vals['option_id'] = $oid;
                     DB::table($tbl)
                         ->insert($vals);
                 }
             } else {
                 /*$vals = array(
-                    ['f_id', '=', $fid],
-                    ['a_id', '=', $aid]
+                    ['find_id', '=', $fid],
+                    ['attribute_id', '=', $aid]
                 );
-                if($isOption) $vals[] = ['o_id', '=', $oid];
+                if($isOption) $vals[] = ['option_id', '=', $oid];
                 $valId = DB::table($tbl)
                     ->where($vals)
                     ->value('id');
@@ -411,7 +411,7 @@ class ContextController extends Controller {
                 $alreadySet = false;
                 $attr;
                 foreach($currAttrs as $currKey => $currVal) {
-                    if($aid == $currVal->a_id) {
+                    if($aid == $currVal->attribute_id) {
                         $alreadySet = true;
                         $attr = $currVal;
                         unset($currAttrs[$currKey]);
@@ -422,28 +422,28 @@ class ContextController extends Controller {
                     $data = array('str_val' => $value);
                     DB::table('context_values')
                             ->where([
-                                ['f_id', '=', $attr->f_id],
-                                ['a_id', '=', $attr->a_id],
+                                ['find_id', '=', $attr->find_id],
+                                ['attribute_id', '=', $attr->attribute_id],
                                 ['id', '=', $attr->id]
                             ])
                         ->update($data);
                 } else {
                         $vals = array(
-                            'f_id' => $fid,
-                            'a_id' => $aid,
+                            'find_id' => $fid,
+                            'attribute_id' => $aid,
                             'str_val' => $value
                         );
-                        if($isOption) $vals['o_id'] = $oid;
+                        if($isOption) $vals['option_id'] = $oid;
                         DB::table($tbl)
                             ->insert($vals);
                 }
             } else {
                     $vals = array(
-                        'f_id' => $fid,
-                        'a_id' => $aid,
+                        'find_id' => $fid,
+                        'attribute_id' => $aid,
                         'str_val' => $value
                     );
-                    if($isOption) $vals['o_id'] = $oid;
+                    if($isOption) $vals['option_id'] = $oid;
                     DB::table($tbl)
                         ->insert($vals);
             }
