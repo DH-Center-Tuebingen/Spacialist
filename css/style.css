@@ -2,8 +2,17 @@
     text-align: right;
 }
 
-.activeLang {
+.activeLang > span.f16 {
     filter: grayscale(0.75);
+}
+
+a.activeLang {
+    color: gray !important;
+}
+
+/* override flag settings */
+.flag {
+    vertical-align: middle !important;
 }
 
 #navigation {
@@ -403,6 +412,9 @@ p, div {
     /*color: red !important;*/
     font-weight: 700;
 }
+.selected-leaf {
+    font-weight: 500;
+}
 
 .angular-ui-tree-handle {
     cursor: pointer;
@@ -417,6 +429,27 @@ p, div {
     cursor: not-allowed;
 }
 
+@media(max-width:767px){
+    ul.nav li a span.tab-desc {
+        display: inline;
+    }
+}
+@media(min-width:768px){
+    ul.nav li a span.tab-desc {
+        display: inline;
+    }
+}
+@media(min-width:992px){
+    ul.nav li a span.tab-desc {
+        display: none;
+    }
+}
+@media(min-width:1200px){
+    ul.nav li a span.tab-desc {
+        display: inline;
+    }
+}
+
 .floating-tab-md-11 {
     position: absolute;
     background-color: white;
@@ -425,10 +458,36 @@ p, div {
     box-shadow: -15px 0 15px -10px rgba(50, 50, 50, 0.5);
 }
 
+.centered {
+    text-align: center;
+}
+
+.contextPrefix {
+    color: gray;
+}
+/*.contextPrefix::before {
+    content: '['
+}
+.contextPrefix::after {
+    content: ']'
+}*/
+
 /* font awesome styles */
 .fa-light {
-    color: rgba(0, 0, 0, 0.6);
+    /*color: rgba(0, 0, 0, 0.6);*/
+    opacity: 0.6;
+}
+
+.fa-small {
     font-size: 0.9em;
+}
+
+.fa-green {
+    color: green;
+}
+
+.fa-red {
+    color: red;
 }
 
 g.leaf > rect {
@@ -455,29 +514,4 @@ g.compound > rect {
   stroke-width: 0.5px;
   stroke-opacity: 1;
   fill: none;
-}
-/* mermaid styles */
-.almost-hidden {
-    color: transparent;
-}
-
-.mermaid .label {
-    font-weight: 500;
-    color: rgba(25, 25, 25, 1);
-}
-
-.mermaid rect {
-    stroke: none;
-}
-
-.mermaidContext rect {
-    fill: #0f0;
-}
-
-.mermaidFound rect {
-    fill: #f00;
-}
-
-.mermaidFound .label {
-    color: #fff;
 }

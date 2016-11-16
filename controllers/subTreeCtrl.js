@@ -1,4 +1,4 @@
-spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'storeContext', '$q', function($scope, scopeService, httpPostFactory, httpGetFactory, storeContext, $q) {
+spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'httpPostPromise', '$q', function($scope, scopeService, httpPostFactory, httpGetFactory, httpPostPromise, $q) {
     if(typeof $scope.ctxts === 'undefined') $scope.ctxts = scopeService.ctxts;
     if(typeof $scope.ctxtRefs === 'undefined') $scope.ctxtRefs = scopeService.ctxtRefs;
     if(typeof this.fields === 'undefined') this.fields = scopeService.fields;
@@ -12,7 +12,7 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
     // In the harris view tab you can create new elements ('new') or edit the currently selected ('edit') element. They share the same attribute arrays, thus an identifier is needed
     var attribDataTypes = ['new', 'edit'];
     $scope.contextData = new FormData();
-    $scope.attribData = new FormData();
+    scopeService.attribData = $scope.attribData = new FormData();
 
     /*
      * callback for context-sc elements
@@ -77,6 +77,7 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
         $scope.addArtifact = false;
         $scope.selection = [];
         $scope.attribData[attribDataTypes[0]] = new FormData();
+        scopeService.attribData = $scope.attribData;
     }
 
     /**
@@ -116,6 +117,7 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
             typeId: attribData.typeId,
             typeName: attribData.typeName,
             typeIndex: attribData.typeIndex,
+            typeLabel: attribData.typeName,
             contextType: $scope.typeFields[0].context,
             data: []
         };
@@ -126,8 +128,9 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
             var attr = {};
             if(key != 'name') {
                 var ids = key.split('_');
-                attr.context = ids[0];
-                attr.attr = ids[1];
+                attr.context = elem.contextType;
+                attr.aid = ids[0];
+                attr.attr = ids[0];
                 attr.value = value;
                 elem.data.push(attr);
             }
@@ -143,9 +146,9 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
         elem.parentId = parent.realId;
         var promise = storeElement(elem);
         promise.then(function(newRealId) {
-            elem.realId = newRealId;
+            elem.realId = newRealId.fid;
             parent.children.push(elem);
-            $scope.createGraphFromHistory();
+            //$scope.createGraphFromHistory(); //TODO reimplement?
         });
         resetValues();
     }
@@ -167,7 +170,15 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
         if(typeof root.children === 'undefined') return;
         for(var i=0; i<root.children.length; i++) {
             var child = root.children[i];
-            if(child.typeId == 1) { //find
+            var promise = storeElement(child);
+            promise.then(function(newRealId) {
+                if(child.typeId == 1) { //find
+                    child.realId = newRealId;
+                } else if(child.typeId == 0) { //context
+                    storeSubElements(child);
+                }
+            });
+            /*if(child.typeId == 1) { //find
                 var promise = storeFind(child, parentId);
                 promise.then(function(newRealId) {
                     child.realId = newRealId;
@@ -177,22 +188,9 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
                 promise.then(function(newRealId) {
                     storeSubElements(child);
                 });
-            }
+            }*/
         }
-    }
-
-    /**
-     * Stores a single element of the context tree in the database
-     */
-    var storeElement = function(elem) {
-        var parent = elem.parentId;
-        if(elem.typeId == 0) {
-            var promise = storeContexti(elem, parent);
-        } else if(elem.typeId == 1) {
-            var promise = storeFind(elem, parent);
-        }
-        return promise;
-    }
+    };
 
     /**
      * Stores all children of a given context array `contexts` and their parent `parent`
@@ -209,26 +207,6 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
     }
 
     /**
-     * Stores the given context `context` with the given parent `parent` in the database.
-     * @return: returns a promise which returns the ID of the newly inserted context
-     */
-    var storeContexti = function(context, parent) {
-            var formData = new FormData();
-            formData.append('name', context.title);
-            formData.append('root', parent);
-            formData.append('cid', context.contextType);
-            if(typeof context.realId !== 'undefined' && context.realId != -1) {
-                formData.append('realId', context.realId);
-            }
-            for(var i=0; i<context.data.length; i++) {
-                var dat = context.data[i];
-                formData.append(dat.attr, dat.value);
-            }
-            var promise = storeContext.getData('../spacialist_api/context/set', formData);
-            return promise;
-    }
-
-    /**
      * Stores all elements of the given find array `finds` and their parent `parent`
      */
     var storeFinds = function(finds, parent) {
@@ -236,29 +214,9 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
             var promise = storeFind(finds[i], parent);
             promise.then(function(realId) {
                 finds[i].realId = realId;
-            })
+            });
         }
-    }
-
-    /**
-     * Stores the given find `f` with the given parent `parent` in the database.
-     * @return: returns a promise which returns the ID of the newly inserted find
-     */
-    var storeFind = function(f, parent) {
-            var formData = new FormData();
-            formData.append('name', f.title);
-            formData.append('root', parent);
-            formData.append('cid', f.contextType);
-            if(typeof f.realId !== 'undefined' && f.realId != -1) {
-                formData.append('realId', f.realId);
-            }
-            for(var i=0; i<f.data.length; i++) {
-                var dat = f.data[i];
-                formData.append(dat.attr, dat.value);
-            }
-            var promise = storeContext.getData('../spacialist_api/context/set', formData);
-            return promise;
-    }
+    };
 
     $scope.cancelArtifact = function() {
         resetValues();
@@ -301,7 +259,7 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
         var foundId = deleteElement(curr, id);
         console.log(foundId);
         if(foundId >= 0) {
-            httpPostFactory('../spacialist_api/context/delete/'+foundId, function(callback) {
+            httpGetFactory('../spacialist_api/context/delete/'+foundId, function(callback) {
             });
         }
         $scope.currentContext = curr;
@@ -315,15 +273,21 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
             if(key != 'name') {
                 var attr = {};
                 var ids = key.split('_');
-                attr.context = ids[0];
-                attr.attr = ids[1];
+                //attr.context = ids[0];
+                attr.aid = ids[0];
+                attr.attr = ids[0];
                 attr.value = value;
                 data.push(attr);
             }
         });
         $scope.currentContext.data = data;
-        $scope.storeSubElements();
-    }
+        //storeSubElements($scope.currentContext);
+        var promise = storeElement($scope.currentContext);
+        promise.then(function(newRealId){
+            console.log(newRealId);
+        });
+        //$scope.storeSubElements();
+    };
 
     /**
      * Computes the number of child elements for a given element `parent`
@@ -359,53 +323,14 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
         $scope.attribData[attrDT] = {};
         $scope.attribData[attrDT]['name'] = parent.title;
         angular.forEach(parent.data, function(value, key) {
-            var index = value.context + "_" + value.attr;
+            console.log(key);
+            console.log(value);
+            var index = value.aid + '_' + (value.oid || '');
             $scope.attribData[attrDT][index] = value.value;
         });
+        scopeService.attribData = $scope.attribData;
         $scope.stuffNav.setEditTab();
-    }
-
-    /**
-     * @returns json object with color settings for different context types, based on their id `id`.
-     * Colors are in hsl format with fixed saturation and lightness. Hue is computed based on the `id`'s hash.
-     */
-    $scope.getColorForId = function(id) {
-        var sat = '90%';
-        var lgt = '65%';
-        if(typeof id === 'undefined') {
-            var hue = 0;
-        } else {
-            //TODO hacky way to get different colors
-            var newId = window.btoa(id);
-            var newerId = newId;
-            for(var i=0; i<newId.length; i++) {
-                newerId += newId.charCodeAt(i);
-            }
-            var hue = getHashCode(newerId) % 360;
-        }
-        var hsl = [
-            hue,
-            sat,
-            lgt
-        ];
-        return {
-            'color': 'hsl(' + hsl.join(',') + ')'
-        };
-    }
-
-    /**
-     * @returns hash code for a given string `str`
-     */
-    var getHashCode = function(str) {
-        var hash = 0;
-        if(str.length === 0) return hash;
-        for(var i=0; i<str.length; i++) {
-            var chr = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + chr;
-            hash |= 0;
-        }
-        return hash;
-    }
+    };
 
     /**
      * Closes an alert window based on the close button's event object `event`
@@ -415,10 +340,10 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
         var elem = document.getElementById(id);
         elem.parentNode.removeChild(elem);
         $scope.closedAlerts[id] = true;
-    }
+    };
 
     var resetValues = function() {
         $scope.activeIndex = -1;
         resetDivs();
-    }
+    };
 }]);

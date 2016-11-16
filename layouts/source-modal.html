@@ -14,8 +14,7 @@
                     <span class="delete-icon" ng-class="{'hidden-del': !hovered}" ng-click="deleteSourceEntry($index, sourceModalFields.addedSources)">
                         &times;
                     </span>
-                    <span class="deletable">
-                        {{ entry.desc }}
+                    <span class="deletable" ng-bind-html="entry.desc | urlify">
                     </span>
                 </td>
             </tr>

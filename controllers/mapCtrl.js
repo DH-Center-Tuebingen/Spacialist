@@ -1,4 +1,4 @@
-spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'Upload', 'modalService', '$uibModal', function($scope, $timeout, $sce, leafletData, scopeService, httpPostFactory, httpGetFactory, Upload, modalService, $uibModal) {
+spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'Upload', 'modalService', '$uibModal', '$auth', '$state', '$http', function($scope, $timeout, $sce, leafletData, scopeService, httpPostFactory, httpGetFactory, Upload, modalService, $uibModal, $auth, $state, $http) {
     scopeService.map = {};
     scopeService.map.events = {
         markers: {
@@ -47,129 +47,12 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
     if (typeof $scope.map.bounds === 'undefined') $scope.map.bounds = scopeService.map.bounds;
     if (typeof $scope.map.events === 'undefined') $scope.map.events = scopeService.map.events;
     if (typeof $scope.map.controls === 'undefined') $scope.map.controls = scopeService.map.controls;
+    if(typeof scopeService.attribData != 'undefined')
     leafletData.getMap().then(function(map) {
         $scope.markers = scopeService.markers;
         $scope.mapObject = map;
     });
-    if (typeof $scope.map.drawOptions === 'undefined') $scope.map.drawOptions = scopeService.map.drawOptions;
-    if (typeof $scope.epochs === 'undefined') $scope.epochs = scopeService.epochs;
-
-    var predefinedArrays = {
-        'gebaeudeart': [
-            'Therme', 'Forum', 'Villa'
-        ],
-        'bauart': [
-            'freistehend', 'komplexgebunden', 'integriert'
-        ],
-        'inhalt': [{
-            name: 'literarische Werke'
-        }],
-        'ident': [{
-            name: 'architektonisch'
-        }, {
-            name: 'inschriftlich'
-        }, {
-            name: 'literarisch'
-        }],
-        'epoche': [
-            'frühe Eisenzeit',
-            'späte Eisenzeit',
-            'späte Bronzezeit',
-            'frühes Mittelalter',
-            'römisch'
-            //'sehr alt', 'alt', 'mittelalt', 'neu', 'sehr neu'
-        ],
-        'epochs': [{
-            name: 'Königszeit',
-            start: -753,
-            end: -500
-        }, {
-            name: 'Frühe römische Republik',
-            start: -500,
-            end: -287
-        }, {
-            name: 'Mittlere römische Republik',
-            start: -287,
-            end: -133
-        }, {
-            name: 'Späte römische Republik',
-            start: -133,
-            end: -27
-        }, {
-            name: 'Römische Kaiserzeit I',
-            start: -27,
-            end: 284
-        }, {
-            name: 'Römische Kaiserzeit II',
-            start: 284,
-            end: 476
-        }],
-        'matrices': [{
-            name: 'Ist identisch mit',
-            id: 1,
-            to: 1
-        }, {
-            name: 'Überlagert',
-            id: 2,
-            to: 3
-        }, {
-            name: 'Wird überlagert',
-            id: 3,
-            to: 2
-        }, {
-            name: 'Schneidet',
-            id: 4,
-            to: 5
-        }, {
-            name: 'Wird geschnitten von',
-            id: 5,
-            to: 4
-        }, {
-            name: 'Zieht heran an',
-            id: 6,
-            to: 7
-        }, {
-            name: 'Wird berührt von',
-            id: 7,
-            to: 6
-        }, {
-            name: 'Füllt/liegt innerhalb von',
-            id: 8,
-            to: 9
-        }, {
-            name: 'Wird gefüllt/umgibt/um­grenzt',
-            id: 9,
-            to: 8
-        }, {
-            name: 'Gehört zu/ist zugewiesen',
-            id: 10,
-            to: 10
-        }, {
-            name: 'Liegt über',
-            id: 11,
-            to: 12
-        }, {
-            name: 'Liegt unter',
-            id: 12,
-            to: 11
-        }, {
-            name: 'Liegt direkt über',
-            id: 13,
-            to: 14
-        }, {
-            name: 'Liegt direkt unter',
-            id: 14,
-            to: 13
-        }, {
-            name: 'Vermischt mit',
-            id: 15,
-            to: 15
-        }, {
-            name: 'Stratigraphisch gleich mit',
-            id: 16,
-            to: 16
-        }]
-    };
+    angular.extend($scope, scopeService);
 
     $scope.map.layercontrol = {
         icons: {
@@ -213,6 +96,11 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
                     attribution: 'MapData ' + osmAttr + ', ' + mqAttr
                 },
                 url: 'http://otile{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg',
+            },
+            empty: {
+                name: 'Empty',
+                type: 'xyz',
+                url: ''
             }
         },
         overlays: {
@@ -233,9 +121,6 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
     }
     $scope.closedAlerts = {};
     $scope.output = {};
-    $scope.matrices = predefinedArrays.matrices;
-    $scope.epochs = predefinedArrays.epochs;
-    $scope.selectedMatrix = predefinedArrays.matrices[0];
     $scope.relations = [];
     $scope.allImages = [];
     $scope.unlinkedFilter = {
@@ -733,15 +618,16 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
                     ctxts.push({
                         title: title,
                         index: index,
-                        type: value.type
+                        type: value.type,
+                        cid: value.cid
                     });
                 }
                 if (value.cid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
                     ctxtRefs[index].push({
+                        aid: value.aid,
+                        val: value.val,
                         context: value.cid,
-                        attr: value.aid,
-                        name: value.val,
-                        type: value.datatype
+                        datatype: value.datatype
                     });
                 }
             });
@@ -772,15 +658,16 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
                     artifacts.push({
                         title: title,
                         index: index,
-                        type: value.type
+                        type: value.type,
+                        cid: value.cid
                     });
                 }
                 if (value.cid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
                     artiRefs[index].push({
+                        aid: value.aid,
+                        val: value.val,
                         context: value.cid,
-                        attr: value.aid,
-                        name: value.val,
-                        type: value.datatype
+                        datatype: value.datatype
                     });
                 }
             });
@@ -792,80 +679,66 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
     var getLiterature = function() {
         var literature = undefined;
         httpGetFactory('../spacialist_api/literature/getAll', function(callback) {
-            $scope.literature = literature = callback;
-            httpGetFactory('../spacialist_api/context/getAttributes/10', function(callback) {
-                var listTabFields = [];
-                var optionFields = [];
-                var harrisRelation = undefined;
-                for (var i = callback.length - 1; i > 0; i--) {
-                    var value = callback[i];
-                    var index = value.cid + "_" + value.aid;
-                    if (value.datatype == 'string-sc' || value.datatype == 'string-mc') {
-                        if(value.choices != null) {
-                            $scope.markerChoices[index] = value.choices;
-                        }
-                    } else if (value.datatype == 'list') {
-                        $scope.hideLists[index] = true;
-                        listTabFields.push({
-                            context: value.cid,
-                            attr: value.aid,
-                            name: value.val,
-                            type: value.datatype,
-                            root: value.root
-                        });
-                        callback.splice(i, 1);
-                        $scope.input[index] = "";
-                    } else if (value.datatype == 'literature') {
-                        $scope.hideLists[index] = true;
-                        listTabFields.push({
-                            context: value.cid,
-                            attr: value.aid,
-                            name: value.val,
-                            type: value.datatype,
-                            options: literature.slice(),
-                            root: value.root
-                        });
-                        callback.splice(i, 1);
-                    } else if (value.datatype == 'epoch') {
-                        $scope.hideLists[index] = true;
-                        listTabFields.push({
-                            context: value.cid,
-                            attr: value.aid,
-                            name: value.val,
-                            type: value.datatype,
-                            options: predefinedArrays['epochs'].slice(),
-                            root: value.root
-                        });
-                        callback.splice(i, 1);
-                    } else if (value.datatype == 'relation') {
-                        $scope.markerChoices[index] = predefinedArrays[value.root].slice();
-                        listTabFields.push({
-                            context: value.cid,
-                            attr: value.aid,
-                            name: value.val,
-                            type: value.datatype,
-                            options: predefinedArrays[value.root].slice(),
-                            root: value.root
-                        });
-                        callback.splice(i, 1);
-                    } else if (value.datatype == 'option') {
-                        for (var j = 0; j < value.attributes.length; j++) {
-                            var attribute = value.attributes[j];
-                            if (attribute.datatype == 'epoch') {
-                                attribute.options = predefinedArrays.epochs.slice();
-                            } else if (attribute.datatype == 'literature') {
-                                attribute.options = literature.slice();
-                            }
-                        }
-                        optionFields.push(value);
-                        callback.splice(i, 1);
+            scopeService.literature = $scope.literature = literature = callback;
+        });
+    }
+
+    var getAttributes = function() {
+        httpGetFactory('../spacialist_api/context/getAttributes/10', function(callback) {
+            var fields = [];
+            var listTabFields = [];
+            var optionFields = [];
+            var harrisRelation = undefined;
+            for (var i = callback.length - 1; i >= 0; i--) {
+                var value = callback[i];
+                var index = value.aid + "_";
+                if(typeof value.oid != 'undefined') index += value.oid;
+                if (value.datatype == 'string-sc' || value.datatype == 'string-mc') {
+                    if(value.choices != null) {
+                        $scope.markerChoices[index] = value.choices;
                     }
-                };
-                $scope.fields = callback;
-                $scope.listTabFields = listTabFields;
-                $scope.optionFields = optionFields;
-                $scope.harrisRelation = harrisRelation;
-            });
+                    if(value.cid == 10) fields.push(value);
+                } else if (value.datatype == 'list') {
+                    if(value.cid == 10) { //library
+                        $scope.hideLists[index] = true;
+                        listTabFields.push({
+                            aid: value.aid,
+                            val: value.val,
+                            datatype: value.datatype,
+                            root: value.root
+                        });
+                        $scope.input[index] = "";
+                        //callback.splice(i, 1);
+                    }
+                } else if (value.datatype == 'epoch') {
+                    $scope.markerChoices[index] = value.choices;
+                    if(value.cid == 10) fields.push(value);
+                } else if (value.datatype == 'relation') {
+                    if(value.cid == 10) {
+                        listTabFields.push({
+                            aid: value.aid,
+                            val: value.val,
+                            datatype: value.datatype,
+                            root: value.root
+                        });
+                        //callback.splice(i, 1);
+                    }
+                } else if (value.datatype == 'option') {
+                    for (var j = 0; j < value.attributes.length; j++) {
+                        var attribute = value.attributes[j];
+                        if (attribute.datatype == 'epoch') {
+                        }
+                    }
+                    optionFields.push(value);
+                    callback.splice(i, 1);
+                } else {
+                    if(value.cid == 10) fields.push(value);
+                }
+            };
+            $scope.fields = fields.reverse();
+            $scope.listTabFields = listTabFields;
+            $scope.optionFields = optionFields;
+            $scope.harrisRelation = harrisRelation;
         });
     }
 
@@ -879,6 +752,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         getContexts();
         getArtifacts();
         getLiterature();
+        getAttributes();
         getAllContexts();
     }
 
@@ -946,26 +820,25 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
             var storedValues = {}
             for (var j = 0; j < curr.attributes.length; j++) {
                 var attr = curr.attributes[j];
-                var key = curr['c_id'] + '_' + attr['a_id'];
+                var key = attr['a_id'] + '_';
+                var posKey = key + 'pos';
                 var val = attr.str_val;
-                if (attr['datatype'] == 'list' || attr['datatype'] == 'literature') {
+                storedValues[posKey] = attr.possibility || 100;
+                if (attr['datatype'] == 'list') {
                     if (typeof storedValues[key] === 'undefined') storedValues[key] = [];
-                    if (attr['datatype'] == 'literature') {
-                        storedValues[key].push(attr.literature_info)
-                    } else {
-                        storedValues[key].push({
-                            name: val
-                        });
-                        if (attr['datatype'] == 'list') {
-                            if (typeof $scope.editEntry[key] === 'undefined') $scope.editEntry[key] = [];
-                            $scope.editEntry[key].push(false);
-                        }
-                    }
+                    storedValues[key].push({
+                        name: val
+                    });
+                    if (typeof $scope.editEntry[key] === 'undefined') $scope.editEntry[key] = [];
+                    $scope.editEntry[key].push(false);
                 } else if(attr['datatype'] == 'string-sc') {
                     storedValues[key] = attr.val;
                 } else if(attr['datatype'] == 'string-mc') {
                     if (typeof storedValues[key] === 'undefined') storedValues[key] = [];
                     storedValues[key].push(attr.val);
+                } else if(attr['datatype'] == 'dimension' || attr['datatype'] == 'epoch') {
+                    if (typeof storedValues[key] === 'undefined') storedValues[key] = {};
+                    storedValues[key].val = val;
                 } else {
                     storedValues[key] = val;
                 }
@@ -1184,11 +1057,10 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
                     for (var j = 0; j < field.attributes.length; j++) {
                         var value = field.attributes[j];
                         $scope.sideNav.optionAttributes.push({
-                            context: field.cid,
-                            option: value.o_id,
-                            attr: value.a_id,
-                            name: value.val,
-                            type: value.datatype,
+                            oid: value.o_id,
+                            aid: value.a_id,
+                            val: value.val,
+                            datatype: value.datatype,
                             options: value.options
                         });
                     }
@@ -1288,39 +1160,6 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
     $scope.isEmpty = function(obj) {
         if (typeof obj === 'undefined') return false;
         return Object.keys(obj).length == 0;
-    }
-
-    //TODO deprecated
-    $scope.setEpochs = function(cid, aid, selected) {
-        var name = cid + "_" + aid;
-        var newEpochs = [];
-        $scope.editEntry[name] = [];
-        for (var i = 0; i < selected.length; i++) {
-            newEpochs.push({
-                name: selected[i],
-                use: 'Bibliothek',
-                phase: 'Phase 1-2'
-            });
-            $scope.editEntry[name].push({
-                name: false,
-                use: false,
-                phase: false
-            });
-        }
-        $scope.markerValues[name].selectedEpochs = newEpochs;
-        setMarkerOption(name, $scope.markerValues[name]);
-        console.log($scope.editEntry[name]);
-    }
-
-    //TODO deprecated
-    $scope.deleteEpochEntry = function(prefix, cid, aid, index) {
-        var name = prefix + cid + "_" + aid;
-        $timeout(function() {
-            //select the close button of the entry at index 'index' of the (hidden) ui-select-match element
-            var divName = 'div#' + name + ' div span.ui-select-match span span.ui-select-match-item span.close.ui-select-match-close';
-            var elem = document.querySelectorAll(divName)[index];
-            if (typeof elem !== 'undefined') elem.click();
-        }, 0, false);
     }
 
     $scope.updateUnlinkedFilter = function(id, isContext) {
@@ -1493,12 +1332,22 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
             scope: $scope
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
-
     }
 
-    $scope.addListEntry = function(cid, aid, oid) {
-        var index = cid + "_" + aid + "_" + oid;
-        var arr = [];
+    $scope.addListEntry = function(aid, oid, text, arr) {
+        var index = aid + '_' + (oid || '');
+        var tmpArr = $scope.$eval(arr);
+        var inp = $scope.$eval(text);
+        if(typeof tmpArr[index] == 'undefined') tmpArr[index] = [];
+        tmpArr[index].push({
+            'name': inp[index]
+        });
+        inp[index] = '';
+        /*if(typeof arr === 'undefined') arr = [];
+        arr.push({
+            'name': text
+        });*/
+        /*var arr = [];
         console.log($scope.fields[index]);
         arr.push({
             'name': $scope.input[index]
@@ -1507,7 +1356,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         if (typeof $scope.editEntry[index] === 'undefined') $scope.editEntry[index] = [];
         $scope.editEntry[index].push(false);
         if (typeof $scope.markerValues[index] !== 'undefined') arr = $scope.markerValues[index].concat(arr);
-        setMarkerOption(index, arr);
+        setMarkerOption(index, arr);*/
     }
 
     $scope.editListEntry = function(cid, aid, $index, val, tableIndex) {
@@ -1554,9 +1403,12 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         $scope.initialListVal = undefined;
     }
 
-    $scope.removeListItem = function(cid, aid, $index) {
-        var name = cid + "_" + aid;
-        $scope.markerValues[name].splice($index, 1);
+    $scope.removeListItem = function(aid, oid, arr, $index) {
+        var index = aid + '_' + (oid || '');
+        var tmpArr = $scope.$eval(arr);
+        tmpArr[index].splice($index, 1);
+        //var name = aid + "_" + oid;
+        //$scope.markerValues[name].splice($index, 1);
     }
 
     $scope.toggleList = function(cid, aid) {
@@ -1605,14 +1457,25 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
                 contextType: ctx.c_id,
                 realId: ctx.id,
                 parentId: ctx.root,
-                data: []
+                data: {}
             };
             angular.forEach(ctx.data, function(value, key) {
+                var aid = value['a_id'];
                 var attr = {};
-                attr.context = ctx.c_id
-                attr.attr = value['a_id'];
-                attr.value = value['str_val'];
-                elem.data.push(attr);
+                attr.cid = ctx.c_id
+                attr.aid = aid;
+                if(value.datatype == 'list') {
+                    if(typeof elem.data[aid] == 'undefined') attr.value = [];
+                    else attr.value = elem.data[aid].value;
+                    attr.value.push({
+                        'name': value['str_val']
+                    });
+                } else {
+                    attr.value = value['str_val'];
+                }
+                //attr.value = value['str_val'];
+                //elem.data.push(attr);
+                elem.data[aid] = attr;
             });
             if (ctx.type == 0) {
                 elem.fields = $scope.ctxtRefs[elem.typeName].slice();
@@ -1742,6 +1605,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         }
         var aid = fieldid;
         var fid = $scope.activeMarker;
+        console.log(fid);
         httpGetFactory('../spacialist_api/sources/get/' + aid + '/' + fid, function(sources) {
             angular.forEach(sources, function(src, key) {
                 $scope.sourceModalFields.addedSources.push({
@@ -1769,7 +1633,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
     /**
      * Remove a source entry at the given index `index` from the given array `arr`.
      */
-    $scope.deleteSourceEntry = function(index, arr) {
+    scopeService.deleteSourceEntry = $scope.deleteSourceEntry = function(index, arr) {
         var src = arr[index];
         var title = '';
         if(typeof src.src !== 'undefined' && typeof src.src.title !== 'undefined') title = src.src.title;
@@ -1829,6 +1693,56 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         });
         $scope.sourceModalFields.currentSource = undefined;
         $scope.sourceModalFields.currentDesc = undefined;
+    }
+
+    /**
+     * Opens a modal window which allows the user to set the possibility for a particular attribute.
+     * One has to pass the field name `fieldname` and the attribute id `fieldid` as parameters.
+     */
+    $scope.openPossibilityModal = function(fieldname, fieldid, currentVal) {
+        $scope.possibilityModalFields = {
+            name: fieldname,
+            id: fieldid,
+            value: currentVal || 100,
+            setPossibility: function(event) {
+                var max = event.currentTarget.scrollWidth;
+                var click = event.originalEvent.layerX;
+                var curr = $scope.possibilityModalFields.value
+                var newVal = parseInt(click/max*100);
+                if(Math.abs(newVal-curr) < 10) {
+                    if(newVal > curr) newVal = parseInt((newVal+10)/10)*10
+                    else newVal = parseInt(newVal/10)*10
+                } else {
+                    newVal = parseInt((newVal+5)/10)*10;
+                }
+                /*var rst = newVal % 10;
+                rst < 5 ? newVal -= rst : newVal += (10-rst);*/
+                event.currentTarget.children[0].style.width = newVal+"%"
+                $scope.possibilityModalFields.value = newVal;
+            }
+        }
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/possibility-modal.html',
+            controller: function($uibModalInstance) {
+                $scope.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                },
+                $scope.save = function() {
+                    var formData = new FormData();
+                    formData.append('fid', $scope.activeMarker); //TODO problem because of activeMarker and currentContext
+                    formData.append('aid', fieldid);
+                    formData.append('possibility', $scope.possibilityModalFields.value);
+                    $scope.attributeOutputs[fieldid+'_pos'] = $scope.possibilityModalFields.value;
+                    //console.log($scope.attributeOutputs.toSource());
+                    httpPostFactory('../spacialist_api/context/set/possibility', formData, function(callback) {
+                        console.log(callback);
+                        $uibModalInstance.dismiss('cancel');
+                    });
+                }
+            },
+            scope: $scope
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
     }
 
     $scope.storeLib = function() {
@@ -1959,6 +1873,14 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
     $scope.subNav.triggerCreateMarker = function() {
         document.querySelector('.leaflet-draw-draw-marker').click();
         $scope.sideNav.setMapTab();
+    }
+
+    $scope.setTestingState = function() {
+        $state.go('testing');
+    }
+
+    $scope.setSpacialistState = function() {
+        $state.go('spacialist');
     }
 }]);
 

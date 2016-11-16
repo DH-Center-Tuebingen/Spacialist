@@ -1,0 +1,19 @@
+<div class="modal-header">
+    <h4>Sicherheit der Angabe <small>{{ possibilityModalFields.name }}</small></h4>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <div class="progress" ng-click="possibilityModalFields.setPossibility($event)">
+            <div class="progress-bar" ng-class="{ 'progress-bar-danger': possibilityModalFields.value <= 25, 'progress-bar-warning': possibilityModalFields.value <= 50, 'progress-bar-info': possibilityModalFields.value <= 75, 'progress-bar-success': possibilityModalFields.value > 75 }" role="progressbar" aria-valuenow="{{possibilityModalFields.value}}" aria-valuemin="0" aria-valuemax="100" style="width: {{ possibilityModalFields.value }}%">
+                <span class="sr-only">{{ possibilityModalFields.value }}% complete</span>
+                {{ possibilityModalFields.value }}%
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success"
+      ng-click="save()">{{ 'Save' | translate }}</button>
+    <button type="button" class="btn btn-default"
+      ng-click="cancel()">{{ 'close' | translate }}</button>
+</div>

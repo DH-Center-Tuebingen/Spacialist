@@ -1,11 +1,11 @@
-var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'ngRoute', 'ngMessages', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'ui.bootstrap', 'monospaced.mousewheel', 'ngFileUpload', 'ui.tree', 'infinite-scroll']);
+var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'ui.bootstrap', 'monospaced.mousewheel', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
 
 spacialistApp.service('modalService', ['$uibModal', function($uibModal) {
     var defaults = {
         backdrop: true,
         keyboard: true,
         modalFade: true,
-        templateUrl: 'layouts/modal-popup.html?t=' + Math.random().toString(36).slice(2),
+        templateUrl: 'layouts/modal-popup.html',
         windowClass: 'wide-modal'
     };
     var options = {};
@@ -14,7 +14,7 @@ spacialistApp.service('modalService', ['$uibModal', function($uibModal) {
         if(!customDefaults) customDefaults = {};
         //customDefaults.backdrop = 'static';
         return this.show(customDefaults, customOptions);
-    }
+    };
 
     this.show = function(customDefaults, customOptions) {
         var tempDefaults = {};
@@ -123,6 +123,48 @@ spacialistApp.service('modalService', ['$uibModal', function($uibModal) {
     }
 }]);
 
+spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
+    this.deleteModal = function(elementName, onConfirm) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/delete-confirm.html',
+            controller: function($uibModalInstance) {
+                this.name = elementName;
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.deleteConfirmed = function() {
+                    onConfirm();
+                    $uibModalInstance.dismiss('ok');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
+    this.createModal = function(heading, text, selection, onCreate) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/create-element.html',
+            controller: function($uibModalInstance) {
+                this.heading = heading;
+                this.desc = text;
+                this.choices = selection;
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.onCreate = function(name, type) {
+                    onCreate(name, type);
+                    $uibModalInstance.dismiss('ok');
+                };
+                this.setSelected = function(ngModel) {
+                    this.type = ngModel.$modelValue;
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
+}]);
+
 spacialistApp.directive('mySetIndex', function() {
     return {
         link: function(scope, element, attr) {
@@ -156,13 +198,66 @@ spacialistApp.directive('myDirective', function(httpPostFactory, scopeService) {
     }
 });
 
+spacialistApp.directive('myTree', function($parse) {
+    return {
+        restrict: 'E',
+        templateUrl: 'includes/new-tree.html',
+        scope: {
+            onClickCallback: '&',
+            onInit: '&',
+            itemList: '=',
+            element: '=',
+            displayAttribute: '=',
+            typeAttribute: '=',
+            prefixAttribute: '=',
+            setContextMenu: '='
+        },
+        controller: 'mainCtrl'
+    };
+});
+
 spacialistApp.directive('formField', function() {
+    var updateInputFields = function(scope, element, attrs) {
+        scope.attributeFields = scope.$eval(attrs.fields);
+        scope.attributeOutputs = scope.$eval(attrs.output);
+        var pattern = /^\d+$/;
+        if(typeof attrs.labelWidth != 'undefined' && pattern.test(attrs.labelWidth)) {
+            scope.labelWidth = parseInt(attrs.labelWidth);
+        } else {
+            scope.labelWidth = 4;
+        }
+        if(typeof attrs.inputWidth != 'undefined' && pattern.test(attrs.inputWidth)) {
+            scope.inputWidth = parseInt(attrs.inputWidth);
+        } else {
+            scope.inputWidth = 8;
+        }
+        if(typeof attrs.offset != 'undefined' && pattern.test(attrs.offset)) {
+            scope.offset = parseInt(attrs.offset);
+        } else {
+            scope.offset = 0;
+        }
+        if(scope.labelWidth + scope.inputWidth + scope.offset > 12) {
+            console.log("> 12");
+            return false;
+        }
+    }
+
     return {
         restrict: 'E',
         templateUrl: 'includes/inputFields.html',
-        scope: {
-            fields: '=',
-            output: '='
+        scope: false,
+        link: function(scope, element, attrs) {
+            scope.listInput = {};
+            scope.$watch(function(scope) {
+                return scope.$eval(attrs.fields);
+            }, function(newVal, oldVal) {
+                updateInputFields(scope, element, attrs);
+            });
+            scope.$watch(function(scope) {
+                return scope.$eval(attrs.output);
+            }, function(newVal, oldVal) {
+                updateInputFields(scope, element, attrs);
+            });
         }
     }
 });
@@ -178,6 +273,16 @@ spacialistApp.directive("number", function() {
         }
     };
 });
+
+spacialistApp.filter('urlify', function() {
+    var urls = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    return function(text) {
+        if(text.match(urls)) {
+            text = text.replace(urls, '<a href="$1" target="_blank">$1</a>');
+        }
+        return text;
+    }
+})
 
 spacialistApp.filter('dateBcAc', ['$q', '$translate', function($q, $translate) {
     var bcStr = null;
@@ -331,7 +436,7 @@ spacialistApp.filter('truncate', function () {
     };
 });
 
-spacialistApp.factory('storeContext', function($http) {
+spacialistApp.factory('httpPostPromise', function($http) {
     var getData = function(file, data) {
         return $http({
             url: file,
@@ -343,7 +448,7 @@ spacialistApp.factory('storeContext', function($http) {
         }).then(function(result) {
             return result.data;
         });
-    }
+    };
     return { getData: getData };
 });
 
@@ -373,7 +478,7 @@ spacialistApp.factory('httpGetFactory', function($http) {
         }).success(function(response) {
             callback(response);
         });
-    }
+    };
 });
 
 spacialistApp.factory('scopeService', function($http) {
@@ -399,7 +504,7 @@ spacialistApp.factory('scopeService', function($http) {
     return service;
 });
 
-spacialistApp.config(function($routeProvider, $locationProvider) {
+/*spacialistApp.config(function($routeProvider, $locationProvider) {
     $routeProvider
         .when('/dates', {
             templateUrl: 'dates.html'
@@ -422,13 +527,124 @@ spacialistApp.config(function($routeProvider, $locationProvider) {
         });
 
     //$locationProvider.html5Mode(true);
-});
+});*/
 
 spacialistApp.config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({
         prefix: 'l10n/',
         suffix: '.json'
     });
+    $translateProvider.registerAvailableLanguageKeys(['en', 'de', 'fr', 'it', 'es'], {
+        'de_DE': 'de',
+        'de_AT': 'de',
+        'de_CH': 'de',
+        'en_UK': 'en',
+        'en_US': 'en'
+    });
     $translateProvider.determinePreferredLanguage();
     $translateProvider.useSanitizeValueStrategy('escape');
+});
+
+spacialistApp.config(function($controllerProvider, $provide) {
+    $provide.factory('moduleHelper', function() {
+        return {
+            controllerExists: function(name) {
+                return $controllerProvider.has(name);
+            }
+        };
+    });
+});
+
+spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider, $httpProvider, $provide) {
+    function redirectWhenLoggedOut($q, $injector) {
+        return {
+            responseError: function(rejection) {
+                var $state = $injector.get('$state');
+                var rejectReasons = ['token_not_provided', 'token_expired', 'token_absent', 'token_invalid'];
+                angular.forEach(rejectReasons, function(value, key) {
+                    if(rejection.data.error === value) {
+                        localStorage.removeItem('user');
+                        $state.go('auth');
+                    }
+                });
+                return $q.reject(rejection);
+            }
+        };
+    }
+    $provide.factory('redirectWhenLoggedOut', redirectWhenLoggedOut);
+
+    function redirectWhenUnauth($q, $injector) {
+        return {
+            'response': function(response) {
+                return response || $q.when(response);
+            },
+            'responseError': function(rejection) {
+                var $state = $injector.get('$state');
+                if(rejection.status == 401) {
+                    localStorage.removeItem('user');
+                    $state.go('auth');
+                    return;
+                }
+                return $q.reject(rejection);
+            }
+        };
+    }
+    $provide.factory('redirectWhenUnauth', redirectWhenUnauth);
+
+    function getUpdatedToken($q, $injector) {
+        return {
+            response: function(response) {
+                var auth = response.config.headers.Authorization;
+                if(typeof auth != 'undefined') {
+                    var $auth = $injector.get('$auth');
+                    $auth.setToken(auth);
+                }
+                return response || $q.when(response);
+            }
+        };
+    }
+    $provide.factory('getUpdatedToken', getUpdatedToken);
+
+    $httpProvider.interceptors.push('getUpdatedToken');
+    $httpProvider.interceptors.push('redirectWhenLoggedOut');
+    $httpProvider.interceptors.push('redirectWhenUnauth');
+
+    $authProvider.loginUrl = '../spacialist_api/user/login';
+    $urlRouterProvider.otherwise('/auth');
+
+    $stateProvider
+        .state('auth', {
+            url: '/auth',
+            templateUrl: 'layouts/login.html',
+            controller: 'userCtrl'
+        })
+        .state('spacialist', {
+            url: '/spacialist',
+            //template: '<h4>Hallo {{ currentUser.user }} <small>{{ currentUser.user.email }}</small></h4>',
+            templateUrl: 'map.html',
+            controller: 'mapCtrl'
+        })
+        .state('testing', {
+            url: '/testing',
+            templateUrl: 'testing.html',
+            controller: 'mainCtrl'
+        });
+});
+
+/**
+ * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
+ */
+spacialistApp.run(function($rootScope, $state) {
+    $rootScope.$on('$stateChangeStart', function(event, toState) {
+        var user = JSON.parse(localStorage.getItem('user'));
+        if(user) {
+            $rootScope.currentUser = {
+                user: user
+            }
+            if(toState.name === 'auth') {
+                event.preventDefault();
+                $state.go('spacialist');
+            }
+        }
+    });
 });

@@ -6,12 +6,12 @@
         <link rel="icon" type="image/png" href="favicon.png" sizes="32x32">
         <link rel="stylesheet" type="text/css" href="bower_components/world-flags-sprite/stylesheets/flags16.css" />
         <link rel="stylesheet" type="text/css" href="bower_components/angular-ui-tree/dist/angular-ui-tree.min.css" />
-        <link rel="stylesheet" type="text/css" href="bower_components/leaflet/dist/leaflet.css" />
-        <link rel="stylesheet" type="text/css" href="bower_components/leaflet-draw/dist/leaflet.draw.css" />
-        <link rel="stylesheet" type="text/css" href="css/animate.css" />
-        <link rel="stylesheet" type="text/css" href="bower_components/angular-ui-select/dist/select.min.css" />
-        <link rel="stylesheet" type="text/css" href="bower_components/font-awesome/css/font-awesome.min.css" />
-        <link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
+        <link rel="stylesheet" href="bower_components/leaflet-draw/dist/leaflet.draw.css" />
+        <link rel="stylesheet" href="css/animate.css" />
+        <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.min.css" />
+        <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
         <!--<link href='https://fonts.googleapis.com/css?family=Fira+Sans:400,300italic,300,400italic,500,500italic,700,700italic' rel='stylesheet' type='text/css'>-->
         <link rel="stylesheet" href="css/style.css" />
         <title>Spacialist</title>
@@ -51,24 +51,56 @@
                             </ul>
                         </li>
                     </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown" uib-dropdown ng-controller="LangCtrl">
+                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                <flag country="{{ currentLanguage.flagCode }}" size="16"></flag> <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" uib-dropdown-menu ng-init="setInitLanguage()">
+                                <li ng-repeat="(code,lang) in availableLanguages">
+                                    <a href="" ng-click="switchLang(code)" ng-class="{ activeLang: isLangSet(code) }">
+                                        <flag country="{{lang.flagCode}}" size="16"></flag>
+                                        {{ lang.label }}
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right" ng-controller="userCtrl">
+                        <li ng-if="currentUser"><!--ng-controller="UserCtrl"-->
+                            <a href="" ng-click="logoutUser()">
+                                <span class="fa fa-fw fa-sign-out"></span> {{ currentUser.user.name }}
+                            </a>
+                        </li>
+                        <li ng-if="currentUser" class="dropdown" uib-dropdown><!--ng-controller="UserCtrl"-->
+                            <a href="" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                Administrator <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" uib-dropdown-menu>
+                                <li>
+                                    <a href="">
+                                        Administrator
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="">
+                                        HiWi
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="">
+                                        Fotobearbeiter
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
-        <div class="col-md-12">
-            <ul ng-controller="LangCtrl" class="list-inline" id="langSwitch">
-              <li>
-                  <a href="" ng-click="switchLang('en_US')">
-                      <flag country="gb" size="16" ng-class="{ activeLang: isLangSet('en') }"></flag>
-                  </a>
-              </li>
-              <li>
-                  <a href="" ng-click="switchLang('de')">
-                      <flag country="de" size="16" ng-class="{ activeLang: isLangSet('de') }"></flag>
-                  </a>
-              </li>
-            </ul>
+        <div ng-controller="mapCtrl">
+            <div ui-view class="col-md-12"></div>
         </div>
-        <div ng-view class="col-md-12"></div>
         <script src="bower_components/jquery/dist/jquery.min.js"></script>
         <script src="bower_components/lodash/dist/lodash.min.js"></script>
         <script src="bower_components/angular/angular.min.js"></script>
@@ -91,11 +123,16 @@
         <script src="bower_components/ng-infinite-scroll-npm-is-better-than-bower/build/ng-infinite-scroll.min.js"></script>
         <script src="bower_components/angular-ui-select/dist/select.min.js"></script>
         <script src="bower_components/ng-flags/src/directives/ng-flags.js"></script>
+        <script src="bower_components/angular-bootstrap-contextmenu/contextMenu.js"></script>
+        <script src="bower_components/satellizer/dist/satellizer.min.js"></script>
+        <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
         <script src="bower_components/proj4/dist/proj4.js"></script>
         <script src="bower_components/d3/d3.min.js"></script>
         <script src="bower_components/klayjs-d3/dist/klayjs-d3.min.js"></script>
         <script src="bower_components/klayjs/klay.js"></script>
         <script src="app.js"></script>
+        <script src="controllers/mainCtrl.js"></script>
+        <script src="controllers/userCtrl.js"></script>
         <script src="controllers/langCtrl.js"></script>
         <script src="controllers/headerCtrl.js"></script>
         <script src="controllers/mapCtrl.js"></script>

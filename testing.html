@@ -1,0 +1,69 @@
+<div ng-controller="mainCtrl">
+    <div class="col-md-2" style="max-height: 500px;">
+        <h3>Elemente</h3>
+        <input type="text" placeholder="{{'search'|translate}}" />
+        <my-tree on-init="getContextList()" on-click-callback="setCurrentElement(target, elem)" item-list="contextList" element="currentElement" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
+        <spinner ng-if="getContextListStarted"></spinner>
+    </div>
+    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;">
+        <div ng-show="currentElement">
+            <h3>{{ currentElement.name }} <small>Element-Eigenschaften</small></h3>
+            <form class="form-horizontal" role="form" ng-if="currentElementFields">
+                <form-field fields="currentElementFields" output="currentElementData" label-width="3" input-width="9" offset="0">
+                </form-field>
+                <button type="button" class="btn btn-success" ng-click="storeElement(currentElement, currentElementData)">
+                    <span class="fa fa-fw fa-floppy-o"></span> {{ 'Save' | translate }}
+                </button>
+                <button type="button" class="btn btn-danger" ng-click="deleteElement(currentElement)">
+                    <span class="fa fa-fw fa-trash-o"></span> {{ 'delete' | translate }}
+                </button>
+            </form>
+        </div>
+        <div ng-hide="currentElement">
+            <h3>Element-Eigenschaften</h3>
+            <div class="alert alert-info">
+                <p>
+                    Kein Element ausgewählt.
+                </p>
+                <p>
+                    Um die Eigenschaften eines Elements anzuzeigen, klicken Sie in der Baumansicht auf ein Element.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <ul class="nav nav-tabs">
+            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'map'}" ng-if="moduleExists('mapCtrl')">
+                <a href="" ng-click="setActiveTab('map')"><span class="fa fa-fw fa-map-marker"></span><span class="tab-desc"> Karte</span></a>
+            </li>
+            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'properties'}">
+                <a href="" ng-click="setActiveTab('properties')"><span class="fa fa-fw fa-sliders"></span><span class="tab-desc"> Weitere Eigenschaften</span></a>
+            </li>
+            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'harris'}" ng-if="moduleExists('harrisCtrl')">
+                <a href="" ng-click="setActiveTab('harris')"><span class="fa fa-fw fa-object-group"></span><span class="tab-desc"> Harris-Matrix</span></a>
+            </li>
+            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'images'}" ng-if="moduleExists('imageCtrl')">
+                <a href="" ng-click="setActiveTab('images')"><span class="fa fa-fw fa-image"></span><span class="tab-desc"> Bilder</span></a>
+            </li>
+            <li role="presentation">
+                <a href=""><span class="fa fa-fw fa-random"></span><span class="tab-desc"> Noch irgendwas</span></a>
+            </li>
+        </ul>
+        <div ng-if="layerTwo.activeTab == 'map'">
+            <div id="map-container" ng-if="sideNav.mapTab && map">
+                <leaflet bounds="map.bounds" layers="map.layers" lf-draw="map.drawOptions" controls="map.controls" markers="markers" event-broadcast="map.events" height="768px" width="100%">
+                    <layercontrol order="normal" icons="map.layercontrol.icons" auto-hide-opacity="true" show-groups="true" title="" base-title="Base Layers" overlays-title="Overlays"></layercontrol>
+                </leaflet>
+            </div>
+        </div>
+        <div ng-if="layerTwo.activeTab == 'properties'">
+            <h5>Properties active</h5>
+        </div>
+        <div ng-if="layerTwo.activeTab == 'harris'">
+            <h5>Harris active</h5>
+        </div>
+        <div ng-if="layerTwo.activeTab == 'images'">
+            <h5>Images active</h5>
+        </div>
+    </div>
+</div>
