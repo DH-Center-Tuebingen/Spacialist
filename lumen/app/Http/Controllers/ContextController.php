@@ -30,6 +30,49 @@ class ContextController extends Controller {
         );
     }
 
+    public function getRecursive() {
+        $rootFields = DB::select("
+        WITH RECURSIVE
+        q AS (
+	        SELECT  f.*, 0 as reclevel
+	        FROM    finds f
+	        WHERE   root = -1
+	        UNION ALL
+	        SELECT  fc.*, reclevel+1
+	        FROM    q
+	        JOIN    finds fc
+	        ON      fc.root = q.id
+        )
+        SELECT  q.*, ct.type as typeid, ct.th_uri AS typename, public.\"getLabelForId\"(ct.th_uri, 'de') as typelabel
+        FROM    q
+        JOIN context_types AS ct
+        ON q.c_id = ct.id
+        ORDER BY reclevel DESC
+        ");
+        $children = [];
+        foreach($rootFields as $key => $field) {
+            $rootFields[$key]->data =  DB::table('context_values as cv')->select('cv.*', 'a.datatype', 'a.th_root')->join('attributes as a', 'cv.a_id', '=', 'a.id')->where('f_id', $field->id)->get();
+            foreach($rootFields[$key]->data as &$attr) {
+                if($attr->datatype == 'literature') {
+                    $attr->literature_info = DB::table('bib_tex')->where('id', $attr->str_val)->first();
+                } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
+                    $attr->val = DB::table('th_concept')
+                        ->select('id_th_concept as narrower_id',
+                            DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
+                        )
+                        ->where('concept_url', '=', $attr->th_val)
+                        ->first();
+                }
+            }
+            if(array_key_exists($field->id, $children)) $tmpChildren = $children[$field->id];
+            else $tmpChildren = array();
+            $rootFields[$key]->children = $tmpChildren;
+            $children[$field->root][] = $field;
+            if($field->reclevel != 0) unset($rootFields[$key]);
+        }
+        return response()->json($rootFields);
+    }
+
     public function getAll() {
         return response()->json(
             [
@@ -48,7 +91,8 @@ class ContextController extends Controller {
         )
         ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.c_id')
         ->leftJoin('attributes as a', 'ca.a_id', '=', 'a.id')
-        ->where('c.id', '=', $id)
+        //->where('c.id', '=', $id)
+        ->orderBy('val')
         ->get();
         foreach($rows as &$row) {
             if(!isset($row->root)) continue;
@@ -71,6 +115,7 @@ class ContextController extends Controller {
                 )
                 SELECT *
                 FROM top
+                ORDER BY narr
             ");
         }
         // TODO get option attributes
@@ -147,7 +192,7 @@ class ContextController extends Controller {
         $roots = array();
         foreach($rows as $row) {
             if(empty($row)) continue;
-            $row->data = DB::table('context_values')->where('f_id', $row->id)->get();
+            $row->data = DB::table('context_values as cv')->select('cv.*', 'a.datatype')->join('attributes as a', 'cv.a_id', '=', 'a.id')->where('f_id', $row->id)->get();
             if(!empty($row->root)) $roots[$row->root][] = $row;
         }
         return response()->json($roots);
@@ -161,7 +206,8 @@ class ContextController extends Controller {
         $name = $request->get('name');
         $cid = $request->get('cid');
         $fid = -1;
-        if($id > 0) {
+        $isUpdate = $id > 0;
+        if($isUpdate) {
             DB::table('finds')
                 ->where('id', $id)
                 ->update([
@@ -171,105 +217,17 @@ class ContextController extends Controller {
                 ]);
             $fid = $id;
         } else {
-            $fid = DB::table('finds')
-                ->insertGetId([
+            $ins = [
                     'name' => $name,
                     'c_id' => $cid,
                     'lat' => $lat,
                     'lng' => $lng
-                ]);
+            ];
+            if($request->has('root')) $ins['root'] = $request->get('root');
+            $fid = DB::table('finds')
+                ->insertGetId($ins);
         }
-        foreach($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid']) as $key => $value) {
-            $ids = explode("_", $key);
-            $aid = $ids[1];
-            if(!empty($ids[2])) {
-                $oid = $ids[2];
-                $tbl = 'option_values';
-                $isOption = true;
-            } else {
-                $tbl = 'context_values';
-                $isOption = false;
-            }
-            $datatype = DB::table('attributes')
-                ->where('id', '=', $aid)
-                ->value('datatype');
-            $jsonArr = json_decode($value);
-            if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
-            if(is_array($jsonArr)) { //only string-sc and string-mc should be arrays
-                if($id > 0) {
-                    $dbEntries = array(
-                        ['f_id', $fid],
-                        ['a_id', $aid]
-                    );
-                    if($isOption) $dbEntries[] = ['o_id', $oid];
-                    $rows = DB::table($tbl)
-                        ->where($dbEntries)
-                        ->get();
-                    foreach($rows as $row) {
-                        $alreadySet = false;
-                        foreach($jsonArr as $k => $v) {
-                            $url = DB::table('th_concept')
-                                ->where('id_th_concept', '=', $v->narrower_id)
-                                ->value('concept_url');
-                            $set = $url;
-                            if($row->th_val === $set) {
-                                unset($jsonArr[$k]);
-                                $alreadySet = true;
-                                break;
-                            }
-                        }
-                        if(!$alreadySet) {
-                            $del = array(
-                                ['f_id', $fid],
-                                ['a_id', $aid],
-                                ['th_val', $row->th_val]
-                            );
-                            if($isOption) $del[] = ['o_id', $oid];
-                            DB::table($tbl)
-                                ->where($del)
-                                ->delete();
-                        }
-                    }
-                }
-                foreach($jsonArr as $v) {
-                    $url = DB::table('th_concept')
-                        ->where('id_th_concept', '=', $v->narrower_id)
-                        ->value('concept_url');
-                    $set = $url;
-                    $vals = array(
-                        'f_id' => $fid,
-                        'a_id' => $aid,
-                        'th_val' => $set
-                    );
-                    if($isOption) $vals['o_id'] = $oid;
-                    DB::table($tbl)
-                        ->insert($vals);
-                }
-            } else {
-                $vals = array(
-                    ['f_id', '=', $fid],
-                    ['a_id', '=', $aid]
-                );
-                if($isOption) $vals[] = ['o_id', '=', $oid];
-                $valId = DB::table($tbl)
-                    ->where($vals)
-                    ->value('id');
-                if($valId > 0) {
-                    DB::table($tbl)
-                        ->where('id', '=', $valId)
-                        ->update(['str_val' => $value]);
-                } else {
-                    $vals = array(
-                        'f_id' => $fid,
-                        'a_id' => $aid,
-                        'str_val' => $value
-                    );
-                    if($isOption) $vals['o_id'] = $oid;
-                    DB::table($tbl)
-                        ->insert($vals);
-                }
-            }
-        }
+        $this->updateOrInsert($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid']), $fid, $isUpdate);
         return response()->json(['fid' => $fid]);
     }
 
@@ -293,8 +251,162 @@ class ContextController extends Controller {
                     'root' => $root
                 ]);
         }
-        foreach($request->except('name', 'root', 'cid', 'realId') as $key => $value) {
-            $aid = $key;
+        $this->updateOrInsert($request->except('name', 'root', 'cid', 'realId'), $fid, $isUpdate);
+        return response()->json(['fid' => $fid]);
+    }
+
+    public function setPossibility(Request $request) {
+        $fid = $request->get('fid');
+        $aid = $request->get('aid');
+        $possibility = $request->get('possibility');
+
+        $where = array(
+            ['f_id', '=', $fid],
+            ['a_id', '=', $aid]
+        );
+        $isSet = DB::table('context_values')
+            ->where($where)
+            ->count();
+        if($isSet == null) { //insert
+            DB::table('context_values')
+                ->insert([
+                    'f_id' => $fid,
+                    'a_id' => $aid,
+                    'possibility' => $possibility
+                ]);
+        } else { //update
+            DB::table('context_values')
+                ->where($where)
+                ->update(['possibility' => $possibility]);
+        }
+        return response()->json(DB::table('context_values')
+            ->where($where)->get());
+    }
+
+
+    public function delete($id) {
+        DB::select("
+            with recursive deletes as
+            (
+                select id
+                from finds
+                where id = $id
+                union all
+                select f.id
+                from finds as f
+                inner join deletes p on f.root = p.id
+            )
+            delete from context_values where f_id in (select id from deletes)
+        ");
+        DB::select("
+            with recursive deletes as
+            (
+                select id
+                from finds
+                where id = $id
+                union all
+                select f.id
+                from finds as f
+                inner join deletes p on f.root = p.id
+            )
+            delete from finds where id in (select id from deletes)
+        ");
+
+        return response()->json(array("id"=>$id));
+    }
+
+    public function updateOrInsert($request, $fid, $isUpdate) {
+        $currAttrs = DB::table('context_values')->where('f_id', $fid)->get();
+        foreach($request as $key => $value) {
+            $ids = explode("_", $key);
+            $aid = $ids[0];
+            if(!empty($ids[1])) {
+                $oid = $ids[1];
+                $tbl = 'option_values';
+                $isOption = true;
+            } else {
+                $tbl = 'context_values';
+                $isOption = false;
+            }
+            $datatype = DB::table('attributes')
+                ->where('id', '=', $aid)
+                ->value('datatype');
+            $jsonArr = json_decode($value);
+            if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
+            if(is_array($jsonArr)) { //only string-sc and string-mc should be arrays
+                if($isUpdate) {
+                    $dbEntries = array(
+                        ['f_id', $fid],
+                        ['a_id', $aid]
+                    );
+                    if($isOption) $dbEntries[] = ['o_id', $oid];
+                    $rows = DB::table($tbl)
+                        ->where($dbEntries)
+                        ->get();
+                    foreach($rows as $row) {
+                        $alreadySet = false;
+                        foreach($jsonArr as $k => $v) {
+                            if($datatype === 'list') {
+                                $set = $v->name;
+                                $val = $row->str_val;
+                            } else {
+                                $set = DB::table('th_concept')
+                                ->where('id_th_concept', '=', $v->narrower_id)
+                                ->value('concept_url');
+                                $val = $row->th_val;
+                            }
+                            if($val === $set) {
+                                unset($jsonArr[$k]);
+                                $alreadySet = true;
+                                break;
+                            }
+                        }
+                        if(!$alreadySet) {
+                            $del = array(
+                                ['f_id', $fid],
+                                ['a_id', $aid]
+                            );
+                            if($datatype === 'list') $del[] = ['str_val', $row->str_val];
+                            else $del[] = ['th_val', $row->th_val];
+                            if($isOption) $del[] = ['o_id', $oid];
+                            DB::table($tbl)
+                                ->where($del)
+                                ->delete();
+                        }
+                    }
+                }
+                foreach($jsonArr as $v) {
+                    $vals = array(
+                        'f_id' => $fid,
+                        'a_id' => $aid
+                    );
+                    if($datatype === 'list') {
+                        $set = $v->name;
+                        $vals['str_val'] = $set;
+                    } else {
+                        $set = DB::table('th_concept')
+                            ->where('id_th_concept', '=', $v->narrower_id)
+                            ->value('concept_url');
+                        $vals['th_val'] = $set;
+                    }
+                    if($isOption) $vals['o_id'] = $oid;
+                    DB::table($tbl)
+                        ->insert($vals);
+                }
+            } else {
+                /*$vals = array(
+                    ['f_id', '=', $fid],
+                    ['a_id', '=', $aid]
+                );
+                if($isOption) $vals[] = ['o_id', '=', $oid];
+                $valId = DB::table($tbl)
+                    ->where($vals)
+                    ->value('id');
+                if($valId > 0) {
+                    DB::table($tbl)
+                        ->where('id', '=', $valId)
+                        ->update(['str_val' => $value]);
+                }*/
             if($isUpdate) {
                 $alreadySet = false;
                 $attr;
@@ -307,44 +419,35 @@ class ContextController extends Controller {
                     }
                 }
                 if($alreadySet) {
-                    unset($attr->str_val);
                     $data = array('str_val' => $value);
                     DB::table('context_values')
-                        ->where([$attr])
+                            ->where([
+                                ['f_id', '=', $attr->f_id],
+                                ['a_id', '=', $attr->a_id],
+                                ['id', '=', $attr->id]
+                            ])
                         ->update($data);
                 } else {
-                    DB::table('context_values')
-                        ->insert([
+                        $vals = array(
                             'f_id' => $fid,
                             'a_id' => $aid,
                             'str_val' => $value
-                        ]);
+                        );
+                        if($isOption) $vals['o_id'] = $oid;
+                        DB::table($tbl)
+                            ->insert($vals);
                 }
             } else {
-                DB::table('context_values')
-                    ->insert([
+                    $vals = array(
                         'f_id' => $fid,
                         'a_id' => $aid,
                         'str_val' => $value
-                    ]);
+                    );
+                    if($isOption) $vals['o_id'] = $oid;
+                    DB::table($tbl)
+                        ->insert($vals);
             }
         }
-        if(isset($currAttrs) && count($currAttrs) > 0) {
-            foreach($currAttrs as $currAttr) {
-                DB::table('context_values')
-                    ->where('id', $currAttr->id)
-                    ->delete();
             }
-        }
-        return response()->json(['fid' => $fid]);
-    }
-
-    public function delete($id) {
-        DB::table('finds')
-            ->where('id', $id)
-            ->delete();
-        DB::table('context_values')
-            ->where('f_id', $id)
-            ->delete();
     }
 }
