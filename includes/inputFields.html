@@ -1,28 +1,48 @@
-<div ng-controller="optionCtrl">
-    <div class="form-group" ng-repeat="attr in fields">
-        <label class="control-label col-md-2" for="a{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}">{{ attr.name }}:</label>
-        <div class="col-md-6" ng-switch on="attr.type">
-            <input class="form-control" ng-switch-when="string" type="text" placeholder="{{ attr.name }}" id="a{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]"/>
-            <input class="form-control" ng-switch-when="double" type="number" step="any" min="0" placeholder="2.0" id="a{{ attr.context }}_{{ attr.attr }}" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]"/>
-            <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]"></textarea>
+<div ng-controller="mapCtrl">
+    <div class="form-group" ng-repeat="attr in attributeFields">
+        <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}">
+            {{ attr.val }}: <sup><i class="fa fa-bookmark source-link" aria-hidden="true" ng-click="openSourceModal(attr.val, attr.aid)"></i></sup> <sup><i class="fa fa-tasks source-link" aria-hidden="true" ng-click="openPossibilityModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'])"></i></sup>
+        </label>
+        <div class="col-md-{{inputWidth}}" ng-switch on="attr.datatype">
+            <input class="form-control" ng-switch-when="string" type="text" placeholder="{{ attr.val }}" id="a{{ attr.aid }}_{{ attr.oid }}" ng-blur="updateInput($event)" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]"/>
+            <input class="form-control" ng-switch-when="double" type="number" step="any" min="0" placeholder="0.0" id="a{{ attr.aid }}" ng-blur="updateInput($event)" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]"/>
+            <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.aid }}_{{ attr.oid }}" ng-blur="updateInput($event)" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]"></textarea>
             <p class="input-group" ng-switch-when="date">
-                <input type="text" class="form-control" id="a{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(output[attr.context+'_'+attr.attr+'_'+attr.option])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]"/>
+                <input type="text" class="form-control" id="a{{ attr.aid }}_{{ attr.oid }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(attributeOutputs[attr.aid+'_'+attr.oid])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]"/>
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-default" ng-click="open()"><i class="fa fa-calendar"></i></button>
                 </span>
             </p>
+            <div ng-switch-when="string-mc">
+                <ui-select multiple ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" close-on-select="false" name="{{ attr.aid }}_{{ attr.oid }}" id="{{ attr.aid }}_{{ attr.oid }}" on-select="updateMSelectInput($select)" on-remove="updateMSelectInput($select)">
+                    <ui-select-match>{{$item.narr}}</ui-select-match>
+                    <ui-select-choices repeat="choice in markerChoices[attr.aid+'_'+attr.oid] | filter:$select.search">
+                        {{choice.narr}}
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div ng-switch-when="string-sc">
+                <ui-select ng-model="attributeOutputs[attr.aid+'_'+attr.oid]"
+                name="{{ attr.aid }}_{{ attr.oid }}" id="{{ attr.aid }}_{{ attr.oid }}"
+                on-select="updateSelectInput($select.ngModel)">
+                  <ui-select-match placeholder="{{ attr.val }}">{{ $select.selected.narr }}</ui-select-match>
+                  <ui-select-choices repeat="choice in markerChoices[attr.aid+'_'+attr.oid] | filter: $select.search">
+                    <span ng-bind-html="choice.narr | highlight: $select.search"></span>
+                  </ui-select-choices>
+                </ui-select>
+            </div>
             <div ng-switch-when="context-mc">
                 <ui-select multiple ng-model="choices" close-on-select="false" on-select="ctrl.onAddToList($item, $model)" on-remove="ctrl.onRemoveFromList($item, $model)">
                     <ui-select-match>{{ $item }}</ui-select-match>
-                    <ui-select-choices repeat="ctx in attr.options | filter:$select.search">
+                    <ui-select-choices repeat="ctx in attr.oids | filter:$select.search">
                         {{ ctx }}
                     </ui-select-choices>
                 </ui-select>
             </div>
             <div ng-switch-when="context-sc">
-                <ui-select ng-model="type" on-select="ctrl.onSelectCallback($item, $model)" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]">
+                <ui-select ng-model="type" on-select="ctrl.onSelectCallback($item, $model)" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]">
                   <ui-select-match placeholder="Select context">{{ $select.selected }}</ui-select-match>
-                  <ui-select-choices repeat="item in attr.options | filter: $select.search">
+                  <ui-select-choices repeat="item in attr.oids | filter: $select.search">
                     <span ng-bind-html="item | highlight: $select.search"></span>
                   </ui-select-choices>
                 </ui-select>
@@ -31,27 +51,27 @@
             <div ng-switch-when="list">
                 <div class="input-group">
                     <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" ng-click="toggleList(attr.context, attr.attr)">
-                            <i class="fa fa-caret-down" style="font-size: 0.9em; top: 0;" ng-show="hideLists[attr.context+'_'+attr.attr+'_'+attr.option]"></i>
-                            <i class="fa fa-caret-up" style="font-size: 0.9em" ng-hide="hideLists[attr.context+'_'+attr.attr+'_'+attr.option]"></i>
+                        <button class="btn btn-default" type="button" ng-click="hiddenLists[attr.aid+'_'+attr.oid] = !hiddenLists[attr.aid+'_'+attr.oid]" ng-init="hiddenLists[attr.aid+'_'+attr.oid] = true">
+                            <i class="fa fa-caret-down" style="font-size: 0.9em; top: 0;" ng-show="hiddenLists[attr.aid+'_'+attr.oid]"></i>
+                            <i class="fa fa-caret-up" style="font-size: 0.9em" ng-hide="hiddenLists[attr.aid+'_'+attr.oid]"></i>
                         </button>
                     </span>
-                    <input class="form-control" type="text" id="{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" ng-model="input[attr.context+'_'+attr.attr+'_'+attr.option]" placeholder="weiteren Punkt anlegen"/>
+                    <input class="form-control" type="text" id="{{ attr.aid }}_{{ attr.oid }}" ng-model="listInput[attr.aid+'_'+attr.oid]" placeholder="weiteren Punkt anlegen"/>
                     <span class="input-group-btn">
-                        <button class="btn btn-success" type="button" ng-click="addListEntry(attr.context, attr.attr, attr.option)" ng-disabled="!input[attr.context+'_'+attr.attr+'_'+attr.option]">
+                        <button class="btn btn-success" type="button" ng-click="addListEntry(attr.aid, attr.oid, 'listInput', 'attributeOutputs')" ng-disabled="!listInput[attr.aid+'_'+attr.oid]">
                             <i class="fa fa-plus"></i>
                         </button>
                     </span>
                 </div>
-                <div ng-hide="hideLists[attr.context+'_'+attr.attr+'_'+attr.option]" class="col-md-12 hideable-list">
+                <div ng-hide="hiddenLists[attr.aid+'_'+attr.oid] || !attributeOutputs[attr.aid+'_'+attr.oid] ||  attributeOutputs[attr.aid+'_'+attr.oid].length == 0" class="col-md-12 hideable-list">
                     <ol class="list-group inline-list">
-                        <li ng-repeat="li in output[attr.context+'_'+attr.attr+'_'+attr.option] track by $index" class="list-group-item animated-item" ng-mouseenter="hovered = true;" ng-mouseleave="hovered = false;">
-                            <span class="delete-icon" ng-show="hovered && !editEntry[attr.context+'_'+attr.attr+'_'+attr.option][$index]" ng-click="removeListItem(attr.context, attr.attr, attr.option, $index)">
+                        <li ng-repeat="li in attributeOutputs[attr.aid+'_'+attr.oid] track by $index" class="list-group-item animated-item" ng-mouseenter="hovered = true;" ng-mouseleave="hovered = false;">
+                            <span class="delete-icon" ng-show="hovered && !editEntry[attr.aid+'_'+attr.oid][$index]" ng-click="removeListItem(attr.aid, attr.oid, 'attributeOutputs', $index)">
                                 <i class="fa fa-remove"></i>
                             </span>
-                            <span ng-hide="editEntry[attr.context+'_'+attr.attr+'_'+attr.option][$index]" ng-click="editListEntry(attr.context, attr.attr, attr.option, $index, li)">{{ li.name }}</span>
-                            <div class="item-edit-tab" ng-show="editEntry[attr.context+'_'+attr.attr+'_'+attr.option][$index]">
-                                <input type="text" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option][$index].name" class="list-item-edit" />
+                            <span ng-hide="editEntry[attr.aid+'_'+attr.oid][$index]" ng-click="editListEntry(attr.aid, attr.oid, $index, li)">{{ li.name }}</span>
+                            <div class="item-edit-tab" ng-show="editEntry[attr.aid+'_'+attr.oid][$index]">
+                                <input type="text" ng-model="attributeOutputs[attr.aid+'_'+attr.oid][$index].name" class="list-item-edit" />
                                 <button type="button" class="btn btn-success" ng-click="storeEditListEntry()"><i class="fa fa-check"></i></button>
                                 <button type="button" class="btn btn-danger" ng-click="cancelEditListEntry()"><i class="fa fa-ban"></i></button>
                             </div>
@@ -59,7 +79,59 @@
                     </ol>
                 </div>
             </div>
-            <input class="form-control" ng-switch-default type="text" id="a{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" ng-model="output[attr.context+'_'+attr.attr+'_'+attr.option]" placeholder="{{ attr.name }}" />
+            <div ng-switch-when="epoch">
+                <div class="input-group">
+                    <div class="input-group-btn" uib-dropdown>
+                        <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ attributeOutputs[attr.aid+'_'+attr.oid].startLabel }} <span class="caret"></span></button>
+                        <ul uib-dropdown-menu class="dropdown-menu">
+                            <li><a href="" ng-click="attributeOutputs[attr.aid+'_'+attr.oid].startLabel = 'v. Chr.'">v. Chr.</a></li>
+                            <li><a href="" ng-click="attributeOutputs[attr.aid+'_'+attr.oid].startLabel = 'n. Chr.'">n. Chr.</a></li>
+                        </ul>
+                    </div>
+                    <input type="text" class="form-control" aria-label="" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].start">
+                    <span class="input-group-addon">-</span>
+                    <input type="text" class="form-control" aria-label="" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].end">
+                    <div class="input-group-btn" uib-dropdown>
+                        <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ attributeOutputs[attr.aid+'_'+attr.oid].endLabel }} <span class="caret"></span></button>
+                        <ul uib-dropdown-menu class="dropdown-menu">
+                            <li><a href="" ng-click="attributeOutputs[attr.aid+'_'+attr.oid].endLabel = 'v. Chr.'">v. Chr.</a></li>
+                            <li><a href="" ng-click="attributeOutputs[attr.aid+'_'+attr.oid].endLabel = 'n. Chr.'">n. Chr.</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-12 input-group" style="padding-top: 10px;">
+                    <ui-select ng-model="attributeOutputs[attr.aid]"
+                    name="{{ attr.aid }}" id="{{ attr.aid }}"
+                    on-select="updateSelectInput($select.ngModel)">
+                      <ui-select-match placeholder="{{ attr.val }}">{{ $select.selected.narr }}</ui-select-match>
+                      <ui-select-choices repeat="choice in markerChoices[attr.aid+'_'+attr.oid] | filter: $select.search">
+                        <span ng-bind-html="choice.narr | highlight: $select.search"></span>
+                      </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div ng-switch-when="dimension">
+                <div class="input-group">
+                    <input type="number" class="form-control centered" aria-label="" placeholder="L" min="0" max="9999" step="0.1">
+                    <span class="input-group-addon">&times;</span>
+                    <input type="number" class="form-control centered" aria-label="" placeholder="H">
+                    <span class="input-group-addon">&times;</span>
+                    <input type="number" class="form-control centered" aria-label="" placeholder="T">
+                    <div class="input-group-btn" uib-dropdown>
+                        <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">m<span class="caret"></span></button>
+                        <ul uib-dropdown-menu class="dropdown-menu">
+                            <li><a href="">nm</a></li>
+                            <li><a href="">µm</a></li>
+                            <li><a href="">mm</a></li>
+                            <li><a href="">cm</a></li>
+                            <li><a href="">dm</a></li>
+                            <li><a href="">m</a></li>
+                            <li><a href="">km</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <input class="form-control" ng-switch-default type="text" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" placeholder="{{ attr.val }}" />
         </div>
     </div>
 </div>

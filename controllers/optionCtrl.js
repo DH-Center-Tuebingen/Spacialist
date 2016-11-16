@@ -1,6 +1,5 @@
-spacialistApp.controller('optionCtrl', ['$scope', '$timeout', 'scopeService', function($scope, $timeout, scopeService) {
-    if(typeof $scope.allContexts == 'undefined') $scope.allContexts = scopeService.allContexts;
-    $scope.deleteLiteratureEntry = scopeService.deleteLiteratureEntry;
+spacialistApp.controller('optionCtrl', ['$scope', '$timeout', 'scopeService', 'httpGetFactory', 'httpPostFactory', '$uibModal', function($scope, $timeout, scopeService, httpGetFactory, httpPostFactory, $uibModal) {
+    angular.extend($scope, scopeService);
 
     /*
      * Opens an editable input field at the desired position in the list

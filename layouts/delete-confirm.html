@@ -3,11 +3,11 @@
 </div>
 <div class="modal-body">
     <div class="col-md-12">
-        <p>Möchten Sie <i>{{ deleteModalFields.name }}</i> wirklich löschen?</p>
+        <p>Möchten Sie <i>{{ mc.name }}</i> wirklich löschen?</p>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="deleteConfirmed()">{{ 'yes' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="mc.deleteConfirmed()">{{ 'yes' | translate }}</button>
     <button type="button" class="btn btn-danger"
-      ng-click="cancel()">{{ 'no' | translate }}</button>
+      ng-click="mc.cancel()">{{ 'no' | translate }}</button>
 </div>

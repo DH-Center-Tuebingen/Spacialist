@@ -1,0 +1,26 @@
+<div class="col-md-4 col-md-offset-4">
+    <div class="well">
+        <h2>{{ 'login' | translate }}</h2>
+        <form ng-submit="loginUser()">
+            <div class="form-group">
+                <label for="email">{{ 'email' | translate }}</label>
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <i class="fa fa-fw fa-envelope"></i>
+                    </div>
+                    <input id="email" class="form-control" type="text" placeholder="E-Mail-Adresse" ng-model="user.email" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="pw">{{ 'password' | translate }}</label>
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <i class="fa fa-fw fa-unlock-alt"></i>
+                    </div>
+                    <input id="pw" class="form-control" type="password" placeholder="Passwort" ng-model="user.pw" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">{{ 'login' | translate }}</button>
+        </form>
+    </div>
+</div>
