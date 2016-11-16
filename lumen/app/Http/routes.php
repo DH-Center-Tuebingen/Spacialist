@@ -21,6 +21,7 @@ $app->get('/', function () use ($app) {
 $app->get('context/artifacts/get', 'ContextController@getArtifacts');
 $app->get('context/get/children/{id}', 'ContextController@getChildren');
 $app->get('context/get', 'ContextController@get');
+$app->get('context/getRecursive', 'ContextController@getRecursive');
 $app->get('context/getAll', 'ContextController@getAll');
 $app->get('context/getAttributes/{id}', 'ContextController@getAttributes');
 $app->get('context/get/type/{id}', 'ContextController@getType');
@@ -41,3 +42,15 @@ $app->post('image/upload', 'ImageController@uploadImage');
 $app->post('context/add', 'ContextController@add');
 $app->post('context/set', 'ContextController@set');
 $app->post('sources/add', 'SourceController@add');
+$app->post('context/set/possibility', 'ContextController@setPossibility');
+
+$app->post('user/login', 'UserController@login');
+
+$app->group(['middleware' => ['jwt.auth', 'jwt.refresh']], function($app) {
+//$app->group(['middleware' => 'auth:api'], function($app) {
+    $app->post('user/logout', 'UserController@logout');
+    $app->post('user/switch', 'UserController@switchRole');
+    $app->post('user/get', function() {
+        return response()->json(Auth::user());
+    });
+});
