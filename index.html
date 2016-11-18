@@ -34,6 +34,20 @@
                 </div>
                 <div class="navbar-collapse" id="navbar-collapse" uib-collapse="isCollapsed">
                     <ul class="nav navbar-nav">
+                        <li>
+                            <form class="navbar-form navbar-left">
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Search">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button">
+                                                <i class="fa fa-fw fa-search" aria-hidden="true"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </form>
+                        </li>
                         <li ng-class="{ active: isActive('/map') }">
                             <a href="#/map">
                                 <span class="fa fa-globe link-icon"></span>{{ 'map' | translate }}

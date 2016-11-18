@@ -62,6 +62,28 @@ class ContextController extends Controller {
                         )
                         ->where('concept_url', '=', $attr->th_val)
                         ->first();
+                } else if($attr->datatype == 'dimension') {
+                    $elems = explode(';', $attr->str_val, 4);
+                    $attr->val = json_encode(['B' => intval($elems[0]), 'H' => intval($elems[1]), 'T' => intval($elems[2]), 'unit' => intval($elems[3])]);
+                } else if($attr->datatype == 'epoch') {
+                    $elems = explode(';', $attr->str_val, 3);
+                    $start = intval($elems[0]);
+                    $end = intval($elems[1]);
+                    $thUri = $elems[2];
+                    $startLabel = $start < 0 ? 'v. Chr.' : 'n. Chr.';
+                    $endLabel = $end < 0 ? 'v. Chr.' : 'n. Chr.';
+                    $attr->val = json_encode([
+                        'startLabel' => $startLabel,
+                        'start' => $start,
+                        'endLabel' => $endLabel,
+                        'end' => $end,
+                        'epoch' => DB::table('th_concept')
+                                    ->select('id as narrower_id',
+                                        DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
+                                    )
+                                    ->where('concept_url', '=', $thUri)
+                                    ->first()
+                    ]);
                 }
             }
             if(array_key_exists($field->id, $children)) $tmpChildren = $children[$field->id];
@@ -339,7 +361,7 @@ class ContextController extends Controller {
                         ['find_id', $fid],
                         ['attribute_id', $aid]
                     );
-                    if($isOption) $dbEntries[] = ['ooption_id', $oid];
+                    if($isOption) $dbEntries[] = ['option_id', $oid];
                     $rows = DB::table($tbl)
                         ->where($dbEntries)
                         ->get();
@@ -381,8 +403,7 @@ class ContextController extends Controller {
                         'attribute_id' => $aid
                     );
                     if($datatype === 'list') {
-                        $set = $v->name;
-                        $vals['str_val'] = $set;
+                        $vals['str_val'] = $v->name;
                     } else {
                         $set = DB::table('th_concept')
                             ->where('id', '=', $v->narrower_id)
@@ -433,6 +454,21 @@ class ContextController extends Controller {
                             'attribute_id' => $aid,
                             'str_val' => $value
                         );
+                        if(is_object($jsonArr)) {
+                            if($datatype === 'epoch') {
+                                $jsonArr->start = ($jsonArr->startLabel === 'n. Chr.') ? $jsonArr->start : -$jsonArr->start;
+                                $jsonArr->end = ($jsonArr->endLabel === 'n. Chr.') ? $jsonArr->end : -$jsonArr->end;
+                                $jsonArr->epochUrl = DB::table('th_concept')
+                                    ->where('id', '=', $jsonArr->epoch->narrower_id)
+                                    ->value('concept_url');
+                                $tmpVal = $jsonArr->start.";".$jsonArr->end.";".$jsonArr->epochUrl;
+                            } else if($datatype === 'dimension') {
+                                $tmpVal = $jsonArr->B.";".$jsonArr->H.";".$jsonArr->T.";".$jsonArr->unit;
+                            }
+                            $vals['str_val'] = $tmpVal;
+                        } else {
+                            $vals['str_val'] = $value;
+                        }
                         if($isOption) $vals['option_id'] = $oid;
                         DB::table($tbl)
                             ->insert($vals);
@@ -440,9 +476,23 @@ class ContextController extends Controller {
             } else {
                     $vals = array(
                         'find_id' => $fid,
-                        'attribute_id' => $aid,
-                        'str_val' => $value
+                        'attribute_id' => $aid
                     );
+                    if(is_object($jsonArr)) {
+                        if($datatype === 'epoch') {
+                            $jsonArr->start = ($jsonArr->startLabel === 'n. Chr.') ? $jsonArr->start : -$jsonArr->start;
+                            $jsonArr->end = ($jsonArr->endLabel === 'n. Chr.') ? $jsonArr->end : -$jsonArr->end;
+                            $jsonArr->epochUrl = DB::table('th_concept')
+                                ->where('id', '=', $jsonArr->epoch->narrower_id)
+                                ->value('concept_url');
+                            $tmpVal = $jsonArr->start.";".$jsonArr->end.";".$jsonArr->epochUrl;
+                        } else if($datatype === 'dimension') {
+                            $tmpVal = $jsonArr->B.";".$jsonArr->H.";".$jsonArr->T.";".$jsonArr->unit;
+                        }
+                        $vals['str_val'] = $tmpVal;
+                    } else {
+                        $vals['str_val'] = $value;
+                    }
                     if($isOption) $vals['option_id'] = $oid;
                     DB::table($tbl)
                         ->insert($vals);

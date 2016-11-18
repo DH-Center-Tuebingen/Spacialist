@@ -1,7 +1,7 @@
 <div ng-controller="mapCtrl">
     <div class="form-group" ng-repeat="attr in attributeFields">
         <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}">
-            {{ attr.val }}: <sup><i class="fa fa-bookmark source-link" aria-hidden="true" ng-click="openSourceModal(attr.val, attr.aid)"></i></sup> <sup><i class="fa fa-tasks source-link" aria-hidden="true" ng-click="openPossibilityModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'])"></i></sup>
+            {{ attr.val }}: <sup ng-click="openSourceModal(attr.val, attr.aid)"><i class="fa fa-fw fa-bookmark source-link" aria-hidden="true"></i><i class="fa fa-circle fa-addon" ng-class="attr.aid > 20 ? 'fa-green' : 'fa-red'"></i></sup> <sup><i class="fa fa-fw fa-tasks source-link" aria-hidden="true" ng-click="openPossibilityModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'])"></i></sup>
         </label>
         <div class="col-md-{{inputWidth}}" ng-switch on="attr.datatype">
             <input class="form-control" ng-switch-when="string" type="text" placeholder="{{ attr.val }}" id="a{{ attr.aid }}_{{ attr.oid }}" ng-blur="updateInput($event)" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]"/>
@@ -88,9 +88,9 @@
                             <li><a href="" ng-click="attributeOutputs[attr.aid+'_'+attr.oid].startLabel = 'n. Chr.'">n. Chr.</a></li>
                         </ul>
                     </div>
-                    <input type="text" class="form-control" aria-label="" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].start">
+                    <input type="text" class="form-control centered" aria-label="" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].start">
                     <span class="input-group-addon">-</span>
-                    <input type="text" class="form-control" aria-label="" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].end">
+                    <input type="text" class="form-control centered" aria-label="" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].end">
                     <div class="input-group-btn" uib-dropdown>
                         <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ attributeOutputs[attr.aid+'_'+attr.oid].endLabel }} <span class="caret"></span></button>
                         <ul uib-dropdown-menu class="dropdown-menu">
@@ -100,8 +100,8 @@
                     </div>
                 </div>
                 <div class="col-md-12 input-group" style="padding-top: 10px;">
-                    <ui-select ng-model="attributeOutputs[attr.aid]"
-                    name="{{ attr.aid }}" id="{{ attr.aid }}"
+                    <ui-select ng-model="attributeOutputs[attr.aid+'_'+attr.oid].epoch"
+                    name="{{ attr.aid+'_'+attr.oid }}" id="{{ attr.aid+'_'+attr.oid }}"
                     on-select="updateSelectInput($select.ngModel)">
                       <ui-select-match placeholder="{{ attr.val }}">{{ $select.selected.narr }}</ui-select-match>
                       <ui-select-choices repeat="choice in markerChoices[attr.aid+'_'+attr.oid] | filter: $select.search">
@@ -112,21 +112,17 @@
             </div>
             <div ng-switch-when="dimension">
                 <div class="input-group">
-                    <input type="number" class="form-control centered" aria-label="" placeholder="L" min="0" max="9999" step="0.1">
+                    <input type="number" class="form-control centered" aria-label="" placeholder="B" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].B">
                     <span class="input-group-addon">&times;</span>
-                    <input type="number" class="form-control centered" aria-label="" placeholder="H">
+                    <input type="number" class="form-control centered" aria-label="" placeholder="H" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].H">
                     <span class="input-group-addon">&times;</span>
-                    <input type="number" class="form-control centered" aria-label="" placeholder="T">
+                    <input type="number" class="form-control centered" aria-label="" placeholder="T" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].T">
                     <div class="input-group-btn" uib-dropdown>
-                        <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">m<span class="caret"></span></button>
+                        <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{ attributeOutputs[attr.aid+'_'+attr.oid].unit }} <span class="caret"></span>
+                        </button>
                         <ul uib-dropdown-menu class="dropdown-menu">
-                            <li><a href="">nm</a></li>
-                            <li><a href="">µm</a></li>
-                            <li><a href="">mm</a></li>
-                            <li><a href="">cm</a></li>
-                            <li><a href="">dm</a></li>
-                            <li><a href="">m</a></li>
-                            <li><a href="">km</a></li>
+                            <li ng-repeat="unit in dimensionUnits"><a href="" ng-click="attributeOutputs[attr.aid+'_'+attr.oid].unit = unit">{{ unit }}</a></li>
                         </ul>
                     </div>
                 </div>
