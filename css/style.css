@@ -490,6 +490,14 @@ p, div {
     color: red;
 }
 
+.fa-addon {
+    cursor: pointer;
+    font-size: 0.8em;
+    position: absolute;
+    left: 6px;
+    top: 7px;
+}
+
 g.leaf > rect {
   stroke: #ff0000;
   stroke-width: 0.25px;

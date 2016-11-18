@@ -1,4 +1,8 @@
-spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'httpPostPromise', 'modalService', '$uibModal', '$auth', '$state', '$http', 'modalFactory', 'moduleHelper', function($scope, scopeService, httpPostFactory, httpGetFactory, httpPostPromise, modalService, $uibModal, $auth, $state, $http, modalFactory, moduleHelper) {
+spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'httpPostPromise', 'httpGetPromise', 'modalService', '$uibModal', '$auth', '$state', '$http', 'modalFactory', 'moduleHelper', function($scope, scopeService, httpPostFactory, httpGetFactory, httpPostPromise, httpGetPromise, modalService, $uibModal, $auth, $state, $http, modalFactory, moduleHelper) {
+    $scope.dimensionUnits = [
+        'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
+    ];
+
     var createModalHelper = function($itemScope, elemType) {
         var parent = $itemScope.parent;
         var selection = [];
@@ -52,12 +56,16 @@ spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory
             createModalHelper($itemScope, 'context');
         }],
         null,
+        ['<span class="fa fa-fw fa-clone fa-light fa-green"></span> Kontext duplizieren', function($itemScope, $event, modelValue, text, $li) {
+            console.log("Clone!");
+        }],
+        null,
         ['<span class="fa fa-fw fa-trash-o fa-light fa-red"></span> Löschen', function($itemScope, $event, modelValue, text, $li) {
             modalFactory.deleteModal($itemScope.parent.name, function() {
-                $scope.deleteElement($itemScope.parent, function() {
+                deleteElement($itemScope.parent, function() {
                     $itemScope.remove();
                 });
-            });
+            }, 'Wenn Sie dieses Element löschen, werden auch alle Kind-Elemente gelöscht!');
         }]
     ];
 
@@ -111,9 +119,10 @@ spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory
             } else if(dType == 'string-mc') {
                 if(typeof data[index] == 'undefined') data[index] = [];
                 data[index].push(value.val);
-            } else if(dType == 'dimension' || dType == 'epoch') {
-                if(typeof data[index] == 'undefined') data[index] = {};
-                data[index].val = val;
+            } else if(dType == 'dimension') {
+                data[index] = JSON.parse(value.val);
+            } else if(dType == 'epoch') {
+                data[index] = JSON.parse(value.val);
             } else {
                 data[index] = val;
             }
@@ -149,33 +158,20 @@ spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory
 
     /**
      * Stores a single element of the context tree in the database
-     */
-    var storeElement = function(elem) {
-        var parentId = elem.root;
-        var promise;
-        if(elem.typeId === 0) {
-            promise = storeContext(elem, parentId);
-        } else if(elem.typeId == 1) {
-            promise = storeFind(elem, parentId);
-        }
-        return promise;
-    };
-
-    /**
-     * Stores the given context `context` with the given parent `parentId` in the database.
      * @return: returns a promise which returns the ID of the newly inserted context
      */
-    var storeContext = function(context, parentId) {
-        console.log("store context " + context.name);
+    var storeElement = function(elem) {
+        console.log("store context " + elem.name);
+        var parentId = elem.root;
         var formData = new FormData();
-        formData.append('name', context.name);
+        formData.append('name', elem.name);
         formData.append('root', parentId);
-        formData.append('cid', context.cid);
-        if(typeof context.id !== 'undefined' && context.id != -1) {
-            formData.append('realId', context.id);
+        formData.append('cid', elem.cid);
+        if(typeof elem.id !== 'undefined' && elem.id != -1) {
+            formData.append('realId', elem.id);
         }
-        for(var i=0; i<context.data.length; i++) {
-            var d = context.data[i];
+        for(var i=0; i<elem.data.length; i++) {
+            var d = elem.data[i];
             var currValue = '';
             if (typeof d.value === 'object') {
                 currValue = angular.toJson(d.value);
@@ -188,36 +184,30 @@ spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory
         return promise;
     };
 
-    /**
-     * Stores the given find `f` with the given parent `parentId` in the database.
-     * @return: returns a promise which returns the ID of the newly inserted find
-     */
-    var storeFind = function(f, parentId) {
-        console.log("store find " + f.name);
-        var formData = new FormData();
-        formData.append('name', f.name);
-        formData.append('root', parentId);
-        formData.append('cid', f.cid);
-        if(typeof f.id !== 'undefined' && f.id != -1) {
-            formData.append('realId', f.id);
-        }
-        for(var i=0; i<f.data.length; i++) {
-            var d = f.data[i];
-            var currValue = '';
-            if (typeof d.value === 'object') {
-                currValue = angular.toJson(d.value);
-            } else {
-                currValue = d.value;
-            }
-            formData.append(d.key, currValue);
-        }
-        var promise = httpPostPromise.getData('../spacialist_api/context/set', formData);
-        return promise;
-    };
+    $scope.deleteElement = function(elem) {
+        modalFactory.deleteModal(elem.name, function() {
+            deleteElement(elem, function() {
+                //$itemScope.remove(); TODO remove from list
+            });
+        }, 'Wenn Sie dieses Element löschen, werden auch alle Kind-Elemente gelöscht!');
+    }
 
-    $scope.deleteElement = function(elem, onSuccess) {
+    var deleteElement = function(elem, onSuccess) {
         console.log("Removing element " + elem.name + " with ID " + elem.id);
         httpGetFactory('../spacialist_api/context/delete/' + elem.id, function(callback) { onSuccess(); });
+    };
+
+    $scope.existsLiterature = function(fid, aid) {
+        var promise = httpGetPromise.getData('../spacialist_api/sources/get/' + aid + '/' + fid);
+        promise.then(function(sources) {
+            console.log(aid);
+            console.log(sources);
+            console.log((sources.length > 0));
+            return sources.length > 0;
+        });
+        /*httpGetFactory('../spacialist_api/sources/get/' + aid + '/' + fid, function(sources) {
+            return sources.length > 0;
+        });*/
     };
 
     /**

@@ -124,11 +124,15 @@ spacialistApp.service('modalService', ['$uibModal', function($uibModal) {
 }]);
 
 spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
-    this.deleteModal = function(elementName, onConfirm) {
+    this.deleteModal = function(elementName, onConfirm, additionalWarning) {
+        if(typeof additionalWarning != 'undefined' && additionalWarning !== '') {
+            var warning = additionalWarning;
+        }
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/delete-confirm.html',
             controller: function($uibModalInstance) {
                 this.name = elementName;
+                this.warning = warning;
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
@@ -464,7 +468,22 @@ spacialistApp.factory('httpPostFactory', function($http) {
         }).success(function(response) {
             callback(response);
         });
-    }
+    };
+});
+
+spacialistApp.factory('httpGetPromise', function($http) {
+    var getData = function(file) {
+        return $http({
+            url: file,
+            method: "GET",
+            headers: {
+                'Content-Type': undefined
+            }
+        }).then(function(result) {
+            return result.data;
+        });
+    };
+    return { getData: getData };
 });
 
 spacialistApp.factory('httpGetFactory', function($http) {
@@ -500,34 +519,9 @@ spacialistApp.factory('scopeService', function($http) {
         },
         drawOptions: {},
         ctxts: []
-    }
+    };
     return service;
 });
-
-/*spacialistApp.config(function($routeProvider, $locationProvider) {
-    $routeProvider
-        .when('/dates', {
-            templateUrl: 'dates.html'
-        })
-        .when('/map', {
-            templateUrl: 'map.html'
-        })
-        .when('/doc', {
-            templateUrl: 'doc.html'
-        })
-        .when('/test', {
-            templateUrl: 'test.html'
-        })
-        .when('/user/role/:activeRole', {
-            template: '',
-            controller: 'headerCtrl'
-        })
-        .otherwise({
-            redirectTo: '/map'
-        });
-
-    //$locationProvider.html5Mode(true);
-});*/
 
 spacialistApp.config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({

@@ -1604,7 +1604,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
             addedSources: []
         }
         var aid = fieldid;
-        var fid = $scope.activeMarker;
+        var fid = $scope.currentElement.id;
         console.log(fid);
         httpGetFactory('../spacialist_api/sources/get/' + aid + '/' + fid, function(sources) {
             angular.forEach(sources, function(src, key) {
