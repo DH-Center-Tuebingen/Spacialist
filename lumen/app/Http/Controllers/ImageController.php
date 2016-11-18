@@ -132,7 +132,7 @@ class ImageController extends Controller
                     ->get();
         foreach($images as &$img) {
             $img->thumb_url = storage_path($img-> url . $img->thumbname);
-            $img->url = storage_path(img->url . $img->filename);
+            $img->url = storage_path($img->url . $img->filename);
             if(file_exists($img->url) && is_file($img->url)) $img->filesize = filesize($img->url);
             $img->modified = strtotime($img->modified) * 1000;
             $img->created = strtotime($img->created) * 1000;
