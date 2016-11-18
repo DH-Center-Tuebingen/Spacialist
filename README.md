@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/eScienceCenter/Spacialist](https://badges.gitter.im/eScienceCenter/Spacialist.svg)](https://gitter.im/eScienceCenter/Spacialist?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Spacialist will be a customizable web-based platform for collecting, managing, analyzing and publishing research data with a focus on the integration of object-related and spatial data for the digital humanities.
+Spacialist will be a customizable Web-based platform for collecting, managing, analyzing and publishing research data with a focus on the integration of object-related and spatial data for the digital humanities.
 
 ## Requirements
 - PostgreSQL (9.1.0+) with PostGIS (2.0+) extension
