@@ -104,7 +104,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory
         for(var i=0; i<elem.data.length; i++) {
             var value = elem.data[i];
             //console.log(value.toSource());
-            var index = value.a_id + '_' + (value.o_id || '');
+            var index = value.attribute_id + '_' + (value.o_id || '');
             var posIndex = index + 'pos';
             var val = value.str_val;
             var dType = value.datatype;
@@ -134,7 +134,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory
             name: elem.name,
             root: elem.root,
             typeId: elem.typeid,
-            cid: elem.c_id
+            cid: elem.context_id
         };
     };
 

@@ -36,7 +36,7 @@ class ContextController extends Controller {
         q AS (
 	        SELECT  f.*, 0 as reclevel
 	        FROM    finds f
-	        WHERE   root = -1
+	        WHERE   root IS NULL
 	        UNION ALL
 	        SELECT  fc.*, reclevel+1
 	        FROM    q
@@ -51,7 +51,7 @@ class ContextController extends Controller {
         ");
         $children = [];
         foreach($rootFields as $key => $field) {
-            $rootFields[$key]->data =  DB::table('context_values as cv')->select('cv.*', 'a.datatype', 'a.th_root')->join('attributes as a', 'cv.attribute_id', '=', 'a.id')->where('find_id', $field->id)->get();
+            $rootFields[$key]->data =  DB::table('context_values as cv')->select('cv.*', 'a.datatype', 'a.thesaurus_root_id')->join('attributes as a', 'cv.attribute_id', '=', 'a.id')->where('find_id', $field->id)->get();
             foreach($rootFields[$key]->data as &$attr) {
                 if($attr->datatype == 'literature') {
                     $attr->literature_info = DB::table('bib_tex')->where('id', $attr->str_val)->first();
@@ -60,7 +60,7 @@ class ContextController extends Controller {
                         ->select('id as narrower_id',
                             DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
                         )
-                        ->where('concept_url', '=', $attr->th_val)
+                        ->where('concept_url', '=', $attr->thesaurus_val)
                         ->first();
                 } else if($attr->datatype == 'dimension') {
                     $elems = explode(';', $attr->str_val, 4);
@@ -108,7 +108,7 @@ class ContextController extends Controller {
 
     public function getAttributes($id) {
         $rows = DB::table('context_types as c')
-        ->select('ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'a.th_root as root',
+        ->select('ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_id as root',
             DB::raw("public.\"getLabelForId\"(C.thesaurus_id, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_id, 'de') AS val")
         )
         ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_id')
@@ -155,7 +155,7 @@ class ContextController extends Controller {
             $attribs = DB::table('context_values as CV')
                     ->join('attributes as A', 'CV.attribute_id', 'A.id')
                     ->where('find_id', $find->id)
-                    ->select('CV.*', 'A.datatype', 'A.th_root')
+                    ->select('CV.*', 'A.datatype', 'A.thesaurus_root_id')
                     ->get();
             foreach($attribs as &$attr) {
                 if($attr->datatype == 'literature') {
@@ -165,7 +165,7 @@ class ContextController extends Controller {
                         ->select('id as narrower_id',
                             DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
                         )
-                        ->where('concept_url', '=', $attr->th_val)
+                        ->where('concept_url', '=', $attr->thesaurus_val)
                         ->first();
                 }
             }
@@ -222,6 +222,7 @@ class ContextController extends Controller {
 
     public function add(Request $request) {
         //$title = $request->get('title');
+        $user = \Auth::user();
         $lat = $request->get('lat');
         $lng = $request->get('lng');
         $id = $request->get('id');
@@ -235,7 +236,8 @@ class ContextController extends Controller {
                 ->update([
                     'name' => $name,
                     'lat' => $lat,
-                    'lng' => $lng
+                    'lng' => $lng,
+                    'lasteditor' => $user['name']
                 ]);
             $fid = $id;
         } else {
@@ -243,17 +245,20 @@ class ContextController extends Controller {
                     'name' => $name,
                     'context_id' => $cid,
                     'lat' => $lat,
-                    'lng' => $lng
+                    'lng' => $lng,
+                    'lasteditor' => $user['name']
             ];
             if($request->has('root')) $ins['root'] = $request->get('root');
             $fid = DB::table('finds')
                 ->insertGetId($ins);
         }
-        $this->updateOrInsert($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid']), $fid, $isUpdate);
+        $this->updateOrInsert($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid']), $fid, $isUpdate, $user);
         return response()->json(['fid' => $fid]);
     }
 
     public function set(Request $request) {
+        $user = \Auth::user();
+        return response()->json($user['name']);
         $isUpdate = $request->has('realId');
         $name = $request->get('name');
         $root = $request->get('root');
@@ -262,7 +267,7 @@ class ContextController extends Controller {
             $realId = $request->get('realId');
             DB::table('finds')
                 ->where('id', $realId)
-                ->update(['name' => $name]);
+                ->update(['name' => $name, 'lasteditor' => $user['name']]);
             $fid = $realId;
             $currAttrs = DB::table('context_values')->where('find_id', $realId)->get();
         } else {
@@ -270,10 +275,11 @@ class ContextController extends Controller {
                 ->insertGetId([
                     'name' => $name,
                     'context_id' => $cid,
-                    'root' => $root
+                    'root' => $root,
+                    'lasteditor' => $user['name']
                 ]);
         }
-        $this->updateOrInsert($request->except('name', 'root', 'cid', 'realId'), $fid, $isUpdate);
+        $this->updateOrInsert($request->except('name', 'root', 'cid', 'realId'), $fid, $isUpdate, $user);
         return response()->json(['fid' => $fid]);
     }
 
@@ -337,7 +343,7 @@ class ContextController extends Controller {
         return response()->json(array("id"=>$id));
     }
 
-    public function updateOrInsert($request, $fid, $isUpdate) {
+    public function updateOrInsert($request, $fid, $isUpdate, $user) {
         $currAttrs = DB::table('context_values')->where('find_id', $fid)->get();
         foreach($request as $key => $value) {
             $ids = explode("_", $key);
@@ -375,7 +381,7 @@ class ContextController extends Controller {
                                 $set = DB::table('th_concept')
                                 ->where('id', '=', $v->narrower_id)
                                 ->value('concept_url');
-                                $val = $row->th_val;
+                                $val = $row->thesaurus_val;
                             }
                             if($val === $set) {
                                 unset($jsonArr[$k]);
@@ -389,7 +395,7 @@ class ContextController extends Controller {
                                 ['attribute_id', $aid]
                             );
                             if($datatype === 'list') $del[] = ['str_val', $row->str_val];
-                            else $del[] = ['th_val', $row->th_val];
+                            else $del[] = ['thesaurus_val', $row->thesaurus_val];
                             if($isOption) $del[] = ['option_id', $oid];
                             DB::table($tbl)
                                 ->where($del)
@@ -400,7 +406,8 @@ class ContextController extends Controller {
                 foreach($jsonArr as $v) {
                     $vals = array(
                         'find_id' => $fid,
-                        'attribute_id' => $aid
+                        'attribute_id' => $aid,
+                        'lasteditor' => $user['name']
                     );
                     if($datatype === 'list') {
                         $vals['str_val'] = $v->name;
@@ -408,7 +415,7 @@ class ContextController extends Controller {
                         $set = DB::table('th_concept')
                             ->where('id', '=', $v->narrower_id)
                             ->value('concept_url');
-                        $vals['th_val'] = $set;
+                        $vals['thesaurus_val'] = $set;
                     }
                     if($isOption) $vals['option_id'] = $oid;
                     DB::table($tbl)
@@ -440,7 +447,7 @@ class ContextController extends Controller {
                     }
                 }
                 if($alreadySet) {
-                    $data = array('str_val' => $value);
+                    $data = array('str_val' => $value, 'lasteditor' => $user['name']);
                     DB::table('context_values')
                             ->where([
                                 ['find_id', '=', $attr->find_id],
@@ -452,7 +459,8 @@ class ContextController extends Controller {
                         $vals = array(
                             'find_id' => $fid,
                             'attribute_id' => $aid,
-                            'str_val' => $value
+                            'str_val' => $value,
+                            'lasteditor' => $user['name']
                         );
                         if(is_object($jsonArr)) {
                             if($datatype === 'epoch') {
@@ -476,7 +484,8 @@ class ContextController extends Controller {
             } else {
                     $vals = array(
                         'find_id' => $fid,
-                        'attribute_id' => $aid
+                        'attribute_id' => $aid,
+                        'lasteditor' => $user['name']
                     );
                     if(is_object($jsonArr)) {
                         if($datatype === 'epoch') {

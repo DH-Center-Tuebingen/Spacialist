@@ -14,8 +14,8 @@ class AddMiscHowpublishedToBibTex extends Migration
     public function up()
     {
         Schema::table('bib_tex', function (Blueprint $table) {
-            $table->text('misc');
-            $table->text('howpublished');
+            $table->text('misc')->nullable();
+            $table->text('howpublished')->nullable();
         });
     }
 
