@@ -553,14 +553,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
     function redirectWhenLoggedOut($q, $injector) {
         return {
             responseError: function(rejection) {
-                var $state = $injector.get('$state');
-                var rejectReasons = ['token_not_provided', 'token_expired', 'token_absent', 'token_invalid'];
-                angular.forEach(rejectReasons, function(value, key) {
-                    if(rejection.data.error === value) {
-                        localStorage.removeItem('user');
-                        $state.go('auth');
-                    }
-                });
+                if(typeof rejection != 'undefined') {
+                    var rejectReasons = ['token_not_provided', 'token_expired', 'token_absent', 'token_invalid'];
+                    angular.forEach(rejectReasons, function(value, key) {
+                        if(rejection.data.error === value) {
+                            var $state = $injector.get('$state');
+                            localStorage.removeItem('user');
+                            $state.go('auth');
+                        }
+                    });
+                }
                 return $q.reject(rejection);
             }
         };
@@ -573,8 +575,8 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 return response || $q.when(response);
             },
             'responseError': function(rejection) {
-                var $state = $injector.get('$state');
                 if(rejection.status == 401) {
+                    var $state = $injector.get('$state');
                     localStorage.removeItem('user');
                     $state.go('auth');
                     return;
@@ -585,21 +587,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
     }
     $provide.factory('redirectWhenUnauth', redirectWhenUnauth);
 
-    function getUpdatedToken($q, $injector) {
-        return {
-            response: function(response) {
-                var auth = response.config.headers.Authorization;
-                if(typeof auth != 'undefined') {
-                    var $auth = $injector.get('$auth');
-                    $auth.setToken(auth);
-                }
-                return response || $q.when(response);
-            }
-        };
-    }
-    $provide.factory('getUpdatedToken', getUpdatedToken);
-
-    $httpProvider.interceptors.push('getUpdatedToken');
     $httpProvider.interceptors.push('redirectWhenLoggedOut');
     $httpProvider.interceptors.push('redirectWhenUnauth');
 
