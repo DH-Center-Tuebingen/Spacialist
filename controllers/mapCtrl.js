@@ -1596,19 +1596,33 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
      * Opens a modal window which allows the user to add/delete sources from a literature list for a particular attribute.
      * One has to pass the field name `fieldname` and the attribute id `fieldid` as parameters.
      */
-    $scope.openSourceModal = function(fieldname, fieldid) {
-        $scope.sourceModalFields = {
+    $scope.openSourceModal = function(fieldname, fieldid, currentVal) {
+        $scope.modalFields = {
             name: fieldname,
             id: fieldid,
             literature: $scope.literature.slice(),
-            addedSources: []
+            addedSources: [],
+            value: currentVal || 100,
+            setPossibility: function(event) {
+                var max = event.currentTarget.scrollWidth;
+                var click = event.originalEvent.layerX;
+                var curr = $scope.modalFields.value
+                var newVal = parseInt(click/max*100);
+                if(Math.abs(newVal-curr) < 10) {
+                    if(newVal > curr) newVal = parseInt((newVal+10)/10)*10
+                    else newVal = parseInt(newVal/10)*10
+                } else {
+                    newVal = parseInt((newVal+5)/10)*10;
+                }
+                event.currentTarget.children[0].style.width = newVal+"%"
+                $scope.modalFields.value = newVal;
+            }
         }
         var aid = fieldid;
         var fid = $scope.currentElement.id;
-        console.log(fid);
         httpGetFactory('../spacialist_api/sources/get/' + aid + '/' + fid, function(sources) {
             angular.forEach(sources, function(src, key) {
-                $scope.sourceModalFields.addedSources.push({
+                $scope.modalFields.addedSources.push({
                     id: src.id,
                     fid: src.find_id,
                     aid: src.attribute_id,
@@ -1623,6 +1637,18 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
             controller: function($uibModalInstance) {
                 $scope.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
+                },
+                $scope.save = function() {
+                    var formData = new FormData();
+                    formData.append('fid', fid);
+                    formData.append('aid', fieldid);
+                    formData.append('possibility', $scope.modalFields.value);
+                    $scope.attributeOutputs[fieldid+'_pos'] = $scope.modalFields.value;
+                    //console.log($scope.attributeOutputs.toSource());
+                    httpPostFactory('../spacialist_api/context/set/possibility', formData, function(callback) {
+                        console.log(callback);
+                        $uibModalInstance.dismiss('cancel');
+                    });
                 }
             },
             scope: $scope
@@ -1693,56 +1719,6 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         });
         $scope.sourceModalFields.currentSource = undefined;
         $scope.sourceModalFields.currentDesc = undefined;
-    }
-
-    /**
-     * Opens a modal window which allows the user to set the possibility for a particular attribute.
-     * One has to pass the field name `fieldname` and the attribute id `fieldid` as parameters.
-     */
-    $scope.openPossibilityModal = function(fieldname, fieldid, currentVal) {
-        $scope.possibilityModalFields = {
-            name: fieldname,
-            id: fieldid,
-            value: currentVal || 100,
-            setPossibility: function(event) {
-                var max = event.currentTarget.scrollWidth;
-                var click = event.originalEvent.layerX;
-                var curr = $scope.possibilityModalFields.value
-                var newVal = parseInt(click/max*100);
-                if(Math.abs(newVal-curr) < 10) {
-                    if(newVal > curr) newVal = parseInt((newVal+10)/10)*10
-                    else newVal = parseInt(newVal/10)*10
-                } else {
-                    newVal = parseInt((newVal+5)/10)*10;
-                }
-                /*var rst = newVal % 10;
-                rst < 5 ? newVal -= rst : newVal += (10-rst);*/
-                event.currentTarget.children[0].style.width = newVal+"%"
-                $scope.possibilityModalFields.value = newVal;
-            }
-        }
-        var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/possibility-modal.html',
-            controller: function($uibModalInstance) {
-                $scope.cancel = function(result) {
-                    $uibModalInstance.dismiss('cancel');
-                },
-                $scope.save = function() {
-                    var formData = new FormData();
-                    formData.append('fid', $scope.activeMarker); //TODO problem because of activeMarker and currentContext
-                    formData.append('aid', fieldid);
-                    formData.append('possibility', $scope.possibilityModalFields.value);
-                    $scope.attributeOutputs[fieldid+'_pos'] = $scope.possibilityModalFields.value;
-                    //console.log($scope.attributeOutputs.toSource());
-                    httpPostFactory('../spacialist_api/context/set/possibility', formData, function(callback) {
-                        console.log(callback);
-                        $uibModalInstance.dismiss('cancel');
-                    });
-                }
-            },
-            scope: $scope
-        });
-        modalInstance.result.then(function(selectedItem) {}, function() {});
     }
 
     $scope.storeLib = function() {

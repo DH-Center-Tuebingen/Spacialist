@@ -281,7 +281,7 @@ ol li.list-group-item {
 .source-link {
     cursor: pointer;
     /*color: #337ab7;*/
-    color: rgba(255, 0, 0, 0.75);
+    /*color: rgba(255, 0, 0, 0.75);*/
 }
 
 .td-50 {
