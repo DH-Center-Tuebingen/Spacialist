@@ -14,7 +14,8 @@ class AddThesaurusValOnContextValues extends Migration
     public function up()
     {
         Schema::table('context_values', function (Blueprint $table) {
-            $table->text('thesaurus_val');
+            $table->text('thesaurus_val')->nullable();
+            $table->dropColumn('th_val');
         });
     }
 
@@ -27,6 +28,7 @@ class AddThesaurusValOnContextValues extends Migration
     {
         Schema::table('context_values', function (Blueprint $table) {
             $table->dropColumn('thesaurus_val');
+            $table->text('th_val')->nullable();
         });
     }
 }

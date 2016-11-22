@@ -17,9 +17,9 @@ class CreateFindsTable extends Migration
             $table->increments('id');
 			$table->string('name', 128);
 			$table->integer('context_id')->unsigned();
-			$table->float('lat', '8', '5');
-			$table->float('lng', '8', '5');
-			$table->integer('root')->default(-1);
+			$table->float('lat', '8', '5')->nullable();
+			$table->float('lng', '8', '5')->nullable();
+			$table->integer('root')->nullable();
             $table->timestamps();
 
 			$table->foreign('context_id')->references('id')->on('context_types')->onDelete('cascade');

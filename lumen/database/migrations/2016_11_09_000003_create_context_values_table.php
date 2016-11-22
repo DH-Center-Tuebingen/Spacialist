@@ -17,12 +17,12 @@ class CreateContextValuesTable extends Migration
             $table->increments('id');
             $table->integer('find_id')->unsigned();
             $table->integer('attribute_id')->unsigned();
-            $table->string('str_val', 256);
-            $table->integer('int_val');
-            $table->double('dbl_val');
-            $table->timestampTz('dt_val');
-            $table->integer('find_val')->unsigned();
-            $table->text('th_val');
+            $table->text('str_val')->nullable();
+            $table->integer('int_val')->nullable();
+            $table->double('dbl_val')->nullable();
+            $table->timestampTz('dt_val')->nullable();
+            $table->integer('find_val')->unsigned()->nullable();
+            $table->text('th_val')->nullable();
             $table->timestamps();
 
             $table->foreign('find_id')->references('id')->on('finds')->onDelete('cascade');

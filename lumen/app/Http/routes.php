@@ -46,8 +46,7 @@ $app->post('context/set/possibility', 'ContextController@setPossibility');
 
 $app->post('user/login', 'UserController@login');
 
-$app->group(['middleware' => ['jwt.auth', 'jwt.refresh']], function($app) {
-//$app->group(['middleware' => 'auth:api'], function($app) {
+$app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']], function($app) {
     $app->post('user/logout', 'UserController@logout');
     $app->post('user/switch', 'UserController@switchRole');
     $app->post('user/get', function() {

@@ -15,17 +15,17 @@ class CreateBibTexTable extends Migration
     {
         Schema::create('bib_tex', function (Blueprint $table) {
             $table->increments('id');
-            $table->text('author');
-            $table->text('editor');
+            $table->text('author')->nullable();
+            $table->text('editor')->nullable();
             $table->text('title');
-            $table->text('journal');
-            $table->text('year');
-            $table->text('pages');
-            $table->text('volume');
-            $table->text('number');
-            $table->text('booktitle');
-            $table->text('publisher');
-            $table->text('address');
+            $table->text('journal')->nullable();
+            $table->text('year')->nullable();
+            $table->text('pages')->nullable();
+            $table->text('volume')->nullable();
+            $table->text('number')->nullable();
+            $table->text('booktitle')->nullable();
+            $table->text('publisher')->nullable();
+            $table->text('address')->nullable();
             $table->timestamps();
         });
     }

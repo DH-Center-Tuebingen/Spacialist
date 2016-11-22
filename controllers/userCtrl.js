@@ -9,7 +9,10 @@ spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory
         }, function(error) {
             console.log("error occured! " + error.data.error);
         }).then(function(response) {
-            if(typeof response === 'undefined' || response.status !== 200) $state.go('auth', {});
+            if(typeof response === 'undefined' || response.status !== 200) {
+                $state.go('auth', {});
+                return;
+            }
             localStorage.setItem('user', JSON.stringify(response.data));
             scopeService.currentUser = $scope.currentUser = {
                 user: response.data
@@ -27,24 +30,4 @@ spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory
             $state.go('auth', {});
         });
     };
-
-    var unauth = true;
-    var user = localStorage.getItem('user');
-    if(user !== null) {
-        var token = localStorage.getItem('satellizer_token');
-        if(token !== null) {
-            unauth = false;
-            $http.post('../spacialist_api/user/get').then(function(response) {
-                if(response.status !== 200) $state.go('auth', {});
-                console.log(response);
-                localStorage.setItem('user', JSON.stringify(response.data));
-                scopeService.currentUser = $scope.currentUser = {
-                    user: response.data
-                };
-            });
-        }
-    }
-    if(unauth) {
-        $state.go('auth', {});
-    }
 }]);
