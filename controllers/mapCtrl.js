@@ -1,10 +1,11 @@
-spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'Upload', 'modalService', '$uibModal', '$auth', '$state', '$http', function($scope, $timeout, $sce, leafletData, scopeService, httpPostFactory, httpGetFactory, Upload, modalService, $uibModal, $auth, $state, $http) {
+spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce', 'leafletData', 'scopeService', 'httpPostFactory', 'httpPostPromise', 'httpGetFactory', 'Upload', 'modalService', '$uibModal', '$auth', '$state', '$http', function($rootScope, $scope, $timeout, $sce, leafletData, scopeService, httpPostFactory, httpPostPromise, httpGetFactory, Upload, modalService, $uibModal, $auth, $state, $http) {
     scopeService.map = {};
     scopeService.map.events = {
         markers: {
             enable: ['click', 'drag', 'dragstart', 'dragend', 'popupopen', 'popupclose']
         }
     }
+    $scope.markerOptions = {};
     scopeService.map.controls = {
         scale: true
     }
@@ -34,7 +35,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
             },
             marker: {
                 icon: L.divIcon({
-                    className: 'marker-point',
+                    className: 'fa fa-fw fa-circle',
                     iconSize: [20, 20]
                 })
             }
@@ -49,7 +50,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
     if (typeof $scope.map.controls === 'undefined') $scope.map.controls = scopeService.map.controls;
     if(typeof scopeService.attribData != 'undefined')
     leafletData.getMap().then(function(map) {
-        $scope.markers = scopeService.markers;
+        scopeService.markers = scopeService.markers;
         $scope.mapObject = map;
     });
     angular.extend($scope, scopeService);
@@ -143,6 +144,65 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
     }, {
         name: 'griechisch'
     }];
+
+    var icons = $scope.icons = [
+        {
+            icon: 'plus',
+            name: 'plus'
+        },
+        {
+            icon: 'close',
+            name: 'close'
+        },
+        {
+            icon: 'circle',
+            name: 'circle'
+        },
+        {
+            icon: 'circle-o',
+            name: 'circle-o'
+        },
+        {
+            icon: 'dot-circle-o',
+            name: 'dot-circle-o'
+        },
+        {
+            icon: 'square',
+            name: 'square'
+        },
+        {
+            icon: 'square-o',
+            name: 'square-o'
+        },
+        {
+            icon: 'star',
+            name: 'star'
+        },
+        {
+            icon: 'asterisk',
+            name: 'asterisk'
+        },
+        {
+            icon: 'flag',
+            name: 'flag'
+        },
+        {
+            icon: 'flag-o',
+            name: 'flag-o'
+        },
+        {
+            icon: 'map-marker',
+            name: 'map-marker'
+        },
+        {
+            icon: 'map-pin',
+            name: 'map-pin'
+        },
+        {
+            icon: 'university',
+            name: 'university'
+        }
+    ];
 
     //klay/d3
     $scope.d3GraphJson = {
@@ -606,162 +666,6 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
             $scope.d3layouter.kgraph(graph);
         }
 
-    var getContexts = function() {
-        httpGetFactory('../spacialist_api/context/get', function(callback) {
-            var ctxts = [];
-            var ctxtRefs = {};
-            angular.forEach(callback, function(value, key) {
-                var index = value.index;
-                var title = value.title;
-                if (typeof ctxtRefs[index] === 'undefined') {
-                    ctxtRefs[index] = [];
-                    ctxts.push({
-                        title: title,
-                        index: index,
-                        type: value.type,
-                        cid: value.cid
-                    });
-                }
-                if (value.cid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
-                    ctxtRefs[index].push({
-                        aid: value.aid,
-                        val: value.val,
-                        context: value.cid,
-                        datatype: value.datatype
-                    });
-                }
-            });
-            var dt = new Date();
-            scopeService.ctxts = $scope.ctxts = ctxts;
-            scopeService.ctxtRefs = $scope.ctxtRefs = ctxtRefs;
-            if (typeof $scope.choices === 'undefined') $scope.choices = [];
-            scopeService.choices = $scope.choices;
-            $scope.dateOptions = {
-                showWeeks: false,
-                maxDate: dt
-            }
-            $scope.date = {
-                opened: false
-            }
-        });
-    }
-
-    var getArtifacts = function() {
-        httpGetFactory('../spacialist_api/context/artifacts/get', function(callback) {
-            var artifacts = [];
-            var artiRefs = [];
-            angular.forEach(callback, function(value, key) {
-                var index = value.index;
-                var title = value.title;
-                if (typeof artiRefs[index] === 'undefined') {
-                    artiRefs[index] = [];
-                    artifacts.push({
-                        title: title,
-                        index: index,
-                        type: value.type,
-                        cid: value.cid
-                    });
-                }
-                if (value.cid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
-                    artiRefs[index].push({
-                        aid: value.aid,
-                        val: value.val,
-                        context: value.cid,
-                        datatype: value.datatype
-                    });
-                }
-            });
-            scopeService.artifacts = $scope.artifacts = artifacts;
-            scopeService.artiRefs = $scope.artiRefs = artiRefs;
-        });
-    }
-
-    var getLiterature = function() {
-        var literature = undefined;
-        httpGetFactory('../spacialist_api/literature/getAll', function(callback) {
-            scopeService.literature = $scope.literature = literature = callback;
-        });
-    }
-
-    var getAttributes = function() {
-        httpGetFactory('../spacialist_api/context/getAttributes/10', function(callback) {
-            var fields = [];
-            var listTabFields = [];
-            var optionFields = [];
-            var harrisRelation = undefined;
-            for (var i = callback.length - 1; i >= 0; i--) {
-                var value = callback[i];
-                var index = value.aid + "_";
-                if(typeof value.oid != 'undefined') index += value.oid;
-                if (value.datatype == 'string-sc' || value.datatype == 'string-mc') {
-                    if(value.choices != null) {
-                        $scope.markerChoices[index] = value.choices;
-                    }
-                    if(value.cid == 10) fields.push(value);
-                } else if (value.datatype == 'list') {
-                    if(value.cid == 10) { //library
-                        $scope.hideLists[index] = true;
-                        listTabFields.push({
-                            aid: value.aid,
-                            val: value.val,
-                            datatype: value.datatype,
-                            root: value.root
-                        });
-                        $scope.input[index] = "";
-                        //callback.splice(i, 1);
-                    }
-                } else if (value.datatype == 'epoch') {
-                    $scope.markerChoices[index] = value.choices;
-                    if(value.cid == 10) fields.push(value);
-                } else if (value.datatype == 'relation') {
-                    if(value.cid == 10) {
-                        listTabFields.push({
-                            aid: value.aid,
-                            val: value.val,
-                            datatype: value.datatype,
-                            root: value.root
-                        });
-                        //callback.splice(i, 1);
-                    }
-                } else if (value.datatype == 'option') {
-                    for (var j = 0; j < value.attributes.length; j++) {
-                        var attribute = value.attributes[j];
-                        if (attribute.datatype == 'epoch') {
-                        }
-                    }
-                    optionFields.push(value);
-                    callback.splice(i, 1);
-                } else {
-                    if(value.cid == 10) fields.push(value);
-                }
-            };
-            $scope.fields = fields.reverse();
-            $scope.listTabFields = listTabFields;
-            $scope.optionFields = optionFields;
-            $scope.harrisRelation = harrisRelation;
-        });
-    }
-
-    var getAllContexts = function() {
-        httpGetFactory('../spacialist_api/context/getAll', function(callback) {
-            scopeService.allContexts = $scope.contexts = callback.finds;
-        });
-    }
-
-    var updateInformations = function() {
-        getContexts();
-        getArtifacts();
-        getLiterature();
-        getAttributes();
-        getAllContexts();
-    }
-
-    $scope.updateInformations = function() {
-        updateInformations();
-    }
-
-    updateInformations();
-
     httpGetFactory('../spacialist_api/image/getAll', function(callback) {
         var unlImg = [];
         angular.forEach(callback, function(value, key) {
@@ -771,13 +675,64 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         angular.extend($scope.allImages, unlImg);
     });
 
-    /**
-     * Gets all contexts with a gps-position from the database
-     * `callback` is an json-array of all contexts
-     */
-    httpGetFactory('../spacialist_api/context/get/type/0', function(callback) {
-        $scope.markers = {};
-        //set initial bounds for the map
+    var displayMarkersHelper = function(current, bounds) {
+        var messageScope = function() { return $scope; };
+        //for(var i = 0; i < current.length; i++) {
+        for(var key in current) {
+            if(!current.hasOwnProperty(key)) continue;
+            var curr = current[key];
+            if (curr.lat === null || curr.lng === null) continue;
+            var latlng = {
+                lat: Number(curr.lat),
+                lng: Number(curr.lng)
+            };
+            //adjust map boundaries
+            if (latlng.lat > bounds.northEast.lat) {
+                bounds.northEast.lat = latlng.lat;
+            }
+            if (latlng.lat < bounds.southWest.lat) {
+                bounds.southWest.lat = latlng.lat;
+            }
+            if (latlng.lng > bounds.northEast.lng) {
+                bounds.northEast.lng = latlng.lng;
+            }
+            if (latlng.lng < bounds.southWest.lng) {
+                bounds.southWest.lng = latlng.lng;
+            }
+            // set marker icon options
+            var icon = curr.icon || icons[0];
+            var color = curr.color || '#00FF00';
+            var iconOpts = {
+                className: 'fa fa-fw fa-lg fa-' + icon,
+                color: color,
+                iconSize: [20, 20]
+            };
+            //add the current marker and load it's stored attribute values
+            var id = curr.id;
+            var title = addMarker(latlng, iconOpts, curr.name, id);
+            scopeService.markers[title].message = "<div ng-include src=\"'layouts/marker.html'\"></div>";
+            scopeService.markers[title].getMessageScope = messageScope;
+            // add values to own object. Easier to read relevant values
+            scopeService.markers[title].contextInfo = {
+                data: curr.data,
+                id: id,
+                title: title,
+                name: curr.name,
+                root: curr.root,
+                typeid: curr.typeid,
+                typename: curr.typename,
+                cid: curr.context_id,
+                color: color,
+                icon: icon
+            };
+            if(typeof current.children != 'undefined') {
+                isplayMarkersHelper(current.children, bounds);
+            }
+        }
+    };
+
+    scopeService.displayMarkers = function(contextList) {
+        scopeService.markers = {};
         $scope.map.bounds = {
             southWest: {
                 lat: 90,
@@ -787,76 +742,30 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
                 lat: -90,
                 lng: -180
             }
-        }
-        for (var i = 0; i < callback.length; i++) {
-            var curr = callback[i];
-            if (curr.lat == null || curr.lng == null) continue;
-            var latlng = {
-                lat: Number(curr.lat),
-                lng: Number(curr.lng)
-            };
-            // set marker icon options
-            var iconOpts = {
-                    className: 'marker-point',
-                    iconSize: [20, 20]
-                }
-                //adjust map boundaries
-            if (latlng.lat > $scope.map.bounds.northEast.lat) {
-                $scope.map.bounds.northEast.lat = latlng.lat;
-            }
-            if (latlng.lat < $scope.map.bounds.southWest.lat) {
-                $scope.map.bounds.southWest.lat = latlng.lat;
-            }
-            if (latlng.lng > $scope.map.bounds.northEast.lng) {
-                $scope.map.bounds.northEast.lng = latlng.lng;
-            }
-            if (latlng.lng < $scope.map.bounds.southWest.lng) {
-                $scope.map.bounds.southWest.lng = latlng.lng;
-            }
-            //add the current marker and load it's stored attribute values
-            var msg = curr.name;
-            var id = curr.id;
-            var title = addMarker(latlng, iconOpts, msg, id);
-            var storedValues = {}
-            for (var j = 0; j < curr.attributes.length; j++) {
-                var attr = curr.attributes[j];
-                var key = attr['a_id'] + '_';
-                var posKey = key + 'pos';
-                var val = attr.str_val;
-                storedValues[posKey] = attr.possibility || 100;
-                if (attr['datatype'] == 'list') {
-                    if (typeof storedValues[key] === 'undefined') storedValues[key] = [];
-                    storedValues[key].push({
-                        name: val
-                    });
-                    if (typeof $scope.editEntry[key] === 'undefined') $scope.editEntry[key] = [];
-                    $scope.editEntry[key].push(false);
-                } else if(attr['datatype'] == 'string-sc') {
-                    storedValues[key] = attr.val;
-                } else if(attr['datatype'] == 'string-mc') {
-                    if (typeof storedValues[key] === 'undefined') storedValues[key] = [];
-                    storedValues[key].push(attr.val);
-                } else if(attr['datatype'] == 'dimension' || attr['datatype'] == 'epoch') {
-                    if (typeof storedValues[key] === 'undefined') storedValues[key] = {};
-                    storedValues[key].val = val;
-                } else {
-                    storedValues[key] = val;
-                }
-            }
-            // add values to own object. Easier to read relevant values
-            $scope.markers[title]['myOptions'] = {
-                lat: latlng.lat,
-                lng: latlng.lng,
-                title: title,
-                name: msg,
-                id: id,
-                images: []
-            };
-            //add attribute values as well
-            angular.extend($scope.markers[title]['myOptions'], storedValues);
-        }
+        };
+        displayMarkersHelper(contextList, $scope.map.bounds);
         scopeService.map.bounds = $scope.map.bounds;
-    });
+        $scope.markers = scopeService.markers;
+    };
+
+    $scope.updateMarkerOptions = function(markerId, markerKey, color, icon) {
+        if(typeof markerId == 'undefined') return;
+        if(markerId <= 0) return;
+        var formData = new FormData();
+        formData.append('id', markerId);
+        if(typeof color != 'undefined') formData.append('color', color);
+        if(typeof icon != 'undefined') formData.append('icon', icon.icon);
+        httpPostPromise.getData('../spacialist_api/context/set/icon', formData).then(
+            function(icon) {
+                console.log(icon);
+                scopeService.markers[markerKey].icon = {
+                    type: "div",
+                    className: 'fa fa-fw fa-lg fa-' + icon.icon,
+                    iconSize: 20
+                };
+            }
+        );
+    };
 
     /**
      * Opens the popup of the current activated/clicked marker
@@ -864,13 +773,22 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
      * Initial values are stored in `markerDefaultValues`
      */
     var openPopup = function(options) {
-        $scope.markerActive = true;
+        $rootScope.$emit('setCurrentElement', {
+            target: $scope.currentElement,
+            source: scopeService.markers[options.title].contextInfo
+        });
         $scope.activeMarker = options.id;
         $scope.markerKey = options.title;
-        $scope.subNav.setBibTab();
+        $scope.markerOptions = {
+            icon: {
+                icon: scopeService.markers[options.title].contextInfo.icon,
+                name: scopeService.markers[options.title].contextInfo.icon
+            },
+            color: scopeService.markers[options.title].contextInfo.color
+        };
         var currentOpts = {};
-        if (typeof $scope.markers[options.title]['myOptions'] !== 'undefined') {
-            currentOpts = angular.extend({}, $scope.markers[options.title]['myOptions']);
+        if (typeof scopeService.markers[options.title].contextInfo !== 'undefined') {
+            currentOpts = angular.extend({}, scopeService.markers[options.title].contextInfo);
             currentOpts.title = options.title;
         } else {
             currentOpts = angular.extend({}, options);
@@ -878,27 +796,26 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         $scope.markerValues.locked = !options.draggable;
         updateMarkerOpts(currentOpts);
         markerDefaultValues = angular.extend({}, $scope.markerValues);
-    }
+    };
 
     /**
      * listener for different leaflet actions
      */
     $scope.$on('leafletDirectiveMarker.popupopen', function(event, args) {
-        openPopup($scope.markers[args.leafletEvent.target.options.title]['myOptions']);
+        openPopup(scopeService.markers[args.leafletEvent.target.options.title].contextInfo);
     });
     /**
      * If the marker's popup was closed, reset all values which hold marker specific values
      */
     $scope.$on('leafletDirectiveMarker.popupclose', function(event, args) {
         args.leafletEvent.target.options.draggable = !$scope.markerValues.locked;
-        if (typeof $scope.markers[$scope.markerValues.title] !== 'undefined') {
-            $scope.markers[$scope.markerValues.title].draggable = !$scope.markerValues.locked;
+        if (typeof scopeService.markers[$scope.markerValues.title] !== 'undefined') {
+            scopeService.markers[$scope.markerValues.title].draggable = !$scope.markerValues.locked;
         }
-        $scope.markerActive = false;
         $scope.activeMarker = -1;
+        $scope.markerKey = undefined;
         $scope.sideNav.contextHistory = undefined;
-        resetMarkerOpts();
-        $scope.output = undefined;
+        $rootScope.$emit('unsetCurrentElement', {});
     });
     /**
      * While dragging the marker, update its geo position
@@ -923,9 +840,9 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         var opts = args.leafletEvent.target.options;
         opts.lat = $scope.markerValues.lat;
         opts.lng = $scope.markerValues.lng;
-        $scope.markers[opts.title]['myOptions'].lat = opts.lat;
-        $scope.markers[opts.title]['myOptions'].lng = opts.lng;
-        $scope.markers[opts.title].focus = true;
+        scopeService.markers[opts.title]['myOptions'].lat = opts.lat;
+        scopeService.markers[opts.title]['myOptions'].lng = opts.lng;
+        scopeService.markers[opts.title].focus = true;
     });
     /**
      * If the marker has been created, add the marker to the marker-array and store it in the database
@@ -940,9 +857,9 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         opts.lng = latlng.lng;
         $scope.markerValues.name = "Untitled";
         opts.title = addMarker(latlng, iconOpts, "Untitled");
-        $scope.markers[opts.title]['myOptions'] = opts;
+        scopeService.markers[opts.title]['myOptions'] = opts;
         storeLib(opts);
-        $scope.markers[opts.title].focus = true;
+        scopeService.markers[opts.title].focus = true;
     });
     /*$scope.$on('leafletDirectiveDraw.draw:edited', function(event, args) {
         console.log("edited");
@@ -1117,38 +1034,38 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
      */
     var addMarker = function(latlng, iconOpts, msg, id) {
         //if no msg (title) is present, set it to Marker_X
-        if(typeof msg === 'undefined' || msg == null || msg.length == 0) {
+        if(typeof msg === 'undefined' || msg === null || msg.length === 0) {
             var max = 0;
             //get the max index of the markers (Marker_X)
-            for(var pos in $scope.markers) {
+            for(var pos in scopeService.markers) {
                 console.log(pos);
-                var title = $scope.markers[pos].title;
-                var matches = title.match(/Marker_([0-9]+)/);
-                if(matches == null) continue;
+                var markerTitle = scopeService.markers[pos].title;
+                var matches = markerTitle.match(/Marker_([0-9]+)/);
+                if(matches === null) continue;
                 var mId = Number(matches[1]);
                 if (mId > max) max = mId;
             }
             msg = "Marker_" + (max+1);
         }
         var title = msg.replace(/-/, ''); //'-' is not allowed in marker title
-        $scope.markers[title] = {
+        scopeService.markers[title] = {
             title: title,
             lat: latlng.lat,
             lng: latlng.lng,
-            message: '<h5>' + msg + '</h5>',
             draggable: false,
             icon: {
                 type: "div",
                 className: iconOpts.className,
+                color: iconOpts.color,
                 iconSize: iconOpts.iconSize
             }
-        }
+        };
         if (typeof id !== 'undefined') {
-            $scope.markers[title].id = id;
+            scopeService.markers[title].id = id;
         }
-        scopeService.markers = $scope.markers;
+        scopeService.markers = scopeService.markers;
         return title;
-    }
+    };
 
     /**
      * Set the variable `value` as value for the given key `id` in the `markerValues` object.
@@ -1217,9 +1134,9 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
      * Link the image `img` to the context with the id `markerIndex`
      */
     $scope.linkImage = function(img, markerIndex) {
-        var markerId = $scope.markers[markerIndex].id;
+        var markerId = scopeService.markers[markerIndex].id;
         img.linked.push(markerId);
-        $scope.markers[markerIndex].myOptions.images.push(img);
+        scopeService.markers[markerIndex].myOptions.images.push(img);
         //TODO add to db
     }
 
@@ -1258,7 +1175,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
      * Toggle if the marker should be draggable or not
      */
     $scope.togglePositionLock = function() {
-        $scope.markers[$scope.markerValues.title].draggable = $scope.markerValues.locked;
+        scopeService.markers[$scope.markerValues.title].draggable = $scope.markerValues.locked;
     }
 
     /**
@@ -1292,8 +1209,8 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
             setMarkerOption('id', newId);
             opts.id = newId;
             $scope.activeMarker = newId;
-            $scope.markers[title]['myOptions'] = opts;
-            $scope.markers[title].message = '<h5>' + $scope.markers[title]['myOptions'].name + '</h5>';
+            scopeService.markers[title]['myOptions'] = opts;
+            scopeService.markers[title].message = '<h5>' + scopeService.markers[title]['myOptions'].name + '</h5>';
             //after storing new values, update default values (`markerDefaultValues`)
             markerDefaultValues = angular.extend({}, $scope.markerValues);
         });
@@ -1303,8 +1220,8 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
      * Reset current marker values to the initial values `markerDefaultValues`
      */
     $scope.resetEntry = function() {
-        $scope.markers[$scope.markerValues.title].lat = markerDefaultValues.lat;
-        $scope.markers[$scope.markerValues.title].lng = markerDefaultValues.lng;
+        scopeService.markers[$scope.markerValues.title].lat = markerDefaultValues.lat;
+        scopeService.markers[$scope.markerValues.title].lng = markerDefaultValues.lng;
         $scope.markerValues = angular.extend({}, markerDefaultValues);
     }
 
@@ -1324,7 +1241,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
                 },
                 $scope.deleteConfirmed = function() {
                     $uibModalInstance.dismiss('ok');
-                    delete $scope.markers[$scope.markerValues.title];
+                    delete scopeService.markers[$scope.markerValues.title];
                     httpGetFactory('../spacialist_api/context/delete/' + $scope.activeMarker, function(callback) {});
                     resetMarkerOpts();
                 }
@@ -1500,7 +1417,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
         $scope.sideNav.contextHistory = [];
         var pId = $scope.sideNav.contextIds++;
         var realId = $scope.activeMarker;
-        var title = $scope.markers[$scope.markerKey]['myOptions'].name;
+        var title = scopeService.markers[$scope.markerKey]['myOptions'].name;
         $scope.sideNav.contextHistory.push({
             id: pId,
             realId: realId,
@@ -1525,7 +1442,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
      * Writes the current existing markers to a temporary csv file which can then be downloaded by the user.
      */
     $scope.write2csv = function() {
-        var data = typeof $scope.markers !== 'object' ? JSON.parse($scope.markers) : $scope.markers;
+        var data = typeof scopeService.markers !== 'object' ? JSON.parse(scopeService.markers) : scopeService.markers;
 
         var out = '';
         for (var i in data) {
@@ -1752,8 +1669,8 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
     }
 
     $scope.hasMarkers = function() {
-        if (typeof $scope.markers === 'undefined') return false;
-        return Object.keys($scope.markers).length > 0;
+        if (typeof scopeService.markers === 'undefined') return false;
+        return Object.keys(scopeService.markers).length > 0;
     }
 
     $scope.subNav.submitImport = function(isValid) {
@@ -1768,7 +1685,8 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
                 lng: Number($scope.subNav.values.y)
             }
             var iconOpts = {
-                className: 'marker-point',
+                //className: 'marker-point',
+                className: 'fa fa-fw fa-circle-o',
                 iconSize: [20, 20]
             }
             var opts = {
@@ -1791,13 +1709,14 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
                         markers[p]['icon'] = {
                             type: 'div',
                             iconSize: [20, 20],
-                            className: 'marker-point'
+                            //className: 'marker-point'
+                            className: 'fa fa-fw fa-circle-o'
                         }
                         markers[p]['draggable'] = false;
                         markers[p]['message'] = '<h5>' + markers[p]['message'] + '</h5>'
                     }
                 };
-                $scope.markers = scopeService.markers = markers;
+                scopeService.markers = scopeService.markers = markers;
             });
             httpPostFactory('upload-test.php', new FormData(), function(callback) {
                 $scope.filedesc = callback.split('\\n');
@@ -1832,7 +1751,7 @@ spacialistApp.controller('mapCtrl', ['$scope', '$timeout', '$sce', 'leafletData'
      */
     $scope.openModal = function(img, filmIndex) {
         modalOptions = {};
-        modalOptions.markers = angular.extend({}, $scope.markers);
+        modalOptions.markers = angular.extend({}, scopeService.markers);
         modalOptions.img = angular.extend({}, img);
         modalOptions.linkImage = $scope.linkImage;
         modalOptions.unlinkImage = $scope.unlinkImage;

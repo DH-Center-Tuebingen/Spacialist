@@ -1,17 +1,105 @@
-spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'httpPostPromise', 'httpGetPromise', 'modalService', '$uibModal', '$auth', '$state', '$http', 'modalFactory', 'moduleHelper', function($scope, scopeService, httpPostFactory, httpGetFactory, httpPostPromise, httpGetPromise, modalService, $uibModal, $auth, $state, $http, modalFactory, moduleHelper) {
+spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'httpPostPromise', 'httpGetPromise', 'modalService', '$uibModal', '$auth', '$state', '$http', 'modalFactory', 'moduleHelper', '$timeout', function($rootScope, $scope, scopeService, httpPostFactory, httpGetFactory, httpPostPromise, httpGetPromise, modalService, $uibModal, $auth, $state, $http, modalFactory, moduleHelper, $timeout) {
     $scope.dimensionUnits = [
         'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
     ];
+
+    var getContexts = function() {
+        httpGetFactory('../spacialist_api/context/get', function(callback) {
+            var ctxts = [];
+            var ctxtRefs = {};
+            angular.forEach(callback, function(value, key) {
+                var index = value.index;
+                var title = value.title;
+                if (typeof ctxtRefs[index] === 'undefined') {
+                    ctxtRefs[index] = [];
+                    ctxts.push({
+                        title: title,
+                        index: index,
+                        type: value.type,
+                        cid: value.cid
+                    });
+                }
+                if (value.cid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
+                    ctxtRefs[index].push({
+                        aid: value.aid,
+                        val: value.val,
+                        context: value.cid,
+                        datatype: value.datatype
+                    });
+                }
+            });
+            var dt = new Date();
+            scopeService.ctxts = ctxts;
+            scopeService.ctxtRefs = ctxtRefs;
+            if (typeof $scope.choices === 'undefined') $scope.choices = [];
+            scopeService.choices = $scope.choices;
+            $scope.dateOptions = {
+                showWeeks: false,
+                maxDate: dt
+            };
+            $scope.date = {
+                opened: false
+            };
+        });
+    };
+
+    var getArtifacts = function() {
+        httpGetFactory('../spacialist_api/context/artifacts/get', function(callback) {
+            var artifacts = [];
+            var artiRefs = [];
+            angular.forEach(callback, function(value, key) {
+                var index = value.index;
+                var title = value.title;
+                if (typeof artiRefs[index] === 'undefined') {
+                    artiRefs[index] = [];
+                    artifacts.push({
+                        title: title,
+                        index: index,
+                        type: value.type,
+                        cid: value.cid
+                    });
+                }
+                if (value.cid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
+                    artiRefs[index].push({
+                        aid: value.aid,
+                        val: value.val,
+                        context: value.cid,
+                        datatype: value.datatype
+                    });
+                }
+            });
+            scopeService.artifacts = artifacts;
+            scopeService.artiRefs = artiRefs;
+        });
+    };
+
+    var getLiterature = function() {
+        httpGetFactory('../spacialist_api/literature/getAll', function(callback) {
+            scopeService.literature = $scope.literature = callback;
+        });
+    };
+
+    var updateInformations = function() {
+        getContexts();
+        getArtifacts();
+        getLiterature();
+    };
+
+    $scope.updateInformations = function() {
+        updateInformations();
+    };
+
+    updateInformations();
 
     var createModalHelper = function($itemScope, elemType) {
         var parent = $itemScope.parent;
         var selection = [];
         var msg = '';
         if(elemType == 'context') {
-            selection = $scope.ctxts.slice();
+            selection = scopeService.ctxts.slice();
             msg = 'Neuen Kontext anlegen';
         } else if(elemType == 'find') {
-            selection = $scope.artifacts.slice();
+            selection = scopeService.artifacts.slice();
             msg = 'Neuen Fund anlegen';
         }
         modalFactory.createModal(parent.name, msg, selection, function(name, type) {
@@ -83,22 +171,47 @@ spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory
         httpGetFactory('../spacialist_api/context/getRecursive', function(contextList) {
             $scope.contextList = contextList;
             $scope.getContextListStarted = false;
+            displayMarkers($scope.contextList);
         });
     };
 
+    var displayMarkers = function(contextList) {
+        if(!moduleHelper.controllerExists('mapCtrl')) return;
+        scopeService.displayMarkers(contextList);
+    };
+
+    var setMarker = function(currentElement, focus) {
+        var name = currentElement.name.replace(/-/, '');
+        console.log(scopeService.markers);
+        scopeService.markers[name].focus = focus;
+    };
+
+    $rootScope.$on('unsetCurrentElement', function(event, args) {
+        $scope.unsetCurrentElement();
+    });
+
+    $scope.unsetCurrentElement = function() {
+        setMarker($scope.currentElement, false);
+        $scope.currentElementData = undefined;
+        $scope.currentElementFields = undefined;
+        $scope.currentElement = undefined;
+    };
+
+    $rootScope.$on('setCurrentElement', function(event, args) {
+        $scope.setCurrentElement(args.source, args.target);
+    });
+
     $scope.setCurrentElement = function(target, elem) {
-        console.log(target);
         if(typeof elem != 'undefined' && elem.id == target.id) {
-            $scope.currentElementData = undefined;
-            $scope.currentElementFields = undefined;
-            $scope.currentElement = undefined;
+            $scope.unsetCurrentElement();
             return;
         }
         elem = target;
+        console.log(elem);
         if(elem.typeid === 0) { //context
-            elem.fields = $scope.ctxtRefs[elem.typename].slice();
+            elem.fields = scopeService.ctxtRefs[elem.typename].slice();
         } else if(elem.typeid == 1) { //find
-            elem.fields = $scope.artiRefs[elem.typename].slice();
+            elem.fields = scopeService.artiRefs[elem.typename].slice();
         }
         var data = {};
         for(var i=0; i<elem.data.length; i++) {
@@ -136,6 +249,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory
             typeId: elem.typeid,
             cid: elem.context_id
         };
+        setMarker($scope.currentElement, true);
     };
 
     $scope.storeElement = function(elem, data) {
@@ -190,7 +304,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory
                 //$itemScope.remove(); TODO remove from list
             });
         }, 'Wenn Sie dieses Element löschen, werden auch alle Kind-Elemente gelöscht!');
-    }
+    };
 
     var deleteElement = function(elem, onSuccess) {
         console.log("Removing element " + elem.name + " with ID " + elem.id);
@@ -230,7 +344,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'scopeService', 'httpPostFactory
             hash |= 0;
         }
         return hash;
-    }
+    };
 
     /**
      * @returns json object with color settings for different context types, based on their id `id`.
