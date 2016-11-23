@@ -1,0 +1,31 @@
+<h4>{{ markerKey }}</h4>
+<hr />
+<div ng-init="collapsed=false">
+    <h5 ng-click="collapsed=!collapsed" style="cursor: pointer;">Optionen <small><i class="fa fa-fw" ng-class="collapsed ? 'fa-caret-right' : 'fa-caret-down'"></i></small></h5>
+    <div ng-if="!collapsed">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label class="control-label col-md-3" for="color_{{ markerKey }}">
+                    Farbe:
+                </label>
+                <div class="col-md-9">
+                    <input class="form-control" type="color" name="color_{{ markerKey }}" ng-model="markerOptions.color" id="color_{{ markerKey }}" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="control-label col-md-3" for="icon_{{ markerKey }}">
+                    Icon:
+                </label>
+                <div class="col-md-9">
+                    <ui-select ng-model="markerOptions.icon" name="icon_{{ markerKey }}">
+                        <ui-select-match placeholder="Icon"><i class="fa fa-fw fa-{{ $select.selected.icon }}"></i> {{ $select.selected.name }}</ui-select-match>
+                        <ui-select-choices repeat="icon in icons | filter: $select.search">
+                            <span><i class="fa fa-fw fa-{{ icon.icon }}"></i> {{ icon.name | highlight: $select.search }}</span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <button type="button" class="btn btn-success" ng-click="updateMarkerOptions(activeMarker, markerKey, markerOptions.color, markerOptions.icon)"><i class="fa fa-fw fa-floppy-o"></i> Optionen speichern</button>
+        </form>
+    </div>
+</div>
