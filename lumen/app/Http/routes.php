@@ -41,6 +41,7 @@ $app->get('sources/delete/literature/{aid}/{fid}/{lid}', 'SourceController@delet
 $app->post('image/upload', 'ImageController@uploadImage');
 $app->post('context/add', 'ContextController@add');
 $app->post('context/set', 'ContextController@set');
+$app->post('context/set/icon', 'ContextController@setIcon');
 $app->post('sources/add', 'SourceController@add');
 $app->post('context/set/possibility', 'ContextController@setPossibility');
 

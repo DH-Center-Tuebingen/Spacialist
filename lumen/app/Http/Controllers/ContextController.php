@@ -283,6 +283,25 @@ class ContextController extends Controller {
         return response()->json(['fid' => $fid]);
     }
 
+    public function setIcon(Request $request) {
+        $id = $request->get('id');
+        $upd = [];
+
+        if($request->has('icon')) $upd['icon'] = $request->get('icon');
+        if($request->has('color')) $upd['color'] = $request->get('color');
+
+        DB::table('finds')
+            ->where('id', $id)
+            ->update($upd);
+        $icon = DB::table('finds')
+                ->where('id', $id)
+                ->first();
+        return response()->json([
+            'icon' => $icon->icon,
+            'color' => $icon->color
+        ]);
+    }
+
     public function setPossibility(Request $request) {
         $fid = $request->get('fid');
         $aid = $request->get('aid');
