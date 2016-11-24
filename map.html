@@ -1,26 +1,5 @@
-<div ng-controller="mapCtrl">
+<div>
     <div class="col-md-3">
-        <!--<div class="row">
-            <ul class="nav nav-tabs nav-justified">
-                <li role="presentation" ng-class="{active: subNav.impTab}" ng-click="subNav.setImportTab()"><a><i class="fa fa-cloud-upload"></i></a></li>
-                <li role="presentation" ng-class="{active: subNav.expTab}" ng-click="subNav.setExportTab()"><a><i class="fa fa-cloud-download"></i></a></li>
-                <li role="presentation" ng-class="{active: subNav.bibTab}" ng-click="subNav.setBibTab()"><a><i class="fa fa-pencil"></i></a></li>
-            </ul>
-        </div>-->
-        <!--<div class="row" ng-if="subNav.impTab">
-            <ng-include src="'includes/importTab.html'"></ng-include>
-        </div>
-        <div class="row" ng-if="subNav.expTab">
-            <h3>{{ 'export data' | translate }}</h3>
-            <div ng-hide="hasMarkers()">
-                <p>{{ 'no markers' | translate }}. {{ 'export not possible' | translate }}.</p>
-            </div>
-            <div ng-show="hasMarkers()">
-                <div class="list-group">
-                    <button type="button" class="btn btn-success list-group-item" ng-click="write2csv()"><i class="fa fa-text-o"></i> {{ 'write to csv' | translate }}</button>
-                </div>
-            </div>
-        </div>-->
         <div class="row" ng-if="subNav.bibTab">
             <div ng-show="markerActive">
                 <ng-include src="'includes/editLib.html'"></ng-include>
@@ -35,7 +14,6 @@
             </div>
         </div>
     </div>
-    <!--<div ng-class="{'col-md-9': !sideNav.stuffTab, 'col-md-11 floating-tab-md-11': sideNav.stuffTab}">-->
     <div class="col-md-9">
         <div class="col-md-11">
             <div id="map-container" ng-if="sideNav.mapTab && map">

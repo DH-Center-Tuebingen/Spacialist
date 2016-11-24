@@ -16,6 +16,45 @@ class ContextController extends Controller {
         //
     }
 
+    private function getData($id) {
+        $data = DB::table('context_values as cv')->select('cv.*', 'a.datatype', 'a.thesaurus_root_id')->join('attributes as a', 'cv.attribute_id', '=', 'a.id')->where('find_id', $id)->get();
+        foreach($data as &$attr) {
+            if($attr->datatype == 'literature') {
+                $attr->literature_info = DB::table('bib_tex')->where('id', $attr->str_val)->first();
+            } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
+                $attr->val = DB::table('th_concept')
+                    ->select('id as narrower_id',
+                        DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
+                    )
+                    ->where('concept_url', '=', $attr->thesaurus_val)
+                    ->first();
+            } else if($attr->datatype == 'dimension') {
+                $elems = explode(';', $attr->str_val, 4);
+                $attr->val = json_encode(['B' => intval($elems[0]), 'H' => intval($elems[1]), 'T' => intval($elems[2]), 'unit' => intval($elems[3])]);
+            } else if($attr->datatype == 'epoch') {
+                $elems = explode(';', $attr->str_val, 3);
+                $start = intval($elems[0]);
+                $end = intval($elems[1]);
+                $thUri = $elems[2];
+                $startLabel = $start < 0 ? 'v. Chr.' : 'n. Chr.';
+                $endLabel = $end < 0 ? 'v. Chr.' : 'n. Chr.';
+                $attr->val = json_encode([
+                    'startLabel' => $startLabel,
+                    'start' => $start,
+                    'endLabel' => $endLabel,
+                    'end' => $end,
+                    'epoch' => DB::table('th_concept')
+                                ->select('id as narrower_id',
+                                    DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
+                                )
+                                ->where('concept_url', '=', $thUri)
+                                ->first()
+                ]);
+            }
+        }
+        return $data;
+    }
+
     public function get() {
         return response()->json(
             DB::table('context_types as c')
@@ -51,48 +90,14 @@ class ContextController extends Controller {
         ");
         $children = [];
         foreach($rootFields as $key => $field) {
-            $rootFields[$key]->data =  DB::table('context_values as cv')->select('cv.*', 'a.datatype', 'a.thesaurus_root_id')->join('attributes as a', 'cv.attribute_id', '=', 'a.id')->where('find_id', $field->id)->get();
-            foreach($rootFields[$key]->data as &$attr) {
-                if($attr->datatype == 'literature') {
-                    $attr->literature_info = DB::table('bib_tex')->where('id', $attr->str_val)->first();
-                } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
-                    $attr->val = DB::table('th_concept')
-                        ->select('id as narrower_id',
-                            DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
-                        )
-                        ->where('concept_url', '=', $attr->thesaurus_val)
-                        ->first();
-                } else if($attr->datatype == 'dimension') {
-                    $elems = explode(';', $attr->str_val, 4);
-                    $attr->val = json_encode(['B' => intval($elems[0]), 'H' => intval($elems[1]), 'T' => intval($elems[2]), 'unit' => intval($elems[3])]);
-                } else if($attr->datatype == 'epoch') {
-                    $elems = explode(';', $attr->str_val, 3);
-                    $start = intval($elems[0]);
-                    $end = intval($elems[1]);
-                    $thUri = $elems[2];
-                    $startLabel = $start < 0 ? 'v. Chr.' : 'n. Chr.';
-                    $endLabel = $end < 0 ? 'v. Chr.' : 'n. Chr.';
-                    $attr->val = json_encode([
-                        'startLabel' => $startLabel,
-                        'start' => $start,
-                        'endLabel' => $endLabel,
-                        'end' => $end,
-                        'epoch' => DB::table('th_concept')
-                                    ->select('id as narrower_id',
-                                        DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
-                                    )
-                                    ->where('concept_url', '=', $thUri)
-                                    ->first()
-                    ]);
-                }
-            }
+            $rootFields[$key]->data =  $this->getData($field->id);
             if(array_key_exists($field->id, $children)) $tmpChildren = $children[$field->id];
             else $tmpChildren = array();
             $rootFields[$key]->children = $tmpChildren;
             $children[$field->root][] = $field;
             if($field->reclevel != 0) unset($rootFields[$key]);
         }
-        return response()->json($rootFields);
+        return response()->json(array_values($rootFields));
     }
 
     public function getAll() {
@@ -186,6 +191,35 @@ class ContextController extends Controller {
             }
         }*/
         return response()->json($rows);
+    }
+
+    public function duplicate($id) {
+        $toDuplicate = DB::table('finds')
+            ->where('id', $id)
+            ->first();
+        unset($toDuplicate->id);
+        $dupCounter = 0;
+        do {
+            $dupCounter++;
+            $sameName = DB::table('finds')
+                ->where('name', '=', $toDuplicate->name . " ($dupCounter)")
+                ->first();
+        } while($sameName != null);
+        $toDuplicate->name .= " ($dupCounter)";
+        $fid = DB::table('finds')
+            ->insertGetId(get_object_vars($toDuplicate));
+        $toDuplicate->id = $fid;
+        $toDuplicateValues = DB::table('context_values')
+            ->where('find_id', $id)
+            ->get();
+        foreach($toDuplicateValues as $value) {
+            unset($value->id);
+            $value->find_id = $fid;
+            Db::table('context_values')
+                ->insertGetId(get_object_vars($value));
+        }
+        $toDuplicate->data = $this->getData($fid);
+        return response()->json(['obj' => $toDuplicate]);
     }
 
     public function getType($id) {
