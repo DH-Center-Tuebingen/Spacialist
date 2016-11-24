@@ -164,7 +164,30 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         }],
         null,
         ['<span class="fa fa-fw fa-clone fa-light fa-green"></span> Kontext duplizieren', function($itemScope, $event, modelValue, text, $li) {
-            console.log("Clone!");
+            var parent = $itemScope.parent;
+            var id = parent.id;
+            httpGetFactory('../spacialist_api/context/duplicate/' + id, function(newElem) {
+                var copy = newElem.obj;
+                var elem = {
+                    id: copy.id,
+                    name: copy.name,
+                    context_id: copy.context_id,
+                    root: parent.root,
+                    reclevel: parent.reclevel,
+                    typeid: parent.typeid,
+                    typename: parent.typename,
+                    typelabel: parent.typelabel,
+                    icon: copy.icon,
+                    color: copy.color,
+                    lat: copy.lat,
+                    lng: copy.lng,
+                    data: copy.data,
+                    children: []
+                };
+                $itemScope.$parent.$parent.$modelValue.push(elem);
+                addMarker(elem);
+                $scope.setCurrentElement(elem, $scope.currentElement);
+            });
         }],
         null,
         ['<span class="fa fa-fw fa-trash-o fa-light fa-red"></span> Löschen', function($itemScope, $event, modelValue, text, $li) {
@@ -198,6 +221,11 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         if(!moduleHelper.controllerExists('mapCtrl')) return;
         scopeService.displayMarkers(contextList);
     };
+
+    var addMarker = function(elem) {
+        if(!moduleHelper.controllerExists('mapCtrl')) return;
+        scopeService.addMarker(elem);
+    }
 
     var setMarker = function(currentElement, focus) {
         var name = currentElement.name.replace(/-/, '');

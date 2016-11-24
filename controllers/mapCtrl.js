@@ -747,6 +747,14 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         $scope.markers = scopeService.markers;
     };
 
+    scopeService.addMarker = function(elem) {
+        displayMarkersHelper({
+            1: elem
+        }, $scope.map.bounds);
+        scopeService.map.bounds = $scope.map.bounds;
+        $scope.markers = scopeService.markers;
+    }
+
     $scope.updateMarkerOptions = function(markerId, markerKey, color, icon) {
         if(typeof markerId == 'undefined') return;
         if(markerId <= 0) return;
@@ -794,6 +802,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         }
         $scope.markerValues.locked = !options.draggable;
         updateMarkerOpts(currentOpts);
+        //$scope.markerChoices = scopeService.markerChoices;
     };
 
     /**

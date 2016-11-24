@@ -26,6 +26,7 @@ $app->get('context/getAll', 'ContextController@getAll');
 $app->get('context/getAttributes/{id}', 'ContextController@getAttributes');
 $app->get('context/getChoices', 'ContextController@getChoices');
 $app->get('context/get/type/{id}', 'ContextController@getType');
+$app->get('context/duplicate/{id}', 'ContextController@duplicate');
 $app->get('literature/getAll', 'LiteratureController@getAll');
 $app->get('image/getAll', 'ImageController@getAll');
 $app->get('image/get/{id}', 'ImageController@getImage');
