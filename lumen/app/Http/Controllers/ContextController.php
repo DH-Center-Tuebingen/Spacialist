@@ -106,6 +106,45 @@ class ContextController extends Controller {
         );
     }
 
+    public function getChoices() {
+        $rows = DB::table('context_types as c')
+        ->select('ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_id as root',
+            DB::raw("public.\"getLabelForId\"(C.thesaurus_id, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_id, 'de') AS val")
+        )
+        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_id')
+        ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
+        ->where('a.datatype', '=', 'string-sc')
+        ->orWhere('a.datatype', '=', 'string-mc')
+        ->orWhere('a.datatype', '=', 'epoch')
+        ->orderBy('val')
+        ->get();
+        foreach($rows as &$row) {
+            if(!isset($row->root)) continue;
+            $rootId = DB::table('th_concept')
+                ->select('id')
+                ->where('concept_url', '=', $row->root)
+                ->first();
+            if(!isset($rootId)) continue;
+            $rootId = $rootId->id;
+            $row->choices = DB::select("
+                WITH RECURSIVE
+                top AS (
+                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    FROM th_broaders br
+                    WHERE broader_id = $rootId
+                    UNION
+                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    FROM top t, th_broaders br
+                    WHERE t.narrower_id = br.broader_id
+                )
+                SELECT *
+                FROM top
+                ORDER BY narr
+            ");
+        }
+        return response()->json($rows);
+    }
+
     public function getAttributes($id) {
         $rows = DB::table('context_types as c')
         ->select('ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_id as root',
@@ -281,6 +320,25 @@ class ContextController extends Controller {
         }
         $this->updateOrInsert($request->except('name', 'root', 'cid', 'realId'), $fid, $isUpdate, $user);
         return response()->json(['fid' => $fid]);
+    }
+
+    public function setIcon(Request $request) {
+        $id = $request->get('id');
+        $upd = [];
+
+        if($request->has('icon')) $upd['icon'] = $request->get('icon');
+        if($request->has('color')) $upd['color'] = $request->get('color');
+
+        DB::table('finds')
+            ->where('id', $id)
+            ->update($upd);
+        $icon = DB::table('finds')
+                ->where('id', $id)
+                ->first();
+        return response()->json([
+            'icon' => $icon->icon,
+            'color' => $icon->color
+        ]);
     }
 
     public function setPossibility(Request $request) {

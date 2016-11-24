@@ -13,7 +13,7 @@ class AddTypeColumnToBibTex extends Migration
      */
     public function up()
     {
-        Schema::table('bib_tex', function (Blueprint $table) {
+        Schema::table('bib_text', function (Blueprint $table) {
             $table->text('type');
         });
     }
@@ -25,7 +25,7 @@ class AddTypeColumnToBibTex extends Migration
      */
     public function down()
     {
-        Schema::table('bib_tex', function (Blueprint $table) {
+        Schema::table('bib_text', function (Blueprint $table) {
             $table->dropColumn('type');
         });
     }
