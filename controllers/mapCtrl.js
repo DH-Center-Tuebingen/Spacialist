@@ -748,6 +748,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
     };
 
     scopeService.addMarker = function(elem) {
+        if(typeof elem.lat == 'undefined' || typeof elem.lng == 'undefined') return;
         displayMarkersHelper({
             1: elem
         }, $scope.map.bounds);

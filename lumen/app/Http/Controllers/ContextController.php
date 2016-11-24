@@ -331,10 +331,9 @@ class ContextController extends Controller {
 
     public function set(Request $request) {
         $user = \Auth::user();
-        return response()->json($user['name']);
+        if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $isUpdate = $request->has('realId');
         $name = $request->get('name');
-        $root = $request->get('root');
         $cid = $request->get('cid');
         if($isUpdate) {
             $realId = $request->get('realId');
@@ -344,13 +343,14 @@ class ContextController extends Controller {
             $fid = $realId;
             $currAttrs = DB::table('context_values')->where('find_id', $realId)->get();
         } else {
+            $ins = [
+                'name' => $name,
+                'context_id' => $cid,
+                'lasteditor' => $user['name']
+            ];
+            if($request->has('root')) $ins['root'] = $request->get('root');
             $fid = DB::table('finds')
-                ->insertGetId([
-                    'name' => $name,
-                    'context_id' => $cid,
-                    'root' => $root,
-                    'lasteditor' => $user['name']
-                ]);
+                ->insertGetId($ins);
         }
         $this->updateOrInsert($request->except('name', 'root', 'cid', 'realId'), $fid, $isUpdate, $user);
         return response()->json(['fid' => $fid]);
@@ -572,8 +572,8 @@ class ContextController extends Controller {
                         if($isOption) $vals['option_id'] = $oid;
                         DB::table($tbl)
                             ->insert($vals);
-                }
-            } else {
+                    }
+                } else {
                     $vals = array(
                         'find_id' => $fid,
                         'attribute_id' => $aid,
@@ -597,8 +597,8 @@ class ContextController extends Controller {
                     if($isOption) $vals['option_id'] = $oid;
                     DB::table($tbl)
                         ->insert($vals);
+                }
             }
         }
-            }
     }
 }
