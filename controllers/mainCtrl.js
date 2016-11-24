@@ -1,4 +1,5 @@
 spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'httpPostPromise', 'httpGetPromise', 'modalService', '$uibModal', '$auth', '$state', '$http', 'modalFactory', 'moduleHelper', '$timeout', function($rootScope, $scope, scopeService, httpPostFactory, httpGetFactory, httpPostPromise, httpGetPromise, modalService, $uibModal, $auth, $state, $http, modalFactory, moduleHelper, $timeout) {
+    $scope.markerChoices = scopeService.markerChoices = {};
     $scope.dimensionUnits = [
         'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
     ];
@@ -73,6 +74,23 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         });
     };
 
+    var getMarkerChoices = function() {
+        httpGetFactory('../spacialist_api/context/getChoices', function(callback) {
+            for(var i=0; i<callback.length; i++) {
+                var value = callback[i];
+                var index = value.aid + "_";
+                if(typeof value.oid != 'undefined') index += value.oid;
+                if (value.datatype == 'string-sc' || value.datatype == 'string-mc') {
+                    if(value.choices !== null) {
+                        scopeService.markerChoices[index] = value.choices;
+                    }
+                } else if (value.datatype == 'epoch') {
+                    scopeService.markerChoices[index] = value.choices;
+                }
+            }
+        });
+    };
+
     var getLiterature = function() {
         httpGetFactory('../spacialist_api/literature/getAll', function(callback) {
             scopeService.literature = $scope.literature = callback;
@@ -82,6 +100,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     var updateInformations = function() {
         getContexts();
         getArtifacts();
+        getMarkerChoices();
         getLiterature();
     };
 

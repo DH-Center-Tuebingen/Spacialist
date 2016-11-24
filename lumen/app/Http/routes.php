@@ -24,6 +24,7 @@ $app->get('context/get', 'ContextController@get');
 $app->get('context/getRecursive', 'ContextController@getRecursive');
 $app->get('context/getAll', 'ContextController@getAll');
 $app->get('context/getAttributes/{id}', 'ContextController@getAttributes');
+$app->get('context/getChoices', 'ContextController@getChoices');
 $app->get('context/get/type/{id}', 'ContextController@getType');
 $app->get('literature/getAll', 'LiteratureController@getAll');
 $app->get('image/getAll', 'ImageController@getAll');

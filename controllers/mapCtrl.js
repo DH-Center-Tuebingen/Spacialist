@@ -132,7 +132,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
     $scope.lists = {};
     $scope.input = {};
     $scope.editEntry = {};
-    $scope.markerChoices = {};
     $scope.availableTags = [{
         name: 'sommer'
     }, {
@@ -795,7 +794,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         }
         $scope.markerValues.locked = !options.draggable;
         updateMarkerOpts(currentOpts);
-        markerDefaultValues = angular.extend({}, $scope.markerValues);
     };
 
     /**
