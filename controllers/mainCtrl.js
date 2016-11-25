@@ -97,11 +97,19 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         });
     };
 
+    var getStoredQueries = function() {
+        httpGetFactory('../spacialist_api/analysis/queries/getAll', function(queries) {
+            console.log(queries);
+            $rootScope.storedQueries = queries;
+        });
+    };
+
     var updateInformations = function() {
         getContexts();
         getArtifacts();
         getMarkerChoices();
         getLiterature();
+        getStoredQueries();
     };
 
     $scope.updateInformations = function() {
@@ -124,7 +132,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         modalFactory.createModal(parent.name, msg, selection, function(name, type) {
             var elem = {
                 name: name,
-                c_id: type.cid,
+                context_id: type.cid,
                 root: parent.id,
                 reclevel: parent.reclevel + 1,
                 typeid: type.type,
@@ -133,13 +141,21 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                 data: [],
                 children: []
             };
+            var hasPos = typeof parent.lat != 'undefined' && typeof parent.lng != 'undefined';
             var formData = new FormData();
             formData.append('name', name);
             formData.append('cid', type.cid);
             if(typeof parent.id != 'undefined') formData.append('root', parent.id);
+            if(hasPos) {
+                formData.append('lat', parent.lat);
+                formData.append('lng', parent.lng);
+                elem.lat = parent.lat;
+                elem.lng = parent.lng;
+            }
             httpPostFactory('../spacialist_api/context/set', formData, function(newElem) {
                 elem.id = newElem.fid;
                 parent.children.push(elem);
+                if(hasPos) addMarker(elem);
                 $scope.setCurrentElement(elem, $scope.currentElement);
                 $itemScope.expand();
             });
@@ -207,13 +223,20 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         $scope.layerTwo.activeTab = tabId;
     };
 
-    $scope.createNewContext = function() {
+    scopeService.createNewContext = function(data) {
+        $scope.createNewContext(data);
+    };
+
+    $scope.createNewContext = function(data) {
+        defaults = {
+            name: 'Neuer Top-Kontext',
+            reclevel: -1,
+            children: scopeService.contextList
+        };
+        var parent = defaults;
+        angular.extend(parent, data);
         createModalHelper({
-            parent: {
-                name: 'Neues Element',
-                reclevel: -1,
-                children: scopeService.contextList
-            },
+            parent: parent,
             expand: function() {}
         }, 'context');
     };
@@ -271,46 +294,67 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             elem.fields = scopeService.artiRefs[elem.typename].slice();
         }
         var data = {};
-        for(var i=0; i<elem.data.length; i++) {
-            var value = elem.data[i];
-            //console.log(value.toSource());
-            var index = value.attribute_id + '_' + (value.o_id || '');
-            var posIndex = index + 'pos';
-            var val = value.str_val;
-            var dType = value.datatype;
-            data[posIndex] = value.possibility || 100;
-            if(dType == 'list') {
-                if(typeof data[index] == 'undefined') data[index] = [];
-                data[index].push({
-                    name: val
-                });
-            } else if(dType == 'string-sc') {
-                data[index] = value.val;
-            } else if(dType == 'string-mc') {
-                if(typeof data[index] == 'undefined') data[index] = [];
-                data[index].push(value.val);
-            } else if(dType == 'dimension') {
-                data[index] = JSON.parse(value.val);
-            } else if(dType == 'epoch') {
-                data[index] = JSON.parse(value.val);
-            } else {
-                data[index] = val;
-            }
-        }
+        data = parseData(elem.data);
         $scope.currentElementData = data;
         $scope.currentElementFields = elem.fields;
         $scope.currentElement = {
             id: elem.id,
             name: elem.name,
-            root: elem.root,
+            root: elem.root || -1,
             typeId: elem.typeid,
             cid: elem.context_id
         };
         setMarker($scope.currentElement, true);
     };
 
+    var parseData = function(data) {
+        var parsedData = {};
+        for(var i=0; i<data.length; i++) {
+            var value = data[i];
+            //console.log(value.toSource());
+            var index = value.attribute_id + '_' + (value.o_id || '');
+            var posIndex = index + 'pos';
+            var val = value.str_val;
+            var dType = value.datatype;
+            parsedData[posIndex] = value.possibility || 100;
+            if(dType == 'list') {
+                if(typeof parsedData[index] == 'undefined') parsedData[index] = [];
+                parsedData[index].push({
+                    name: val
+                });
+            } else if(dType == 'string-sc') {
+                parsedData[index] = value.val;
+            } else if(dType == 'string-mc') {
+                if(typeof parsedData[index] == 'undefined') parsedData[index] = [];
+                parsedData[index].push(value.val);
+            } else if(dType == 'dimension') {
+                if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
+            } else if(dType == 'epoch') {
+                if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
+            } else {
+                parsedData[index] = val;
+            }
+        }
+        return parsedData;
+    };
+
+    var setDataForId = function(id, data) {
+        setDataForIdHelper(id, data, scopeService.contextList);
+    };
+
+    var setDataForIdHelper = function(id, data, children) {
+        if(typeof children == 'undefined') return;
+        for(var i=0; i<children.length; i++) {
+            var child = children[i];
+            if(child.id == id) {
+                child.data = data;
+                break;
+            }
+            setDataForIdHelper(id, data, child.children);
+        }
+    };
+
     $scope.storeElement = function(elem, data) {
-        console.log("Would store elem " + elem.name + " with ID " + elem.id + " in the database.");
         var parsedData = [];
         angular.forEach(data, function(value, key) {
             if(key != 'name' && !key.endsWith('pos')) {
@@ -323,7 +367,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         elem.data = parsedData;
         var promise = storeElement(elem);
         promise.then(function(newRealId){
-            console.log(newRealId);
+            elem.data = newRealId.data;
+            setDataForId(elem.id, elem.data);
         });
     };
 
@@ -366,6 +411,149 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     var deleteElement = function(elem, onSuccess) {
         console.log("Removing element " + elem.name + " with ID " + elem.id);
         httpGetFactory('../spacialist_api/context/delete/' + elem.id, function(callback) { onSuccess(); });
+    };
+
+    /**
+     * Opens a modal window which allows the user to add/delete sources from a literature list for a particular attribute.
+     * One has to pass the field name `fieldname` and the attribute id `fieldid` as parameters.
+     */
+    $scope.openSourceModal = function(fieldname, fieldid, currentVal) {
+        $scope.modalFields = {
+            name: fieldname,
+            id: fieldid,
+            literature: $scope.literature.slice(),
+            addedSources: [],
+            value: currentVal || 100,
+            setPossibility: function(event) {
+                var max = event.currentTarget.scrollWidth;
+                var click = event.originalEvent.layerX;
+                var curr = $scope.modalFields.value;
+                var newVal = parseInt(click/max*100);
+                if(Math.abs(newVal-curr) < 10) {
+                    if(newVal > curr) newVal = parseInt((newVal+10)/10)*10;
+                    else newVal = parseInt(newVal/10)*10;
+                } else {
+                    newVal = parseInt((newVal+5)/10)*10;
+                }
+                event.currentTarget.children[0].style.width = newVal+"%";
+                $scope.modalFields.value = newVal;
+            }
+        };
+        var aid = fieldid;
+        var fid = $scope.currentElement.id;
+        httpGetFactory('../spacialist_api/sources/get/' + aid + '/' + fid, function(sources) {
+            angular.forEach(sources, function(src, key) {
+                $scope.modalFields.addedSources.push({
+                    id: src.id,
+                    fid: src.find_id,
+                    aid: src.attribute_id,
+                    src: src.literature,
+                    desc: src.description
+                });
+            });
+        });
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/source-modal.html',
+            windowClass: 'wide-modal',
+            controller: function($uibModalInstance) {
+                $scope.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                },
+                $scope.savePossibility = function() {
+                    var formData = new FormData();
+                    formData.append('fid', fid);
+                    formData.append('aid', fieldid);
+                    formData.append('possibility', $scope.modalFields.value);
+                    httpPostFactory('../spacialist_api/context/set/possibility', formData, function(callback) {
+                        $scope.currentElementData[fieldid+'_pos'] = $scope.modalFields.value;
+                    });
+                }
+            },
+            scope: $scope
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
+
+    /**
+     * Remove a source entry at the given index `index` from the given array `arr`.
+     */
+    scopeService.deleteSourceEntry = $scope.deleteSourceEntry = function(index, arr) {
+        var src = arr[index];
+        var title = '';
+        if(typeof src.src !== 'undefined' && typeof src.src.title !== 'undefined') title = src.src.title;
+        else if(typeof src.literature !== 'undefined' && typeof src.literature.title !== 'undefined') title = src.literature.title;
+        modalFactory.deleteModal(title, function() {
+            var fid = -1;
+            var aid = -1;
+            var lid = -1;
+            if(typeof src.fid !== 'undefined') fid = src.fid;
+            else if(typeof src.find_id !== 'undefined') fid = src.find_id;
+            else return;
+            if(typeof src.aid !== 'undefined') aid = src.aid;
+            else if(typeof src.attribute_id !== 'undefined') aid = src.attribute_id;
+            else return;
+            if(typeof src.src !== 'undefined' && src.src.lid !== 'undefined') lid = src.src.id;
+            else if(typeof src.literature_id !== 'undefined') lid = src.literature_id;
+            else return;
+            httpGetFactory('../spacialist_api/sources/delete/literature/'+aid+'/'+fid+'/'+lid, function(callback) {
+                arr.splice(index, 1);
+            });
+        }, '');
+        /*$scope.deleteModalFields = {
+            name: title
+        };
+        var modalInstanceDelConfirm = $uibModal.open({
+            templateUrl: 'layouts/delete-confirm.html',
+            //windowClass: 'wide-modal',
+            controller: function($uibModalInstance) {
+                $scope.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                },
+                $scope.deleteConfirmed = function() {
+                    $uibModalInstance.dismiss('ok');
+                    var fid = -1;
+                    var aid = -1;
+                    var lid = -1;
+                    if(typeof src.fid !== 'undefined') fid = src.fid;
+                    else if(typeof src.find_id !== 'undefined') fid = src.find_id;
+                    else return;
+                    if(typeof src.aid !== 'undefined') aid = src.aid;
+                    else if(typeof src.attribute_id !== 'undefined') aid = src.attribute_id;
+                    else return;
+                    if(typeof src.src !== 'undefined' && src.src.lid !== 'undefined') lid = src.src.id;
+                    else if(typeof src.literature_id !== 'undefined') lid = src.literature_id;
+                    else return;
+                    httpGetFactory('../spacialist_api/sources/delete/literature/'+aid+'/'+fid+'/'+lid, function(callback) {
+                        arr.splice(index, 1);
+                    });
+                }
+            },
+            scope: $scope
+        });
+        modalInstanceDelConfirm.result.then(function(selectedItem) {}, function() {});*/
+    };
+
+    /**
+     * Adds the current selected source entry `currentSource` with the given description `currentDesc` for the given attribute `aid` to the database and the source modal window array
+     */
+    $scope.addSource = function(currentSource, currentDesc, aid) {
+        var fid = $scope.currentElement.id;
+        var formData = new FormData();
+        formData.append('fid', fid);
+        formData.append('aid', aid);
+        formData.append('lid', currentSource.id);
+        formData.append('desc', currentDesc);
+        httpPostFactory('../spacialist_api/sources/add', formData, function(row) {
+            $scope.modalFields.addedSources.push({
+                id: row.sid,
+                fid: fid,
+                aid: aid,
+                src: currentSource,
+                desc: currentDesc
+            });
+        });
+        $scope.modalFields.currentSource = undefined;
+        $scope.modalFields.currentDesc = undefined;
     };
 
     $scope.existsLiterature = function(fid, aid) {
