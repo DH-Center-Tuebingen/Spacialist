@@ -472,6 +472,11 @@ p, div {
     content: ']'
 }*/
 
+/* contextMenu */
+body > .angular-bootstrap-contextmenu.dropdown {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
 /* font awesome styles */
 .fa-light {
     /*color: rgba(0, 0, 0, 0.6);*/
