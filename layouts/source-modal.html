@@ -14,7 +14,7 @@
         </div>
         <div class="col-md-3">
             <button type="button" class="btn btn-success"
-              ng-click="save()">
+              ng-click="savePossibility()">
               <i class="fa fa-fw fa-floppy-o"></i> {{ 'Save' | translate }}
           </button>
         </div>
@@ -46,25 +46,11 @@
                     {{ $select.selected.title | truncate:80:true }}
                 </ui-select-match>
                 <ui-select-choices repeat="lit in modalFields.literature | filter:$select.search">
-                    <div ng-switch on="lit.type">
-                        <div ng-switch-when="0">
-                            <div>
-                                {{ lit.title | truncate:80:true }} <small><i style="color:gray; align: right;">{{ lit.author | truncate:80:true }}</i></small>
-                            </div>
-                            <small>{{ lit.year }}</small><small ng-show="lit.journal"> - {{ lit.journal }}</small><small ng-show="lit.volume && lit.number"> ({{ lit.volume}}/{{ lit.number }})</small>
+                    <div>
+                        <div>
+                            {{ lit.title | truncate:80:true }} <small><i style="color:gray; align: right;">{{ lit.author | truncate:80:true }}</i></small>
                         </div>
-                        <div ng-switch-when="1">
-                            <div>
-                                {{ lit.title | truncate:80:true }} <small><i style="color:gray; align: right;">{{ lit.author | truncate:80:true }}</i></small>
-                            </div>
-                            <small>{{ lit.year }}</small><small ng-show="lit.publisher"> - {{ lit.publisher }}</small>
-                        </div>
-                        <div ng-switch-when="2">
-                            <div>
-                                {{ lit.title | truncate:80:true }} <small><i style="color:gray; align: right;">{{ lit.author | truncate:80:true }}</i></small>
-                            </div>
-                            <small>{{ lit.year }}</small><small ng-show="lit.booktitle"> - {{ lit.booktitle }}</small><small ng-show="lit.publisher"> - {{ lit.publisher }}</small>
-                        </div>
+                        <small>{{ lit.year }}</small>
                     </div>
                 </ui-select-choices>
             </ui-select>
