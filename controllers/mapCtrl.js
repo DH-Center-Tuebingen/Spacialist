@@ -35,23 +35,23 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
             },
             marker: {
                 icon: L.divIcon({
-                    className: 'fa fa-fw fa-circle',
+                    className: 'fa fa-fw fa-plus',
                     iconSize: [20, 20]
                 })
             }
         }
     }
     if (typeof $scope.map === 'undefined') $scope.map = {};
-    if (typeof scopeService.map.bounds === 'undefined') scopeService.map.bounds = {};
+    if (typeof scopeService.mapBounds === 'undefined') scopeService.mapBounds = {};
     if (typeof scopeService.filedesc === 'undefined') $scope.filedesc = undefined;
     else $scope.filedesc = scopeService.filedesc;
-    if (typeof $scope.map.bounds === 'undefined') $scope.map.bounds = scopeService.map.bounds;
+    if (typeof $scope.mapBounds === 'undefined') $scope.mapBounds = scopeService.mapBounds;
     if (typeof $scope.map.events === 'undefined') $scope.map.events = scopeService.map.events;
     if (typeof $scope.map.controls === 'undefined') $scope.map.controls = scopeService.map.controls;
     if(typeof scopeService.attribData != 'undefined')
     leafletData.getMap().then(function(map) {
         scopeService.markers = scopeService.markers;
-        $scope.mapObject = map;
+        scopeService.mapObject = $scope.mapObject = map;
     });
     angular.extend($scope, scopeService);
 
@@ -680,7 +680,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         for(var key in current) {
             if(!current.hasOwnProperty(key)) continue;
             var curr = current[key];
-            if (curr.lat === null || curr.lng === null) continue;
+            if (typeof curr.lat == 'undefined' || typeof curr.lng == 'undefined' || curr.lat === null || curr.lng === null) continue;
             var latlng = {
                 lat: Number(curr.lat),
                 lng: Number(curr.lng)
@@ -699,7 +699,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
                 bounds.southWest.lng = latlng.lng;
             }
             // set marker icon options
-            var icon = curr.icon || icons[0];
+            var icon = curr.icon || icons[0].icon;
             var color = curr.color || '#00FF00';
             var iconOpts = {
                 className: 'fa fa-fw fa-lg fa-' + icon,
@@ -725,14 +725,14 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
                 icon: icon
             };
             if(typeof current.children != 'undefined') {
-                isplayMarkersHelper(current.children, bounds);
+                displayMarkersHelper(current.children, bounds);
             }
         }
     };
 
     scopeService.displayMarkers = function(contextList) {
         scopeService.markers = {};
-        $scope.map.bounds = {
+        $scope.mapBounds = {
             southWest: {
                 lat: 90,
                 lng: 180
@@ -742,19 +742,22 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
                 lng: -180
             }
         };
-        displayMarkersHelper(contextList, $scope.map.bounds);
-        scopeService.map.bounds = $scope.map.bounds;
+        displayMarkersHelper(contextList, $scope.mapBounds);
+        scopeService.mapBounds = $scope.mapBounds;
         $scope.markers = scopeService.markers;
     };
 
     scopeService.addMarker = function(elem) {
         if(typeof elem.lat == 'undefined' || typeof elem.lng == 'undefined') return;
+        console.log("before");
+        console.log(scopeService.mapBounds);
+        console.log($scope.mapBounds);
         displayMarkersHelper({
             1: elem
-        }, $scope.map.bounds);
-        scopeService.map.bounds = $scope.map.bounds;
+        }, scopeService.mapBounds);
+        $scope.mapBounds = scopeService.mapBounds;
         $scope.markers = scopeService.markers;
-    }
+    };
 
     $scope.updateMarkerOptions = function(markerId, markerKey, color, icon) {
         if(typeof markerId == 'undefined') return;
@@ -766,11 +769,10 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         httpPostPromise.getData('../spacialist_api/context/set/icon', formData).then(
             function(icon) {
                 console.log(icon);
-                scopeService.markers[markerKey].icon = {
-                    type: "div",
+                angular.extend(scopeService.markers[markerKey].icon, {
                     className: 'fa fa-fw fa-lg fa-' + icon.icon,
-                    iconSize: 20
-                };
+                    color: icon.color
+                });
             }
         );
     };
@@ -856,18 +858,13 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
      * If the marker has been created, add the marker to the marker-array and store it in the database
      */
     $scope.$on('leafletDirectiveDraw.draw:created', function(event, args) {
-        $scope.markerPlaceMode = false;
         var layer = args.leafletEvent.layer;
-        var opts = {};
         var iconOpts = layer.options.icon.options;
         var latlng = layer._latlng;
+        var opts = {};
         opts.lat = latlng.lat;
         opts.lng = latlng.lng;
-        $scope.markerValues.name = "Untitled";
-        opts.title = addMarker(latlng, iconOpts, "Untitled");
-        scopeService.markers[opts.title]['myOptions'] = opts;
-        storeLib(opts);
-        scopeService.markers[opts.title].focus = true;
+        scopeService.createNewContext(opts);
     });
     /*$scope.$on('leafletDirectiveDraw.draw:edited', function(event, args) {
         console.log("edited");
@@ -1515,135 +1512,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    }
-
-    /**
-     * Opens a modal window which allows the user to add/delete sources from a literature list for a particular attribute.
-     * One has to pass the field name `fieldname` and the attribute id `fieldid` as parameters.
-     */
-    $scope.openSourceModal = function(fieldname, fieldid, currentVal) {
-        $scope.modalFields = {
-            name: fieldname,
-            id: fieldid,
-            literature: $scope.literature.slice(),
-            addedSources: [],
-            value: currentVal || 100,
-            setPossibility: function(event) {
-                var max = event.currentTarget.scrollWidth;
-                var click = event.originalEvent.layerX;
-                var curr = $scope.modalFields.value
-                var newVal = parseInt(click/max*100);
-                if(Math.abs(newVal-curr) < 10) {
-                    if(newVal > curr) newVal = parseInt((newVal+10)/10)*10
-                    else newVal = parseInt(newVal/10)*10
-                } else {
-                    newVal = parseInt((newVal+5)/10)*10;
-                }
-                event.currentTarget.children[0].style.width = newVal+"%"
-                $scope.modalFields.value = newVal;
-            }
-        }
-        var aid = fieldid;
-        var fid = $scope.currentElement.id;
-        httpGetFactory('../spacialist_api/sources/get/' + aid + '/' + fid, function(sources) {
-            angular.forEach(sources, function(src, key) {
-                $scope.modalFields.addedSources.push({
-                    id: src.id,
-                    fid: src.find_id,
-                    aid: src.attribute_id,
-                    src: src.literature,
-                    desc: src.description
-                });
-            });
-        });
-        var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/source-modal.html',
-            windowClass: 'wide-modal',
-            controller: function($uibModalInstance) {
-                $scope.cancel = function(result) {
-                    $uibModalInstance.dismiss('cancel');
-                },
-                $scope.save = function() {
-                    var formData = new FormData();
-                    formData.append('fid', fid);
-                    formData.append('aid', fieldid);
-                    formData.append('possibility', $scope.modalFields.value);
-                    $scope.attributeOutputs[fieldid+'_pos'] = $scope.modalFields.value;
-                    //console.log($scope.attributeOutputs.toSource());
-                    httpPostFactory('../spacialist_api/context/set/possibility', formData, function(callback) {
-                        console.log(callback);
-                        $uibModalInstance.dismiss('cancel');
-                    });
-                }
-            },
-            scope: $scope
-        });
-        modalInstance.result.then(function(selectedItem) {}, function() {});
-    }
-
-    /**
-     * Remove a source entry at the given index `index` from the given array `arr`.
-     */
-    scopeService.deleteSourceEntry = $scope.deleteSourceEntry = function(index, arr) {
-        var src = arr[index];
-        var title = '';
-        if(typeof src.src !== 'undefined' && typeof src.src.title !== 'undefined') title = src.src.title;
-        else if(typeof src.literature !== 'undefined' && typeof src.literature.title !== 'undefined') title = src.literature.title;
-        $scope.deleteModalFields = {
-            name: title
-        }
-        var modalInstanceDelConfirm = $uibModal.open({
-            templateUrl: 'layouts/delete-confirm.html',
-            windowClass: 'wide-modal',
-            controller: function($uibModalInstance) {
-                $scope.cancel = function(result) {
-                    $uibModalInstance.dismiss('cancel');
-                },
-                $scope.deleteConfirmed = function() {
-                    $uibModalInstance.dismiss('ok');
-                    var fid = -1;
-                    var aid = -1;
-                    var lid = -1;
-                    if(typeof src.fid !== 'undefined') fid = src.fid;
-                    else if(typeof src.find_id !== 'undefined') fid = src.find_id;
-                    else return;
-                    if(typeof src.aid !== 'undefined') aid = src.aid;
-                    else if(typeof src.attribute_id !== 'undefined') aid = src.attribute_id;
-                    else return;
-                    if(typeof src.src !== 'undefined' && src.src.lid !== 'undefined') lid = src.src.id;
-                    else if(typeof src.literature_id !== 'undefined') lid = src.literature_id;
-                    else return;
-                    httpGetFactory('../spacialist_api/sources/delete/literature/'+aid+'/'+fid+'/'+lid, function(callback) {
-                        arr.splice(index, 1);
-                    });
-                }
-            },
-            scope: $scope
-        });
-        modalInstanceDelConfirm.result.then(function(selectedItem) {}, function() {});
-    }
-
-    /**
-     * Adds the current selected source entry `currentSource` with the given description `currentDesc` for the given attribute `aid` to the database and the source modal window array
-     */
-    $scope.addSource = function(currentSource, currentDesc, aid) {
-        var fid = $scope.activeMarker;
-        var formData = new FormData();
-        formData.append('fid', fid);
-        formData.append('aid', aid);
-        formData.append('lid', currentSource.id);
-        formData.append('desc', currentDesc);
-        httpPostFactory('../spacialist_api/sources/add', formData, function(row) {
-            $scope.sourceModalFields.addedSources.push({
-                id: row.sid,
-                fid: fid,
-                aid: aid,
-                src: currentSource,
-                desc: currentDesc
-            });
-        });
-        $scope.sourceModalFields.currentSource = undefined;
-        $scope.sourceModalFields.currentDesc = undefined;
     }
 
     $scope.storeLib = function() {
