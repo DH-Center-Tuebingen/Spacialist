@@ -1,7 +1,6 @@
 <div ng-controller="mainCtrl">
     <div class="col-md-2" style="max-height: 500px;">
         <h3>Elemente</h3>
-        <input type="text" placeholder="{{'search'|translate}}" />
         <my-tree on-init="getContextList()" on-click-callback="setCurrentElement(target, elem)" item-list="contextList" element="currentElement" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
         <spinner ng-if="getContextListStarted"></spinner>
     </div>
@@ -38,7 +37,7 @@
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'map'}" ng-if="moduleExists('mapCtrl')">
                 <a href="" ng-click="setActiveTab('map')"><span class="fa fa-fw fa-map-marker"></span><span class="tab-desc"> Karte</span></a>
             </li>
-            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'properties'}">
+            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'properties'}" ng-if="currentElement.furtherProperties">
                 <a href="" ng-click="setActiveTab('properties')"><span class="fa fa-fw fa-sliders"></span><span class="tab-desc"> Weitere Eigenschaften</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'harris'}" ng-if="moduleExists('harrisCtrl')">
@@ -47,13 +46,10 @@
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'images'}" ng-if="moduleExists('imageCtrl')">
                 <a href="" ng-click="setActiveTab('images')"><span class="fa fa-fw fa-image"></span><span class="tab-desc"> Bilder</span></a>
             </li>
-            <li role="presentation">
-                <a href=""><span class="fa fa-fw fa-random"></span><span class="tab-desc"> Noch irgendwas</span></a>
-            </li>
         </ul>
         <div ng-if="layerTwo.activeTab == 'map'">
             <div id="map-container" ng-if="sideNav.mapTab && map">
-                <leaflet bounds="map.bounds" layers="map.layers" lf-draw="map.drawOptions" controls="map.controls" markers="markers" event-broadcast="map.events" height="768px" width="100%">
+                <leaflet bounds="mapBounds" layers="map.layers" lf-draw="map.drawOptions" controls="map.controls" markers="markers" event-broadcast="map.events" height="768px" width="100%">
                     <layercontrol order="normal" icons="map.layercontrol.icons" auto-hide-opacity="true" show-groups="true" title="" base-title="Base Layers" overlays-title="Overlays"></layercontrol>
                 </leaflet>
             </div>
