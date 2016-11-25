@@ -136,7 +136,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             var formData = new FormData();
             formData.append('name', name);
             formData.append('cid', type.cid);
-            formData.append('root', parent.id);
+            if(typeof parent.id != 'undefined') formData.append('root', parent.id);
             httpPostFactory('../spacialist_api/context/set', formData, function(newElem) {
                 elem.id = newElem.fid;
                 parent.children.push(elem);
@@ -207,11 +207,22 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         $scope.layerTwo.activeTab = tabId;
     };
 
+    $scope.createNewContext = function() {
+        createModalHelper({
+            parent: {
+                name: 'Neues Element',
+                reclevel: -1,
+                children: scopeService.contextList
+            },
+            expand: function() {}
+        }, 'context');
+    };
+
     $scope.getContextList = function() {
         $scope.getContextListStarted = true;
         $scope.testingElement = {};
         httpGetFactory('../spacialist_api/context/getRecursive', function(contextList) {
-            $scope.contextList = contextList;
+            $scope.contextList = scopeService.contextList = contextList;
             $scope.getContextListStarted = false;
             displayMarkers($scope.contextList);
         });
@@ -225,12 +236,11 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     var addMarker = function(elem) {
         if(!moduleHelper.controllerExists('mapCtrl')) return;
         scopeService.addMarker(elem);
-    }
+    };
 
     var setMarker = function(currentElement, focus) {
         var name = currentElement.name.replace(/-/, '');
-        console.log(scopeService.markers);
-        scopeService.markers[name].focus = focus;
+        if(typeof scopeService.markers[name] != 'undefined') scopeService.markers[name].focus = focus;
     };
 
     $rootScope.$on('unsetCurrentElement', function(event, args) {

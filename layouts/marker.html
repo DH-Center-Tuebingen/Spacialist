@@ -1,7 +1,7 @@
 <h4>{{ markerKey }}</h4>
 <hr />
 <div ng-init="collapsed=false">
-    <h5 ng-click="collapsed=!collapsed" style="cursor: pointer;">Optionen <small><i class="fa fa-fw" ng-class="collapsed ? 'fa-caret-right' : 'fa-caret-down'"></i></small></h5>
+    <h5 ng-click="collapsed=!collapsed" class="clickable">Optionen <small><i class="fa fa-fw" ng-class="collapsed ? 'fa-caret-right' : 'fa-caret-down'"></i></small></h5>
     <div ng-if="!collapsed">
         <form class="form-horizontal" role="form">
             <div class="form-group">
