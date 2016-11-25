@@ -34,7 +34,7 @@
                 </div>
                 <div class="navbar-collapse" id="navbar-collapse" uib-collapse="isCollapsed">
                     <ul class="nav navbar-nav">
-                        <li>
+                        <!--<li>
                             <form class="navbar-form navbar-left">
                                 <div class="form-group">
                                     <div class="input-group">
@@ -47,13 +47,8 @@
                                     </div>
                                 </div>
                             </form>
-                        </li>
-                        <li ng-class="{ active: isActive('/map') }">
-                            <a href="#/map">
-                                <span class="fa fa-globe link-icon"></span>{{ 'map' | translate }}
-                            </a>
-                        </li>
-                        <li class="dropdown" uib-dropdown>
+                        </li>-->
+                        <!--<li class="dropdown" uib-dropdown>
                             <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                                 {{ 'import_export' | translate }} <span class="caret"></span>
                             </a>
@@ -61,6 +56,15 @@
                                 <li ><a class="nav-link" href="#/file/import"><i class="fa fa-cloud-upload"></i> {{ 'import' | translate }}</a>
                                 </li>
                                 <li ><a class="nav-link" href="#/file/export"><i class="fa fa-cloud-download"></i> {{ 'export' | translate }}</a>
+                                </li>
+                            </ul>
+                        </li>-->
+                        <li class="dropdown" uib-dropdown>
+                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Datenbank-Abfragen <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" uib-dropdown-menu>
+                                <li ng-repeat="query in storedQueries">
+                                    <a href="db/?mode=query&navbar=on&id={{query.id}}" target="_blank">{{query.title}}</a>
                                 </li>
                             </ul>
                         </li>
@@ -96,7 +100,7 @@
                                         Administrator
                                     </a>
                                 </li>
-                                <li>
+                                <!--<li>
                                     <a href="">
                                         HiWi
                                     </a>
@@ -105,7 +109,7 @@
                                     <a href="">
                                         Fotobearbeiter
                                     </a>
-                                </li>
+                                </li>-->
                             </ul>
                         </li>
                     </ul>
