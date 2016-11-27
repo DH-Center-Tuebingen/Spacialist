@@ -42,6 +42,8 @@ class SourceController extends Controller {
     }
 
     public function add(Request $request) {
+        $user = \Auth::user();
+        if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $aid = $request->get('aid');
         $fid = $request->get('fid');
         $lid = $request->get('lid');
@@ -52,7 +54,8 @@ class SourceController extends Controller {
                     'find_id' => $fid,
                     'attribute_id' => $aid,
                     'literature_id' => $lid,
-                    'description' => $desc
+                    'description' => $desc,
+                    'lasteditor' => $user['name']
                 ]
             );
         return response()->json(['sid' => $id]);

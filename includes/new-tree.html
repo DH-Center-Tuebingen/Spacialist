@@ -2,13 +2,13 @@
     <ul ui-tree-nodes ng-model="itemList" style="margin-bottom: 8px;">
         <li class="clickable" ng-click="createNewContext()">
             <i class="fa fa-fw"></i><i class="fa fa-fw fa-plus fa-light fa-small"></i>
-            <span class="contextPrefix">Neues Element</span>
+            <span class="contextPrefix">Neuen Top-Kontext anlegen</span>
         </li>
         <li ng-repeat="parent in itemList" ui-tree-node data-collapsed="true" ng-include="'includes/new-tree-child.html'" context-menu="setContextMenu">
         </li>
         <li class="clickable" ng-click="createNewContext()">
             <i class="fa fa-fw"></i><i class="fa fa-fw fa-plus fa-light fa-small"></i>
-            <span class="contextPrefix">Neues Element</span>
+            <span class="contextPrefix">Neuen Top-Kontext anlegen</span>
         </li>
     </ul>
 </div>

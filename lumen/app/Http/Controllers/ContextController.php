@@ -30,14 +30,28 @@ class ContextController extends Controller {
                     ->first();
             } else if($attr->datatype == 'dimension') {
                 $elems = explode(';', $attr->str_val, 4);
-                $attr->val = json_encode(['B' => intval($elems[0]), 'H' => intval($elems[1]), 'T' => intval($elems[2]), 'unit' => intval($elems[3])]);
+                if(count($elems) != 4) continue;
+                $attr->val = json_encode(['B' => floatval($elems[0]), 'H' => floatval($elems[1]), 'T' => floatval($elems[2]), 'unit' => $elems[3]]);
             } else if($attr->datatype == 'epoch') {
                 $elems = explode(';', $attr->str_val, 3);
-                $start = intval($elems[0]);
-                $end = intval($elems[1]);
+                if(count($elems) != 3) continue;
+                if($elems[0] != '') {
+                    $start = intval($elems[0]);
+                    $startLabel = $start < 0 ? 'v. Chr.' : 'n. Chr.';
+                    $start = abs($start);
+                } else {
+                    $start = '';
+                    $startLabel = '';
+                }
+                if($elems[1] != '') {
+                    $end = intval($elems[1]);
+                    $endLabel = $end < 0 ? 'v. Chr.' : 'n. Chr.';
+                    $end = abs($end);
+                } else {
+                    $end = '';
+                    $endLabel = '';
+                }
                 $thUri = $elems[2];
-                $startLabel = $start < 0 ? 'v. Chr.' : 'n. Chr.';
-                $endLabel = $end < 0 ? 'v. Chr.' : 'n. Chr.';
                 $attr->val = json_encode([
                     'startLabel' => $startLabel,
                     'start' => $start,
@@ -296,6 +310,7 @@ class ContextController extends Controller {
     public function add(Request $request) {
         //$title = $request->get('title');
         $user = \Auth::user();
+        if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $lat = $request->get('lat');
         $lng = $request->get('lng');
         $id = $request->get('id');
@@ -337,9 +352,15 @@ class ContextController extends Controller {
         $cid = $request->get('cid');
         if($isUpdate) {
             $realId = $request->get('realId');
+            $upd = [
+                'name' => $name,
+                'lasteditor' => $user['name']
+            ];
+            if($request->has('lat')) $upd['lat'] = $request->get('lat');
+            if($request->has('lng')) $upd['lng'] = $request->get('lng');
             DB::table('finds')
                 ->where('id', $realId)
-                ->update(['name' => $name, 'lasteditor' => $user['name']]);
+                ->update($upd);
             $fid = $realId;
             $currAttrs = DB::table('context_values')->where('find_id', $realId)->get();
         } else {
@@ -349,11 +370,13 @@ class ContextController extends Controller {
                 'lasteditor' => $user['name']
             ];
             if($request->has('root')) $ins['root'] = $request->get('root');
+            if($request->has('lat')) $ins['lat'] = $request->get('lat');
+            if($request->has('lng')) $ins['lng'] = $request->get('lng');
             $fid = DB::table('finds')
                 ->insertGetId($ins);
         }
-        $this->updateOrInsert($request->except('name', 'root', 'cid', 'realId'), $fid, $isUpdate, $user);
-        return response()->json(['fid' => $fid]);
+        $this->updateOrInsert($request->except('name', 'lat', 'lng', 'root', 'cid', 'realId'), $fid, $isUpdate, $user);
+        return response()->json(['fid' => $fid, 'data' => $this->getData($fid)]);
     }
 
     public function setIcon(Request $request) {
@@ -376,6 +399,8 @@ class ContextController extends Controller {
     }
 
     public function setPossibility(Request $request) {
+        $user = \Auth::user();
+        if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $fid = $request->get('fid');
         $aid = $request->get('aid');
         $possibility = $request->get('possibility');
@@ -392,12 +417,13 @@ class ContextController extends Controller {
                 ->insert([
                     'find_id' => $fid,
                     'attribute_id' => $aid,
-                    'possibility' => $possibility
+                    'possibility' => $possibility,
+                    'lasteditor' => $user['name']
                 ]);
         } else { //update
             DB::table('context_values')
                 ->where($where)
-                ->update(['possibility' => $possibility]);
+                ->update(['possibility' => $possibility, 'lasteditor' => $user['name']]);
         }
         return response()->json(DB::table('context_values')
             ->where($where)->get());
@@ -514,61 +540,35 @@ class ContextController extends Controller {
                         ->insert($vals);
                 }
             } else {
-                /*$vals = array(
-                    ['find_id', '=', $fid],
-                    ['attribute_id', '=', $aid]
-                );
-                if($isOption) $vals[] = ['option_id', '=', $oid];
-                $valId = DB::table($tbl)
-                    ->where($vals)
-                    ->value('id');
-                if($valId > 0) {
-                    DB::table($tbl)
-                        ->where('id', '=', $valId)
-                        ->update(['str_val' => $value]);
-                }*/
-            if($isUpdate) {
-                $alreadySet = false;
-                $attr;
-                foreach($currAttrs as $currKey => $currVal) {
-                    if($aid == $currVal->attribute_id) {
-                        $alreadySet = true;
-                        $attr = $currVal;
-                        unset($currAttrs[$currKey]);
-                        break;
+                if($isUpdate) {
+                    $alreadySet = false;
+                    $attr;
+                    foreach($currAttrs as $currKey => $currVal) {
+                        if($aid == $currVal->attribute_id) {
+                            $alreadySet = true;
+                            $attr = $currVal;
+                            unset($currAttrs[$currKey]);
+                            break;
+                        }
                     }
-                }
-                if($alreadySet) {
-                    $data = array('str_val' => $value, 'lasteditor' => $user['name']);
-                    DB::table('context_values')
-                            ->where([
-                                ['find_id', '=', $attr->find_id],
-                                ['attribute_id', '=', $attr->attribute_id],
-                                ['id', '=', $attr->id]
-                            ])
-                        ->update($data);
-                } else {
+                    if($alreadySet) {
+                        $data = array('lasteditor' => $user['name']);
+                        $data['str_val'] = $this->parseValue($jsonArr, $value, $datatype);
+                        DB::table('context_values')
+                                ->where([
+                                    ['find_id', '=', $attr->find_id],
+                                    ['attribute_id', '=', $attr->attribute_id],
+                                    ['id', '=', $attr->id]
+                                ])
+                            ->update($data);
+                    } else {
                         $vals = array(
                             'find_id' => $fid,
                             'attribute_id' => $aid,
                             'str_val' => $value,
                             'lasteditor' => $user['name']
                         );
-                        if(is_object($jsonArr)) {
-                            if($datatype === 'epoch') {
-                                $jsonArr->start = ($jsonArr->startLabel === 'n. Chr.') ? $jsonArr->start : -$jsonArr->start;
-                                $jsonArr->end = ($jsonArr->endLabel === 'n. Chr.') ? $jsonArr->end : -$jsonArr->end;
-                                $jsonArr->epochUrl = DB::table('th_concept')
-                                    ->where('id', '=', $jsonArr->epoch->narrower_id)
-                                    ->value('concept_url');
-                                $tmpVal = $jsonArr->start.";".$jsonArr->end.";".$jsonArr->epochUrl;
-                            } else if($datatype === 'dimension') {
-                                $tmpVal = $jsonArr->B.";".$jsonArr->H.";".$jsonArr->T.";".$jsonArr->unit;
-                            }
-                            $vals['str_val'] = $tmpVal;
-                        } else {
-                            $vals['str_val'] = $value;
-                        }
+                        $vals['str_val'] = $this->parseValue($jsonArr, $value, $datatype);
                         if($isOption) $vals['option_id'] = $oid;
                         DB::table($tbl)
                             ->insert($vals);
@@ -579,26 +579,62 @@ class ContextController extends Controller {
                         'attribute_id' => $aid,
                         'lasteditor' => $user['name']
                     );
-                    if(is_object($jsonArr)) {
-                        if($datatype === 'epoch') {
-                            $jsonArr->start = ($jsonArr->startLabel === 'n. Chr.') ? $jsonArr->start : -$jsonArr->start;
-                            $jsonArr->end = ($jsonArr->endLabel === 'n. Chr.') ? $jsonArr->end : -$jsonArr->end;
-                            $jsonArr->epochUrl = DB::table('th_concept')
-                                ->where('id', '=', $jsonArr->epoch->narrower_id)
-                                ->value('concept_url');
-                            $tmpVal = $jsonArr->start.";".$jsonArr->end.";".$jsonArr->epochUrl;
-                        } else if($datatype === 'dimension') {
-                            $tmpVal = $jsonArr->B.";".$jsonArr->H.";".$jsonArr->T.";".$jsonArr->unit;
-                        }
-                        $vals['str_val'] = $tmpVal;
-                    } else {
-                        $vals['str_val'] = $value;
-                    }
+                    $vals['str_val'] = $this->parseValue($jsonArr, $value, $datatype);
                     if($isOption) $vals['option_id'] = $oid;
                     DB::table($tbl)
                         ->insert($vals);
                 }
             }
         }
+    }
+    
+    private function parseValue($jsonArr, $value, $datatype) {
+        if(is_object($jsonArr)) {
+            if($datatype === 'epoch') {
+                if(property_exists($jsonArr, 'start')) {
+                    $jsonArr->start = ($jsonArr->startLabel === 'n. Chr.') ? $jsonArr->start : -$jsonArr->start;
+                } else {
+                    $jsonArr->start = '';
+                }
+                if(property_exists($jsonArr, 'end')) {
+                    $jsonArr->end = ($jsonArr->endLabel === 'n. Chr.') ? $jsonArr->end : -$jsonArr->end;
+                } else {
+                    $jsonArr->end = '';
+                }
+                if(property_exists($jsonArr, 'epoch')) {
+                    $jsonArr->epochUrl = DB::table('th_concept')
+                        ->where('id', '=', $jsonArr->epoch->narrower_id)
+                        ->value('concept_url');
+                } else {
+                    $jsonArr->epochUrl = '';
+                }
+                $tmpVal = $jsonArr->start.";".$jsonArr->end.";".$jsonArr->epochUrl;
+            } else if($datatype === 'dimension') {
+                if(property_exists($jsonArr, 'B')) {
+                    $b = $jsonArr->B;
+                } else {
+                    $b = '';
+                }
+                if(property_exists($jsonArr, 'H')) {
+                    $h = $jsonArr->H;
+                } else {
+                    $h = '';
+                }
+                if(property_exists($jsonArr, 'T')) {
+                    $t = $jsonArr->T;
+                } else {
+                    $t = '';
+                }
+                if(property_exists($jsonArr, 'unit')) {
+                    $unit = $jsonArr->unit;
+                } else {
+                    $unit = '';
+                }
+                $tmpVal = $b.";".$h.";".$t.";".$unit;
+            }
+        } else {
+            $tmpVal = $value;
+        }
+        return $tmpVal;
     }
 }

@@ -12,7 +12,7 @@
             <p class="input-group" ng-switch-when="date">
                 <input type="text" class="form-control" id="a{{ attr.aid }}_{{ attr.oid }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(attributeOutputs[attr.aid+'_'+attr.oid])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]"/>
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-default" ng-click="open()"><i class="fa fa-calendar"></i></button>
+                    <button type="button" class="btn btn-default" ng-init="date.opened=false" ng-click="date.opened=!date.opened"><i class="fa fa-calendar"></i></button>
                 </span>
             </p>
             <div ng-switch-when="string-mc">
