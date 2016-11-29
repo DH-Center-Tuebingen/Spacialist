@@ -259,7 +259,7 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
         var foundId = deleteElement(curr, id);
         console.log(foundId);
         if(foundId >= 0) {
-            httpGetFactory('../spacialist_api/context/delete/'+foundId, function(callback) {
+            httpGetFactory('../spacialist_api/intern/context/delete/'+foundId, function(callback) {
             });
         }
         $scope.currentContext = curr;

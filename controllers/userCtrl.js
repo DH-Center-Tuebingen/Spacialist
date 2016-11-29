@@ -5,7 +5,7 @@ spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory
             password: $scope.user.pw
         };
         $auth.login(credentials).then(function() {
-            return $http.post('../spacialist_api/user/get');
+            return $http.post('../spacialist_api/intern/user/get');
         }, function(error) {
             console.log("error occured! " + error.data.error);
         }).then(function(response) {
