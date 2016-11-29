@@ -587,7 +587,7 @@ class ContextController extends Controller {
             }
         }
     }
-    
+
     private function parseValue($jsonArr, $value, $datatype) {
         if(is_object($jsonArr)) {
             if($datatype === 'epoch') {
@@ -601,7 +601,7 @@ class ContextController extends Controller {
                 } else {
                     $jsonArr->end = '';
                 }
-                if(property_exists($jsonArr, 'epoch')) {
+                if(property_exists($jsonArr, 'epoch') && $jsonArr->epoch != null) {
                     $jsonArr->epochUrl = DB::table('th_concept')
                         ->where('id', '=', $jsonArr->epoch->narrower_id)
                         ->value('concept_url');
