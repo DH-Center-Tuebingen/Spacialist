@@ -5,7 +5,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     ];
 
     var getContexts = function() {
-        httpGetFactory('../spacialist_api/context/get', function(callback) {
+        httpGetFactory('../spacialist_api/intern/context/get', function(callback) {
             var ctxts = [];
             var ctxtRefs = {};
             angular.forEach(callback, function(value, key) {
@@ -45,7 +45,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     };
 
     var getArtifacts = function() {
-        httpGetFactory('../spacialist_api/context/artifacts/get', function(callback) {
+        httpGetFactory('../spacialist_api/intern/context/artifacts/get', function(callback) {
             var artifacts = [];
             var artiRefs = [];
             angular.forEach(callback, function(value, key) {
@@ -75,7 +75,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     };
 
     var getMarkerChoices = function() {
-        httpGetFactory('../spacialist_api/context/getChoices', function(callback) {
+        httpGetFactory('../spacialist_api/intern/context/getChoices', function(callback) {
             for(var i=0; i<callback.length; i++) {
                 var value = callback[i];
                 var index = value.aid + "_";
@@ -92,13 +92,13 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     };
 
     var getLiterature = function() {
-        httpGetFactory('../spacialist_api/literature/getAll', function(callback) {
+        httpGetFactory('../spacialist_api/intern/literature/getAll', function(callback) {
             scopeService.literature = $scope.literature = callback;
         });
     };
 
     var getStoredQueries = function() {
-        httpGetFactory('../spacialist_api/analysis/queries/getAll', function(queries) {
+        httpGetFactory('../spacialist_api/intern/analysis/queries/getAll', function(queries) {
             console.log(queries);
             $rootScope.storedQueries = queries;
         });
@@ -118,7 +118,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
 
     updateInformations();
 
-    var createModalHelper = function($itemScope, elemType) {
+    var createModalHelper = function($itemScope, elemType, copyPosition) {
         var parent = $itemScope.parent;
         var selection = [];
         var msg = '';
@@ -141,18 +141,18 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                 data: [],
                 children: []
             };
-            var hasPos = typeof parent.lat != 'undefined' && typeof parent.lng != 'undefined';
+            var hasPos = typeof parent.lat != 'undefined' && typeof parent.lng != 'undefined' && parent.lat !== null && parent.lng !== null;
             var formData = new FormData();
             formData.append('name', name);
             formData.append('cid', type.cid);
             if(typeof parent.id != 'undefined') formData.append('root', parent.id);
-            if(hasPos) {
+            if(hasPos && copyPosition) {
                 formData.append('lat', parent.lat);
                 formData.append('lng', parent.lng);
                 elem.lat = parent.lat;
                 elem.lng = parent.lng;
             }
-            httpPostFactory('../spacialist_api/context/set', formData, function(newElem) {
+            httpPostFactory('../spacialist_api/intern/context/set', formData, function(newElem) {
                 elem.id = newElem.fid;
                 parent.children.push(elem);
                 if(hasPos) addMarker(elem);
@@ -173,16 +173,20 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         ],
         null,
         ['<span class="fa fa-fw fa-plus-circle fa-light fa-green"></span> Neuer Fund', function($itemScope, $event, modelValue, text, $li) {
-            createModalHelper($itemScope, 'find');
+            createModalHelper($itemScope, 'find', false);
+        }, function($itemScope) {
+            return $itemScope.parent.typeid === 0;
         }],
         ['<span class="fa fa-fw fa-plus-circle fa-light fa-green"></span> Neuer Kontext', function($itemScope, $event, modelValue, text, $li) {
-            createModalHelper($itemScope, 'context');
+            createModalHelper($itemScope, 'context', false);
+        }, function($itemScope) {
+            return $itemScope.parent.typeid === 0;
         }],
         null,
-        ['<span class="fa fa-fw fa-clone fa-light fa-green"></span> Kontext duplizieren', function($itemScope, $event, modelValue, text, $li) {
+        ['<span class="fa fa-fw fa-clone fa-light fa-green"></span> Element duplizieren', function($itemScope, $event, modelValue, text, $li) {
             var parent = $itemScope.parent;
             var id = parent.id;
-            httpGetFactory('../spacialist_api/context/duplicate/' + id, function(newElem) {
+            httpGetFactory('../spacialist_api/intern/context/duplicate/' + id, function(newElem) {
                 var copy = newElem.obj;
                 var elem = {
                     id: copy.id,
@@ -238,13 +242,13 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         createModalHelper({
             parent: parent,
             expand: function() {}
-        }, 'context');
+        }, 'context', true);
     };
 
     $scope.getContextList = function() {
         $scope.getContextListStarted = true;
         $scope.testingElement = {};
-        httpGetFactory('../spacialist_api/context/getRecursive', function(contextList) {
+        httpGetFactory('../spacialist_api/intern/context/getRecursive', function(contextList) {
             $scope.contextList = scopeService.contextList = contextList;
             $scope.getContextListStarted = false;
             displayMarkers($scope.contextList);
@@ -271,6 +275,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     });
 
     $scope.unsetCurrentElement = function() {
+        if(typeof $scope.currentElement == 'undefined') return;
         setMarker($scope.currentElement, false);
         $scope.currentElementData = undefined;
         $scope.currentElementFields = undefined;
@@ -282,8 +287,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     });
 
     $scope.setCurrentElement = function(target, elem) {
+        $scope.unsetCurrentElement();
         if(typeof elem != 'undefined' && elem.id == target.id) {
-            $scope.unsetCurrentElement();
             return;
         }
         elem = target;
@@ -396,7 +401,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             }
             formData.append(d.key, currValue);
         }
-        var promise = httpPostPromise.getData('../spacialist_api/context/set', formData);
+        var promise = httpPostPromise.getData('../spacialist_api/intern/context/set', formData);
         return promise;
     };
 
@@ -410,7 +415,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
 
     var deleteElement = function(elem, onSuccess) {
         console.log("Removing element " + elem.name + " with ID " + elem.id);
-        httpGetFactory('../spacialist_api/context/delete/' + elem.id, function(callback) { onSuccess(); });
+        httpGetFactory('../spacialist_api/intern/context/delete/' + elem.id, function(callback) { onSuccess(); });
     };
 
     /**
@@ -441,7 +446,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         };
         var aid = fieldid;
         var fid = $scope.currentElement.id;
-        httpGetFactory('../spacialist_api/sources/get/' + aid + '/' + fid, function(sources) {
+        httpGetFactory('../spacialist_api/intern/sources/get/' + aid + '/' + fid, function(sources) {
             angular.forEach(sources, function(src, key) {
                 $scope.modalFields.addedSources.push({
                     id: src.id,
@@ -464,7 +469,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                     formData.append('fid', fid);
                     formData.append('aid', fieldid);
                     formData.append('possibility', $scope.modalFields.value);
-                    httpPostFactory('../spacialist_api/context/set/possibility', formData, function(callback) {
+                    httpPostFactory('../spacialist_api/intern/context/set/possibility', formData, function(callback) {
                         $scope.currentElementData[fieldid+'_pos'] = $scope.modalFields.value;
                     });
                 }
@@ -495,7 +500,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             if(typeof src.src !== 'undefined' && src.src.lid !== 'undefined') lid = src.src.id;
             else if(typeof src.literature_id !== 'undefined') lid = src.literature_id;
             else return;
-            httpGetFactory('../spacialist_api/sources/delete/literature/'+aid+'/'+fid+'/'+lid, function(callback) {
+            httpGetFactory('../spacialist_api/intern/sources/delete/literature/'+aid+'/'+fid+'/'+lid, function(callback) {
                 arr.splice(index, 1);
             });
         }, '');
@@ -523,7 +528,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                     if(typeof src.src !== 'undefined' && src.src.lid !== 'undefined') lid = src.src.id;
                     else if(typeof src.literature_id !== 'undefined') lid = src.literature_id;
                     else return;
-                    httpGetFactory('../spacialist_api/sources/delete/literature/'+aid+'/'+fid+'/'+lid, function(callback) {
+                    httpGetFactory('../spacialist_api/intern/sources/delete/literature/'+aid+'/'+fid+'/'+lid, function(callback) {
                         arr.splice(index, 1);
                     });
                 }
@@ -543,7 +548,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         formData.append('aid', aid);
         formData.append('lid', currentSource.id);
         formData.append('desc', currentDesc);
-        httpPostFactory('../spacialist_api/sources/add', formData, function(row) {
+        httpPostFactory('../spacialist_api/intern/sources/add', formData, function(row) {
             $scope.modalFields.addedSources.push({
                 id: row.sid,
                 fid: fid,
@@ -557,14 +562,14 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     };
 
     $scope.existsLiterature = function(fid, aid) {
-        var promise = httpGetPromise.getData('../spacialist_api/sources/get/' + aid + '/' + fid);
+        var promise = httpGetPromise.getData('../spacialist_api/intern/sources/get/' + aid + '/' + fid);
         promise.then(function(sources) {
             console.log(aid);
             console.log(sources);
             console.log((sources.length > 0));
             return sources.length > 0;
         });
-        /*httpGetFactory('../spacialist_api/sources/get/' + aid + '/' + fid, function(sources) {
+        /*httpGetFactory('../spacialist_api/intern/sources/get/' + aid + '/' + fid, function(sources) {
             return sources.length > 0;
         });*/
     };
