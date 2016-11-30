@@ -15,8 +15,8 @@ class CreateRolesTable extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name', 128);
-            $table->string('code', 64)->comment('used as reference code in the app\'s code to enable/disable parts for a particular role');
+            $table->text('name');
+            $table->text('code')->comment('used as reference code in the app\'s code to enable/disable parts for a particular role');
         });
     }
 

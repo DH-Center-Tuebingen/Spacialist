@@ -16,7 +16,7 @@ class CreateAttributesTable extends Migration
         Schema::create('attributes', function (Blueprint $table) {
             $table->increments('id');
             $table->text('thesaurus_id');
-            $table->string('datatype', 128);
+            $table->text('datatype');
             $table->text('thesaurus_root_id')->nullable()->comment('only for string-sc and string-mc');
             $table->timestamps();
 

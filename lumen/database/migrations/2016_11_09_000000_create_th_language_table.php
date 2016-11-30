@@ -15,9 +15,9 @@ class CreateThLanguageTable extends Migration
     {
         Schema::create('th_language', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('lasteditor', 64);
-            $table->string('display_name', 256);
-            $table->string('short_name', 2);
+            $table->text('lasteditor');
+            $table->text('display_name');
+            $table->text('short_name');
             $table->timestamps();
         });
     }

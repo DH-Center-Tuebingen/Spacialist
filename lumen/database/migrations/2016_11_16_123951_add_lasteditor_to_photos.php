@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddLasteditorToPhPhotos extends Migration
+class AddLasteditorToPhotos extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class AddLasteditorToPhPhotos extends Migration
      */
     public function up()
     {
-        Schema::table('ph_photo', function (Blueprint $table) {
+        Schema::table('photos', function (Blueprint $table) {
             $table->text('lasteditor');
         });
     }
@@ -25,7 +25,7 @@ class AddLasteditorToPhPhotos extends Migration
      */
     public function down()
     {
-        Schema::table('ph_photo', function (Blueprint $table) {
+        Schema::table('photos', function (Blueprint $table) {
             $table->dropcolumn('lasteditor');
         });
     }
