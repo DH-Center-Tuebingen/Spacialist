@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class PhPhoto extends Model
 {
-    protected $table = 'ph_photo';
     /**
      * The attributes that are assignable.
      *
