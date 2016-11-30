@@ -472,6 +472,16 @@ p, div {
     content: ']'
 }*/
 
+.type-desc {
+    color: gray;
+}
+.type-desc::before {
+    content: ' ['
+}
+.type-desc::after {
+    content: ']'
+}
+
 /* contextMenu */
 body > .angular-bootstrap-contextmenu.dropdown {
     background-color: rgba(0, 0, 0, 0.05);

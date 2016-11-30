@@ -306,6 +306,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             id: elem.id,
             name: elem.name,
             root: elem.root || -1,
+            typeLabel: elem.typelabel,
             typeId: elem.typeid,
             cid: elem.context_id
         };
@@ -343,19 +344,26 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         return parsedData;
     };
 
-    var setDataForId = function(id, data) {
-        setDataForIdHelper(id, data, scopeService.contextList);
+    var updateElementData = function(elem) {
+        updateElementDataHelper(elem, scopeService.contextList);
     };
 
-    var setDataForIdHelper = function(id, data, children) {
+    var updateElementDataHelper = function(elem, children) {
         if(typeof children == 'undefined') return;
         for(var i=0; i<children.length; i++) {
             var child = children[i];
-            if(child.id == id) {
-                child.data = data;
+            if(child.id == elem.id) {
+                child.data = elem.data;
+                if(child.name != elem.name) {
+                    console.log(child.name);
+                    console.log(elem.name);
+                    $scope.renameMarker(child.name, elem.name);
+                    child.name = elem.name;
+                    setMarker(elem, true);
+                }
                 break;
             }
-            setDataForIdHelper(id, data, child.children);
+            updateElementDataHelper(elem, child.children);
         }
     };
 
@@ -373,7 +381,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         var promise = storeElement(elem);
         promise.then(function(newRealId){
             elem.data = newRealId.data;
-            setDataForId(elem.id, elem.data);
+            updateElementData(elem);
         });
     };
 

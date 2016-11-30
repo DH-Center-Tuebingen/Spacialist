@@ -6,8 +6,16 @@
     </div>
     <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;">
         <div ng-show="currentElement">
-            <h3>{{ currentElement.name }} <small>Element-Eigenschaften</small></h3>
+            <h3>{{ currentElement.name }}<span ng-if="currentElement.typeLabel" class="type-desc">{{ currentElement.typeLabel }}</span> <small>Element-Eigenschaften</small></h3>
             <form class="form-horizontal" role="form" ng-if="currentElementFields">
+                <div class="form-group">
+                    <label class="control-label col-md-3" for="name">
+                        Name:
+                    </label>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" id="name" ng-model="currentElement.name" />
+                    </div>
+                </div>
                 <form-field fields="currentElementFields" output="currentElementData" label-width="3" input-width="9" offset="0">
                 </form-field>
                 <div class="col-md-offset-3">
