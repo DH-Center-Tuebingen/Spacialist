@@ -15,8 +15,8 @@ class CreateThConceptLabelTable extends Migration
     {
         Schema::create('th_concept_label', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('lasteditor', 64);
-            $table->string('label', 256);
+            $table->text('lasteditor');
+            $table->text('label');
             $table->integer('concept_id')->unsigned();
             $table->integer('language_id')->unsigned();
             $table->integer('concept_label_type')->default(1);

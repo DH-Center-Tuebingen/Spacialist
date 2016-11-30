@@ -15,7 +15,7 @@ class CreateContextTypesTable extends Migration
     {
         Schema::create('context_types', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('thesaurus_id', 256);
+            $table->text('thesaurus_id');
             $table->integer('type')->unsigned();
             $table->timestamps();
 

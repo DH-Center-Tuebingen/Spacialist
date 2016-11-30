@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateThConceptTable extends Migration
+class AddLasteditorToPhotos extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,8 @@ class CreateThConceptTable extends Migration
      */
     public function up()
     {
-        Schema::create('th_concept', function (Blueprint $table) {
-            $table->increments('id');
-            $table->text('concept_url')->unique();
-            $table->text('concept_scheme');
+        Schema::table('photos', function (Blueprint $table) {
             $table->text('lasteditor');
-            $table->timestamps();
         });
     }
 
@@ -29,6 +25,8 @@ class CreateThConceptTable extends Migration
      */
     public function down()
     {
-        Schema::drop('th_concept');
+        Schema::table('photos', function (Blueprint $table) {
+            $table->dropcolumn('lasteditor');
+        });
     }
 }

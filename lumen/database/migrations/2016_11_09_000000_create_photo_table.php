@@ -13,17 +13,17 @@ class CreatePhotoTable extends Migration
      */
     public function up()
     {
-        Schema::create('ph_photo', function (Blueprint $table) {
+        Schema::create('photos', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name', 256);
+            $table->text('name');
             $table->timestamp('modified');
-            $table->string('cameraname', 256);
+            $table->text('cameraname');
             $table->integer('photographer_id')->unsigned();
             $table->timestamp('created');
-            $table->string('thumb', 256)->default('');
+            $table->text('thumb')->default('');
             $table->integer('orientation')->default(1);
-            $table->string('copyright', 512)->default('');
-            $table->string('description', 1024)->default('');
+            $table->text('copyright')->default('');
+            $table->text('description')->default('');
             $table->timestamps();
         });
     }
@@ -35,6 +35,6 @@ class CreatePhotoTable extends Migration
      */
     public function down()
     {
-        Schema::drop('ph_photo');
+        Schema::drop('photos');
     }
 }

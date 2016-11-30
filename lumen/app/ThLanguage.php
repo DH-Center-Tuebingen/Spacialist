@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ThLanguage extends Model
 {
+    protected $table = 'th_language';
     /**
      * The attributes that are assignable.
      *
