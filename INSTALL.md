@@ -33,21 +33,27 @@ Beside these packages we use a couple of packages you have to install on your ow
 
 ## Setup
 ### Package Installation
+
 1. Install all the required packages. For debian-based/apt systems you can use the following command
-```bash
-sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring ufraw memcached python3 python-pip python-rdflib python-psycopg2 phpunit nodejs npm
-```
+
+    ```bash
+    sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring ufraw memcached python3 python-pip python-rdflib python-psycopg2 phpunit nodejs npm
+    ```
+    
 2. Clone This Repository
-```bash
-git clone https://github.com/eScienceCenter/Spacialist
-```
+
+    ```bash
+    git clone https://github.com/eScienceCenter/Spacialist
+    ```
+
 3. Download Dependencies
-```bash
-cd Spacialist
-bower install
-cd lumen
-composer install
-```
+
+    ```bash
+    cd Spacialist
+    bower install
+    cd lumen
+    composer install
+    ```
 
 **Please note**: During the `composer install` you might get an error regarding an unsecure installation. To fix this you have to edit your `composer.json` file (only edit this file if you know what you're doing) in the `lumen` folder to disable secure HTTP connections. Add `"secure-http": false` or set `"secure-http": true` to `false` if the line already exists.
 
@@ -63,45 +69,55 @@ Since Lumen has a sub-folder as document root `lumen/public`, it won't work to s
 One solution is to setup a proxy on the same machine and re-route all requests from `/spacialist_api` to Lumen's public folder (e.g. `/var/www/html/Spacialist/lumen/public`).
 
 1. Enable the webserver's proxy packages and the rewrite engine
-```bash
-sudo a2enmod proxy proxy_http rewrite
-```
+
+    ```bash
+    sudo a2enmod proxy proxy_http rewrite
+    ```
+    
 2. Add a new entry to your hosts file, because your proxy needs a (imaginary) domain.
-```bash
-sudo nano /etc/hosts
-# Add an entry to "redirect" a domain to your local machine (localhost)
-127.0.0.1 spacialist-lumen.tld # or anything you want
-```
+
+    ```bash
+    sudo nano /etc/hosts
+    # Add an entry to "redirect" a domain to your local machine (localhost)
+    127.0.0.1 spacialist-lumen.tld # or anything you want
+    ```
+    
 3. Add a new vHost file to your apache
-```bash
-cd /etc/apache2/site-available
-sudo nano spacialist-lumen.conf
-```
-Paste the following snippet into the file:
-```apache
-<VirtualHost *:80>
-  ServerName spacialist-lumen.tld
-  ServerAdmin webmaster@localhost
-  DocumentRoot /var/www/html/Spacialist/lumen/public
 
-  DirectoryIndex index.php
+    ```bash
+    cd /etc/apache2/site-available
+    sudo nano spacialist-lumen.conf
+    ```
+     
+    Paste the following snippet into the file:
+    ```apache
+    <VirtualHost *:80>
+      ServerName spacialist-lumen.tld
+      ServerAdmin webmaster@localhost
+      DocumentRoot /var/www/html/Spacialist/lumen/public
+    
+      DirectoryIndex index.php
 
-  <Directory "/var/www/html/Spacialist/lumen/public">
-    AllowOverride All
-    Require all granted
-  </Directory>
-</VirtualHost>
-```
+      <Directory "/var/www/html/Spacialist/lumen/public">
+        AllowOverride All
+        Require all granted
+      </Directory>
+    </VirtualHost>
+    ```
+    
 4. Add the proxy route to your default vHost file (e.g. `/etc/apache2/sites-available/000-default.conf`)
-```apache
-ProxyPass "/spacialist_api" "http://spacialist-lumen.tld"
-ProxyPassReverse "/spacialist_api" "http://spacialist-lumen.tld"
-```
+
+    ```apache
+    ProxyPass "/spacialist_api" "http://spacialist-lumen.tld"
+    ProxyPassReverse "/spacialist_api" "http://spacialist-lumen.tld"
+    ```
+    
 5. Enable the new vHost file and restart the webserver
-```bash
-sudo a2ensite spacialist-lumen.conf
-sudo service apache2 restart
-```
+
+    ```bash
+    sudo a2ensite spacialist-lumen.conf
+    sudo service apache2 restart
+    ```
 
 ### Configure Lumen
 Lumen should now work, but to test it you need to create a `.env` file which stores the Lumen configuration. 
@@ -150,9 +166,11 @@ Spacialist ships with Lumen preinstalled. If you ever have or want to install it
 **Please note**: This manual is based on version 5.3 of Lumen. If you want to use a different version, please check the [official lumen manual](https://lumen.laravel.com/docs/)
 
 1. Use `composer` to install the lumen executable
-```bash
-composer global require "laravel/lumen-installer"
-```
+
+    ```bash
+    composer global require "laravel/lumen-installer"
+    ```
+    
 2. Change directory to the desired installation path (e.g. `/var/www/html/`)
 3. Run `lumen new lumen` (you can replace the second "lumen" with any name you want. This is the folder name in which lumen will be installed). If the command `lumen` is not found, you can add it to your `PATH` or use the absolute path of the executable
     1. Change directory to `/usr/local/bin`
