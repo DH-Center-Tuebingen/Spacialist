@@ -665,7 +665,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
             $scope.d3layouter.kgraph(graph);
         }
 
-    httpGetFactory('../spacialist_api/intern/image/getAll', function(callback) {
+    httpGetFactory('api/image/getAll', function(callback) {
         var unlImg = [];
         angular.forEach(callback, function(value, key) {
             value.linked = [];
@@ -803,7 +803,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         formData.append('id', markerId);
         if(typeof color != 'undefined') formData.append('color', color);
         if(typeof icon != 'undefined') formData.append('icon', icon.icon);
-        httpPostPromise.getData('../spacialist_api/intern/context/set/icon', formData).then(
+        httpPostPromise.getData('api/context/set/icon', formData).then(
             function(icon) {
                 console.log(icon);
                 angular.extend(scopeService.markers[markerKey].icon, {
@@ -994,7 +994,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
             $scope.sideNav.resetTabs();
             $scope.sideNav.sourcesTab = true;
             var fid = $scope.activeMarker;
-            httpGetFactory('../spacialist_api/intern/sources/get/' + fid, function(sources) {
+            httpGetFactory('api/sources/get/' + fid, function(sources) {
                 $scope.markerValues.sources = sources;
             });
         },
@@ -1141,7 +1141,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         $scope.errFiles = invalidFiles;
         angular.forEach(files, function(file) {
             file.upload = Upload.upload({
-                url: '../spacialist_api/intern/image/upload',
+                url: 'api/image/upload',
                 data: {
                     file: file
                 }
@@ -1241,7 +1241,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
             }
         }
         //update marker values
-        httpPostFactory('../spacialist_api/intern/context/add', formData, function(callback) {
+        httpPostFactory('api/context/add', formData, function(callback) {
             var newId = parseInt(callback.fid, 10);
             setMarkerOption('id', newId);
             opts.id = newId;
@@ -1279,7 +1279,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
                 $scope.deleteConfirmed = function() {
                     $uibModalInstance.dismiss('ok');
                     delete scopeService.markers[$scope.markerValues.title];
-                    httpGetFactory('../spacialist_api/intern/context/delete/' + $scope.activeMarker, function(callback) {});
+                    httpGetFactory('api/context/delete/' + $scope.activeMarker, function(callback) {});
                     resetMarkerOpts();
                 }
             },
@@ -1463,7 +1463,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
             clickable: true,
             children: []
         });
-        httpGetFactory('../spacialist_api/intern/context/get/children/' + $scope.activeMarker, function(roots) {
+        httpGetFactory('api/context/get/children/' + $scope.activeMarker, function(roots) {
             $scope.roots = roots;
             if (typeof roots[realId] !== 'undefined' && roots[realId].length > 0) {
                 $scope.stuffNav.setHarrisTab();
