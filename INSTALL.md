@@ -3,11 +3,13 @@ We recommend a rather new unix/linux-based OS. Please check if your desired OS m
 
 ## Requirements
 The following packages you should be able to install from your package manager:
+- git
 - Apache (or any other web server-software, e.g. nginx)
 - PHP
   - Imagick
   - memcached
   - mbstring
+- libapache2-mod-php
 - composer
 - PostGIS (`>= 2.0`)
 - PostgreSQL (`>= 9.1.0`)
@@ -21,20 +23,126 @@ The following packages you should be able to install from your package manager:
   - getopt
 - unzip
 - php-pgsql
-- libapache2-mod-php
+- phpunit
+- nodejs
+- npm
 
 Beside these packages we use a couple of packages you have to install on your own.
-- Lumen (PHP-Framework)
+- Lumen (PHP-Framework), currently pre-installed
 - Geoserver
 
 ## Setup
 ### Package installation
 1. Install all the required packages. For debian-based/apt systems you can use the following command
 ```bash
-sudo apt-get install apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring ufraw memcached python3 python-pip python-rdflib python-psycopg2
+sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring ufraw memcached python3 python-pip python-rdflib python-psycopg2 phpunit nodejs npm
+```
+2. Clone this repository
+```bash
+git clone https://github.com/eScienceCenter/Spacialist
+```
+3. Download dependencies
+```bash
+cd Spacialist
+bower install
+cd lumen
+composer install
 ```
 
-### Lumen installation
+**Please note**: During the `composer install` you might get a error regarding an unsecure installation. To fix this you have to edit your `composer.json` file (only edit this file if you know what you're doing) in the `lumen` folder to disable secure http connections. Add `"secure-http": false` or set `"secure-http": true` to `false` if the line already exists.
+After editing the `composer.json` you have to re-run `composer` with
+```bash
+composer update
+```
+
+### Proxy setup
+To communicate with Lumen, Spacialist requires the API to be on the same level.
+If you run Spacialist under `yourdomain.tld/Spacialist`, the Lumen API has to be `yourdomain.tld/spacialist_api`.
+
+Since Lumen has a sub-folder as document root `lumen/public`, it doesn't work to simply copy Lumen to your webserver's root directory.
+One solution is to setup a proxy on the same machine and re-route all requests from `/spacialist_api` to the Lumen's public folder (e.g. `/var/www/html/Spacialist/lumen/public`).
+1. Enable the webserver's proxy packages and the rewrite engine
+```bash
+sudo a2enmod proxy proxy_http rewrite
+```
+2. Add a new entry to your hosts file, because your proxy needs a (imaginary) domain.
+```bash
+sudo nano /etc/hosts
+# Add an entry to "redirect" a domain to your local machine (localhost)
+127.0.0.1 spacialist-lumen.tld # or anything you want
+```
+3. Add a new vHost file to your apache
+```bash
+cd /etc/apache2/site-available
+sudo nano spacialist-lumen.conf
+```
+Paste the following snippet into the file
+```apache
+<VirtualHost *:80>
+  ServerName spacialist-lumen.tld
+  ServerAdmin webmaster@localhost
+  DocumentRoot /var/www/html/Spacialist/lumen/public
+
+  DirectoryIndex index.php
+
+  <Directory "/var/www/html/Spacialist/lumen/public">
+    AllowOverride All
+    Require all granted
+  </Directory>
+</VirtualHost>
+```
+4. Add the proxy route to your default vHost file (`e.g. /etc/apache2/sites-available/000-default.conf`)
+```apache
+ProxyPass "/spacialist_api" "http://spacialist-lumen.tld"
+ProxyPassReverse "/spacialist_api" "http://spacialist-lumen.tld"
+```
+5. Enable the new vHost file and restart the webserver
+```bash
+sudo a2ensite spacialist-lumen.conf
+sudo service apache2 restart
+```
+
+### Configure Lumen
+Lumen should now work, but to test it you need to create a `.env` file which stores the Lumen configuration.
+Inside the `lumen`-subfolder in the Spacialist installation, create the `.env` file and paste this configuration (Please edit some of the configuration settings `*` to match your installation).
+```bash
+cd /var/www/html/Spacialist/lumen
+sudo nano .env
+```
+```
+APP_ENV=local
+APP_DEBUG=true
+APP_KEY=* #this needs to be a 32 digit random key. Use an online generator or run php artisan jwt:generate twice
+
+# Your database setup. pgsql is PostgreSQL. Host, port, database, username and password need to be configured first (e.g. using your database server's commands).
+DB_CONNECTION=pgsql
+DB_HOST=localhost
+DB_PORT=5432
+DB_DATABASE=*
+DB_USERNAME=*
+DB_PASSWORD=*
+
+CACHE_DRIVER=memcached
+QUEUE_DRIVER=sync
+
+JWT_SECRET=* #same as APP_KEY, run php artisan jwt:generate
+JWT_TTL=* #the time to live (in minutes) of your user tokens. Default is 60 (minutes).
+JWT_REFRESH_TTL=* #the ttl (in minutes) in which you can generate a new token. Default is two weeks
+JWT_BLACKLIST_GRACE_PERIOD=* #a time span in seconds which allows you to use the same token several times in this time span without blacklisting it (good for async api calls)
+```
+
+After the `.env` file has been configured, you should run the migrations, to setup your database.
+```bash
+php artisan migrate
+```
+
+To test your installation, simply open `http://yourdomain.tld/spacialist_api`. You should see a website with Lumen's current version.
+Example:
+```
+Lumen (5.3.2) (Laravel Components 5.3.*)
+```
+
+### Lumen installation (optional)
 Spacialist ships with Lumen preinstalled. If you ever have or want to install it on your own, please follow these instructions:
 
 **Please note**: This manual is based on version 5.3 of lumen. If you want to use a different version, please check the [official lumen manual](https://lumen.laravel.com/docs/)
