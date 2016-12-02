@@ -5,12 +5,12 @@ We recommend a recent unix/linux-based OS. Please check if your desired OS meets
 The following packages you should be able to install from your package manager:
 - git
 - Apache (or any other web server-software, e.g. nginx)
-- PHP (`>= 5.6.4`)
+- PHP (`>= 5.6.4`) with the following extensions installed and enabled:
   - Imagick
   - memcached
   - mbstring
-- libapache2-mod-php
-- composer
+- libapache2-mod-php (on Unix systems)
+- [Composer](https://getcomposer.org)
 - PostGIS (`>= 2.0`)
 - PostgreSQL (`>= 9.1.0`)
 - ImageMagick
@@ -26,10 +26,11 @@ The following packages you should be able to install from your package manager:
 - phpunit
 - nodejs
 - npm
+- bower (run `npm install -g bower` on the command line)
 
 Beside these packages we use a couple of packages you have to install on your own.
-- Lumen (PHP-Framework), currently pre-installed
-- [GeoServer](http://geoserver.org/)
+- Lumen (PHP-Framework), currently included in the Spacialist repository, so no need to install.
+- [GeoServer](http://geoserver.org/) for hosting your own geo maps
 
 ## Setup
 ### Package Installation
@@ -63,10 +64,10 @@ composer update
 ```
 
 ### Proxy Setup
-To communicate with Lumen, Spacialist requires the API to be on the same directory level. If you run Spacialist under `yourdomain.tld/Spacialist`, the Lumen API has to be `yourdomain.tld/spacialist_api`.
+To communicate with Lumen, Spacialist requires the API folder to be in the Spacialist folder. If you run Spacialist under `yourdomain.tld/Spacialist`, the Lumen API has to be `yourdomain.tld/Spacialist/api`.
 
 Since Lumen has a sub-folder as document root `lumen/public`, it won't work to simply copy Lumen to your webserver's root directory.
-One solution is to setup a proxy on the same machine and re-route all requests from `/spacialist_api` to Lumen's public folder (e.g. `/var/www/html/Spacialist/lumen/public`).
+One solution is to setup a proxy on the same machine and re-route all requests from `/Spacialist/api` to Lumen's public folder (e.g. `/var/www/html/Spacialist/lumen/public`).
 
 1. Enable the webserver's proxy packages and the rewrite engine
 
