@@ -5,7 +5,7 @@ We recommend a recent unix/linux-based OS. Please check if your desired OS meets
 The following packages you should be able to install from your package manager:
 - git
 - Apache (or any other web server-software, e.g. nginx)
-- PHP
+- PHP (`>= 5.6.4`)
   - Imagick
   - memcached
   - mbstring
