@@ -26,7 +26,7 @@ The following packages you should be able to install from your package manager:
 - phpunit
 - nodejs
 - npm
-- bower (run `npm install -g bower` on the command line)
+- bower (run `npm install -g bower` on the command line, **Please note**: You may have to link your `nodejs` executable to the new command `node`. e.g. `sudo ln -s /usr/bin/nodejs /usr/bin/node`)
 
 Beside these packages we use a couple of packages you have to install on your own.
 - Lumen (PHP-Framework), currently included in the Spacialist repository, so no need to install.
