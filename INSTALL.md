@@ -1,5 +1,5 @@
 # Installation
-We recommend a recent unix/linux-based OS. Please check if your desired OS meets the following requirements. If not, we recommend debian (8.5 aka _jessie_ or later) or Ubuntu (16.04 LTS aka _Xenial Xerus_ or later). For better PHP performance we recommend a system with PHP 7.x support such as Ubuntu 16.04.
+We recommend a recent unix/linux-based OS. Please check if your desired OS meets the following requirements. If not, we recommend debian (8.5 aka _jessie_ or later) or Ubuntu (16.04 LTS aka _Xenial Xerus_ or later). For better PHP performance we recommend a system with PHP 7.x support such as Ubuntu 16.04. Note: Installation on Windows 10 with PHP 5.6 was also successfully tested, but you will need to adjust the commands in these instructions by yourself to your local Windows version equivalents.
 
 ## Requirements
 The following packages you should be able to install from your package manager:
@@ -7,7 +7,7 @@ The following packages you should be able to install from your package manager:
 - Apache (or any other web server-software, e.g. nginx)
 - PHP (`>= 5.6.4`) with the following extensions installed and enabled:
   - Imagick
-  - memcached
+  - memcached (on Windows this will not work -- see later)
   - mbstring
 - libapache2-mod-php (on Unix systems)
 - [Composer](https://getcomposer.org)
@@ -15,7 +15,7 @@ The following packages you should be able to install from your package manager:
 - PostgreSQL (`>= 9.1.0`)
 - ImageMagick
 - ufraw
-- memcached
+- memcached (extension DLL not available for Windows at the moment, see later)
 - Python 3.x
   - pip
   - rdflib
@@ -122,12 +122,13 @@ One solution is to setup a proxy on the same machine and re-route all requests f
 
 ### Configure Lumen
 Lumen should now work, but to test it you need to create a `.env` file which stores the Lumen configuration. 
-Inside the `lumen`-subfolder in the Spacialist installation, create the `.env` file and paste this configuration (Please edit some of the configuration settings `*` to match your installation).
+Inside the `lumen`-subfolder in the Spacialist installation, create the `.env` file: 
 ```bash
 cd /var/www/html/Spacialist/lumen
 sudo nano .env
 ```
 
+Then paste this configuration (Please edit some of the configuration settings `*` to match your installation). **Note**: on Windows, memchached extension DLL seems unavailable. Use `CACHE_DRIVER=array` instead where indicated:
 ```
 APP_ENV=local
 APP_DEBUG=true
@@ -141,7 +142,7 @@ DB_DATABASE=*
 DB_USERNAME=*
 DB_PASSWORD=*
 
-CACHE_DRIVER=memcached
+CACHE_DRIVER=memcached # on Windows memcached extension unavailable, but it seems to work with "array"
 QUEUE_DRIVER=sync
 
 JWT_SECRET=* #same as APP_KEY, run php artisan jwt:generate
