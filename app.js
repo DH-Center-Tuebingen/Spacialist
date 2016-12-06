@@ -590,6 +590,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
     $httpProvider.interceptors.push('redirectWhenLoggedOut');
     $httpProvider.interceptors.push('redirectWhenUnauth');
 
+	$authProvider.baseUrl = '.';
     $authProvider.loginUrl = 'api/user/login';
     $urlRouterProvider.otherwise('/auth');
 
