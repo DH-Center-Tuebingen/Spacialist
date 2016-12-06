@@ -109,8 +109,8 @@ One solution is to setup a proxy on the same machine and re-route all requests f
 4. Add the proxy route to your default vHost file (e.g. `/etc/apache2/sites-available/000-default.conf`)
 
     ```apache
-    ProxyPass "/spacialist_api" "http://spacialist-lumen.tld"
-    ProxyPassReverse "/spacialist_api" "http://spacialist-lumen.tld"
+    ProxyPass "/Spacialist/api" "http://spacialist-lumen.tld"
+    ProxyPassReverse "/Spacialist/api" "http://spacialist-lumen.tld"
     ```
     
 5. Enable the new vHost file and restart the webserver
@@ -144,7 +144,7 @@ DB_PASSWORD=*
 CACHE_DRIVER=memcached
 QUEUE_DRIVER=sync
 
-JWT_SECRET=* #same as APP_KEY, run php artisan jwt:generate
+JWT_SECRET=* # 32 char random, run php artisan jwt:generate
 JWT_TTL=* #the time to live (in minutes) of your user tokens. Default is 60 (minutes).
 JWT_REFRESH_TTL=* #the ttl (in minutes) in which you can generate a new token. Default is two weeks
 JWT_BLACKLIST_GRACE_PERIOD=* #a time span in seconds which allows you to use the same token several times in this time span without blacklisting it (good for async api calls)
@@ -155,7 +155,7 @@ After the `.env` file has been configured you should run the migrations to setup
 php artisan migrate
 ```
 
-To test your installation, simply open `http://yourdomain.tld/spacialist_api`. You should see a website with Lumen's current version.
+To test your installation, simply open `http://yourdomain.tld/Spacialist/api`. You should see a website with Lumen's current version.
 Example:
 ```
 Lumen (5.3.2) (Laravel Components 5.3.*)
