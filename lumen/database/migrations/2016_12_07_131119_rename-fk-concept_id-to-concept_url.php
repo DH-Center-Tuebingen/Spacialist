@@ -17,7 +17,7 @@ class RenameFkConceptIdToConceptUrl extends Migration
 
             $table->dropForeign(['thesaurus_id']);
             $table->renameColumn('thesaurus_id', 'thesaurus_url');
-            $table->foreign('thesaurus_url')->references('concept_url')->on('th_concept');
+            $table->foreign('thesaurus_url')->references('concept_url')->on('th_concept')->onDelete('cascade');
 
             $table->dropForeign(['thesaurus_root_id']);
             $table->renameColumn('thesaurus_root_id', 'thesaurus_root_url');
@@ -27,7 +27,7 @@ class RenameFkConceptIdToConceptUrl extends Migration
         Schema::table('context_types', function ($table) {
             $table->dropForeign(['thesaurus_id']);
             $table->renameColumn('thesaurus_id', 'thesaurus_url');
-            $table->foreign('thesaurus_url')->references('concept_url')->on('th_concept');
+            $table->foreign('thesaurus_url')->references('concept_url')->on('th_concept')->onDelete('cascade');
         });
         //
     }
@@ -43,7 +43,7 @@ class RenameFkConceptIdToConceptUrl extends Migration
 
             $table->dropForeign(['thesaurus_url']);
             $table->renameColumn('thesaurus_url', 'thesaurus_id');
-            $table->foreign('thesaurus_id')->references('concept_url')->on('th_concept');
+            $table->foreign('thesaurus_id')->references('concept_url')->on('th_concept')->onDelete('cascade');
 
             $table->dropForeign(['thesaurus_root_url']);
             $table->renameColumn('thesaurus_root_url', 'thesaurus_root_id');
@@ -53,7 +53,7 @@ class RenameFkConceptIdToConceptUrl extends Migration
         Schema::table('context_types', function ($table) {
             $table->dropForeign(['thesaurus_url']);
             $table->renameColumn('thesaurus_url', 'thesaurus_id');
-            $table->foreign('thesaurus_id')->references('concept_url')->on('th_concept');
+            $table->foreign('thesaurus_id')->references('concept_url')->on('th_concept')->onDelete('cascade');
         });
     }
 }

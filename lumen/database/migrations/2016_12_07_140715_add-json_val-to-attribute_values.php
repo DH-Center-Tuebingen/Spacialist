@@ -14,7 +14,7 @@ class AddJsonValToAttributeValues extends Migration
     public function up()
     {
         Schema::table('attribute_values', function (Blueprint $table) {
-            $table->json('json_val');
+            $table->json('json_val')->nullable();
             //
         });
     }
