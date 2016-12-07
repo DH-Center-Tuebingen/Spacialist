@@ -23,5 +23,6 @@ class AttributeValue extends Model
         'possibility',
         'lasteditor',
         'thesaurus_val',
+        'json_val'
     ];
 }
