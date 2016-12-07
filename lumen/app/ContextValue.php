@@ -13,9 +13,9 @@ class ContextValue extends Model
      * @var array
      */
     protected $fillable = [
-        'find_id',
+        'context_id',
         'attribute_id',
-        'find_val',
+        'context_val',
         'str_val',
         'int_val',
         'dbl_val',
