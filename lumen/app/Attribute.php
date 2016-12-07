@@ -12,8 +12,8 @@ class Attribute extends Model
      * @var array
      */
     protected $fillable = [
-        'thesaurus_id',
-        'thesaurus_root_id',
+        'thesaurus_url',
+        'thesaurus_root_url',
         'datatype',
     ];
 }
