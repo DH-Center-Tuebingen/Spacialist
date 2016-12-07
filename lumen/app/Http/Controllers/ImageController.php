@@ -83,7 +83,7 @@ class ImageController extends Controller
             $description = NULL;
         }
         $mod = date('Y-m-d H:i:s', filemtime($fileUrl));
-        $id = \DB::table('ph_photo')
+        $id = \DB::table('photo')
             ->insertGetId([
                 'modified' => $mod,
                 'name' => $filename,
@@ -103,7 +103,7 @@ class ImageController extends Controller
     }
 
     private function getImageById($id) {
-        $img = \DB::table('ph_photo as ph')
+        $img = \DB::table('photo as ph')
                 ->select('ph.id as id', 'ph.modified as modified', 'ph.name as filename', 'ph.thumb as thumbname', 'ph.cameraname', 'ph.orientation', 'ph.description', 'ph.copyright', 'ph.photographer_id')
                 ->where('ph.id', $id)
                 ->first();
@@ -117,12 +117,12 @@ class ImageController extends Controller
 
     //TODO add 'linking images' functionality
     public function getByContext($id) {
-        $find = DB::table('finds')->get()->where('id', $id)->first();
+        $find = DB::table('contexts')->get()->where('id', $id)->first();
         return response()->json();
     }
 
     public function getAll() {
-        $images = DB::table('ph_photo as ph')
+        $images = DB::table('photo as ph')
                     ->select("ph.id as id", "ph.modified as modified", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id")
                     ->get();
         foreach($images as &$img) {

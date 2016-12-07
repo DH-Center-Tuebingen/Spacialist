@@ -15,15 +15,15 @@ class SourceController extends Controller {
         //
     }
 
-    public function getByAttribute($aid, $fid) {
+    public function getByAttribute($aid, $cid) {
         $src = DB::table('sources')
             ->where([
                 ['attribute_id', '=', $aid],
-                ['find_id', '=', $fid]
+                ['context_id', '=', $cid]
             ])
             ->get();
         foreach($src as &$s) {
-            $s->literature = DB::table('bib_tex')->where('id', '=', $s->literature_id)->first();
+            $s->literature = DB::table('literature')->where('id', '=', $s->literature_id)->first();
         }
         return response()->json($src);
     }
@@ -31,12 +31,12 @@ class SourceController extends Controller {
     public function getByContext($id) {
         $src = DB::table('sources')
                 ->select('sources.*', DB::raw("public.\"getLabelForId\"(attributes.thesaurus_id, 'de') AS attribute_name"))
-                ->where('find_id', '=', $id)
+                ->where('context_id', '=', $id)
                 ->join('attributes', 'sources.attribute_id', '=', 'attributes.id')
                 ->orderBy('attribute_name', 'asc')
                 ->get();
         foreach($src as &$s) {
-            $s->literature = DB::table('bib_tex')->where('id', '=', $s->literature_id)->first();
+            $s->literature = DB::table('literature')->where('id', '=', $s->literature_id)->first();
         }
         return response()->json($src);
     }
@@ -45,13 +45,13 @@ class SourceController extends Controller {
         $user = \Auth::user();
         if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $aid = $request->get('aid');
-        $fid = $request->get('fid');
+        $cid = $request->get('fid');
         $lid = $request->get('lid');
         $desc = $request->get('desc');
         $id = DB::table('sources')
             ->insertGetId(
                 [
-                    'find_id' => $fid,
+                    'context_id' => $cid,
                     'attribute_id' => $aid,
                     'literature_id' => $lid,
                     'description' => $desc,
@@ -69,24 +69,24 @@ class SourceController extends Controller {
 
     public function deleteByContext($id) {
         DB::table('sources')
-            ->where('find_id', $id)
+            ->where('context_id', $id)
             ->delete();
     }
 
-    public function deleteByAttribute($aid, $fid) {
+    public function deleteByAttribute($aid, $cid) {
         DB::table('sources')
             ->where([
                 ['attribute_id', $aid],
-                ['find_id', $fid]
+                ['context_id', $cid]
             ])
             ->delete();
     }
 
-    public function deleteByLiterature($aid, $fid, $lid) {
+    public function deleteByLiterature($aid, $cid, $lid) {
         DB::table('sources')
             ->where([
                 ['attribute_id', $aid],
-                ['find_id', $fid],
+                ['context_id', $cid],
                 ['literature_id', $lid]
             ])
             ->delete();
