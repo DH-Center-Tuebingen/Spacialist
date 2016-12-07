@@ -13,7 +13,7 @@ class RenameContextValuesToAttributeValues extends Migration
      */
     public function up()
     {
-        //
+        Schema::rename('context_values', 'attribute_values');
     }
 
     /**
@@ -23,6 +23,7 @@ class RenameContextValuesToAttributeValues extends Migration
      */
     public function down()
     {
+        Schema::rename('attribute_values', 'context_values');
         //
     }
 }

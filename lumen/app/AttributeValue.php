@@ -4,9 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ContextValue extends Model
+class AttributeValue extends Model
 {
-    protected $table = 'context_values';
+    protected $table = 'attribute_values';
     /**
      * The attributes that are assignable.
      *
