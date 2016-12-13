@@ -109,8 +109,8 @@ One solution is to setup a proxy on the same machine and re-route all requests f
 4. Add the proxy route to your default vHost file (e.g. `/etc/apache2/sites-available/000-default.conf`)
 
     ```apache
-    ProxyPass "/spacialist_api" "http://spacialist-lumen.tld"
-    ProxyPassReverse "/spacialist_api" "http://spacialist-lumen.tld"
+    ProxyPass "/Spacialist/api" "http://spacialist-lumen.tld"
+    ProxyPassReverse "/Spacialist/api" "http://spacialist-lumen.tld"
     ```
     
 5. Enable the new vHost file and restart the webserver
