@@ -156,7 +156,7 @@ After the `.env` file has been configured you should run the migrations to setup
 php artisan migrate
 ```
 
-To test your installation, simply open `http://yourdomain.tld/spacialist_api`. You should see a website with Lumen's current version.
+To test your installation, simply open `http://yourdomain.tld/Spacialist/api`. You should see a website with Lumen's current version.
 Example:
 ```
 Lumen (5.3.2) (Laravel Components 5.3.*)
