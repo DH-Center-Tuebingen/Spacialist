@@ -18,7 +18,7 @@ spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory
                 user: response.data
             };
             console.log(JSON.stringify(response.data));
-            $state.go('testing', {});
+            $state.go('spacialist', {});
         });
     };
 
