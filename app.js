@@ -189,6 +189,40 @@ spacialistApp.directive('spinner', function() {
     };
 });
 
+spacialistApp.directive('resizeWatcher', function($window) {
+    return function(scope, element) {
+        var headerPadding = 20;
+        var bottomPadding = 20;
+
+        scope.getViewportDim = function() {
+            return {
+                'height': $window.innerHeight,
+                'width': $window.innerWidth,
+                'isSm': window.matchMedia("(max-width: 991px)").matches
+            };
+        };
+        scope.$watch(scope.getViewportDim, function(newValue, oldValue) {
+            if(newValue.isSm) {
+                $('#tree-container').css('height', '');
+                $('#attribute-container').css('height', '');
+                $('#addon-container').css('height', '');
+            } else {
+                var height = newValue.height;
+                var width = newValue.width;
+
+                var headerHeight = document.getElementById('header-nav').offsetHeight;
+                var addonNavHeight = document.getElementById('addon-nav').offsetHeight;
+                var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
+                var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
+
+                $('#tree-container').css('height', containerHeight);
+                $('#attribute-container').css('height', containerHeight);
+                $('#addon-container').css('height', containerHeight);
+            }
+        }, true);
+    };
+});
+
 spacialistApp.directive('myDirective', function(httpPostFactory, scopeService) {
     return {
         restrict: 'A',

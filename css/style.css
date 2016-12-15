@@ -416,6 +416,10 @@ p, div {
     font-weight: 500;
 }
 
+#tree-container, #attribute-container {
+    overflow: auto;
+}
+
 .angular-ui-tree-handle {
     cursor: pointer;
     font-weight: 500;
