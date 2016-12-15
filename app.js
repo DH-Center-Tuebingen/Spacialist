@@ -197,23 +197,28 @@ spacialistApp.directive('resizeWatcher', function($window) {
         scope.getViewportDim = function() {
             return {
                 'height': $window.innerHeight,
-                'width': $window.innerWidth
+                'width': $window.innerWidth,
+                'isSm': window.matchMedia("(max-width: 991px)").matches
             };
         };
         scope.$watch(scope.getViewportDim, function(newValue, oldValue) {
-            console.log(newValue);
+            if(newValue.isSm) {
+                $('#tree-container').css('height', '');
+                $('#attribute-container').css('height', '');
+                $('#addon-container').css('height', '');
+            } else {
+                var height = newValue.height;
+                var width = newValue.width;
 
-            var height = newValue.height;
-            var width = newValue.width;
+                var headerHeight = document.getElementById('header-nav').offsetHeight;
+                var addonNavHeight = document.getElementById('addon-nav').offsetHeight;
+                var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
+                var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
 
-            var headerHeight = document.getElementById('header-nav').offsetHeight;
-            var addonNavHeight = document.getElementById('addon-nav').offsetHeight;
-            var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
-            var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
-
-            $('#tree-container').css('height', containerHeight);
-            $('#attribute-container').css('height', containerHeight);
-            $('#addon-container').css('height', containerHeight);
+                $('#tree-container').css('height', containerHeight);
+                $('#attribute-container').css('height', containerHeight);
+                $('#addon-container').css('height', containerHeight);
+            }
         }, true);
     };
 });
