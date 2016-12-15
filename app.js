@@ -191,6 +191,9 @@ spacialistApp.directive('spinner', function() {
 
 spacialistApp.directive('resizeWatcher', function($window) {
     return function(scope, element) {
+        var headerPadding = 20;
+        var bottomPadding = 20;
+
         scope.getViewportDim = function() {
             return {
                 'height': $window.innerHeight,
@@ -205,7 +208,7 @@ spacialistApp.directive('resizeWatcher', function($window) {
 
             var headerHeight = document.getElementById('header-nav').offsetHeight;
             var addonNavHeight = document.getElementById('addon-nav').offsetHeight;
-            var containerHeight = scope.containerHeight = height - headerHeight - 20;
+            var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
             var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
 
             $('#tree-container').css('height', containerHeight);
