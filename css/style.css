@@ -416,7 +416,7 @@ p, div {
     font-weight: 500;
 }
 
-#tree-container {
+#tree-container, #attribute-container {
     overflow: auto;
 }
 
