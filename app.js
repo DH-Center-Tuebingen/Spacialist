@@ -189,6 +189,32 @@ spacialistApp.directive('spinner', function() {
     };
 });
 
+spacialistApp.directive('resizeWatcher', function($window) {
+    return function(scope, element) {
+        scope.getViewportDim = function() {
+            return {
+                'height': $window.innerHeight,
+                'width': $window.innerWidth
+            };
+        };
+        scope.$watch(scope.getViewportDim, function(newValue, oldValue) {
+            console.log(newValue);
+
+            var height = newValue.height;
+            var width = newValue.width;
+
+            var headerHeight = document.getElementById('header-nav').offsetHeight;
+            var addonNavHeight = document.getElementById('addon-nav').offsetHeight;
+            var containerHeight = scope.containerHeight = height - headerHeight - 20;
+            var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
+
+            $('#tree-container').css('height', containerHeight);
+            $('#attribute-container').css('height', containerHeight);
+            $('#addon-container').css('height', containerHeight);
+        }, true);
+    };
+});
+
 spacialistApp.directive('myDirective', function(httpPostFactory, scopeService) {
     return {
         restrict: 'A',

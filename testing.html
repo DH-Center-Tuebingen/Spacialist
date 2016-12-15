@@ -1,10 +1,10 @@
-<div ng-controller="mainCtrl">
-    <div class="col-md-2" style="max-height: 500px;">
+<div ng-controller="mainCtrl" resize-watcher>
+    <div class="col-md-2" id="tree-container">
         <h3>Elemente</h3>
         <my-tree on-init="getContextList()" on-click-callback="setCurrentElement(target, elem)" item-list="contextList" element="currentElement" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
         <spinner ng-if="getContextListStarted"></spinner>
     </div>
-    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;">
+    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container">
         <div ng-show="currentElement">
             <h3>{{ currentElement.name }}<span ng-if="currentElement.typeLabel" class="type-desc">{{ currentElement.typeLabel }}</span> <small>Element-Eigenschaften</small></h3>
             <form class="form-horizontal" role="form" ng-if="currentElementFields">
@@ -40,8 +40,8 @@
             </div>
         </div>
     </div>
-    <div class="col-md-5">
-        <ul class="nav nav-tabs">
+    <div class="col-md-5" id="addon-container">
+        <ul class="nav nav-tabs" id="addon-nav">
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'map'}" ng-if="moduleExists('mapCtrl')">
                 <a href="" ng-click="setActiveTab('map')"><span class="fa fa-fw fa-map-marker"></span><span class="tab-desc"> Karte</span></a>
             </li>
@@ -57,7 +57,7 @@
         </ul>
         <div ng-if="layerTwo.activeTab == 'map'">
             <div id="map-container" ng-if="sideNav.mapTab && map">
-                <leaflet bounds="mapBounds" layers="map.layers" lf-draw="map.drawOptions" controls="map.controls" markers="markers" event-broadcast="map.events" height="768px" width="100%">
+                <leaflet bounds="mapBounds" layers="map.layers" lf-draw="map.drawOptions" controls="map.controls" markers="markers" event-broadcast="map.events" height="{{addonContainerHeight}}px" width="100%">
                     <layercontrol order="normal" icons="map.layercontrol.icons" auto-hide-opacity="true" show-groups="true" title="" base-title="Base Layers" overlays-title="Overlays"></layercontrol>
                 </leaflet>
             </div>
