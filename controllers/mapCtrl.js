@@ -1,4 +1,4 @@
-spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce', 'leafletData', 'scopeService', 'httpPostFactory', 'httpPostPromise', 'httpGetFactory', 'Upload', 'modalService', '$uibModal', '$auth', '$state', '$http', function($rootScope, $scope, $timeout, $sce, leafletData, scopeService, httpPostFactory, httpPostPromise, httpGetFactory, Upload, modalService, $uibModal, $auth, $state, $http) {
+spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce', 'leafletData', 'scopeService', 'httpPostFactory', 'httpPostPromise', 'httpGetFactory', 'modalService', '$uibModal', '$auth', '$state', '$http', function($rootScope, $scope, $timeout, $sce, leafletData, scopeService, httpPostFactory, httpPostPromise, httpGetFactory, modalService, $uibModal, $auth, $state, $http) {
     scopeService.map = {};
     scopeService.map.events = {
         markers: {
@@ -499,12 +499,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         }]
     }
 
-    $scope.loadImages = function() {
-        var len = $scope.loadedImages.length;
-        if (len == $scope.allImages.length) return;
-        $scope.loadedImages = [].concat($scope.loadedImages, $scope.allImages.slice(len, len + 10));
-    }
-
     $scope.addStuff = function() {
         $scope.d3GraphJson.children.push({
             "id": "n15",
@@ -664,15 +658,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
             // start an initial layout
             $scope.d3layouter.kgraph(graph);
         }
-
-    httpGetFactory('api/image/getAll', function(callback) {
-        var unlImg = [];
-        angular.forEach(callback, function(value, key) {
-            value.linked = [];
-            unlImg.push(value);
-        });
-        angular.extend($scope.allImages, unlImg);
-    });
 
     var getKeyForName = function(name) {
         return name.replace(/-/, '');
@@ -1122,49 +1107,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         } else {
             //console.log($scope.unlinkedFilter.contexts[id]);
         }
-    }
-
-    /**
-     * enables drag & drop support for image upload, calls `$scope.uploadImages` if files are dropped on the `dropFiles` model
-     */
-    $scope.$watch('dropFiles', function() {
-        $scope.uploadImages($scope.dropFiles);
-    });
-
-    /**
-     * Upload the image files `files` to the server, one by one and store their paths in the database.
-     */
-    $scope.uploadImages = function(files, invalidFiles) {
-        var finished = 0;
-        var toFinish = (typeof files === 'undefined') ? 0 : files.length;
-        $scope.uploadingImages = files;
-        $scope.errFiles = invalidFiles;
-        angular.forEach(files, function(file) {
-            file.upload = Upload.upload({
-                url: 'api/image/upload',
-                data: {
-                    file: file
-                }
-            });
-            file.upload.then(function(response) {
-                $timeout(function() {
-                    var data = response.data;
-                    data.linked = [];
-                    if (typeof $scope.allImages === 'undefined') $scope.allImages = [];
-                    $scope.allImages.push(data);
-                    finished++;
-                    if (finished == toFinish) {
-                        $scope.uploadingImages = undefined;
-                    }
-                });
-            }, function(response) {
-                if (response.status > 0)
-                    $scope.errorMsg = response.status + ': ' + response.data;
-            }, function(evt) {
-                file.progress = Math.min(100, parseInt(100.0 *
-                    evt.loaded / evt.total));
-            });
-        });
     }
 
     /**
@@ -1652,21 +1594,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         $scope.subNav.fileImp = false;
         $scope.subNav.valueImp = false;
         $scope.subNav.values = {};
-    }
-
-    /**
-     * Opens a modal for a given image `img`. This modal displays a zoomable image container and other relevant information of the image
-     */
-    $scope.openModal = function(img, filmIndex) {
-        modalOptions = {};
-        modalOptions.markers = angular.extend({}, scopeService.markers);
-        modalOptions.img = angular.extend({}, img);
-        modalOptions.linkImage = $scope.linkImage;
-        modalOptions.unlinkImage = $scope.unlinkImage;
-        modalOptions.isEmpty = $scope.isEmpty;
-        modalOptions.zoomlevel = 100;
-        modalOptions.modalNav = angular.extend({}, $scope.modalNav);
-        modalService.showModal({}, modalOptions);
     }
 
     $scope.subNav.triggerFileSelect = function() {
