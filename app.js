@@ -673,7 +673,8 @@ spacialistApp.run(function($rootScope, $state) {
         var user = JSON.parse(localStorage.getItem('user'));
         if(user) {
             $rootScope.currentUser = {
-                user: user
+                user: user.user,
+                roles: user.roles
             };
             if(toState.name === 'auth') {
                 event.preventDefault();

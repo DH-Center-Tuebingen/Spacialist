@@ -53,7 +53,5 @@ $app->post('user/login', 'UserController@login');
 $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']], function($app) {
     $app->post('user/logout', 'UserController@logout');
     $app->post('user/switch', 'UserController@switchRole');
-    $app->post('user/get', function() {
-        return response()->json(Auth::user());
-    });
+    $app->post('user/get', 'UserController@get');
 });

@@ -85,7 +85,7 @@
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right" ng-controller="userCtrl">
-                        <li ng-if="currentUser"><!--ng-controller="UserCtrl"-->
+                        <li ng-if="currentUser">
                             <a href="" ng-click="logoutUser()">
                                 <span class="fa fa-fw fa-sign-out"></span> {{ currentUser.user.name }}
                             </a>
@@ -95,21 +95,11 @@
                                 Administrator <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu>
-                                <li>
+                                <li ng-repeat="role in currentUser.roles">
                                     <a href="">
-                                        Administrator
+                                        {{ role.name }}
                                     </a>
                                 </li>
-                                <!--<li>
-                                    <a href="">
-                                        HiWi
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="">
-                                        Fotobearbeiter
-                                    </a>
-                                </li>-->
                             </ul>
                         </li>
                     </ul>

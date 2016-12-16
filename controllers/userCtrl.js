@@ -15,7 +15,8 @@ spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory
             }
             localStorage.setItem('user', JSON.stringify(response.data));
             scopeService.currentUser = $scope.currentUser = {
-                user: response.data
+                user: response.data.user,
+                roles: response.data.roles
             };
             console.log(JSON.stringify(response.data));
             $state.go('spacialist', {});

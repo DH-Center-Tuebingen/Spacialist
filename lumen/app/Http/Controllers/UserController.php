@@ -17,6 +17,19 @@ class UserController extends Controller
         $this->jwt = $jwt;
     }
 
+    public function get() {
+        $user = \Auth::user();
+        $roles = \DB::table('user_roles')
+            ->join('roles', 'roles.id', '=' , 'role_id')
+            ->where('user_id', '=', $user->id)
+            ->select('name', 'code')
+            ->get();
+        return response()->json([
+            'user' => $user,
+            'roles' => $roles
+        ]);
+    }
+
     public function login(Request $request) {
         $this->validate($request, [
             'email'    => 'required|email|max:255',
