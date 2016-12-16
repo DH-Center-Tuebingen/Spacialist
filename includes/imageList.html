@@ -1,0 +1,83 @@
+<div class="col-md-12">
+    <h4>{{ 'add new images' | translate }}</h4>
+    <div class="col-md-12">
+        <div class="alert alert-info drop-box" ngf-drop ngf-select ng-model="dropFiles" ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="false" accept="image/*" ngf-pattern="'image/*'">
+            Entweder per Drag &amp; Drop hierherziehen oder über den Button hochladen.
+        </div>
+        <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple accept="image/*">Bilder hochladen</button>
+        <ul>
+            <li ng-repeat="f in uploadingImages">
+                {{ f.name }} {{ f.$errorParam }}
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ f.progress }}%">
+                        <span ng-hide="f.progress < 100">
+                            {{ 'upload finished' | translate }}
+                        </span>
+                        <span ng-show="f.progress < 100">
+                            {{ f.progress }}%
+                        </span>
+                    </div>
+                </div>
+            </li>
+            <li ng-repeat="f in errFiles">{{f.name}} {{f.$error}} {{f.$errorParam}}
+            </li>
+        </ul>
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            <h3>{{ 'all images' | translate }} <span class="badge">{{ allImages.length }}</span></h3>
+            <div class="alert alert-warning" ng-hide="allImages">
+                <p>{{ 'no images' | translate }}</p>
+            </div>
+        </div>
+        <div class="row" infinite-scroll="loadImages()" infinite-scroll-distance="0" infinite-scroll-container="'#addon-container'">
+            <div class="col-sm-6 col-md-4 unlinked-item" ng-repeat="img in imageList">
+                <div class="thumbnail">
+                    <a ng-click="openImageModal(img, key)">
+                        <div class="thumb-wrapper">
+                            <!--<img class="thumb" ng-src="{{ img.thumb_url }}"/>-->
+                            <img class="thumb" src="api/image/get/preview/{{img.id}}" />
+                             <div class="overlay">
+                                 <span class="fa fa-search-plus overlay-icon" aria-hidden="true"></span>
+                             </div>
+                         </div>
+                    </a>
+                    <div class="caption">
+                        <h3 class="nowrap clickable" ng-click="showDetails = !showDetails" ng-init="showDetails = false" style="line-height: 1.3; margin-top: 10px;">
+                            {{ img.filename }}
+                        </h3>
+                        <div ng-if="showDetails">
+                            <p>
+                                <b>Zuletzt geändert:</b> <span style="color: gray;">{{ img.modified * 1000 | date:'d.MM.yyyy H:mm:ss' }}</span>
+                            </p>
+                            <p>
+                                <b>Dateigröße:</b> <span style="color: gray;">{{ img.filesize | bytes:2 }}</span>
+                            </p>
+                            <p>
+                                <b>Verknüpft:</b> <span style="color: gray;" ng-show="img.linked.length > 0">{{ img.linked }}</span>
+                                <i style="color: gray;" ng-hide="img.linked.length > 0">Nicht verknüpft</i>
+                            </p>
+                            <div class="btn-group dropdown" uib-dropdown>
+                                <button type="button" class="btn btn-danger dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="fa fa-link"></span> {{ 'link' | translate }} <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" uib-dropdown-menu>
+                                    <li ng-repeat="marker in markers | filterLinkedMarker:img.linked">
+                                        <a style="cursor: pointer;" ng-click="linkImage(img, marker.title)">{{ marker.myOptions.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <h4><i class="fa fa-tags" style="font-size: 0.8em;"></i> Tags</h4>
+                            <ui-select multiple tagging tagging-label="(custom 'new' label)" ng-model="img.tags" theme="bootstrap" sortable="true" close-on-select="false">
+                                <ui-select-match placeholder="Add tag">{{ $item.name }}</ui-select-match>
+                                <ui-select-choices repeat="tag in availableTags | filter:$select.search">
+                                  {{ tag.name }}
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -68,8 +68,22 @@
         <div ng-if="layerTwo.activeTab == 'harris'">
             <h5>Harris active</h5>
         </div>
-        <div ng-if="layerTwo.activeTab == 'images'">
-            <h5>Images active</h5>
+        <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl">
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1" ng-if="currentElement">
+                    <ul class="nav nav-tabs nav-justified">
+                        <li role="presentation" ng-class="{ active: layerTwo.activeImageTab == 'all' }">
+                            <a href="" ng-click="setImageTab('all')">Alle <span class="badge">{{ allImages.length }}</span></a>
+                        </li>
+                        <li role="presentation" ng-class="{ active: layerTwo.activeImageTab == 'linked' }">
+                            <a href="" ng-click="setImageTab('linked')">Verknüpft <span class="badge">{{ linkedImages.length }}</span></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <ng-include src="'includes/imageList.html'" />
+            </div>
         </div>
     </div>
 </div>
