@@ -552,7 +552,8 @@ spacialistApp.factory('scopeService', function($http) {
             activeRole: roles[0]
         },
         drawOptions: {},
-        ctxts: []
+        ctxts: [],
+        layerTwo: {}
     };
     return service;
 });

@@ -222,6 +222,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     $scope.layerTwo = {
         activeTab: 'map'
     };
+    scopeService.layerTwo = $scope.layerTwo;
 
     $scope.setActiveTab = function(tabId) {
         $scope.layerTwo.activeTab = tabId;
@@ -289,6 +290,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     $scope.setCurrentElement = function(target, elem) {
         $scope.unsetCurrentElement();
         if(typeof elem != 'undefined' && elem.id == target.id) {
+            $scope.layerTwo.activeImageTab = 'all';
             return;
         }
         elem = target;
@@ -310,6 +312,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             typeId: elem.typeid,
             cid: elem.context_id
         };
+        $scope.layerTwo.activeImageTab = 'linked';
         setMarker($scope.currentElement, true);
     };
 
