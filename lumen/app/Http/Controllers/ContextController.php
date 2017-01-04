@@ -369,13 +369,13 @@ class ContextController extends Controller {
                 'context_type_id' => $ctid,
                 'lasteditor' => $user['name']
             ];
-            if($request->has('root_ctid')) $ins['root_ctid'] = $request->get('root_ctid');
+            if($request->has('root_cid')) $ins['root_cid'] = $request->get('root_cid');
             if($request->has('lat')) $ins['lat'] = $request->get('lat');
             if($request->has('lng')) $ins['lng'] = $request->get('lng');
             $cid = DB::table('contexts')
                 ->insertGetId($ins);
         }
-        $this->updateOrInsert($request->except('name', 'lat', 'lng', 'root_ctid', 'ctid', 'realId'), $cid, $isUpdate, $user);
+        $this->updateOrInsert($request->except('name', 'lat', 'lng', 'root_cid', 'ctid', 'realId'), $cid, $isUpdate, $user);
         return response()->json(['fid' => $cid, 'data' => $this->getData($cid)]);
     }
 

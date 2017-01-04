@@ -133,7 +133,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             var elem = {
                 name: name,
                 ctid: type.ctid,
-                root_ctid: parent.id,
+                root_cid: parent.id,
                 reclevel: parent.reclevel + 1,
                 typeid: type.type,
                 typename: type.index,
@@ -145,7 +145,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             var formData = new FormData();
             formData.append('name', name);
             formData.append('ctid', type.ctid);
-            if(typeof parent.id != 'undefined') formData.append('root_ctid', parent.id);
+            if(typeof parent.id != 'undefined') formData.append('root_cid', parent.id);
             if(hasPos && copyPosition) {
                 formData.append('lat', parent.lat);
                 formData.append('lng', parent.lng);
@@ -192,7 +192,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                     id: copy.id,
                     name: copy.name,
                     ctid: copy.ctid,
-                    root_ctid: parent.root_ctid,
+                    root_cid: parent.root_cid,
                     reclevel: parent.reclevel,
                     typeid: parent.typeid,
                     typename: parent.typename,
@@ -305,7 +305,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         $scope.currentElement = {
             id: elem.id,
             name: elem.name,
-            root_ctid: elem.root_ctid || -1,
+            root_cid: elem.root_cid || -1,
             typeLabel: elem.typelabel,
             typeId: elem.typeid,
             ctid: elem.ctid
@@ -391,10 +391,10 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
      */
     var storeElement = function(elem) {
         console.log("store context " + elem.name);
-        var root_ctid = elem.root_ctid;
+        var root_cid = elem.root_cid;
         var formData = new FormData();
         formData.append('name', elem.name);
-        formData.append('root_ctid', root_ctid);
+        formData.append('root_cid', root_cid);
         formData.append('ctid', elem.ctid);
         if(typeof elem.id !== 'undefined' && elem.id != -1) {
             formData.append('realId', elem.id);
