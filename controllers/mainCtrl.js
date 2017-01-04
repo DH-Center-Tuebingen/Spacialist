@@ -144,8 +144,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             var hasPos = typeof parent.lat != 'undefined' && typeof parent.lng != 'undefined' && parent.lat !== null && parent.lng !== null;
             var formData = new FormData();
             formData.append('name', name);
-            formData.append('cid', type.ctid);
-            if(typeof parent.id != 'undefined') formData.append('root', parent.id);
+            formData.append('ctid', type.ctid);
+            if(typeof parent.id != 'undefined') formData.append('root_ctid', parent.id);
             if(hasPos && copyPosition) {
                 formData.append('lat', parent.lat);
                 formData.append('lng', parent.lng);
@@ -394,8 +394,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         var root_ctid = elem.root_ctid;
         var formData = new FormData();
         formData.append('name', elem.name);
-        formData.append('root', root_ctid);
-        formData.append('cid', elem.ctid);
+        formData.append('root_ctid', root_ctid);
+        formData.append('ctid', elem.ctid);
         if(typeof elem.id !== 'undefined' && elem.id != -1) {
             formData.append('realId', elem.id);
         }
@@ -474,7 +474,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                 },
                 $scope.savePossibility = function() {
                     var formData = new FormData();
-                    formData.append('fid', cid);
+                    formData.append('cid', cid);
                     formData.append('aid', fieldid);
                     formData.append('possibility', $scope.modalFields.value);
                     httpPostFactory('api/context/set/possibility', formData, function(callback) {
@@ -552,7 +552,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     $scope.addSource = function(currentSource, currentDesc, aid) {
         var cid = $scope.currentElement.id;
         var formData = new FormData();
-        formData.append('fid', cid);
+        formData.append('cid', cid);
         formData.append('aid', aid);
         formData.append('lid', currentSource.id);
         formData.append('desc', currentDesc);
