@@ -83,7 +83,7 @@ class ImageController extends Controller
             $description = NULL;
         }
         $mod = date('Y-m-d H:i:s', filemtime($fileUrl));
-        $id = \DB::table('photo')
+        $id = \DB::table('photos')
             ->insertGetId([
                 'modified' => $mod,
                 'name' => $filename,
@@ -103,7 +103,7 @@ class ImageController extends Controller
     }
 
     private function getImageById($id) {
-        $img = \DB::table('photo as ph')
+        $img = \DB::table('photos as ph')
                 ->select('ph.id as id', 'ph.modified as modified', 'ph.name as filename', 'ph.thumb as thumbname', 'ph.cameraname', 'ph.orientation', 'ph.description', 'ph.copyright', 'ph.photographer_id')
                 ->where('ph.id', $id)
                 ->first();
@@ -122,7 +122,7 @@ class ImageController extends Controller
     }
 
     public function getAll() {
-        $images = DB::table('photo as ph')
+        $images = DB::table('photos as ph')
                     ->select("ph.id as id", "ph.modified as modified", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id")
                     ->get();
         foreach($images as &$img) {
