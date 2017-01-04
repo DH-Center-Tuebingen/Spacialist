@@ -22,6 +22,6 @@ class GpsController extends Controller
     }
 
     public function getMarkers() {
-        return response()->json(DB::table('finds')->get()->first());
+        return response()->json(DB::table('contexts')->get()->first());
     }
 }

@@ -19,7 +19,7 @@ class LiteratureController extends Controller
 
     public function getAll() {
         return response()->json(
-            DB::table('bib_tex')
+            DB::table('literature')
             ->orderBy('id', 'asc')
             ->get()
         );

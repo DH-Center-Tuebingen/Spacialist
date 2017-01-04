@@ -4,10 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BibTex extends Model
+class Literature extends Model
 {
 
-    protected $table = 'bib_tex';
+    protected $table = 'literature';
     /**
      * The attributes that are assignable.
      *
