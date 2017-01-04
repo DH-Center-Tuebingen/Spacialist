@@ -73,9 +73,11 @@ spacialistApp.controller('imageCtrl', function($scope, scopeService, modalServic
     };
 
     $scope.loadImages = function() {
-        var imageSrc = $scope.linkedImages;
+        var imageSrc;
         if($scope.layerTwo.activeImageTab == 'all') {
             imageSrc = $scope.allImages;
+        } else {
+             imageSrc = $scope.linkedImages;
         }
         var len = $scope.imageList.length;
         if (len == imageSrc.length) return;

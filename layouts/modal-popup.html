@@ -15,9 +15,51 @@
             <li role="presentation" ng-class="{active: modalOptions.modalNav.propTab}" ng-click="modalOptions.modalNav.setPropTab()"><a><i class="fa fa-cog"></i> Eigenschaften</a></li>
             <li role="presentation" ng-class="{active: modalOptions.modalNav.linkTab}" ng-click="modalOptions.modalNav.setLinkTab()"><a><i class="fa fa-link"></i> Verknüpfungen</a></li>
         </ul>
-        <div ng-show="modalOptions.modalNav.propTab">
+        <div ng-show="modalOptions.modalNav.propTab" class="col-md-10 col-md-offset-1">
             <h3>Eigenschaften</h3>
-            <p class="left">
+            <table class="table table-striped" style="width: 100%;">
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Ort (allgemein)</td>
+                    <td style="text-align:right;"><i style="color: gray;">Tübingen</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Ort (spezifisch)</td>
+                    <td style="text-align:right;"><i style="color: gray;">Österberg</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Befund</td>
+                    <td style="text-align:right;"><i style="color: gray;">Fundstelle 123, Installation 45 und 86, Fundnr. 990</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Datierung</td>
+                    <td style="text-align:right;"><i style="color: gray;">Spätbronzezeit, moderne Befunde</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Blickrichtung</td>
+                    <td style="text-align:right;"><i style="color: gray;">SSW</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Fotoart</td>
+                    <td style="text-align:right;"><i style="color: gray;">Arbeitsfoto</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Fotograf</td>
+                    <td style="text-align:right;"><i style="color: gray;">Team eScience-Center</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Copyright</td>
+                    <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.copyright }}</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Beschreibung</td>
+                    <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.description }}</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Orientierung</td>
+                    <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.orientation }}</i></td>
+                </tr>
+            </table>
+            <!--<p class="left">
                 <b>Ort (allgemein):</b> <i style="color: gray;"></i>
             </p>
             <p class="left">
@@ -36,7 +78,7 @@
                 <b>Fotoart:</b> <i style="color: gray;">Arbeitsfoto</i>
             </p>
             <p class="left">
-                <b>Fotograf:</b> <i style="color: gray;"><!--{{ modalOptions.img.photographer_id }}-->Team eScience-Center</i>
+                <b>Fotograf:</b> <i style="color: gray;">Team eScience-Center</i>
             </p>
             <p class="left">
                 <b>Copyright:</b> <i style="color: gray;">{{ modalOptions.img.copyright }}</i>
@@ -46,7 +88,7 @@
             </p>
             <p class="left">
                 <b>Orientierung:</b> <i style="color: gray;">{{ modalOptions.img.orientation }}</i>
-            </p>
+            </p>-->
             <hr/>
             <h3>Bildeigenschaften</h3>
             <p class="left">
