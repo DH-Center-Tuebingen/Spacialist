@@ -118,7 +118,7 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
             typeName: attribData.typeName,
             typeIndex: attribData.typeIndex,
             typeLabel: attribData.typeName,
-            contextType: $scope.typeFields[0].context,
+            ctid: $scope.typeFields[0].ctid,
             data: []
         };
         delete attribData.typeId;
@@ -128,7 +128,7 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
             var attr = {};
             if(key != 'name') {
                 var ids = key.split('_');
-                attr.context = elem.contextType;
+                attr.ctid = elem.ctid;
                 attr.aid = ids[0];
                 attr.attr = ids[0];
                 attr.value = value;
@@ -146,7 +146,7 @@ spacialistApp.controller('subTreeCtrl', ['$scope', 'scopeService', 'httpPostFact
         elem.parentId = parent.realId;
         var promise = storeElement(elem);
         promise.then(function(newRealId) {
-            elem.realId = newRealId.fid;
+            elem.realId = newRealId.cid;
             parent.children.push(elem);
             //$scope.createGraphFromHistory(); //TODO reimplement?
         });
