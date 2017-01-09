@@ -8,6 +8,24 @@ spacialistApp.controller('imageCtrl', function($scope, scopeService, modalServic
         $scope.loadImages();
     };
 
+    $scope.imageContextMenu = [
+        [function() {
+            var dflt = '<i class="fa fa-fw fa-plus-circle"></i> Mit aktuellem Kontext verbinden';
+            if($scope.currentElement) {
+                dflt += ' <i style="opacity: 0.5;">' + $scope.currentElement.name + '</i>';
+            }
+            return dflt;
+        }, function ($itemScope, $event, modelValue, text, $li) {
+            //TODO implement
+        }, function() {
+            return typeof $scope.currentElement != 'undefined';
+        }],
+        null,
+        ['<i class="fa fa-fw fa-search"></i> Nach Kontexten suchen', function ($itemScope, $event, modelValue, text, $li) {
+            //TODO implement (open modal with search field or inline)
+        }]
+    ];
+
     /**
      * Opens a modal for a given image `img`. This modal displays a zoomable image container and other relevant information of the image
      */

@@ -31,7 +31,7 @@
             </div>
         </div>
         <div class="row" infinite-scroll="loadImages()" infinite-scroll-distance="0" infinite-scroll-container="'#addon-container'">
-            <div class="col-sm-6 col-md-4 unlinked-item" ng-repeat="img in imageList">
+            <div class="col-sm-6 col-md-4 unlinked-item" context-menu="imageContextMenu" ng-repeat="img in imageList">
                 <div class="thumbnail">
                     <a ng-click="openImageModal(img, key)">
                         <div class="thumb-wrapper">
