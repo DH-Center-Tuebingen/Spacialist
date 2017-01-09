@@ -1,12 +1,15 @@
 <div class="modal-header">
     <h4>{{ modalOptions.img.filename }}</h4>
 </div>
-<div class="modal-body row">
-    <div class="col-md-7" style="display: flex; overflow: hidden;">
-        <span class="vertical-slider-val" style="width: 4em; align-self: center;">{{ modalOptions.zoomlevel }}%</span>
-        <input type="range" class="vertical-slider" id="width-25" min="50" max="500" step="5" orient="vertical" ng-model="modalOptions.zoomlevel" ng-change="modalOptions.zoomIn()"/>
-        <div id="imageWrapper" style="width: 100%; height: 550px; overflow: hidden; position: relative;">
-            <img src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" />
+<div class="modal-body col-md-12">
+    <div class="col-md-7 external-container">
+        <img src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" />
+        <div class="external-content">
+            <a href="api/image/get/{{ modalOptions.img.id }}" target="_blank">
+                <dfn title="Open {{ modalOptions.img.filename }} in a new tab">
+                    <i class="fa fa-fw fa-2x fa-external-link" aria-hidden="true"></i>
+                </dfn>
+            </a>
         </div>
     </div>
     <div class="col-md-5">
