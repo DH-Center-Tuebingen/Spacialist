@@ -18,7 +18,6 @@ spacialistApp.controller('imageCtrl', function($scope, scopeService, modalServic
         modalOptions.linkImage = $scope.linkImage;
         modalOptions.unlinkImage = $scope.unlinkImage;
         modalOptions.isEmpty = $scope.isEmpty;
-        modalOptions.zoomlevel = 100;
         modalOptions.modalNav = angular.extend({}, $scope.modalNav);
         modalService.showModal({}, modalOptions);
     };

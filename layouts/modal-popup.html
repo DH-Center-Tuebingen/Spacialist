@@ -6,8 +6,7 @@
         <span class="vertical-slider-val" style="width: 4em; align-self: center;">{{ modalOptions.zoomlevel }}%</span>
         <input type="range" class="vertical-slider" id="width-25" min="50" max="500" step="5" orient="vertical" ng-model="modalOptions.zoomlevel" ng-change="modalOptions.zoomIn()"/>
         <div id="imageWrapper" style="width: 100%; height: 550px; overflow: hidden; position: relative;">
-            <img src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" draggable="false" ng-mousedown="modalOptions.mDown($event)" ng-mouseup="modalOptions.mUp($event)" ng-mousemove="modalOptions.mMove($event)" ng-mouseleave="modalOptions.mLeave($event)"
-            msd-wheel="modalOptions.mScroll($event, $delta, $deltaX, $deltaY)"/>
+            <img src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" />
         </div>
     </div>
     <div class="col-md-5">
