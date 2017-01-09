@@ -4,18 +4,18 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ContextValue extends Model
+class AttributeValue extends Model
 {
-    protected $table = 'context_values';
+    protected $table = 'attribute_values';
     /**
      * The attributes that are assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'find_id',
+        'context_id',
         'attribute_id',
-        'find_val',
+        'context_val',
         'str_val',
         'int_val',
         'dbl_val',
@@ -23,5 +23,6 @@ class ContextValue extends Model
         'possibility',
         'lasteditor',
         'thesaurus_val',
+        'json_val'
     ];
 }

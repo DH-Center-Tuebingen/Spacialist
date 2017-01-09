@@ -17,10 +17,10 @@ class ContextController extends Controller {
     }
 
     private function getData($id) {
-        $data = DB::table('context_values as cv')->select('cv.*', 'a.datatype', 'a.thesaurus_root_id')->join('attributes as a', 'cv.attribute_id', '=', 'a.id')->where('find_id', $id)->get();
+        $data = DB::table('attribute_values as av')->select('av.*', 'a.datatype', 'a.thesaurus_root_url')->join('attributes as a', 'av.attribute_id', '=', 'a.id')->where('context_id', $id)->get();
         foreach($data as &$attr) {
             if($attr->datatype == 'literature') {
-                $attr->literature_info = DB::table('bib_tex')->where('id', $attr->str_val)->first();
+                $attr->literature_info = DB::table('literature')->where('id', $attr->str_val)->first();
             } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
                 $attr->val = DB::table('th_concept')
                     ->select('id as narrower_id',
@@ -72,10 +72,10 @@ class ContextController extends Controller {
     public function get() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_id as index', 'ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
-                    DB::raw("public.\"getLabelForId\"(C.thesaurus_id, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_id, 'de') AS val")
+                ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
+                    DB::raw("public.\"getLabelForId\"(C.thesaurus_url, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_url, 'de') AS val")
                 )
-                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_id')
+                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
                 ->where('c.type', '=', '0')
                 ->orderBy('val')
@@ -87,19 +87,19 @@ class ContextController extends Controller {
         $rootFields = DB::select("
         WITH RECURSIVE
         q AS (
-	        SELECT  f.*, 0 as reclevel
-	        FROM    finds f
-	        WHERE   root IS NULL
+	        SELECT  c.*, 0 as reclevel
+	        FROM    contexts c
+	        WHERE   root_context_id IS NULL
 	        UNION ALL
-	        SELECT  fc.*, reclevel+1
+	        SELECT  cc.*, reclevel+1
 	        FROM    q
-	        JOIN    finds fc
-	        ON      fc.root = q.id
+	        JOIN    contexts cc
+	        ON      cc.root_context_id = q.id
         )
-        SELECT  q.*, ct.type as typeid, ct.thesaurus_id AS typename, public.\"getLabelForId\"(ct.thesaurus_id, 'de') as typelabel
+        SELECT  q.*, ct.type as typeid, ct.thesaurus_url AS typename, public.\"getLabelForId\"(ct.thesaurus_url, 'de') as typelabel
         FROM    q
         JOIN context_types AS ct
-        ON q.context_id = ct.id
+        ON q.context_type_id = ct.id
         ORDER BY reclevel DESC
         ");
         $children = [];
@@ -108,7 +108,7 @@ class ContextController extends Controller {
             if(array_key_exists($field->id, $children)) $tmpChildren = $children[$field->id];
             else $tmpChildren = array();
             $rootFields[$key]->children = $tmpChildren;
-            $children[$field->root][] = $field;
+            $children[$field->root_context_id][] = $field;
             if($field->reclevel != 0) unset($rootFields[$key]);
         }
         return response()->json(array_values($rootFields));
@@ -118,8 +118,8 @@ class ContextController extends Controller {
         return response()->json(
             [
                 'finds' =>
-                    DB::table('finds')
-                    ->select('name', 'context_id as cid, id')
+                    DB::table('contexts')
+                    ->select('name', 'context_type_id as ctid, id')
                     ->get()
             ]
         );
@@ -127,10 +127,10 @@ class ContextController extends Controller {
 
     public function getChoices() {
         $rows = DB::table('context_types as c')
-        ->select('ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_id as root',
-            DB::raw("public.\"getLabelForId\"(C.thesaurus_id, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_id, 'de') AS val")
+        ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
+            DB::raw("public.\"getLabelForId\"(C.thesaurus_url, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_url, 'de') AS val")
         )
-        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_id')
+        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
         ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
         ->where('a.datatype', '=', 'string-sc')
         ->orWhere('a.datatype', '=', 'string-mc')
@@ -166,10 +166,10 @@ class ContextController extends Controller {
 
     public function getAttributes($id) {
         $rows = DB::table('context_types as c')
-        ->select('ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_id as root',
-            DB::raw("public.\"getLabelForId\"(C.thesaurus_id, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_id, 'de') AS val")
+        ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
+            DB::raw("public.\"getLabelForId\"(C.thesaurus_url, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_url, 'de') AS val")
         )
-        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_id')
+        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
         ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
         //->where('c.id', '=', $id)
         ->orderBy('val')
@@ -208,45 +208,45 @@ class ContextController extends Controller {
     }
 
     public function duplicate($id) {
-        $toDuplicate = DB::table('finds')
+        $toDuplicate = DB::table('contexts')
             ->where('id', $id)
             ->first();
         unset($toDuplicate->id);
         $dupCounter = 0;
         do {
             $dupCounter++;
-            $sameName = DB::table('finds')
+            $sameName = DB::table('contexts')
                 ->where('name', '=', $toDuplicate->name . " ($dupCounter)")
                 ->first();
         } while($sameName != null);
         $toDuplicate->name .= " ($dupCounter)";
-        $fid = DB::table('finds')
+        $cid = DB::table('contexts')
             ->insertGetId(get_object_vars($toDuplicate));
-        $toDuplicate->id = $fid;
-        $toDuplicateValues = DB::table('context_values')
-            ->where('find_id', $id)
+        $toDuplicate->id = $cid;
+        $toDuplicateValues = DB::table('attribute_values')
+            ->where('context_id', $id)
             ->get();
         foreach($toDuplicateValues as $value) {
             unset($value->id);
-            $value->find_id = $fid;
-            Db::table('context_values')
+            $value->context_id = $cid;
+            Db::table('attribute_values')
                 ->insertGetId(get_object_vars($value));
         }
-        $toDuplicate->data = $this->getData($fid);
+        $toDuplicate->data = $this->getData($cid);
         return response()->json(['obj' => $toDuplicate]);
     }
 
     public function getType($id) {
-        $finds = DB::table('finds')->get();
-        foreach($finds as &$find) {
-            $attribs = DB::table('context_values as CV')
-                    ->join('attributes as A', 'CV.attribute_id', 'A.id')
-                    ->where('find_id', $find->id)
-                    ->select('CV.*', 'A.datatype', 'A.thesaurus_root_id')
+        $contexts = DB::table('contexts')->get();
+        foreach($contexts as &$context) {
+            $attribs = DB::table('attribute_values as av')
+                    ->join('attributes as A', 'av.attribute_id', 'A.id')
+                    ->where('context_id', $context->id)
+                    ->select('av.*', 'A.datatype', 'A.thesaurus_root_url')
                     ->get();
             foreach($attribs as &$attr) {
                 if($attr->datatype == 'literature') {
-                    $attr->literature_info = DB::table('bib_tex')->where('id', $attr->str_val)->first();
+                    $attr->literature_info = DB::table('literature')->where('id', $attr->str_val)->first();
                 } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
                     $attr->val = DB::table('th_concept')
                         ->select('id as narrower_id',
@@ -256,20 +256,20 @@ class ContextController extends Controller {
                         ->first();
                 }
             }
-            $find->attributes = $attribs;
+            $context->attributes = $attribs;
         }
-        return response()->json($finds);
+        return response()->json($contexts);
     }
 
     public function getArtifacts() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_id as index', 'ca.context_id as cid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
+                ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
                     DB::raw(
-                        "public.\"getLabelForId\"(C.thesaurus_id, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_id, 'de') AS val"
+                        "public.\"getLabelForId\"(C.thesaurus_url, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_url, 'de') AS val"
                     )
                 )
-                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_id')
+                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
                 ->where('c.type', '=', '1')
                 ->orderBy('val')
@@ -283,26 +283,26 @@ class ContextController extends Controller {
         $rows = DB::select(
             "WITH RECURSIVE
             q AS (
-                SELECT  f.*
-                FROM    finds f
+                SELECT  c.*
+                FROM    contexts c
                 WHERE   id = $id
                 UNION ALL
-                SELECT  fc.*
+                SELECT  cc.*
                 FROM    q
-                JOIN    finds fc
-                ON      fc.root = q.id
+                JOIN    contexts cc
+                ON      cc.root_context_id = q.id
             )
-            SELECT  q.*, ct.type, ct.thesaurus_id AS typename, public.\"getLabelForId\"(ct.thesaurus_id, 'de') as typelabel
+            SELECT  q.*, ct.type, ct.thesaurus_url AS typename, public.\"getLabelForId\"(ct.thesaurus_url, 'de') as typelabel
             FROM    q
             JOIN context_types AS ct
-            ON q.context_id = ct.id
+            ON q.context_type_id = ct.id
             ORDER BY id ASC"
         );
         $roots = array();
         foreach($rows as $row) {
             if(empty($row)) continue;
-            $row->data = DB::table('context_values as cv')->select('cv.*', 'a.datatype')->join('attributes as a', 'cv.attribute_id', '=', 'a.id')->where('find_id', $row->id)->get();
-            if(!empty($row->root)) $roots[$row->root][] = $row;
+            $row->data = DB::table('attribute_values as av')->select('av.*', 'a.datatype')->join('attributes as a', 'av.attribute_id', '=', 'a.id')->where('context_id', $row->id)->get();
+            if(!empty($row->root_context_id)) $roots[$row->root_context_id][] = $row;
         }
         return response()->json($roots);
     }
@@ -315,11 +315,11 @@ class ContextController extends Controller {
         $lng = $request->get('lng');
         $id = $request->get('id');
         $name = $request->get('name');
-        $cid = $request->get('cid');
-        $fid = -1;
+        $ctid = $request->get('cid');
+        $cid = -1;
         $isUpdate = $id > 0;
         if($isUpdate) {
-            DB::table('finds')
+            DB::table('contexts')
                 ->where('id', $id)
                 ->update([
                     'name' => $name,
@@ -327,21 +327,21 @@ class ContextController extends Controller {
                     'lng' => $lng,
                     'lasteditor' => $user['name']
                 ]);
-            $fid = $id;
+            $cid = $id;
         } else {
             $ins = [
                     'name' => $name,
-                    'context_id' => $cid,
+                    'context_type_id' => $ctid,
                     'lat' => $lat,
                     'lng' => $lng,
                     'lasteditor' => $user['name']
             ];
             if($request->has('root')) $ins['root'] = $request->get('root');
-            $fid = DB::table('finds')
+            $cid = DB::table('contexts')
                 ->insertGetId($ins);
         }
-        $this->updateOrInsert($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid']), $fid, $isUpdate, $user);
-        return response()->json(['fid' => $fid]);
+        $this->updateOrInsert($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid']), $cid, $isUpdate, $user);
+        return response()->json(['fid' => $cid]);
     }
 
     public function set(Request $request) {
@@ -349,7 +349,7 @@ class ContextController extends Controller {
         if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $isUpdate = $request->has('realId');
         $name = $request->get('name');
-        $cid = $request->get('cid');
+        $ctid = $request->get('ctid');
         if($isUpdate) {
             $realId = $request->get('realId');
             $upd = [
@@ -358,25 +358,25 @@ class ContextController extends Controller {
             ];
             if($request->has('lat')) $upd['lat'] = $request->get('lat');
             if($request->has('lng')) $upd['lng'] = $request->get('lng');
-            DB::table('finds')
+            DB::table('contexts')
                 ->where('id', $realId)
                 ->update($upd);
-            $fid = $realId;
-            $currAttrs = DB::table('context_values')->where('find_id', $realId)->get();
+            $cid = $realId;
+            $currAttrs = DB::table('attribute_values')->where('context_id', $realId)->get();
         } else {
             $ins = [
                 'name' => $name,
-                'context_id' => $cid,
+                'context_type_id' => $ctid,
                 'lasteditor' => $user['name']
             ];
-            if($request->has('root')) $ins['root'] = $request->get('root');
+            if($request->has('root_cid')) $ins['root_cid'] = $request->get('root_cid');
             if($request->has('lat')) $ins['lat'] = $request->get('lat');
             if($request->has('lng')) $ins['lng'] = $request->get('lng');
-            $fid = DB::table('finds')
+            $cid = DB::table('contexts')
                 ->insertGetId($ins);
         }
-        $this->updateOrInsert($request->except('name', 'lat', 'lng', 'root', 'cid', 'realId'), $fid, $isUpdate, $user);
-        return response()->json(['fid' => $fid, 'data' => $this->getData($fid)]);
+        $this->updateOrInsert($request->except('name', 'lat', 'lng', 'root_cid', 'ctid', 'realId'), $cid, $isUpdate, $user);
+        return response()->json(['fid' => $cid, 'data' => $this->getData($cid)]);
     }
 
     public function setIcon(Request $request) {
@@ -386,10 +386,10 @@ class ContextController extends Controller {
         if($request->has('icon')) $upd['icon'] = $request->get('icon');
         if($request->has('color')) $upd['color'] = $request->get('color');
 
-        DB::table('finds')
+        DB::table('contexts')
             ->where('id', $id)
             ->update($upd);
-        $icon = DB::table('finds')
+        $icon = DB::table('contexts')
                 ->where('id', $id)
                 ->first();
         return response()->json([
@@ -401,31 +401,31 @@ class ContextController extends Controller {
     public function setPossibility(Request $request) {
         $user = \Auth::user();
         if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
-        $fid = $request->get('fid');
+        $cid = $request->get('cid');
         $aid = $request->get('aid');
         $possibility = $request->get('possibility');
 
         $where = array(
-            ['find_id', '=', $fid],
+            ['context_id', '=', $cid],
             ['attribute_id', '=', $aid]
         );
-        $isSet = DB::table('context_values')
+        $isSet = DB::table('attribute_values')
             ->where($where)
             ->count();
         if($isSet == null) { //insert
-            DB::table('context_values')
+            DB::table('attribute_values')
                 ->insert([
-                    'find_id' => $fid,
+                    'context_id' => $cid,
                     'attribute_id' => $aid,
                     'possibility' => $possibility,
                     'lasteditor' => $user['name']
                 ]);
         } else { //update
-            DB::table('context_values')
+            DB::table('attribute_values')
                 ->where($where)
                 ->update(['possibility' => $possibility, 'lasteditor' => $user['name']]);
         }
-        return response()->json(DB::table('context_values')
+        return response()->json(DB::table('attribute_values')
             ->where($where)->get());
     }
 
@@ -435,34 +435,34 @@ class ContextController extends Controller {
             with recursive deletes as
             (
                 select id
-                from finds
+                from contexts
                 where id = $id
                 union all
-                select f.id
-                from finds as f
-                inner join deletes p on f.root = p.id
+                select c.id
+                from contexts as c
+                inner join deletes p on f.root_context_id = p.id
             )
-            delete from context_values where find_id in (select id from deletes)
+            delete from attribute_values where context_id in (select id from deletes)
         ");
         DB::select("
             with recursive deletes as
             (
                 select id
-                from finds
+                from contexts
                 where id = $id
                 union all
-                select f.id
-                from finds as f
-                inner join deletes p on f.root = p.id
+                select c.id
+                from contexts as c
+                inner join deletes p on f.root_context_id = p.id
             )
-            delete from finds where id in (select id from deletes)
+            delete from contexts where id in (select id from deletes)
         ");
 
         return response()->json(array("id"=>$id));
     }
 
-    public function updateOrInsert($request, $fid, $isUpdate, $user) {
-        $currAttrs = DB::table('context_values')->where('find_id', $fid)->get();
+    public function updateOrInsert($request, $cid, $isUpdate, $user) {
+        $currAttrs = DB::table('attribute_values')->where('context_id', $cid)->get();
         foreach($request as $key => $value) {
             $ids = explode("_", $key);
             $aid = $ids[0];
@@ -471,7 +471,7 @@ class ContextController extends Controller {
                 $tbl = 'option_values';
                 $isOption = true;
             } else {
-                $tbl = 'context_values';
+                $tbl = 'attribute_values';
                 $isOption = false;
             }
             $datatype = DB::table('attributes')
@@ -482,7 +482,7 @@ class ContextController extends Controller {
             if(is_array($jsonArr)) { //only string-sc and string-mc should be arrays
                 if($isUpdate) {
                     $dbEntries = array(
-                        ['find_id', $fid],
+                        ['context_id', $cid],
                         ['attribute_id', $aid]
                     );
                     if($isOption) $dbEntries[] = ['option_id', $oid];
@@ -509,7 +509,7 @@ class ContextController extends Controller {
                         }
                         if(!$alreadySet) {
                             $del = array(
-                                ['find_id', $fid],
+                                ['context_id', $cid],
                                 ['attribute_id', $aid]
                             );
                             if($datatype === 'list') $del[] = ['str_val', $row->str_val];
@@ -523,7 +523,7 @@ class ContextController extends Controller {
                 }
                 foreach($jsonArr as $v) {
                     $vals = array(
-                        'find_id' => $fid,
+                        'context_id' => $cid,
                         'attribute_id' => $aid,
                         'lasteditor' => $user['name']
                     );
@@ -554,16 +554,16 @@ class ContextController extends Controller {
                     if($alreadySet) {
                         $data = array('lasteditor' => $user['name']);
                         $data['str_val'] = $this->parseValue($jsonArr, $value, $datatype);
-                        DB::table('context_values')
+                        DB::table('attribute_values')
                                 ->where([
-                                    ['find_id', '=', $attr->find_id],
+                                    ['context_id', '=', $attr->context_id],
                                     ['attribute_id', '=', $attr->attribute_id],
                                     ['id', '=', $attr->id]
                                 ])
                             ->update($data);
                     } else {
                         $vals = array(
-                            'find_id' => $fid,
+                            'context_id' => $cid,
                             'attribute_id' => $aid,
                             'str_val' => $value,
                             'lasteditor' => $user['name']
@@ -575,7 +575,7 @@ class ContextController extends Controller {
                     }
                 } else {
                     $vals = array(
-                        'find_id' => $fid,
+                        'context_id' => $cid,
                         'attribute_id' => $aid,
                         'lasteditor' => $user['name']
                     );

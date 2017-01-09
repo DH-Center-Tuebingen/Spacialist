@@ -13,7 +13,7 @@ class ContextAttribute extends Model
      * @var array
      */
     protected $fillable = [
-        'context_id',
+        'context_type_id',
         'attribute_id',
     ];
 }

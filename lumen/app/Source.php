@@ -12,7 +12,7 @@ class Source extends Model
      * @var array
      */
     protected $fillable = [
-        'find_id',
+        'context_id',
         'attribute_id',
         'literature_id',
         'description',

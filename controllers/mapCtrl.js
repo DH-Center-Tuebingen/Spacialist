@@ -689,10 +689,10 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
             id: id,
             title: title,
             name: newName,
-            root: oldInfo.root,
+            root_cid: oldInfo.root_cid,
             typeid: oldInfo.typeid,
             typename: oldInfo.typename,
-            cid: oldInfo.context_id,
+            ctid: oldInfo.ctid,
             color: oldInfo.color,
             icon: oldInfo.icon
         };
@@ -742,10 +742,10 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
                 id: id,
                 title: title,
                 name: curr.name,
-                root: curr.root,
+                root_cid: curr.root_cid,
                 typeid: curr.typeid,
                 typename: curr.typename,
-                cid: curr.context_id,
+                ctid: curr.ctid,
                 color: color,
                 icon: icon
             };
@@ -978,8 +978,8 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         setSourcesTab: function() {
             $scope.sideNav.resetTabs();
             $scope.sideNav.sourcesTab = true;
-            var fid = $scope.activeMarker;
-            httpGetFactory('api/sources/get/' + fid, function(sources) {
+            var cid = $scope.activeMarker;
+            httpGetFactory('api/sources/get/' + cid, function(sources) {
                 $scope.markerValues.sources = sources;
             });
         },
@@ -1184,7 +1184,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         }
         //update marker values
         httpPostFactory('api/context/add', formData, function(callback) {
-            var newId = parseInt(callback.fid, 10);
+            var newId = parseInt(callback.cid, 10);
             setMarkerOption('id', newId);
             opts.id = newId;
             $scope.activeMarker = newId;
@@ -1255,9 +1255,9 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         setMarkerOption(index, arr);*/
     }
 
-    $scope.editListEntry = function(cid, aid, $index, val, tableIndex) {
+    $scope.editListEntry = function(ctid, aid, $index, val, tableIndex) {
         $scope.cancelEditListEntry();
-        var name = cid + "_" + aid;
+        var name = ctid + "_" + aid;
         $scope.currentEditName = name;
         $scope.currentEditIndex = $index;
         if (typeof tableIndex !== 'undefined') {
@@ -1307,8 +1307,8 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         //$scope.markerValues[name].splice($index, 1);
     }
 
-    $scope.toggleList = function(cid, aid) {
-        var index = cid + "_" + aid;
+    $scope.toggleList = function(ctid, aid) {
+        var index = ctid + "_" + aid;
         $scope.hideLists[index] = !$scope.hideLists[index];
     }
 
@@ -1350,15 +1350,15 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
                 typeId: ctx.type,
                 typeName: ctx.typename,
                 typeLabel: ctx.typelabel,
-                contextType: ctx.c_id,
+                ctid: ctx.ctid,
                 realId: ctx.id,
-                parentId: ctx.root,
+                root_cid: ctx.root_cid,
                 data: {}
             };
             angular.forEach(ctx.data, function(value, key) {
                 var aid = value['a_id'];
                 var attr = {};
-                attr.cid = ctx.c_id
+                attr.ctid = ctx.ctid
                 attr.aid = aid;
                 if(value.datatype == 'list') {
                     if(typeof elem.data[aid] == 'undefined') attr.value = [];
@@ -1494,7 +1494,7 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
     }
 
     var storeLib = function(opts) {
-        opts.cid = 10;
+        opts.ctid = 10;
         updateMarkerOpts(opts);
         $scope.updateEntry();
     }

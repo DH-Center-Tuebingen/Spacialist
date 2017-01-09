@@ -20,7 +20,7 @@ class CreateAttributesTable extends Migration
             $table->text('thesaurus_root_id')->nullable()->comment('only for string-sc and string-mc');
             $table->timestamps();
 
-            $table->foreign('thesaurus_id')->references('concept_url')->on('th_concept');
+            $table->foreign('thesaurus_id')->references('concept_url')->on('th_concept')->onDelete('cascade');
             $table->foreign('thesaurus_root_id')->references('concept_url')->on('th_concept');
         });
     }

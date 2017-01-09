@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Find extends Model
+class Context extends Model
 {
     /**
      * The attributes that are assignable.
@@ -12,7 +12,7 @@ class Find extends Model
      * @var array
      */
     protected $fillable = [
-        'context_id',
+        'context_type_id',
         'root',
         'name',
         'lat',
