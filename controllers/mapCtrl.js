@@ -1110,47 +1110,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
     }
 
     /**
-     * Link the image `img` to the context with the id `markerIndex`
-     */
-    $scope.linkImage = function(img, markerIndex) {
-        var markerId = scopeService.markers[markerIndex].id;
-        img.linked.push(markerId);
-        scopeService.markers[markerIndex].myOptions.images.push(img);
-        //TODO add to db
-    }
-
-    //TODO rewrite
-    $scope.unlinkImage = function(img, id) {
-        //TODO get marker id and remove from db
-        console.log("Reimplement!");
-        return;
-        var filmIndex = img.filmname;
-        var idx = img.linked.indexOf(id);
-        if (idx > -1) {
-            img.linked.splice(idx, 1);
-        }
-        var found = false;
-        angular.forEach($scope.allImages, function(value, key) {
-            if (!found) { //break, the angular way
-                if (value.id == img.id) {
-                    $scope.allImages[key].linked = img.linked;
-                    console.log(img.linked);
-                    found = true;
-                }
-            }
-        });
-        if (typeof $scope.markerValues !== 'undefined' && typeof $scope.markerValues.images !== 'undefined') {
-            for (var i = 0; i < $scope.markerValues.images.length; i++) {
-                if ($scope.markerValues.images[i].id == img.id) {
-                    $scope.markerValues.images.splice(i, 1);
-                    break;
-                }
-            }
-        }
-        //TODO remove from db
-    }
-
-    /**
      * Toggle if the marker should be draggable or not
      */
     $scope.togglePositionLock = function() {

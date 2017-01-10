@@ -1,24 +1,44 @@
-spacialistApp.controller('imageCtrl', function($scope, scopeService, modalService, httpGetFactory, Upload, $timeout) {
-    $scope.imageList = [];
-    scopeService.imageList = $scope.imageList;
+spacialistApp.controller('imageCtrl', function($rootScope, $scope, scopeService, modalService, httpGetFactory, httpPostFactory, Upload, $timeout) {
+    $scope.images = {
+        linked: [],
+        all: []
+    };
+    scopeService.images = $scope.images;
 
-    $scope.setImageTab = function(to) {
-        $scope.layerTwo.activeImageTab = to;
-        $scope.imageList = [];
-        $scope.loadImages();
+    $scope.initImageTab = function() {
+        $scope.layerTwo.imageTab.newOpen = false;
+        if($scope.currentElement) {
+            $scope.layerTwo.imageTab.linkedOpen = true;
+            $scope.layerTwo.imageTab.allOpen = false;
+            getLinkedImages($scope.currentElement.id);
+        } else {
+            $scope.layerTwo.imageTab.linkedOpen = false;
+            $scope.layerTwo.imageTab.allOpen = true;
+            getAllImages();
+        }
     };
 
     $scope.imageContextMenu = [
         [function() {
             var dflt = '<i class="fa fa-fw fa-plus-circle"></i> Mit aktuellem Kontext verbinden';
-            if($scope.currentElement) {
-                dflt += ' <i style="opacity: 0.5;">' + $scope.currentElement.name + '</i>';
+            //get element by dom, because $scope seems to be the isolated template (image-list.html) scope
+            var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
+            if(tmpScope) {
+                var currentElement = tmpScope.element;
+                dflt += ' <i style="opacity: 0.5;">' + currentElement.name + '</i>';
             }
             return dflt;
         }, function ($itemScope, $event, modelValue, text, $li) {
-            //TODO implement
+            var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
+            if(!tmpScope) return;
+            var currentElement = tmpScope.element;
+            var imgId = $itemScope.img.id;
+            var contextId = currentElement.id;
+            linkImage(imgId, contextId);
         }, function() {
-            return typeof $scope.currentElement != 'undefined';
+            var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
+            if(!tmpScope) return false;
+            return typeof tmpScope.element != 'undefined';
         }],
         null,
         ['<i class="fa fa-fw fa-search"></i> Nach Kontexten suchen', function ($itemScope, $event, modelValue, text, $li) {
@@ -60,8 +80,8 @@ spacialistApp.controller('imageCtrl', function($scope, scopeService, modalServic
                 console.log(response);
                 var data = response.data;
                 data.linked = [];
-                if (typeof $scope.allImages === 'undefined') $scope.allImages = [];
-                $scope.allImages.push(data);
+                if (typeof $scope.images.all === 'undefined') $scope.images.all = [];
+                $scope.images.all.push(data);
                 finished++;
                 if (finished == toFinish) {
                     $scope.uploadingImages = undefined;
@@ -89,29 +109,116 @@ spacialistApp.controller('imageCtrl', function($scope, scopeService, modalServic
         }
     };
 
-    $scope.loadImages = function() {
-        var imageSrc;
-        if($scope.layerTwo.activeImageTab == 'all') {
-            imageSrc = $scope.allImages;
-        } else {
-             imageSrc = $scope.linkedImages;
-        }
-        var len = $scope.imageList.length;
-        if (len == imageSrc.length) return;
-        $scope.imageList = [].concat($scope.imageList, imageSrc.slice(len, len + 10));
-    };
-
-    var getAllImages = function() {
-        httpGetFactory('api/image/getAll', function(callback) {
-            var images = [];
-            angular.forEach(callback, function(value, key) {
-                value.linked = [];
-                images.push(value);
-            });
-            angular.extend($scope.allImages, images);
-            $scope.linkedImages = [];
+    /**
+     * Link the image with ID `imgId` to the context with the id `contextId`
+     */
+    var linkImage = function(imgId, contextId) {
+        var formData = new FormData();
+        formData.append('imgId', imgId);
+        formData.append('ctxId', contextId);
+        httpPostFactory('api/image/link', formData, function(response) {
+            console.log("image " + imgId + " is now linked to " + contextId);
         });
     };
 
-    getAllImages();
+    var unlinkImage = function(imgId, contextId) {
+        var formData = new FormData();
+        formData.append('imgId', imgId);
+        formData.append('ctxId', contextId);
+        httpPostFactory('api/image/unlink', formData, function(response) {
+            console.log("unlinked image " + imgId + " from " + contextId);
+        });
+    };
+
+    $scope.loadImages = function(len, type) {
+        var src = $scope.images[type];
+        if(len == src.length) return src;
+        var loaded = src.slice(0, len + 10);
+        return loaded;
+    };
+
+    $scope.updateLinkedImages = function(beforeClick) {
+        //if it was closed before toggle
+        if(!beforeClick) {
+            getLinkedImages($scope.currentElement.id);
+        }
+    };
+
+    $scope.updateAllImages = function(beforeClick) {
+        //if it was closed before toggle
+        if(!beforeClick) {
+            getAllImages();
+        }
+    };
+
+    scopeService.getImagesForContext = function(id) {
+        $rootScope.$emit('image:delete:linked');
+        $scope.images.linked = [];
+        getLinkedImages(id);
+    };
+
+    var getLinkedImages = function(id) {
+        httpGetFactory('api/image/getByContext/' + id, function(response) {
+            var oneUpdated = false;
+            var linkedCopy = $scope.images.linked.slice();
+            for(var i=0; i<response.images.length; i++) {
+                var newLinked = response.images[i];
+                var alreadyLinked = false;
+                for(var j=0; j<linkedCopy.length; j++) {
+                    var linked = linkedCopy[j];
+                    if(newLinked.id == linked.id) {
+                        if(!angular.equals(newLinked, linked)) {
+                            oneUpdated = true;
+                            $scope.images.linked[j] = newLinked;
+                        }
+                        alreadyLinked = true;
+                        break;
+                    }
+                }
+                if(!alreadyLinked) {
+                    oneUpdated = true;
+                    $scope.images.linked.push(newLinked);
+                }
+            }
+            if(oneUpdated) {
+                $rootScope.$emit('image:updated:linked');
+            }
+        });
+    };
+
+    var getAllImages = function(forceUpdate) {
+        forceUpdate = forceUpdate || false;
+        var currentTime = (new Date()).getTime();
+        //only fetch images again if it is a force update or last time checked is > 60s
+        if(!forceUpdate && currentTime - $scope.lastTimeImageChecked <= 60000) {
+            return;
+        } else {
+            httpGetFactory('api/image/getAll', function(response) {
+                var oneUpdated = false;
+                var allCopy = $scope.images.all.slice();
+                for(var i=0; i<response.length; i++) {
+                    var newImg = response[i];
+                    var alreadyLinked = false;
+                    for(var j=0; j<allCopy.length; j++) {
+                        var one = allCopy[j];
+                        if(newImg.id == one.id) {
+                            if(!angular.equals(newImg, one)) {
+                                oneUpdated = true;
+                                $scope.images.all[j] = newImg;
+                            }
+                            alreadyLinked = true;
+                            break;
+                        }
+                    }
+                    if(!alreadyLinked) {
+                        oneUpdated = true;
+                        $scope.images.all.push(newImg);
+                    }
+                }
+                if(oneUpdated) {
+                    $rootScope.$emit('image:updated:all');
+                }
+            });
+        }
+    };
 });

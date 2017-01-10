@@ -182,6 +182,25 @@ spacialistApp.directive('myTree', function($parse) {
     };
 });
 
+spacialistApp.directive('imageList', function() {
+    return {
+        restrict: 'E',
+        templateUrl: 'includes/image-list.html',
+        scope: {
+            onScrollLoad: '&',
+            scrollContainer: '=',
+            imageData: '=',
+            imageType: '='
+        },
+        controller: 'imageCtrl',
+        link: function(scope, elements, attrs) {
+            scope.$root.$on('image:delete:linked', function(event, args) {
+                scope.tmpData.linked = [];
+            });
+        }
+    };
+});
+
 spacialistApp.directive('formField', function() {
     var updateInputFields = function(scope, element, attrs) {
         scope.attributeFields = scope.$eval(attrs.fields);

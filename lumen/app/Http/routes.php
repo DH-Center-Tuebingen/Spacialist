@@ -44,6 +44,8 @@ $app->get('sources/delete/context/{id}', 'SourceController@deleteByContext');
 $app->get('sources/delete/literature/{aid}/{fid}/{lid}', 'SourceController@deleteByLiterature');
 $app->get('analysis/queries/getAll', 'AnalysisController@getAll');
 $app->post('image/upload', 'ImageController@uploadImage');
+$app->post('image/link', 'ImageController@link');
+$app->post('image/unlink', 'ImageController@unlink');
 $app->post('context/add', 'ContextController@add');
 $app->post('context/set', 'ContextController@set');
 $app->post('context/set/icon', 'ContextController@setIcon');

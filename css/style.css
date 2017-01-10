@@ -19,6 +19,10 @@ a.activeLang {
     padding-bottom: 20px;
 }
 
+.unpadded-alert {
+    margin-bottom: 0;
+}
+
 .link-icon {
     color: #333;
     margin-right: 10px;

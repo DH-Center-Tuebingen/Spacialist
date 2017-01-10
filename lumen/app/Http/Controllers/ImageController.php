@@ -151,6 +151,42 @@ class ImageController extends Controller
         return response()->json($this->getImageById($id));
     }
 
+    public function link(Request $request) {
+        if(!$request->has('imgId') || !$request->has('ctxId')) {
+            return response()->json([
+                'error' => 'Either the ID for the image or the context is missing.'
+            ]);
+        }
+        $imgId = $request->get('imgId');
+        $ctxId = $request->get('ctxId');
+
+        DB::table('context_photos')
+            ->insert([
+                'photo_id' => $imgId,
+                'context_id' => $ctxId,
+                'lasteditor' => 'postgres'
+            ]);
+        return response()->json();
+    }
+
+    public function unlink(Request $request) {
+        if(!$request->has('imgId') || !$request->has('ctxId')) {
+            return response()->json([
+                'error' => 'Either the ID for the image or the context is missing.'
+            ]);
+        }
+        $imgId = $request->get('imgId');
+        $ctxId = $request->get('ctxId');
+
+        DB::table('context_photos')
+            ->where([
+                ['photo_id', '=', $imgId],
+                ['context_id', '=', $ctxId]
+            ])
+            ->delete();
+        return response()->json();
+    }
+
     public function getImage($id) {
         return response()->json($this->getImageById($id));
     }
@@ -169,10 +205,14 @@ class ImageController extends Controller
         return $img;
     }
 
-    //TODO add 'linking images' functionality
     public function getByContext($id) {
-        $find = DB::table('contexts')->get()->where('id', $id)->first();
-        return response()->json();
+        $images = DB::table('context_photos as cp')
+            ->join('photos as p', 'p.id', '=', 'cp.photo_id')
+            ->where('cp.context_id', '=', $id)
+            ->get();
+        return response()->json([
+            'images' => $images
+        ]);
     }
 
     public function getImagePreviewObject($id) {

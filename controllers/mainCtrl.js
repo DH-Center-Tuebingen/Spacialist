@@ -220,7 +220,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     ];
 
     $scope.layerTwo = {
-        activeTab: 'map'
+        activeTab: 'map',
+        imageTab: {}
     };
     scopeService.layerTwo = $scope.layerTwo;
 
@@ -271,6 +272,12 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         if(typeof scopeService.markers[name] != 'undefined') scopeService.markers[name].focus = focus;
     };
 
+    var loadLinkedImages = function(currentElement) {
+        if(!moduleHelper.controllerExists('imageCtrl')) return;
+        if(typeof scopeService.getImagesForContext == 'undefined') return;
+        scopeService.getImagesForContext(currentElement.id);
+    };
+
     $rootScope.$on('unsetCurrentElement', function(event, args) {
         $scope.unsetCurrentElement();
     });
@@ -314,6 +321,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         };
         $scope.layerTwo.activeImageTab = 'linked';
         setMarker($scope.currentElement, true);
+        loadLinkedImages($scope.currentElement);
     };
 
     var parseData = function(data) {
