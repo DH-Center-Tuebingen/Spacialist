@@ -156,11 +156,13 @@ class ContextController extends Controller {
             $row->choices = DB::select("
                 WITH RECURSIVE
                 top AS (
-                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    SELECT br.broader_id, br.narrower_id, (select label from getLabelForTmpId where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
+                            (select label from getLabelForTmpId where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
                     FROM th_broaders br
                     WHERE broader_id = $rootId
                     UNION
-                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    SELECT br.broader_id, br.narrower_id, (select label from getLabelForTmpId where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
+                            (select label from getLabelForTmpId where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
                     FROM top t, th_broaders br
                     WHERE t.narrower_id = br.broader_id
                 )
@@ -194,11 +196,13 @@ class ContextController extends Controller {
             $row->choices = DB::select("
                 WITH RECURSIVE
                 top AS (
-                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    SELECT br.broader_id, br.narrower_id, (select label from getLabelForTmpId where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
+                        (select label from getLabelForTmpId where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
                     FROM th_broaders br
                     WHERE broader_id = $rootId
                     UNION
-                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    SELECT br.broader_id, br.narrower_id, (select label from getLabelForTmpId where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
+                        (select label from getLabelForTmpId where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
                     FROM top t, th_broaders br
                     WHERE t.narrower_id = br.broader_id
                 )
