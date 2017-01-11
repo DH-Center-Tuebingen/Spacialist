@@ -22,6 +22,15 @@ class CreateDbFunctions extends Migration
                 JOIN th_concept con ON con.id = lbl.concept_id
             ORDER BY con.id, lbl.concept_label_type
         ');
+
+        Schema::getConnection()->statement('CREATE OR REPLACE VIEW getLabelForTmpId AS
+            SELECT  lbl.label,
+                    lng.short_name,
+                    lbl.concept_id
+            FROM th_concept_label lbl
+                    JOIN th_language lng ON lbl.language_id = lng.id
+            ORDER BY lbl.concept_label_type
+        ');
     }
 
     /**
@@ -31,6 +40,7 @@ class CreateDbFunctions extends Migration
      */
     public function down()
     {
+        Schema::getConnection()->statement('DROP VIEW getLabelForTmpId');
         Schema::getConnection()->statement('DROP VIEW getLabelForId');
     }
 }
