@@ -9,6 +9,7 @@ The following packages you should be able to install from your package manager:
   - Imagick
   - memcached (on Windows this will not work -- see later)
   - mbstring
+  - gd
 - libapache2-mod-php (on Unix systems)
 - [Composer](https://getcomposer.org)
 - PostGIS (`>= 2.0`)
@@ -38,7 +39,7 @@ Beside these packages we use a couple of packages you have to install on your ow
 1. Install all the required packages. For debian-based/apt systems you can use the following command
 
     ```bash
-    sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring ufraw memcached python3 python-pip python-rdflib python-psycopg2 phpunit nodejs npm
+    sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring php-gd ufraw memcached python3 python-pip python-rdflib python-psycopg2 phpunit nodejs npm
     ```
     
 2. Clone This Repository

@@ -9,6 +9,7 @@
         "laravel/lumen-framework": "5.3.*",
         "vlucas/phpdotenv": "~2.2",
         "tymon/jwt-auth": "^1.0@dev",
+        "league/flysystem": " ~1.0",
         "doctrine/dbal": "^2.5"
     },
     "require-dev": {

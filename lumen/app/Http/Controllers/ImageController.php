@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\User;
 use \DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ImageController extends Controller
 {
@@ -15,6 +16,10 @@ class ImageController extends Controller
     public function __construct()
     {
         //
+    }
+
+    private function exifDataExists($exif, $rootKey, $dataKey) {
+        return array_key_exists($rootKey, $exif) && array_key_exists($dataKey, $exif[$rootKey]);
     }
 
     public function uploadImage(Request $request) {
@@ -29,7 +34,11 @@ class ImageController extends Controller
         $cleanName = substr($filename, 0, strlen($filename)-strlen($ext)-1);
         $thumbName = $cleanName . $THUMB_SUFFIX . $EXP_SUFFIX;
         $url = storage_path() . '/app/images';
-        $file->move($url, $filename);
+        //$file->move($url, $filename);
+        Storage::put(
+            'images/' . $filename,
+            file_get_contents($file->getRealPath())
+        );
         $fileUrl = $url . '/' . $filename;
         $thumbUrl = $url . '/' . $thumbName;
 
@@ -60,42 +69,122 @@ class ImageController extends Controller
                     $image = imagecreatefromjpeg($fileUrl);
             }
             $scaled = imagescale($image, $THUMB_WIDTH);
-            imagejpeg($scaled, $thumbUrl);
+            ob_start();
+            imagejpeg($scaled/*, $thumbUrl*/);
+            $image = ob_get_clean();
+            Storage::put(
+                'images/' . $thumbName,
+                $image
+            );
         } else {
-            copy($fileUrl, $thumbUrl);
+            Storage::copy('images/' . $filename, 'images/' . $thumbName);
         }
-        if($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM && ($exif = exif_read_data($fileUrl, 'ANY_TAG', true)) !== false) {
-            $make = $exif['IFD0']['Make'];
-            $model = $exif['IFD0']['Model'];
-            $orientation = $exif['IFD0']['Orientation'];
-            $copyright = $exif['IFD0']['Copyright'];
-            $description = $exif['IFD0']['ImageDescription'];
-            $dateOrig = strtotime($exif['EXIF']['DateTimeOriginal']);
-            $dateOrig = date('Y-m-d H:i:s', $dateOrig);
-            $fileType = $exif['FILE']['FileType'];
-            $mimeType = $exif['FILE']['MimeType'];
-            $model = $model . " ($make)";
-        } else {
-            $make = NULL;
-            $model = NULL;
-            $orientation = 0;
-            $copyright = NULL;
-            $description = NULL;
-        }
+
         $mod = date('Y-m-d H:i:s', filemtime($fileUrl));
+        $exifFound = false;
+        if($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM) {
+            $exif = exif_read_data($fileUrl, 'ANY_TAG', true);
+            if($exif !== false) {
+                if($this->exifDataExists($exif, 'IFD0', 'Make')) {
+                    $make = $exif['IFD0']['Make'];
+                }
+                if($this->exifDataExists($exif, 'IFD0', 'Model')) {
+                    $model = $exif['IFD0']['Model'];
+                } else {
+                    $model = '';
+                }
+                if($this->exifDataExists($exif, 'IFD0', 'Orientation')) {
+                    $orientation = $exif['IFD0']['Orientation'];
+                } else {
+                    $orientation = 0;
+                }
+                if($this->exifDataExists($exif, 'IFD0', 'Copyright')) {
+                    $copyright = $exif['IFD0']['Copyright'];
+                } else {
+                    $copyright = '';
+                }
+                if($this->exifDataExists($exif, 'IFD0', 'ImageDescription')) {
+                    $description = $exif['IFD0']['ImageDescription'];
+                } else {
+                    $description = '';
+                }
+                if($this->exifDataExists($exif, 'EXIF', 'DateTimeOriginal')) {
+                    $dateOrig = strtotime($exif['EXIF']['DateTimeOriginal']);
+                    $dateOrig = date('Y-m-d H:i:s', $dateOrig);
+                } else {
+                    $dateOrig = $mod;
+                }
+                if($this->exifDataExists($exif, 'FILE', 'FileType')) {
+                    $fileType = $exif['FILE']['FileType'];
+                }
+                if($this->exifDataExists($exif, 'FILE', 'MimeType')) {
+                    $mimeType = $exif['FILE']['MimeType'];
+                }
+                if(isset($make)) $model = $model . " ($make)";
+                $exifFound = true;
+            }
+        }
+
+        if(!$exifFound) {
+            $dateOrig = $mod;
+            $model = '';
+            $orientation = 0;
+            $copyright = '';
+            $description = '';
+        }
+
+        $lasteditor = 'postgres';
+
         $id = \DB::table('photos')
             ->insertGetId([
                 'modified' => $mod,
+                'created' => $dateOrig,
                 'name' => $filename,
                 'thumb' => $thumbName,
                 'cameraname' => $model,
                 'orientation' => $orientation,
                 'copyright' => $copyright,
                 'description' => $description,
-                'film_id' => 1,
+                'lasteditor' => $lasteditor,
                 'photographer_id' => 1
             ]);
         return response()->json($this->getImageById($id));
+    }
+
+    public function link(Request $request) {
+        if(!$request->has('imgId') || !$request->has('ctxId')) {
+            return response()->json([
+                'error' => 'Either the ID for the image or the context is missing.'
+            ]);
+        }
+        $imgId = $request->get('imgId');
+        $ctxId = $request->get('ctxId');
+
+        DB::table('context_photos')
+            ->insert([
+                'photo_id' => $imgId,
+                'context_id' => $ctxId,
+                'lasteditor' => 'postgres'
+            ]);
+        return response()->json();
+    }
+
+    public function unlink(Request $request) {
+        if(!$request->has('imgId') || !$request->has('ctxId')) {
+            return response()->json([
+                'error' => 'Either the ID for the image or the context is missing.'
+            ]);
+        }
+        $imgId = $request->get('imgId');
+        $ctxId = $request->get('ctxId');
+
+        DB::table('context_photos')
+            ->where([
+                ['photo_id', '=', $imgId],
+                ['context_id', '=', $ctxId]
+            ])
+            ->delete();
+        return response()->json();
     }
 
     public function getImage($id) {
@@ -104,32 +193,50 @@ class ImageController extends Controller
 
     private function getImageById($id) {
         $img = \DB::table('photos as ph')
-                ->select('ph.id as id', 'ph.modified as modified', 'ph.name as filename', 'ph.thumb as thumbname', 'ph.cameraname', 'ph.orientation', 'ph.description', 'ph.copyright', 'ph.photographer_id')
+                ->select('ph.id as id', 'ph.modified', 'ph.created', 'ph.name as filename', 'ph.thumb as thumbname', 'ph.cameraname', 'ph.orientation', 'ph.description', 'ph.copyright', 'ph.photographer_id')
                 ->where('ph.id', $id)
                 ->first();
-        //$img->url = storage_path() . '/' . $img->url;
-        //$img->thumb_url = $img->url . $img->thumbname;
-        //$img->url = $img->url . $img->filename;
-        $img->filesize = filesize($img->url);
-        $img->modified = strtotime($img->modified) * 1000;
+        if($img == null) return null;
+        $img->url = 'images/' . $img->filename;
+        $img->thumb_url = 'images/' . $img->thumbname;
+        $img->filesize = Storage::size($img->url);
+        $img->modified = Storage::lastModified($img->url);
+        $img->created = strtotime($img->created);
         return $img;
     }
 
-    //TODO add 'linking images' functionality
     public function getByContext($id) {
-        $find = DB::table('contexts')->get()->where('id', $id)->first();
-        return response()->json();
+        $images = DB::table('context_photos as cp')
+            ->join('photos as p', 'p.id', '=', 'cp.photo_id')
+            ->where('cp.context_id', '=', $id)
+            ->get();
+        return response()->json([
+            'images' => $images
+        ]);
+    }
+
+    public function getImagePreviewObject($id) {
+        $img = $this->getImageById($id);
+        $file = Storage::get($img->thumb_url);
+        return response($file, 200)->header('Content-Type', 'image/jpeg');
+    }
+
+    public function getImageObject($id) {
+        $img = $this->getImageById($id);
+        $file = Storage::get($img->url);
+        return response($file, 200)->header('Content-Type', 'image/jpeg');
     }
 
     public function getAll() {
         $images = DB::table('photos as ph')
-                    ->select("ph.id as id", "ph.modified as modified", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id")
+                    ->select("ph.id as id", "ph.modified", "ph.created", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id")
                     ->get();
         foreach($images as &$img) {
-            //$img->thumb_url = storage_path($img-> url . $img->thumbname);
-            //$img->url = storage_path($img->url . $img->filename);
-            //if(file_exists($img->url) && is_file($img->url)) $img->filesize = filesize($img->url);
-            $img->modified = strtotime($img->modified) * 1000;
+            $img->url = 'images/' . $img->filename;
+            $img->thumb_url = 'images/' . $img->thumbname;
+            $img->filesize = Storage::size($img->url);
+            $img->modified = Storage::lastModified($img->url);
+            $img->created = strtotime($img->created);
         }
         return response()->json($images);
     }

@@ -1,4 +1,4 @@
-spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce', 'leafletData', 'scopeService', 'httpPostFactory', 'httpPostPromise', 'httpGetFactory', 'Upload', 'modalService', '$uibModal', '$auth', '$state', '$http', function($rootScope, $scope, $timeout, $sce, leafletData, scopeService, httpPostFactory, httpPostPromise, httpGetFactory, Upload, modalService, $uibModal, $auth, $state, $http) {
+spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce', 'leafletData', 'scopeService', 'httpPostFactory', 'httpPostPromise', 'httpGetFactory', 'modalService', '$uibModal', '$auth', '$state', '$http', function($rootScope, $scope, $timeout, $sce, leafletData, scopeService, httpPostFactory, httpPostPromise, httpGetFactory, modalService, $uibModal, $auth, $state, $http) {
     scopeService.map = {};
     scopeService.map.events = {
         markers: {
@@ -499,12 +499,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         }]
     }
 
-    $scope.loadImages = function() {
-        var len = $scope.loadedImages.length;
-        if (len == $scope.allImages.length) return;
-        $scope.loadedImages = [].concat($scope.loadedImages, $scope.allImages.slice(len, len + 10));
-    }
-
     $scope.addStuff = function() {
         $scope.d3GraphJson.children.push({
             "id": "n15",
@@ -664,15 +658,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
             // start an initial layout
             $scope.d3layouter.kgraph(graph);
         }
-
-    httpGetFactory('api/image/getAll', function(callback) {
-        var unlImg = [];
-        angular.forEach(callback, function(value, key) {
-            value.linked = [];
-            unlImg.push(value);
-        });
-        angular.extend($scope.allImages, unlImg);
-    });
 
     var getKeyForName = function(name) {
         return name.replace(/-/, '');
@@ -1125,90 +1110,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
     }
 
     /**
-     * enables drag & drop support for image upload, calls `$scope.uploadImages` if files are dropped on the `dropFiles` model
-     */
-    $scope.$watch('dropFiles', function() {
-        $scope.uploadImages($scope.dropFiles);
-    });
-
-    /**
-     * Upload the image files `files` to the server, one by one and store their paths in the database.
-     */
-    $scope.uploadImages = function(files, invalidFiles) {
-        var finished = 0;
-        var toFinish = (typeof files === 'undefined') ? 0 : files.length;
-        $scope.uploadingImages = files;
-        $scope.errFiles = invalidFiles;
-        angular.forEach(files, function(file) {
-            file.upload = Upload.upload({
-                url: 'api/image/upload',
-                data: {
-                    file: file
-                }
-            });
-            file.upload.then(function(response) {
-                $timeout(function() {
-                    var data = response.data;
-                    data.linked = [];
-                    if (typeof $scope.allImages === 'undefined') $scope.allImages = [];
-                    $scope.allImages.push(data);
-                    finished++;
-                    if (finished == toFinish) {
-                        $scope.uploadingImages = undefined;
-                    }
-                });
-            }, function(response) {
-                if (response.status > 0)
-                    $scope.errorMsg = response.status + ': ' + response.data;
-            }, function(evt) {
-                file.progress = Math.min(100, parseInt(100.0 *
-                    evt.loaded / evt.total));
-            });
-        });
-    }
-
-    /**
-     * Link the image `img` to the context with the id `markerIndex`
-     */
-    $scope.linkImage = function(img, markerIndex) {
-        var markerId = scopeService.markers[markerIndex].id;
-        img.linked.push(markerId);
-        scopeService.markers[markerIndex].myOptions.images.push(img);
-        //TODO add to db
-    }
-
-    //TODO rewrite
-    $scope.unlinkImage = function(img, id) {
-        //TODO get marker id and remove from db
-        console.log("Reimplement!");
-        return;
-        var filmIndex = img.filmname;
-        var idx = img.linked.indexOf(id);
-        if (idx > -1) {
-            img.linked.splice(idx, 1);
-        }
-        var found = false;
-        angular.forEach($scope.allImages, function(value, key) {
-            if (!found) { //break, the angular way
-                if (value.id == img.id) {
-                    $scope.allImages[key].linked = img.linked;
-                    console.log(img.linked);
-                    found = true;
-                }
-            }
-        });
-        if (typeof $scope.markerValues !== 'undefined' && typeof $scope.markerValues.images !== 'undefined') {
-            for (var i = 0; i < $scope.markerValues.images.length; i++) {
-                if ($scope.markerValues.images[i].id == img.id) {
-                    $scope.markerValues.images.splice(i, 1);
-                    break;
-                }
-            }
-        }
-        //TODO remove from db
-    }
-
-    /**
      * Toggle if the marker should be draggable or not
      */
     $scope.togglePositionLock = function() {
@@ -1652,21 +1553,6 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
         $scope.subNav.fileImp = false;
         $scope.subNav.valueImp = false;
         $scope.subNav.values = {};
-    }
-
-    /**
-     * Opens a modal for a given image `img`. This modal displays a zoomable image container and other relevant information of the image
-     */
-    $scope.openModal = function(img, filmIndex) {
-        modalOptions = {};
-        modalOptions.markers = angular.extend({}, scopeService.markers);
-        modalOptions.img = angular.extend({}, img);
-        modalOptions.linkImage = $scope.linkImage;
-        modalOptions.unlinkImage = $scope.unlinkImage;
-        modalOptions.isEmpty = $scope.isEmpty;
-        modalOptions.zoomlevel = 100;
-        modalOptions.modalNav = angular.extend({}, $scope.modalNav);
-        modalService.showModal({}, modalOptions);
     }
 
     $scope.subNav.triggerFileSelect = function() {
