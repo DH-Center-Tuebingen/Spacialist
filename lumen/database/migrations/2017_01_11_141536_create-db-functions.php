@@ -13,7 +13,7 @@ class CreateDbFunctions extends Migration
      */
     public function up()
     {
-        Schema::getConnection()->statement('CREATE OR REPLACE VIEW getLabelForId AS
+        Schema::getConnection()->statement('CREATE OR REPLACE VIEW getConceptLabelsFromUrl AS
             SELECT  lbl.label,
                     con.concept_url,
                     lng.short_name
@@ -23,7 +23,7 @@ class CreateDbFunctions extends Migration
             ORDER BY con.id, lbl.concept_label_type
         ');
 
-        Schema::getConnection()->statement('CREATE OR REPLACE VIEW getLabelForTmpId AS
+        Schema::getConnection()->statement('CREATE OR REPLACE VIEW getConceptLabelsFromID AS
             SELECT  lbl.label,
                     lng.short_name,
                     lbl.concept_id

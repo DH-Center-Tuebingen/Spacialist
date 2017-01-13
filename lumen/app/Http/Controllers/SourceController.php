@@ -30,7 +30,7 @@ class SourceController extends Controller {
 
     public function getByContext($id) {
         $src = DB::table('sources')
-                ->select('sources.*', DB::raw("(select label from getLabelForId where concept_url = attributes.thesaurus_url and short_name = 'de') AS attribute_name"))
+                ->select('sources.*', DB::raw("(select label from getConceptLabelsFromUrl where concept_url = attributes.thesaurus_url and short_name = 'de') AS attribute_name"))
                 ->where('context_id', '=', $id)
                 ->join('attributes', 'sources.attribute_id', '=', 'attributes.id')
                 ->orderBy('attribute_name', 'asc')
