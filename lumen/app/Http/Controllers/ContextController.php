@@ -24,7 +24,10 @@ class ContextController extends Controller {
             } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
                 $attr->val = DB::table('th_concept')
                     ->select('id as narrower_id',
-                        DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
+                        DB::table('getConceptLabelsFromUrl')
+                        ->where('concept_url', $attr->thesaurus_val)
+                        ->where('short_name', 'de')
+                        ->value('label')
                     )
                     ->where('concept_url', '=', $attr->thesaurus_val)
                     ->first();
@@ -59,7 +62,10 @@ class ContextController extends Controller {
                     'end' => $end,
                     'epoch' => DB::table('th_concept')
                                 ->select('id as narrower_id',
-                                    DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
+                                    DB::table('getConceptLabelsFromUrl')
+                                    ->where('concept_url', $thUri)
+                                    ->where('short_name', 'de')
+                                    ->value('label')
                                 )
                                 ->where('concept_url', '=', $thUri)
                                 ->first()
@@ -73,7 +79,8 @@ class ContextController extends Controller {
         return response()->json(
             DB::table('context_types as c')
                 ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
-                    DB::raw("public.\"getLabelForId\"(C.thesaurus_url, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_url, 'de') AS val")
+                    DB::raw("(select label from getConceptLabelsFromUrl where concept_url = c.thesaurus_url and short_name = 'de') as title"),
+                    DB::raw("(select label from getConceptLabelsFromUrl where concept_url = a.thesaurus_url and short_name = 'de') as val")
                 )
                 ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
@@ -96,7 +103,7 @@ class ContextController extends Controller {
 	        JOIN    contexts cc
 	        ON      cc.root_context_id = q.id
         )
-        SELECT  q.*, ct.type as typeid, ct.thesaurus_url AS typename, public.\"getLabelForId\"(ct.thesaurus_url, 'de') as typelabel
+        SELECT  q.*, ct.type as typeid, ct.thesaurus_url AS typename, (select label from getConceptLabelsFromUrl where concept_url = ct.thesaurus_url and short_name = 'de') as typelabel
         FROM    q
         JOIN context_types AS ct
         ON q.context_type_id = ct.id
@@ -128,7 +135,8 @@ class ContextController extends Controller {
     public function getChoices() {
         $rows = DB::table('context_types as c')
         ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
-            DB::raw("public.\"getLabelForId\"(C.thesaurus_url, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_url, 'de') AS val")
+            DB::raw("(select label from getConceptLabelsFromUrl where concept_url = C.thesaurus_url and short_name = 'de') AS title"),
+            DB::raw("(select label from getConceptLabelsFromUrl where concept_url = A.thesaurus_url and short_name = 'de') AS val")
         )
         ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
         ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
@@ -148,11 +156,13 @@ class ContextController extends Controller {
             $row->choices = DB::select("
                 WITH RECURSIVE
                 top AS (
-                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    SELECT br.broader_id, br.narrower_id, (select label from getConceptLabelsFromID where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
+                            (select label from getConceptLabelsFromID where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
                     FROM th_broaders br
                     WHERE broader_id = $rootId
                     UNION
-                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    SELECT br.broader_id, br.narrower_id, (select label from getConceptLabelsFromID where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
+                            (select label from getConceptLabelsFromID where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
                     FROM top t, th_broaders br
                     WHERE t.narrower_id = br.broader_id
                 )
@@ -167,7 +177,8 @@ class ContextController extends Controller {
     public function getAttributes($id) {
         $rows = DB::table('context_types as c')
         ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
-            DB::raw("public.\"getLabelForId\"(C.thesaurus_url, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_url, 'de') AS val")
+            DB::raw("(select label from getConceptLabelsFromUrl where concept_url = C.thesaurus_url and short_name = 'de') AS title"),
+            DB::raw("(select label from getConceptLabelsFromUrl where concept_url = A.thesaurus_url and short_name = 'de') AS val")
         )
         ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
         ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
@@ -185,11 +196,13 @@ class ContextController extends Controller {
             $row->choices = DB::select("
                 WITH RECURSIVE
                 top AS (
-                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    SELECT br.broader_id, br.narrower_id, (select label from getConceptLabelsFromID where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
+                        (select label from getConceptLabelsFromID where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
                     FROM th_broaders br
                     WHERE broader_id = $rootId
                     UNION
-                    SELECT br.broader_id, br.narrower_id, public.\"getLabeForTmpid\"(br.broader_id, 'de') as broad, public.\"getLabeForTmpid\"(br.narrower_id, 'de') as narr
+                    SELECT br.broader_id, br.narrower_id, (select label from getConceptLabelsFromID where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
+                        (select label from getConceptLabelsFromID where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
                     FROM top t, th_broaders br
                     WHERE t.narrower_id = br.broader_id
                 )
@@ -250,7 +263,10 @@ class ContextController extends Controller {
                 } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
                     $attr->val = DB::table('th_concept')
                         ->select('id as narrower_id',
-                            DB::raw("public.\"getLabelForId\"(concept_url, 'de') as narr")
+                            DB::table('getConceptLabelsFromUrl')
+                            ->where('concept_url', $attr->thesaurus_val)
+                            ->where('short_name', 'de')
+                            ->value('label')
                         )
                         ->where('concept_url', '=', $attr->thesaurus_val)
                         ->first();
@@ -265,9 +281,8 @@ class ContextController extends Controller {
         return response()->json(
             DB::table('context_types as c')
                 ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
-                    DB::raw(
-                        "public.\"getLabelForId\"(C.thesaurus_url, 'de') AS title, public.\"getLabelForId\"(A.thesaurus_url, 'de') AS val"
-                    )
+                    DB::raw("(select label from getConceptLabelsFromUrl where concept_url = C.thesaurus_url and short_name = 'de') AS title"),
+                    DB::raw("(select label from getConceptLabelsFromUrl where concept_url = A.thesaurus_url and short_name = 'de') AS val")
                 )
                 ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
@@ -292,7 +307,7 @@ class ContextController extends Controller {
                 JOIN    contexts cc
                 ON      cc.root_context_id = q.id
             )
-            SELECT  q.*, ct.type, ct.thesaurus_url AS typename, public.\"getLabelForId\"(ct.thesaurus_url, 'de') as typelabel
+            SELECT  q.*, ct.type, ct.thesaurus_url AS typename, (select label from getConceptLabelsFromUrl where concept_url = ct.thesaurus_url and short_name = 'de') as typelabel
             FROM    q
             JOIN context_types AS ct
             ON q.context_type_id = ct.id
