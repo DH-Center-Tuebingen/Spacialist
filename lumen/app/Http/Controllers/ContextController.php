@@ -24,10 +24,10 @@ class ContextController extends Controller {
             } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
                 $attr->val = DB::table('th_concept')
                     ->select('id as narrower_id',
-                        DB::table('getconceptlabelsfromurl')
+                        DB::raw("'".DB::table('getconceptlabelsfromurl')
                         ->where('concept_url', $attr->thesaurus_val)
                         ->where('short_name', 'de')
-                        ->value('label')
+                        ->value('label')."' as narr")
                     )
                     ->where('concept_url', '=', $attr->thesaurus_val)
                     ->first();
@@ -62,10 +62,10 @@ class ContextController extends Controller {
                     'end' => $end,
                     'epoch' => DB::table('th_concept')
                                 ->select('id as narrower_id',
-                                    DB::table('getconceptlabelsfromurl')
+                                    DB::raw("'".DB::table('getconceptlabelsfromurl')
                                     ->where('concept_url', $thUri)
                                     ->where('short_name', 'de')
-                                    ->value('label')
+                                    ->value('label')."' as narr")
                                 )
                                 ->where('concept_url', '=', $thUri)
                                 ->first()
