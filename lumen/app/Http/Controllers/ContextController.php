@@ -79,8 +79,8 @@ class ContextController extends Controller {
         return response()->json(
             DB::table('context_types as c')
                 ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de') as title"),
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de') as val")
+                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de' limit 1) as title"),
+                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) as val")
                 )
                 ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
@@ -103,7 +103,7 @@ class ContextController extends Controller {
 	        JOIN    contexts cc
 	        ON      cc.root_context_id = q.id
         )
-        SELECT  q.*, ct.type as typeid, ct.thesaurus_url AS typename, (select label from getconceptlabelsfromurl where concept_url = ct.thesaurus_url and short_name = 'de') as typelabel
+        SELECT  q.*, ct.type as typeid, ct.thesaurus_url AS typename, (select label from getconceptlabelsfromurl where concept_url = ct.thesaurus_url and short_name = 'de' limit 1) as typelabel
         FROM    q
         JOIN context_types AS ct
         ON q.context_type_id = ct.id
@@ -135,8 +135,8 @@ class ContextController extends Controller {
     public function getChoices() {
         $rows = DB::table('context_types as c')
         ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de') AS title"),
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de') AS val")
+            DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
+            DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
         )
         ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
         ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
@@ -177,8 +177,8 @@ class ContextController extends Controller {
     public function getAttributes($id) {
         $rows = DB::table('context_types as c')
         ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de') AS title"),
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de') AS val")
+            DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
+            DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
         )
         ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
         ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
@@ -281,8 +281,8 @@ class ContextController extends Controller {
         return response()->json(
             DB::table('context_types as c')
                 ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de') AS title"),
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de') AS val")
+                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
+                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
                 )
                 ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
@@ -307,7 +307,7 @@ class ContextController extends Controller {
                 JOIN    contexts cc
                 ON      cc.root_context_id = q.id
             )
-            SELECT  q.*, ct.type, ct.thesaurus_url AS typename, (select label from getconceptlabelsfromurl where concept_url = ct.thesaurus_url and short_name = 'de') as typelabel
+            SELECT  q.*, ct.type, ct.thesaurus_url AS typename, (select label from getconceptlabelsfromurl where concept_url = ct.thesaurus_url and short_name = 'de' limit 1) as typelabel
             FROM    q
             JOIN context_types AS ct
             ON q.context_type_id = ct.id
