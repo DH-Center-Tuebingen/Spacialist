@@ -40,7 +40,7 @@ class CreateDbFunctions extends Migration
      */
     public function down()
     {
-        Schema::getConnection()->statement('DROP VIEW getLabelForTmpId');
-        Schema::getConnection()->statement('DROP VIEW getLabelForId');
+        Schema::getConnection()->statement('DROP VIEW getConceptLabelsFromID');
+        Schema::getConnection()->statement('DROP VIEW getConceptLabelsFromUrl');
     }
 }
