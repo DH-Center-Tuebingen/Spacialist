@@ -19,7 +19,7 @@ class CreateContextTypesTable extends Migration
             $table->integer('type')->unsigned();
             $table->timestamps();
 
-            $table->foreign('thesaurus_id')->references('concept_url')->on('th_concept');
+            $table->foreign('thesaurus_id')->references('concept_url')->on('th_concept')->onDelete('cascade');
         });
     }
 

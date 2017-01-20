@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddTypeColumnToBibTex extends Migration
+class RenameBibTexToLiterature extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class AddTypeColumnToBibTex extends Migration
      */
     public function up()
     {
-        Schema::table('bib_tex', function (Blueprint $table) {
-            $table->text('type');
-        });
+        Schema::rename('bib_tex', 'literature');
+        //
     }
 
     /**
@@ -25,8 +24,7 @@ class AddTypeColumnToBibTex extends Migration
      */
     public function down()
     {
-        Schema::table('bib_tex', function (Blueprint $table) {
-            $table->dropColumn('type');
-        });
+        Schema::rename('literature', 'bib_tex');
+        //
     }
 }

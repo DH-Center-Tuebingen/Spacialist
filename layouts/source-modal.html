@@ -41,7 +41,7 @@
             </tr>
         </table>
         <div class="col-md-6">
-            <ui-select id="lit{{ attr.context }}_{{ attr.attr }}_{{ attr.option }}" ng-model="modalFields.currentSource" close-on-select="true">
+            <ui-select id="lit{{ attr.ctid }}_{{ attr.attr }}_{{ attr.option }}" ng-model="modalFields.currentSource" close-on-select="true">
                 <ui-select-match>
                     {{ $select.selected.title | truncate:80:true }}
                 </ui-select-match>

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddTypeColumnToBibTex extends Migration
+class AddJsonValToAttributeValues extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class AddTypeColumnToBibTex extends Migration
      */
     public function up()
     {
-        Schema::table('bib_tex', function (Blueprint $table) {
-            $table->text('type');
+        Schema::table('attribute_values', function (Blueprint $table) {
+            $table->json('json_val')->nullable();
+            //
         });
     }
 
@@ -25,8 +26,9 @@ class AddTypeColumnToBibTex extends Migration
      */
     public function down()
     {
-        Schema::table('bib_tex', function (Blueprint $table) {
-            $table->dropColumn('type');
+        Schema::table('attribute_values', function (Blueprint $table) {
+            $table->dropColumn('json_val');
+            //
         });
     }
 }

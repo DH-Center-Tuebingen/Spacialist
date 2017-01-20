@@ -9,6 +9,7 @@ The following packages you should be able to install from your package manager:
   - Imagick
   - memcached (on Windows this will not work -- see later)
   - mbstring
+  - gd
 - libapache2-mod-php (on Unix systems)
 - [Composer](https://getcomposer.org)
 - PostGIS (`>= 2.0`)
@@ -38,7 +39,7 @@ Beside these packages we use a couple of packages you have to install on your ow
 1. Install all the required packages. For debian-based/apt systems you can use the following command
 
     ```bash
-    sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring ufraw memcached python3 python-pip python-rdflib python-psycopg2 phpunit nodejs npm
+    sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring php-gd ufraw memcached python3 python-pip python-rdflib python-psycopg2 phpunit nodejs npm
     ```
     
 2. Clone This Repository
@@ -86,7 +87,7 @@ One solution is to setup a proxy on the same machine and re-route all requests f
 3. Add a new vHost file to your apache
 
     ```bash
-    cd /etc/apache2/site-available
+    cd /etc/apache2/sites-available
     sudo nano spacialist-lumen.conf
     ```
      
@@ -132,7 +133,7 @@ Then paste this configuration (Please edit some of the configuration settings `*
 ```
 APP_ENV=local
 APP_DEBUG=true
-APP_KEY=* #this needs to be a 32 digit random key. Use an online generator or run php artisan jwt:generate twice
+APP_KEY=* #this needs to be a 32 digit random key. Use an online generator or run php artisan jwt:secret twice
 
 # Your database setup. pgsql is PostgreSQL. Host, port, database, username and password need to be configured first (e.g. using your database server's commands).
 DB_CONNECTION=pgsql
@@ -145,7 +146,7 @@ DB_PASSWORD=*
 CACHE_DRIVER=memcached # on Windows memcached extension unavailable, but it seems to work with "array"
 QUEUE_DRIVER=sync
 
-JWT_SECRET=* #same as APP_KEY, run php artisan jwt:generate
+JWT_SECRET=* #same as APP_KEY, run php artisan jwt:secret
 JWT_TTL=* #the time to live (in minutes) of your user tokens. Default is 60 (minutes).
 JWT_REFRESH_TTL=* #the ttl (in minutes) in which you can generate a new token. Default is two weeks
 JWT_BLACKLIST_GRACE_PERIOD=* #a time span in seconds which allows you to use the same token several times in this time span without blacklisting it (good for async api calls)

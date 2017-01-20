@@ -68,8 +68,53 @@
         <div ng-if="layerTwo.activeTab == 'harris'">
             <h5>Harris active</h5>
         </div>
-        <div ng-if="layerTwo.activeTab == 'images'">
-            <h5>Images active</h5>
+        <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" style="max-height: 100%;">
+            <uib-accordion close-others="true">
+                <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!currentElement">
+                    <uib-accordion-heading>
+                        <span ng-click="!currentElement || updateLinkedImages(layerTwo.imageTab.linkedOpen)">
+                            Linked images
+                        </span><!-- <span class="badge">{{ images.linked.length }}</span>-->
+                    </uib-accordion-heading>
+                    <image-list on-scroll-load="loadImages(len, type)" image-data="images.linked" image-type="'linked'" scroll-container="'#addon-container'"></image-list>
+                </div>
+                <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.newOpen">
+                    <uib-accordion-heading>
+                        {{ 'add new images' | translate }}
+                    </uib-accordion-heading>
+                    <div class="col-md-12">
+                        <div class="alert alert-info drop-box" ngf-drop ngf-select ng-model="dropFiles" ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="false" accept="image/*" ngf-pattern="'image/*'">
+                            Entweder per Drag &amp; Drop hierherziehen oder über den Button hochladen.
+                        </div>
+                        <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple accept="image/*">Bilder hochladen</button>
+                        <ul>
+                            <li ng-repeat="f in uploadingImages">
+                                {{ f.name }} {{ f.$errorParam }}
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ f.progress }}%">
+                                        <span ng-hide="f.progress < 100">
+                                            {{ 'upload finished' | translate }}
+                                        </span>
+                                        <span ng-show="f.progress < 100">
+                                            {{ f.progress }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li ng-repeat="f in errFiles">{{f.name}} {{f.$error}} {{f.$errorParam}}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.allOpen">
+                    <uib-accordion-heading>
+                        <span ng-click="updateAllImages(layerTwo.imageTab.allOpen)">
+                            Alle Bilder
+                        </span><!-- <span class="badge">{{ images.all.length }}</span>-->
+                    </uib-accordion-heading>
+                    <image-list on-scroll-load="loadImages(len, type)" image-data="images.all" image-type="'all'" scroll-container="'#addon-container'"></image-list>
+                </div>
+            </uib-accordion>
         </div>
     </div>
 </div>

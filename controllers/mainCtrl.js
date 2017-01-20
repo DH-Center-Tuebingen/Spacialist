@@ -17,14 +17,14 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                         title: title,
                         index: index,
                         type: value.type,
-                        cid: value.cid
+                        ctid: value.ctid
                     });
                 }
-                if (value.cid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
+                if (value.ctid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
                     ctxtRefs[index].push({
                         aid: value.aid,
                         val: value.val,
-                        context: value.cid,
+                        ctid: value.ctid,
                         datatype: value.datatype
                     });
                 }
@@ -57,14 +57,14 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                         title: title,
                         index: index,
                         type: value.type,
-                        cid: value.cid
+                        ctid: value.ctid
                     });
                 }
-                if (value.cid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
+                if (value.ctid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
                     artiRefs[index].push({
                         aid: value.aid,
                         val: value.val,
-                        context: value.cid,
+                        ctid: value.ctid,
                         datatype: value.datatype
                     });
                 }
@@ -132,8 +132,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         modalFactory.createModal(parent.name, msg, selection, function(name, type) {
             var elem = {
                 name: name,
-                context_id: type.cid,
-                root: parent.id,
+                ctid: type.ctid,
+                root_cid: parent.id,
                 reclevel: parent.reclevel + 1,
                 typeid: type.type,
                 typename: type.index,
@@ -144,8 +144,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             var hasPos = typeof parent.lat != 'undefined' && typeof parent.lng != 'undefined' && parent.lat !== null && parent.lng !== null;
             var formData = new FormData();
             formData.append('name', name);
-            formData.append('cid', type.cid);
-            if(typeof parent.id != 'undefined') formData.append('root', parent.id);
+            formData.append('ctid', type.ctid);
+            if(typeof parent.id != 'undefined') formData.append('root_cid', parent.id);
             if(hasPos && copyPosition) {
                 formData.append('lat', parent.lat);
                 formData.append('lng', parent.lng);
@@ -153,7 +153,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                 elem.lng = parent.lng;
             }
             httpPostFactory('api/context/set', formData, function(newElem) {
-                elem.id = newElem.fid;
+                elem.id = newElem.cid;
                 parent.children.push(elem);
                 if(hasPos) addMarker(elem);
                 $scope.setCurrentElement(elem, $scope.currentElement);
@@ -191,8 +191,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                 var elem = {
                     id: copy.id,
                     name: copy.name,
-                    context_id: copy.context_id,
-                    root: parent.root,
+                    ctid: copy.ctid,
+                    root_cid: parent.root_cid,
                     reclevel: parent.reclevel,
                     typeid: parent.typeid,
                     typename: parent.typename,
@@ -220,8 +220,10 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     ];
 
     $scope.layerTwo = {
-        activeTab: 'map'
+        activeTab: 'map',
+        imageTab: {}
     };
+    scopeService.layerTwo = $scope.layerTwo;
 
     $scope.setActiveTab = function(tabId) {
         $scope.layerTwo.activeTab = tabId;
@@ -270,6 +272,12 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         if(typeof scopeService.markers[name] != 'undefined') scopeService.markers[name].focus = focus;
     };
 
+    var loadLinkedImages = function(currentElement) {
+        if(!moduleHelper.controllerExists('imageCtrl')) return;
+        if(typeof scopeService.getImagesForContext == 'undefined') return;
+        scopeService.getImagesForContext(currentElement.id);
+    };
+
     $rootScope.$on('unsetCurrentElement', function(event, args) {
         $scope.unsetCurrentElement();
     });
@@ -289,6 +297,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     $scope.setCurrentElement = function(target, elem) {
         $scope.unsetCurrentElement();
         if(typeof elem != 'undefined' && elem.id == target.id) {
+            $scope.layerTwo.activeImageTab = 'all';
             return;
         }
         elem = target;
@@ -305,12 +314,14 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         $scope.currentElement = {
             id: elem.id,
             name: elem.name,
-            root: elem.root || -1,
+            root_cid: elem.root_cid || -1,
             typeLabel: elem.typelabel,
             typeId: elem.typeid,
-            cid: elem.context_id
+            ctid: elem.ctid
         };
+        $scope.layerTwo.activeImageTab = 'linked';
         setMarker($scope.currentElement, true);
+        loadLinkedImages($scope.currentElement);
     };
 
     var parseData = function(data) {
@@ -391,11 +402,11 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
      */
     var storeElement = function(elem) {
         console.log("store context " + elem.name);
-        var parentId = elem.root;
+        var root_cid = elem.root_cid;
         var formData = new FormData();
         formData.append('name', elem.name);
-        formData.append('root', parentId);
-        formData.append('cid', elem.cid);
+        formData.append('root_cid', root_cid);
+        formData.append('ctid', elem.ctid);
         if(typeof elem.id !== 'undefined' && elem.id != -1) {
             formData.append('realId', elem.id);
         }
@@ -453,12 +464,12 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             }
         };
         var aid = fieldid;
-        var fid = $scope.currentElement.id;
-        httpGetFactory('api/sources/get/' + aid + '/' + fid, function(sources) {
+        var cid = $scope.currentElement.id;
+        httpGetFactory('api/sources/get/' + aid + '/' + cid, function(sources) {
             angular.forEach(sources, function(src, key) {
                 $scope.modalFields.addedSources.push({
                     id: src.id,
-                    fid: src.find_id,
+                    cid: src.cid,
                     aid: src.attribute_id,
                     src: src.literature,
                     desc: src.description
@@ -474,7 +485,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
                 },
                 $scope.savePossibility = function() {
                     var formData = new FormData();
-                    formData.append('fid', fid);
+                    formData.append('cid', cid);
                     formData.append('aid', fieldid);
                     formData.append('possibility', $scope.modalFields.value);
                     httpPostFactory('api/context/set/possibility', formData, function(callback) {
@@ -496,11 +507,11 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         if(typeof src.src !== 'undefined' && typeof src.src.title !== 'undefined') title = src.src.title;
         else if(typeof src.literature !== 'undefined' && typeof src.literature.title !== 'undefined') title = src.literature.title;
         modalFactory.deleteModal(title, function() {
-            var fid = -1;
+            var cid = -1;
             var aid = -1;
             var lid = -1;
-            if(typeof src.fid !== 'undefined') fid = src.fid;
-            else if(typeof src.find_id !== 'undefined') fid = src.find_id;
+            if(typeof src.cid !== 'undefined') cid = src.cid;
+            else if(typeof src.cid !== 'undefined') cid = src.cid;
             else return;
             if(typeof src.aid !== 'undefined') aid = src.aid;
             else if(typeof src.attribute_id !== 'undefined') aid = src.attribute_id;
@@ -508,7 +519,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             if(typeof src.src !== 'undefined' && src.src.lid !== 'undefined') lid = src.src.id;
             else if(typeof src.literature_id !== 'undefined') lid = src.literature_id;
             else return;
-            httpGetFactory('api/sources/delete/literature/'+aid+'/'+fid+'/'+lid, function(callback) {
+            httpGetFactory('api/sources/delete/literature/'+aid+'/'+cid+'/'+lid, function(callback) {
                 arr.splice(index, 1);
             });
         }, '');
@@ -550,16 +561,16 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
      * Adds the current selected source entry `currentSource` with the given description `currentDesc` for the given attribute `aid` to the database and the source modal window array
      */
     $scope.addSource = function(currentSource, currentDesc, aid) {
-        var fid = $scope.currentElement.id;
+        var cid = $scope.currentElement.id;
         var formData = new FormData();
-        formData.append('fid', fid);
+        formData.append('cid', cid);
         formData.append('aid', aid);
         formData.append('lid', currentSource.id);
         formData.append('desc', currentDesc);
         httpPostFactory('api/sources/add', formData, function(row) {
             $scope.modalFields.addedSources.push({
                 id: row.sid,
-                fid: fid,
+                cid: cid,
                 aid: aid,
                 src: currentSource,
                 desc: currentDesc
@@ -569,8 +580,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         $scope.modalFields.currentDesc = undefined;
     };
 
-    $scope.existsLiterature = function(fid, aid) {
-        var promise = httpGetPromise.getData('api/sources/get/' + aid + '/' + fid);
+    $scope.existsLiterature = function(cid, aid) {
+        var promise = httpGetPromise.getData('api/sources/get/' + aid + '/' + cid);
         promise.then(function(sources) {
             console.log(aid);
             console.log(sources);

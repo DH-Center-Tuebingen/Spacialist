@@ -1,4 +1,4 @@
-var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'ui.bootstrap', 'monospaced.mousewheel', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
+var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
 
 spacialistApp.service('modalService', ['$uibModal', function($uibModal) {
     var defaults = {
@@ -38,80 +38,8 @@ spacialistApp.service('modalService', ['$uibModal', function($uibModal) {
         if(!tempDefaults.controller) {
             tempDefaults.controller = function($scope, $uibModalInstance) {
                 $scope.modalOptions = tempOptions;
-                var initHeight = -1;
-                var initWidth = -1;
-                var dragging = false;
-                var startX = -1;
-                var startY = -1;
-                var startTop = 0;
-                var startLeft = 0;
                 $scope.modalOptions.close = function(result) {
                     $uibModalInstance.dismiss('cancel');
-                };
-                $scope.modalOptions.mDown = function(event) {
-                    var img = document.querySelector('#modalImage');
-                    img.style.cursor = "grabbing";
-                    dragging = true;
-                    startX = event.clientX;
-                    startY = event.clientY;
-                    startTop = img.offsetTop;
-                    startLeft = img.offsetLeft;
-                };
-                $scope.modalOptions.mUp = function(event) {
-                    var img = document.querySelector('#modalImage');
-                    dragging = false;
-                    img.style.cursor = "grab";
-                };
-                $scope.modalOptions.mLeave = function(event) {
-                    var img = document.querySelector('#modalImage');
-                    dragging = false;
-                    img.style.cursor = "grab";
-                };
-                $scope.modalOptions.mMove = function(event) {
-                    if(dragging) {
-                        var img = document.querySelector('#modalImage');
-                        var div = document.querySelector('#imageWrapper');
-                        var newTop = startTop + (event.clientY - startY);
-                        var newLeft = startLeft + (event.clientX - startX);
-                        var minTop, maxTop, minLeft, maxLeft;
-                        if(img.height >= div.offsetHeight) {
-                            minTop = -img.height + div.offsetHeight;
-                            maxTop = 0;
-                        } else {
-                            minTop = 0;
-                            maxTop = div.offsetHeight - img.height;
-                        }
-                        if(img.width >= div.offsetWidth) {
-                            minLeft = -img.width + div.offsetWidth;
-                            maxLeft = 0;
-                        } else {
-                            minLeft = 0;
-                            maxLeft = div.offsetWidth - img.width;
-                        }
-
-                        if(newTop < minTop) newTop = minTop;
-                        else if(newTop > maxTop) newTop = maxTop;
-                        if(newLeft < minLeft) newLeft = minLeft;
-                        else if(newLeft > maxLeft) newLeft = maxLeft;
-                        img.style.top = newTop + "px";
-                        img.style.left = newLeft + "px";
-                    }
-                };
-                $scope.modalOptions.mScroll = function(event, d, dx, dy) {
-                    var slider = document.querySelector('#width-25');
-                    var newZoom = parseInt($scope.modalOptions.zoomlevel, 10) + (slider.step * dy);
-                    if(newZoom < slider.min) newZoom = parseInt(slider.min, 10);
-                    if(newZoom > slider.max) newZoom = parseInt(slider.max, 10);
-                    $scope.modalOptions.zoomlevel = newZoom;
-                    $scope.modalOptions.zoomIn();
-                };
-                $scope.modalOptions.zoomIn = function() {
-                    var img = document.querySelector('#modalImage');
-                    var zl = parseInt($scope.modalOptions.zoomlevel) / 100.0;
-                    if(initHeight == -1) initHeight = img.height;
-                    if(initWidth == -1) initWidth = img.width;
-                    img.height = initHeight * zl;
-                    img.width = initWidth * zl;
                 };
             };
         }
@@ -251,6 +179,25 @@ spacialistApp.directive('myTree', function($parse) {
             setContextMenu: '='
         },
         controller: 'mainCtrl'
+    };
+});
+
+spacialistApp.directive('imageList', function() {
+    return {
+        restrict: 'E',
+        templateUrl: 'includes/image-list.html',
+        scope: {
+            onScrollLoad: '&',
+            scrollContainer: '=',
+            imageData: '=',
+            imageType: '='
+        },
+        controller: 'imageCtrl',
+        link: function(scope, elements, attrs) {
+            scope.$root.$on('image:delete:linked', function(event, args) {
+                scope.tmpData.linked = [];
+            });
+        }
     };
 });
 
@@ -552,7 +499,8 @@ spacialistApp.factory('scopeService', function($http) {
             activeRole: roles[0]
         },
         drawOptions: {},
-        ctxts: []
+        ctxts: [],
+        layerTwo: {}
     };
     return service;
 });

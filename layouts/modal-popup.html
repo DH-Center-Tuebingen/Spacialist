@@ -1,13 +1,15 @@
 <div class="modal-header">
     <h4>{{ modalOptions.img.filename }}</h4>
 </div>
-<div class="modal-body row">
-    <div class="col-md-7" style="display: flex; overflow: hidden;">
-        <span class="vertical-slider-val" style="width: 4em; align-self: center;">{{ modalOptions.zoomlevel }}%</span>
-        <input type="range" class="vertical-slider" id="width-25" min="50" max="500" step="5" orient="vertical" ng-model="modalOptions.zoomlevel" ng-change="modalOptions.zoomIn()"/>
-        <div id="imageWrapper" style="width: 100%; height: 550px; overflow: hidden; position: relative;">
-            <img ng-src="{{ modalOptions.img.url }}" id="modalImage" draggable="false" ng-mousedown="modalOptions.mDown($event)" ng-mouseup="modalOptions.mUp($event)" ng-mousemove="modalOptions.mMove($event)" ng-mouseleave="modalOptions.mLeave($event)"
-            msd-wheel="modalOptions.mScroll($event, $delta, $deltaX, $deltaY)"/>
+<div class="modal-body col-md-12">
+    <div class="col-md-7 external-container">
+        <img src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" />
+        <div class="external-content">
+            <a href="api/image/get/{{ modalOptions.img.id }}" target="_blank">
+                <dfn title="Open {{ modalOptions.img.filename }} in a new tab">
+                    <i class="fa fa-fw fa-2x fa-external-link" aria-hidden="true"></i>
+                </dfn>
+            </a>
         </div>
     </div>
     <div class="col-md-5">
@@ -15,9 +17,51 @@
             <li role="presentation" ng-class="{active: modalOptions.modalNav.propTab}" ng-click="modalOptions.modalNav.setPropTab()"><a><i class="fa fa-cog"></i> Eigenschaften</a></li>
             <li role="presentation" ng-class="{active: modalOptions.modalNav.linkTab}" ng-click="modalOptions.modalNav.setLinkTab()"><a><i class="fa fa-link"></i> Verknüpfungen</a></li>
         </ul>
-        <div ng-show="modalOptions.modalNav.propTab">
+        <div ng-show="modalOptions.modalNav.propTab" class="col-md-10 col-md-offset-1">
             <h3>Eigenschaften</h3>
-            <p class="left">
+            <table class="table table-striped" style="width: 100%;">
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Ort (allgemein)</td>
+                    <td style="text-align:right;"><i style="color: gray;">Tübingen</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Ort (spezifisch)</td>
+                    <td style="text-align:right;"><i style="color: gray;">Österberg</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Befund</td>
+                    <td style="text-align:right;"><i style="color: gray;">Fundstelle 123, Installation 45 und 86, Fundnr. 990</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Datierung</td>
+                    <td style="text-align:right;"><i style="color: gray;">Spätbronzezeit, moderne Befunde</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Blickrichtung</td>
+                    <td style="text-align:right;"><i style="color: gray;">SSW</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Fotoart</td>
+                    <td style="text-align:right;"><i style="color: gray;">Arbeitsfoto</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Fotograf</td>
+                    <td style="text-align:right;"><i style="color: gray;">Team eScience-Center</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Copyright</td>
+                    <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.copyright }}</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Beschreibung</td>
+                    <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.description }}</i></td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">Orientierung</td>
+                    <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.orientation }}</i></td>
+                </tr>
+            </table>
+            <!--<p class="left">
                 <b>Ort (allgemein):</b> <i style="color: gray;"></i>
             </p>
             <p class="left">
@@ -36,7 +80,7 @@
                 <b>Fotoart:</b> <i style="color: gray;">Arbeitsfoto</i>
             </p>
             <p class="left">
-                <b>Fotograf:</b> <i style="color: gray;"><!--{{ modalOptions.img.photographer_id }}-->Team eScience-Center</i>
+                <b>Fotograf:</b> <i style="color: gray;">Team eScience-Center</i>
             </p>
             <p class="left">
                 <b>Copyright:</b> <i style="color: gray;">{{ modalOptions.img.copyright }}</i>
@@ -46,7 +90,7 @@
             </p>
             <p class="left">
                 <b>Orientierung:</b> <i style="color: gray;">{{ modalOptions.img.orientation }}</i>
-            </p>
+            </p>-->
             <hr/>
             <h3>Bildeigenschaften</h3>
             <p class="left">
@@ -56,44 +100,14 @@
                 <b>Kamera:</b> <i style="color: gray;">{{ modalOptions.img.cameraname }}</i>
             </p>
             <p class="left">
-                <b>Zuletzt geändert:</b> <span style="color: gray;">{{ modalOptions.img.modified | date:'d.MM.yyyy H:mm:ss' }}</span>
+                <b>Zuletzt geändert:</b> <span style="color: gray;">{{ modalOptions.img.modified * 1000 | date:'d.MM.yyyy H:mm:ss' }}</span>
             </p>
             <p class="left">
                 <b>Dateigröße:</b> <span style="color: gray;">{{ modalOptions.img.filesize | bytes:2 }}</span>
             </p>
         </div>
         <div ng-show="modalOptions.modalNav.linkTab" style="padding-right: 10px;">
-            <h3 class="left">Verknüpft</h3>
-            <div class="list-group modal-list">
-                <a class="list-group-item clickable" ng-repeat="marker in modalOptions.markers | filterUnlinkedMarker:modalOptions.img.linked" ng-click="modalOptions.unlinkImage(modalOptions.img, marker.id)">{{ marker.myOptions.name }}</a>
-                <a class="list-group-item list-group-item-warning" ng-if="modalOptions.img.linked.length == 0">
-                    Noch nicht verknüpft.
-                </a>
-            </div>
-            <h3 class="left">Nicht verknüpft</h3>
-            <div class="col-md-8">
-                <div class="list-group modal-list">
-                    <a class="list-group-item clickable" ng-repeat="marker in modalOptions.markers | filterLinkedMarker:modalOptions.img.linked | filterByMarkerName:modalUnlinkedFilter['search'] as filteredMarkers" ng-click="modalOptions.linkImage(modalOptions.img, marker.title)">{{ marker.myOptions.name }}
-                    </a>
-                    <a class="list-group-item list-group-item-warning" ng-if="modalOptions.isEmpty(filteredMarkers)">
-                        Keine Ergebnisse.
-                    </a>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <h4>Filter</h4>
-                <form class="form-horizontal" role="form">
-                    <div class="form-group">
-                        <label class="control-label" for="search_unlinked">Suche</label>
-                        <input class="form-control" type="text" ng-model="modalUnlinkedFilter['search']" ng-change="updateModalUnlinkedFilter('search')" name="search_unlinked" id="search_unlinked"/>
-                    </div>
-                    <div class="form-group" ng-repeat="ctx in ['Kontexttyp 1', 'Kontexttyp 2', 'Kontexttyp 3']">
-                        <input type="checkbox" name="{{ctx}}_check" ng-model="modalUnlinkedFilter.contexts[ctx]"
-                        ng-checked="modalUnlinkedFilter.contexts[ctx]" ng-change="updateModalUnlinkedFilter(ctx, true)" id="{{ctx}}_check"/>
-                        <label for="{{ctx}}_check">{{ ctx }}</label>
-                    </div>
-                </form>
-            </div>
+            <h1>TODO</h1>
         </div>
     </div>
 </div>
