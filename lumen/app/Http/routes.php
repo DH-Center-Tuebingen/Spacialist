@@ -28,6 +28,8 @@ $app->get('context/getChoices', 'ContextController@getChoices');
 $app->get('context/get/type/{id}', 'ContextController@getType');
 $app->get('context/duplicate/{id}', 'ContextController@duplicate');
 $app->get('literature/getAll', 'LiteratureController@getAll');
+$app->get('literature/get/{id}', 'LiteratureController@getById');
+$app->get('literature/delete/{id}', 'LiteratureController@delete');
 $app->get('image/getAll', 'ImageController@getAll');
 $app->get('image/get/info/{id}', 'ImageController@getImage');
 $app->get('image/get/{id}', 'ImageController@getImageObject');
@@ -51,6 +53,8 @@ $app->post('context/set', 'ContextController@set');
 $app->post('context/set/icon', 'ContextController@setIcon');
 $app->post('sources/add', 'SourceController@add');
 $app->post('context/set/possibility', 'ContextController@setPossibility');
+$app->post('literature/add', 'LiteratureController@add');
+$app->post('literature/edit', 'LiteratureController@edit');
 
 $app->post('user/login', 'UserController@login');
 
