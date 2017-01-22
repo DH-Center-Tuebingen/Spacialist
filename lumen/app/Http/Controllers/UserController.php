@@ -18,6 +18,18 @@ class UserController extends Controller
     }
 
     public function get() {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_users')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $user = \Auth::user();
         $roles = \DB::table('user_roles')
             ->join('roles', 'roles.id', '=' , 'role_id')

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 use Log;
 use App\User;
+use App\Permission;
+use App\Role;
+use Zizaco\Entrust;
 use \DB;
 use Illuminate\Http\Request;
 
@@ -91,6 +94,18 @@ class ContextController extends Controller {
     }
 
     public function getRecursive() {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_concept_props')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $rootFields = DB::select("
         WITH RECURSIVE
         q AS (
@@ -121,18 +136,19 @@ class ContextController extends Controller {
         return response()->json(array_values($rootFields));
     }
 
-    public function getAll() {
-        return response()->json(
-            [
-                'finds' =>
-                    DB::table('contexts')
-                    ->select('name', 'context_type_id as ctid, id')
-                    ->get()
-            ]
-        );
-    }
-
     public function getChoices() {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $rows = DB::table('context_types as c')
         ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
@@ -174,53 +190,19 @@ class ContextController extends Controller {
         return response()->json($rows);
     }
 
-    public function getAttributes($id) {
-        $rows = DB::table('context_types as c')
-        ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
-        )
-        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
-        ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
-        //->where('c.id', '=', $id)
-        ->orderBy('val')
-        ->get();
-        foreach($rows as &$row) {
-            if(!isset($row->root)) continue;
-            $rootId = DB::table('th_concept')
-                ->select('id')
-                ->where('concept_url', '=', $row->root)
-                ->first();
-            if(!isset($rootId)) continue;
-            $rootId = $rootId->id;
-            $row->choices = DB::select("
-                WITH RECURSIVE
-                top AS (
-                    SELECT br.broader_id, br.narrower_id, (select label from getconceptlabelsfromid where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
-                        (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
-                    FROM th_broaders br
-                    WHERE broader_id = $rootId
-                    UNION
-                    SELECT br.broader_id, br.narrower_id, (select label from getconceptlabelsfromid where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
-                        (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
-                    FROM top t, th_broaders br
-                    WHERE t.narrower_id = br.broader_id
-                )
-                SELECT *
-                FROM top
-                ORDER BY narr
-            ");
-        }
-        // TODO get option attributes
-        /*foreach($rows as &$row) {
-            if($row->datatype == "option") {
-                $row->attributes = getOptionsForId($db, $row['root']);
-            }
-        }*/
-        return response()->json($rows);
-    }
-
     public function duplicate($id) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $toDuplicate = DB::table('contexts')
             ->where('id', $id)
             ->first();
@@ -249,34 +231,6 @@ class ContextController extends Controller {
         return response()->json(['obj' => $toDuplicate]);
     }
 
-    public function getType($id) {
-        $contexts = DB::table('contexts')->get();
-        foreach($contexts as &$context) {
-            $attribs = DB::table('attribute_values as av')
-                    ->join('attributes as A', 'av.attribute_id', 'A.id')
-                    ->where('context_id', $context->id)
-                    ->select('av.*', 'A.datatype', 'A.thesaurus_root_url')
-                    ->get();
-            foreach($attribs as &$attr) {
-                if($attr->datatype == 'literature') {
-                    $attr->literature_info = DB::table('literature')->where('id', $attr->str_val)->first();
-                } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
-                    $attr->val = DB::table('th_concept')
-                        ->select('id as narrower_id',
-                            DB::raw("'".DB::table('getconceptlabelsfromurl')
-                            ->where('concept_url', $attr->thesaurus_val)
-                            ->where('short_name', 'de')
-                            ->value('label')."' as narr")
-                        )
-                        ->where('concept_url', '=', $attr->thesaurus_val)
-                        ->first();
-                }
-            }
-            $context->attributes = $attribs;
-        }
-        return response()->json($contexts);
-    }
-
     public function getArtifacts() {
         return response()->json(
             DB::table('context_types as c')
@@ -295,6 +249,18 @@ class ContextController extends Controller {
     public function getChildren($id) {
         $intId = filter_var($id, FILTER_VALIDATE_INT);
         if($intId === false || $intId <= 0) return;
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_concept_props')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $rows = DB::select(
             "WITH RECURSIVE
             q AS (
@@ -323,6 +289,18 @@ class ContextController extends Controller {
     }
 
     public function add(Request $request) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         //$title = $request->get('title');
         $user = \Auth::user();
         if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
@@ -360,6 +338,18 @@ class ContextController extends Controller {
     }
 
     public function set(Request $request) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $user = \Auth::user();
         if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $isUpdate = $request->has('realId');
@@ -395,6 +385,18 @@ class ContextController extends Controller {
     }
 
     public function setIcon(Request $request) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $id = $request->get('id');
         $upd = [];
 
@@ -414,6 +416,18 @@ class ContextController extends Controller {
     }
 
     public function setPossibility(Request $request) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $user = \Auth::user();
         if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $cid = $request->get('cid');
@@ -446,6 +460,18 @@ class ContextController extends Controller {
 
 
     public function delete($id) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('delete_move_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         DB::select("
             with recursive deletes as
             (

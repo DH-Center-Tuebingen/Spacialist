@@ -23,6 +23,18 @@ class ImageController extends Controller
     }
 
     public function uploadImage(Request $request) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('manage_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         if(!$request->hasFile('file') || !$request->file('file')->isValid()) return response()->json('null');
         $THUMB_SUFFIX = "_thumb";
         $THUMB_WIDTH = 256;
@@ -152,6 +164,18 @@ class ImageController extends Controller
     }
 
     public function link(Request $request) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('link_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         if(!$request->has('imgId') || !$request->has('ctxId')) {
             return response()->json([
                 'error' => 'Either the ID for the image or the context is missing.'
@@ -170,6 +194,18 @@ class ImageController extends Controller
     }
 
     public function unlink(Request $request) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('link_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         if(!$request->has('imgId') || !$request->has('ctxId')) {
             return response()->json([
                 'error' => 'Either the ID for the image or the context is missing.'
@@ -188,6 +224,18 @@ class ImageController extends Controller
     }
 
     public function getImage($id) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         return response()->json($this->getImageById($id));
     }
 
@@ -206,6 +254,18 @@ class ImageController extends Controller
     }
 
     public function getByContext($id) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $images = DB::table('context_photos as cp')
             ->join('photos as p', 'p.id', '=', 'cp.photo_id')
             ->where('cp.context_id', '=', $id)
@@ -216,18 +276,54 @@ class ImageController extends Controller
     }
 
     public function getImagePreviewObject($id) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $img = $this->getImageById($id);
         $file = Storage::get($img->thumb_url);
         return response($file, 200)->header('Content-Type', 'image/jpeg');
     }
 
     public function getImageObject($id) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $img = $this->getImageById($id);
         $file = Storage::get($img->url);
         return response($file, 200)->header('Content-Type', 'image/jpeg');
     }
 
     public function getAll() {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $images = DB::table('photos as ph')
                     ->select("ph.id as id", "ph.modified", "ph.created", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id")
                     ->get();

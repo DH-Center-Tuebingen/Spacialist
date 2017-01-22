@@ -16,6 +16,18 @@ class SourceController extends Controller {
     }
 
     public function getByAttribute($aid, $cid) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_concept_props')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $src = DB::table('sources')
             ->where([
                 ['attribute_id', '=', $aid],
@@ -29,6 +41,18 @@ class SourceController extends Controller {
     }
 
     public function getByContext($id) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('view_concept_props')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $src = DB::table('sources')
                 ->select('sources.*', DB::raw("(select label from getconceptlabelsfromurl where concept_url = attributes.thesaurus_url and short_name = 'de' limit 1) AS attribute_name"))
                 ->where('context_id', '=', $id)
@@ -42,6 +66,18 @@ class SourceController extends Controller {
     }
 
     public function add(Request $request) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $user = \Auth::user();
         if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $aid = $request->get('aid');
@@ -61,28 +97,19 @@ class SourceController extends Controller {
         return response()->json(['sid' => $id]);
     }
 
-    public function delete($id) {
-        DB::table('sources')
-            ->where('id', $id)
-            ->delete();
-    }
-
-    public function deleteByContext($id) {
-        DB::table('sources')
-            ->where('context_id', $id)
-            ->delete();
-    }
-
-    public function deleteByAttribute($aid, $cid) {
-        DB::table('sources')
-            ->where([
-                ['attribute_id', $aid],
-                ['context_id', $cid]
-            ])
-            ->delete();
-    }
-
     public function deleteByLiterature($aid, $cid, $lid) {
+        $role = 'map_user';
+        $user = User::find(1);
+        if(!$user->hasRole($role)) {
+            return response([
+                'error' => 'You are not a member of the role \'' . $role . '\''
+            ], 409);
+        }
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         DB::table('sources')
             ->where([
                 ['attribute_id', $aid],
