@@ -384,7 +384,7 @@ class ContextController extends Controller {
                 'context_type_id' => $ctid,
                 'lasteditor' => $user['name']
             ];
-            if($request->has('root_cid')) $ins['root_cid'] = $request->get('root_cid');
+            if($request->has('root_cid')) $ins['root_context_id'] = $request->get('root_cid');
             if($request->has('lat')) $ins['lat'] = $request->get('lat');
             if($request->has('lng')) $ins['lng'] = $request->get('lng');
             $cid = DB::table('contexts')
@@ -455,7 +455,7 @@ class ContextController extends Controller {
                 union all
                 select c.id
                 from contexts as c
-                inner join deletes p on f.root_context_id = p.id
+                inner join deletes p on c.root_context_id = p.id
             )
             delete from attribute_values where context_id in (select id from deletes)
         ");
@@ -468,7 +468,7 @@ class ContextController extends Controller {
                 union all
                 select c.id
                 from contexts as c
-                inner join deletes p on f.root_context_id = p.id
+                inner join deletes p on c.root_context_id = p.id
             )
             delete from contexts where id in (select id from deletes)
         ");
