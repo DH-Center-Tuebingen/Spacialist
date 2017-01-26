@@ -15,8 +15,6 @@ class Context extends Model
         'context_type_id',
         'root',
         'name',
-        'lat',
-        'lng',
         'lasteditor',
         'icon',
         'color',
