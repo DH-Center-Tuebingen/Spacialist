@@ -10,7 +10,8 @@
         "vlucas/phpdotenv": "~2.2",
         "tymon/jwt-auth": "^1.0@dev",
         "league/flysystem": " ~1.0",
-        "doctrine/dbal": "^2.5"
+        "doctrine/dbal": "^2.5",
+        "phaza/laravel-postgis": "^3.1"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
