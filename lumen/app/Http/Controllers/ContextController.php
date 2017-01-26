@@ -101,7 +101,7 @@ class ContextController extends Controller {
                 'error' => 'You are not a member of the role \'' . $role . '\''
             ], 409);
         }
-        if(!$user->can('view_concept_props')) {
+        if(!$user->can('view_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
@@ -126,7 +126,9 @@ class ContextController extends Controller {
         ");
         $children = [];
         foreach($rootFields as $key => $field) {
-            $rootFields[$key]->data =  $this->getData($field->id);
+            if($user->can('view_concept_props')) {
+                $rootFields[$key]->data =  $this->getData($field->id);
+            }
             if(array_key_exists($field->id, $children)) $tmpChildren = $children[$field->id];
             else $tmpChildren = array();
             $rootFields[$key]->children = $tmpChildren;

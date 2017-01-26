@@ -4,10 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\User;
+use DB;
 use Tymon\JWTAuth\JWTAuth;
+use Zizaco\Entrust;
 
 class UserController extends Controller
 {
+    /*
+    Entrust::hasRole($role);
+    Entrust::can('view_concepts');
+     */
     /**
      * @var \Tymon\JWTAuth\JWTAuth
      */
@@ -17,28 +24,52 @@ class UserController extends Controller
         $this->jwt = $jwt;
     }
 
-    public function get() {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
-        if(!$user->can('view_users')) {
+    public function getUserPermissions() {
+        $user = \Auth::user();
+        return response()->json(
+            $this->getUserPermissionsById($user->id)
+        );
+    }
+
+    public function addRoleToUser(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('add_remove_role')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $user = \Auth::user();
-        $roles = \DB::table('user_roles')
-            ->join('roles', 'roles.id', '=' , 'role_id')
-            ->where('user_id', '=', $user->id)
-            ->select('name', 'code')
+        $role = $request->get('role');
+        $roleId = DB::table('roles')->where('name', '=', $role)->value('id');
+        $receiver = User::find($request->get('user_id'));
+        $receiver->attachRole($roleId);
+        return response()->json([
+            'user' => $receiver,
+            'role' => $roleId
+        ]);
+    }
+
+    private function getUserPermissionsById($id) {
+        $permissions = DB::table('role_user as ru')
+            ->select('p.name')
+            ->join('permission_role as pr', 'ru.role_id', '=', 'pr.role_id')
+            ->join('permissions as p', 'p.id', '=', 'pr.permission_id')
+            ->orderBy('id')
+            ->groupBy('id')
+            ->where('user_id', '=', $id)
             ->get();
+        $hash = [];
+        foreach($permissions as $p) {
+            $hash[$p->name] = '1';
+        }
+        return $hash;
+    }
+
+    public function get() {
+        $user = \Auth::user();
+        $permissions = $this->getUserPermissionsById($user->id);
         return response()->json([
             'user' => $user,
-            'roles' => $roles
+            'permissions' => $permissions
         ]);
     }
 
@@ -48,31 +79,72 @@ class UserController extends Controller
             'password' => 'required',
         ]);
 
+        $valid = $this->validateRequest($request->only('email', 'password'));
+        if($valid['status'] == 200) {
+            return response()->json($valid['token']);
+        } else {
+            return response()->json($valid, $valid['status']);
+        }
+    }
+
+    private function validateRequest($request) {
         try {
-            if(!$token = $this->jwt->attempt($request->only('email', 'password'))) {
-                return response()->json(['error' => 'user_not_found'], 404);
+            if(!$token = $this->jwt->attempt($request)) {
+                return [
+                    'error' => 'user_not_found',
+                    'status' => 404
+                ];
             }
         } catch(\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-            return response()->json(['error' => 'token_expired'], 500);
+            return [
+                'error' => 'token_expired',
+                'status' => 500
+            ];
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-            return response()->json(['error' => 'token_invalid'], 500);
+            return [
+                'error' => 'token_invalid',
+                'status' => 500
+            ];
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-            return response()->json(['error' => 'token_absent ' . $e->getMessage()], 500);
+            return [
+                'error' => 'token_absent',
+                'status' => 500
+            ];
         }
-        return response()->json(compact('token'));
+        return [
+            'error' => '',
+            'status' => 200,
+            'token' => compact('token')
+        ];
     }
-    public function getAuthenticatedUser(Request $request) {
+
+    private function validateToken() {
         try {
             if(!$user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['error' => 'user_not_found'], 404);
+                return [
+                    'error' => 'user_not_found',
+                    'status' => 404
+                ];
             }
         } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-            return response()->json(['error' => 'token_expired'], $e->getStatusCode());
+            return [
+                'error' => 'token_expired',
+                'status' => 500
+            ];
         } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-            return response()->json(['error' => 'token_invalid'], $e->getStatusCode());
+            return [
+                'error' => 'token_invalid',
+                'status' => 500
+            ];
         } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
-            return response()->json(['error' => 'token_absent'], $e->getStatusCode());
+            return [
+                'error' => 'token_absent',
+                'status' => 500
+            ];
         }
-        return response()->json(compact('user'));
+        return [
+            'user' => $user,
+            'status' => 200
+        ];
     }
 }

@@ -601,6 +601,10 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         return moduleHelper.controllerExists(name);
     };
 
+    $scope.can = function(to) {
+        return typeof $scope.currentUser.permissions[to] != 'undefined' && $scope.currentUser.permissions[to] == 1;
+    };
+
     /**
      * @returns hash code for a given string `str`
      */

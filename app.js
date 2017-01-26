@@ -205,6 +205,7 @@ spacialistApp.directive('formField', function() {
     var updateInputFields = function(scope, element, attrs) {
         scope.attributeFields = scope.$eval(attrs.fields);
         scope.attributeOutputs = scope.$eval(attrs.output);
+        scope.readonlyInput = scope.$eval(attrs.spReadonly);
         var pattern = /^\d+$/;
         if(typeof attrs.labelWidth != 'undefined' && pattern.test(attrs.labelWidth)) {
             scope.labelWidth = parseInt(attrs.labelWidth);
@@ -622,7 +623,7 @@ spacialistApp.run(function($rootScope, $state) {
         if(user) {
             $rootScope.currentUser = {
                 user: user.user,
-                roles: user.roles
+                permissions: user.permissions
             };
             if(toState.name === 'auth') {
                 event.preventDefault();
