@@ -97,16 +97,6 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
     };
 }]);
 
-spacialistApp.directive('mySetIndex', function() {
-    return {
-        link: function(scope, element, attr) {
-            if(typeof attr.new !== 'undefined') scope.attribDataType = 'new';
-            else if(typeof attr.edit !== 'undefined') scope.attribDataType = 'edit';
-        },
-        templateUrl: 'includes/varFields.html'
-    };
-});
-
 spacialistApp.directive('spinner', function() {
     return {
         template: '<div class="spinner-container">' +
@@ -606,11 +596,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             url: '/spacialist',
             templateUrl: 'testing.html',
             controller: 'mainCtrl'
-        })
-        .state('old', {
-            url: '/old',
-            templateUrl: 'map.html',
-            controller: 'mapCtrl'
         });
 });
 
