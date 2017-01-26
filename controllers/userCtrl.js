@@ -16,16 +16,23 @@ spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory
             localStorage.setItem('user', JSON.stringify(response.data));
             scopeService.currentUser = $scope.currentUser = {
                 user: response.data.user,
-                roles: response.data.roles
+                permissions: response.data.permissions
             };
             console.log(JSON.stringify(response.data));
             $state.go('spacialist', {});
         });
     };
 
+    $scope.guestLogin = function() {
+        $scope.user.email = 'udontneedtoseehisidentification@rebels.tld';
+        $scope.user.pw = 'thesearentthedroidsuarelookingfor';
+        $scope.loginUser();
+    };
+
     $scope.logoutUser = function() {
         $auth.logout().then(function() {
             console.log("logged out");
+            $scope.user = {};
             localStorage.removeItem('user');
             scopeService.currentUser = $scope.currentUser = undefined;
             $state.go('auth', {});

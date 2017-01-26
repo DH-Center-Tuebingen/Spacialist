@@ -10,6 +10,7 @@
     "admin": "Administrator",
     "student_assistent": "HiWi",
     "login": "Einloggen",
+    "login as guest": "Als Gast einloggen",
     "logout": "Ausloggen",
     "email": "E-Mail-Adresse",
     "password": "Passwort",

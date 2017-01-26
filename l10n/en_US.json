@@ -10,6 +10,7 @@
     "admin": "Admin",
     "student_assistent": "student assistent",
     "login": "Log in",
+    "login as guest": "Log in as guest",
     "logout": "Log out",
     "email": "Email address",
     "password": "Password",
