@@ -52,6 +52,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('user/get', 'UserController@get');
     $app->post('user/get/all', 'UserController@getAll');
     $app->post('user/add', 'UserController@add');
+    $app->post('user/edit', 'UserController@edit');
     $app->get('user/get/roles/all', 'UserController@getRoles');
     $app->get('user/get/roles/{id}', 'UserController@getRolesByUser');
     $app->post('user/add/role', 'UserController@addRoleToUser');

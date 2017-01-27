@@ -158,6 +158,32 @@ class UserController extends Controller
         $selectedUser->detachRole($role_id);
     }
 
+    public function edit(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('change_password')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $user_id = $request->get('user_id');
+        $editedUser = User::find($user_id);
+        //$keys = ['name', 'email', 'password'];
+        $keys = ['password']; //currently only password is supported
+        $updated = false;
+        foreach($keys as $key) {
+            if($request->has($key)) {
+                $value = $request->get($key);
+                if($key == 'password') $value = Hash::make($value);
+                $editedUser->{$key} = $value;
+                $updated = true;
+            }
+        }
+        if($updated) $editedUser->save();
+        return response()->json([
+            'user' => $editedUser
+        ]);
+    }
+
     public function login(Request $request) {
         $this->validate($request, [
             'email'    => 'required|email|max:255',

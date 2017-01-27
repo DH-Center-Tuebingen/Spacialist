@@ -25,6 +25,39 @@ spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory
         modalFactory.addUserModal(addUser);
     };
 
+    var addUser = function(name, email, password) {
+        var formData = new FormData();
+        formData.append('name', name);
+        formData.append('email', email);
+        formData.append('password', password);
+        httpPostFactory('api/user/add', formData, function(response) {
+            $scope.users.push(response.user);
+        });
+    };
+
+    $scope.openEditUserDialog = function(user, $index) {
+        var values = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            password: ''
+        };
+        modalFactory.editUserModal(editUser, values, $index);
+    };
+
+    var editUser = function(changes, id, $index) {
+        var formData = new FormData();
+        formData.append('user_id', id);
+        for(var k in changes) {
+            if(changes.hasOwnProperty(k)) {
+                formData.append(k, changes[k]);
+            }
+        }
+        httpPostFactory('api/user/edit', formData, function(response) {
+            $scope.users[$index] = response.user;
+        });
+    };
+
     $scope.getRoles = function() {
         httpGetFactory('api/user/get/roles/all', function(response) {
             $scope.roles = response.roles;
@@ -52,16 +85,6 @@ spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory
         formData.append('user_id', user_id);
         httpPostFactory('api/user/remove/role', formData, function(response) {
             // TODO only remove/add role if function returns no error
-        });
-    };
-
-    var addUser = function(name, email, password) {
-        var formData = new FormData();
-        formData.append('name', name);
-        formData.append('email', email);
-        formData.append('password', password);
-        httpPostFactory('api/user/add', formData, function(response) {
-            $scope.users.push(response.user);
         });
     };
 
