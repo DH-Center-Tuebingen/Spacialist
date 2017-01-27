@@ -23,13 +23,7 @@ class ImageController extends Controller
     }
 
     public function uploadImage(Request $request) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('manage_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -164,13 +158,7 @@ class ImageController extends Controller
     }
 
     public function link(Request $request) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('link_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -194,13 +182,7 @@ class ImageController extends Controller
     }
 
     public function unlink(Request $request) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('link_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -224,13 +206,7 @@ class ImageController extends Controller
     }
 
     public function getImage($id) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -254,13 +230,7 @@ class ImageController extends Controller
     }
 
     public function getByContext($id) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -276,13 +246,7 @@ class ImageController extends Controller
     }
 
     public function getImagePreviewObject($id) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -294,13 +258,7 @@ class ImageController extends Controller
     }
 
     public function getImageObject($id) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -312,13 +270,7 @@ class ImageController extends Controller
     }
 
     public function getAll() {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'

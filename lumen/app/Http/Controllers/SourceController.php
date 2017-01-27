@@ -16,13 +16,7 @@ class SourceController extends Controller {
     }
 
     public function getByAttribute($aid, $cid) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_concept_props')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -41,13 +35,7 @@ class SourceController extends Controller {
     }
 
     public function getByContext($id) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_concept_props')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -66,13 +54,7 @@ class SourceController extends Controller {
     }
 
     public function add(Request $request) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -98,13 +80,7 @@ class SourceController extends Controller {
     }
 
     public function deleteByLiterature($aid, $cid, $lid) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
