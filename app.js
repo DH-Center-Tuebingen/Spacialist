@@ -1,6 +1,6 @@
 var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
 
-spacialistApp.service('modalService', ['$uibModal', function($uibModal) {
+spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($uibModal, httpGetFactory) {
     var defaults = {
         backdrop: true,
         keyboard: true,
@@ -40,6 +40,11 @@ spacialistApp.service('modalService', ['$uibModal', function($uibModal) {
                 $scope.modalOptions = tempOptions;
                 $scope.modalOptions.close = function(result) {
                     $uibModalInstance.dismiss('cancel');
+                };
+                $scope.modalOptions.openImageInTab = function(id) {
+                    httpGetFactory('api/image/get/' + id, function(data) {
+                        window.open(data);
+                    });
                 };
             };
         }
@@ -278,6 +283,17 @@ spacialistApp.directive('formField', function() {
         }
     };
 });
+
+spacialistApp.directive('protectedSrc', ['httpGetFactory', function(httpGetFactory) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            httpGetFactory(attrs.protectedSrc, function(response) {
+                attrs.$set('src', response);
+            });
+        }
+    };
+}]);
 
 spacialistApp.directive("number", function() {
     return {

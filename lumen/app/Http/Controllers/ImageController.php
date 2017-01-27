@@ -246,27 +246,15 @@ class ImageController extends Controller
     }
 
     public function getImagePreviewObject($id) {
-        $user = \Auth::user();
-        if(!$user->can('view_photos')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
         $img = $this->getImageById($id);
         $file = Storage::get($img->thumb_url);
-        return response($file, 200)->header('Content-Type', 'image/jpeg');
+        return 'data:image/jpeg;base64,' . base64_encode($file);
     }
 
     public function getImageObject($id) {
-        $user = \Auth::user();
-        if(!$user->can('view_photos')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
         $img = $this->getImageById($id);
         $file = Storage::get($img->url);
-        return response($file, 200)->header('Content-Type', 'image/jpeg');
+        return 'data:image/jpeg;base64,' . base64_encode($file);
     }
 
     public function getAll() {
