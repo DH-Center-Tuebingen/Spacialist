@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\User;
 use DB;
@@ -31,23 +32,6 @@ class UserController extends Controller
         );
     }
 
-    public function addRoleToUser(Request $request) {
-        $user = \Auth::user();
-        if(!$user->can('add_remove_role')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $role = $request->get('role');
-        $roleId = DB::table('roles')->where('name', '=', $role)->value('id');
-        $receiver = User::find($request->get('user_id'));
-        $receiver->attachRole($roleId);
-        return response()->json([
-            'user' => $receiver,
-            'role' => $roleId
-        ]);
-    }
-
     private function getUserPermissionsById($id) {
         $permissions = DB::table('role_user as ru')
             ->select('p.name')
@@ -71,6 +55,107 @@ class UserController extends Controller
             'user' => $user,
             'permissions' => $permissions
         ]);
+    }
+
+    public function getAll() {
+        $user = \Auth::user();
+        if(!$user->can('view_users')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        return response()->json([
+            'users' => User::all()
+        ]);
+    }
+
+    public function delete($id) {
+        $user = \Auth::user();
+        if(!$user->can('delete_users')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $toDelete = User::find($id);
+        $toDelete->delete();
+    }
+
+    public function add(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('create_users')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $name = $request->get('name');
+        $email = $request->get('email');
+        $password = Hash::make($request->get('password'));
+
+        $newUser = new User();
+        $newUser->name = $name;
+        $newUser->email = $email;
+        $newUser->password = $password;
+        $newUser->save();
+
+        return response()->json([
+            'user' => $newUser
+        ]);
+    }
+
+    public function getRoles() {
+        $user = \Auth::user();
+        if(!$user->can('add_remove_role')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        return response()->json([
+            'roles' => DB::table('roles')
+                ->select('id', 'name', 'display_name', 'description')
+                ->get()
+        ]);
+    }
+
+    public function getRolesByUser($id) {
+        $user = \Auth::user();
+        if(!$user->can('add_remove_role')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        return response()->json([
+            'roles' => DB::table('role_user as ru')
+                ->select('r.id', 'r.name', 'r.display_name', 'r.description')
+                ->join('roles as r', 'ru.role_id', '=', 'r.id')
+                ->where('ru.user_id', '=', $id)
+                ->get()
+        ]);
+    }
+
+    public function addRoleToUser(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('add_remove_role')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $role_id = $request->get('role_id');
+        $user_id = $request->get('user_id');
+        $selectedUser = User::find($user_id);
+        $selectedUser->attachRole($role_id);
+    }
+
+    public function removeRoleFromUser(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('add_remove_role')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $role_id = $request->get('role_id');
+        $user_id = $request->get('user_id');
+        $selectedUser = User::find($user_id);
+        $selectedUser->detachRole($role_id);
     }
 
     public function login(Request $request) {

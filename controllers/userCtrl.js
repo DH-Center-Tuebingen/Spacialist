@@ -1,4 +1,70 @@
-spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'modalService', '$uibModal', '$auth', '$state', '$http', function($scope, scopeService, httpPostFactory, httpGetFactory, modalService, $uibModal, $auth, $state, $http) {
+spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'modalService', 'modalFactory', '$uibModal', '$auth', '$state', '$http', function($scope, scopeService, httpPostFactory, httpGetFactory, modalService, modalFactory, $uibModal, $auth, $state, $http) {
+    scopeService.can = $scope.can = function(to) {
+        if(typeof $scope.currentUser == 'undefined') return false;
+        if(typeof $scope.currentUser.permissions[to] == 'undefined') return false;
+        return $scope.currentUser.permissions[to] == 1;
+    };
+
+    $scope.openUserManagement = function() {
+        $state.go('user', {});
+    };
+
+    $scope.getUserList = function() {
+        httpPostFactory('api/user/get/all', new FormData(), function(response) {
+            $scope.users = response.users;
+        });
+    };
+
+    $scope.deleteUser = function(id, $index) {
+        httpGetFactory('api/user/delete/' + id, function(response) {
+            $scope.users.splice($index, 1);
+        });
+    };
+
+    $scope.openAddUserDialog = function() {
+        modalFactory.addUserModal(addUser);
+    };
+
+    $scope.getRoles = function() {
+        httpGetFactory('api/user/get/roles/all', function(response) {
+            $scope.roles = response.roles;
+        });
+    };
+
+    $scope.getUserRoles = function(id, $index) {
+        httpGetFactory('api/user/get/roles/' + id, function(response) {
+            $scope.users[$index].roles = response.roles;
+        });
+    };
+
+    $scope.addUserRole = function($item, user_id) {
+        var formData = new FormData();
+        formData.append('role_id', $item.id);
+        formData.append('user_id', user_id);
+        httpPostFactory('api/user/add/role', formData, function(response) {
+            // TODO only remove/add role if function returns no error
+        });
+    };
+
+    $scope.removeUserRole = function($item, user_id) {
+        var formData = new FormData();
+        formData.append('role_id', $item.id);
+        formData.append('user_id', user_id);
+        httpPostFactory('api/user/remove/role', formData, function(response) {
+            // TODO only remove/add role if function returns no error
+        });
+    };
+
+    var addUser = function(name, email, password) {
+        var formData = new FormData();
+        formData.append('name', name);
+        formData.append('email', email);
+        formData.append('password', password);
+        httpPostFactory('api/user/add', formData, function(response) {
+            $scope.users.push(response.user);
+        });
+    };
+
     $scope.loginUser = function() {
         var credentials = {
             email: $scope.user.email,

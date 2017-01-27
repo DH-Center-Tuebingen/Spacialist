@@ -102,6 +102,11 @@
                                 </li>
                             </ul>
                         </li>
+                        <li ng-if="can('view_users')">
+                            <a href="" ng-click="openUserManagement()">
+                                Benutzerverwaltung
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>

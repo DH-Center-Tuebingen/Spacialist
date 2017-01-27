@@ -46,8 +46,14 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('context/set/icon', 'ContextController@setIcon');
     $app->post('sources/add', 'SourceController@add');
     $app->post('context/set/possibility', 'ContextController@setPossibility');
+    $app->get('user/delete/{id}', 'UserController@delete');
     $app->post('user/logout', 'UserController@logout');
     $app->post('user/switch', 'UserController@switchRole');
     $app->post('user/get', 'UserController@get');
-    $app->post('user/role/add', 'UserController@addRoleToUser');
+    $app->post('user/get/all', 'UserController@getAll');
+    $app->post('user/add', 'UserController@add');
+    $app->get('user/get/roles/all', 'UserController@getRoles');
+    $app->get('user/get/roles/{id}', 'UserController@getRolesByUser');
+    $app->post('user/add/role', 'UserController@addRoleToUser');
+    $app->post('user/remove/role', 'UserController@removeRoleFromUser');
 });

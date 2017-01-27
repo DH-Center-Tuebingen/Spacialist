@@ -94,13 +94,7 @@ class ContextController extends Controller {
     }
 
     public function getRecursive() {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -139,13 +133,7 @@ class ContextController extends Controller {
     }
 
     public function getChoices() {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -193,13 +181,7 @@ class ContextController extends Controller {
     }
 
     public function duplicate($id) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -251,13 +233,7 @@ class ContextController extends Controller {
     public function getChildren($id) {
         $intId = filter_var($id, FILTER_VALIDATE_INT);
         if($intId === false || $intId <= 0) return;
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_concept_props')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -291,13 +267,7 @@ class ContextController extends Controller {
     }
 
     public function add(Request $request) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -340,13 +310,7 @@ class ContextController extends Controller {
     }
 
     public function set(Request $request) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('view_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -387,13 +351,7 @@ class ContextController extends Controller {
     }
 
     public function setIcon(Request $request) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -418,13 +376,7 @@ class ContextController extends Controller {
     }
 
     public function setPossibility(Request $request) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
@@ -462,13 +414,7 @@ class ContextController extends Controller {
 
 
     public function delete($id) {
-        $role = 'map_user';
-        $user = User::find(1);
-        if(!$user->hasRole($role)) {
-            return response([
-                'error' => 'You are not a member of the role \'' . $role . '\''
-            ], 409);
-        }
+        $user = \Auth::user();
         if(!$user->can('delete_move_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
