@@ -141,6 +141,19 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function() {}, function() {});
     };
+    this.errorModal = function(msg) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/error.html',
+            controller: function($uibModalInstance) {
+                this.msg = msg;
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
 }]);
 
 spacialistApp.directive('spinner', function() {
@@ -585,13 +598,15 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             responseError: function(rejection) {
                 if(typeof rejection != 'undefined' && typeof rejection.data != 'undefined' && rejection.data !== null) {
                     var rejectReasons = ['token_not_provided', 'token_expired', 'token_absent', 'token_invalid'];
-                    angular.forEach(rejectReasons, function(value, key) {
+                    for(var i=0; i<rejectReasons.length; i++) {
+                        var value = rejectReasons[i];
                         if(rejection.data.error === value) {
                             var $state = $injector.get('$state');
                             localStorage.removeItem('user');
                             $state.go('auth');
                         }
-                    });
+                    }
+                    console.log(rejection);
                 }
                 return $q.reject(rejection);
             }
@@ -617,7 +632,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
     function setAuthHeader($q, $injector) {
         return {
             response: function(response) {
-                if(response.headers('Authorization') !== null) console.log(response.headers('Authorization'));
                 if(response.headers('Authorization') !== null) {
                     var token = response.headers('Authorization').replace('Bearer ', '');
                     var $auth = $injector.get('$auth');
@@ -629,6 +643,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             responseError: function(rejection) {
                 console.log("Something went wrong...");
                 console.log(rejection);
+                if(rejection.status == 403) {
+                    if(rejection.headers('Authorization') !== null) {
+                        var token = rejection.headers('Authorization').replace('Bearer ', '');
+                        var $auth = $injector.get('$auth');
+                        $auth.setToken(token);
+                        localStorage.setItem('satellizer_token', token);
+                    }
+                    var modalFactory = $injector.get('modalFactory');
+                    modalFactory.errorModal(rejection.data.error);
+                }
                 return $q.reject(rejection);
             }
         };
