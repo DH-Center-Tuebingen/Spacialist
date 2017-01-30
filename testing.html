@@ -140,38 +140,39 @@
             </div>
         </div>
         <div ng-if="layerTwo.activeTab == 'literature'" ng-controller="literatureCtrl">
-            <h3>Neue Literatur hinzufügen</h3>
-            <form class="form-horizontal">
-                <div class="form-group">
-                    <label class="control-label col-md-3" for="type">Typ:</label>
-                    <div class="col-md-9">
-                        <ui-select ng-model="literature.selectedType">
-                            <ui-select-match>
-                                <span ng-bind="$select.selected.name"></span>
-                            </ui-select-match>
-                            <ui-select-choices repeat="type in availableTypes">
-                                <span ng-bind="type.name"></span>
-                            </ui-select-choices>
-                        </ui-select>
+            <div ng-if="can('add_remove_literature') || can('edit_literature')">
+                <h3>Neue Literatur hinzufügen</h3>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="type">Typ:</label>
+                        <div class="col-md-9">
+                            <ui-select ng-model="literature.selectedType">
+                                <ui-select-match>
+                                    <span ng-bind="$select.selected.name"></span>
+                                </ui-select-match>
+                                <ui-select-choices repeat="type in availableTypes">
+                                    <span ng-bind="type.name"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group" ng-repeat="mandatory in availableTypes[literature.selectedType.id].mandatoryFields">
-                    <label class="control-label col-md-3">{{ mandatory }}:<span style="color: red;">*</span></label>
-                    <div class="col-md-9">
-                        <input type="text" class="form-control" ng-model="literature.fields[mandatory]" placeholder="{{ mandatory }}"/>
+                    <div class="form-group" ng-repeat="mandatory in availableTypes[literature.selectedType.id].mandatoryFields">
+                        <label class="control-label col-md-3">{{ mandatory }}:<span style="color: red;">*</span></label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" ng-model="literature.fields[mandatory]" placeholder="{{ mandatory }}"/>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group" ng-repeat="optional in availableTypes[literature.selectedType.id].optionalFields">
-                    <label class="control-label col-md-3">{{ optional }}:</label>
-                    <div class="col-md-9">
-                        <input type="text" class="form-control" ng-model="literature.fields[optional]" placeholder="{{ optional }}"/>
+                    <div class="form-group" ng-repeat="optional in availableTypes[literature.selectedType.id].optionalFields">
+                        <label class="control-label col-md-3">{{ optional }}:</label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" ng-model="literature.fields[optional]" placeholder="{{ optional }}"/>
+                        </div>
                     </div>
-                </div>
-                <button type="button" class="btn btn-success" ng-click="addLiterature(literature.fields, literature.selectedType)">Hinzufügen</button>
-            </form>
-            <h4>BibTex-Code</h4>
-            <pre>
-                <code>
+                    <button type="button" class="btn btn-success" ng-click="addLiterature(literature.fields, literature.selectedType)" ng-if="can('add_remove_literature')">Hinzufügen</button>
+                </form>
+                <h4>BibTex-Code</h4>
+                <pre>
+                    <code>
 {{ literature.fields }}
 @ARTICLE {
     author = "Bruce Wayne",
@@ -179,8 +180,12 @@
     journal = "XY"
     year = "1337"
 }
-                </code>
-            </pre>
+                    </code>
+                </pre>
+            </div>
+            <div ng-if="!can('add_remove_literature') && !can('edit_literature')">
+                <div ng-include="'layouts/restricted-access.html'"></div>
+            </div>
         </div>
     </div>
 </div>
