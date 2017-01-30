@@ -756,6 +756,9 @@ spacialistApp.controller('mapCtrl', ['$rootScope', '$scope', '$timeout', '$sce',
     };
 
     scopeService.displayMarkers = function(contextList) {
+        if(!scopeService.can('view_geodata')) {
+            return;
+        }
         scopeService.markers = {};
         $scope.mapBounds = {
             southWest: {

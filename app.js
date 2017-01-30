@@ -662,10 +662,19 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 /**
  * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
  */
-spacialistApp.run(function($rootScope, $state) {
+spacialistApp.run(function($rootScope, $state, scopeService) {
     $rootScope.$on('$stateChangeStart', function(event, toState) {
         var user = JSON.parse(localStorage.getItem('user'));
         if(user) {
+            if(!scopeService.can('duplicate_edit_concepts')) {
+                scopeService.map.drawOptions.draw = {
+                    polyline: false,
+                    polygon: false,
+                    rectangle: false,
+                    circle: false,
+                    marker: false
+                };
+            }
             $rootScope.currentUser = {
                 user: user.user,
                 permissions: user.permissions
