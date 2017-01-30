@@ -297,7 +297,6 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
     $scope.setCurrentElement = function(target, elem) {
         $scope.unsetCurrentElement();
         if(typeof elem != 'undefined' && elem.id == target.id) {
-            $scope.layerTwo.activeImageTab = 'all';
             return;
         }
         elem = target;
@@ -319,7 +318,6 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
             typeId: elem.typeid,
             ctid: elem.ctid
         };
-        $scope.layerTwo.activeImageTab = 'linked';
         setMarker($scope.currentElement, true);
         loadLinkedImages($scope.currentElement);
     };
