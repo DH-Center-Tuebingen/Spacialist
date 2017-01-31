@@ -23,6 +23,12 @@ class ImageController extends Controller
     }
 
     public function uploadImage(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('manage_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         if(!$request->hasFile('file') || !$request->file('file')->isValid()) return response()->json('null');
         $THUMB_SUFFIX = "_thumb";
         $THUMB_WIDTH = 256;
@@ -152,6 +158,12 @@ class ImageController extends Controller
     }
 
     public function link(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('link_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         if(!$request->has('imgId') || !$request->has('ctxId')) {
             return response()->json([
                 'error' => 'Either the ID for the image or the context is missing.'
@@ -170,6 +182,12 @@ class ImageController extends Controller
     }
 
     public function unlink(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('link_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         if(!$request->has('imgId') || !$request->has('ctxId')) {
             return response()->json([
                 'error' => 'Either the ID for the image or the context is missing.'
@@ -188,6 +206,12 @@ class ImageController extends Controller
     }
 
     public function getImage($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         return response()->json($this->getImageById($id));
     }
 
@@ -206,6 +230,12 @@ class ImageController extends Controller
     }
 
     public function getByContext($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $images = DB::table('context_photos as cp')
             ->join('photos as p', 'p.id', '=', 'cp.photo_id')
             ->where('cp.context_id', '=', $id)
@@ -218,16 +248,22 @@ class ImageController extends Controller
     public function getImagePreviewObject($id) {
         $img = $this->getImageById($id);
         $file = Storage::get($img->thumb_url);
-        return response($file, 200)->header('Content-Type', 'image/jpeg');
+        return 'data:image/jpeg;base64,' . base64_encode($file);
     }
 
     public function getImageObject($id) {
         $img = $this->getImageById($id);
         $file = Storage::get($img->url);
-        return response($file, 200)->header('Content-Type', 'image/jpeg');
+        return 'data:image/jpeg;base64,' . base64_encode($file);
     }
 
     public function getAll() {
+        $user = \Auth::user();
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $images = DB::table('photos as ph')
                     ->select("ph.id as id", "ph.modified", "ph.created", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id")
                     ->get();

@@ -85,32 +85,15 @@
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right" ng-controller="userCtrl">
-                        <li ng-if="currentUser"><!--ng-controller="UserCtrl"-->
+                        <li ng-if="currentUser">
                             <a href="" ng-click="logoutUser()">
                                 <span class="fa fa-fw fa-sign-out"></span> {{ currentUser.user.name }}
                             </a>
                         </li>
-                        <li ng-if="currentUser" class="dropdown" uib-dropdown><!--ng-controller="UserCtrl"-->
-                            <a href="" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                Administrator <span class="caret"></span>
+                        <li ng-if="can('view_users')">
+                            <a href="" ng-click="openUserManagement()">
+                                Benutzerverwaltung
                             </a>
-                            <ul class="dropdown-menu" uib-dropdown-menu>
-                                <li>
-                                    <a href="">
-                                        Administrator
-                                    </a>
-                                </li>
-                                <!--<li>
-                                    <a href="">
-                                        HiWi
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="">
-                                        Fotobearbeiter
-                                    </a>
-                                </li>-->
-                            </ul>
                         </li>
                     </ul>
                 </div>

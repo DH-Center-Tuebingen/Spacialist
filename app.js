@@ -1,6 +1,6 @@
 var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
 
-spacialistApp.service('modalService', ['$uibModal', function($uibModal) {
+spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($uibModal, httpGetFactory) {
     var defaults = {
         backdrop: true,
         keyboard: true,
@@ -40,6 +40,11 @@ spacialistApp.service('modalService', ['$uibModal', function($uibModal) {
                 $scope.modalOptions = tempOptions;
                 $scope.modalOptions.close = function(result) {
                     $uibModalInstance.dismiss('cancel');
+                };
+                $scope.modalOptions.openImageInTab = function(id) {
+                    httpGetFactory('api/image/get/' + id, function(data) {
+                        window.open(data);
+                    });
                 };
             };
         }
@@ -95,17 +100,61 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-}]);
-
-spacialistApp.directive('mySetIndex', function() {
-    return {
-        link: function(scope, element, attr) {
-            if(typeof attr.new !== 'undefined') scope.attribDataType = 'new';
-            else if(typeof attr.edit !== 'undefined') scope.attribDataType = 'edit';
-        },
-        templateUrl: 'includes/varFields.html'
+    this.addUserModal = function(onCreate) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/new-user.html',
+            controller: function($uibModalInstance) {
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.onCreate = function(name, email, password) {
+                    onCreate(name, email, password);
+                    $uibModalInstance.dismiss('ok');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function() {}, function() {});
     };
-});
+    this.editUserModal = function(onEdit, user, index) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/edit-user.html',
+            controller: function($uibModalInstance) {
+                this.userinfo = angular.copy(user);
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.onEdit = function(userinfo) {
+                    var changes = {};
+                    for(var key in user) {
+                        if(user.hasOwnProperty(key)) {
+                            if(user[key] != userinfo[key]) {
+                                changes[key] = userinfo[key];
+                            }
+                        }
+                    }
+                    onEdit(changes, user.id, index);
+                    $uibModalInstance.dismiss('ok');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function() {}, function() {});
+    };
+    this.errorModal = function(msg) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/error.html',
+            controller: function($uibModalInstance) {
+                this.msg = msg;
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
+}]);
 
 spacialistApp.directive('spinner', function() {
     return {
@@ -205,6 +254,7 @@ spacialistApp.directive('formField', function() {
     var updateInputFields = function(scope, element, attrs) {
         scope.attributeFields = scope.$eval(attrs.fields);
         scope.attributeOutputs = scope.$eval(attrs.output);
+        scope.readonlyInput = scope.$eval(attrs.spReadonly);
         var pattern = /^\d+$/;
         if(typeof attrs.labelWidth != 'undefined' && pattern.test(attrs.labelWidth)) {
             scope.labelWidth = parseInt(attrs.labelWidth);
@@ -246,6 +296,17 @@ spacialistApp.directive('formField', function() {
         }
     };
 });
+
+spacialistApp.directive('protectedSrc', ['httpGetFactory', function(httpGetFactory) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            httpGetFactory(attrs.protectedSrc, function(response) {
+                attrs.$set('src', response);
+            });
+        }
+    };
+}]);
 
 spacialistApp.directive("number", function() {
     return {
@@ -537,13 +598,15 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             responseError: function(rejection) {
                 if(typeof rejection != 'undefined' && typeof rejection.data != 'undefined' && rejection.data !== null) {
                     var rejectReasons = ['token_not_provided', 'token_expired', 'token_absent', 'token_invalid'];
-                    angular.forEach(rejectReasons, function(value, key) {
+                    for(var i=0; i<rejectReasons.length; i++) {
+                        var value = rejectReasons[i];
                         if(rejection.data.error === value) {
                             var $state = $injector.get('$state');
                             localStorage.removeItem('user');
                             $state.go('auth');
                         }
-                    });
+                    }
+                    console.log(rejection);
                 }
                 return $q.reject(rejection);
             }
@@ -569,7 +632,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
     function setAuthHeader($q, $injector) {
         return {
             response: function(response) {
-                if(response.headers('Authorization') !== null) console.log(response.headers('Authorization'));
                 if(response.headers('Authorization') !== null) {
                     var token = response.headers('Authorization').replace('Bearer ', '');
                     var $auth = $injector.get('$auth');
@@ -581,6 +643,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             responseError: function(rejection) {
                 console.log("Something went wrong...");
                 console.log(rejection);
+                if(rejection.status == 403) {
+                    if(rejection.headers('Authorization') !== null) {
+                        var token = rejection.headers('Authorization').replace('Bearer ', '');
+                        var $auth = $injector.get('$auth');
+                        $auth.setToken(token);
+                        localStorage.setItem('satellizer_token', token);
+                    }
+                    var modalFactory = $injector.get('modalFactory');
+                    modalFactory.errorModal(rejection.data.error);
+                }
                 return $q.reject(rejection);
             }
         };
@@ -603,25 +675,33 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         })
         .state('spacialist', {
             url: '/spacialist',
-            templateUrl: 'testing.html',
-            controller: 'mainCtrl'
+            templateUrl: 'testing.html'
         })
-        .state('old', {
-            url: '/old',
-            templateUrl: 'map.html',
-            controller: 'mapCtrl'
+        .state('user', {
+            url: '/user',
+            templateUrl: 'user.html'
         });
 });
 
 /**
  * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
  */
-spacialistApp.run(function($rootScope, $state) {
+spacialistApp.run(function($rootScope, $state, scopeService) {
     $rootScope.$on('$stateChangeStart', function(event, toState) {
         var user = JSON.parse(localStorage.getItem('user'));
         if(user) {
+            if(!scopeService.can('duplicate_edit_concepts')) {
+                scopeService.map.drawOptions.draw = {
+                    polyline: false,
+                    polygon: false,
+                    rectangle: false,
+                    circle: false,
+                    marker: false
+                };
+            }
             $rootScope.currentUser = {
-                user: user
+                user: user.user,
+                permissions: user.permissions
             };
             if(toState.name === 'auth') {
                 event.preventDefault();

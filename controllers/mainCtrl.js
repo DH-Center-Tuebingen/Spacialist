@@ -599,6 +599,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         return moduleHelper.controllerExists(name);
     };
 
+    $scope.can = scopeService.can;
+
     /**
      * @returns hash code for a given string `str`
      */
