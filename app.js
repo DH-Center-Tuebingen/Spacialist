@@ -675,7 +675,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         })
         .state('spacialist', {
             url: '/spacialist',
-            templateUrl: 'testing.html'
+            templateUrl: 'view.html'
         })
         .state('user', {
             url: '/user',
