@@ -18,33 +18,64 @@ spacialistApp.controller('imageCtrl', function($rootScope, $scope, scopeService,
         }
     };
 
-    $scope.imageContextMenu = [
-        [function() {
-            var dflt = '<i class="fa fa-fw fa-plus-circle"></i> Mit aktuellem Kontext verbinden';
-            //get element by dom, because $scope seems to be the isolated template (image-list.html) scope
-            var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
-            if(tmpScope) {
-                var currentElement = tmpScope.element;
-                dflt += ' <i style="opacity: 0.5;">' + currentElement.name + '</i>';
-            }
-            return dflt;
-        }, function ($itemScope, $event, modelValue, text, $li) {
-            var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
-            if(!tmpScope) return;
-            var currentElement = tmpScope.element;
-            var imgId = $itemScope.img.id;
-            var contextId = currentElement.id;
-            linkImage(imgId, contextId);
-        }, function() {
-            var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
-            if(!tmpScope) return false;
-            return typeof tmpScope.element != 'undefined';
-        }],
-        null,
-        ['<i class="fa fa-fw fa-search"></i> Nach Kontexten suchen', function ($itemScope, $event, modelValue, text, $li) {
-            //TODO implement (open modal with search field or inline)
-        }]
-    ];
+    var linkImageContextMenu = [function() {
+       var dflt = '<i class="fa fa-fw fa-plus-circle"></i> Mit aktuellem Kontext verbinden';
+       //get element by dom, because $scope seems to be the isolated template (image-list.html) scope
+       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
+       if(tmpScope) {
+           var currentElement = tmpScope.element;
+           dflt += ' <i style="opacity: 0.5;">' + currentElement.name + '</i>';
+       }
+       return dflt;
+    }, function ($itemScope, $event, modelValue, text, $li) {
+       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
+       if(!tmpScope) return;
+       var currentElement = tmpScope.element;
+       var imgId = $itemScope.img.id;
+       var contextId = currentElement.id;
+       linkImage(imgId, contextId);
+    }, function() {
+       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
+       if(!tmpScope) return false;
+       return typeof tmpScope.element != 'undefined';
+    }];
+    var unlinkImageContextMenu = [function() {
+       var dflt = '<i class="fa fa-fw fa-plus-circle"></i> Von aktuellem Kontext lösen';
+       //get element by dom, because $scope seems to be the isolated template (image-list.html) scope
+       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
+       if(tmpScope) {
+           var currentElement = tmpScope.element;
+           dflt += ' <i style="opacity: 0.5;">' + currentElement.name + '</i>';
+       }
+       return dflt;
+    }, function ($itemScope, $event, modelValue, text, $li) {
+       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
+       if(!tmpScope) return;
+       var currentElement = tmpScope.element;
+       var imgId = $itemScope.img.id;
+       var contextId = currentElement.id;
+       unlinkImage(imgId, contextId);
+    }, function() {
+       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
+       if(!tmpScope) return false;
+       return typeof tmpScope.element != 'undefined';
+    }];
+    var contextMenuSearch = ['<i class="fa fa-fw fa-search"></i> Nach Kontexten suchen', function ($itemScope, $event, modelValue, text, $li) {
+       //TODO implement (open modal with search field or inline)
+    }];
+
+    $scope.imageContextMenu = {
+       all: [
+           linkImageContextMenu,
+           null,
+           contextMenuSearch
+       ],
+       linked: [
+           unlinkImageContextMenu,
+           null,
+           contextMenuSearch
+       ]
+    };
 
     /**
      * Opens a modal for a given image `img`. This modal displays a zoomable image container and other relevant information of the image
@@ -80,8 +111,8 @@ spacialistApp.controller('imageCtrl', function($rootScope, $scope, scopeService,
                 console.log(response);
                 var data = response.data;
                 data.linked = [];
-                if (typeof $scope.images.all === 'undefined') $scope.images.all = [];
-                $scope.images.all.push(data);
+                if (typeof scopeService.images.all === 'undefined') scopeService.images.all = [];
+                scopeService.images.all.push(data);
                 finished++;
                 if (finished == toFinish) {
                     $scope.uploadingImages = undefined;
@@ -127,11 +158,12 @@ spacialistApp.controller('imageCtrl', function($rootScope, $scope, scopeService,
         formData.append('ctxId', contextId);
         httpPostFactory('api/image/unlink', formData, function(response) {
             console.log("unlinked image " + imgId + " from " + contextId);
+            scopeService.getImagesForContext(imgId);
         });
     };
 
     $scope.loadImages = function(len, type) {
-        var src = $scope.images[type];
+        var src = scopeService.images[type];
         if(len == src.length) return src;
         var loaded = src.slice(0, len + 10);
         return loaded;
@@ -153,14 +185,14 @@ spacialistApp.controller('imageCtrl', function($rootScope, $scope, scopeService,
 
     scopeService.getImagesForContext = function(id) {
         $rootScope.$emit('image:delete:linked');
-        $scope.images.linked = [];
+        scopeService.images.linked = [];
         getLinkedImages(id);
     };
 
     var getLinkedImages = function(id) {
         httpGetFactory('api/image/getByContext/' + id, function(response) {
             var oneUpdated = false;
-            var linkedCopy = $scope.images.linked.slice();
+            var linkedCopy = scopeService.images.linked.slice();
             for(var i=0; i<response.images.length; i++) {
                 var newLinked = response.images[i];
                 var alreadyLinked = false;
@@ -169,7 +201,7 @@ spacialistApp.controller('imageCtrl', function($rootScope, $scope, scopeService,
                     if(newLinked.id == linked.id) {
                         if(!angular.equals(newLinked, linked)) {
                             oneUpdated = true;
-                            $scope.images.linked[j] = newLinked;
+                            scopeService.images.linked[j] = newLinked;
                         }
                         alreadyLinked = true;
                         break;
@@ -177,7 +209,7 @@ spacialistApp.controller('imageCtrl', function($rootScope, $scope, scopeService,
                 }
                 if(!alreadyLinked) {
                     oneUpdated = true;
-                    $scope.images.linked.push(newLinked);
+                    scopeService.images.linked.push(newLinked);
                 }
             }
             if(oneUpdated) {
@@ -195,7 +227,7 @@ spacialistApp.controller('imageCtrl', function($rootScope, $scope, scopeService,
         } else {
             httpGetFactory('api/image/getAll', function(response) {
                 var oneUpdated = false;
-                var allCopy = $scope.images.all.slice();
+                var allCopy = scopeService.images.all.slice();
                 for(var i=0; i<response.length; i++) {
                     var newImg = response[i];
                     var alreadyLinked = false;
@@ -204,7 +236,7 @@ spacialistApp.controller('imageCtrl', function($rootScope, $scope, scopeService,
                         if(newImg.id == one.id) {
                             if(!angular.equals(newImg, one)) {
                                 oneUpdated = true;
-                                $scope.images.all[j] = newImg;
+                                scopeService.images.all[j] = newImg;
                             }
                             alreadyLinked = true;
                             break;
@@ -212,7 +244,7 @@ spacialistApp.controller('imageCtrl', function($rootScope, $scope, scopeService,
                     }
                     if(!alreadyLinked) {
                         oneUpdated = true;
-                        $scope.images.all.push(newImg);
+                        scopeService.images.all.push(newImg);
                     }
                 }
                 if(oneUpdated) {
