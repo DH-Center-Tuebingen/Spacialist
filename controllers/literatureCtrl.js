@@ -1,5 +1,6 @@
-spacialistApp.controller('literatureCtrl', function($rootScope, $scope, scopeService, modalService, httpGetFactory, httpPostFactory) {
-    $scope.availableTypes = [
+spacialistApp.controller('literatureCtrl', function($rootScope, $scope, scopeService, modalFactory, httpGetFactory, httpPostFactory) {
+    $scope.literatureOptions = {};
+    $scope.literatureOptions.availableTypes = [
         {
             name: 'article',
             id: 0,
@@ -37,9 +38,21 @@ spacialistApp.controller('literatureCtrl', function($rootScope, $scope, scopeSer
             ]
         }
     ];
-    $scope.literature.selectedType = $scope.availableTypes[0];
 
-    $scope.addLiterature = function(fields, type) {
+    $scope.can = scopeService.can;
+    $scope.literature = scopeService.literature;
+
+    $scope.deleteLiteratureEntry = function(id, index) {
+        httpGetFactory('api/literature/delete/' + id, function(response) {
+            $scope.literature.splice(index, 1);
+        });
+    };
+
+    $scope.openAddLiteratureDialog = function() {
+        modalFactory.addLiteratureModal(addLiterature, $scope.literatureOptions.availableTypes);
+    };
+
+    var addLiterature = function(fields, type) {
         if(typeof type == 'undefined') return;
         if(typeof fields == 'undefined') return;
         var mandatorySet = true;
@@ -67,8 +80,9 @@ spacialistApp.controller('literatureCtrl', function($rootScope, $scope, scopeSer
             if(lit.error) {
                 alert(lit.error);
             } else {
-                scopeService.literature.push(lit.literature[0]);
                 $scope.literature.push(lit.literature[0]);
+                var container = document.getElementById('literature-container');
+                container.scrollTop = container.scrollTopMax;
             }
         });
     };

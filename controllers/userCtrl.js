@@ -9,6 +9,10 @@ spacialistApp.controller('userCtrl', ['$scope', 'scopeService', 'httpPostFactory
         $state.go('user', {});
     };
 
+    $scope.openLiteratureView = function() {
+        $state.go('literature', {});
+    };
+
     $scope.getUserList = function() {
         httpPostFactory('api/user/get/all', new FormData(), function(response) {
             $scope.users = response.users;
