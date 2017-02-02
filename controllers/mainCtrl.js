@@ -1,8 +1,11 @@
-spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'httpPostPromise', 'httpGetPromise', 'modalService', '$uibModal', '$auth', '$state', '$http', 'modalFactory', 'moduleHelper', '$timeout', function($rootScope, $scope, scopeService, httpPostFactory, httpGetFactory, httpPostPromise, httpGetPromise, modalService, $uibModal, $auth, $state, $http, modalFactory, moduleHelper, $timeout) {
+spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'httpPostPromise', 'httpGetPromise', 'modalService', 'userService', 'literatureService', '$uibModal', '$auth', '$state', '$http', 'modalFactory', 'moduleHelper', '$timeout', function($rootScope, $scope, scopeService, httpPostFactory, httpGetFactory, httpPostPromise, httpGetPromise, modalService, userService, literatureService, $uibModal, $auth, $state, $http, modalFactory, moduleHelper, $timeout) {
     $scope.markerChoices = scopeService.markerChoices = {};
     $scope.dimensionUnits = [
         'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
     ];
+    $scope.literature = literatureService.literature;
+    $scope.currentUser = userService.currentUser;
+    $scope.can = userService.can;
 
     var getContexts = function() {
         httpGetFactory('api/context/get', function(callback) {
@@ -91,12 +94,6 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         });
     };
 
-    var getLiterature = function() {
-        httpGetFactory('api/literature/getAll', function(callback) {
-            scopeService.literature = $scope.literature = callback;
-        });
-    };
-
     var getStoredQueries = function() {
         httpGetFactory('api/analysis/queries/getAll', function(queries) {
             console.log(queries);
@@ -108,7 +105,6 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'h
         getContexts();
         getArtifacts();
         getMarkerChoices();
-        getLiterature();
         getStoredQueries();
     };
 
