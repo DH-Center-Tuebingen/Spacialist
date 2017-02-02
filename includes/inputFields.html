@@ -33,23 +33,6 @@
                   </ui-select-choices>
                 </ui-select>
             </div>
-            <div ng-switch-when="context-mc">
-                <ui-select multiple ng-model="choices" close-on-select="false" ng-disabled="readonlyInput" on-select="ctrl.onAddToList($item, $model)" on-remove="ctrl.onRemoveFromList($item, $model)">
-                    <ui-select-match>{{ $item }}</ui-select-match>
-                    <ui-select-choices repeat="ctx in attr.oids | filter:$select.search">
-                        {{ ctx }}
-                    </ui-select-choices>
-                </ui-select>
-            </div>
-            <div ng-switch-when="context-sc">
-                <ui-select ng-model="type" ng-disabled="readonlyInput" on-select="ctrl.onSelectCallback($item, $model)" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]">
-                  <ui-select-match placeholder="Select context">{{ $select.selected }}</ui-select-match>
-                  <ui-select-choices repeat="item in attr.oids | filter: $select.search">
-                    <span ng-bind-html="item | highlight: $select.search"></span>
-                  </ui-select-choices>
-                </ui-select>
-            </div>
-
             <div ng-switch-when="list">
                 <div class="input-group">
                     <span class="input-group-btn">
