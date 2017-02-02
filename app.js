@@ -56,7 +56,7 @@ spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($
     };
 }]);
 
-spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
+spacialistApp.service('modalFactory', ['$uibModal', 'scopeService', function($uibModal, scopeService) {
     this.deleteModal = function(elementName, onConfirm, additionalWarning) {
         if(typeof additionalWarning != 'undefined' && additionalWarning !== '') {
             var warning = additionalWarning;
@@ -141,6 +141,25 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function() {}, function() {});
     };
+    this.addLiteratureModal = function(onCreate, types) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/new-literature.html',
+            controller: function($uibModalInstance) {
+                this.availableTypes = types;
+                this.selectedType = types[0];
+                this.can = scopeService.can;
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.onCreate = function(fields, type) {
+                    onCreate(fields, type);
+                    $uibModalInstance.dismiss('ok');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function() {}, function() {});
+    };
     this.errorModal = function(msg) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/error.html',
@@ -183,18 +202,25 @@ spacialistApp.directive('resizeWatcher', function($window) {
                 $('#tree-container').css('height', '');
                 $('#attribute-container').css('height', '');
                 $('#addon-container').css('height', '');
+                $('#literature-container').css('height', '');
             } else {
                 var height = newValue.height;
                 var width = newValue.width;
 
                 var headerHeight = document.getElementById('header-nav').offsetHeight;
-                var addonNavHeight = document.getElementById('addon-nav').offsetHeight;
+                var addonNavHeight = 0;
+                var addonNav = document.getElementById('addon-nav');
+                if(addonNav) addonNavHeight = addonNav.offsetHeight;
                 var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
                 var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
+                var literatureHeight = containerHeight;
+                var literatureAddButton = document.getElementById('literature-add-button');
+                if(literatureAddButton) literatureHeight -= literatureAddButton.offsetHeight;
 
                 $('#tree-container').css('height', containerHeight);
                 $('#attribute-container').css('height', containerHeight);
                 $('#addon-container').css('height', containerHeight);
+                $('#literature-container').css('height', literatureHeight);
             }
         }, true);
     };
@@ -680,6 +706,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         .state('user', {
             url: '/user',
             templateUrl: 'user.html'
+        })
+        .state('literature', {
+            url: '/literature',
+            templateUrl: 'literature.html'
         });
 });
 
@@ -691,13 +721,15 @@ spacialistApp.run(function($rootScope, $state, scopeService) {
         var user = JSON.parse(localStorage.getItem('user'));
         if(user) {
             if(!scopeService.can('duplicate_edit_concepts')) {
-                scopeService.map.drawOptions.draw = {
-                    polyline: false,
-                    polygon: false,
-                    rectangle: false,
-                    circle: false,
-                    marker: false
-                };
+                if(typeof scopeService.map != 'undefined') {
+                    scopeService.map.drawOptions.draw = {
+                        polyline: false,
+                        polygon: false,
+                        rectangle: false,
+                        circle: false,
+                        marker: false
+                    };
+                }
             }
             $rootScope.currentUser = {
                 user: user.user,
