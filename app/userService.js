@@ -5,9 +5,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         roles: {},
         user: {}
     };
-    user.can = function(to, from) {
-        // if(from == 'main') console.log(to);
-        console.log(to + ", " + from);
+    user.can = function(to) {
         if(typeof user.currentUser == 'undefined') return false;
         if(typeof user.currentUser.permissions[to] == 'undefined') return false;
         return user.currentUser.permissions[to] == 1;
