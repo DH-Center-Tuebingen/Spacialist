@@ -141,18 +141,20 @@ spacialistApp.service('modalFactory', ['$uibModal', 'scopeService', function($ui
         });
         modalInstance.result.then(function() {}, function() {});
     };
-    this.addLiteratureModal = function(onCreate, types) {
+    this.addLiteratureModal = function(onCreate, types, selectedType, fields, index) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/new-literature.html',
             controller: function($uibModalInstance) {
                 this.availableTypes = types;
-                this.selectedType = types[0];
+                this.selectedType = selectedType || types[0];
+                this.fields = fields;
+                this.index = index;
                 this.can = scopeService.can;
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
                 this.onCreate = function(fields, type) {
-                    onCreate(fields, type);
+                    onCreate(fields, type, index);
                     $uibModalInstance.dismiss('ok');
                 };
             },

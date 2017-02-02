@@ -53,6 +53,9 @@
                 <th ng-if="can('add_remove_literature')">
                     Löschen
                 </th>
+                <th ng-if="can('edit_literature')">
+                    Bearbeiten
+                </th>
             </tr>
             <tr ng-repeat="entry in literature">
                 <td>
@@ -106,6 +109,11 @@
                 <td ng-if="can('add_remove_literature')">
                     <button type="button" class="btn btn-danger" ng-click="deleteLiteratureEntry(entry.id, $index)">
                         <i class="fa fa-fw fa-trash-o"></i>
+                    </button>
+                </td>
+                <td ng-if="can('edit_literature')">
+                    <button type="button" class="btn btn-info" ng-click="editLiteratureEntry(entry.id, $index)">
+                        <i class="fa fa-fw fa-pencil"></i>
                     </button>
                 </td>
             </tr>
