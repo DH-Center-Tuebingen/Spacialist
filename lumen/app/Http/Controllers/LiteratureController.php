@@ -94,8 +94,15 @@ class LiteratureController extends Controller
 
         $ins = $this->getFields($request);
 
-        $id = DB::table('literature')
-            ->insertGetId($ins);
+        if($request->has('id')) {
+            $id = $request->get('id');
+            DB::table('literature')
+                ->where('id', '=', $id)
+                ->update($ins);
+        } else {
+            $id = DB::table('literature')
+                ->insertGetId($ins);
+        }
 
         $lit = DB::table('literature')
             ->where('id', '=', $id)

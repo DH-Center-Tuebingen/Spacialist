@@ -421,7 +421,7 @@ p, div {
     font-weight: 500;
 }
 
-#tree-container, #attribute-container, #addon-container {
+#tree-container, #attribute-container, #addon-container, #literature-container {
     overflow: auto;
 }
 

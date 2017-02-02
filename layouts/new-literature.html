@@ -1,0 +1,45 @@
+<div class="modal-header">
+    <h4>Neue Literatur hinzufügen</h4>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-md-3" for="type">Typ:</label>
+                <div class="col-md-9">
+                    <ui-select ng-model="mc.selectedType">
+                        <ui-select-match>
+                            <span ng-bind="$select.selected.name"></span>
+                        </ui-select-match>
+                        <ui-select-choices repeat="type in mc.availableTypes">
+                            <span ng-bind="type.name"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="form-group" ng-repeat="mandatory in mc.availableTypes[mc.selectedType.id].mandatoryFields">
+                <label class="control-label col-md-3">{{ mandatory }}:<span style="color: red;">*</span></label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" ng-model="mc.fields[mandatory]" placeholder="{{ mandatory }}"/>
+                </div>
+            </div>
+            <div class="form-group" ng-repeat="optional in mc.availableTypes[mc.selectedType.id].optionalFields">
+                <label class="control-label col-md-3">{{ optional }}:</label>
+                <div class="col-md-9">
+                    <input type="text" class="form-control" ng-model="mc.fields[optional]" placeholder="{{ optional }}"/>
+                </div>
+            </div>
+        </form>
+        <h4>BibTex-Code</h4>
+        <pre>
+            <code>
+        {{ mc.fields }}
+            </code>
+        </pre>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.fields, mc.selectedType)">{{ 'create' | translate }}</button>
+    <button type="button" class="btn btn-danger"
+      ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
+</div>
