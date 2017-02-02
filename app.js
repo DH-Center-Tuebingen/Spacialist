@@ -718,11 +718,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 /**
  * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
  */
-spacialistApp.run(function($rootScope, $state, scopeService) {
+spacialistApp.run(function($rootScope, $state, scopeService, userService) {
     $rootScope.$on('$stateChangeStart', function(event, toState) {
         var user = JSON.parse(localStorage.getItem('user'));
         if(user) {
-            if(!scopeService.can('duplicate_edit_concepts')) {
+            if(!userService.can('duplicate_edit_concepts')) {
                 if(typeof scopeService.map != 'undefined') {
                     scopeService.map.drawOptions.draw = {
                         polyline: false,
@@ -733,7 +733,7 @@ spacialistApp.run(function($rootScope, $state, scopeService) {
                     };
                 }
             }
-            $rootScope.currentUser = {
+            userService.currentUser = {
                 user: user.user,
                 permissions: user.permissions
             };

@@ -68,7 +68,7 @@
                                 </li>
                             </ul>
                         </li>
-                        <li ng-if="can('edit_literature')">
+                        <li ng-if="currentUser.permissions.edit_literature">
                             <a href="" ng-click="openLiteratureView()">
                                 Literatur
                             </a>
@@ -95,7 +95,7 @@
                                 <span class="fa fa-fw fa-sign-out"></span> {{ currentUser.user.name }}
                             </a>
                         </li>
-                        <li ng-if="can('view_users')">
+                        <li ng-if="currentUser.permissions.view_users">
                             <a href="" ng-click="openUserManagement()">
                                 Benutzerverwaltung
                             </a>
@@ -135,6 +135,8 @@
         <script src="bower_components/klayjs-d3/dist/klayjs-d3.min.js"></script>
         <script src="bower_components/klayjs/klay.js"></script>
         <script src="app.js"></script>
+        <script src="app/userService.js"></script>
+        <script src="app/literatureService.js"></script>
         <script src="controllers/mainCtrl.js"></script>
         <script src="controllers/userCtrl.js"></script>
         <script src="controllers/langCtrl.js"></script>

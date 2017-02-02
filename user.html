@@ -7,13 +7,13 @@
             <th>
                 E-Mail-Adresse
             </th>
-            <th ng-if="can('change_password')">
+            <th ng-if="currentUser.permissions.change_password">
                 Passwort
             </th>
-            <th ng-if="can('add_remove_role')" ng-init="getRoles()">
+            <th ng-if="currentUser.permissions.add_remove_role" ng-init="getRoles()">
                 Rollen
             </th>
-            <th ng-if="can('delete_users')">
+            <th ng-if="currentUser.permissions.delete_users">
                 Löschen
             </th>
             <th>
@@ -30,12 +30,12 @@
             <td>
                 {{ user.email }}
             </td>
-            <td ng-if="can('change_password')">
+            <td ng-if="currentUser.permissions.change_password">
                 <button type="button" class="btn btn-info" ng-click="openEditUserDialog(user, $index)">
                     <i class="fa fa-fw fa-pencil"></i> Passwort ändern
                 </button>
             </td>
-            <td ng-if="can('add_remove_role')" ng-init="getUserRoles(user.id, $index)">
+            <td ng-if="currentUser.permissions.add_remove_role" ng-init="getUserRoles(user.id, $index)">
                 <ui-select multiple ng-model="user.roles" close-on-select="false" name="userroles" id="userroles" on-select="addUserRole($item, user.id)" on-remove="removeUserRole($item, user.id)">
                     <ui-select-match>{{ $item.display_name }}</ui-select-match>
                     <ui-select-choices repeat="role in roles | filter:$select.search">
@@ -43,7 +43,7 @@
                     </ui-select-choices>
                 </ui-select>
             </td>
-            <td ng-if="can('delete_users')">
+            <td ng-if="currentUser.permissions.delete_users">
                 <button type="button" class="btn btn-danger" ng-click="deleteUser(user.id, $index)">
                     <i class="fa fa-fw fa-trash-o"></i>
                 </button>
@@ -56,7 +56,7 @@
             </td>
         </tr>
     </table>
-    <button type="button" class="btn btn-success" ng-click="openAddUserDialog()" ng-if="can('create_users')">
+    <button type="button" class="btn btn-success" ng-click="openAddUserDialog()" ng-if="currentUser.permissions.create_users">
         <i class="fa fa-fw fa-plus"></i> Benutzer hinzufügen
     </button>
 </div>
