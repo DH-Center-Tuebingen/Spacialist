@@ -1,4 +1,4 @@
-spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'scopeService', 'httpPostFactory', 'httpGetFactory', 'httpPostPromise', 'httpGetPromise', 'modalService', 'userService', 'analysisService', 'mainService', 'literatureService', '$uibModal', '$auth', '$state', '$http', 'modalFactory', 'moduleHelper', '$timeout', function($rootScope, $scope, scopeService, httpPostFactory, httpGetFactory, httpPostPromise, httpGetPromise, modalService, userService, analysisService, mainService, literatureService, $uibModal, $auth, $state, $http, modalFactory, moduleHelper, $timeout) {
+spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'analysisService', 'mainService', 'literatureService', 'modalFactory', function($rootScope, $scope, userService, analysisService, mainService, literatureService, modalFactory) {
     $scope.literature = literatureService.literature;
 
     $scope.currentUser = userService.currentUser;
