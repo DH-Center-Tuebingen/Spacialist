@@ -1,4 +1,6 @@
 spacialistApp.controller('userCtrl', ['$scope', 'userService', function($scope, userService) {
+    $scope.currentUser = userService.currentUser;
+
     $scope.loginUser = function(email, password) {
         var credentials = {
             email: email,

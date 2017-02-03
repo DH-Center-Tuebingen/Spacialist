@@ -722,6 +722,8 @@ spacialistApp.run(function($rootScope, $state, scopeService, userService) {
     $rootScope.$on('$stateChangeStart', function(event, toState) {
         var user = JSON.parse(localStorage.getItem('user'));
         if(user) {
+            userService.currentUser.user = user.user;
+            userService.currentUser.permissions = user.permissions;
             if(!userService.can('duplicate_edit_concepts')) {
                 if(typeof scopeService.map != 'undefined') {
                     scopeService.map.drawOptions.draw = {
@@ -733,10 +735,6 @@ spacialistApp.run(function($rootScope, $state, scopeService, userService) {
                     };
                 }
             }
-            userService.currentUser = {
-                user: user.user,
-                permissions: user.permissions
-            };
             if(toState.name === 'auth') {
                 event.preventDefault();
                 $state.go('spacialist');

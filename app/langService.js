@@ -28,14 +28,16 @@ spacialistApp.service('langService', ['$translate', function($translate) {
         }
     };
 
-    lang.setInitLanguage = function() {
-        updateLanguage($translate.resolveClientLocale());
-    };
+    setInitLanguage();
 
-    var updateLanguage = function(langKey) {
+    function setInitLanguage() {
+        updateLanguage($translate.resolveClientLocale());
+    }
+
+    function updateLanguage(langKey) {
         if(typeof langKey == 'undefined') lang.currentLanguage = undefined;
         else lang.currentLanguage = lang.availableLanguages[langKey];
-    };
+    }
 
     lang.switchLang = function(key) {
         var langPromise = $translate.use(key);
