@@ -5,6 +5,9 @@ use Log;
 use App\User;
 use App\Permission;
 use App\Role;
+use App\Geodata;
+use App\Context;
+use Phaza\LaravelPostgis\Geometries\Point;
 use Zizaco\Entrust;
 use \DB;
 use Illuminate\Http\Request;
@@ -128,6 +131,13 @@ class ContextController extends Controller {
             $rootFields[$key]->children = $tmpChildren;
             $children[$field->root_context_id][] = $field;
             if($field->reclevel != 0) unset($rootFields[$key]);
+
+            if($user->can('view_geodata')) {
+                if(isset($rootFields[$key]->geodata_id)){
+                    $geom = Geodata::find($rootFields[$key]->geodata_id)->geom;
+                    $rootFields[$key]->geodata = $geom->jsonSerialize();
+                }
+            }
         }
         return response()->json(array_values($rootFields));
     }
@@ -278,6 +288,9 @@ class ContextController extends Controller {
         if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $lat = $request->get('lat');
         $lng = $request->get('lng');
+        $geodata = new Geodata;
+        $geodata->geom = new Point($lat, $lng);
+        $geodata->save();
         $id = $request->get('id');
         $name = $request->get('name');
         $ctid = $request->get('cid');
@@ -288,8 +301,7 @@ class ContextController extends Controller {
                 ->where('id', $id)
                 ->update([
                     'name' => $name,
-                    'lat' => $lat,
-                    'lng' => $lng,
+                    'geodata_id' => $geodata->id,
                     'lasteditor' => $user['name']
                 ]);
             $cid = $id;
@@ -297,8 +309,7 @@ class ContextController extends Controller {
             $ins = [
                     'name' => $name,
                     'context_type_id' => $ctid,
-                    'lat' => $lat,
-                    'lng' => $lng,
+                    'geodata_id' => $geodata->id,
                     'lasteditor' => $user['name']
             ];
             if($request->has('root')) $ins['root'] = $request->get('root');
@@ -327,8 +338,20 @@ class ContextController extends Controller {
                 'name' => $name,
                 'lasteditor' => $user['name']
             ];
-            if($request->has('lat')) $upd['lat'] = $request->get('lat');
-            if($request->has('lng')) $upd['lng'] = $request->get('lng');
+            if($request->has('lat') && $request->has('lng')){
+                $lat = $request->get('lat');
+                $lng = $request->get('lng');
+                $context = Context::find($realId);
+                if(isset($context->geodata_id)){
+                    $geodata = DB::table('geodata')->where('id', $geodata_id);
+                }
+                else{
+                    $geodata = new Geodata;
+                }
+                $geodata->geom = new Point($lat, $lng);
+                $geodata->save();
+                $upd['geodata_id'] = $geodata->id;
+            }
             DB::table('contexts')
                 ->where('id', $realId)
                 ->update($upd);
@@ -341,8 +364,20 @@ class ContextController extends Controller {
                 'lasteditor' => $user['name']
             ];
             if($request->has('root_cid')) $ins['root_context_id'] = $request->get('root_cid');
-            if($request->has('lat')) $ins['lat'] = $request->get('lat');
-            if($request->has('lng')) $ins['lng'] = $request->get('lng');
+            if($request->has('lat') && $request->has('lng')){
+                $lat = $request->get('lat');
+                $lng = $request->get('lng');
+                $context = Context::find($realId);
+                if(isset($context->geodata_id)){
+                    $geodata = DB::table('geodata')->where('id', $geodata_id);
+                }
+                else{
+                    $geodata = new Geodata;
+                }
+                $geodata->geom = new Point($lat, $lng);
+                $geodata->save();
+                $ins['geodata_id'] = $geodata->id;
+            }
             $cid = DB::table('contexts')
                 ->insertGetId($ins);
         }
