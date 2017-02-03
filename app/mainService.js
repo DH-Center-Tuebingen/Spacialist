@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', function(httpGetFactory, httpPostFactory, modalFactory, $uibModal, moduleHelper, imageService, literatureService) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', function(httpGetFactory, httpPostFactory, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService) {
     var main = {};
     var modalFields;
 
@@ -16,6 +16,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
     main.dimensionUnits = [
         'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
     ];
+    main.legendList = {};
 
     main.datepickerOptions = {
         showWeeks: false,
@@ -134,10 +135,18 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
         //main.getContextListStarted = true;
         httpGetFactory('api/context/getRecursive', function(contextList) {
             for(var i=0; i<contextList.length; i++) {
-                main.contextList.push(contextList[i]);
+                var current = contextList[i];
+                main.contextList.push(current);
+                if(!main.legendList[current.typelabel]) {
+                    main.legendList[current.typelabel] = {
+                        name: current.typelabel,
+                        color: main.getColorForId(current.typelabel)
+                    };
+                }
             }
+            mapService.addLegend(main.legendList);
+            //mapService.addListToMarkers(main.contextList);
             //main.getContextListStarted = false;
-            // displayMarkers(main.contextList);
         });
     }
 
@@ -171,7 +180,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
     };
 
     function updateElementData(elem) {
-        updateElementDataHelper(elem, scopeService.contextList);
+        updateElementDataHelper(elem, main.contextList);
     }
 
     function updateElementDataHelper(elem, children) {
