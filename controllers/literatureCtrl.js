@@ -1,5 +1,6 @@
-spacialistApp.controller('literatureCtrl', function($rootScope, $scope, scopeService, modalService, httpGetFactory, httpPostFactory) {
-    $scope.availableTypes = [
+spacialistApp.controller('literatureCtrl', function($rootScope, $scope, scopeService, modalFactory, httpGetFactory, httpPostFactory) {
+    $scope.literatureOptions = {};
+    $scope.literatureOptions.availableTypes = [
         {
             name: 'article',
             id: 0,
@@ -37,9 +38,36 @@ spacialistApp.controller('literatureCtrl', function($rootScope, $scope, scopeSer
             ]
         }
     ];
-    $scope.literature.selectedType = $scope.availableTypes[0];
 
-    $scope.addLiterature = function(fields, type) {
+    $scope.can = scopeService.can;
+    $scope.literature = scopeService.literature;
+
+    $scope.deleteLiteratureEntry = function(id, index) {
+        httpGetFactory('api/literature/delete/' + id, function(response) {
+            $scope.literature.splice(index, 1);
+        });
+    };
+
+    $scope.editLiteratureEntry = function(id, index) {
+        var entry = angular.copy($scope.literature[index]);
+        var typeName = entry.type;
+        delete entry.type;
+        var type;
+        for(var i=0; i<$scope.literatureOptions.availableTypes.length; i++) {
+            var curr = $scope.literatureOptions.availableTypes[i];
+            if(curr.name == typeName) {
+                type = curr;
+                break;
+            }
+        }
+        modalFactory.addLiteratureModal(addLiterature, $scope.literatureOptions.availableTypes, type, entry, index);
+    };
+
+    $scope.openAddLiteratureDialog = function() {
+        modalFactory.addLiteratureModal(addLiterature, $scope.literatureOptions.availableTypes);
+    };
+
+    var addLiterature = function(fields, type, index) {
         if(typeof type == 'undefined') return;
         if(typeof fields == 'undefined') return;
         var mandatorySet = true;
@@ -60,15 +88,22 @@ spacialistApp.controller('literatureCtrl', function($rootScope, $scope, scopeSer
         }
         var formData = new FormData();
         for(var field in fields) {
-            formData.append(field, fields[field]);
+            if(fields[field] !== null && fields[field] !== '') {
+                formData.append(field, fields[field]);
+            }
         }
         formData.append('type', type.name);
         httpPostFactory('api/literature/add', formData, function(lit) {
             if(lit.error) {
                 alert(lit.error);
             } else {
-                scopeService.literature.push(lit.literature[0]);
-                $scope.literature.push(lit.literature[0]);
+                if(fields.id) {
+                    $scope.literature[index] = lit.literature[0];
+                } else {
+                    $scope.literature.push(lit.literature[0]);
+                    var container = document.getElementById('literature-container');
+                    container.scrollTop = container.scrollTopMax;
+                }
             }
         });
     };

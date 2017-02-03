@@ -250,7 +250,7 @@ class DefineRolesAndPermissions extends Migration
             'add_remove_literature', 'manage_photos',
             'link_photos', 'edit_photo_props', 'view_photos',
             'export_photos', 'view_geodata', 'create_edit_geodata',
-            'upload_remove_geodata', 'link_geodata', 'create_users',
+            'upload_remove_geodata', 'link_geodata', 'view_users', 'create_users',
             'delete_users', 'add_remove_role', 'change_password'
         ];
         foreach($permissions as $p) {

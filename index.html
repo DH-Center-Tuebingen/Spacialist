@@ -17,8 +17,8 @@
         <title>Spacialist</title>
     </head>
     <body>
-        <nav id="header-nav" class="navbar navbar-inverse" role="navigation">
-            <div class="container-fluid" ng-controller="headerCtrl">
+        <nav id="header-nav" class="navbar navbar-inverse" role="navigation" ng-controller="userCtrl">
+            <div class="container-fluid">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle"
                      ng-click="isCollapsed = !isCollapsed" aria-expanded="false">
@@ -68,6 +68,11 @@
                                 </li>
                             </ul>
                         </li>
+                        <li ng-if="can('edit_literature')">
+                            <a href="" ng-click="openLiteratureView()">
+                                Literatur
+                            </a>
+                        </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown" uib-dropdown ng-controller="LangCtrl">
@@ -84,7 +89,7 @@
                             </ul>
                         </li>
                     </ul>
-                    <ul class="nav navbar-nav navbar-right" ng-controller="userCtrl">
+                    <ul class="nav navbar-nav navbar-right">
                         <li ng-if="currentUser">
                             <a href="" ng-click="logoutUser()">
                                 <span class="fa fa-fw fa-sign-out"></span> {{ currentUser.user.name }}
@@ -99,7 +104,7 @@
                 </div>
             </div>
         </nav>
-        <div ng-controller="mapCtrl">
+        <div>
             <div ui-view class="col-md-12"></div>
         </div>
         <script src="bower_components/jquery/dist/jquery.min.js"></script>
@@ -133,7 +138,6 @@
         <script src="controllers/mainCtrl.js"></script>
         <script src="controllers/userCtrl.js"></script>
         <script src="controllers/langCtrl.js"></script>
-        <script src="controllers/headerCtrl.js"></script>
         <script src="controllers/mapCtrl.js"></script>
         <script src="controllers/imageCtrl.js"></script>
         <script src="controllers/literatureCtrl.js"></script>
