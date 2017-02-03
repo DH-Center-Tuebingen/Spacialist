@@ -5,7 +5,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'leafletData', 'userServi
     initMap();
 
     function cleanName(name) {
-        return name.replace(/[^\x00-\x7F]/g, '');
+        return getKeyForName(name.replace(/[^\x00-\x7F]/g, ''));
     }
 
     function getKeyForName(name) {
@@ -62,10 +62,24 @@ spacialistApp.service('mapService', ['httpGetFactory', 'leafletData', 'userServi
         }
         var messageScope = function() { return $scope; };
         angular.forEach(contextList, function(context, key) {
-            console.log("converting: " + context.name + " => " + cleanName(context.name));
-            console.log(context);
-            if(typeof context.geodata != 'undefined' || context.geodata !== null) {
-                addContextToMarkers(context);
+            if(typeof context.geodata != 'undefined' && context.geodata !== null) {
+                var cName = cleanName(context.name);
+                console.log("converting: " + context.name + " => " + cleanName(context.name));
+                console.log(context);
+                var feature = {
+                    type: 'Feature',
+                    id: cName,
+                    properties: {
+                        name: context.name,
+                        color: context.color,
+                        icon: context.icon
+                    },
+                    geometry: context.geodata
+                };
+                //map.map.geojson.data.features.push(feature);
+                map.geoJson.addData(feature);
+                map.mapObject.fitBounds(map.geoJson.getBounds());
+                //addContextToMarkers(context);
             }
         });
     };
@@ -107,8 +121,11 @@ spacialistApp.service('mapService', ['httpGetFactory', 'leafletData', 'userServi
     };
 
     function initMap() {
-        leafletData.getMap().then(function(map) {
-            map.mapObject = map;
+        leafletData.getMap().then(function(mapObject) {
+            map.mapObject = mapObject;
+        });
+        leafletData.getGeoJSON().then(function(geoJson) {
+            map.geoJson = geoJson;
         });
     }
 
@@ -172,6 +189,28 @@ spacialistApp.service('mapService', ['httpGetFactory', 'leafletData', 'userServi
                 name: 'university'
             }
         ];
+        var style = {
+            fillColor: "green",
+            weight: 2,
+            opacity: 1,
+            color: 'black',
+            dashArray: '3',
+            fillOpacity: 0.5
+        };
+        map.map.geojson = {
+            data: {
+                type: 'FeatureCollection',
+                features: []
+            },
+            style: function(feature) {
+                var currentStyle = angular.copy(style);
+                currentStyle.fillColor = feature.properties.color;
+                return currentStyle;
+            },
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, style);
+            }
+        };
         map.map.markers = {};
         map.map.bounds = {
             southWest: {

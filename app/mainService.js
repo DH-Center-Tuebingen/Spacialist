@@ -145,7 +145,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
                 }
             }
             mapService.addLegend(main.legendList);
-            //mapService.addListToMarkers(main.contextList);
+            mapService.addListToMarkers(main.contextList);
             //main.getContextListStarted = false;
         });
     }
