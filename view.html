@@ -2,7 +2,7 @@
     <div class="col-md-2" id="tree-container">
         <div ng-if="currentUser.permissions.view_concepts">
             <h3>Elemente</h3>
-            <my-tree on-init="getContextList()" on-click-callback="setCurrentElement(target, elem)" item-list="contextList" element="currentElement" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
+            <my-tree on-init="getContextList()" on-click-callback="setCurrentElement(target, elem)" item-list="contextList" element="currentElement.element" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
             <spinner ng-if="getContextListStarted"></spinner>
         </div>
         <div ng-if="!currentUser.permissions.view_concepts">
@@ -12,23 +12,23 @@
     <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container">
         <div ng-if="currentUser.permissions.view_concept_props">
             <div ng-show="currentElement">
-                <h3>{{ currentElement.name }}<span ng-if="currentElement.typeLabel" class="type-desc">{{ currentElement.typeLabel }}</span> <small>Element-Eigenschaften</small></h3>
-                <form class="form-horizontal" role="form" ng-if="currentElementFields">
+                <h3>{{ currentElement.element.name }}<span ng-if="currentElement.element.typeLabel" class="type-desc">{{ currentElement.element.typeLabel }}</span> <small>Element-Eigenschaften</small></h3>
+                <form class="form-horizontal" role="form" ng-if="currentElement.fields">
                     <div class="form-group">
                         <label class="control-label col-md-3" for="name">
                             Name:
                         </label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" id="name" ng-model="currentElement.name" ng-readonly="!currentUser.permissions.duplicate_edit_concepts" />
+                            <input type="text" class="form-control" id="name" ng-model="currentElement.element.name" ng-readonly="!currentUser.permissions.duplicate_edit_concepts" />
                         </div>
                     </div>
-                    <form-field fields="currentElementFields" output="currentElementData" label-width="3" input-width="9" offset="0" sp-readonly="{{ !currentUser.permissions.duplicate_edit_concepts }}">
+                    <form-field fields="currentElement.fields" output="currentElement.data" label-width="3" input-width="9" offset="0" sp-readonly="{{ !currentUser.permissions.duplicate_edit_concepts }}">
                     </form-field>
                     <div class="col-md-offset-3" ng-if="currentUser.permissions.duplicate_edit_concepts">
-                        <button type="button" class="btn btn-success" ng-click="storeElement(currentElement, currentElementData)">
+                        <button type="button" class="btn btn-success" ng-click="storeElement(currentElement.element, currentElement.data)">
                             <span class="fa fa-fw fa-floppy-o"></span> {{ 'Save' | translate }}
                         </button>
-                        <button type="button" class="btn btn-danger" ng-click="deleteElement(currentElement)">
+                        <button type="button" class="btn btn-danger" ng-click="deleteElement(currentElement.element)">
                             <span class="fa fa-fw fa-trash-o"></span> {{ 'delete' | translate }}
                         </button>
                     </div>
@@ -55,7 +55,7 @@
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'map'}" ng-if="moduleExists('mapCtrl')">
                 <a href="" ng-click="setActiveTab('map')"><span class="fa fa-fw fa-map-marker"></span><span class="tab-desc"> Karte</span></a>
             </li>
-            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'properties'}" ng-if="currentElement.furtherProperties">
+            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'properties'}" ng-if="currentElement.element.furtherProperties">
                 <a href="" ng-click="setActiveTab('properties')"><span class="fa fa-fw fa-sliders"></span><span class="tab-desc"> Weitere Eigenschaften</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'harris'}" ng-if="moduleExists('harrisCtrl')">
@@ -89,9 +89,9 @@
         <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" style="max-height: 100%;">
             <div ng-if="currentUser.permissions.view_photos">
                 <uib-accordion close-others="true">
-                    <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!currentElement">
+                    <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!currentElement.element">
                         <uib-accordion-heading>
-                            <span ng-click="!currentElement || updateLinkedImages(layerTwo.imageTab.linkedOpen)">
+                            <span ng-click="!currentElement.element || updateLinkedImages(layerTwo.imageTab.linkedOpen)">
                                 Linked images
                             </span><!-- <span class="badge">{{ images.linked.length }}</span>-->
                         </uib-accordion-heading>

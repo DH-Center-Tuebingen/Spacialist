@@ -570,30 +570,6 @@ spacialistApp.factory('httpGetFactory', function($http) {
     };
 });
 
-spacialistApp.factory('scopeService', function($http) {
-    var roles = [
-        "admin",
-        "student_assistent"
-    ];
-    var service = {
-        map: undefined,
-        datetable: "",
-        epochs: [],
-        filedesc: undefined,
-        markers: {},
-        center: {},
-        events: {},
-        user: {
-            roles: roles,
-            activeRole: roles[0]
-        },
-        drawOptions: {},
-        ctxts: [],
-        layerTwo: {}
-    };
-    return service;
-});
-
 spacialistApp.config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({
         prefix: 'l10n/',

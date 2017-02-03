@@ -1,14 +1,15 @@
-spacialistApp.controller('imageCtrl', ['$scope', 'imageService', function($scope, imageService) {
+spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', function($scope, imageService, mainService) {
     $scope.images = {};
     $scope.images.all = imageService.all;
     $scope.images.linked = imageService.linked;
+    $scope.currentElement = mainService.currentElement;
 
     $scope.initImageTab = function() {
         $scope.layerTwo.imageTab.newOpen = false;
         if($scope.currentElement) {
             $scope.layerTwo.imageTab.linkedOpen = true;
             $scope.layerTwo.imageTab.allOpen = false;
-            imageService.getLinkedImages($scope.currentElement.id);
+            imageService.getLinkedImages($scope.currentElement.element.id);
         } else {
             $scope.layerTwo.imageTab.linkedOpen = false;
             $scope.layerTwo.imageTab.allOpen = true;
@@ -97,7 +98,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', function($scope
     $scope.updateLinkedImages = function(beforeClick) {
         //if it was closed before toggle
         if(!beforeClick) {
-            imageService.getLinkedImages($scope.currentElement.id);
+            imageService.getLinkedImages($scope.currentElement.element.id);
         }
     };
 

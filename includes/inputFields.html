@@ -18,7 +18,7 @@
             <div ng-switch-when="string-mc">
                 <ui-select multiple ng-disabled="readonlyInput" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" close-on-select="false" name="{{ attr.aid }}_{{ attr.oid }}" id="{{ attr.aid }}_{{ attr.oid }}" on-select="updateMSelectInput($select)" on-remove="updateMSelectInput($select)">
                     <ui-select-match>{{$item.narr}}</ui-select-match>
-                    <ui-select-choices repeat="choice in markerChoices[attr.aid+'_'+attr.oid] | filter:$select.search">
+                    <ui-select-choices repeat="choice in dropdownOptions[attr.aid+'_'+attr.oid] | filter:$select.search">
                         {{choice.narr}}
                     </ui-select-choices>
                 </ui-select>
@@ -28,7 +28,7 @@
                 name="{{ attr.aid }}_{{ attr.oid }}" id="{{ attr.aid }}_{{ attr.oid }}"
                 on-select="updateSelectInput($select.ngModel)">
                   <ui-select-match placeholder="{{ attr.val }}">{{ $select.selected.narr }}</ui-select-match>
-                  <ui-select-choices repeat="choice in markerChoices[attr.aid+'_'+attr.oid] | filter: $select.search">
+                  <ui-select-choices repeat="choice in dropdownOptions[attr.aid+'_'+attr.oid] | filter: $select.search">
                     <span ng-bind-html="choice.narr | highlight: $select.search"></span>
                   </ui-select-choices>
                 </ui-select>
@@ -89,7 +89,7 @@
                     name="{{ attr.aid+'_'+attr.oid }}" id="{{ attr.aid+'_'+attr.oid }}"
                     on-select="updateSelectInput($select.ngModel)" ng-disabled="readonlyInput">
                       <ui-select-match placeholder="{{ attr.val }}">{{ $select.selected.narr }}</ui-select-match>
-                      <ui-select-choices repeat="choice in markerChoices[attr.aid+'_'+attr.oid] | filter: $select.search">
+                      <ui-select-choices repeat="choice in dropdownOptions[attr.aid+'_'+attr.oid] | filter: $select.search">
                         <span ng-bind-html="choice.narr | highlight: $select.search"></span>
                       </ui-select-choices>
                     </ui-select>
