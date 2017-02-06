@@ -1,5 +1,7 @@
-spacialistApp.controller('userCtrl', ['$scope', 'userService', function($scope, userService) {
+spacialistApp.controller('userCtrl', ['$scope', 'userService', '$state', 'modalFactory', function($scope, userService, $state, modalFactory) {
     $scope.currentUser = userService.currentUser;
+    $scope.users = userService.users;
+    $scope.roles = userService.roles;
 
     $scope.loginUser = function(email, password) {
         var credentials = {
@@ -25,5 +27,31 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', function($scope, 
 
     $scope.openLiteratureView = function() {
         $state.go('literature', {});
+    };
+
+    $scope.getUserList = function() {
+        userService.getUserList();
+    };
+
+    $scope.getRoles = function() {
+        userService.getRoles();
+    };
+
+    $scope.getUserRoles = function(id, $index) {
+        userService.getUserRoles(id, $index);
+    };
+
+    $scope.openAddUserDialog = function() {
+        modalFactory.addUserModal(userService.addUser);
+    };
+
+    $scope.openEditUserDialog = function(user, $index) {
+        var values = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            password: ''
+        };
+        modalFactory.editUserModal(userService.editUser, values, $index);
     };
 }]);

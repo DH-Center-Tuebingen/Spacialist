@@ -1,10 +1,12 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'modalFactory', '$auth', '$state', '$http', function(httpPostFactory, httpGetFactory, modalFactory, $auth, $state, $http) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$auth', '$state', '$http', function(httpPostFactory, httpGetFactory, $auth, $state, $http) {
     var user = {};
     user.currentUser = {
         permissions: {},
         roles: {},
         user: {}
     };
+    user.users = [];
+    user.roles = [];
     user.can = function(to) {
         if(typeof user.currentUser == 'undefined') return false;
         if(typeof user.currentUser.permissions[to] == 'undefined') return false;
@@ -12,8 +14,11 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     };
 
     user.getUserList = function() {
+        user.users.length = 0;
         httpPostFactory('api/user/get/all', new FormData(), function(response) {
-            user.users = response.users;
+            angular.forEach(response.users, function(u, key) {
+                user.users.push(u);
+            });
         });
     };
 
@@ -21,10 +26,6 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         httpGetFactory('api/user/delete/' + id, function(response) {
             user.users.splice($index, 1);
         });
-    };
-
-    user.openAddUserDialog = function() {
-        modalFactory.addUserModal(addUser);
     };
 
     user.addUser = function(name, email, password) {
@@ -35,16 +36,6 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         httpPostFactory('api/user/add', formData, function(response) {
             user.users.push(response.user);
         });
-    };
-
-    user.openEditUserDialog = function(user, $index) {
-        var values = {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            password: ''
-        };
-        modalFactory.editUserModal(editUser, values, $index);
     };
 
     user.editUser = function(changes, id, $index) {
@@ -61,8 +52,11 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     };
 
     user.getRoles = function() {
+        user.roles.length = 0;
         httpGetFactory('api/user/get/roles/all', function(response) {
-            user.roles = response.roles;
+            angular.forEach(response.roles, function(role, key) {
+                user.roles.push(role);
+            });
         });
     };
 
