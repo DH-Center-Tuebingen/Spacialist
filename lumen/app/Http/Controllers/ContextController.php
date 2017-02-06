@@ -132,14 +132,33 @@ class ContextController extends Controller {
             $children[$field->root_context_id][] = $field;
             if($field->reclevel != 0) unset($rootFields[$key]);
 
-            if($user->can('view_geodata')) {
+            if(!$user->can('view_geodata')) {
                 if(isset($rootFields[$key]->geodata_id)){
-                    $geom = Geodata::find($rootFields[$key]->geodata_id)->geom;
-                    $rootFields[$key]->geodata = $geom->jsonSerialize();
+                    unset($rootFields[$key]->geodata_id);
                 }
             }
         }
         return response()->json(array_values($rootFields));
+    }
+
+    public function getGeodata() {
+        $user = \Auth::user();
+        if(!$user->can('view_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $geoms = Geodata::all();
+        $geodataList = [];
+        foreach($geoms as $geom) {
+            $geodataList[] = [
+                'geodata' => $geom->geom->jsonSerialize(),
+                'id' => $geom->id
+            ];
+        }
+        return response()->json([
+            'geodata' => $geodataList
+        ]);
     }
 
     public function getChoices() {
