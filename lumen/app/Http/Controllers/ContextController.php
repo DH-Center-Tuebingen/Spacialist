@@ -8,6 +8,8 @@ use App\Role;
 use App\Geodata;
 use App\Context;
 use Phaza\LaravelPostgis\Geometries\Point;
+use Phaza\LaravelPostgis\Geometries\LineString;
+use Phaza\LaravelPostgis\Geometries\Polygon;
 use Zizaco\Entrust;
 use \DB;
 use Illuminate\Http\Request;
@@ -139,6 +141,46 @@ class ContextController extends Controller {
             }
         }
         return response()->json(array_values($rootFields));
+    }
+
+    public function addGeodata(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('create_edit_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $coords = json_decode($request->get('coords'));
+        $type = $request->get('type');
+        $geodata = new Geodata();
+        switch($type) {
+            case 'marker':
+                $coords = $coords[0];
+                $geodata->geom = new Point($coords->lat, $coords->lng);
+                break;
+            case 'polyline':
+                $lines = [];
+                foreach($coords as $coord) {
+                    $lines[] = new Point($coord->lat, $coord->lng);
+                }
+                $geodata->geom = new LineString($lines);
+                break;
+            case 'polygon':
+                $lines = [];
+                foreach($coords as $coord) {
+                    $lines[] = new Point($coord->lat, $coord->lng);
+                }
+                $linestring = new LineString($lines);
+                $geodata->geom = new Polygon([ $linestring ]);
+                break;
+        }
+        $geodata->save();
+        return response()->json([
+            'geodata' => [
+                'geodata' => $geodata->geom->jsonSerialize(),
+                'id' => $geodata->id
+            ]
+        ]);
     }
 
     public function getGeodata() {

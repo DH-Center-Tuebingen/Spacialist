@@ -55,7 +55,11 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', '$co
     $scope.$on('leafletDirectiveMap.popupopen', function(event, args) {
        var featureId = args.leafletEvent.popup._source.feature.id;
        var context = mapService.getMatchingContext(featureId);
-       mainService.setCurrentElement(context, undefined, false);
+       if(context !== null) {
+           mainService.setCurrentElement(context, undefined, false);
+       } else {
+           mainService.unsetCurrentElement();
+       }
     //    var newScope = $scope.$new();
     //    newScope.stream = args.leafletEvent.popup.options.feature;
        $compile(args.leafletEvent.popup._contentNode)($scope);
@@ -64,16 +68,16 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', '$co
      * If the marker has been created, add the marker to the marker-array and store it in the database
      */
     $scope.$on('leafletDirectiveDraw.draw:created', function(event, args) {
-        console.log("created!");
-        console.log(event);
-        console.log(args);
-        // var layer = args.leafletEvent.layer;
-        // var iconOpts = layer.options.icon.options;
-        // var latlng = layer._latlng;
-        // var opts = {};
-        // opts.lat = latlng.lat;
-        // opts.lng = latlng.lng;
-        // scopeService.createNewContext(opts);
+        var type = args.leafletEvent.layerType;
+        var layer = args.leafletEvent.layer;
+        var coords;
+        if(type == 'marker') {
+            coords = [ layer.getLatLng() ];
+        } else {
+            coords = layer.getLatLngs();
+            coords.push(angular.copy(coords[0]));
+        }
+        mapService.addGeodata(type, coords);
     });
     $scope.$on('leafletDirectiveDraw.draw:drawstart', function(event, args) {
         $scope.markerPlaceMode = true;

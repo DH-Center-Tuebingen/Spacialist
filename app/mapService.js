@@ -1,4 +1,4 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'leafletData', 'userService', function(httpGetFactory, leafletData, userService) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'leafletData', 'userService', function(httpGetFactory, httpPostFactory, leafletData, userService) {
     var contextGeodata;
     var localContexts;
     var defaultColor = '#00FF00';
@@ -28,6 +28,18 @@ spacialistApp.service('mapService', ['httpGetFactory', 'leafletData', 'userServi
                 map.map.legend.labels.push(value.name);
             }
         }
+    };
+
+    map.addGeodata = function(type, coords) {
+        var formData = new FormData();
+        formData.append('type', type);
+        formData.append('coords', angular.toJson(coords));
+        httpPostFactory('api/context/add/geodata', formData, function(response) {
+            console.log(response);
+            map.addListToMarkers([
+                response.geodata
+            ]);
+        });
     };
 
     map.getGeodata = function(contexts, contextMap) {
