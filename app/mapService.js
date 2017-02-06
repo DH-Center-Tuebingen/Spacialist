@@ -17,7 +17,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'leafletData', 'userServi
     }
 
     map.addLegend = function(legend) {
-        console.log(legend);
         map.map.legend = {};
         map.map.legend.position = 'bottomleft';
         map.map.legend.colors = [];

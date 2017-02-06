@@ -498,7 +498,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
     };
 
     function loadLinkedImages(currentElement) {
-        console.log(currentElement);
         if(!moduleHelper.controllerExists('imageCtrl')) return;
         imageService.getImagesForContext(currentElement.element.id);
     }
