@@ -8,6 +8,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
         fields: {}
     };
     main.contextList = [];
+    main.contextGeodata = {};
     main.contexts = [];
     main.contextReferences = {};
     main.artifacts = [];
@@ -137,6 +138,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
             for(var i=0; i<contextList.length; i++) {
                 var current = contextList[i];
                 main.contextList.push(current);
+                if(current.geodata_id) {
+                    main.contextGeodata['#' + current.geodata_id] = main.contextList.length - 1;
+                }
                 if(!main.legendList[current.typelabel]) {
                     main.legendList[current.typelabel] = {
                         name: current.typelabel,
@@ -145,7 +149,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
                 }
             }
             mapService.addLegend(main.legendList);
-            mapService.addListToMarkers(main.contextList);
+            mapService.getGeodata(main.contextList, main.contextGeodata);
             //main.getContextListStarted = false;
         });
     }
@@ -415,9 +419,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
         main.currentElement.fields = {};
     };
 
-    main.setCurrentElement = function(target, elem) {
+    main.setCurrentElement = function(target, elem, openAgain) {
         main.unsetCurrentElement();
         if(typeof elem != 'undefined' && elem.id == target.id) {
+            mapService.closePopup();
             return;
         }
         elem = target;
@@ -437,8 +442,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
             root_cid: elem.root_cid || -1,
             typeLabel: elem.typelabel,
             typeId: elem.typeid,
-            ctid: elem.ctid
+            ctid: elem.ctid,
+            geodata_id: elem.geodata_id
         };
+        if(typeof openAgain == 'undefined') openAgain = true;
+        if(elem.geodata_id !== null && openAgain) {
+            mapService.openPopup(elem.geodata_id);
+        }
         // setMarker(main.currentElement, true);
         loadLinkedImages(main.currentElement);
     };

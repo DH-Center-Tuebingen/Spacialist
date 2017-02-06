@@ -1,8 +1,9 @@
-spacialistApp.controller('mapCtrl', ['$scope', 'mapService', function($scope, mapService) {
+spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', '$compile', function($scope, mapService, mainService, $compile) {
     $scope.map = mapService.map;
     $scope.mapObject = mapService.mapObject;
     $scope.markerIcons = mapService.markerIcons;
     $scope.markers = mapService.markers;
+    $scope.currentElement = mainService.currentElement;
     ////
     $scope.markerOptions = {};
     $scope.closedAlerts = {};
@@ -46,49 +47,18 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', function($scope, ma
     };
 
     /**
-     * Opens the popup of the current activated/clicked marker
-     * Also stores the object's attribute values in an array `markerValues`
-     * Initial values are stored in `markerDefaultValues`
-     */
-    var openPopup = function(options) {
-        $rootScope.$emit('setCurrentElement', {
-            target: $scope.currentElement,
-            source: scopeService.markers[options.title].contextInfo
-        });
-        $scope.activeMarker = options.id;
-        $scope.markerKey = options.title;
-        $scope.markerOptions = {
-            icon: {
-                icon: scopeService.markers[options.title].contextInfo.icon,
-                name: scopeService.markers[options.title].contextInfo.icon
-            },
-            color: scopeService.markers[options.title].contextInfo.color
-        };
-        var currentOpts = {};
-        if (typeof scopeService.markers[options.title].contextInfo !== 'undefined') {
-            currentOpts = angular.extend({}, scopeService.markers[options.title].contextInfo);
-            currentOpts.title = options.title;
-        } else {
-            currentOpts = angular.extend({}, options);
-        }
-        $scope.markerValues.locked = !options.draggable;
-        updateMarkerOpts(currentOpts);
-        //$scope.markerChoices = scopeService.markerChoices;
-    };
-
-    /**
      * listener for different leaflet actions
      */
-    $scope.$on('leafletDirectiveMarker.popupopen', function(event, args) {
-        openPopup(scopeService.markers[args.leafletEvent.target.options.title].contextInfo);
+    $scope.$on('leafletDirectiveMap.popupclose', function(event, args) {
+
     });
-    /**
-     * If the marker's popup was closed, reset all values which hold marker specific values
-     */
-    $scope.$on('leafletDirectiveMarker.popupclose', function(event, args) {
-        $scope.activeMarker = -1;
-        $scope.markerKey = undefined;
-        $scope.sideNav.contextHistory = undefined;
+    $scope.$on('leafletDirectiveMap.popupopen', function(event, args) {
+       var featureId = args.leafletEvent.popup._source.feature.id;
+       var context = mapService.getMatchingContext(featureId);
+       mainService.setCurrentElement(context, undefined, false);
+    //    var newScope = $scope.$new();
+    //    newScope.stream = args.leafletEvent.popup.options.feature;
+       $compile(args.leafletEvent.popup._contentNode)($scope);
     });
     /**
      * While dragging the marker, update its geo position
@@ -122,6 +92,8 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', function($scope, ma
      */
     $scope.$on('leafletDirectiveDraw.draw:created', function(event, args) {
         console.log("created!");
+        console.log(event);
+        console.log(args);
         // var layer = args.leafletEvent.layer;
         // var iconOpts = layer.options.icon.options;
         // var latlng = layer._latlng;

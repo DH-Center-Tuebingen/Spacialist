@@ -1,5 +1,9 @@
 spacialistApp.service('mapService', ['httpGetFactory', 'leafletData', 'userService', function(httpGetFactory, leafletData, userService) {
+    var contextGeodata;
+    var localContexts;
+    var defaultColor = '#00FF00';
     var map = {};
+    map.geodataList = [];
 
     initMapVariables();
     initMap();
@@ -27,61 +31,71 @@ spacialistApp.service('mapService', ['httpGetFactory', 'leafletData', 'userServi
         }
     };
 
-    function addContextToMarkers(context) {
-        // set marker icon options
-        var icon = context.icon || map.markerIcons[0].icon;
-        var color = context.color || '#00FF00';
-        var iconOpts = {
-            className: 'fa fa-fw fa-lg fa-' + icon,
-            color: color,
-            iconSize: [20, 20]
-        };
-        //add the current marker and load it's stored attribute values
-        var id = context.id;
-        var title = addMarker(latlng, iconOpts, context.name, id);
-        map.map.markers[title].message = "<div ng-include src=\"'layouts/marker.html'\"></div>";
-        map.map.markers[title].getMessageScope = messageScope;
-        // add values to own object. Easier to read relevant values
-        map.map.markers[title].contextInfo = {
-            data: context.data,
-            id: id,
-            title: title,
-            name: context.name,
-            root_cid: context.root_cid,
-            typeid: context.typeid,
-            typename: context.typename,
-            ctid: context.ctid,
-            color: color,
-            icon: icon
-        };
-    }
+    map.getGeodata = function(contexts, contextMap) {
+        localContexts = contexts;
+        contextGeodata = contextMap;
+        httpGetFactory('api/context/get/geodata', function(response) {
+            if(response.error) {
+                //TODO show modal
+                console.log("ERROR OCCURED");
+            } else {
+                var geodatas = response.geodata;
+                for(var i=0; i<geodatas.length; i++) {
+                    var current = geodatas[i];
+                    map.geodataList.push(current);
+                }
+                map.addListToMarkers(map.geodataList);
+            }
+        });
+    };
 
-    map.addListToMarkers = function(contextList) {
+    map.addListToMarkers = function(geodataList) {
         if(!userService.can('view_geodata')) {
             return;
         }
-        var messageScope = function() { return $scope; };
-        angular.forEach(contextList, function(context, key) {
-            if(typeof context.geodata != 'undefined' && context.geodata !== null) {
-                var cName = cleanName(context.name);
-                console.log("converting: " + context.name + " => " + cleanName(context.name));
-                console.log(context);
-                var feature = {
-                    type: 'Feature',
-                    id: cName,
-                    properties: {
-                        name: context.name,
-                        color: context.color,
-                        icon: context.icon
-                    },
-                    geometry: context.geodata
-                };
-                //map.map.geojson.data.features.push(feature);
-                map.geoJson.addData(feature);
-                map.mapObject.fitBounds(map.geoJson.getBounds());
-                //addContextToMarkers(context);
+        var defaultIcon = map.markerIcons[0].icon;
+        for(var i=0; i<geodataList.length; i++) {
+            var geodata = geodataList[i];
+            var cIndex = contextGeodata['#' + geodata.id];
+            var color, icon;
+            if(localContexts[cIndex]) {
+                color = localContexts[cIndex].color;
+                icon = localContexts[cIndex].icon;
+            } else {
+                color = defaultColor;
+                icon = defaultIcon;
+            }
+            var feature = {
+                type: 'Feature',
+                id: geodata.id,
+                geometry: geodata.geodata,
+                properties: {
+                    name: 'Geodata #' + geodata.id,
+                    color: color,
+                    icon: icon,
+                    popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
+                }
+            };
+            map.geoJson.addData(feature);
+            map.mapObject.fitBounds(map.geoJson.getBounds());
+        }
+    };
+
+    map.closePopup = function() {
+        map.mapObject.closePopup();
+    };
+
+    map.openPopup = function(geodataId) {
+        angular.forEach(map.geoJson.getLayers(), function(layer, key) {
+            if(layer.feature.id == geodataId) {
+                layer.openPopup();
             }
         });
+    };
+
+    map.getMatchingContext = function(featureId) {
+        var cIndex = contextGeodata['#' + featureId];
+        return localContexts[cIndex] || null;
     };
 
     map.renameMarker = function(oldName, newName) {
@@ -209,6 +223,14 @@ spacialistApp.service('mapService', ['httpGetFactory', 'leafletData', 'userServi
             },
             pointToLayer: function(feature, latlng) {
                 return L.circleMarker(latlng, style);
+            },
+            onEachFeature: function(feature, layer) {
+                if(feature.properties && feature.properties.popupContent) {
+                    layer.bindPopup(feature.properties.popupContent, {
+                        minWidth: 300,
+                        feature: feature
+                    });
+                }
             }
         };
         map.map.markers = {};
