@@ -127,7 +127,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
             };
             $itemScope.$parent.$parent.$modelValue.push(elem);
             addMarker(elem);
-            setCurrentElement(elem, main.currentElement);
+            main.setCurrentElement(elem, main.currentElement);
         });
     };
 
@@ -527,7 +527,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
                 elem.id = newElem.cid;
                 parent.children.push(elem);
                 if(hasPos) addMarker(elem);
-                $scope.setCurrentElement(elem, $scope.currentElement);
+                main.setCurrentElement(elem, main.currentElement);
                 $itemScope.expand();
             });
         });
