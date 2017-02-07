@@ -53,7 +53,12 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
 
     });
     $scope.$on('leafletDirectiveMap.popupopen', function(event, args) {
-        $compile(args.leafletEvent.popup._contentNode)($scope);
+        var popup = args.leafletEvent.popup;
+        var newScope = $scope.$new();
+        newScope.stream = popup.options.feature;
+        $compile(popup._contentNode)(newScope);
+        var center = popup._source.getBounds().getCenter();
+        popup.setLatLng(center);
         var featureId = args.leafletEvent.popup._source.feature.id;
         var promise = mapService.getMatchingContext(featureId);
         promise.then(function(response) {
