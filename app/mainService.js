@@ -8,7 +8,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
         fields: {}
     };
     main.contextList = [];
-    main.contextGeodata = {};
     main.contexts = [];
     main.contextReferences = {};
     main.artifacts = [];
@@ -138,20 +137,31 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
             for(var i=0; i<contextList.length; i++) {
                 var current = contextList[i];
                 main.contextList.push(current);
-                if(current.geodata_id) {
-                    main.contextGeodata['#' + current.geodata_id] = main.contextList.length - 1;
-                }
                 if(!main.legendList[current.typelabel]) {
                     main.legendList[current.typelabel] = {
                         name: current.typelabel,
                         color: main.getColorForId(current.typelabel)
                     };
                 }
+                if(current.children) addMetadata(current.children);
             }
             mapService.addLegend(main.legendList);
-            mapService.getGeodata(main.contextList, main.contextGeodata);
+            mapService.getGeodata(main.contextList);
             //main.getContextListStarted = false;
         });
+    }
+
+    function addMetadata(contexts) {
+        for(var i=0; i<contexts.length; i++) {
+            var current = contexts[i];
+            if(!main.legendList[current.typelabel]) {
+                main.legendList[current.typelabel] = {
+                    name: current.typelabel,
+                    color: main.getColorForId(current.typelabel)
+                };
+            }
+            if(current.children) addMetadata(current.children);
+        }
     }
 
     // function displayMarkers(contextList) {
@@ -411,6 +421,30 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
         return parsedData;
     }
 
+    main.expandTreeTo = function(path) {
+        var t = angular.element(document.getElementById('context-tree')).scope();
+        var nodesScope = t.$nodesScope;
+        var children = nodesScope.childNodes();
+        var finished = false;
+        for(var i=0; i<path.length; i++) {
+            var level = path[i];
+            for(var j=0; j<children.length; j++) {
+                var child = children[j];
+                if(level.id == child.$modelValue.id) {
+                    if(path.length - 1 == i) {
+                        main.setCurrentElement(child.$modelValue, undefined, false);
+                        finished = true;
+                        break;
+                    }
+                    child.expand();
+                    children = child.childNodes();
+                    break;
+                }
+            }
+            if(finished) break;
+        }
+    };
+
     main.unsetCurrentElement = function() {
         if(typeof main.currentElement == 'undefined') return;
         // setMarker(main.currentElement, false);
@@ -420,8 +454,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
     };
 
     main.setCurrentElement = function(target, elem, openAgain) {
-        main.unsetCurrentElement();
         if(typeof elem != 'undefined' && elem.id == target.id) {
+            main.unsetCurrentElement();
             mapService.closePopup();
             return;
         }
@@ -448,9 +482,11 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
         if(typeof openAgain == 'undefined') openAgain = true;
         if(elem.geodata_id !== null && openAgain) {
             mapService.openPopup(elem.geodata_id);
+        } else if(elem.geodata_id === null) {
+            mapService.closePopup();
         }
         // setMarker(main.currentElement, true);
-        loadLinkedImages(main.currentElement);
+        loadLinkedImages(main.currentElement.element.id);
     };
 
     main.createModalHelper = function($itemScope, elemType, copyPosition) {
@@ -497,9 +533,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
         });
     };
 
-    function loadLinkedImages(currentElement) {
+    function loadLinkedImages(id) {
         if(!moduleHelper.controllerExists('imageCtrl')) return;
-        imageService.getImagesForContext(currentElement.element.id);
+        imageService.getImagesForContext(id);
     }
 
     /**

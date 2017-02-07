@@ -1,4 +1,4 @@
-spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', '$compile', function($scope, mapService, mainService, $compile) {
+spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'modalFactory', '$compile', function($scope, mapService, mainService, modalFactory, $compile) {
     $scope.map = mapService.map;
     $scope.mapObject = mapService.mapObject;
     $scope.markerIcons = mapService.markerIcons;
@@ -53,16 +53,21 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', '$co
 
     });
     $scope.$on('leafletDirectiveMap.popupopen', function(event, args) {
-       var featureId = args.leafletEvent.popup._source.feature.id;
-       var context = mapService.getMatchingContext(featureId);
-       if(context !== null) {
-           mainService.setCurrentElement(context, undefined, false);
-       } else {
-           mainService.unsetCurrentElement();
-       }
-    //    var newScope = $scope.$new();
-    //    newScope.stream = args.leafletEvent.popup.options.feature;
-       $compile(args.leafletEvent.popup._contentNode)($scope);
+        $compile(args.leafletEvent.popup._contentNode)($scope);
+        var featureId = args.leafletEvent.popup._source.feature.id;
+        var promise = mapService.getMatchingContext(featureId);
+        promise.then(function(response) {
+            if(response.error) {
+                modalFactory.errorModal(response.error);
+            } else {
+                var path = response.path;
+                if(path !== null) {
+                    mainService.expandTreeTo(path);
+                } else {
+                    mainService.unsetCurrentElement();
+                }
+            }
+        });
     });
     /**
      * If the marker has been created, add the marker to the marker-array and store it in the database

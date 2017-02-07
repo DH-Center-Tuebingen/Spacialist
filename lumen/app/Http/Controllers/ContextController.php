@@ -143,6 +143,34 @@ class ContextController extends Controller {
         return response()->json(array_values($rootFields));
     }
 
+    public function getContextByGeodata($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_geodata') || !$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $path = DB::select("
+        WITH RECURSIVE
+        q AS (
+	        SELECT  c.*, 0 as reclevel
+	        FROM    contexts c
+	        WHERE   geodata_id = $id
+	        UNION ALL
+	        SELECT  cc.*, reclevel+1
+	        FROM    q
+	        JOIN    contexts cc
+	        ON      q.root_context_id = cc.id
+        )
+        SELECT  q.id
+        FROM    q
+        ORDER BY reclevel DESC
+        ");
+        return response()->json([
+            'path' => $path
+        ]);
+    }
+
     public function addGeodata(Request $request) {
         $user = \Auth::user();
         if(!$user->can('create_edit_geodata')) {

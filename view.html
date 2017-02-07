@@ -2,7 +2,7 @@
     <div class="col-md-2" id="tree-container">
         <div ng-if="currentUser.permissions.view_concepts">
             <h3>Elemente</h3>
-            <my-tree on-init="getContextList()" on-click-callback="setCurrentElement(target, elem)" item-list="contextList" element="currentElement.element" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
+            <my-tree on-click-callback="setCurrentElement(target, elem)" item-list="contextList" element="currentElement.element" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
             <spinner ng-if="getContextListStarted"></spinner>
         </div>
         <div ng-if="!currentUser.permissions.view_concepts">

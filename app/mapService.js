@@ -1,4 +1,4 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'leafletData', 'userService', function(httpGetFactory, httpPostFactory, leafletData, userService) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'leafletData', 'userService', function(httpGetFactory, httpPostFactory, httpGetPromise, leafletData, userService) {
     var contextGeodata;
     var localContexts;
     var defaultColor = '#00FF00';
@@ -42,9 +42,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'leafl
         });
     };
 
-    map.getGeodata = function(contexts, contextMap) {
+    map.getGeodata = function(contexts) {
         localContexts = contexts;
-        contextGeodata = contextMap;
         httpGetFactory('api/context/get/geodata', function(response) {
             if(response.error) {
                 //TODO show modal
@@ -67,15 +66,14 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'leafl
         var defaultIcon = map.markerIcons[0].icon;
         for(var i=0; i<geodataList.length; i++) {
             var geodata = geodataList[i];
-            var cIndex = contextGeodata['#' + geodata.id];
             var color, icon;
-            if(localContexts[cIndex]) {
-                color = localContexts[cIndex].color;
-                icon = localContexts[cIndex].icon;
-            } else {
+            // if(localContexts[cIndex]) {
+            //     color = localContexts[cIndex].color;
+            //     icon = localContexts[cIndex].icon;
+            // } else {
                 color = defaultColor;
                 icon = defaultIcon;
-            }
+            // }
             var feature = {
                 type: 'Feature',
                 id: geodata.id,
@@ -97,16 +95,24 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'leafl
     };
 
     map.openPopup = function(geodataId) {
-        angular.forEach(map.geoJson.getLayers(), function(layer, key) {
-            if(layer.feature.id == geodataId) {
-                layer.openPopup();
+        var alreadyFound = false;
+        var layers = map.geoJson.getLayers();
+        angular.forEach(layers, function(layer, key) {
+            if(!alreadyFound) {
+                if(layer.feature.id == geodataId) {
+                    alreadyFound = true;
+                    layer.openPopup();
+                }
             }
         });
     };
 
     map.getMatchingContext = function(featureId) {
-        var cIndex = contextGeodata['#' + featureId];
-        return localContexts[cIndex] || null;
+        // console.log(contextGeodata);
+        // console.log(localContexts);
+        // var cIndex = contextGeodata['#' + featureId];
+        // return localContexts[cIndex] || null;
+        return httpGetPromise.getData('api/context/get/byGeodata/' + featureId);
     };
 
     map.renameMarker = function(oldName, newName) {
