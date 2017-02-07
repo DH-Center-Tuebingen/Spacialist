@@ -25,6 +25,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('context/get/children/{id}', 'ContextController@getChildren');
     $app->get('context/get', 'ContextController@get');
     $app->get('context/get/geodata', 'ContextController@getGeodata');
+    $app->get('context/get/byGeodata/{id}', 'ContextController@getContextByGeodata');
     $app->get('context/getRecursive', 'ContextController@getRecursive');
     $app->get('context/getChoices', 'ContextController@getChoices');
     $app->get('context/duplicate/{id}', 'ContextController@duplicate');
