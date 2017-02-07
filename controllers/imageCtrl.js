@@ -90,6 +90,10 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
         imageService.uploadImages($scope.dropFiles);
     });
 
+    $scope.uploadImages = function($files, $invalidFiles) {
+        imageService.uploadImages($files, $invalidFiles);
+    };
+
     $scope.loadImages = function(len, type) {
         var imgs = imageService.loadImages(len, type);
         return imgs;

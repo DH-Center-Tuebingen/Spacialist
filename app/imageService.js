@@ -1,4 +1,4 @@
-spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'modalService', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, modalService, $timeout) {
+spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'modalService', 'Upload', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, modalService, Upload, $timeout) {
     var images = {
         all: [],
         linked: [],
