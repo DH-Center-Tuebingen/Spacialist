@@ -86,8 +86,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 }
             };
             map.geoJson.addData(feature);
-            map.mapObject.fitBounds(map.geoJson.getBounds());
         }
+        map.mapObject.fitBounds(map.geoJson.getBounds());
     };
 
     map.closePopup = function() {
