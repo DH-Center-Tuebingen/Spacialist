@@ -61,7 +61,7 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
                 modalFactory.errorModal(response.error);
             } else {
                 var path = response.path;
-                if(path !== null) {
+                if(path !== null && path.length > 0) {
                     mainService.expandTreeTo(path);
                 } else {
                     mainService.unsetCurrentElement();
