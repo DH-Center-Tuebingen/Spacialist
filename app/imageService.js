@@ -115,6 +115,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         formData.append('ctxId', contextId);
         httpPostFactory('api/image/link', formData, function(response) {
             console.log("image " + imgId + " is now linked to " + contextId);
+            images.getImagesForContext(contextId);
         });
     };
 
@@ -124,7 +125,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         formData.append('ctxId', contextId);
         httpPostFactory('api/image/unlink', formData, function(response) {
             console.log("unlinked image " + imgId + " from " + contextId);
-            images.getImagesForContext(imgId);
+            images.getImagesForContext(contextId);
         });
     };
 

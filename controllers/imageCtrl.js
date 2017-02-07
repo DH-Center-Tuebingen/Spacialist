@@ -32,7 +32,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
        var currentElement = tmpScope.element;
        var imgId = $itemScope.img.id;
        var contextId = currentElement.id;
-       linkImage(imgId, contextId);
+       imageService.linkImage(imgId, contextId);
     }, function() {
        var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
        if(!tmpScope) return false;
@@ -53,7 +53,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
        var currentElement = tmpScope.element;
        var imgId = $itemScope.img.id;
        var contextId = currentElement.id;
-       unlinkImage(imgId, contextId);
+       imageService.unlinkImage(imgId, contextId);
     }, function() {
        var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
        if(!tmpScope) return false;
