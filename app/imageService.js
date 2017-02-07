@@ -19,12 +19,14 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     };
 
     images.getImagesForContext = function(id) {
+        if(!id) return;
         $rootScope.$emit('image:delete:linked');
         images.linked = [];
         images.getLinkedImages(id);
     };
 
     images.getLinkedImages = function(id) {
+        if(!id) return;
         httpGetFactory('api/image/getByContext/' + id, function(response) {
             var oneUpdated = false;
             var linkedCopy = images.linked.slice();

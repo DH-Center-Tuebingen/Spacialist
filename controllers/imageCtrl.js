@@ -6,7 +6,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
 
     $scope.initImageTab = function() {
         $scope.layerTwo.imageTab.newOpen = false;
-        if($scope.currentElement) {
+        if($scope.currentElement.element.id) {
             $scope.layerTwo.imageTab.linkedOpen = true;
             $scope.layerTwo.imageTab.allOpen = false;
             imageService.getLinkedImages($scope.currentElement.element.id);
