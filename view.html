@@ -71,7 +71,7 @@
         <div ng-if="layerTwo.activeTab == 'map'">
             <div ng-if="currentUser.permissions.view_geodata" ng-controller="mapCtrl">
                 <div id="map-container" ng-if="map">
-                    <leaflet layers="map.layers" lf-draw="map.drawOptions" controls="map.controls" event-broadcast="map.events" legend="map.legend" geojson="map.geojson" height="{{addonContainerHeight}}px" width="100%">
+                    <leaflet layers="map.layers" lf-draw="map.drawOptions" controls="map.controls" legend="map.legend" geojson="map.geojson" height="{{addonContainerHeight}}px" width="100%">
                     </leaflet>
                 </div>
             </div>
