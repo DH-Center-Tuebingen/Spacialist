@@ -56,7 +56,7 @@ spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($
     };
 }]);
 
-spacialistApp.service('modalFactory', ['$uibModal', 'scopeService', function($uibModal, scopeService) {
+spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
     this.deleteModal = function(elementName, onConfirm, additionalWarning) {
         if(typeof additionalWarning != 'undefined' && additionalWarning !== '') {
             var warning = additionalWarning;
@@ -149,7 +149,6 @@ spacialistApp.service('modalFactory', ['$uibModal', 'scopeService', function($ui
                 this.selectedType = selectedType || types[0];
                 this.fields = fields;
                 this.index = index;
-                this.can = scopeService.can;
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
@@ -228,7 +227,7 @@ spacialistApp.directive('resizeWatcher', function($window) {
     };
 });
 
-spacialistApp.directive('myDirective', function(httpPostFactory, scopeService) {
+spacialistApp.directive('myDirective', function(httpPostFactory) {
     return {
         restrict: 'A',
         scope: false,
@@ -570,30 +569,6 @@ spacialistApp.factory('httpGetFactory', function($http) {
     };
 });
 
-spacialistApp.factory('scopeService', function($http) {
-    var roles = [
-        "admin",
-        "student_assistent"
-    ];
-    var service = {
-        map: undefined,
-        datetable: "",
-        epochs: [],
-        filedesc: undefined,
-        markers: {},
-        center: {},
-        events: {},
-        user: {
-            roles: roles,
-            activeRole: roles[0]
-        },
-        drawOptions: {},
-        ctxts: [],
-        layerTwo: {}
-    };
-    return service;
-});
-
 spacialistApp.config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({
         prefix: 'l10n/',
@@ -718,13 +693,15 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 /**
  * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
  */
-spacialistApp.run(function($rootScope, $state, scopeService) {
+spacialistApp.run(function($rootScope, $state, mapService, userService) {
     $rootScope.$on('$stateChangeStart', function(event, toState) {
         var user = JSON.parse(localStorage.getItem('user'));
         if(user) {
-            if(!scopeService.can('duplicate_edit_concepts')) {
-                if(typeof scopeService.map != 'undefined') {
-                    scopeService.map.drawOptions.draw = {
+            userService.currentUser.user = user.user;
+            userService.currentUser.permissions = user.permissions;
+            if(!userService.can('duplicate_edit_concepts')) {
+                if(typeof mapService.map != 'undefined') {
+                    mapService.map.drawOptions.draw = {
                         polyline: false,
                         polygon: false,
                         rectangle: false,
@@ -733,10 +710,6 @@ spacialistApp.run(function($rootScope, $state, scopeService) {
                     };
                 }
             }
-            $rootScope.currentUser = {
-                user: user.user,
-                permissions: user.permissions
-            };
             if(toState.name === 'auth') {
                 event.preventDefault();
                 $state.go('spacialist');

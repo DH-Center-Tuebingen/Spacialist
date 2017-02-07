@@ -50,10 +50,10 @@
                 <th>
                 	howpublished
                 </th>
-                <th ng-if="can('add_remove_literature')">
+                <th ng-if="currentUser.permissions.add_remove_literature">
                     Löschen
                 </th>
-                <th ng-if="can('edit_literature')">
+                <th ng-if="currentUser.permissions.edit_literature">
                     Bearbeiten
                 </th>
             </tr>
@@ -106,12 +106,12 @@
                 <td>
                 	{{ entry.howpublished }}
                 </td>
-                <td ng-if="can('add_remove_literature')">
+                <td ng-if="currentUser.permissions.add_remove_literature">
                     <button type="button" class="btn btn-danger" ng-click="deleteLiteratureEntry(entry.id, $index)">
                         <i class="fa fa-fw fa-trash-o"></i>
                     </button>
                 </td>
-                <td ng-if="can('edit_literature')">
+                <td ng-if="currentUser.permissions.edit_literature">
                     <button type="button" class="btn btn-info" ng-click="editLiteratureEntry(entry.id, $index)">
                         <i class="fa fa-fw fa-pencil"></i>
                     </button>
@@ -119,7 +119,7 @@
             </tr>
         </table>
     </div>
-    <button type="button" class="btn btn-success" id="literature-add-button" ng-click="openAddLiteratureDialog()" ng-if="can('add_remove_literature')">
+    <button type="button" class="btn btn-success" id="literature-add-button" ng-click="openAddLiteratureDialog()" ng-if="currentUser.permissions.add_remove_literature">
         <i class="fa fa-fw fa-plus"></i> Literatur hinzufügen
     </button>
 </div>
