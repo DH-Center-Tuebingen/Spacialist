@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', function(httpGetFactory, httpPostFactory, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService) {
     var main = {};
     var modalFields;
 
@@ -321,7 +321,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
             controller: function($uibModalInstance) {
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
-                },
+                };
                 this.savePossibility = function() {
                     var formData = new FormData();
                     formData.append('cid', cid);
@@ -330,10 +330,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
                     httpPostFactory('api/context/set/possibility', formData, function(callback) {
                         main.currentElement.data[fieldid+'_pos'] = modalFields.value;
                     });
-                },
-                this.modalFields = modalFields,
-                this.addSource = undefined, //TODO
-                this.deleteSourceEntry = undefined //TODO
+                };
+                this.modalFields = modalFields;
+                this.addSource = undefined; //TODO
+                this.deleteSourceEntry = undefined; //TODO
             },
             //scope: $scope
             controllerAs: 'mc'
