@@ -41,6 +41,14 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', '$state', 'modalF
         userService.getUserRoles(id, $index);
     };
 
+    $scope.addUserRole = function($item, user_id) {
+        userService.addUserRole($item, user_id);
+    };
+
+    $scope.removeUserRole = function($item, user_id) {
+        userService.removeUserRole($item, user_id);
+    };
+
     $scope.openAddUserDialog = function() {
         modalFactory.addUserModal(userService.addUser);
     };
