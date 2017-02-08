@@ -4,6 +4,7 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
     $scope.markerIcons = mapService.markerIcons;
     $scope.markers = mapService.markers;
     $scope.currentElement = mainService.currentElement;
+    $scope.currentGeodata = mapService.currentGeodata;
     ////
     $scope.markerOptions = {};
     $scope.closedAlerts = {};
@@ -60,6 +61,7 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
         var center = popup._source.getBounds().getCenter();
         popup.setLatLng(center);
         var featureId = args.leafletEvent.popup._source.feature.id;
+        mapService.setCurrentGeodata(featureId);
         var promise = mapService.getMatchingContext(featureId);
         promise.then(function(response) {
             if(response.error) {
@@ -95,6 +97,35 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
     $scope.$on('leafletDirectiveDraw.draw:drawstop', function(event, args) {
         $scope.markerPlaceMode = false;
     });
+
+    $scope.linkGeodata = function(cid, gid) {
+        var promise = mapService.linkGeodata(cid, gid);
+        promise.then(function(response) {
+            if(response.error) {
+                modalFactory.errorModal(response.error);
+                return;
+            }
+            var updatedContext = response.context;
+            var updatedValues = {
+                geodata_id: updatedContext.geodata_id
+            };
+            mainService.updateContextById(cid, updatedValues);
+        });
+    };
+
+    $scope.unlinkGeodata = function(cid) {
+        var promise = mapService.unlinkGeodata(cid);
+        promise.then(function(response) {
+            if(response.error) {
+                modalFactory.errorModal(response.error);
+                return;
+            }
+            var updatedValues = {
+                geodata_id: undefined
+            };
+            mainService.updateContextById(cid, updatedValues);
+        });
+    };
 
     $scope.isEmpty = function(obj) {
         if (typeof obj === 'undefined') return false;

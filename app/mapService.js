@@ -4,6 +4,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     var defaultColor = '#00FF00';
     var map = {};
     map.geodataList = [];
+    map.currentGeodata = {};
 
     initMapVariables();
     initMap();
@@ -105,6 +106,18 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 }
             }
         });
+    };
+
+    map.setCurrentGeodata = function(gid) {
+        map.currentGeodata.id = gid;
+    };
+
+    map.linkGeodata = function(cid, gid) {
+        return httpGetPromise.getData('api/context/link/geodata/' + cid + '/' + gid);
+    };
+
+    map.unlinkGeodata = function(cid) {
+        return httpGetPromise.getData('api/context/unlink/geodata/' + cid);
     };
 
     map.getMatchingContext = function(featureId) {
