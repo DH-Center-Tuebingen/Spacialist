@@ -127,7 +127,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             };
             $itemScope.$parent.$parent.$modelValue.push(elem);
             addMarker(elem);
-            setCurrentElement(elem, main.currentElement);
+            main.setCurrentElement(elem, main.currentElement);
         });
     };
 
@@ -246,10 +246,12 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         var root_cid = elem.root_cid;
         var formData = new FormData();
         formData.append('name', elem.name);
-        formData.append('root_cid', root_cid);
         formData.append('ctid', elem.ctid);
+        if(root_cid != -1) {
+            formData.append('root_cid', root_cid);
+        }
         if(typeof elem.id !== 'undefined' && elem.id != -1) {
-            formData.append('realId', elem.id);
+            formData.append('id', elem.id);
         }
         for(var i=0; i<elem.data.length; i++) {
             var d = elem.data[i];
@@ -476,7 +478,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             root_cid: elem.root_cid || -1,
             typeLabel: elem.typelabel,
             typeId: elem.typeid,
-            ctid: elem.ctid,
+            ctid: elem.context_type_id,
             geodata_id: elem.geodata_id
         };
         if(typeof openAgain == 'undefined') openAgain = true;
@@ -512,22 +514,14 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                 data: [],
                 children: []
             };
-            var hasPos = typeof parent.lat != 'undefined' && typeof parent.lng != 'undefined' && parent.lat !== null && parent.lng !== null;
             var formData = new FormData();
             formData.append('name', name);
             formData.append('ctid', type.ctid);
             if(typeof parent.id != 'undefined') formData.append('root_cid', parent.id);
-            if(hasPos && copyPosition) {
-                formData.append('lat', parent.lat);
-                formData.append('lng', parent.lng);
-                elem.lat = parent.lat;
-                elem.lng = parent.lng;
-            }
             httpPostFactory('api/context/set', formData, function(newElem) {
-                elem.id = newElem.cid;
+                elem.id = newElem.id;
                 parent.children.push(elem);
-                if(hasPos) addMarker(elem);
-                $scope.setCurrentElement(elem, $scope.currentElement);
+                main.setCurrentElement(elem, main.currentElement);
                 $itemScope.expand();
             });
         });
