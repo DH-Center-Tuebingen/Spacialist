@@ -140,7 +140,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                 if(!main.legendList[current.typelabel]) {
                     main.legendList[current.typelabel] = {
                         name: current.typelabel,
-                        color: main.getColorForId(current.typelabel)
+                        color: main.getColorForId(current.typename)
                     };
                 }
                 if(current.children) addMetadata(current.children);
@@ -157,7 +157,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             if(!main.legendList[current.typelabel]) {
                 main.legendList[current.typelabel] = {
                     name: current.typelabel,
-                    color: main.getColorForId(current.typelabel)
+                    color: main.getColorForId(current.typename)
                 };
             }
             if(current.children) addMetadata(current.children);
