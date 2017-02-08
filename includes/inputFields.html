@@ -1,4 +1,4 @@
-<div ng-controller="mapCtrl">
+<div>
     <div class="form-group" ng-repeat="attr in attributeFields">
         <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}">
             {{ attr.val }}: <sup ng-click="openSourceModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'])">
@@ -6,9 +6,9 @@
             </sup>
         </label>
         <div class="col-md-{{inputWidth}}" ng-switch on="attr.datatype">
-            <input class="form-control" ng-switch-when="string" type="text" placeholder="{{ attr.val }}" id="a{{ attr.aid }}_{{ attr.oid }}" ng-blur="updateInput($event)" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
-            <input class="form-control" ng-switch-when="double" type="number" step="any" min="0" placeholder="0.0" id="a{{ attr.aid }}" ng-blur="updateInput($event)" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
-            <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.aid }}_{{ attr.oid }}" ng-blur="updateInput($event)" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"></textarea>
+            <input class="form-control" ng-switch-when="string" type="text" placeholder="{{ attr.val }}" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
+            <input class="form-control" ng-switch-when="double" type="number" step="any" min="0" placeholder="0.0" id="a{{ attr.aid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
+            <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"></textarea>
             <p class="input-group" ng-switch-when="date">
                 <input type="text" class="form-control" id="a{{ attr.aid }}_{{ attr.oid }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(attributeOutputs[attr.aid+'_'+attr.oid])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
                 <span class="input-group-btn">
@@ -16,7 +16,7 @@
                 </span>
             </p>
             <div ng-switch-when="string-mc">
-                <ui-select multiple ng-disabled="readonlyInput" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" close-on-select="false" name="{{ attr.aid }}_{{ attr.oid }}" id="{{ attr.aid }}_{{ attr.oid }}" on-select="updateMSelectInput($select)" on-remove="updateMSelectInput($select)">
+                <ui-select multiple ng-disabled="readonlyInput" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" close-on-select="false" name="{{ attr.aid }}_{{ attr.oid }}" id="{{ attr.aid }}_{{ attr.oid }}">
                     <ui-select-match>{{$item.narr}}</ui-select-match>
                     <ui-select-choices repeat="choice in dropdownOptions[attr.aid+'_'+attr.oid] | filter:$select.search">
                         {{choice.narr}}
@@ -26,7 +26,7 @@
             <div ng-switch-when="string-sc">
                 <ui-select ng-disabled="readonlyInput" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]"
                 name="{{ attr.aid }}_{{ attr.oid }}" id="{{ attr.aid }}_{{ attr.oid }}"
-                on-select="updateSelectInput($select.ngModel)">
+               >
                   <ui-select-match placeholder="{{ attr.val }}">{{ $select.selected.narr }}</ui-select-match>
                   <ui-select-choices repeat="choice in dropdownOptions[attr.aid+'_'+attr.oid] | filter: $select.search">
                     <span ng-bind-html="choice.narr | highlight: $select.search"></span>
@@ -87,7 +87,7 @@
                 <div class="col-md-12 input-group" style="padding-top: 10px;">
                     <ui-select ng-model="attributeOutputs[attr.aid+'_'+attr.oid].epoch"
                     name="{{ attr.aid+'_'+attr.oid }}" id="{{ attr.aid+'_'+attr.oid }}"
-                    on-select="updateSelectInput($select.ngModel)" ng-disabled="readonlyInput">
+                    ng-disabled="readonlyInput">
                       <ui-select-match placeholder="{{ attr.val }}">{{ $select.selected.narr }}</ui-select-match>
                       <ui-select-choices repeat="choice in dropdownOptions[attr.aid+'_'+attr.oid] | filter: $select.search">
                         <span ng-bind-html="choice.narr | highlight: $select.search"></span>

@@ -82,6 +82,79 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         mainService.deleteElement(elem);
     };
 
+    $scope.isEmpty = function(obj) {
+        if (typeof obj === 'undefined') return false;
+        return Object.keys(obj).length === 0;
+    };
+
+    $scope.addListEntry = function(aid, oid, text, arr) {
+        var index = aid + '_' + (oid || '');
+        var tmpArr = $scope.$eval(arr);
+        var inp = $scope.$eval(text);
+        if(typeof tmpArr[index] == 'undefined') tmpArr[index] = [];
+        tmpArr[index].push({
+            'name': inp[index]
+        });
+        inp[index] = '';
+    };
+
+    $scope.editListEntry = function(ctid, aid, $index, val, tableIndex) {
+        $scope.cancelEditListEntry();
+        var name = ctid + "_" + aid;
+        $scope.currentEditName = name;
+        $scope.currentEditIndex = $index;
+        if (typeof tableIndex !== 'undefined') {
+            $scope.currentEditCol = tableIndex;
+            $scope.editEntry[name][$index][tableIndex] = true;
+        } else {
+            $scope.editEntry[name][$index] = true;
+        }
+        $scope.initialListVal = val;
+    };
+
+    $scope.cancelEditListEntry = function() {
+        if (typeof $scope.currentEditName !== 'undefined' && typeof $scope.currentEditIndex !== 'undefined') {
+            if (typeof $scope.currentEditCol !== 'undefined') {
+                $scope.editEntry[$scope.currentEditName][$scope.currentEditIndex][$scope.currentEditCol] = false;
+                $scope.markerValues[$scope.currentEditName].selectedEpochs[$scope.currentEditIndex][$scope.currentEditCol] = $scope.initialListVal;
+            } else {
+                $scope.editEntry[$scope.currentEditName][$scope.currentEditIndex] = false;
+                $scope.markerValues[$scope.currentEditName][$scope.currentEditIndex] = $scope.initialListVal;
+            }
+        }
+        $scope.currentEditName = undefined;
+        $scope.currentEditIndex = undefined;
+        $scope.currentEditCol = undefined;
+        $scope.initialListVal = undefined;
+    };
+
+    $scope.storeEditListEntry = function() {
+        if (typeof $scope.currentEditName !== 'undefined' && typeof $scope.currentEditIndex !== 'undefined') {
+            if (typeof $scope.currentEditCol !== 'undefined') {
+                $scope.editEntry[$scope.currentEditName][$scope.currentEditIndex][$scope.currentEditCol] = false;
+            } else {
+                $scope.editEntry[$scope.currentEditName][$scope.currentEditIndex] = false;
+            }
+        }
+        $scope.currentEditName = undefined;
+        $scope.currentEditIndex = undefined;
+        $scope.currentEditCol = undefined;
+        $scope.initialListVal = undefined;
+    };
+
+    $scope.removeListItem = function(aid, oid, arr, $index) {
+        var index = aid + '_' + (oid || '');
+        var tmpArr = $scope.$eval(arr);
+        tmpArr[index].splice($index, 1);
+        //var name = aid + "_" + oid;
+        //$scope.markerValues[name].splice($index, 1);
+    };
+
+    $scope.toggleList = function(ctid, aid) {
+        var index = ctid + "_" + aid;
+        $scope.hideLists[index] = !$scope.hideLists[index];
+    };
+
     /**
      * Opens a modal window which allows the user to add/delete sources from a literature list for a particular attribute.
      * One has to pass the field name `fieldname` and the attribute id `fieldid` as parameters.
