@@ -143,6 +143,88 @@ class ContextController extends Controller {
         return response()->json(array_values($rootFields));
     }
 
+    public function linkGeodata($cid, $gid) {
+        $user = \Auth::user();
+        if(!$user->can('link_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        try {
+            $context = Context::findOrFail($cid);
+        } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ]);
+        }
+        if(isset($context->geodata_id)) {
+            return response()->json([
+                'error' => 'This context is already linked to a geodata'
+            ]);
+        }
+        try {
+            Geodata::findOrFail($gid);
+        } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This geodata does not exist'
+            ]);
+        }
+        $context->geodata_id = $gid;
+        $context->save();
+        return response()->json([
+            'context' => $context
+        ]);
+    }
+
+    public function unlinkGeodata($cid) {
+        $user = \Auth::user();
+        if(!$user->can('link_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        try {
+            $context = Context::findOrFail($cid);
+        } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ]);
+        }
+        $context->geodata_id = null;
+        $context->save();
+        return response()->json([
+            'context' => $context
+        ]);
+    }
+
+    public function getContextParents($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $path = DB::select("
+        WITH RECURSIVE
+        q AS (
+	        SELECT  c.*, 0 as reclevel
+	        FROM    contexts c
+	        WHERE   id = $id
+	        UNION ALL
+	        SELECT  cc.*, reclevel+1
+	        FROM    q
+	        JOIN    contexts cc
+	        ON      q.root_context_id = cc.id
+        )
+        SELECT  q.id
+        FROM    q
+        ORDER BY reclevel DESC
+        ");
+        return response()->json([
+            'path' => $path
+        ]);
+    }
+
     public function getContextByGeodata($id) {
         $user = \Auth::user();
         if(!$user->can('view_geodata') || !$user->can('view_concepts')) {

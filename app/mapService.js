@@ -4,6 +4,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     var defaultColor = '#00FF00';
     var map = {};
     map.geodataList = [];
+    map.currentGeodata = {};
 
     initMapVariables();
     initMap();
@@ -86,8 +87,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 }
             };
             map.geoJson.addData(feature);
-            map.mapObject.fitBounds(map.geoJson.getBounds());
         }
+        map.mapObject.fitBounds(map.geoJson.getBounds());
     };
 
     map.closePopup = function() {
@@ -105,6 +106,18 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 }
             }
         });
+    };
+
+    map.setCurrentGeodata = function(gid) {
+        map.currentGeodata.id = gid;
+    };
+
+    map.linkGeodata = function(cid, gid) {
+        return httpGetPromise.getData('api/context/link/geodata/' + cid + '/' + gid);
+    };
+
+    map.unlinkGeodata = function(cid) {
+        return httpGetPromise.getData('api/context/unlink/geodata/' + cid);
     };
 
     map.getMatchingContext = function(featureId) {
@@ -251,33 +264,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             }
         };
         map.map.markers = {};
-        map.map.bounds = {
-            southWest: {
-                lat: 90,
-                lng: 180
-            },
-            northEast: {
-                lat: -90,
-                lng: -180
-            }
-        };
-        map.map.layercontrol = {
-            icons: {
-                uncheck: "fa fa-fw fa-square-o",
-                check: "fa fa-fw fa-check-square-o",
-                radio: "fa fa-fw fa-check-circle-o",
-                unradio: "fa fa-fw fa-circle-thin",
-                up: "fa fa-fw fa-level-up",
-                down: "fa fa-fw fa-level-down",
-                open: "fa fa-fw fa-caret-down",
-                close: "fa fa-fw fa-caret-up"
-            }
-        };
-        map.map.events = {
-            markers: {
-                enable: ['click', 'drag', 'dragstart', 'dragend', 'popupopen', 'popupclose']
-            }
-        };
         map.map.controls = {
             scale: true
         };
@@ -346,7 +332,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 }
             },
             overlays: {
-                /*hillshade: {
+                hillshade: {
                     name: "Hillshade Europa",
                     type: "wms",
                     url: "http://129.206.228.72/cached/hillshade",
@@ -358,7 +344,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                         opacity: 0.25,
                         attribution: "Hillshade layer by GIScience http://www.osm-wms.de"
                     }
-                }*/
+                }
             }
         };
     }

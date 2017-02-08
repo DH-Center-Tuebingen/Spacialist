@@ -127,7 +127,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
             };
             $itemScope.$parent.$parent.$modelValue.push(elem);
             addMarker(elem);
-            setCurrentElement(elem, main.currentElement);
+            main.setCurrentElement(elem, main.currentElement);
         });
     };
 
@@ -421,6 +421,41 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
         return parsedData;
     }
 
+    main.updateContextById = function(id, newValues) {
+        httpGetFactory('api/context/get/parents/' + id, function(response) {
+            if(response.error) {
+                modalFactory.errorModal(response.error);
+                return;
+            }
+            updateContext(response.path, newValues);
+        });
+    };
+
+    function updateContext(path, values) {
+        var t = angular.element(document.getElementById('context-tree')).scope();
+        var nodesScope = t.$nodesScope;
+        var children = nodesScope.childNodes();
+        var finished = false;
+        for(var i=0; i<path.length; i++) {
+            var level = path[i];
+            for(var j=0; j<children.length; j++) {
+                var child = children[j];
+                if(level.id == child.$modelValue.id) {
+                    if(path.length - 1 == i) {
+                        angular.merge(main.currentElement.element, values);
+                        angular.merge(child.$modelValue, values);
+                        finished = true;
+                        break;
+                    }
+                    child.expand();
+                    children = child.childNodes();
+                    break;
+                }
+            }
+            if(finished) break;
+        }
+    }
+
     main.expandTreeTo = function(path) {
         var t = angular.element(document.getElementById('context-tree')).scope();
         var nodesScope = t.$nodesScope;
@@ -527,7 +562,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
                 elem.id = newElem.cid;
                 parent.children.push(elem);
                 if(hasPos) addMarker(elem);
-                $scope.setCurrentElement(elem, $scope.currentElement);
+                main.setCurrentElement(elem, main.currentElement);
                 $itemScope.expand();
             });
         });
