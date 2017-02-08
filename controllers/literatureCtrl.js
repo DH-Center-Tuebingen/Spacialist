@@ -3,6 +3,10 @@ spacialistApp.controller('literatureCtrl', function($scope, literatureService, u
     $scope.literature = literatureService.literature;
     $scope.currentUser = userService.currentUser;
 
+    $scope.sortType = 'author';
+    $scope.sortReverse = false;
+    $scope.searchTerm = '';
+
     $scope.deleteLiteratureEntry = function(id, index) {
         literatureService.deleteLiteratureEntry(id, index);
     };
