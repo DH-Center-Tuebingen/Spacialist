@@ -6,31 +6,38 @@ use Illuminate\Support\Facades\Hash;
 class LanguageTableSeeder extends Seeder
 {
     public function run() {
-        DB::table('th_language')->delete();
-        DB::table('th_language')->create(array(
-            'lasteditor'    => 'postgres',
-            'display_name'  => 'Deutsch',
-            'short_name'    => 'de'
-        ));
-        DB::table('th_language')->create(array(
-            'lasteditor'    => 'postgres',
-            'display_name'  => 'English',
-            'short_name'    => 'en'
-        ));
-        DB::table('th_language')->create(array(
-           'lasteditor'    => 'postgres',
-           'display_name'  => 'Español',
-           'short_name'    => 'es'
-        ));
-        DB::table('th_language')->create(array(
-            'lasteditor'    => 'postgres',
-            'display_name'  => 'Français',
-            'short_name'    => 'fr'
-        ));
-        DB::table('th_language')->create(array(
-            'lasteditor'    => 'postgres',
-            'display_name'  => 'Italiano',
-            'short_name'    => 'it'
-        ));
+        App\ThLanguage::select()->delete();
+        $de = new App\ThLanguage;
+        $de->lasteditor     = 'postgres';
+        $de->display_name   = 'Deutsch';
+        $de->short_name     = 'de';
+        $de->save();
+
+        $en = new App\ThLanguage;
+        $en->lasteditor    = 'postgres';
+        $en->display_name  = 'English';
+        $en->short_name    = 'en';
+        $en->save();
+
+        $es = new App\ThLanguage;
+        $es->lasteditor    = 'postgres';
+        $es->display_name  = 'Español';
+        $es->short_name    = 'es';
+        $es->save();
+
+        $fr = new App\ThLanguage;
+        $fr->lasteditor    = 'postgres';
+        $fr->display_name  = 'Français';
+        $fr->short_name    = 'fr';
+        $fr->save();
+
+
+        $it = new App\ThLanguage;
+        $it->lasteditor    = 'postgres';
+        $it->display_name  = 'Italiano';
+        $it->short_name    = 'it';
+        $it->save();
+
+
     }
 }

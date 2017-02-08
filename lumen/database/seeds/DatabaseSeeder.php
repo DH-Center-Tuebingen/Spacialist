@@ -11,6 +11,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call('UsersTableSeeder');
+        // $this->call('LanguageTableSeeder');
+        $this->call('TestSeeder');
+
+        // $this->call('ContextTableSeeder');
+        // // $this->call('ThesaurusSeeder');
+        // //
+        App\User::select()->delete();
+        $user = factory(App\User::class, 'test')->create();
+        $user->attachRole(App\Role::where('name', 'employee')->first());
     }
+
 }
