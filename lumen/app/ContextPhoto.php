@@ -4,20 +4,17 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Context extends Model
+class ContextPhoto extends Model
 {
+    protected $table = 'context_photos';
     /**
      * The attributes that are assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'context_type_id',
-        'root_context_id',
-        'name',
+        'photo_id',
+        'context_id',
         'lasteditor',
-        'icon',
-        'color',
-        'geodata_id',
     ];
 }
