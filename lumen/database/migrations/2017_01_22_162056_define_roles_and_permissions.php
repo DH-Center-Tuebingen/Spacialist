@@ -263,7 +263,7 @@ class DefineRolesAndPermissions extends Migration
         ];
         foreach($roles as $r) {
             $entry = App\Role::where('name', '=', $r)->firstOrFail();
-            $entry-delete();
+            $entry->delete();
         }
     }
 }
