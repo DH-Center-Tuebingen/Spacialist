@@ -1,3 +1,7 @@
+#literature-table thead {
+    background: white;
+}
+
 #langSwitch {
     text-align: right;
 }
