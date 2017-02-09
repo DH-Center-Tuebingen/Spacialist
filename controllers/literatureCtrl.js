@@ -1,6 +1,7 @@
 spacialistApp.controller('literatureCtrl', function($scope, literatureService, userService, modalFactory, httpGetFactory, httpPostFactory) {
     $scope.can = userService.can;
     $scope.literature = literatureService.literature;
+    $scope.currentUser = userService.currentUser;
 
     $scope.deleteLiteratureEntry = function(id, index) {
         literatureService.deleteLiteratureEntry(id, index);

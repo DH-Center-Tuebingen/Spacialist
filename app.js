@@ -595,6 +595,15 @@ spacialistApp.config(function($controllerProvider, $provide) {
 });
 
 spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider, $httpProvider, $provide) {
+    function updateToken(response, $injector) {
+        if(response.headers('Authorization') !== null) {
+            var token = response.headers('Authorization').replace('Bearer ', '');
+            var $auth = $injector.get('$auth');
+            $auth.setToken(token);
+            localStorage.setItem('satellizer_token', token);
+        }
+    }
+
     function redirectWhenLoggedOut($q, $injector) {
         return {
             responseError: function(rejection) {
@@ -634,27 +643,19 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
     function setAuthHeader($q, $injector) {
         return {
             response: function(response) {
-                if(response.headers('Authorization') !== null) {
-                    var token = response.headers('Authorization').replace('Bearer ', '');
-                    var $auth = $injector.get('$auth');
-                    $auth.setToken(token);
-                    localStorage.setItem('satellizer_token', token);
-                }
+                updateToken(response, $injector);
                 return response || $q.when(response);
             },
             responseError: function(rejection) {
                 console.log("Something went wrong...");
-                console.log(rejection);
-                if(rejection.status == 403) {
-                    if(rejection.headers('Authorization') !== null) {
-                        var token = rejection.headers('Authorization').replace('Bearer ', '');
-                        var $auth = $injector.get('$auth');
-                        $auth.setToken(token);
-                        localStorage.setItem('satellizer_token', token);
-                    }
-                    var modalFactory = $injector.get('modalFactory');
-                    modalFactory.errorModal(rejection.data.error);
-                }
+                //console.log(rejection);
+                updateToken(rejection, $injector);
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(rejection.data, "text/xml");
+                var errors = doc.getElementsByClassName('exception_message');
+                var modalFactory = $injector.get('modalFactory');
+                var errorMsg = errors[0].innerHTML || rejection.statusText;
+                modalFactory.errorModal(errorMsg);
                 return $q.reject(rejection);
             }
         };
