@@ -6,7 +6,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
 
     $scope.initImageTab = function() {
         $scope.layerTwo.imageTab.newOpen = false;
-        if($scope.currentElement) {
+        if($scope.currentElement.element.id) {
             $scope.layerTwo.imageTab.linkedOpen = true;
             $scope.layerTwo.imageTab.allOpen = false;
             imageService.getLinkedImages($scope.currentElement.element.id);
@@ -32,7 +32,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
        var currentElement = tmpScope.element;
        var imgId = $itemScope.img.id;
        var contextId = currentElement.id;
-       linkImage(imgId, contextId);
+       imageService.linkImage(imgId, contextId);
     }, function() {
        var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
        if(!tmpScope) return false;
@@ -53,7 +53,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
        var currentElement = tmpScope.element;
        var imgId = $itemScope.img.id;
        var contextId = currentElement.id;
-       unlinkImage(imgId, contextId);
+       imageService.unlinkImage(imgId, contextId);
     }, function() {
        var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
        if(!tmpScope) return false;
@@ -89,6 +89,10 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
     $scope.$watch('dropFiles', function() {
         imageService.uploadImages($scope.dropFiles);
     });
+
+    $scope.uploadImages = function($files, $invalidFiles) {
+        imageService.uploadImages($files, $invalidFiles);
+    };
 
     $scope.loadImages = function(len, type) {
         var imgs = imageService.loadImages(len, type);

@@ -1,4 +1,4 @@
-spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'modalService', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, modalService, $timeout) {
+spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'modalService', 'Upload', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, modalService, Upload, $timeout) {
     var images = {
         all: [],
         linked: [],
@@ -19,12 +19,14 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     };
 
     images.getImagesForContext = function(id) {
+        if(!id) return;
         $rootScope.$emit('image:delete:linked');
         images.linked = [];
         images.getLinkedImages(id);
     };
 
     images.getLinkedImages = function(id) {
+        if(!id) return;
         httpGetFactory('api/image/getByContext/' + id, function(response) {
             var oneUpdated = false;
             var linkedCopy = images.linked.slice();
@@ -113,6 +115,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         formData.append('ctxId', contextId);
         httpPostFactory('api/image/link', formData, function(response) {
             console.log("image " + imgId + " is now linked to " + contextId);
+            images.getImagesForContext(contextId);
         });
     };
 
@@ -122,7 +125,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         formData.append('ctxId', contextId);
         httpPostFactory('api/image/unlink', formData, function(response) {
             console.log("unlinked image " + imgId + " from " + contextId);
-            images.getImagesForContext(imgId);
+            images.getImagesForContext(contextId);
         });
     };
 
