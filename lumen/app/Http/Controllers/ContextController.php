@@ -7,6 +7,9 @@ use App\Permission;
 use App\Role;
 use App\Geodata;
 use App\Context;
+use App\Attribute;
+use App\AttributeValue;
+use App\ThConcept;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
 use Phaza\LaravelPostgis\Geometries\Polygon;
@@ -389,7 +392,7 @@ class ContextController extends Controller {
         foreach($toDuplicateValues as $value) {
             unset($value->id);
             $value->context_id = $cid;
-            Db::table('attribute_values')
+            DB::table('attribute_values')
                 ->insertGetId(get_object_vars($value));
         }
         $toDuplicate->data = $this->getData($cid);
@@ -447,113 +450,31 @@ class ContextController extends Controller {
         return response()->json($roots);
     }
 
-    public function add(Request $request) {
-        $user = \Auth::user();
-        if(!$user->can('view_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        //$title = $request->get('title');
-        $user = \Auth::user();
-        if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
-        $lat = $request->get('lat');
-        $lng = $request->get('lng');
-        $geodata = new Geodata;
-        $geodata->geom = new Point($lat, $lng);
-        $geodata->save();
-        $id = $request->get('id');
-        $name = $request->get('name');
-        $ctid = $request->get('cid');
-        $cid = -1;
-        $isUpdate = $id > 0;
-        if($isUpdate) {
-            DB::table('contexts')
-                ->where('id', $id)
-                ->update([
-                    'name' => $name,
-                    'geodata_id' => $geodata->id,
-                    'lasteditor' => $user['name']
-                ]);
-            $cid = $id;
-        } else {
-            $ins = [
-                    'name' => $name,
-                    'context_type_id' => $ctid,
-                    'geodata_id' => $geodata->id,
-                    'lasteditor' => $user['name']
-            ];
-            if($request->has('root')) $ins['root'] = $request->get('root');
-            $cid = DB::table('contexts')
-                ->insertGetId($ins);
-        }
-        $this->updateOrInsert($request->except(['title', 'lat', 'lng', 'id', 'name', 'cid']), $cid, $isUpdate, $user);
-        return response()->json(['fid' => $cid]);
-    }
-
     public function set(Request $request) {
         $user = \Auth::user();
-        if(!$user->can('view_concepts')) {
+        $id = $request->get('id');
+
+        if((isset($id) && !$user->can('duplicate_edit_concepts')) || (!isset($id) && !$user->can('create_concepts'))) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $user = \Auth::user();
-        if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
-        $isUpdate = $request->has('realId');
-        $name = $request->get('name');
-        $ctid = $request->get('ctid');
+
+        $isUpdate = isset($id) && $id > 0;
         if($isUpdate) {
-            $realId = $request->get('realId');
-            $upd = [
-                'name' => $name,
-                'lasteditor' => $user['name']
-            ];
-            if($request->has('lat') && $request->has('lng')){
-                $lat = $request->get('lat');
-                $lng = $request->get('lng');
-                $context = Context::find($realId);
-                if(isset($context->geodata_id)){
-                    $geodata = DB::table('geodata')->where('id', $geodata_id);
-                }
-                else{
-                    $geodata = new Geodata;
-                }
-                $geodata->geom = new Point($lat, $lng);
-                $geodata->save();
-                $upd['geodata_id'] = $geodata->id;
-            }
-            DB::table('contexts')
-                ->where('id', $realId)
-                ->update($upd);
-            $cid = $realId;
-            $currAttrs = DB::table('attribute_values')->where('context_id', $realId)->get();
+            $context = Context::find($id);
         } else {
-            $ins = [
-                'name' => $name,
-                'context_type_id' => $ctid,
-                'lasteditor' => $user['name']
-            ];
-            if($request->has('root_cid')) $ins['root_context_id'] = $request->get('root_cid');
-            if($request->has('lat') && $request->has('lng')){
-                $lat = $request->get('lat');
-                $lng = $request->get('lng');
-                $context = Context::find($realId);
-                if(isset($context->geodata_id)){
-                    $geodata = DB::table('geodata')->where('id', $geodata_id);
-                }
-                else{
-                    $geodata = new Geodata;
-                }
-                $geodata->geom = new Point($lat, $lng);
-                $geodata->save();
-                $ins['geodata_id'] = $geodata->id;
-            }
-            $cid = DB::table('contexts')
-                ->insertGetId($ins);
+            $context = new Context();
         }
-        $this->updateOrInsert($request->except('name', 'lat', 'lng', 'root_cid', 'ctid', 'realId'), $cid, $isUpdate, $user);
-        return response()->json(['fid' => $cid, 'data' => $this->getData($cid)]);
+        if($request->has('name')) $context->name = $request->get('name');
+        if($request->has('ctid')) $context->context_type_id = $request->get('ctid');
+        if($request->has('root_cid')) $context->root_context_id = $request->get('root_cid');
+        $context->lasteditor = $user['name'];
+        $context->save();
+
+        $id = $context->id;
+        $this->updateOrInsert($request->except(['id', 'name', 'ctid', 'root_cid']), $id, $isUpdate, $user);
+        return response()->json(['id' => $id]);
     }
 
     public function setIcon(Request $request) {
@@ -657,21 +578,10 @@ class ContextController extends Controller {
     }
 
     public function updateOrInsert($request, $cid, $isUpdate, $user) {
-        $currAttrs = DB::table('attribute_values')->where('context_id', $cid)->get();
         foreach($request as $key => $value) {
             $ids = explode("_", $key);
             $aid = $ids[0];
-            if(!empty($ids[1])) {
-                $oid = $ids[1];
-                $tbl = 'option_values';
-                $isOption = true;
-            } else {
-                $tbl = 'attribute_values';
-                $isOption = false;
-            }
-            $datatype = DB::table('attributes')
-                ->where('id', '=', $aid)
-                ->value('datatype');
+            $datatype = Attribute::find($aid)->datatype;
             $jsonArr = json_decode($value);
             if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
             if(is_array($jsonArr)) { //only string-sc and string-mc should be arrays
@@ -680,10 +590,7 @@ class ContextController extends Controller {
                         ['context_id', $cid],
                         ['attribute_id', $aid]
                     );
-                    if($isOption) $dbEntries[] = ['option_id', $oid];
-                    $rows = DB::table($tbl)
-                        ->where($dbEntries)
-                        ->get();
+                    $rows = AttributeValue::where($dbEntries)->get();
                     foreach($rows as $row) {
                         $alreadySet = false;
                         foreach($jsonArr as $k => $v) {
@@ -691,9 +598,7 @@ class ContextController extends Controller {
                                 $set = $v->name;
                                 $val = $row->str_val;
                             } else {
-                                $set = DB::table('th_concept')
-                                ->where('id', '=', $v->narrower_id)
-                                ->value('concept_url');
+                                $set = ThConcept::find($v->narrower_id)->concept_url;
                                 $val = $row->thesaurus_val;
                             }
                             if($val === $set) {
@@ -709,35 +614,28 @@ class ContextController extends Controller {
                             );
                             if($datatype === 'list') $del[] = ['str_val', $row->str_val];
                             else $del[] = ['thesaurus_val', $row->thesaurus_val];
-                            if($isOption) $del[] = ['option_id', $oid];
-                            DB::table($tbl)
-                                ->where($del)
-                                ->delete();
+                            $AttributeValue::where($del)->delete();
                         }
                     }
                 }
                 foreach($jsonArr as $v) {
-                    $vals = array(
-                        'context_id' => $cid,
-                        'attribute_id' => $aid,
-                        'lasteditor' => $user['name']
-                    );
+                    $attr = new AttributeValue();
+                    $attr->context_id = $cid;
+                    $attr->attribute_id = $aid;
+                    $attr->lasteditor = $user['name'];
                     if($datatype === 'list') {
-                        $vals['str_val'] = $v->name;
+                        $attr->str_val = $v->name;
                     } else {
-                        $set = DB::table('th_concept')
-                            ->where('id', '=', $v->narrower_id)
-                            ->value('concept_url');
-                        $vals['thesaurus_val'] = $set;
+                        $set = ThConcept::find($v->narrower_id)->concept_url;
+                        $attr->thesaurus_val = $set;
                     }
-                    if($isOption) $vals['option_id'] = $oid;
-                    DB::table($tbl)
-                        ->insert($vals);
+                    $attr->save();
                 }
             } else {
                 if($isUpdate) {
                     $alreadySet = false;
                     $attr;
+                    $currAttrs = DB::table('attribute_values')->where('context_id', $cid)->get();
                     foreach($currAttrs as $currKey => $currVal) {
                         if($aid == $currVal->attribute_id) {
                             $alreadySet = true;
@@ -747,37 +645,26 @@ class ContextController extends Controller {
                         }
                     }
                     if($alreadySet) {
-                        $data = array('lasteditor' => $user['name']);
-                        $data['str_val'] = $this->parseValue($jsonArr, $value, $datatype);
-                        DB::table('attribute_values')
-                                ->where([
-                                    ['context_id', '=', $attr->context_id],
-                                    ['attribute_id', '=', $attr->attribute_id],
-                                    ['id', '=', $attr->id]
-                                ])
-                            ->update($data);
+                        $attrValue = AttributeValue::where([
+                            ['context_id', '=', $attr->context_id],
+                            ['attribute_id', '=', $attr->attribute_id],
+                            ['id', '=', $attr->id]
+                        ])->first();
                     } else {
-                        $vals = array(
-                            'context_id' => $cid,
-                            'attribute_id' => $aid,
-                            'str_val' => $value,
-                            'lasteditor' => $user['name']
-                        );
-                        $vals['str_val'] = $this->parseValue($jsonArr, $value, $datatype);
-                        if($isOption) $vals['option_id'] = $oid;
-                        DB::table($tbl)
-                            ->insert($vals);
+                        $attrValue = new AttributeValue();
+                        $attrValue->context_id = $cid;
+                        $attrValue->attribute_id = $aid;
                     }
+                    $attrValue->lasteditor = $user['name'];
+                    $attrValue->str_val = $this->parseValue($jsonArr, $value, $datatype);
+                    $attrValue->save();
                 } else {
-                    $vals = array(
-                        'context_id' => $cid,
-                        'attribute_id' => $aid,
-                        'lasteditor' => $user['name']
-                    );
-                    $vals['str_val'] = $this->parseValue($jsonArr, $value, $datatype);
-                    if($isOption) $vals['option_id'] = $oid;
-                    DB::table($tbl)
-                        ->insert($vals);
+                    $attrValue = new AttributeValue();
+                    $attrValue->context_id = $cid;
+                    $attrValue->attribute_id = $aid;
+                    $attrValue->lasteditor = $user['name'];
+                    $attrValue->str_val = $this->parseValue($jsonArr, $value, $datatype);
+                    $attrValue->save();
                 }
             }
         }

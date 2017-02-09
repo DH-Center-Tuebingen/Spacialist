@@ -51,7 +51,6 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('image/upload', 'ImageController@uploadImage');
     $app->post('image/link', 'ImageController@link');
     $app->post('image/unlink', 'ImageController@unlink');
-    $app->post('context/add', 'ContextController@add');
     $app->post('context/add/geodata', 'ContextController@addGeodata');
     $app->post('context/set', 'ContextController@set');
     $app->post('context/set/icon', 'ContextController@setIcon');

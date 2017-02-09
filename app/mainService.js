@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', function(httpGetFactory, httpPostFactory, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService) {
     var main = {};
     var modalFields;
 
@@ -140,7 +140,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
                 if(!main.legendList[current.typelabel]) {
                     main.legendList[current.typelabel] = {
                         name: current.typelabel,
-                        color: main.getColorForId(current.typelabel)
+                        color: main.getColorForId(current.typename)
                     };
                 }
                 if(current.children) addMetadata(current.children);
@@ -157,7 +157,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
             if(!main.legendList[current.typelabel]) {
                 main.legendList[current.typelabel] = {
                     name: current.typelabel,
-                    color: main.getColorForId(current.typelabel)
+                    color: main.getColorForId(current.typename)
                 };
             }
             if(current.children) addMetadata(current.children);
@@ -246,10 +246,12 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
         var root_cid = elem.root_cid;
         var formData = new FormData();
         formData.append('name', elem.name);
-        formData.append('root_cid', root_cid);
         formData.append('ctid', elem.ctid);
+        if(root_cid != -1) {
+            formData.append('root_cid', root_cid);
+        }
         if(typeof elem.id !== 'undefined' && elem.id != -1) {
-            formData.append('realId', elem.id);
+            formData.append('id', elem.id);
         }
         for(var i=0; i<elem.data.length; i++) {
             var d = elem.data[i];
@@ -321,7 +323,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
             controller: function($uibModalInstance) {
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
-                },
+                };
                 this.savePossibility = function() {
                     var formData = new FormData();
                     formData.append('cid', cid);
@@ -330,10 +332,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
                     httpPostFactory('api/context/set/possibility', formData, function(callback) {
                         main.currentElement.data[fieldid+'_pos'] = modalFields.value;
                     });
-                },
-                this.modalFields = modalFields,
-                this.addSource = undefined, //TODO
-                this.deleteSourceEntry = undefined //TODO
+                };
+                this.modalFields = modalFields;
+                this.addSource = undefined; //TODO
+                this.deleteSourceEntry = undefined; //TODO
             },
             //scope: $scope
             controllerAs: 'mc'
@@ -511,7 +513,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
             root_cid: elem.root_cid || -1,
             typeLabel: elem.typelabel,
             typeId: elem.typeid,
-            ctid: elem.ctid,
+            ctid: elem.context_type_id,
             geodata_id: elem.geodata_id
         };
         if(typeof openAgain == 'undefined') openAgain = true;
@@ -547,21 +549,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'moda
                 data: [],
                 children: []
             };
-            var hasPos = typeof parent.lat != 'undefined' && typeof parent.lng != 'undefined' && parent.lat !== null && parent.lng !== null;
             var formData = new FormData();
             formData.append('name', name);
             formData.append('ctid', type.ctid);
             if(typeof parent.id != 'undefined') formData.append('root_cid', parent.id);
-            if(hasPos && copyPosition) {
-                formData.append('lat', parent.lat);
-                formData.append('lng', parent.lng);
-                elem.lat = parent.lat;
-                elem.lng = parent.lng;
-            }
             httpPostFactory('api/context/set', formData, function(newElem) {
-                elem.id = newElem.cid;
+                elem.id = newElem.id;
                 parent.children.push(elem);
-                if(hasPos) addMarker(elem);
                 main.setCurrentElement(elem, main.currentElement);
                 $itemScope.expand();
             });
