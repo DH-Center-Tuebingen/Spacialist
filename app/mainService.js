@@ -504,8 +504,14 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             elem.fields = main.artifactReferences[elem.typename].slice();
         }
         var data = {};
-        data = parseData(elem.data);
-        main.currentElement.data = data;
+        httpGetFactory('api/context/get/data/' + elem.id, function(response) {
+            if(response.error) {
+                modalFactory.errorModal(response.error);
+                return;
+            }
+            data = parseData(response.data);
+            main.currentElement.data = data;
+        });
         main.currentElement.fields = elem.fields;
         main.currentElement.element = {
             id: elem.id,
