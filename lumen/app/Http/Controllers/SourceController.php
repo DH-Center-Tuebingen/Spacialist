@@ -50,7 +50,9 @@ class SourceController extends Controller {
         foreach($src as &$s) {
             $s->literature = DB::table('literature')->where('id', '=', $s->literature_id)->first();
         }
-        return response()->json($src);
+        return response()->json([
+            'sources' => $src
+        ]);
     }
 
     public function add(Request $request) {

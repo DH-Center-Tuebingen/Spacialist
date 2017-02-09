@@ -5,7 +5,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     main.currentElement = {
         element: {},
         data: {},
-        fields: {}
+        fields: {},
+        sources: {}
     };
     main.contextList = [];
     main.contexts = [];
@@ -533,6 +534,21 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             }
             data = parseData(response.data);
             main.currentElement.data = data;
+        });
+        main.currentElement.sources = {};
+        httpGetFactory('api/sources/get/' + elem.id, function(response) {
+            if(response.error) {
+                modalFactory.errorModal(response.error);
+                return;
+            }
+            var sources = response.sources;
+            angular.forEach(sources, function(source, i) {
+                var index = '#' + source.attribute_id;
+                if(typeof main.currentElement.sources[index] == 'undefined') {
+                    main.currentElement.sources[index] = [];
+                }
+                main.currentElement.sources[index].push(source);
+            });
         });
         main.currentElement.fields = elem.fields;
         main.currentElement.element = {
