@@ -11,7 +11,7 @@
     </div>
     <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container">
         <div ng-if="currentUser.permissions.view_concept_props">
-            <div ng-show="currentElement">
+            <div ng-show="currentElement.element.id">
                 <h3>{{ currentElement.element.name }}<span ng-if="currentElement.element.typeLabel" class="type-desc">{{ currentElement.element.typeLabel }}</span> <small>Element-Eigenschaften</small></h3>
                 <form class="form-horizontal" role="form" ng-if="currentElement.fields">
                     <div class="form-group">
@@ -34,7 +34,7 @@
                     </div>
                 </form>
             </div>
-            <div ng-hide="currentElement">
+            <div ng-hide="currentElement.element.id">
                 <h3>Element-Eigenschaften</h3>
                 <div class="alert alert-info">
                     <p>
