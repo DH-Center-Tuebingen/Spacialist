@@ -27,6 +27,18 @@ class ContextController extends Controller {
         //
     }
 
+    public function getContextData($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_concept_props')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        return response()->json([
+            'data' => $this->getData($id)
+        ]);
+    }
+
     private function getData($id) {
         $data = DB::table('attribute_values as av')->select('av.*', 'a.datatype', 'a.thesaurus_root_url')->join('attributes as a', 'av.attribute_id', '=', 'a.id')->where('context_id', $id)->get();
         foreach($data as &$attr) {
@@ -128,9 +140,6 @@ class ContextController extends Controller {
         ");
         $children = [];
         foreach($rootFields as $key => $field) {
-            if($user->can('view_concept_props')) {
-                $rootFields[$key]->data =  $this->getData($field->id);
-            }
             if(array_key_exists($field->id, $children)) $tmpChildren = $children[$field->id];
             else $tmpChildren = array();
             $rootFields[$key]->children = $tmpChildren;
