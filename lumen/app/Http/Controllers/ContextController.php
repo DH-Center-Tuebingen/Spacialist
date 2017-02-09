@@ -567,7 +567,7 @@ class ContextController extends Controller {
                             ['context_id', '=', $attr->context_id],
                             ['attribute_id', '=', $attr->attribute_id],
                             ['id', '=', $attr->id]
-                        ]);
+                        ])->first();
                     } else {
                         $attrValue = new AttributeValue();
                         $attrValue->context_id = $cid;
