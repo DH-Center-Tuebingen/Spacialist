@@ -131,7 +131,7 @@ class LiteratureController extends Controller
     public function getAll() {
         return response()->json(
             DB::table('literature')
-            ->orderBy('id', 'asc')
+            ->orderBy('author', 'asc')
             ->get()
         );
     }
