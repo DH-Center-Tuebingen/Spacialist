@@ -214,14 +214,30 @@ spacialistApp.directive('resizeWatcher', function($window) {
                 if(addonNav) addonNavHeight = addonNav.offsetHeight;
                 var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
                 var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
-                var literatureHeight = containerHeight;
-                var literatureAddButton = document.getElementById('literature-add-button');
-                if(literatureAddButton) literatureHeight -= literatureAddButton.offsetHeight;
+                var literatureContainer = document.getElementById('literature-container');
+                if(literatureContainer) {
+                    var literatureHeight = containerHeight;
+                    var literatureAddButton = document.getElementById('literature-add-button');
+                    if(literatureAddButton) literatureHeight -= literatureAddButton.offsetHeight;
+                    var literatureSearch = document.getElementById('literature-search-form');
+                    if(literatureSearch) literatureHeight -= literatureSearch.offsetHeight;
+                    var literatureTable = document.getElementById('literature-table');
+                    if(literatureTable) {
+                        var head = literatureTable.tHead;
+                        angular.element(literatureContainer).bind('scroll', function(e) {
+                            var t = 'translate(0, ' + this.scrollTop + 'px)';
+                            head.style.transform = t;
+                        });
+                        var headHeight = head.offsetHeight;
+                        var body = literatureTable.tBodies[0];
+                        $(body).css('height', literatureHeight - headHeight);
+                        $(literatureContainer).css('height', literatureHeight);
+                    }
+                }
 
                 $('#tree-container').css('height', containerHeight);
                 $('#attribute-container').css('height', containerHeight);
                 $('#addon-container').css('height', containerHeight);
-                $('#literature-container').css('height', literatureHeight);
             }
         }, true);
     };

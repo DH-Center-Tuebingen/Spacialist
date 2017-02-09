@@ -43,6 +43,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
 
     literature.getLiterature = function() {
         var promise = httpGetFactory('api/literature/getAll', function(response) {
+            literature.literature.length = 0;
             angular.forEach(response, function(entry, key) {
                 literature.literature.push(entry);
             });
