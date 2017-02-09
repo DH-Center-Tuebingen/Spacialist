@@ -230,7 +230,7 @@ spacialistApp.directive('resizeWatcher', function($window) {
                         });
                         var headHeight = head.offsetHeight;
                         var body = literatureTable.tBodies[0];
-                        $(body).css('height', literatureHeight - headHeight);
+                        $(body).css('max-height', literatureHeight - headHeight);
                         $(literatureContainer).css('height', literatureHeight);
                     }
                 }
