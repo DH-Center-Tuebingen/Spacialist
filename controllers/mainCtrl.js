@@ -87,6 +87,10 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         return Object.keys(obj).length === 0;
     };
 
+    $scope.deleteSourceEntry = function(index, key) {
+        mainService.deleteSourceEntry(index, key);
+    };
+
     $scope.addListEntry = function(aid, oid, text, arr) {
         var index = aid + '_' + (oid || '');
         var tmpArr = $scope.$eval(arr);
