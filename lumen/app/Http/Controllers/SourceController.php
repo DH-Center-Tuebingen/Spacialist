@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 use App\User;
+use App\Literature;
+use App\Source;
 use \DB;
 use Illuminate\Http\Request;
 
@@ -29,7 +31,7 @@ class SourceController extends Controller {
             ])
             ->get();
         foreach($src as &$s) {
-            $s->literature = DB::table('literature')->where('id', '=', $s->literature_id)->first();
+            $s->literature = Literature::find($s->literature_id);
         }
         return response()->json($src);
     }
@@ -48,11 +50,22 @@ class SourceController extends Controller {
                 ->orderBy('attribute_name', 'asc')
                 ->get();
         foreach($src as &$s) {
-            $s->literature = DB::table('literature')->where('id', '=', $s->literature_id)->first();
+            $s->literature = Literature::find($s->literature_id);
         }
         return response()->json([
             'sources' => $src
         ]);
+    }
+
+    private function getById($id) {
+        $src = DB::table('sources as s')
+                ->select('s.*', DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) AS attribute_name"))
+                ->where('s.id', '=', $id)
+                ->join('attributes as a', 's.attribute_id', '=', 'a.id')
+                ->orderBy('attribute_name', 'asc')
+                ->first();
+        $src->literature = Literature::find($src->literature_id);
+        return $src;
     }
 
     public function add(Request $request) {
@@ -78,22 +91,18 @@ class SourceController extends Controller {
                     'lasteditor' => $user['name']
                 ]
             );
-        return response()->json(['sid' => $id]);
+        return response()->json([
+            'source' => $this->getById($id)
+        ]);
     }
 
-    public function deleteByLiterature($aid, $cid, $lid) {
+    public function delete($id) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        DB::table('sources')
-            ->where([
-                ['attribute_id', $aid],
-                ['context_id', $cid],
-                ['literature_id', $lid]
-            ])
-            ->delete();
+        Source::find($id)->delete();
     }
 }
