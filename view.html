@@ -22,7 +22,7 @@
                             <input type="text" class="form-control" id="name" ng-model="currentElement.element.name" ng-readonly="!currentUser.permissions.duplicate_edit_concepts" />
                         </div>
                     </div>
-                    <form-field fields="currentElement.fields" output="currentElement.data" label-width="3" input-width="9" offset="0" sp-readonly="{{ !currentUser.permissions.duplicate_edit_concepts }}">
+                    <form-field fields="currentElement.fields" output="currentElement.data" sources="currentElement.sources" label-width="3" input-width="9" offset="0" sp-readonly="{{ !currentUser.permissions.duplicate_edit_concepts }}">
                     </form-field>
                     <div class="col-md-offset-3" ng-if="currentUser.permissions.duplicate_edit_concepts">
                         <button type="button" class="btn btn-success" ng-click="storeElement(currentElement.element, currentElement.data)">

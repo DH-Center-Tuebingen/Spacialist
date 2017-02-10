@@ -483,6 +483,10 @@ body > .angular-bootstrap-contextmenu.dropdown {
     font-size: 0.9em;
 }
 
+.fa-limegreen {
+    color: limegreen;
+}
+
 .fa-green {
     color: green;
 }

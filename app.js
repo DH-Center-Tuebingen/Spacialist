@@ -296,6 +296,7 @@ spacialistApp.directive('formField', function() {
     var updateInputFields = function(scope, element, attrs) {
         scope.attributeFields = scope.$eval(attrs.fields);
         scope.attributeOutputs = scope.$eval(attrs.output);
+        scope.attributeSources = scope.$eval(attrs.sources);
         scope.readonlyInput = scope.$eval(attrs.spReadonly);
         var pattern = /^\d+$/;
         if(typeof attrs.labelWidth != 'undefined' && pattern.test(attrs.labelWidth)) {
@@ -332,6 +333,11 @@ spacialistApp.directive('formField', function() {
             });
             scope.$watch(function(scope) {
                 return scope.$eval(attrs.output);
+            }, function(newVal, oldVal) {
+                updateInputFields(scope, element, attrs);
+            });
+            scope.$watch(function(scope) {
+                return scope.$eval(attrs.sources);
             }, function(newVal, oldVal) {
                 updateInputFields(scope, element, attrs);
             });
