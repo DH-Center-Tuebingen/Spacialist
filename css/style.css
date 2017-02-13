@@ -48,6 +48,17 @@ a.activeLang {
 
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
+.nav-undecorated, .nav-undecorated > li {
+    border: none !important;
+}
+
+.nav-inline {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 10px 15px 10px 10px;
+}
+
 .uib-datepicker-popup.dropdown-menu {
     padding: 10px;
 }
