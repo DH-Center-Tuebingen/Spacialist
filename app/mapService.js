@@ -95,6 +95,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             }
         }
         map.mapObject.fitBounds(map.geoJson.getBounds());
+        setDrawOptions(map.geoJson.getLayers());
     };
 
     map.closePopup = function() {
@@ -274,31 +275,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             scale: true
         };
         map.map.drawOptions = {
-            position: "bottomright",
-            draw: {
-                polyline: {
-                    metric: false
-                },
-                polygon: {
-                    metric: false,
-                    showArea: true,
-                    drawError: {
-                        color: '#b00b00',
-                        timeout: 1000
-                    },
-                    shapeOptions: {
-                        color: 'blue'
-                    }
-                },
-                marker: {
-                    icon: L.divIcon({
-                        className: 'fa fa-fw fa-plus',
-                        iconSize: [20, 20]
-                    })
-                },
-                circle: false,
-                rectangle: false
-            }
+            draw: false,
+            edit: false
         };
 
         var osmAttr = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>';
@@ -351,6 +329,40 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                         attribution: "Hillshade layer by GIScience http://www.osm-wms.de"
                     }
                 }
+            }
+        };
+    }
+
+    function setDrawOptions(layerGroup) {
+        map.map.drawOptions = {
+            position: "bottomright",
+            draw: {
+                polyline: {
+                    metric: false
+                },
+                polygon: {
+                    metric: false,
+                    showArea: true,
+                    drawError: {
+                        color: '#b00b00',
+                        timeout: 1000
+                    },
+                    shapeOptions: {
+                        color: 'blue'
+                    }
+                },
+                marker: {
+                    icon: L.divIcon({
+                        className: 'fa fa-fw fa-plus',
+                        iconSize: [20, 20]
+                    })
+                },
+                circle: false,
+                rectangle: false
+            },
+            edit: {
+                featureGroup: L.featureGroup(layerGroup),
+                remove: true
             }
         };
     }
