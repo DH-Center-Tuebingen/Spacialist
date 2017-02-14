@@ -31,15 +31,20 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         }
     };
 
-    map.addGeodata = function(type, coords) {
+    map.addGeodata = function(type, coords, id) {
         var formData = new FormData();
+        if(id) {
+            formData.append('id', id);
+        }
         formData.append('type', type);
         formData.append('coords', angular.toJson(coords));
         httpPostFactory('api/context/add/geodata', formData, function(response) {
             console.log(response);
-            map.addListToMarkers([
-                response.geodata
-            ]);
+            if(!id) {
+                map.addListToMarkers([
+                    response.geodata
+                ]);
+            }
         });
     };
 
@@ -274,6 +279,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         map.map.controls = {
             scale: true
         };
+
         map.map.drawOptions = {
             draw: false,
             edit: false

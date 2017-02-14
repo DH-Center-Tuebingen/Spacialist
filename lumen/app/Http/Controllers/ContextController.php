@@ -274,13 +274,20 @@ class ContextController extends Controller {
         }
         $coords = json_decode($request->get('coords'));
         $type = $request->get('type');
-        $geodata = new Geodata();
+        if($request->has('id')) {
+            $id = $request->get('id');
+            $geodata = Geodata::find($id);
+        } else {
+            $geodata = new Geodata();
+        }
         switch($type) {
             case 'marker':
+            case 'Point':
                 $coords = $coords[0];
                 $geodata->geom = new Point($coords->lat, $coords->lng);
                 break;
             case 'polyline':
+            case 'LineString':
                 $lines = [];
                 foreach($coords as $coord) {
                     $lines[] = new Point($coord->lat, $coord->lng);
@@ -288,6 +295,7 @@ class ContextController extends Controller {
                 $geodata->geom = new LineString($lines);
                 break;
             case 'polygon':
+            case 'Polygon':
                 $lines = [];
                 foreach($coords as $coord) {
                     $lines[] = new Point($coord->lat, $coord->lng);
