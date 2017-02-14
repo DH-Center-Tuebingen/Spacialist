@@ -523,6 +523,7 @@ class ContextController extends Controller {
         $cid = $request->get('cid');
         $aid = $request->get('aid');
         $possibility = $request->get('possibility');
+        $description = $request->get('possibility_description');
 
         $where = array(
             ['context_id', '=', $cid],
@@ -537,12 +538,17 @@ class ContextController extends Controller {
                     'context_id' => $cid,
                     'attribute_id' => $aid,
                     'possibility' => $possibility,
+                    'possibility_description' => $description,
                     'lasteditor' => $user['name']
                 ]);
         } else { //update
             DB::table('attribute_values')
                 ->where($where)
-                ->update(['possibility' => $possibility, 'lasteditor' => $user['name']]);
+                ->update([
+                    'possibility' => $possibility,
+                    'possibility_description' => $description,
+                    'lasteditor' => $user['name']
+                ]);
         }
         return response()->json(DB::table('attribute_values')
             ->where($where)->get());
