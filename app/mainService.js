@@ -283,13 +283,14 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         });
     }
 
-    main.openSourceModal = function(fieldname, fieldid, currentVal) {
+    main.openSourceModal = function(fieldname, fieldid, currentVal, currentDesc) {
         modalFields = {
             name: fieldname,
             id: fieldid,
             literature: literatureService.literature.slice(),
             addedSources: [],
             value: currentVal || 100,
+            description: currentDesc,
             setPossibility: function(event) {
                 var max = event.currentTarget.scrollWidth;
                 var click = event.originalEvent.layerX;

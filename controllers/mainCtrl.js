@@ -159,7 +159,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
      * Opens a modal window which allows the user to add/delete sources from a literature list for a particular attribute.
      * One has to pass the field name `fieldname` and the attribute id `fieldid` as parameters.
      */
-    $scope.openSourceModal = function(fieldname, fieldid, currentVal) {
-        mainService.openSourceModal(fieldname, fieldid, currentVal);
+    $scope.openSourceModal = function(fieldname, fieldid, currentVal, currentDesc) {
+        mainService.openSourceModal(fieldname, fieldid, currentVal, currentDesc);
     };
 }]);
