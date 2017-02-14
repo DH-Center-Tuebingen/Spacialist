@@ -87,6 +87,12 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 }
             };
             map.geoJson.addData(feature);
+            // workaround, because calling `bringToBack()` in the `onEachFeature` throws an error (this._map is undefined)
+            var currentLayers = map.geoJson.getLayers();
+            var currentLayer = currentLayers[currentLayers.length - 1];
+            if(feature.geometry.type != 'Point') {
+                currentLayer.bringToBack();
+            }
         }
         map.mapObject.fitBounds(map.geoJson.getBounds());
     };
