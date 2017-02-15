@@ -284,11 +284,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     }
 
     main.openSourceModal = function(fieldname, fieldid, currentVal) {
+        var aid = fieldid;
+        var cid = main.currentElement.element.id;
         modalFields = {
             name: fieldname,
-            id: fieldid,
+            id: aid,
             literature: literatureService.literature.slice(),
-            addedSources: [],
+            addedSources: main.currentElement.sources['#'+aid],
             value: currentVal || 100,
             setPossibility: function(event) {
                 var max = event.currentTarget.scrollWidth;
@@ -305,8 +307,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                 modalFields.value = newVal;
             }
         };
-        var aid = fieldid;
-        var cid = main.currentElement.element.id;
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/source-modal.html',
             windowClass: 'wide-modal',
@@ -346,13 +346,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         formData.append('desc', currentDesc);
         httpPostFactory('api/sources/add', formData, function(response) {
             var source = response.source;
-            modalFields.addedSources.push({
-                id: source.id,
-                cid: cid,
-                aid: aid,
-                src: currentSource,
-                desc: currentDesc
-            });
             addContextSource(source);
         });
         modalFields.currentSource = undefined;
