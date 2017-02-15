@@ -64,12 +64,13 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                     var current = geodatas[i];
                     map.geodataList.push(current);
                 }
-                map.addListToMarkers(map.geodataList);
+                map.addListToMarkers(map.geodataList, true);
             }
         });
     };
 
-    map.addListToMarkers = function(geodataList) {
+    map.addListToMarkers = function(geodataList, isInit) {
+        isInit = isInit || false;
         if(!userService.can('view_geodata')) {
             return;
         }
@@ -103,8 +104,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 currentLayer.bringToBack();
             }
         }
-        map.mapObject.fitBounds(map.geoJson.getBounds());
-        setDrawOptions(map.geoJson.getLayers());
+        if(isInit) {
+            map.mapObject.fitBounds(map.geoJson.getBounds());
+            setDrawOptions(map.geoJson.getLayers());
+        }
     };
 
     map.closePopup = function() {
