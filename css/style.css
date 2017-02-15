@@ -403,10 +403,10 @@ p, div {
 
 .selected-leaf, .selected-leaf-child {
     /*color: red !important;*/
-    font-weight: 700;
+    font-weight: bold;
 }
 .selected-leaf {
-    font-weight: 500;
+    font-weight: normal;
 }
 
 #tree-container, #attribute-container, #addon-container, #literature-container {
@@ -415,7 +415,7 @@ p, div {
 
 .angular-ui-tree-handle {
     cursor: pointer;
-    font-weight: 500;
+    font-weight: normal;
 }
 
 .expandable-toggle {

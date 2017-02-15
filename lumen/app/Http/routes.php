@@ -44,7 +44,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('context/delete/{id}', 'ContextController@delete');
     $app->get('sources/get/{aid}/{fid}', 'SourceController@getByAttribute');
     $app->get('sources/get/{id}', 'SourceController@getByContext');
-    $app->get('sources/delete/literature/{aid}/{fid}/{lid}', 'SourceController@deleteByLiterature');
+    $app->get('sources/delete/{id}', 'SourceController@delete');
     $app->get('analysis/queries/getAll', 'AnalysisController@getAll');
     $app->get('user/delete/{id}', 'UserController@delete');
     $app->get('user/get/roles/all', 'UserController@getRoles');

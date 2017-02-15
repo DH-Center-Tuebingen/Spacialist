@@ -35,15 +35,15 @@
         <table class="table table-striped table-bordered table-hover">
             <tr ng-repeat="entry in mc.modalFields.addedSources" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
                 <td class="td-50 word-break">
-                    {{ entry.src.title }}<span ng-if="entry.src.year"> - <i>{{ entry.src.year}}</i></span>
+                    {{ entry.literature.title }}<span ng-if="entry.literature.year"> - <i>{{ entry.literature.year}}</i></span>
                     <br/>
-                    <strong>{{ entry.src.author }}</strong><span ng-if="entry.src.isbn"> ({{ entry.src.isbn }})</span>
+                    <strong>{{ entry.literature.author }}</strong>
                 </td>
                 <td class="td-50 word-break">
-                    <span class="delete-icon" ng-class="{'hidden-del': !hovered}" ng-click="mc.deleteSourceEntry($index, mc.modalFields.addedSources)">
+                    <span class="delete-icon" ng-class="{'hidden-del': !hovered}" ng-click="mc.deleteSourceEntry($index, '#'+mc.modalFields.id)">
                         &times;
                     </span>
-                    <span class="deletable" ng-bind-html="entry.desc | urlify">
+                    <span class="deletable" ng-bind-html="entry.description | urlify">
                     </span>
                 </td>
             </tr>
