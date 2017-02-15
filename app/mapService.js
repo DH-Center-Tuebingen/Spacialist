@@ -6,6 +6,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     map.geodataList = [];
     map.currentGeodata = {};
 
+    var availableLayerKeys = [
+        'subdomains', 'attribution', 'opacity', 'layers', 'styles', 'format', 'version', 'visible'
+    ];
+
     initMapVariables();
     initMap();
 
@@ -285,58 +289,51 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             edit: false
         };
 
-        var osmAttr = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>';
-        var mqAttr = 'Tiles &copy; <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png" />';
         map.map.layers = {
-            baselayers: {
-                osm: {
-                    name: 'OpenStreetMap',
-                    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    type: 'xyz',
-                    layerOptions: {
-                        attribution: osmAttr
-                    }
-                },
-                mapquest: {
-                    name: 'Mapquest',
-                    type: 'xyz',
-                    layerOptions: {
-                        subdomains: '1234',
-                        attribution: 'MapData ' + osmAttr + ', ' + mqAttr
-                    },
-                    url: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.jpg',
-                },
-                mapquestsat: {
-                    name: 'Mapquest Satellite',
-                    type: 'xyz',
-                    layerOptions: {
-                        subdomains: '1234',
-                        attribution: 'MapData ' + osmAttr + ', ' + mqAttr
-                    },
-                    url: 'http://otile{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg',
-                },
-                empty: {
-                    name: 'Empty',
-                    type: 'xyz',
-                    url: ''
+            baselayers: {},
+            overlays: {}
+        };
+
+        httpGetFactory('api/overlay/get/all', function(response) {
+            console.log(response.layers);
+            angular.forEach(response.layers, function(layer, key) {
+                var id = layer.id;
+                var currentLayer = {};
+                currentLayer.name = layer.name;
+                currentLayer.url = layer.url;
+                currentLayer.type = layer.type;
+                currentLayer.visible = layer.visible;
+                var layerOptions = {};
+                currentLayer.layerOptions = setLayerOptions(layer);
+                if(layer.is_overlay) {
+                    map.map.layers.overlays[id] = currentLayer;
+                } else {
+                    map.map.layers.baselayers[id] = currentLayer;
                 }
-            },
-            overlays: {
-                hillshade: {
-                    name: "Hillshade Europa",
-                    type: "wms",
-                    url: "http://129.206.228.72/cached/hillshade",
-                    visible: true,
-                    layerOptions: {
-                        layers: "europe_wms:hs_srtm_europa",
-                        format: "image/png",
-                        transparent: true,
-                        opacity: 0.25,
-                        attribution: "Hillshade layer by GIScience http://www.osm-wms.de"
-                    }
+                console.log(currentLayer);
+            });
+        });
+    }
+
+    function setLayerOptions(l) {
+        var layerOptions = {};
+        layerOptions.noWrap = true;
+        layerOptions.detectRetina = true;
+        if(l.is_overlay) {
+            layerOptions.transparent = true;
+        }
+        for(var k in l) {
+            if(l.hasOwnProperty(k)) {
+                if(!isIllegalKey(k) && l[k] !== null) {
+                    layerOptions[k] = l[k];
                 }
             }
-        };
+        }
+        return layerOptions;
+    }
+
+    function isIllegalKey(k) {
+        return availableLayerKeys.indexOf(k) < 0;
     }
 
     function setDrawOptions(layerGroup) {
