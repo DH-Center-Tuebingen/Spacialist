@@ -17,7 +17,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     main.dimensionUnits = [
         'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
     ];
-    main.legendList = {};
+    // main.legendList = {};
 
     main.datepickerOptions = {
         showWeeks: false,
@@ -138,15 +138,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             for(var i=0; i<contextList.length; i++) {
                 var current = contextList[i];
                 main.contextList.push(current);
-                if(!main.legendList[current.typelabel]) {
-                    main.legendList[current.typelabel] = {
-                        name: current.typelabel,
-                        color: main.getColorForId(current.typename)
-                    };
-                }
+                // if(!main.legendList[current.typelabel]) {
+                //     main.legendList[current.typelabel] = {
+                //         name: current.typelabel,
+                //         color: main.getColorForId(current.typename)
+                //     };
+                // }
                 if(current.children) addMetadata(current.children);
             }
-            mapService.addLegend(main.legendList);
+            // mapService.addLegend(main.legendList);
             mapService.getGeodata(main.contextList);
             //main.getContextListStarted = false;
         });
@@ -155,12 +155,12 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     function addMetadata(contexts) {
         for(var i=0; i<contexts.length; i++) {
             var current = contexts[i];
-            if(!main.legendList[current.typelabel]) {
-                main.legendList[current.typelabel] = {
-                    name: current.typelabel,
-                    color: main.getColorForId(current.typename)
-                };
-            }
+            // if(!main.legendList[current.typelabel]) {
+            //     main.legendList[current.typelabel] = {
+            //         name: current.typelabel,
+            //         color: main.getColorForId(current.typename)
+            //     };
+            // }
             if(current.children) addMetadata(current.children);
         }
     }

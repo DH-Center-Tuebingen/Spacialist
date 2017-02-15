@@ -21,19 +21,19 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         return name.replace(/-/, '');
     }
 
-    map.addLegend = function(legend) {
-        map.map.legend = {};
-        map.map.legend.position = 'bottomleft';
-        map.map.legend.colors = [];
-        map.map.legend.labels = [];
-        for(var k in legend) {
-            if(legend.hasOwnProperty(k)) {
-                var value = legend[k];
-                map.map.legend.colors.push(value.color.color);
-                map.map.legend.labels.push(value.name);
-            }
-        }
-    };
+    // map.addLegend = function(legend) {
+    //     map.map.legend = {};
+    //     map.map.legend.position = 'bottomleft';
+    //     map.map.legend.colors = [];
+    //     map.map.legend.labels = [];
+    //     for(var k in legend) {
+    //         if(legend.hasOwnProperty(k)) {
+    //             var value = legend[k];
+    //             map.map.legend.colors.push(value.color.color);
+    //             map.map.legend.labels.push(value.name);
+    //         }
+    //     }
+    // };
 
     map.addGeodata = function(type, coords, id) {
         var formData = new FormData();
