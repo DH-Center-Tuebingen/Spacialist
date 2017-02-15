@@ -602,6 +602,7 @@ class ContextController extends Controller {
 
     public function updateOrInsert($request, $cid, $isUpdate, $user) {
         foreach($request as $key => $value) {
+            if($value == 'null' || $value === null) continue;
             $ids = explode("_", $key);
             $aid = $ids[0];
             $datatype = Attribute::find($aid)->datatype;
