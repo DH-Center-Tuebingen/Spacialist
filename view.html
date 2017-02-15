@@ -146,12 +146,9 @@
                     Um Quellen hinzuzufügen klicken Sie auf das <sup><i class="fa fa-circle-plus source-link" aria-hidden="true"></i></sup>-Symbol neben den Element-Eigenschaften.
                 </p>
                 <div ng-repeat="(key, attr) in currentElement.sources">
-                    <h4>{{ attr[0].attribute_name }}</h4>
+                    <h4><a href="" ng-click="openSourceModal(attr[0].attribute_name, attr[0].attribute_id)">{{ attr[0].attribute_name }}</a></h4>
                     <table class="table table-striped table-bordered table-hover">
                         <tr ng-repeat="entry in attr" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
-                            <td>
-                                <a ng-click="openSourceModal(entry.attribute_name, entry.attribute_id)" style="cursor: pointer;">{{ entry.attribute_name }}</a>
-                            </td>
                             <td class="td-50 word-break">
                                 {{ entry.literature.title }}<span ng-if="entry.literature.year"> - <i>{{ entry.literature.year}}</i></span>
                                 <br/>
