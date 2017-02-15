@@ -4,20 +4,28 @@
 <div class="modal-body">
     <div class="col-md-12">
         <h4 class="left">Sicherheit der Angabe</h4>
-        <div class="col-md-offset-3 col-md-6">
-            <div class="progress" ng-click="mc.modalFields.setPossibility($event)">
-                <div class="progress-bar" ng-class="{ 'progress-bar-danger': mc.modalFields.value <= 25, 'progress-bar-warning': mc.modalFields.value <= 50, 'progress-bar-info': mc.modalFields.value <= 75, 'progress-bar-success': mc.modalFields.value > 75 }" role="progressbar" aria-valuenow="{{mc.modalFields.value}}" aria-valuemin="0" aria-valuemax="100" style="width: {{ mc.modalFields.value }}%">
-                    <span class="sr-only">{{ mc.modalFields.value }}% complete</span>
-                    {{ mc.modalFields.value }}%
+        <div class="row">
+            <div class="col-md-offset-3 col-md-6">
+                <div class="progress" ng-click="mc.modalFields.setPossibility($event)">
+                    <div class="progress-bar" ng-class="{ 'progress-bar-danger': mc.modalFields.value <= 25, 'progress-bar-warning': mc.modalFields.value <= 50, 'progress-bar-info': mc.modalFields.value <= 75, 'progress-bar-success': mc.modalFields.value > 75 }" role="progressbar" aria-valuenow="{{mc.modalFields.value}}" aria-valuemin="0" aria-valuemax="100" style="width: {{ mc.modalFields.value }}%">
+                        <span class="sr-only">{{ mc.modalFields.value }}% complete</span>
+                        {{ mc.modalFields.value }}%
+                    </div>
+                </div>
+                <div>
+                    <h4>Erklärung</h4>
+                    <form>
+                        <div class="form-group">
+                            <textarea class="form-control" ng-model="mc.modalFields.description"></textarea>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <button type="button" class="btn btn-success"
-              ng-click="mc.savePossibility()">
-              <i class="fa fa-fw fa-floppy-o"></i> {{ 'Save' | translate }}
-          </button>
-        </div>
+        <button type="button" class="btn btn-success"
+          ng-click="mc.savePossibility()">
+          <i class="fa fa-fw fa-floppy-o"></i> {{ 'Save' | translate }}
+      </button>
     </div>
     <div class="col-md-12">
         <hr />

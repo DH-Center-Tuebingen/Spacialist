@@ -283,7 +283,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         });
     }
 
-    main.openSourceModal = function(fieldname, fieldid, currentVal) {
+    main.openSourceModal = function(fieldname, fieldid, currentVal, currentDesc) {
         var aid = fieldid;
         var cid = main.currentElement.element.id;
         modalFields = {
@@ -292,6 +292,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             literature: literatureService.literature.slice(),
             addedSources: main.currentElement.sources['#'+aid],
             value: currentVal || 100,
+            description: currentDesc,
             setPossibility: function(event) {
                 var max = event.currentTarget.scrollWidth;
                 var click = event.originalEvent.layerX;
@@ -319,8 +320,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                     formData.append('cid', cid);
                     formData.append('aid', aid);
                     formData.append('possibility', modalFields.value);
+                    formData.append('possibility_description', modalFields.description);
                     httpPostFactory('api/context/set/possibility', formData, function(callback) {
                         main.currentElement.data[aid+'_pos'] = modalFields.value;
+                        main.currentElement.data[aid+'_desc'] = modalFields.description;
                     });
                 };
                 this.modalFields = modalFields;
@@ -372,9 +375,11 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             var value = data[i];
             var index = value.attribute_id + '_' + (value.o_id || '');
             var posIndex = index + 'pos';
+            var descIndex = index + 'desc';
             var val = value.str_val;
             var dType = value.datatype;
             parsedData[posIndex] = value.possibility || 100;
+            parsedData[descIndex] = value.possibility_description;
             if(dType == 'list') {
                 if(typeof parsedData[index] == 'undefined') parsedData[index] = [];
                 parsedData[index].push({

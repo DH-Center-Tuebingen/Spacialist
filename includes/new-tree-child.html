@@ -5,7 +5,7 @@
     <span ng-click="onClickCallback({target:parent, elem: element})" ng-class="{ 'selected-leaf': element.id == parent.id }">
         <i class="fa fa-university fa-fw fa-light fa-small" aria-hidden="true" ng-if="parent.typeid == 0"></i>
         <i class="fa fa-tag fa-fw fa-light fa-small" aria-hidden="true" ng-if="parent.typeid == 1"></i>
-        <span ng-if="parent[prefixAttribute]" class="contextPrefix">{{ parent[prefixAttribute]}}</span> <span ng-style="getColorForId(parent[typeAttribute])" ng-class="{ 'selected-leaf-child': element.id == parent.id }">{{ parent[displayAttribute] }}</span>
+        <span ng-style="getColorForId(parent[typeAttribute])" ng-class="{ 'selected-leaf-child': element.id == parent.id }">{{ parent[displayAttribute] }}</span> <span ng-if="parent[prefixAttribute]" class="contextPrefix">{{ parent[prefixAttribute]}}</span>
     </span>
     <span ng-if="getRecLength(parent) > 0" class="badge" style="float: right;">
         {{ getRecLength(parent) }}
