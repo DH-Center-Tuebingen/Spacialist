@@ -284,11 +284,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     }
 
     main.openSourceModal = function(fieldname, fieldid, currentVal) {
+        var aid = fieldid;
+        var cid = main.currentElement.element.id;
         modalFields = {
             name: fieldname,
-            id: fieldid,
+            id: aid,
             literature: literatureService.literature.slice(),
-            addedSources: [],
+            addedSources: main.currentElement.sources['#'+aid],
             value: currentVal || 100,
             setPossibility: function(event) {
                 var max = event.currentTarget.scrollWidth;
@@ -305,19 +307,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                 modalFields.value = newVal;
             }
         };
-        var aid = fieldid;
-        var cid = main.currentElement.element.id;
-        httpGetFactory('api/sources/get/' + aid + '/' + cid, function(sources) {
-            angular.forEach(sources, function(src, key) {
-                modalFields.addedSources.push({
-                    id: src.id,
-                    cid: src.cid,
-                    aid: src.attribute_id,
-                    src: src.literature,
-                    desc: src.description
-                });
-            });
-        });
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/source-modal.html',
             windowClass: 'wide-modal',
@@ -328,15 +317,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                 this.savePossibility = function() {
                     var formData = new FormData();
                     formData.append('cid', cid);
-                    formData.append('aid', fieldid);
+                    formData.append('aid', aid);
                     formData.append('possibility', modalFields.value);
                     httpPostFactory('api/context/set/possibility', formData, function(callback) {
-                        main.currentElement.data[fieldid+'_pos'] = modalFields.value;
+                        main.currentElement.data[aid+'_pos'] = modalFields.value;
                     });
                 };
                 this.modalFields = modalFields;
-                this.addSource = undefined; //TODO
-                this.deleteSourceEntry = undefined; //TODO
+                this.addSource = addSource;
+                this.deleteSourceEntry = main.deleteSourceEntry;
             },
             //scope: $scope
             controllerAs: 'mc'
@@ -348,20 +337,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
      * Adds the current selected source entry `currentSource` with the given description `currentDesc` for the given attribute `aid` to the database and the source modal window array
      */
     function addSource(currentSource, currentDesc, aid) {
-        var cid = $scope.currentElement.id;
+        if(typeof main.currentElement.element.id == 'undefined') return;
+        var cid = main.currentElement.element.id;
         var formData = new FormData();
         formData.append('cid', cid);
         formData.append('aid', aid);
         formData.append('lid', currentSource.id);
         formData.append('desc', currentDesc);
-        httpPostFactory('api/sources/add', formData, function(row) {
-            modalFields.addedSources.push({
-                id: row.sid,
-                cid: cid,
-                aid: aid,
-                src: currentSource,
-                desc: currentDesc
-            });
+        httpPostFactory('api/sources/add', formData, function(response) {
+            var source = response.source;
+            addContextSource(source);
         });
         modalFields.currentSource = undefined;
         modalFields.currentDesc = undefined;
@@ -370,29 +355,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     /**
      * Remove a source entry at the given index `index` from the given array `arr`.
      */
-    function deleteSourceEntry(index, arr) {
-        var src = arr[index];
-        var title = '';
-        if(typeof src.src !== 'undefined' && typeof src.src.title !== 'undefined') title = src.src.title;
-        else if(typeof src.literature !== 'undefined' && typeof src.literature.title !== 'undefined') title = src.literature.title;
+    main.deleteSourceEntry = function(index, key) {
+        var src = main.currentElement.sources[key][index];
+        var id = src.id;
+        var title = src.literature.title + ' (' + src.description + ')';
         modalFactory.deleteModal(title, function() {
-            var cid = -1;
-            var aid = -1;
-            var lid = -1;
-            if(typeof src.cid !== 'undefined') cid = src.cid;
-            else if(typeof src.cid !== 'undefined') cid = src.cid;
-            else return;
-            if(typeof src.aid !== 'undefined') aid = src.aid;
-            else if(typeof src.attribute_id !== 'undefined') aid = src.attribute_id;
-            else return;
-            if(typeof src.src !== 'undefined' && src.src.lid !== 'undefined') lid = src.src.id;
-            else if(typeof src.literature_id !== 'undefined') lid = src.literature_id;
-            else return;
-            httpGetFactory('api/sources/delete/literature/'+aid+'/'+cid+'/'+lid, function(callback) {
-                arr.splice(index, 1);
+            httpGetFactory('api/sources/delete/'+id, function(callback) {
+                main.currentElement.sources[key].splice(index, 1);
             });
         }, '');
-    }
+    };
 
     function parseData(data) {
         var parsedData = {};
@@ -513,6 +485,14 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         main.currentElement.fields = {};
     };
 
+    function addContextSource(source) {
+        var index = '#' + source.attribute_id;
+        if(typeof main.currentElement.sources[index] == 'undefined') {
+            main.currentElement.sources[index] = [];
+        }
+        main.currentElement.sources[index].push(source);
+    }
+
     main.setCurrentElement = function(target, elem, openAgain) {
         if(typeof elem != 'undefined' && elem.id == target.id) {
             main.unsetCurrentElement();
@@ -543,11 +523,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             }
             var sources = response.sources;
             angular.forEach(sources, function(source, i) {
-                var index = '#' + source.attribute_id;
-                if(typeof main.currentElement.sources[index] == 'undefined') {
-                    main.currentElement.sources[index] = [];
-                }
-                main.currentElement.sources[index].push(source);
+                addContextSource(source);
             });
         });
         main.currentElement.fields = elem.fields;
