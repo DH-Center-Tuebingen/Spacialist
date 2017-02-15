@@ -483,6 +483,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         main.currentElement.element = {};
         main.currentElement.data = {};
         main.currentElement.fields = {};
+        main.currentElement.sources = {};
     };
 
     function addContextSource(source) {
