@@ -617,6 +617,8 @@ spacialistApp.config(function($controllerProvider, $provide) {
 });
 
 spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider, $httpProvider, $provide) {
+    var lastError;
+
     function updateToken(response, $injector) {
         if(response.headers('Authorization') !== null) {
             var token = response.headers('Authorization').replace('Bearer ', '');
@@ -676,8 +678,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 var doc = parser.parseFromString(rejection.data, "text/xml");
                 var errors = doc.getElementsByClassName('exception_message');
                 var modalFactory = $injector.get('modalFactory');
-                var errorMsg = errors[0].innerHTML || rejection.statusText;
-                modalFactory.errorModal(errorMsg);
+                var errorMsg;
+                if(typeof errors[0] != 'undefined' && errors[0].innerHTML) {
+                    errorMsg = errors[0].innerHTML;
+                } else {
+                    errorMsg = rejection.statusText;
+                }
+                if(!lastError || lastError != rejection.status) {
+                    lastError = rejection.status;
+                    modalFactory.errorModal(errorMsg);
+                }
                 return $q.reject(rejection);
             }
         };
