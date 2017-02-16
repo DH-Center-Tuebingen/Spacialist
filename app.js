@@ -618,6 +618,20 @@ spacialistApp.config(function($controllerProvider, $provide) {
 
 spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider, $httpProvider, $provide) {
     var lastError;
+    var rejectReasons = [
+        'user_not_found',
+        'token_not_provided',
+        'token_expired',
+        'token_absent',
+        'token_invalid'
+    ];
+    var rejectTranslations = [
+        'Invalid username or password',
+        'Authentication error (token not provided)',
+        'Session is expired. Please login again.',
+        'Authentication error (token absent)',
+        'Authentication error (invalid token)'
+    ];
 
     function updateToken(response, $injector) {
         if(response.headers('Authorization') !== null) {
@@ -628,42 +642,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         }
     }
 
-    function redirectWhenLoggedOut($q, $injector) {
-        return {
-            responseError: function(rejection) {
-                if(typeof rejection != 'undefined' && typeof rejection.data != 'undefined' && rejection.data !== null) {
-                    var rejectReasons = ['token_not_provided', 'token_expired', 'token_absent', 'token_invalid'];
-                    for(var i=0; i<rejectReasons.length; i++) {
-                        var value = rejectReasons[i];
-                        if(rejection.data.error === value) {
-                            var $state = $injector.get('$state');
-                            localStorage.removeItem('user');
-                            $state.go('auth');
-                        }
-                    }
-                    console.log(rejection);
-                }
-                return $q.reject(rejection);
-            }
-        };
-    }
-    $provide.factory('redirectWhenLoggedOut', redirectWhenLoggedOut);
-
-    function redirectWhenUnauth($q, $injector) {
-        return {
-            responseError: function(rejection) {
-                if(rejection.status == 401 || rejection.status == 400) {
-                    var $state = $injector.get('$state');
-                    localStorage.removeItem('user');
-                    $state.go('auth');
-                    return;
-                }
-                return $q.reject(rejection);
-            }
-        };
-    }
-    $provide.factory('redirectWhenUnauth', redirectWhenUnauth);
-
     function setAuthHeader($q, $injector) {
         return {
             response: function(response) {
@@ -672,21 +650,32 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             },
             responseError: function(rejection) {
                 console.log("Something went wrong...");
-                //console.log(rejection);
-                updateToken(rejection, $injector);
-                var parser = new DOMParser();
-                var doc = parser.parseFromString(rejection.data, "text/xml");
-                var errors = doc.getElementsByClassName('exception_message');
-                var modalFactory = $injector.get('modalFactory');
-                var errorMsg;
-                if(typeof errors[0] != 'undefined' && errors[0].innerHTML) {
-                    errorMsg = errors[0].innerHTML;
+                var reasonIndex = rejectReasons.indexOf(rejection.data.error);
+                if(rejection.data && reasonIndex > -1) {
+                    localStorage.removeItem('user');
+                    var userService = $injector.get('userService');
+                    userService.loginError.message = rejectTranslations[reasonIndex];
+                } else if(rejection.status == 400 || rejection.status == 401) {
+                    var $state = $injector.get('$state');
+                    var userService = $injector.get('userService');
+                    userService.loginError.message = 'An error occured. Please log in again';
+                    $state.go('auth');
                 } else {
-                    errorMsg = rejection.statusText;
-                }
-                if(!lastError || lastError != rejection.status) {
-                    lastError = rejection.status;
-                    modalFactory.errorModal(errorMsg);
+                    updateToken(rejection, $injector);
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(rejection.data, "text/xml");
+                    var errors = doc.getElementsByClassName('exception_message');
+                    var modalFactory = $injector.get('modalFactory');
+                    var errorMsg;
+                    if(typeof errors[0] != 'undefined' && errors[0].innerHTML) {
+                        errorMsg = errors[0].innerHTML;
+                    } else {
+                        errorMsg = rejection.statusText;
+                    }
+                    if(!lastError || lastError != rejection.status) {
+                        lastError = rejection.status;
+                        modalFactory.errorModal(errorMsg);
+                    }
                 }
                 return $q.reject(rejection);
             }
@@ -694,8 +683,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
     }
     $provide.factory('setAuthHeader', setAuthHeader);
 
-    $httpProvider.interceptors.push('redirectWhenLoggedOut');
-    $httpProvider.interceptors.push('redirectWhenUnauth');
     $httpProvider.interceptors.push('setAuthHeader');
 
 	$authProvider.baseUrl = '.';
@@ -727,24 +714,27 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
  */
 spacialistApp.run(function($rootScope, $state, mapService, userService) {
     $rootScope.$on('$stateChangeStart', function(event, toState) {
-        var user = JSON.parse(localStorage.getItem('user'));
-        if(user) {
-            userService.currentUser.user = user.user;
-            userService.currentUser.permissions = user.permissions;
-            if(!userService.can('duplicate_edit_concepts')) {
-                if(typeof mapService.map != 'undefined') {
-                    mapService.map.drawOptions.draw = {
-                        polyline: false,
-                        polygon: false,
-                        rectangle: false,
-                        circle: false,
-                        marker: false
-                    };
+        var user = localStorage.getItem('user');
+        if(user !== '') {
+            parsedUser = JSON.parse(user);
+            if(parsedUser) {
+                userService.currentUser.user = parsedUser.user;
+                userService.currentUser.permissions = parsedUser.permissions;
+                if(!userService.can('duplicate_edit_concepts')) {
+                    if(typeof mapService.map != 'undefined') {
+                        mapService.map.drawOptions.draw = {
+                            polyline: false,
+                            polygon: false,
+                            rectangle: false,
+                            circle: false,
+                            marker: false
+                        };
+                    }
                 }
-            }
-            if(toState.name === 'auth') {
-                event.preventDefault();
-                $state.go('spacialist');
+                if(toState.name === 'auth') {
+                    event.preventDefault();
+                    $state.go('spacialist');
+                }
             }
         }
     });
