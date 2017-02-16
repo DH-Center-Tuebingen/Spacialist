@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Hash;
+use Phaza\LaravelPostgis\Geometries\Point;
+use Phaza\LaravelPostgis\Geometries\LineString;
+use Phaza\LaravelPostgis\Geometries\Polygon;
+
 /*
 |--------------------------------------------------------------------------
 | Model Factories
@@ -36,7 +40,6 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
     ];
 });
 
-// TODO: a concept_label should exist for each (concept x language) pair
 $factory->define(App\ThConcept::class, function(Faker\Generator $faker) {
     return [
         'concept_url' => $faker->unique()->url,
@@ -48,13 +51,11 @@ $factory->define(App\ThConcept::class, function(Faker\Generator $faker) {
 $factory->define(App\ThBroader::class, function(Faker\Generator $faker) {
     $broader = App\ThConcept::inRandomOrder()->first();
     if(!isset($broader)){
-        factory(App\ThConcept::class, 1)->create();
-        $broader = App\ThConcept::inRandomOrder()->first();
+        $broader = factory(App\ThConcept::class)->create();
     }
     $narrower = App\ThConcept::inRandomOrder()->first();
     if(!isset($narrower)){
-        factory(App\ThConcept::class, 1)->create();
-        $narrower = App\ThConcept::inRandomOrder()->first();
+        $narrower = factory(App\ThConcept::class)->create();
     }
     return [
         'broader_id' => $broader->id,
@@ -75,8 +76,7 @@ $factory->define(App\ThConceptLabel::class, function(Faker\Generator $faker) {
 
     $concept = App\ThConcept::inRandomOrder()->first();
     if(!isset($concept)){
-        factory(App\ThConcept::class, 1)->create();
-        $concept = App\ThConcept::inRandomOrder()->first();
+        $concept = factory(App\ThConcept::class)->create();
     }
 
     return [
@@ -91,8 +91,7 @@ $factory->define(App\ThConceptLabel::class, function(Faker\Generator $faker) {
 $factory->define(App\ContextType::class, function(Faker\Generator $faker) {
     $concept = App\ThConcept::inRandomOrder()->first();
     if(!isset($concept)){
-        factory(App\ThConcept::class, 1)->create();
-        $concept = App\ThConcept::inRandomOrder()->first();
+        $concept = factory(App\ThConcept::class)->create();
     }
     return [
         'thesaurus_url' => $concept->concept_url,
@@ -103,13 +102,11 @@ $factory->define(App\ContextType::class, function(Faker\Generator $faker) {
 $factory->define(App\Attribute::class, function(Faker\Generator $faker) {
     $concept = App\ThConcept::inRandomOrder()->first();
     if(!isset($concept)){
-        factory(App\ThConcept::class, 1)->create();
-        $concept = App\ThConcept::inRandomOrder()->first();
+        $concept = factory(App\ThConcept::class)->create();
     }
     $root_concept = App\ThConcept::inRandomOrder()->first();
     if(!isset($root_concept)){
-        factory(App\ThConcept::class, 1)->create();
-        $root_concept = App\ThConcept::inRandomOrder()->first();
+        $root_concept = factory(App\ThConcept::class)->create();
     }
     return [
         'thesaurus_url' => $concept->concept_url,
@@ -121,13 +118,11 @@ $factory->define(App\Attribute::class, function(Faker\Generator $faker) {
 $factory->define(App\ContextAttribute::class, function(Faker\Generator $faker) {
     $contextType = App\ContextType::inRandomOrder()->first();
     if(!isset($contextType)){
-        factory(App\ContextType::class, 1)->create();
-        $contextType = App\ContextType::inRandomOrder()->first();
+        $contextType = factory(App\ContextType::class)->create();
     }
     $attribute = App\Attribute::inRandomOrder()->first();
     if(!isset($attribute)){
-        factory(App\Attribute::class, 1)->create();
-        $attribute = App\Attribute::inRandomOrder()->first();
+        $attribute = factory(App\Attribute::class)->create();
     }
     return [
         'context_type_id' => $contextType->id,
@@ -153,52 +148,124 @@ $factory->define(App\Literature::class, function(Faker\Generator $faker) {
 });
 
 $factory->define(App\Geodata::class, function(Faker\Generator $faker) {
-    $point = new Phaza\LaravelPostgis\Geometries\Point($faker->latitude($min = -90, $max = 90), $faker->longitude($min = -180, $max = 180));
-    $deltaLat = $faker->randomFloat($min = -0.5, $max = 0.5);
-    $deltaLng = $faker->randomFloat($min = -0.5, $max = 0.5);
-    $point2 = new Phaza\LaravelPostgis\Geometries\Point($point->getLat() + $deltaLat, $point->getLng() + $deltaLng);
-    $deltaLat = $faker->randomFloat($min = -0.5, $max = 0.5);
-    $deltaLng = $faker->randomFloat($min = -0.5, $max = 0.5);
-    $point3 = new Phaza\LaravelPostgis\Geometries\Point($point2->getLat() + $deltaLat, $point2->getLng() + $deltaLng);
-    $deltaLat = $faker->randomFloat($min = -0.5, $max = 0.5);
-    $deltaLng = $faker->randomFloat($min = -0.5, $max = 0.5);
-    $point4 = new Phaza\LaravelPostgis\Geometries\Point($point3->getLat() + $deltaLat, $point3->getLng() + $deltaLng);
-    $linestring = new Phaza\LaravelPostgis\Geometries\LineString([$point, $point2, $point3, $point4, $point]);
-    $polygon = new Phaza\LaravelPostgis\Geometries\Polygon([$linestring]);
+    $lat = $faker->latitude($min = 47, $max = 56);
+    $lng = $faker->longitude($min = 6, $max = 15);
+
+    switch ($faker->randomElement(['point', 'polygon', 'linestring'])) {
+    case 'point':
+        $geom = new Point($lat, $lng);
+        break;
+    case 'polygon':
+        for($i = 0; $i < $faker->numberBetween($min = 3, $max = 6); $i++){
+            $deltaLat = $faker->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 0.5);
+            $deltaLng = $faker->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 0.5);
+            $points[$i] = new Point($lat + $deltaLat, $lng + $deltaLng);
+        }
+        $points[] = $points[0]; // polygon must be closed
+        $geom = new Polygon([new LineString($points)]);
+        break;
+    case 'linestring':
+        for($i = 0; $i < $faker->numberBetween($min = 3, $max = 6); $i++){
+            $deltaLat = $faker->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 0.5);
+            $deltaLng = $faker->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 0.5);
+            $points[$i] = new Point($lat + $deltaLat, $lng + $deltaLng);
+        }
+        $geom = new LineString($points);
+        break;
+    }
+
     return [
-        'geom' => $faker->randomElement([$point, $polygon, $linestring]),
+        'geom' => $geom,
     ];
 });
 
 $factory->define(App\Context::class, function(Faker\Generator $faker) {
     $contextType = App\ContextType::inRandomOrder()->first();
     if(!isset($contextType)){
-        factory(App\ContextType::class, 1)->create();
-        $contextType = App\ContextType::inRandomOrder()->first();
+        $contextType = factory(App\ContextType::class)->create();
     }
     $geodata = App\Geodata::inRandomOrder()->first();
     if(!isset($geodata)){
-        $geodata = new App\Geodata();
+        $geodata = factory(App\Geodata::class)->create();
     }
     $rootContext = App\Context::inRandomOrder()->first();
     if(!isset($rootContext)){
+        // if there is no entry in the Contexts table, do not recursively call this factory
         $rootContext = new App\Context();
     }
     return [
         'context_type_id' => $contextType->id,
         'root_context_id' => $faker->optional()->randomElement([$rootContext->id]),
         'name' => $faker->word,
-        // 'icon' => $faker->optional($weight=0.9)->randomElement([]), //TODO
-        // 'color' => $faker->optional()->randomElement([$faker->hexcolor]), //TODO
+        'icon' => $faker->optional($weight=0.9)->randomElement(['plus','close','circle','circle-o','dot-circle-o','square','square-o','star','asterisk','flag','flag-o','map-marker','map-pin','university']),
+        'color' => $faker->optional()->randomElement([$faker->hexcolor]),
         'geodata_id' => $faker->optional($weight=0.7)->randomElement([$geodata->id]),
         'lasteditor' => $faker->name,
     ];
 });
 
 $factory->define(App\Source::class, function(Faker\Generator $faker) {
-    $point = new Phaza\LaravelPostgis\Geometries\Point();
-    $polygon = new Phaza\LaravelPostgis\Geometries\Polygon();
+    $context = App\Context::inRandomOrder()->first();
+    if(!isset($context)){
+        $context = factory(App\Context::class)->create();
+    }
+    $attribute = App\Attribute::inRandomOrder()->first();
+    if(!isset($attribute)){
+        $attribute = factory(App\Attribute::class)->create();
+    }
+    $literature = App\Literature::inRandomOrder()->first();
+    if(!isset($literature)){
+        $literature = factory(App\Literature::class)->create();
+    }
     return [
-        'geom' => $faker->randomElement([$point, $polygon]),
+        'context_id' => $context->id,
+        'attribute_id' => $attribute->id,
+        'literature_id' => $literature->id,
+        'description' => $faker->sentence($nbWords = 6, $variableNbWords = true),
+        'lasteditor' => $faker->name,
+    ];
+});
+
+
+$factory->define(App\AttributeValue::class, function(Faker\Generator $faker) {
+    $context = App\Context::inRandomOrder()->first();
+    if(!isset($context)){
+        $context = factory(App\Context::class)->create();
+    }
+    $attribute = App\Attribute::inRandomOrder()->first();
+    if(!isset($attribute)){
+        $attribute = factory(App\Attribute::class)->create();
+    }
+    $context_val = App\Context::inRandomOrder()->first();
+    if(!isset($context_val)){
+        $context_val = factory(App\Context::class)->create();
+    }
+    return [
+        'context_id' => $context->id,
+        'attribute_id' => $attribute->id,
+        'context_val' => $faker->optional()->randomElement([$context_val->id]),
+        'str_val' => $faker->optional()->sentence($nbWords = 6, $variableNbWords = true),
+        'int_val' => $faker->optional()->randomDigit,
+        'dbl_val' => $faker->optional()->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 42),
+        'dt_val' => $faker->optional()->dateTime(),
+        'possibility' => $faker->numberBetween($min = 0, $max = 100),
+        'thesaurus_val' => $faker->optional()->randomElement([App\ThConcept::inRandomOrder()->first()->value('concept_url')]),
+        // 'json_val' => TODO
+        'lasteditor' => $faker->name,
+    ];
+});
+
+//TODO seed photos?
+$factory->define(App\Photo::class, function(Faker\Generator $faker) {
+    return [
+        'name' => '',
+        'modified' => $faker->dateTime(),
+        'cameraname' => '',
+        'photographer_id' => $faker->randomDigit,
+        'created' => $faker->dateTime(),
+        'thumb' => '',
+        'orientation' => $faker->randomElement([0,1]),
+        'copyright' => '',
+        'description' => $faker->sentence($nbWords = 6, $variableNbWords = true),
     ];
 });
