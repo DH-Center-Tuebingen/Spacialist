@@ -5,6 +5,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     var map = {};
     map.geodataList = [];
     map.currentGeodata = {};
+    map.featureGroup = new L.FeatureGroup();
 
     var availableLayerKeys = [
         'subdomains', 'attribution', 'opacity', 'layers', 'styles', 'format', 'version', 'visible'
@@ -103,10 +104,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             if(feature.geometry.type != 'Point') {
                 currentLayer.bringToBack();
             }
+            map.featureGroup.addLayer(currentLayer);
         }
         if(isInit) {
             map.mapObject.fitBounds(map.geoJson.getBounds());
-            setDrawOptions(map.geoJson.getLayers());
         }
     };
 
@@ -288,8 +289,35 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         };
 
         map.map.drawOptions = {
-            draw: false,
-            edit: false
+            position: "bottomright",
+            draw: {
+                polyline: {
+                    metric: false
+                },
+                polygon: {
+                    metric: false,
+                    showArea: true,
+                    drawError: {
+                        color: '#b00b00',
+                        timeout: 1000
+                    },
+                    shapeOptions: {
+                        color: 'blue'
+                    }
+                },
+                marker: {
+                    icon: L.divIcon({
+                        className: 'fa fa-fw fa-plus',
+                        iconSize: [20, 20]
+                    })
+                },
+                circle: false,
+                rectangle: false
+            },
+            edit: {
+                featureGroup: map.featureGroup,
+                remove: true
+            }
         };
 
         map.map.layers = {
@@ -337,40 +365,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
     function isIllegalKey(k) {
         return availableLayerKeys.indexOf(k) < 0;
-    }
-
-    function setDrawOptions(layerGroup) {
-        map.map.drawOptions = {
-            position: "bottomright",
-            draw: {
-                polyline: {
-                    metric: false
-                },
-                polygon: {
-                    metric: false,
-                    showArea: true,
-                    drawError: {
-                        color: '#b00b00',
-                        timeout: 1000
-                    },
-                    shapeOptions: {
-                        color: 'blue'
-                    }
-                },
-                marker: {
-                    icon: L.divIcon({
-                        className: 'fa fa-fw fa-plus',
-                        iconSize: [20, 20]
-                    })
-                },
-                circle: false,
-                rectangle: false
-            },
-            edit: {
-                featureGroup: L.featureGroup(layerGroup),
-                remove: true
-            }
-        };
     }
 
     return map;
