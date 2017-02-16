@@ -23,5 +23,10 @@
             <button type="submit" class="btn btn-primary">{{ 'login' | translate }}</button>
             <button type="button" class="btn btn-default" ng-click="guestLogin()">{{ 'login as guest' | translate }}</button>
         </form>
+        <div ng-if="loginError.message.length > 0" style="padding-top: 10px;">
+            <p class="alert alert-info unpadded-alert">
+                {{ loginError.message }}
+            </p>
+        </div>
     </div>
 </div>
