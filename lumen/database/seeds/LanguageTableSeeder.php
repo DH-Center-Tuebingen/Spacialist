@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Hash;
 class LanguageTableSeeder extends Seeder
 {
     public function run() {
-        App\ThLanguage::select()->delete();
         $de = new App\ThLanguage;
         $de->lasteditor     = 'postgres';
         $de->display_name   = 'Deutsch';
@@ -37,7 +36,5 @@ class LanguageTableSeeder extends Seeder
         $it->display_name  = 'Italiano';
         $it->short_name    = 'it';
         $it->save();
-
-
     }
 }
