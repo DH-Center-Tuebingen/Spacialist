@@ -1,4 +1,4 @@
-spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'modalFactory', '$compile', function($scope, mapService, mainService, modalFactory, $compile) {
+spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'modalFactory', 'httpGetFactory', '$compile', function($scope, mapService, mainService, modalFactory, httpGetFactory, $compile) {
     $scope.map = mapService.map;
     $scope.mapObject = mapService.mapObject;
     $scope.markerIcons = mapService.markerIcons;
@@ -95,6 +95,16 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
             var coords = getCoords(layer, type);
             var id = layer.feature.id;
             mapService.addGeodata(type, coords, id);
+        });
+    });
+
+    $scope.$on('leafletDirectiveDraw.draw:deleted', function(event, args) {
+        var layers = args.leafletEvent.layers.getLayers();
+        angular.forEach(layers, function(layer, key) {
+            var id = layer.feature.id;
+            httpGetFactory('api/context/delete/geodata/' + id, function(response) {
+                //
+            });
         });
     });
     /**
