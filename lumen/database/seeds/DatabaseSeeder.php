@@ -11,6 +11,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call('UsersTableSeeder');
+        $this->call('LanguageTableSeeder');
+        $this->call('RandomSeeder');
+        $user = factory(App\User::class, 'guest')->create();
+        $user->attachRole(App\Role::where('name', 'guest')->first());
     }
+
 }
