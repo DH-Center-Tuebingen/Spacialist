@@ -188,6 +188,11 @@ ol li.list-group-item {
     width: 70%;
 }
 
+.shrinked-modal {
+    width: 80%;
+    margin-left: 10%; /* (100%-width)/2 */
+}
+
 .left {
     text-align: left;
 }

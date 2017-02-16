@@ -310,7 +310,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         };
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/source-modal.html',
-            windowClass: 'wide-modal',
+            windowClass: 'wide-modal shrinked-modal',
             controller: function($uibModalInstance) {
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
