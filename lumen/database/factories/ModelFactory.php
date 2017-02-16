@@ -21,11 +21,11 @@ use Phaza\LaravelPostgis\Geometries\Polygon;
 /*
 | Factory for the test user
 */
-$factory->defineAs(App\User::class, 'test', function () {
+$factory->defineAs(App\User::class, 'guest', function () {
     return [
-        'name' => "Test User",
-        'email' => "test@user.com",
-        'password' => Hash::make("testpassword"),
+        'name' => "Guest User",
+        'email' => "udontneedtoseehisidentification@rebels.tld",
+        'password' => Hash::make("thesearentthedroidsuarelookingfor"),
     ];
 });
 

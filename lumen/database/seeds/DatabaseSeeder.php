@@ -17,9 +17,8 @@ class DatabaseSeeder extends Seeder
         // $this->call('ContextTableSeeder');
         // // $this->call('ThesaurusSeeder');
         // //
-        App\User::select()->delete();
-        $user = factory(App\User::class, 'test')->create();
-        $user->attachRole(App\Role::where('name', 'employee')->first());
+        $user = factory(App\User::class, 'guest')->create();
+        $user->attachRole(App\Role::where('name', 'guest')->first());
     }
 
 }
