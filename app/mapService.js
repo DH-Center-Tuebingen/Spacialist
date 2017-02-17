@@ -1,4 +1,4 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'leafletData', 'userService', function(httpGetFactory, httpPostFactory, httpGetPromise, leafletData, userService) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'leafletData', 'userService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, leafletData, userService, leafletBoundsHelpers) {
     var contextGeodata;
     var localContexts;
     var defaultColor = '#00FF00';
@@ -97,17 +97,13 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                     popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
                 }
             };
-            map.geoJson.addData(feature);
+            map.map.geojson.data.features.push(feature);
             // workaround, because calling `bringToBack()` in the `onEachFeature` throws an error (this._map is undefined)
-            var currentLayers = map.geoJson.getLayers();
-            var currentLayer = currentLayers[currentLayers.length - 1];
-            if(feature.geometry.type != 'Point') {
-                currentLayer.bringToBack();
-            }
-            map.featureGroup.addLayer(currentLayer);
-        }
-        if(isInit) {
-            map.mapObject.fitBounds(map.geoJson.getBounds());
+            // var currentLayers = map.geoJson.getLayers();
+            // var currentLayer = currentLayers[currentLayers.length - 1];
+            // if(feature.geometry.type != 'Point') {
+            //     currentLayer.bringToBack();
+            // }
         }
     };
 
@@ -195,6 +191,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
     function initMapVariables() {
         map.map = {};
+        map.map.bounds = leafletBoundsHelpers.createBoundsFromArray([
+            [-90, 180],
+            [90, -180]
+        ]);
         map.markerIcons = [
             {
                 icon: 'plus',
@@ -281,6 +281,14 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                         feature: feature
                     });
                 }
+                map.featureGroup.addLayer(layer);
+                var newBounds = map.featureGroup.getBounds();
+                var newNE = newBounds.getNorthEast();
+                var newSW = newBounds.getSouthWest();
+                map.map.bounds.northEast.lat = newNE.lat;
+                map.map.bounds.northEast.lng = newNE.lng;
+                map.map.bounds.southWest.lat = newSW.lat;
+                map.map.bounds.southWest.lng = newSW.lng;
             }
         };
         map.map.markers = {};
