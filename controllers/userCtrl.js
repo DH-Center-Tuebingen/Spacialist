@@ -2,6 +2,7 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', '$state', 'modalF
     $scope.currentUser = userService.currentUser;
     $scope.users = userService.users;
     $scope.roles = userService.roles;
+    $scope.loginError = userService.loginError;
 
     $scope.loginUser = function(email, password) {
         var credentials = {

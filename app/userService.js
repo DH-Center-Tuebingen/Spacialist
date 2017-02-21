@@ -5,6 +5,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$aut
         roles: {},
         user: {}
     };
+    user.loginError = {};
     user.users = [];
     user.roles = [];
     user.can = function(to) {
@@ -87,8 +88,6 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$aut
     user.loginUser = function(credentials) {
         $auth.login(credentials).then(function() {
             return $http.post('api/user/get');
-        }, function(error) {
-            console.log("error occured! " + error.data.error);
         }).then(function(response) {
             if(typeof response === 'undefined' || response.status !== 200) {
                 $state.go('auth', {});
@@ -100,6 +99,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$aut
                 permissions: response.data.permissions
             };
             console.log(JSON.stringify(response.data));
+            delete user.loginError.message;
             $state.go('spacialist', {});
         });
     };
