@@ -1,10 +1,11 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'leafletData', 'userService', function(httpGetFactory, httpPostFactory, httpGetPromise, leafletData, userService) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'leafletData', 'userService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, leafletData, userService, leafletBoundsHelpers) {
     var contextGeodata;
     var localContexts;
     var defaultColor = '#00FF00';
     var map = {};
     map.geodataList = [];
     map.currentGeodata = {};
+    map.featureGroup = new L.FeatureGroup();
 
     var availableLayerKeys = [
         'subdomains', 'attribution', 'opacity', 'layers', 'styles', 'format', 'version', 'visible'
@@ -96,17 +97,13 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                     popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
                 }
             };
-            map.geoJson.addData(feature);
+            map.map.geojson.data.features.push(feature);
             // workaround, because calling `bringToBack()` in the `onEachFeature` throws an error (this._map is undefined)
-            var currentLayers = map.geoJson.getLayers();
-            var currentLayer = currentLayers[currentLayers.length - 1];
-            if(feature.geometry.type != 'Point') {
-                currentLayer.bringToBack();
-            }
-        }
-        if(isInit) {
-            map.mapObject.fitBounds(map.geoJson.getBounds());
-            setDrawOptions(map.geoJson.getLayers());
+            // var currentLayers = map.geoJson.getLayers();
+            // var currentLayer = currentLayers[currentLayers.length - 1];
+            // if(feature.geometry.type != 'Point') {
+            //     currentLayer.bringToBack();
+            // }
         }
     };
 
@@ -194,6 +191,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
     function initMapVariables() {
         map.map = {};
+        map.map.bounds = leafletBoundsHelpers.createBoundsFromArray([
+            [-90, 180],
+            [90, -180]
+        ]);
         map.markerIcons = [
             {
                 icon: 'plus',
@@ -280,6 +281,14 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                         feature: feature
                     });
                 }
+                map.featureGroup.addLayer(layer);
+                var newBounds = map.featureGroup.getBounds();
+                var newNE = newBounds.getNorthEast();
+                var newSW = newBounds.getSouthWest();
+                map.map.bounds.northEast.lat = newNE.lat;
+                map.map.bounds.northEast.lng = newNE.lng;
+                map.map.bounds.southWest.lat = newSW.lat;
+                map.map.bounds.southWest.lng = newSW.lng;
             }
         };
         map.map.markers = {};
@@ -288,8 +297,35 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         };
 
         map.map.drawOptions = {
-            draw: false,
-            edit: false
+            position: "bottomright",
+            draw: {
+                polyline: {
+                    metric: false
+                },
+                polygon: {
+                    metric: false,
+                    showArea: true,
+                    drawError: {
+                        color: '#b00b00',
+                        timeout: 1000
+                    },
+                    shapeOptions: {
+                        color: 'blue'
+                    }
+                },
+                marker: {
+                    icon: L.divIcon({
+                        className: 'fa fa-fw fa-plus',
+                        iconSize: [20, 20]
+                    })
+                },
+                circle: false,
+                rectangle: false
+            },
+            edit: {
+                featureGroup: map.featureGroup,
+                remove: true
+            }
         };
 
         map.map.layers = {
@@ -337,40 +373,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
     function isIllegalKey(k) {
         return availableLayerKeys.indexOf(k) < 0;
-    }
-
-    function setDrawOptions(layerGroup) {
-        map.map.drawOptions = {
-            position: "bottomright",
-            draw: {
-                polyline: {
-                    metric: false
-                },
-                polygon: {
-                    metric: false,
-                    showArea: true,
-                    drawError: {
-                        color: '#b00b00',
-                        timeout: 1000
-                    },
-                    shapeOptions: {
-                        color: 'blue'
-                    }
-                },
-                marker: {
-                    icon: L.divIcon({
-                        className: 'fa fa-fw fa-plus',
-                        iconSize: [20, 20]
-                    })
-                },
-                circle: false,
-                rectangle: false
-            },
-            edit: {
-                featureGroup: L.featureGroup(layerGroup),
-                remove: true
-            }
-        };
     }
 
     return map;
