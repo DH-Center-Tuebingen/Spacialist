@@ -265,6 +265,24 @@ class ContextController extends Controller {
         ]);
     }
 
+    public function deleteGeodata($id) {
+        $user = \Auth::user();
+        if(!$user->can('upload_remove_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $linkedContexts = Context::where('geodata_id', '=', $id)->get();
+        foreach($linkedContexts as $context) {
+            $context->geodata_id = null;
+            $context->save();
+        }
+        Geodata::find($id)->delete();
+        return response()->json([
+            'success' => ''
+        ]);
+    }
+
     public function addGeodata(Request $request) {
         $user = \Auth::user();
         if(!$user->can('create_edit_geodata')) {
