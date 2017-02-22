@@ -57,7 +57,7 @@ class ContextController extends Controller {
             } else if($attr->datatype == 'dimension') {
                 $jsonVal = json_decode($attr->json_val);
                 if(!isset($jsonVal)) continue;
-                
+
                 if(isset($jsonVal->B)){
                     $attrVal['B'] = $jsonVal->B;
                 }
@@ -514,7 +514,10 @@ class ContextController extends Controller {
         $context->save();
 
         $id = $context->id;
-        $this->updateOrInsert($request->except(['id', 'name', 'ctid', 'root_cid']), $id, $isUpdate, $user);
+        $message = $this->updateOrInsert($request->except(['id', 'name', 'ctid', 'root_cid']), $id, $isUpdate, $user);
+        if(isset($message['error'])){
+            return response()->json($message);
+        }
         return response()->json(['id' => $id]);
     }
 
@@ -632,6 +635,23 @@ class ContextController extends Controller {
             $datatype = Attribute::find($aid)->datatype;
             $jsonArr = json_decode($value);
             if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
+
+            if($datatype === 'epoch') {
+                $start = $jsonArr->start;
+                if(isset($jsonArr->startLabel) && $jsonArr->startLabel === 'bc') {
+                    $start = -$start;
+                }
+                $end = $jsonArr->end;
+                if(isset($jsonArr->endLabel) && $jsonArr->endLabel === 'bc') {
+                    $end = -$end;
+                }
+                if($end < $start){
+                    return [
+                        'error' => 'End date should be later than start date.'
+                    ];
+                }
+            }
+
             if(is_array($jsonArr)) { //only string-sc and string-mc should be arrays
                 if($isUpdate) {
                     $dbEntries = array(
