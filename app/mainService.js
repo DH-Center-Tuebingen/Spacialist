@@ -232,8 +232,12 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         }
         elem.data = parsedData;
         var promise = storeElement(elem);
-        promise.then(function(newRealId){
-            elem.data = newRealId.data;
+        promise.then(function(response){
+            if(response.error){
+                modalFactory.errorModal(response.error);
+                return;
+            }
+            elem.data = response.data;
             updateElementData(elem);
         });
     };
