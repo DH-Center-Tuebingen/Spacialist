@@ -55,44 +55,50 @@ class ContextController extends Controller {
                     ->where('concept_url', '=', $attr->thesaurus_val)
                     ->first();
             } else if($attr->datatype == 'dimension') {
-                $elems = explode(';', $attr->str_val, 4);
-                if(count($elems) != 4) continue;
-                $attr->val = json_encode(['B' => floatval($elems[0]), 'H' => floatval($elems[1]), 'T' => floatval($elems[2]), 'unit' => $elems[3]]);
+                $jsonVal = json_decode($attr->json_val);
+                if(!isset($jsonVal)) continue;
+                
+                if(isset($jsonVal->B)){
+                    $attrVal['B'] = $jsonVal->B;
+                }
+                if(isset($jsonVal->H)){
+                    $attrVal['H'] = $jsonVal->H;
+                }
+                if(isset($jsonVal->T)){
+                    $attrVal['T'] = $jsonVal->T;
+                }
+                if(isset($jsonVal->unit)){
+                    $attrVal['unit'] = $jsonVal->unit;
+                }
+                $attr->val = json_encode($attrVal);
             } else if($attr->datatype == 'epoch') {
-                $elems = explode(';', $attr->str_val, 3);
-                if(count($elems) != 3) continue;
-                if($elems[0] != '') {
-                    $start = intval($elems[0]);
-                    $startLabel = $start < 0 ? 'v. Chr.' : 'n. Chr.';
-                    $start = abs($start);
-                } else {
-                    $start = '';
-                    $startLabel = '';
+                $jsonVal = json_decode($attr->json_val);
+                if(!isset($jsonVal)) continue;
+
+                if(isset($jsonVal->startLabel)){
+                    $attrVal['startLabel'] = $jsonVal->startLabel;
                 }
-                if($elems[1] != '') {
-                    $end = intval($elems[1]);
-                    $endLabel = $end < 0 ? 'v. Chr.' : 'n. Chr.';
-                    $end = abs($end);
-                } else {
-                    $end = '';
-                    $endLabel = '';
+                if(isset($jsonVal->start)){
+                    $attrVal['start'] = $jsonVal->start;
                 }
-                $thUri = $elems[2];
-                $attr->val = json_encode([
-                    'startLabel' => $startLabel,
-                    'start' => $start,
-                    'endLabel' => $endLabel,
-                    'end' => $end,
-                    'epoch' => DB::table('th_concept')
-                                ->select('id as narrower_id',
-                                    DB::raw("'".DB::table('getconceptlabelsfromurl')
-                                    ->where('concept_url', $thUri)
-                                    ->where('short_name', 'de')
-                                    ->value('label')."' as narr")
-                                )
-                                ->where('concept_url', '=', $thUri)
-                                ->first()
-                ]);
+                if(isset($jsonVal->endLabel)){
+                    $attrVal['endLabel'] = $jsonVal->endLabel;
+                }
+                if(isset($jsonVal->end)){
+                    $attrVal['end'] = $jsonVal->end;
+                }
+                if(isset($jsonVal->epoch)){
+                    $attrVal['epoch'] = DB::table('th_concept')
+                                        ->select('id as narrower_id',
+                                            DB::raw("'".DB::table('getconceptlabelsfromurl')
+                                            ->where('concept_url', $jsonVal->epoch)
+                                            ->where('short_name', 'de')
+                                            ->value('label')."' as narr")
+                                        )
+                                        ->where('concept_url', '=', $jsonVal->epoch)
+                                        ->first();
+                }
+                $attr->val = json_encode($attrVal);
             }
         }
         return $data;
@@ -698,67 +704,25 @@ class ContextController extends Controller {
                         $attrValue->attribute_id = $aid;
                     }
                     $attrValue->lasteditor = $user['name'];
-                    $attrValue->str_val = $this->parseValue($jsonArr, $value, $datatype);
+                    if(is_object($jsonArr)) {
+                        $attrValue->json_val = json_encode($jsonArr);
+                    } else {
+                        $attrValue->str_val = $value;
+                    }
                     $attrValue->save();
                 } else {
                     $attrValue = new AttributeValue();
                     $attrValue->context_id = $cid;
                     $attrValue->attribute_id = $aid;
                     $attrValue->lasteditor = $user['name'];
-                    $attrValue->str_val = $this->parseValue($jsonArr, $value, $datatype);
+                    if(is_object($jsonArr)) {
+                        $attrValue->json_val = json_encode($jsonArr);
+                    } else {
+                        $attrValue->str_val = $value;
+                    }
                     $attrValue->save();
                 }
             }
         }
-    }
-
-    private function parseValue($jsonArr, $value, $datatype) {
-        if(is_object($jsonArr)) {
-            if($datatype === 'epoch') {
-                if(property_exists($jsonArr, 'start')) {
-                    $jsonArr->start = ($jsonArr->startLabel === 'n. Chr.') ? $jsonArr->start : -$jsonArr->start;
-                } else {
-                    $jsonArr->start = '';
-                }
-                if(property_exists($jsonArr, 'end')) {
-                    $jsonArr->end = ($jsonArr->endLabel === 'n. Chr.') ? $jsonArr->end : -$jsonArr->end;
-                } else {
-                    $jsonArr->end = '';
-                }
-                if(property_exists($jsonArr, 'epoch') && $jsonArr->epoch != null) {
-                    $jsonArr->epochUrl = DB::table('th_concept')
-                        ->where('id', '=', $jsonArr->epoch->narrower_id)
-                        ->value('concept_url');
-                } else {
-                    $jsonArr->epochUrl = '';
-                }
-                $tmpVal = $jsonArr->start.";".$jsonArr->end.";".$jsonArr->epochUrl;
-            } else if($datatype === 'dimension') {
-                if(property_exists($jsonArr, 'B')) {
-                    $b = $jsonArr->B;
-                } else {
-                    $b = '';
-                }
-                if(property_exists($jsonArr, 'H')) {
-                    $h = $jsonArr->H;
-                } else {
-                    $h = '';
-                }
-                if(property_exists($jsonArr, 'T')) {
-                    $t = $jsonArr->T;
-                } else {
-                    $t = '';
-                }
-                if(property_exists($jsonArr, 'unit')) {
-                    $unit = $jsonArr->unit;
-                } else {
-                    $unit = '';
-                }
-                $tmpVal = $b.";".$h.";".$t.";".$unit;
-            }
-        } else {
-            $tmpVal = $value;
-        }
-        return $tmpVal;
     }
 }
