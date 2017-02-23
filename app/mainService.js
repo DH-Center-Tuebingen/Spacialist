@@ -326,6 +326,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                         main.currentElement.data[aid+'_desc'] = modalFields.description;
                     });
                 };
+                this.savePossibilityAndClose = function() {
+                    this.savePossibility();
+                    this.cancel();
+                };
                 this.modalFields = modalFields;
                 this.addSource = addSource;
                 this.deleteSourceEntry = main.deleteSourceEntry;
