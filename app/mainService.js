@@ -314,7 +314,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         };
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/source-modal.html',
-            windowClass: 'wide-modal',
+            windowClass: 'wide-modal shrinked-modal',
             controller: function($uibModalInstance) {
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
@@ -329,6 +329,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                         main.currentElement.data[aid+'_pos'] = modalFields.value;
                         main.currentElement.data[aid+'_desc'] = modalFields.description;
                     });
+                };
+                this.savePossibilityAndClose = function() {
+                    this.savePossibility();
+                    this.cancel();
                 };
                 this.modalFields = modalFields;
                 this.addSource = addSource;
