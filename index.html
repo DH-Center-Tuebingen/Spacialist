@@ -81,7 +81,7 @@
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu ng-init="setInitLanguage()">
                                 <li ng-repeat="(code,lang) in availableLanguages">
-                                    <a href="" ng-click="switchLang(code)" ng-class="{ activeLang: isLangSet(code) }">
+                                    <a href="" ng-click="switchLanguage(code)" ng-class="{ activeLang: isLangSet(code) }">
                                         <flag country="{{lang.flagCode}}" size="16"></flag>
                                         {{ lang.label }}
                                     </a>

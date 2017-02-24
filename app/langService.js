@@ -28,6 +28,11 @@ spacialistApp.service('langService', ['$translate', function($translate) {
         }
     };
 
+    lang.currentLanguage = {
+        label: '',
+        flagCode: ''
+    };
+
     setInitLanguage();
 
     function setInitLanguage() {
@@ -35,11 +40,17 @@ spacialistApp.service('langService', ['$translate', function($translate) {
     }
 
     function updateLanguage(langKey) {
-        if(typeof langKey == 'undefined') lang.currentLanguage = undefined;
-        else lang.currentLanguage = lang.availableLanguages[langKey];
+        if(typeof langKey == 'undefined') {
+            lang.currentLanguage.label = '';
+            lang.currentLanguage.flagCode = '';
+        } else {
+            var newLang = lang.availableLanguages[langKey];
+            lang.currentLanguage.label = newLang.label;
+            lang.currentLanguage.flagCode = newLang.flagCode;
+        }
     }
 
-    lang.switchLang = function(key) {
+    lang.switchLanguage = function(key) {
         var langPromise = $translate.use(key);
         if(typeof langPromise == 'object') {
             langPromise.then(function() { updateLanguage(key); });
