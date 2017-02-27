@@ -84,9 +84,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         mainService.deleteElement(elem);
     };
 
-    $scope.isEmpty = function(obj) {
-        if (typeof obj === 'undefined') return false;
-        return Object.keys(obj).length === 0;
+    $scope.hasSources = function(elem) {
+        return !mainService.isEmpty(elem.sources);
     };
 
     $scope.deleteSourceEntry = function(index, key) {

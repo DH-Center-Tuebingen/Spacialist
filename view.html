@@ -72,7 +72,7 @@
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'images'}" ng-if="moduleExists('imageCtrl')">
                 <a href="" ng-click="setActiveTab('images')"><span class="fa fa-fw fa-image"></span><span class="tab-desc"> Bilder</span></a>
             </li>
-            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'bibliography'}" ng-if="moduleExists('literatureCtrl')">
+            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'bibliography'}" ng-if="moduleExists('literatureCtrl') && currentElement.element.id">
                 <a href="" ng-click="setActiveTab('bibliography')"><span class="fa fa-fw fa-book"></span><span class="tab-desc"> Quellennachweise</span></a>
             </li>
         </ul>
@@ -87,13 +87,13 @@
                 <div ng-include="'layouts/restricted-access.html'"></div>
             </div>
         </div>
-        <div ng-if="layerTwo.activeTab == 'properties'">
+        <div ng-if="layerTwo.activeTab == 'properties'" class="padded-content">
             <h5>Properties active</h5>
         </div>
-        <div ng-if="layerTwo.activeTab == 'harris'">
+        <div ng-if="layerTwo.activeTab == 'harris'" class="padded-content">
             <h5>Harris active</h5>
         </div>
-        <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" style="max-height: 100%;">
+        <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" class="padded-content" style="max-height: 100%;">
             <div ng-if="currentUser.permissions.view_photos">
                 <uib-accordion close-others="true">
                     <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!currentElement.element">
@@ -146,9 +146,9 @@
                 <div ng-include="'layouts/restricted-access.html'"></div>
             </div>
         </div>
-        <div ng-if="layerTwo.activeTab == 'bibliography'">
+        <div ng-if="layerTwo.activeTab == 'bibliography'" class="padded-content">
             <div ng-if="currentUser.permissions.duplicate_edit_concepts">
-                <p class="alert alert-warning" ng-if="!currentElement.sources">
+                <p class="alert alert-warning" ng-if="!hasSources(currentElement)">
                     Noch keine Quellen hinzugefügt.
                     <br/>
                     Um Quellen hinzuzufügen klicken Sie auf das <sup><i class="fa fa-circle-plus source-link" aria-hidden="true"></i></sup>-Symbol neben den Element-Eigenschaften.
