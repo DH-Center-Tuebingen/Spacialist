@@ -238,6 +238,10 @@ ol li.list-group-item {
     font-size: 2em;
 }
 
+.padded-content {
+    padding-top: 10px;
+}
+
 .external-container {
     position: relative;
 }
