@@ -1,8 +1,14 @@
-spacialistApp.controller('userCtrl', ['$scope', 'userService', '$state', 'modalFactory', function($scope, userService, $state, modalFactory) {
+spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService', '$state', 'modalFactory', function($scope, userService, analysisService, $state, modalFactory) {
     $scope.currentUser = userService.currentUser;
     $scope.users = userService.users;
     $scope.roles = userService.roles;
     $scope.loginError = userService.loginError;
+    $scope.analysisEntries = analysisService.entries;
+    $scope.setAnalysisEntry = analysisService.setAnalysisEntry;
+
+    $scope.openStartPage = function() {
+        analysisService.unsetAnalysisEntry();
+    };
 
     $scope.loginUser = function(email, password) {
         var credentials = {

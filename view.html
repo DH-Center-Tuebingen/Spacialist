@@ -1,5 +1,5 @@
 <div ng-controller="mainCtrl" resize-watcher>
-    <div class="col-md-2" id="tree-container">
+    <div class="col-md-2" id="tree-container" ng-hide="activeAnalysis.isActive">
         <div ng-if="currentUser.permissions.view_concepts">
             <h3>Elemente</h3>
             <my-tree on-click-callback="setCurrentElement(target, elem)" item-list="contextList" element="currentElement.element" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
@@ -9,7 +9,7 @@
             <div ng-include="'layouts/restricted-access.html'"></div>
         </div>
     </div>
-    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container">
+    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive">
         <div ng-if="currentUser.permissions.view_concept_props">
             <div ng-show="currentElement.element.id">
                 <h3>{{ currentElement.element.name }}<span ng-if="currentElement.element.typeLabel" class="type-desc">{{ currentElement.element.typeLabel }}</span> <small>Element-Eigenschaften</small></h3>
@@ -58,7 +58,7 @@
             <div ng-include="'layouts/restricted-access.html'"></div>
         </div>
     </div>
-    <div class="col-md-5" id="addon-container">
+    <div class="col-md-5" id="addon-container" ng-hide="activeAnalysis.isActive">
         <ul class="nav nav-tabs" id="addon-nav">
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'map'}" ng-if="moduleExists('mapCtrl')">
                 <a href="" ng-click="setActiveTab('map')"><span class="fa fa-fw fa-map-marker"></span><span class="tab-desc"> Karte</span></a>
@@ -177,5 +177,8 @@
                 <div ng-include="'layouts/restricted-access.html'"></div>
             </div>
         </div>
+    </div>
+    <div ng-show="activeAnalysis.isActive">
+        <iframe id="analysis-frame" ng-src="{{ activeAnalysis.url }}" style="border: none; width: 100%;"></iframe>
     </div>
 </div>
