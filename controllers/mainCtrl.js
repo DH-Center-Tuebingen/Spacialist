@@ -15,6 +15,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.moduleExists = mainService.moduleExists;
     $scope.setCurrentElement = mainService.setCurrentElement;
     $scope.unsetCurrentElement = mainService.unsetCurrentElement;
+    $scope.analysisEntries = analysisService.entries;
+    $scope.activeAnalysis = analysisService.activeAnalysis;
     var createModalHelper = mainService.createModalHelper;
 
     $scope.storedQueries = analysisService.storedQueries;
