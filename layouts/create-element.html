@@ -3,11 +3,11 @@
 </div>
 <div class="modal-body">
     <div class="col-md-12">
-        <p>{{ mc.desc }}</p>
+        <p>{{ mc.desc | translate }}</p>
         <form class="form-horizontal" role="form">
             <div class="form-group">
                 <label class="control-label col-md-3" for="name">
-                    Name:
+                    {{'context-new.name'|translate}}:
                 </label>
                 <div class="col-md-9">
                     <input class="form-control" type="text" id="name" ng-model="mc.name" />
@@ -15,11 +15,11 @@
             </div>
             <div class="form-group">
                 <label class="control-label col-md-3" for="type">
-                    Typ:
+                    {{'context-new.type'|translate}}:
                 </label>
                 <ui-select ng-model="mc.type" id="type"
                 on-select="mc.type=$select.ngModel.$modelValue" class="col-md-9">
-                  <ui-select-match placeholder="Wählen Sie den Typ">{{ $select.selected.title }}</ui-select-match>
+                  <ui-select-match placeholder="{{'context-new.type-placeholder'|translate}}">{{ $select.selected.title }}</ui-select-match>
                   <ui-select-choices repeat="choice in mc.choices | filter: $select.search">
                     <span ng-bind-html="choice.title | highlight: $select.search"></span>
                   </ui-select-choices>

@@ -41,7 +41,7 @@
                             <i class="fa fa-caret-up" style="font-size: 0.9em" ng-hide="hiddenLists[attr.aid+'_'+attr.oid]"></i>
                         </button>
                     </span>
-                    <input class="form-control" type="text" id="{{ attr.aid }}_{{ attr.oid }}" ng-model="listInput[attr.aid+'_'+attr.oid]" placeholder="weiteren Punkt anlegen" ng-readonly="readonlyInput"/>
+                    <input class="form-control" type="text" id="{{ attr.aid }}_{{ attr.oid }}" ng-model="listInput[attr.aid+'_'+attr.oid]" placeholder="{{'field-types.list.new-placeholder'|translate}}" ng-readonly="readonlyInput"/>
                     <span class="input-group-btn">
                         <button class="btn btn-success" type="button" ng-click="addListEntry(attr.aid, attr.oid, 'listInput', 'attributeOutputs')" ng-disabled="!listInput[attr.aid+'_'+attr.oid] || readonlyInput">
                             <i class="fa fa-plus"></i>
@@ -97,11 +97,11 @@
             </div>
             <div ng-switch-when="dimension">
                 <div class="input-group">
-                    <input type="number" class="form-control centered" aria-label="" placeholder="B" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].B" ng-readonly="readonlyInput">
+                    <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.width-placeholder'|translate}}" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].B" ng-readonly="readonlyInput">
                     <span class="input-group-addon">&times;</span>
-                    <input type="number" class="form-control centered" aria-label="" placeholder="H" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].H" ng-readonly="readonlyInput">
+                    <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.height-placeholder'|translate}}" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].H" ng-readonly="readonlyInput">
                     <span class="input-group-addon">&times;</span>
-                    <input type="number" class="form-control centered" aria-label="" placeholder="T" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].T" ng-readonly="readonlyInput">
+                    <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.depth-placeholder'|translate}}" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].T" ng-readonly="readonlyInput">
                     <div class="input-group-btn" uib-dropdown>
                         <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="readonlyInput">
                             {{ attributeOutputs[attr.aid+'_'+attr.oid].unit }} <span class="caret"></span>

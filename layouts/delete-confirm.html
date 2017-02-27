@@ -3,10 +3,10 @@
 </div>
 <div class="modal-body">
     <div class="col-md-12">
-        <p>Möchten Sie <i>{{ mc.name }}</i> wirklich löschen?</p>
+        <p>{{ 'delete-confirm.question' | translate: {name: mc.name} }}</p>
         <div class="alert alert-danger" ng-if="mc.warning">
             <p>
-                {{ mc.warning }}
+                {{ mc.warning | translate }}
             </p>
         </div>
     </div>

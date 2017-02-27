@@ -5,7 +5,7 @@
                 <div class="input-group-addon">
                     <i class="fa fa-fw fa-search"></i>
                 </div>
-                <input type="text" class="form-control" placeholder="Literatur durchsuchen" ng-model="searchTerm">
+                <input type="text" class="form-control" placeholder="{{'literature.search-placeholder'|translate}}" ng-model="searchTerm">
             </div>
         </div>
     </form>
@@ -15,101 +15,101 @@
                 <tr>
                     <td>
                         <a href="" ng-click="sortType = 'type'; sortReverse = !sortReverse">
-                            type
+                            {{'literature.bibtex.type'|translate}}
                             <span ng-show="sortType == 'type' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'type' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'author'; sortReverse = !sortReverse">
-                            author
+                            {{'literature.bibtex.author'|translate}}
                             <span ng-show="sortType == 'author' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'author' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'editor'; sortReverse = !sortReverse">
-                            editor
+                            {{'literature.bibtex.editor'|translate}}
                             <span ng-show="sortType == 'editor' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'editor' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'title'; sortReverse = !sortReverse">
-                            title
+                            {{'literature.bibtex.title'|translate}}
                             <span ng-show="sortType == 'title' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'title' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'journal'; sortReverse = !sortReverse">
-                            journal
+                            {{'literature.bibtex.journal'|translate}}
                             <span ng-show="sortType == 'journal' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'journal' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'year'; sortReverse = !sortReverse">
-                            year
+                            {{'literature.bibtex.year'|translate}}
                             <span ng-show="sortType == 'year' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'year' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td>
-                    	pages
+                    	{{'literature.bibtex.pages'|translate}}
                     </td>
                     <td>
-                        volume
+                        {{'literature.bibtex.volume'|translate}}
                     </td>
                     <td>
-                        number
+                        {{'literature.bibtex.number'|translate}}
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'booktitle'; sortReverse = !sortReverse">
-                            booktitle
+                            {{'literature.bibtex.booktitle'|translate}}
                             <span ng-show="sortType == 'booktitle' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'booktitle' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'publisher'; sortReverse = !sortReverse">
-                            publisher
+                            {{'literature.bibtex.publisher'|translate}}
                             <span ng-show="sortType == 'publisher' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'publisher' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'address'; sortReverse = !sortReverse">
-                            address
+                            {{'literature.bibtex.address'|translate}}
                             <span ng-show="sortType == 'address' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'address' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td>
-                    	created_at
+                    	{{'literature.created-at'|translate}}
                     </td>
                     <td>
-                    	updated_at
+                    	{{'literature.updated-at'|translate}}
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'misc'; sortReverse = !sortReverse">
-                            misc
+                            {{'literature.bibtex.misc'|translate}}
                             <span ng-show="sortType == 'misc' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'misc' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'howpublished'; sortReverse = !sortReverse">
-                            howpublished
+                            {{'literature.bibtex.howpublished'|translate}}
                             <span ng-show="sortType == 'howpublished' && !sortReverse" class="fa fa-fw fa-caret-down"></span>
                             <span ng-show="sortType == 'howpublished' && sortReverse" class="fa fa-fw fa-caret-up"></span>
                         </a>
                     </td>
                     <td ng-if="currentUser.permissions.add_remove_literature">
-                        Löschen
+                        {{'literature.delete'|translate}}
                     </td>
                     <td ng-if="currentUser.permissions.edit_literature">
-                        Bearbeiten
+                        {{'literature.edit'|translate}}
                     </td>
                 </tr>
             </thead>
@@ -178,6 +178,6 @@
         </table>
     </div>
     <button type="button" class="btn btn-success" id="literature-add-button" ng-click="openAddLiteratureDialog()" ng-if="currentUser.permissions.add_remove_literature">
-        <i class="fa fa-fw fa-plus"></i> Literatur hinzufügen
+        <i class="fa fa-fw fa-plus"></i> {{'literature.add'|translate}}
     </button>
 </div>

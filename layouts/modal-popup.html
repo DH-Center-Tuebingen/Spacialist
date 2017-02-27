@@ -14,100 +14,71 @@
     </div>
     <div class="col-md-5">
         <ul class="nav nav-tabs nav-justified">
-            <li role="presentation" ng-class="{active: modalOptions.modalNav.propTab}" ng-click="modalOptions.modalNav.setPropTab()"><a><i class="fa fa-cog"></i> Eigenschaften</a></li>
-            <li role="presentation" ng-class="{active: modalOptions.modalNav.linkTab}" ng-click="modalOptions.modalNav.setLinkTab()"><a><i class="fa fa-link"></i> Verknüpfungen</a></li>
+            <li role="presentation" ng-class="{active: modalOptions.modalNav.propTab}" ng-click="modalOptions.modalNav.setPropTab()"><a><i class="fa fa-cog"></i> {{'photos.properties.heading'|translate}}</a></li>
+            <li role="presentation" ng-class="{active: modalOptions.modalNav.linkTab}" ng-click="modalOptions.modalNav.setLinkTab()"><a><i class="fa fa-link"></i> {{'photos.linkages.heading'|translate}}</a></li>
         </ul>
         <div ng-show="modalOptions.modalNav.propTab" class="col-md-10 col-md-offset-1">
-            <h3>Eigenschaften</h3>
+            <h3>{{'photos.properties.heading'|translate}}</h3>
             <table class="table table-striped" style="width: 100%;">
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">Ort (allgemein)</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.location-general'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">Tübingen</i></td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">Ort (spezifisch)</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.location-specific'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">Österberg</i></td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">Befund</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.befund'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">Fundstelle 123, Installation 45 und 86, Fundnr. 990</i></td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">Datierung</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.dating'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">Spätbronzezeit, moderne Befunde</i></td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">Blickrichtung</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.direction'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">SSW</i></td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">Fotoart</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.type'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">Arbeitsfoto</i></td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">Fotograf</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">Team eScience-Center</i></td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">Copyright</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.copyright'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.copyright }}</i></td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">Beschreibung</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.description'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.description }}</i></td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">Orientierung</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.orientation'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.orientation }}</i></td>
                 </tr>
             </table>
-            <!--<p class="left">
-                <b>Ort (allgemein):</b> <i style="color: gray;"></i>
-            </p>
-            <p class="left">
-                <b>Ort (spezifisch):</b> <i style="color: gray;"></i>
-            </p>
-            <p class="left">
-                <b>Befund:</b> <i style="color: gray;">Fundstelle 123, Installation 45 und 86, Fundnr. 990</i>
-            </p>
-            <p class="left">
-                <b>Datierung:</b> <i style="color: gray;">Spätbronzezeit, moderne Befunde</i>
-            </p>
-            <p class="left">
-                <b>Blickrichtung:</b> <i style="color: gray;">SSW</i>
-            </p>
-            <p class="left">
-                <b>Fotoart:</b> <i style="color: gray;">Arbeitsfoto</i>
-            </p>
-            <p class="left">
-                <b>Fotograf:</b> <i style="color: gray;">Team eScience-Center</i>
-            </p>
-            <p class="left">
-                <b>Copyright:</b> <i style="color: gray;">{{ modalOptions.img.copyright }}</i>
-            </p>
-            <p class="left">
-                <b>Beschreibung:</b> <i style="color: gray;">{{ modalOptions.img.description }}</i>
-            </p>
-            <p class="left">
-                <b>Orientierung:</b> <i style="color: gray;">{{ modalOptions.img.orientation }}</i>
-            </p>-->
             <hr/>
-            <h3>Bildeigenschaften</h3>
+            <h3>{{'photos.properties.image.heading'|translate}}</h3>
             <p class="left">
-                <b>Aufnahmedatum:</b> <span style="color: gray;">{{ modalOptions.img.created | date:'d.MM.yyyy H:mm:ss' }}</span>
+                <b>{{'photos.properties.image.created'|translate}}:</b> <span style="color: gray;">{{ modalOptions.img.created | date:'d.MM.yyyy H:mm:ss' }}</span>
             </p>
             <p class="left">
-                <b>Kamera:</b> <i style="color: gray;">{{ modalOptions.img.cameraname }}</i>
+                <b>{{'photos.properties.image.cameraname'|translate}}:</b> <i style="color: gray;">{{ modalOptions.img.cameraname }}</i>
             </p>
             <p class="left">
-                <b>Zuletzt geändert:</b> <span style="color: gray;">{{ modalOptions.img.modified * 1000 | date:'d.MM.yyyy H:mm:ss' }}</span>
+                <b>{{'photos.properties.image.modified'|translate}}:</b> <span style="color: gray;">{{ modalOptions.img.modified * 1000 | date:'d.MM.yyyy H:mm:ss' }}</span>
             </p>
             <p class="left">
-                <b>Dateigröße:</b> <span style="color: gray;">{{ modalOptions.img.filesize | bytes:2 }}</span>
+                <b>{{'photos.properties.image.filesize'|translate}}:</b> <span style="color: gray;">{{ modalOptions.img.filesize | bytes:2 }}</span>
             </p>
         </div>
         <div ng-show="modalOptions.modalNav.linkTab" style="padding-right: 10px;">
-            <h1>TODO</h1>
+            <h3>{{'photos.linkages.heading'|translate}}</h3>
+            <p>TODO</p>
         </div>
     </div>
 </div>

@@ -625,12 +625,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         'token_absent',
         'token_invalid'
     ];
-    var rejectTranslations = [
-        'Invalid username or password',
-        'Authentication error (token not provided)',
-        'Session is expired. Please login again.',
-        'Authentication error (token absent)',
-        'Authentication error (invalid token)'
+    var rejectTranslationKeys = [
+        "login.error.user-not-found",
+        "login.error.token-not-provided",
+        "login.error.token-expired",
+        "login.error.token-absent",
+        "login.error.token-invalid"
     ];
 
     function updateToken(response, $injector) {
@@ -654,11 +654,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 if(rejection.data && reasonIndex > -1) {
                     localStorage.removeItem('user');
                     var userService = $injector.get('userService');
-                    userService.loginError.message = rejectTranslations[reasonIndex];
+                    userService.loginError.message = rejectTranslationKeys[reasonIndex];
                 } else if(rejection.status == 400 || rejection.status == 401) {
                     var $state = $injector.get('$state');
                     var userService = $injector.get('userService');
-                    userService.loginError.message = 'An error occured. Please log in again';
+                    userService.loginError.message = 'login.error.400-or-401';
                     $state.go('auth');
                 } else {
                     updateToken(rejection, $injector);

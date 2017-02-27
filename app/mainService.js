@@ -182,7 +182,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
 
     main.createNewContext = function(data) {
         defaults = {
-            name: 'Neuer Top-Kontext',
+            name: 'Neuer Top-Kontext', //TODO:TRANSLATE
             reclevel: -1,
             children: []
         };
@@ -277,7 +277,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             deleteElement(elem, function() {
                 //$itemScope.remove(); TODO remove from list
             });
-        }, 'Wenn Sie dieses Element löschen, werden auch alle Kind-Elemente gelöscht!');
+        }, 'delete-confirm.warning');
     };
 
     function deleteElement(elem, onSuccess) {
@@ -566,10 +566,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         var msg = '';
         if(elemType == 'context') {
             selection = main.contexts.slice();
-            msg = 'Neuen Kontext anlegen';
+            msg = 'create-dialog.new-context-description';
         } else if(elemType == 'find') {
             selection = main.artifacts.slice();
-            msg = 'Neuen Fund anlegen';
+            msg = 'create-dialog.new-artifact-description';
         }
         modalFactory.createModal(parent.name, msg, selection, function(name, type) {
             var elem = {

@@ -22,6 +22,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.newElementContextMenu = [
         [
             function($itemScope, $event, modelValue, text, $li) {
+                //TODO:TRANSLATE
                 return 'Optionen für ' + $itemScope.parent.name;
             },
             function($itemScope, $event, modelValue, text, $li) {
@@ -49,7 +50,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
                 deleteElement($itemScope.parent, function() {
                     $itemScope.remove();
                 });
-            }, 'Wenn Sie dieses Element löschen, werden auch alle Kind-Elemente gelöscht!');
+            }, 'delete-confirm.warning');
         }]
     ];
 
