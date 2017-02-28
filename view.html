@@ -1,5 +1,5 @@
 <div ng-controller="mainCtrl" resize-watcher>
-    <div class="col-md-2" id="tree-container">
+    <div class="col-md-2" id="tree-container" ng-hide="activeAnalysis.isActive">
         <div ng-if="currentUser.permissions.view_concepts">
             <h3>{{'context-tree.heading'|translate}}</h3>
             <my-tree on-click-callback="setCurrentElement(target, elem)" item-list="contextList" element="currentElement.element" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
@@ -9,7 +9,7 @@
             <div ng-include="'layouts/restricted-access.html'"></div>
         </div>
     </div>
-    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container">
+    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive">
         <div ng-if="currentUser.permissions.view_concept_props">
             <div ng-show="currentElement.element.id">
                 <h3>{{ currentElement.element.name }}<span ng-if="currentElement.element.typeLabel" class="type-desc">{{ currentElement.element.typeLabel }}</span> <small>{{'context-form.heading'|translate}}</small></h3>
@@ -54,7 +54,7 @@
             <div ng-include="'layouts/restricted-access.html'"></div>
         </div>
     </div>
-    <div class="col-md-5" id="addon-container">
+    <div class="col-md-5" id="addon-container" ng-hide="activeAnalysis.isActive">
         <ul class="nav nav-tabs" id="addon-nav">
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'map'}" ng-if="moduleExists('mapCtrl')">
                 <a href="" ng-click="setActiveTab('map')"><span class="fa fa-fw fa-map-marker"></span><span class="tab-desc"> {{'context-form.tabs.map'|translate}}</span></a>
@@ -68,7 +68,7 @@
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'images'}" ng-if="moduleExists('imageCtrl')">
                 <a href="" ng-click="setActiveTab('images')"><span class="fa fa-fw fa-image"></span><span class="tab-desc"> {{'context-form.tabs.photos'|translate}}</span></a>
             </li>
-            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'bibliography'}" ng-if="moduleExists('literatureCtrl')">
+            <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'bibliography'}" ng-if="moduleExists('literatureCtrl') && currentElement.element.id">
                 <a href="" ng-click="setActiveTab('bibliography')"><span class="fa fa-fw fa-book"></span><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
             </li>
         </ul>
@@ -83,13 +83,13 @@
                 <div ng-include="'layouts/restricted-access.html'"></div>
             </div>
         </div>
-        <div ng-if="layerTwo.activeTab == 'properties'">
+        <div ng-if="layerTwo.activeTab == 'properties'" class="padded-content">
             <h5>Properties active</h5>
         </div>
-        <div ng-if="layerTwo.activeTab == 'harris'">
+        <div ng-if="layerTwo.activeTab == 'harris'" class="padded-content">
             <h5>Harris active</h5>
         </div>
-        <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" style="max-height: 100%;">
+        <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" class="padded-content" style="max-height: 100%;">
             <div ng-if="currentUser.permissions.view_photos">
                 <uib-accordion close-others="true">
                     <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!currentElement.element">
@@ -142,9 +142,9 @@
                 <div ng-include="'layouts/restricted-access.html'"></div>
             </div>
         </div>
-        <div ng-if="layerTwo.activeTab == 'bibliography'">
+        <div ng-if="layerTwo.activeTab == 'bibliography'" class="padded-content">
             <div ng-if="currentUser.permissions.duplicate_edit_concepts">
-                <p class="alert alert-warning" ng-if="!currentElement.sources" ng-bind-html="{{'context-form.tabs.sources.empty'|translate}}"></p>
+                <p class="alert alert-warning" ng-if="!hasSources(currentElement)" ng-bind-html="{{'context-form.tabs.sources.empty'|translate}}"></p>
                 <div ng-repeat="(key, attr) in currentElement.sources">
                     <h4><a href="" ng-click="openSourceModal(attr[0].attribute_name, attr[0].attribute_id, currentElement.data[attr[0].attribute_id+'_pos'])">{{ attr[0].attribute_name }}</a></h4>
                     <table class="table table-striped table-bordered table-hover">
@@ -169,5 +169,8 @@
                 <div ng-include="'layouts/restricted-access.html'"></div>
             </div>
         </div>
+    </div>
+    <div ng-show="activeAnalysis.isActive">
+        <iframe id="analysis-frame" ng-src="{{ activeAnalysis.url }}" style="border: none; width: 100%;"></iframe>
     </div>
 </div>

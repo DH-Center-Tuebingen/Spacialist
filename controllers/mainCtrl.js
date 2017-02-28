@@ -15,6 +15,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.moduleExists = mainService.moduleExists;
     $scope.setCurrentElement = mainService.setCurrentElement;
     $scope.unsetCurrentElement = mainService.unsetCurrentElement;
+    $scope.analysisEntries = analysisService.entries;
+    $scope.activeAnalysis = analysisService.activeAnalysis;
     var createModalHelper = mainService.createModalHelper;
 
     $scope.storedQueries = analysisService.storedQueries;
@@ -98,9 +100,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         mainService.deleteElement(elem);
     };
 
-    $scope.isEmpty = function(obj) {
-        if (typeof obj === 'undefined') return false;
-        return Object.keys(obj).length === 0;
+    $scope.hasSources = function(elem) {
+        return !mainService.isEmpty(elem.sources);
     };
 
     $scope.deleteSourceEntry = function(index, key) {

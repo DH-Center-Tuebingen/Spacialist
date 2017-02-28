@@ -204,6 +204,7 @@ spacialistApp.directive('resizeWatcher', function($window) {
                 $('#attribute-container').css('height', '');
                 $('#addon-container').css('height', '');
                 $('#literature-container').css('height', '');
+                $('analysis-frame').css('height', '');
             } else {
                 var height = newValue.height;
                 var width = newValue.width;
@@ -238,6 +239,7 @@ spacialistApp.directive('resizeWatcher', function($window) {
                 $('#tree-container').css('height', containerHeight);
                 $('#attribute-container').css('height', containerHeight);
                 $('#addon-container').css('height', containerHeight);
+                $('#analysis-frame').css('height', containerHeight);
             }
         }, true);
     };

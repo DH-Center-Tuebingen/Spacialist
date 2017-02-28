@@ -27,7 +27,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#/">
+                    <a class="navbar-brand" href="" ng-click="openStartPage()">
                         <img src="favicon.png" alt="spacialist logo" style="height: 20px; width: 20px; display: inline; vertical-align: top;"/>
                         {{'spacialist'|translate}}
                     </a>
@@ -60,11 +60,11 @@
                             </ul>
                         </li>-->
                         <li class="dropdown" uib-dropdown>
-                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{'main.menu.db-queries'|translate}}<span class="caret"></span>
+                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'main.menu.data-analysis' | translate }} <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu>
-                                <li ng-repeat="query in storedQueries">
-                                    <a href="db/?mode=query&navbar=on&id={{query.id}}" target="_blank">{{query.title}}</a>
+                                <li ng-repeat="entry in analysisEntries">
+                                    <a href="" ng-click="setAnalysisEntry($index)">{{ entry.name | translate }}</a>
                                 </li>
                             </ul>
                         </li>

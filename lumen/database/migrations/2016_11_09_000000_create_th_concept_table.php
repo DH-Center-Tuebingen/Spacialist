@@ -13,13 +13,15 @@ class CreateThConceptTable extends Migration
      */
     public function up()
     {
-        Schema::create('th_concept', function (Blueprint $table) {
-            $table->increments('id');
-            $table->text('concept_url')->unique();
-            $table->text('concept_scheme');
-            $table->text('lasteditor');
-            $table->timestamps();
-        });
+        if(!Schema::hasTable('th_concept')) {
+            Schema::create('th_concept', function (Blueprint $table) {
+                $table->increments('id');
+                $table->text('concept_url')->unique();
+                $table->text('concept_scheme');
+                $table->text('lasteditor');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

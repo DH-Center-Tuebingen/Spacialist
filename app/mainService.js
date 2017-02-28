@@ -603,6 +603,11 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         imageService.getImagesForContext(id);
     }
 
+    main.isEmpty = function(obj) {
+        if (typeof obj === 'undefined') return false;
+        return Object.keys(obj).length === 0;
+    };
+
     /**
      * `name` is the name of the controller which is bound to this module
      * @returns whether the given controller exists or not
