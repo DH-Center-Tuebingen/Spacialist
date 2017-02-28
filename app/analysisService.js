@@ -32,11 +32,11 @@ spacialistApp.service('analysisService', ['httpGetFactory', function(httpGetFact
 
     function setEntries() {
         analysis.entries.push({
-            name: 'New Data Analysis',
+            name: 'main.menu.new-data-analysis',
             url: 'db/?mode=query&navbar=off&padding=none'
         });
         analysis.entries.push({
-            name: 'Browse Data Analysis',
+            name: 'main.menu.browse-data-analysis',
             url: 'db/?mode=list&table=stored_queries&navbar=off'
         });
     }
