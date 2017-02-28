@@ -1,11 +1,11 @@
 <div class="modal-header">
-    <h4>Neue Literatur hinzufügen</h4>
+    <h4>{{'literature.new.heading'|translate}}</h4>
 </div>
 <div class="modal-body">
     <div class="col-md-12">
         <form class="form-horizontal">
             <div class="form-group">
-                <label class="control-label col-md-3" for="type">Typ:</label>
+                <label class="control-label col-md-3" for="type">{{'literature.new.type'|translate}}:</label>
                 <div class="col-md-9">
                     <ui-select ng-model="mc.selectedType">
                         <ui-select-match>
@@ -18,19 +18,19 @@
                 </div>
             </div>
             <div class="form-group" ng-repeat="mandatory in mc.availableTypes[mc.selectedType.id].mandatoryFields">
-                <label class="control-label col-md-3">{{ mandatory }}:<span style="color: red;">*</span></label>
+                <label class="control-label col-md-3">{{ 'literature.bibtex.' + mandatory | translate }}:<span style="color: red;">*</span></label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" ng-model="mc.fields[mandatory]" placeholder="{{ mandatory }}"/>
+                    <input type="text" class="form-control" ng-model="mc.fields[mandatory]" placeholder="{{ 'literature.bibtex.' + mandatory | translate }}"/>
                 </div>
             </div>
             <div class="form-group" ng-repeat="optional in mc.availableTypes[mc.selectedType.id].optionalFields">
-                <label class="control-label col-md-3">{{ optional }}:</label>
+                <label class="control-label col-md-3">{{ 'literature.bibtex.' + optional | translate }}:</label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" ng-model="mc.fields[optional]" placeholder="{{ optional }}"/>
+                    <input type="text" class="form-control" ng-model="mc.fields[optional]" placeholder="{{ 'literature.bibtex.' + optional | translate }}"/>
                 </div>
             </div>
         </form>
-        <h4>BibTex-Code</h4>
+        <h4>{{'literature.new.bibtex-code'|translate}}</h4>
         <pre>
             <code>
         {{ mc.fields }}

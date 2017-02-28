@@ -6,7 +6,11 @@ spacialistApp.service('langService', ['$translate', function($translate) {
             label: 'Deutsch',
             flagCode: 'de'
         },
-        en_UK: {
+        en: {
+            label: 'English',
+            flagCode: 'us'
+        }
+        /*en_UK: {
             label: 'English (UK)',
             flagCode: 'gb'
         },
@@ -25,7 +29,7 @@ spacialistApp.service('langService', ['$translate', function($translate) {
         es: {
             label: 'Español',
             flagCode: 'es'
-        }
+        }*/
     };
 
     lang.currentLanguage = {

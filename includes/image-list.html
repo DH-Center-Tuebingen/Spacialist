@@ -1,7 +1,7 @@
 <div class="col-md-12" ng-init="tmpData[imageType] = []">
     <div class="row">
         <div class="alert alert-warning unpadded-alert" ng-hide="tmpData[imageType].length > 0">
-            <p>{{ 'no images' | translate }}</p>
+            <p>{{ 'photos.empty' | translate }}</p>
         </div>
     </div>
     <div class="row" infinite-scroll="tmpData[imageType]=onScrollLoad({len: tmpData[imageType].length, type: imageType})" infinite-scroll-distance="0" infinite-scroll-container="scrollContainer" infinite-scroll-listen-for-event="image:updated:{{imageType}}">

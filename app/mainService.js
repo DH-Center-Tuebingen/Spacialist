@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', '$timeout', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, $timeout) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', '$timeout', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, $timeout, $translate) {
     var main = {};
     var modalFields;
 
@@ -182,16 +182,18 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
 
     main.createNewContext = function(data) {
         defaults = {
-            name: 'Neuer Top-Kontext',
             reclevel: -1,
             children: []
         };
-        var parent = defaults;
-        angular.extend(parent, data);
-        main.createModalHelper({
-            parent: parent,
-            expand: function() {}
-        }, 'context', true);
+        $translate('create-dialog.new-top-context').then(function(translation) {
+            defaults.name = translation;
+            var parent = defaults;
+            angular.extend(parent, data);
+            main.createModalHelper({
+                parent: parent,
+                expand: function() {}
+            }, 'context', true);
+        });
     };
 
     function updateElementData(elem) {
@@ -277,7 +279,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             deleteElement(elem, function() {
                 //$itemScope.remove(); TODO remove from list
             });
-        }, 'Wenn Sie dieses Element löschen, werden auch alle Kind-Elemente gelöscht!');
+        }, 'delete-confirm.warning');
     };
 
     function deleteElement(elem, onSuccess) {
@@ -566,10 +568,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         var msg = '';
         if(elemType == 'context') {
             selection = main.contexts.slice();
-            msg = 'Neuen Kontext anlegen';
+            msg = 'create-dialog.new-context-description';
         } else if(elemType == 'find') {
             selection = main.artifacts.slice();
-            msg = 'Neuen Fund anlegen';
+            msg = 'create-dialog.new-artifact-description';
         }
         modalFactory.createModal(parent.name, msg, selection, function(name, type) {
             var elem = {

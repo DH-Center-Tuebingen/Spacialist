@@ -1,7 +1,7 @@
 <div ng-controller="mainCtrl" resize-watcher>
     <div class="col-md-2" id="tree-container" ng-hide="activeAnalysis.isActive">
         <div ng-if="currentUser.permissions.view_concepts">
-            <h3>Elemente</h3>
+            <h3>{{'context-tree.heading'|translate}}</h3>
             <my-tree on-click-callback="setCurrentElement(target, elem)" item-list="contextList" element="currentElement.element" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
             <spinner ng-if="getContextListStarted"></spinner>
         </div>
@@ -12,7 +12,7 @@
     <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive">
         <div ng-if="currentUser.permissions.view_concept_props">
             <div ng-show="currentElement.element.id">
-                <h3>{{ currentElement.element.name }}<span ng-if="currentElement.element.typeLabel" class="type-desc">{{ currentElement.element.typeLabel }}</span> <small>Element-Eigenschaften</small></h3>
+                <h3>{{ currentElement.element.name }}<span ng-if="currentElement.element.typeLabel" class="type-desc">{{ currentElement.element.typeLabel }}</span> <small>{{'context-form.heading'|translate}}</small></h3>
                 <ul class="nav nav-tabs nav-undecorated nav-inline">
                     <li role="presentation">
                         <a href="" ng-click="storeElement(currentElement.element, currentElement.data)"><span class="fa fa-fw fa-floppy-o fa-green"></span></a>
@@ -24,7 +24,7 @@
                 <form class="form-horizontal" role="form" ng-if="currentElement.fields">
                     <div class="form-group">
                         <label class="control-label col-md-3" for="name">
-                            Name:
+                            {{'context-form.name'|translate}}:
                         </label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="name" ng-model="currentElement.element.name" ng-readonly="!currentUser.permissions.duplicate_edit_concepts" />
@@ -34,23 +34,19 @@
                     </form-field>
                     <div class="col-md-offset-3" ng-if="currentUser.permissions.duplicate_edit_concepts">
                         <button type="button" class="btn btn-success" ng-click="storeElement(currentElement.element, currentElement.data)">
-                            <span class="fa fa-fw fa-floppy-o"></span> {{ 'Save' | translate }}
+                            <span class="fa fa-fw fa-floppy-o"></span> {{ 'context-form.save-button' | translate }}
                         </button>
                         <button type="button" class="btn btn-danger" ng-click="deleteElement(currentElement.element)">
-                            <span class="fa fa-fw fa-trash-o"></span> {{ 'delete' | translate }}
+                            <span class="fa fa-fw fa-trash-o"></span> {{ 'context-form.delete-button' | translate }}
                         </button>
                     </div>
                 </form>
             </div>
             <div ng-hide="currentElement.element.id">
-                <h3>Element-Eigenschaften</h3>
+                <h3>{{'context-form.heading'|translate}}</h3>
                 <div class="alert alert-info">
-                    <p>
-                        Kein Element ausgewählt.
-                    </p>
-                    <p>
-                        Um die Eigenschaften eines Elements anzuzeigen, klicken Sie in der Baumansicht auf ein Element.
-                    </p>
+                    <p>{{ 'context-form.no-selection' | translate }}</p>
+                    <p>{{ 'context-form.no-selection-info' | translate }}</p>
                 </div>
             </div>
         </div>
@@ -61,19 +57,19 @@
     <div class="col-md-5" id="addon-container" ng-hide="activeAnalysis.isActive">
         <ul class="nav nav-tabs" id="addon-nav">
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'map'}" ng-if="moduleExists('mapCtrl')">
-                <a href="" ng-click="setActiveTab('map')"><span class="fa fa-fw fa-map-marker"></span><span class="tab-desc"> Karte</span></a>
+                <a href="" ng-click="setActiveTab('map')"><span class="fa fa-fw fa-map-marker"></span><span class="tab-desc"> {{'context-form.tabs.map'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'properties'}" ng-if="currentElement.element.furtherProperties">
-                <a href="" ng-click="setActiveTab('properties')"><span class="fa fa-fw fa-sliders"></span><span class="tab-desc"> Weitere Eigenschaften</span></a>
+                <a href="" ng-click="setActiveTab('properties')"><span class="fa fa-fw fa-sliders"></span><span class="tab-desc"> {{'context-form.tabs.further-properties'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'harris'}" ng-if="moduleExists('harrisCtrl')">
-                <a href="" ng-click="setActiveTab('harris')"><span class="fa fa-fw fa-object-group"></span><span class="tab-desc"> Harris-Matrix</span></a>
+                <a href="" ng-click="setActiveTab('harris')"><span class="fa fa-fw fa-object-group"></span><span class="tab-desc"> {{'context-form.tabs.harris-matrix'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'images'}" ng-if="moduleExists('imageCtrl')">
-                <a href="" ng-click="setActiveTab('images')"><span class="fa fa-fw fa-image"></span><span class="tab-desc"> Bilder</span></a>
+                <a href="" ng-click="setActiveTab('images')"><span class="fa fa-fw fa-image"></span><span class="tab-desc"> {{'context-form.tabs.photos'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'bibliography'}" ng-if="moduleExists('literatureCtrl') && currentElement.element.id">
-                <a href="" ng-click="setActiveTab('bibliography')"><span class="fa fa-fw fa-book"></span><span class="tab-desc"> Quellennachweise</span></a>
+                <a href="" ng-click="setActiveTab('bibliography')"><span class="fa fa-fw fa-book"></span><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
             </li>
         </ul>
         <div ng-if="layerTwo.activeTab == 'map'">
@@ -99,27 +95,27 @@
                     <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!currentElement.element">
                         <uib-accordion-heading>
                             <span ng-click="!currentElement.element || updateLinkedImages(layerTwo.imageTab.linkedOpen)">
-                                Linked images
-                            </span><!-- <span class="badge">{{ images.linked.length }}</span>-->
+                                {{'context-form.tabs.photos.linked'|translate}}
+                            </span>
                         </uib-accordion-heading>
                         <image-list on-scroll-load="loadImages(len, type)" image-data="images.linked" image-type="'linked'" scroll-container="'#addon-container'"></image-list>
                     </div>
                     <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.newOpen">
                         <uib-accordion-heading>
-                            {{ 'add new images' | translate }}
+                            {{ 'context-form.tabs.photos.upload' | translate }}
                         </uib-accordion-heading>
                         <div class="col-md-12">
                             <div class="alert alert-info drop-box" ngf-drop ngf-select ng-model="dropFiles" ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="false" accept="image/*" ngf-pattern="'image/*'">
-                                Entweder per Drag &amp; Drop hierherziehen oder über den Button hochladen.
+                                {{'context-form.tabs.photos.drag+drop'|translate}}
                             </div>
-                            <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple accept="image/*">Bilder hochladen</button>
+                            <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple accept="image/*">{{'context-form.tabs.photos.upload-button'|translate}}</button>
                             <ul>
                                 <li ng-repeat="f in uploadingImages">
                                     {{ f.name }} {{ f.$errorParam }}
                                     <div class="progress">
                                         <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ f.progress }}%">
                                             <span ng-hide="f.progress < 100">
-                                                {{ 'upload finished' | translate }}
+                                                {{'context-form.tabs.photos.upload-finished'|translate}}
                                             </span>
                                             <span ng-show="f.progress < 100">
                                                 {{ f.progress }}%
@@ -135,8 +131,8 @@
                     <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.allOpen">
                         <uib-accordion-heading>
                             <span ng-click="updateAllImages(layerTwo.imageTab.allOpen)">
-                                Alle Bilder
-                            </span><!-- <span class="badge">{{ images.all.length }}</span>-->
+                                {{'context-form.tabs.photos.all'|translate}}
+                            </span>
                         </uib-accordion-heading>
                         <image-list on-scroll-load="loadImages(len, type)" image-data="images.all" image-type="'all'" scroll-container="'#addon-container'"></image-list>
                     </div>
@@ -148,11 +144,7 @@
         </div>
         <div ng-if="layerTwo.activeTab == 'bibliography'" class="padded-content">
             <div ng-if="currentUser.permissions.duplicate_edit_concepts">
-                <p class="alert alert-warning" ng-if="!hasSources(currentElement)">
-                    Noch keine Quellen hinzugefügt.
-                    <br/>
-                    Um Quellen hinzuzufügen klicken Sie auf das <sup><i class="fa fa-circle-plus source-link" aria-hidden="true"></i></sup>-Symbol neben den Element-Eigenschaften.
-                </p>
+                <p class="alert alert-warning" ng-if="!hasSources(currentElement)" ng-bind-html="{{'context-form.tabs.sources.empty'|translate}}"></p>
                 <div ng-repeat="(key, attr) in currentElement.sources">
                     <h4><a href="" ng-click="openSourceModal(attr[0].attribute_name, attr[0].attribute_id, currentElement.data[attr[0].attribute_id+'_pos'])">{{ attr[0].attribute_name }}</a></h4>
                     <table class="table table-striped table-bordered table-hover">
