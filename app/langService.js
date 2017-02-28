@@ -40,7 +40,13 @@ spacialistApp.service('langService', ['$translate', function($translate) {
     setInitLanguage();
 
     function setInitLanguage() {
-        updateLanguage($translate.resolveClientLocale());
+        var storedLang = localStorage.getItem('NG_TRANSLATE_LANG_KEY');
+        // check if there is a stored language
+        if(storedLang === null) {
+            updateLanguage($translate.resolveClientLocale());
+        } else {
+            updateLanguage(storedLang);
+        }
     }
 
     function updateLanguage(langKey) {
