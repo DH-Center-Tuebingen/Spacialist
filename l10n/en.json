@@ -116,6 +116,11 @@
 	"evidence.sources.literature": "Select from bibliography",
 	"evidence.sources.comment": "Comment",
 	"evidence.sources.add": "Add",
+    "context-menu.options-of": "Options of {{ object }}",
+    "context-menu.new-artifact": "New artifact",
+    "context-menu.new-context": "New context",
+    "context-menu.duplicate-element": "Duplicate element",
+    "context-menu.delete": "Delete",
 
     "dates_list": "Dates list",
     "map": "Map",

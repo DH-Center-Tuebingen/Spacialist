@@ -1,4 +1,4 @@
-spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'analysisService', 'mainService', 'literatureService', 'modalFactory', function($rootScope, $scope, userService, analysisService, mainService, literatureService, modalFactory) {
+spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'analysisService', 'mainService', 'literatureService', 'modalFactory', '$translate', function($rootScope, $scope, userService, analysisService, mainService, literatureService, modalFactory, $translate) {
     $scope.literature = literatureService.literature;
 
     $scope.currentUser = userService.currentUser;
@@ -22,30 +22,45 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.newElementContextMenu = [
         [
             function($itemScope, $event, modelValue, text, $li) {
-                //TODO:TRANSLATE
-                return 'Optionen für ' + $itemScope.parent.name;
+                return $translate('context-menu.options-of', { object: $itemScope.parent.name });
             },
             function($itemScope, $event, modelValue, text, $li) {
             },
             function() { return false; }
         ],
         null,
-        ['<span class="fa fa-fw fa-plus-circle fa-light fa-green"></span> Neuer Fund', function($itemScope, $event, modelValue, text, $li) {
+        [
+            function() {
+                return '<span class="fa fa-fw fa-plus-circle fa-light fa-green"></span> ' + $translate.instant('context-menu.new-artifact');
+            },
+            function($itemScope, $event, modelValue, text, $li) {
             createModalHelper($itemScope, 'find', false);
         }, function($itemScope) {
             return $itemScope.parent.typeid === 0;
         }],
-        ['<span class="fa fa-fw fa-plus-circle fa-light fa-green"></span> Neuer Kontext', function($itemScope, $event, modelValue, text, $li) {
+        [
+            function() {
+                return '<span class="fa fa-fw fa-plus-circle fa-light fa-green"></span> ' + $translate.instant('context-menu.new-context');
+            },
+            function($itemScope, $event, modelValue, text, $li) {
             createModalHelper($itemScope, 'context', false);
         }, function($itemScope) {
             return $itemScope.parent.typeid === 0;
         }],
         null,
-        ['<span class="fa fa-fw fa-clone fa-light fa-green"></span> Element duplizieren', function($itemScope, $event, modelValue, text, $li) {
+        [
+            function() {
+                return '<span class="fa fa-fw fa-clone fa-light fa-green"></span> ' + $translate.instant('context-menu.duplicate-element');
+            },
+                function($itemScope, $event, modelValue, text, $li) {
             mainService.duplicateElement($itemScope);
         }],
         null,
-        ['<span class="fa fa-fw fa-trash-o fa-light fa-red"></span> Löschen', function($itemScope, $event, modelValue, text, $li) {
+        [
+            function() {
+                return '<span class="fa fa-fw fa-trash-o fa-light fa-red"></span> ' + $translate.instant('context-menu.delete')
+            },
+                function($itemScope, $event, modelValue, text, $li) {
             modalFactory.deleteModal($itemScope.parent.name, function() {
                 deleteElement($itemScope.parent, function() {
                     $itemScope.remove();

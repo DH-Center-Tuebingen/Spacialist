@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', '$timeout', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, $timeout) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', '$timeout', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, $timeout, $translate) {
     var main = {};
     var modalFields;
 
@@ -182,16 +182,18 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
 
     main.createNewContext = function(data) {
         defaults = {
-            name: 'Neuer Top-Kontext', //TODO:TRANSLATE
             reclevel: -1,
             children: []
         };
-        var parent = defaults;
-        angular.extend(parent, data);
-        main.createModalHelper({
-            parent: parent,
-            expand: function() {}
-        }, 'context', true);
+        $translate('create-dialog.new-top-context').then(function(translation) {
+            defaults.name = translation;
+            var parent = defaults;
+            angular.extend(parent, data);
+            main.createModalHelper({
+                parent: parent,
+                expand: function() {}
+            }, 'context', true);
+        });
     };
 
     function updateElementData(elem) {
