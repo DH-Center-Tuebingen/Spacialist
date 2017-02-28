@@ -661,6 +661,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     var $state = $injector.get('$state');
                     var userService = $injector.get('userService');
                     userService.loginError.message = 'login.error.400-or-401';
+                    localStorage.removeItem('user');
                     $state.go('auth');
                 } else {
                     updateToken(rejection, $injector);
