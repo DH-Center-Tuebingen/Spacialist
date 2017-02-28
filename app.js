@@ -594,8 +594,13 @@ spacialistApp.factory('httpGetFactory', function($http) {
 
 spacialistApp.config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({
-        prefix: 'l10n/',
-        suffix: '.json'
+        files: [{
+            prefix: 'l10n/',
+            suffix: '.json'
+        }, {
+            prefix: 'l10n/project-',
+            suffix: '.json'
+        }]
     });
     $translateProvider.registerAvailableLanguageKeys(['en', 'de', 'fr', 'it', 'es'], {
         'de_DE': 'de',
