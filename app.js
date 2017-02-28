@@ -1,4 +1,4 @@
-var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
+var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ngCookies', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
 
 spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($uibModal, httpGetFactory) {
     var defaults = {
@@ -594,8 +594,13 @@ spacialistApp.factory('httpGetFactory', function($http) {
 
 spacialistApp.config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({
-        prefix: 'l10n/',
-        suffix: '.json'
+        files: [{
+            prefix: 'l10n/',
+            suffix: '.json'
+        }, {
+            prefix: 'l10n/project-',
+            suffix: '.json'
+        }]
     });
     $translateProvider.registerAvailableLanguageKeys(['en', 'de', 'fr', 'it', 'es'], {
         'de_DE': 'de',
@@ -606,6 +611,7 @@ spacialistApp.config(function($translateProvider) {
     });
     $translateProvider.determinePreferredLanguage();
     $translateProvider.useSanitizeValueStrategy('escape');
+    $translateProvider.useLocalStorage();
 });
 
 spacialistApp.config(function($controllerProvider, $provide) {
