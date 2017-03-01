@@ -86,6 +86,12 @@ class LiteratureController extends Controller
     }
 
     public function add(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('add_remove_literature')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         if(!$request->has('type') || !$request->has('title')) {
             return response()->json([
                 'error' => 'Your literature should have at least a title and a type.'
@@ -93,6 +99,7 @@ class LiteratureController extends Controller
         }
 
         $ins = $this->getFields($request);
+        $ins['lasteditor'] = $user['name'];
 
         if($request->has('id')) {
             $id = $request->get('id');
@@ -113,6 +120,12 @@ class LiteratureController extends Controller
     }
 
     public function edit(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('edit_literature')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         if(!$request->has('id')) {
             return response()->json([
                 'error' => 'No ID given.'
@@ -122,6 +135,7 @@ class LiteratureController extends Controller
         $id = $request->get('id');
 
         $upd = $this->getFields($request);
+        $upd = $user['name'];
 
         DB::table('literature')
             ->where('id', '=', $id)
