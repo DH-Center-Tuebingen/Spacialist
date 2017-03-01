@@ -8,6 +8,7 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService'
 
     $scope.openStartPage = function() {
         analysisService.unsetAnalysisEntry();
+        $state.go('spacialist');
     };
 
     $scope.loginUser = function(email, password) {
