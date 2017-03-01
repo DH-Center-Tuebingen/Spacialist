@@ -52,16 +52,18 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
 
     literature.getLiterature();
 
-    literature.deleteLiteratureEntry = function(id, index) {
-        httpGetFactory('api/literature/delete/' + id, function(response) {
+    literature.deleteLiteratureEntry = function(entry) {
+        var index = literature.literature.indexOf(entry);
+        httpGetFactory('api/literature/delete/' + entry.id, function(response) {
             literature.literature.splice(index, 1);
         });
     };
 
-    literature.editLiteratureEntry = function(id, index) {
-        var entry = angular.copy(literature.literature[index]);
-        var typeName = entry.type;
-        delete entry.type;
+    literature.editLiteratureEntry = function(entry) {
+        var index = literature.literature.indexOf(entry);
+        var entryCopy = angular.copy(entry);
+        var typeName = entryCopy.type;
+        delete entryCopy.type;
         var type;
         for(var i=0; i<literature.literatureOptions.availableTypes.length; i++) {
             var curr = literature.literatureOptions.availableTypes[i];
@@ -70,7 +72,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
                 break;
             }
         }
-        modalFactory.addLiteratureModal(literature.addLiterature, literature.literatureOptions.availableTypes, type, entry, index);
+        modalFactory.addLiteratureModal(literature.addLiterature, literature.literatureOptions.availableTypes, type, entryCopy, index);
     };
 
     literature.openAddLiteratureDialog = function() {
