@@ -610,7 +610,7 @@ spacialistApp.config(function($translateProvider) {
         'en_US': 'en'
     });
     $translateProvider.determinePreferredLanguage();
-    $translateProvider.useSanitizeValueStrategy('escape');
+    //$translateProvider.useSanitizeValueStrategy('sanitize');
     $translateProvider.useLocalStorage();
 });
 
