@@ -152,7 +152,7 @@
         </div>
         <div ng-if="layerTwo.activeTab == 'bibliography'" class="padded-content">
             <div ng-if="currentUser.permissions.duplicate_edit_concepts">
-                <p class="alert alert-warning" ng-if="!hasSources(currentElement)" ng-bind-html="{{'context-form.tabs.sources.empty'|translate}}"></p>
+                <p class="alert alert-warning" ng-if="!hasSources(currentElement)" ng-bind-html="'context-form.tabs.sources.empty'|translate"></p>
                 <div ng-repeat="(key, attr) in currentElement.sources">
                     <h4><a href="" ng-click="openSourceModal(attr[0].attribute_name, attr[0].attribute_id, currentElement.data[attr[0].attribute_id+'_pos'])">{{ attr[0].attribute_name }}</a></h4>
                     <table class="table table-striped table-bordered table-hover">
