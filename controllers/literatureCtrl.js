@@ -7,12 +7,12 @@ spacialistApp.controller('literatureCtrl', function($scope, literatureService, u
     $scope.sortReverse = false;
     $scope.searchTerm = '';
 
-    $scope.deleteLiteratureEntry = function(id, index) {
-        literatureService.deleteLiteratureEntry(id, index);
+    $scope.deleteLiteratureEntry = function(entry) {
+        literatureService.deleteLiteratureEntry(entry);
     };
 
-    $scope.editLiteratureEntry = function(id, index) {
-        literatureService.editLiteratureEntry(id, index);
+    $scope.editLiteratureEntry = function(entry) {
+        literatureService.editLiteratureEntry(entry);
     };
 
     $scope.openAddLiteratureDialog = function() {
