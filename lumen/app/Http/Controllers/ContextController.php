@@ -328,6 +328,7 @@ class ContextController extends Controller {
                 $geodata->geom = new Polygon([ $linestring ]);
                 break;
         }
+        $geodata->lasteditor = $user['name'];
         $geodata->save();
         return response()->json([
             'geodata' => [
