@@ -113,7 +113,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
     map.openPopup = function(geodataId) {
         var alreadyFound = false;
-        var layers = map.geoJson.getLayers();
+        var layers = map.featureGroup.getLayers();
         angular.forEach(layers, function(layer, key) {
             if(!alreadyFound) {
                 if(layer.feature.id == geodataId) {
