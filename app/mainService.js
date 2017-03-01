@@ -326,7 +326,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                     formData.append('cid', cid);
                     formData.append('aid', aid);
                     formData.append('possibility', modalFields.value);
-                    formData.append('possibility_description', modalFields.description);
+                    if(modalFields.description) formData.append('possibility_description', modalFields.description);
                     httpPostFactory('api/context/set/possibility', formData, function(callback) {
                         main.currentElement.data[aid+'_pos'] = modalFields.value;
                         main.currentElement.data[aid+'_desc'] = modalFields.description;
