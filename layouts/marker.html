@@ -1,6 +1,31 @@
 <h4>{{ currentElement.element.name }}</h4>
-<hr />
-<div ng-init="collapsed=true">
+
+<div ng-if="!currentElement.element.id">
+    <p translate="map-marker.not-linked-info"></p>
+    <p ng-if="currentUser.permissions.link_geodata" translate="map-marker.how-to-link"></p>
+</div>
+
+<p ng-if="currentUser.permissions.link_geodata
+       && currentElement.element.id
+       && !currentElement.element.geodata_id"
+><button
+    type="button"
+    class="btn btn-xs btn-success"
+    ng-click="linkGeodata(currentElement.element.id, currentGeodata.id)"
+><i class="fa fa-fw fa-link"></i> {{'map-marker.actions.context-link'|translate}}</button>
+</p>
+
+<p ng-if="currentUser.permissions.link_geodata
+       && currentElement.element.geodata_id
+       && currentElement.element.geodata_id == currentGeodata.id"
+><button
+    type="button"
+    class="btn btn-xs btn-success"
+    ng-click="unlinkGeodata(currentElement.element.id)"
+><i class="fa fa-fw fa-link"></i> {{'map-marker.actions.context-unlink'|translate}}</button>
+</p>
+
+<!--<div ng-init="collapsed=true">
     <h5 ng-click="collapsed=!collapsed" class="clickable">{{'map-marker.options.label'|translate}} <small><i class="fa fa-fw" ng-class="collapsed ? 'fa-caret-right' : 'fa-caret-down'"></i></small></h5>
     <div ng-if="!collapsed">
         <form class="form-horizontal" role="form">
@@ -25,9 +50,9 @@
                     </ui-select>
                 </div>
             </div>
-            <button type="button" class="btn btn-xs btn-success" ng-click="linkGeodata(currentElement.element.id, currentGeodata.id)" ng-if="currentUser.permissions.link_geodata && currentElement.element.id && !currentElement.element.geodata_id"><i class="fa fa-fw fa-link"></i> {{'map-marker.actions.context-link'|translate}}</button>
-            <button type="button" class="btn btn-xs btn-success" ng-click="unlinkGeodata(currentElement.element.id)" ng-if="currentUser.permissions.link_geodata && currentElement.element.geodata_id > 0"><i class="fa fa-fw fa-link"></i> {{'map-marker.actions.context-unlink'|translate}}</button>
-            <button type="button" class="btn btn-xs btn-success" ng-click="updateMarkerOptions(activeMarker, markerKey, markerOptions.color, markerOptions.icon)" ng-if="currentUser.permissions.duplicate_edit_concepts"><i class="fa fa-fw fa-floppy-o"></i> {{'map-marker.save'|translate}}</button>
-        </form>
+
+            <button type="button" class="btn btn-xs btn-success" ng-click="updateMarkerOptions(activeMarker, markerKey, markerOptions.color, markerOptions.icon)" ng-if="currentUser.permissions.duplicate_edit_concepts"><i class="fa fa-fw fa-floppy-o"></i> {{'map-marker.save'|translate}}</button>-->
+
+        <!--</form>
     </div>
-</div>
+</div>-->
