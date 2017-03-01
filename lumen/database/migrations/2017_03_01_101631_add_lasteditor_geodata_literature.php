@@ -14,10 +14,10 @@ class AddLasteditorGeodataLiterature extends Migration
     public function up()
     {
         Schema::table('geodata', function (Blueprint $table) {
-            $table->text('lasteditor');
+            $table->text('lasteditor')->default('');
         });
         Schema::table('literature', function (Blueprint $table) {
-            $table->text('lasteditor');
+            $table->text('lasteditor')->default('');
         });
     }
 
