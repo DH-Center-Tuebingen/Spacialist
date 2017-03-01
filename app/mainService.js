@@ -542,10 +542,14 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                 addContextSource(source);
             });
         });
+        var lastmodified = elem.updated_at || elem.created_at;
+        var d = new Date(lastmodified);
         main.currentElement.fields = elem.fields;
         main.currentElement.element = {
             id: elem.id,
             name: elem.name,
+            lasteditor: elem.lasteditor,
+            lastmodified: d.toLocaleDateString() + ' ' + d.toLocaleTimeString(),
             root_cid: elem.root_cid || -1,
             typeLabel: elem.typelabel,
             typeId: elem.typeid,

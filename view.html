@@ -32,6 +32,14 @@
                     </div>
                     <form-field fields="currentElement.fields" output="currentElement.data" sources="currentElement.sources" label-width="3" input-width="9" offset="0" sp-readonly="{{ !currentUser.permissions.duplicate_edit_concepts }}">
                     </form-field>
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="lasteditor">{{ 'context-form.last-modified' | translate }}:</label>
+                        <div class="col-md-9">
+                            <p class="form-control-static">
+                                {{ currentElement.element.lastmodified }} (<strong>{{ currentElement.element.lasteditor }}</strong>)
+                            </p>
+                        </div>
+                    </div>
                     <div class="col-md-offset-3" ng-if="currentUser.permissions.duplicate_edit_concepts">
                         <button type="button" class="btn btn-success" ng-click="storeElement(currentElement.element, currentElement.data)">
                             <span class="fa fa-fw fa-floppy-o"></span> {{ 'context-form.save-button' | translate }}

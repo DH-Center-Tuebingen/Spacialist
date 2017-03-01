@@ -3,6 +3,7 @@
     "context-tree.new-toplevel-context": "Neuen Top-Kontext anlegen",
     "context-form.heading": "Element-Eigenschaften",
 	"context-form.name": "Name",
+    "context-form.last-modified": "Zuletzt geändert",
 	"context-form.save-button": "Speichern",
 	"context-form.delete-button": "Löschen",
 	"context-form.no-selection": "Kein Element ausgewählt.",
