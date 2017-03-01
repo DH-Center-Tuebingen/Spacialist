@@ -351,6 +351,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
      */
     function addSource(currentSource, currentDesc, aid) {
         if(typeof main.currentElement.element.id == 'undefined') return;
+        if(!currentDesc) currentDesc = '';
         var cid = main.currentElement.element.id;
         var formData = new FormData();
         formData.append('cid', cid);
