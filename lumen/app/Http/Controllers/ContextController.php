@@ -119,6 +119,55 @@ class ContextController extends Controller {
         );
     }
 
+    public function getAvailableAttributeTypes() {
+        return response()->json([
+            'types' => [
+                [
+                    'datatype' => 'string',
+                    'description' => 'Einfaches Eingabefeld'
+                ],
+                [
+                    'datatype' => 'stringf',
+                    'description' => 'Einfaches großes Textfeld'
+                ],
+                [
+                    'datatype' => 'string-sc',
+                    'description' => 'Einfachauswahl als Dropdown'
+                ],
+                [
+                    'datatype' => 'string-mc',
+                    'description' => 'Mehrfachauswahl als Dropdown'
+                ],
+                [
+                    'datatype' => 'epoch',
+                    'description' => 'Kombiniertes Eingabefeld aus Zeitangabe und Epochenangabe (als Dropdown)'
+                ],
+                [
+                    'datatype' => 'date',
+                    'description' => 'Eingabefeld für Datumsangaben, mit Kalender-Widget'
+                ],
+                [
+                    'datatype' => 'dimension',
+                    'description' => 'Eingabefeld für Volumen (BxHxT)'
+                ],
+                [
+                    'datatype' => 'list',
+                    'description' => 'Einfaches Eingabefeld, was die Einträge in einer Liste speichert'
+                ],
+                [
+                    'datatype' => 'geography',
+                    'description' => 'Eingabefeld für WKT-Daten. Unterstützt das Platzieren der Marker über eine Karte.'
+                ]
+            ]
+        ]);
+    }
+
+    public function getAttributes() {
+        return response()->json([
+            'attributes' => Attribute::select('*', DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as label"), DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_root_url and short_name = 'de' limit 1) as root_label"))->orderBy('label', 'asc')->get()
+        ]);
+    }
+
     public function getRecursive() {
         $user = \Auth::user();
         if(!$user->can('view_concepts')) {

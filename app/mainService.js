@@ -41,6 +41,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             angular.forEach(callback, function(value, key) {
                 var index = value.index;
                 var title = value.title;
+                console.log(value);
                 if(typeof main.contextReferences[index] === 'undefined') {
                     main.contextReferences[index] = [];
                     main.contexts.push({

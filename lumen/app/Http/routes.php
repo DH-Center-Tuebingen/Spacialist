@@ -24,6 +24,8 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('context/artifacts/get', 'ContextController@getArtifacts');
     $app->get('context/get/children/{id}', 'ContextController@getChildren');
     $app->get('context/get', 'ContextController@get');
+    $app->get('context/get/attributes', 'ContextController@getAttributes');
+    $app->get('context/get/attributes/types', 'ContextController@getAvailableAttributeTypes');
     $app->get('context/get/data/{id}', 'ContextController@getContextData');
     $app->get('context/get/geodata', 'ContextController@getGeodata');
     $app->get('context/get/byGeodata/{id}', 'ContextController@getContextByGeodata');

@@ -715,6 +715,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         .state('literature', {
             url: '/literature',
             templateUrl: 'literature.html'
+        })
+        .state('attribute-editor', {
+            url: '/attribute-editor',
+            templateUrl: 'attribute-editor.html'
         });
 });
 
