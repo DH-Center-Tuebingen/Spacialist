@@ -183,4 +183,8 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.openSourceModal = function(fieldname, fieldid, currentVal, currentDesc) {
         mainService.openSourceModal(fieldname, fieldid, currentVal, currentDesc);
     };
+
+    $scope.openGeographyPlacer = function() {
+        mainService.openGeographyModal($scope);
+    };
 }]);
