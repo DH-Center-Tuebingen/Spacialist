@@ -567,6 +567,41 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         loadLinkedImages(main.currentElement.element.id);
     };
 
+    main.openGeographyModal = function($scope) {
+        var featureGroup = new L.FeatureGroup();
+        var createdListener = $scope.$on('leafletDirectiveMap.placermap.draw:created', function(event, args) {
+            var layer = args.leafletEvent.layer;
+            featureGroup.addLayer(layer);
+        });
+        var drawStartListener = $scope.$on('leafletDirectiveMap.placermap.draw:drawstart', function(event, args) {
+            featureGroup.clearLayers();
+        });
+        var drawOptions = angular.copy(mapService.drawOptions);
+        drawOptions.edit.featureGroup = featureGroup;
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/map-placer.html',
+            windowClass: 'wide-modal',
+            scope: $scope,
+            controller: function($uibModalInstance) {
+                this.drawOptions = drawOptions;
+                this.controls = mapService.controls;
+                this.layers = mapService.layers;
+                this.cancel = function(result) {
+                    createdListener();
+                    drawStartListener();
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.finish = function(event, args) {
+                    createdListener();
+                    drawStartListener();
+                    $uibModalInstance.dismiss('ok');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
+
     main.createModalHelper = function($itemScope, elemType, copyPosition) {
         var parent = $itemScope.parent;
         var selection = [];
