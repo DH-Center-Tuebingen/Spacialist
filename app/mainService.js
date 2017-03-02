@@ -493,9 +493,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         }
     }
 
-    main.unsetCurrentElement = function() {
+    main.unsetCurrentElement = function(dontUnsetUnlinked) {
+        dontUnsetUnlinked = dontUnsetUnlinked || false;
         if(typeof main.currentElement == 'undefined') return;
-        // setMarker(main.currentElement, false);
+        if(dontUnsetUnlinked) {
+            console.log(main.currentElement.element.geodata_id);
+            if(typeof main.currentElement.element.geodata_id == 'undefined' || main.currentElement.element.geodata_id === null) {
+                return;
+            }
+        }
         main.currentElement.element = {};
         main.currentElement.data = {};
         main.currentElement.fields = {};
@@ -513,7 +519,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     main.setCurrentElement = function(target, elem, openAgain) {
         if(typeof elem != 'undefined' && elem.id == target.id) {
             main.unsetCurrentElement();
-            mapService.closePopup();
+            if(mapService.getPopupGeoId() == elem.geodata_id) mapService.closePopup();
             return;
         }
         elem = target;
@@ -560,10 +566,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         if(typeof openAgain == 'undefined') openAgain = true;
         if(elem.geodata_id !== null && openAgain) {
             mapService.openPopup(elem.geodata_id);
-        } else if(elem.geodata_id === null) {
-            mapService.closePopup();
         }
-        // setMarker(main.currentElement, true);
         loadLinkedImages(main.currentElement.element.id);
     };
 

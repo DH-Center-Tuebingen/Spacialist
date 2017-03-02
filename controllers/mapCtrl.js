@@ -51,7 +51,7 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
      * listener for different leaflet actions
      */
     $scope.$on('leafletDirectiveMap.popupclose', function(event, args) {
-
+        mapService.unsetCurrentGeodata();
     });
     $scope.$on('leafletDirectiveMap.popupopen', function(event, args) {
         var popup = args.leafletEvent.popup;
@@ -71,7 +71,8 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
                 if(path !== null && path.length > 0) {
                     mainService.expandTreeTo(path);
                 } else {
-                    mainService.unsetCurrentElement();
+                    var dontUnsetUnlinked = true;
+                    mainService.unsetCurrentElement(dontUnsetUnlinked);
                 }
             }
         });
