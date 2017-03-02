@@ -181,10 +181,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     };
 
     function initMap() {
-        leafletData.getMap().then(function(mapObject) {
+        leafletData.getMap('mainmap').then(function(mapObject) {
             map.mapObject = mapObject;
         });
-        leafletData.getGeoJSON().then(function(geoJson) {
+        leafletData.getGeoJSON('mainmap').then(function(geoJson) {
             map.geoJson = geoJson;
         });
     }
