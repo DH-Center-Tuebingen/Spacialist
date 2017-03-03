@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', '$timeout', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, $timeout, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, $timeout, $translate) {
     var main = {};
     var modalFields;
 
@@ -276,11 +276,24 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     }
 
     main.deleteElement = function(elem) {
-        modalFactory.deleteModal(elem.name, function() {
-            deleteElement(elem, function() {
-                //$itemScope.remove(); TODO remove from list
-            });
-        }, 'delete-confirm.warning');
+        var toDelete = true;
+        httpGetPromise.getData('api/context/get/parents/' + elem.id).then(
+            function(response) {
+                if(response.error) {
+                    modalFactory.errorModal(response.error);
+                    return;
+                }
+                var path = response.path;
+                modalFactory.deleteModal(elem.name, function() {
+                    deleteElement(elem, function() {
+                        updateContext(path, {}, toDelete);
+                        if(main.currentElement.element.id == elem.id) {
+                            main.unsetCurrentElement();
+                        }
+                    });
+                }, 'delete-confirm.warning');
+            }
+        );
     };
 
     function deleteElement(elem, onSuccess) {
@@ -416,31 +429,36 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         return parsedData;
     }
 
-    main.updateContextById = function(id, newValues) {
+    main.updateContextById = function(id, newValues, toDelete) {
+        toDelete = toDelete || false;
         httpGetFactory('api/context/get/parents/' + id, function(response) {
             if(response.error) {
                 modalFactory.errorModal(response.error);
                 return;
             }
-            updateContext(response.path, newValues);
+            updateContext(response.path, newValues, toDelete);
         });
     };
 
-    function updateContext(path, values) {
+    function updateContext(path, values, toDelete) {
         var t = angular.element(document.getElementById('context-tree')).scope();
         var nodesScope = t.$nodesScope;
         var children = nodesScope.childNodes();
-        updateContextHelper(path, children, values, 0);
+        updateContextHelper(path, children, values, 0, toDelete);
     }
 
-    function updateContextHelper(pathArray, children, values, depth) {
+    function updateContextHelper(pathArray, children, values, depth, toDelete) {
         var level = pathArray[depth];
         for(var j=0; j<children.length; j++) {
             var child = children[j];
             if(level.id == child.$modelValue.id) {
-                if(path.length - 1 == i) {
-                    angular.merge(main.currentElement.element, values);
-                    angular.merge(child.$modelValue, values);
+                if(pathArray.length - 1 == depth) {
+                    if(toDelete) {
+                        child.remove();
+                    } else {
+                        angular.merge(main.currentElement.element, values);
+                        angular.merge(child.$modelValue, values);
+                    }
                     break;
                 }
                 // child.expand();
@@ -455,7 +473,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                     }
                     children = child.childNodes();
                     depth++;
-                    updateContextHelper(pathArray, children, values, depth);
+                    updateContextHelper(pathArray, children, values, depth, toDelete);
                 }, 0, false);
                 break;
             }
