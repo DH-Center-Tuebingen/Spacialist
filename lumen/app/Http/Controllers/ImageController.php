@@ -253,8 +253,15 @@ class ImageController extends Controller
 
     public function getImagePreviewObject($id) {
         $img = $this->getImageById($id);
-        $file = Storage::get($img->thumb_url);
-        return 'data:image/jpeg;base64,' . base64_encode($file);
+        // try to get file to check if it exists
+        try {
+            $file = Storage::get($img->thumb_url);
+            return 'data:image/jpeg;base64,' . base64_encode($file);
+        } catch(FileNotFoundException $e) {
+            return response()->json([
+                'error' => 'image not found'
+            ]);
+        }
     }
 
     public function getImageObject($id) {
