@@ -293,6 +293,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     main.openSourceModal = function(fieldname, fieldid, currentVal, currentDesc) {
         var aid = fieldid;
         var cid = main.currentElement.element.id;
+        if(!main.currentElement.sources['#'+aid]) {
+            main.currentElement.sources['#'+aid] = [];
+        }
         modalFields = {
             name: fieldname,
             id: aid,
