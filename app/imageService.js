@@ -66,44 +66,36 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
      * Upload the image files `files` to the server, one by one and store their paths in the database.
      */
     images.uploadImages = function(files, invalidFiles) {
-        var finished = 0;
-        var toFinish = (typeof files === 'undefined') ? 0 : files.length;
-        images.uploadingImages = files;
-        images.errFiles = invalidFiles;
-        var responseF = function(response) {
-            $timeout(function() {
-                console.log(response);
-                var data = response.data;
-                data.linked = [];
-                if (typeof images.all === 'undefined') images.all = [];
-                images.all.push(data);
-                finished++;
-                if (finished == toFinish) {
-                    images.uploadingImages = undefined;
-                }
+        images.upload.files = files;
+        images.upload.errFiles = invalidFiles;
+        images.upload.finished = 0;
+        images.upload.toFinish = (typeof files === 'undefined') ? 0 : files.length;
+        angular.forEach(files, function(file) {
+            file.upload = Upload.upload({
+                url: 'api/image/upload',
+                data: { file: file }
             });
-        };
-        var errorF = function(response) {
-            if(response.status > 0)
-                images.upload.errorMsg = response.status + ': ' + response.data;
-        };
-        var updateF = function(evt) {
-            file.progress = Math.min(100, parseInt(100.0 *
-                evt.loaded / evt.total));
-        };
-
-        if(files) {
-            for(var i=0; i<files.length; i++) {
-                var file = files[i];
-                file.upload = Upload.upload({
-                    url: 'api/image/upload',
-                    data: {
-                        file: file
+            file.upload.then(function(response) {
+                $timeout(function() {
+                    var data = response.data;
+                    data.linked = [];
+                    if (typeof images.all === 'undefined') images.all = [];
+                    images.all.push(data);
+                    images.upload.finished++;
+                    if (images.upload.finished == images.upload.toFinish) {
+                        $timeout(function() {
+                            images.upload.files.length = 0;
+                        }, 1000);
                     }
                 });
-                file.upload.then(responseF, errorF, updateF);
-            }
-        }
+            }, function(response) {
+                if(response.status > 0) {
+                    file.errorMsg = response.status + ': ' + response.data;
+                }
+            }, function(evt) {
+                file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+            });
+        });
     };
 
     /**
