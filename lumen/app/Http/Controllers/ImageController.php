@@ -5,6 +5,7 @@ use App\User;
 use \DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 class ImageController extends Controller
 {
@@ -223,8 +224,13 @@ class ImageController extends Controller
         if($img == null) return null;
         $img->url = 'images/' . $img->filename;
         $img->thumb_url = 'images/' . $img->thumbname;
-        $img->filesize = Storage::size($img->url);
-        $img->modified = Storage::lastModified($img->url);
+        // try to get file to check if it exists
+        try {
+            Storage::get($img->url);
+            $img->filesize = Storage::size($img->url);
+            $img->modified = Storage::lastModified($img->url);
+        } catch(FileNotFoundException $e) {
+        }
         $img->created = strtotime($img->created);
         return $img;
     }
@@ -270,8 +276,13 @@ class ImageController extends Controller
         foreach($images as &$img) {
             $img->url = 'images/' . $img->filename;
             $img->thumb_url = 'images/' . $img->thumbname;
-            $img->filesize = Storage::size($img->url);
-            $img->modified = Storage::lastModified($img->url);
+            // try to get file to check if it exists
+            try {
+                Storage::get($img->url);
+                $img->filesize = Storage::size($img->url);
+                $img->modified = Storage::lastModified($img->url);
+            } catch(FileNotFoundException $e) {
+            }
             $img->created = strtotime($img->created);
         }
         return response()->json($images);
