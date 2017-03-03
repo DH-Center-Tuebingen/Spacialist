@@ -34,6 +34,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         getArtifacts();
         getDropdownOptions();
         getContextList();
+        mapService.reinitVariables();
     }
 
     function getContexts() {
