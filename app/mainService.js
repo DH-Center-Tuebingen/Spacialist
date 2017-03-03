@@ -183,7 +183,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     main.createNewContext = function(data) {
         defaults = {
             reclevel: -1,
-            children: []
+            children: main.contextList
         };
         $translate('create-dialog.new-top-context').then(function(translation) {
             defaults.name = translation;
@@ -579,23 +579,27 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             msg = 'create-dialog.new-artifact-description';
         }
         modalFactory.createModal(parent.name, msg, selection, function(name, type) {
-            var elem = {
-                name: name,
-                ctid: type.ctid,
-                root_cid: parent.id,
-                reclevel: parent.reclevel + 1,
-                typeid: type.type,
-                typename: type.index,
-                typelabel: type.title,
-                data: [],
-                children: []
-            };
             var formData = new FormData();
             formData.append('name', name);
             formData.append('ctid', type.ctid);
             if(typeof parent.id != 'undefined') formData.append('root_cid', parent.id);
-            httpPostFactory('api/context/set', formData, function(newElem) {
-                elem.id = newElem.id;
+            httpPostFactory('api/context/set', formData, function(response) {
+                var newContext = response.context;
+                var elem = {
+                    id: newContext.id,
+                    name: name,
+                    context_type_id: type.ctid,
+                    root_context_id: parent.id,
+                    reclevel: parent.reclevel + 1,
+                    typeid: type.type,
+                    typename: type.index,
+                    typelabel: type.title,
+                    data: [],
+                    children: [],
+                    lasteditor: newContext.lasteditor,
+                    updated_at: newContext.updated_at,
+                    created_at: newContext.created_at
+                };
                 parent.children.push(elem);
                 main.setCurrentElement(elem, main.currentElement);
                 $itemScope.expand();
