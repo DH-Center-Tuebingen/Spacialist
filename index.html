@@ -90,7 +90,7 @@
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        <li ng-if="currentUser">
+                        <li ng-if="currentUser.user.name">
                             <a href="" ng-click="logoutUser()">
                                 <span class="fa fa-fw fa-sign-out"></span> {{ currentUser.user.name }}
                             </a>

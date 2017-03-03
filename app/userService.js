@@ -94,10 +94,8 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$aut
                 return;
             }
             localStorage.setItem('user', JSON.stringify(response.data));
-            user.currentUser = {
-                user: response.data.user,
-                permissions: response.data.permissions
-            };
+            user.currentUser.user = response.data.user;
+            user.currentUser.permissions = response.data.permissions;
             console.log(JSON.stringify(response.data));
             delete user.loginError.message;
             $state.go('spacialist', {});
@@ -106,9 +104,9 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$aut
 
     user.logoutUser = function() {
         $auth.logout().then(function() {
-            user.currentUser = {};
+            user.currentUser.user = {};
+            user.currentUser.permissions = {};
             localStorage.removeItem('user');
-            user.currentUser = undefined;
             $state.go('auth', {});
         });
     };
