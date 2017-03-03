@@ -107,7 +107,6 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$aut
             user.currentUser.user = {};
             user.currentUser.permissions = {};
             localStorage.removeItem('user');
-            user.currentUser = undefined;
             $state.go('auth', {});
         });
     };
