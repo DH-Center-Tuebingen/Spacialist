@@ -60,15 +60,12 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         null,
         [
             function() {
-                return '<span class="fa fa-fw fa-trash-o fa-light fa-red"></span> ' + $translate.instant('context-menu.delete')
+                return '<span class="fa fa-fw fa-trash-o fa-light fa-red"></span> ' + $translate.instant('context-menu.delete');
             },
-                function($itemScope, $event, modelValue, text, $li) {
-            modalFactory.deleteModal($itemScope.parent.name, function() {
-                deleteElement($itemScope.parent, function() {
-                    $itemScope.remove();
-                });
-            }, 'delete-confirm.warning');
-        }]
+            function($itemScope, $event, modelValue, text, $li) {
+                mainService.deleteElement($itemScope.parent);
+            }
+        ]
     ];
 
     $scope.layerTwo = {
