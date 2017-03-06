@@ -519,7 +519,7 @@ class ContextController extends Controller {
         if(isset($message['error'])){
             return response()->json($message);
         }
-        return response()->json(['id' => $id]);
+        return response()->json(['context' => $context]);
     }
 
     public function setIcon(Request $request) {

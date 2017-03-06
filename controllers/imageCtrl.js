@@ -3,6 +3,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
     $scope.images.all = imageService.all;
     $scope.images.linked = imageService.linked;
     $scope.currentElement = mainService.currentElement;
+    $scope.upload = imageService.upload;
 
     $scope.initImageTab = function() {
         $scope.layerTwo.imageTab.newOpen = false;

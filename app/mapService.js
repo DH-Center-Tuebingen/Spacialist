@@ -11,7 +11,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         'subdomains', 'attribution', 'opacity', 'layers', 'styles', 'format', 'version', 'visible'
     ];
 
-    initMapVariables();
     initMap();
 
     function cleanName(name) {
@@ -196,6 +195,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             map.geoJson = geoJson;
         });
     }
+
+    map.reinitVariables = function() {
+        initMapVariables();
+    };
 
     function initMapVariables() {
         map.map = {};
