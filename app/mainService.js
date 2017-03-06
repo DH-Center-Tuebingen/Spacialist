@@ -197,29 +197,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     };
 
-    function updateElementData(elem) {
-        updateElementDataHelper(elem, main.contextList);
-    }
-
-    function updateElementDataHelper(elem, children) {
-        if(typeof children == 'undefined') return;
-        for(var i=0; i<children.length; i++) {
-            var child = children[i];
-            if(child.id == elem.id) {
-                child.data = elem.data;
-                if(child.name != elem.name) {
-                    console.log(child.name);
-                    console.log(elem.name);
-                    $scope.renameMarker(child.name, elem.name);
-                    child.name = elem.name;
-                    setMarker(elem, true);
-                }
-                break;
-            }
-            updateElementDataHelper(elem, child.children);
-        }
-    }
-
     main.storeElement = function(elem, data) {
         var parsedData = [];
         for(var key in data) {
@@ -241,7 +218,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 return;
             }
             elem.data = response.data;
-            updateElementData(elem);
         });
     };
 
