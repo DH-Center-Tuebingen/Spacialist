@@ -35,6 +35,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     //     }
     // };
 
+    map.getPopupGeoId = function() {
+        return map.mapObject._popup.options.feature.id;
+    };
+
     map.addGeodata = function(type, coords, id) {
         var formData = new FormData();
         if(id) {
@@ -125,6 +129,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
     map.setCurrentGeodata = function(gid) {
         map.currentGeodata.id = gid;
+    };
+
+    map.unsetCurrentGeodata = function() {
+        delete map.currentGeodata.id;
     };
 
     map.linkGeodata = function(cid, gid) {
