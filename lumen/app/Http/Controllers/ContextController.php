@@ -107,7 +107,7 @@ class ContextController extends Controller {
     public function get() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
+                ->select('c.thesaurus_url as index', 'ca.context_type_id', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de' limit 1) as title"),
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) as val")
                 )
@@ -366,7 +366,7 @@ class ContextController extends Controller {
             ], 403);
         }
         $rows = DB::table('context_types as c')
-        ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
+        ->select('ca.context_type_id', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
         )
@@ -444,7 +444,7 @@ class ContextController extends Controller {
     public function getArtifacts() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
+                ->select('c.thesaurus_url as index', 'ca.context_type_id', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
                 )
@@ -509,13 +509,13 @@ class ContextController extends Controller {
             $context = new Context();
         }
         if($request->has('name')) $context->name = $request->get('name');
-        if($request->has('ctid')) $context->context_type_id = $request->get('ctid');
+        if($request->has('context_type_id')) $context->context_type_id = $request->get('context_type_id');
         if($request->has('root_cid')) $context->root_context_id = $request->get('root_cid');
         $context->lasteditor = $user['name'];
         $context->save();
 
         $id = $context->id;
-        $message = $this->updateOrInsert($request->except(['id', 'name', 'ctid', 'root_cid']), $id, $isUpdate, $user);
+        $message = $this->updateOrInsert($request->except(['id', 'name', 'context_type_id', 'root_cid']), $id, $isUpdate, $user);
         if(isset($message['error'])){
             return response()->json($message);
         }
@@ -633,6 +633,7 @@ class ContextController extends Controller {
             if($value == 'null' || $value === null) continue;
             $ids = explode("_", $key);
             $aid = $ids[0];
+            if(isset($ids[1]) && $ids[1] == 'desc') continue;
             $datatype = Attribute::find($aid)->datatype;
             $jsonArr = json_decode($value);
             if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
@@ -667,8 +668,13 @@ class ContextController extends Controller {
                                 $set = $v->name;
                                 $val = $row->str_val;
                             } else {
-                                $set = ThConcept::find($v->narrower_id)->concept_url;
-                                $val = $row->thesaurus_val;
+                                try {
+                                    $con = ThConcept::findOrFail($v->narrower_id);
+                                    $set = $con->concept_url;
+                                    $val = $row->thesaurus_val;
+                                } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                                    continue;
+                                }
                             }
                             if($val === $set) {
                                 unset($jsonArr[$k]);

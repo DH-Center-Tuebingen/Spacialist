@@ -48,7 +48,7 @@
             </tr>
         </table>
         <div class="col-md-5">
-            <ui-select id="lit{{ attr.ctid }}_{{ attr.attr }}_{{ attr.option }}" ng-model="mc.modalFields.currentSource" close-on-select="true">
+            <ui-select id="lit{{ attr.context_type_id }}_{{ attr.attr }}_{{ attr.option }}" ng-model="mc.modalFields.currentSource" close-on-select="true">
                 <ui-select-match placeholder="{{'evidence.sources.literature'|translate}}">
                     {{ $select.selected.title | truncate:80:true }}
                 </ui-select-match>
