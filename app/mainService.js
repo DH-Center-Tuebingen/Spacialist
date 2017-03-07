@@ -239,6 +239,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
         for(var i=0; i<elem.data.length; i++) {
             var d = elem.data[i];
+            if(d.key.endsWith('_desc')) continue;
             var currValue = '';
             if (typeof d.value === 'object') {
                 currValue = angular.toJson(d.value);
