@@ -172,7 +172,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             root_cid: oldInfo.root_cid,
             typeid: oldInfo.typeid,
             typename: oldInfo.typename,
-            ctid: oldInfo.ctid,
+            context_type_id: oldInfo.context_type_id,
             color: oldInfo.color,
             icon: oldInfo.icon
         };
