@@ -567,7 +567,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         loadLinkedImages(main.currentElement.element.id);
     };
 
-    main.openGeographyModal = function($scope) {
+    main.openGeographyModal = function($scope, aid) {
         var featureGroup = new L.FeatureGroup();
         var createdListener = $scope.$on('leafletDirectiveMap.placermap.draw:created', function(event, args) {
             var layer = args.leafletEvent.layer;
@@ -576,7 +576,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         var drawStartListener = $scope.$on('leafletDirectiveMap.placermap.draw:drawstart', function(event, args) {
             featureGroup.clearLayers();
         });
-        console.log(mapService.map.drawOptions);
         var drawOptions = angular.copy(mapService.map.drawOptions);
         drawOptions.edit.featureGroup = featureGroup;
         var modalInstance = $uibModal.open({
@@ -598,7 +597,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                     var layers = featureGroup.getLayers();
                     if(layers.length == 1) {
                         var layer = layers[0];
-                        console.log(main.toWkt(layer));
+                        var wkt = main.toWkt(layer);
+                        var inp = document.getElementById('a' + aid);
+                        inp.value = wkt;
+                        console.log(wkt);
                     }
                     $uibModalInstance.dismiss('ok');
                 };
@@ -699,24 +701,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         return {
             'color': 'hsl(' + hsl.join(',') + ')'
         };
-    };
-
-    main.toWkt = function(layer) {
-        var coords = [];
-        if(layer instanceof L.Polygon || layer instanceof L.Polyline) {
-            var latlngs = layer.getLatLngs();
-            for(var i=0; i<latlngs.length; i++) {
-                coords.push(latlngs[i].lng + ' ' + latlngs[i].lat);
-            }
-            if (layer instanceof L.Polygon) {
-                var latlng = layer.getLatLngs()[0];
-                return 'POLYGON((' + coords.join(',') + ',' + latlng.lng + ' ' + latlng.lat + '))';
-            } else if (layer instanceof L.Polyline) {
-                return 'LINESTRING(' + coords.join(',') + ')';
-            }
-        } else if (layer instanceof L.Marker) {
-            return 'POINT(' + layer.getLatLng().lng + ' ' + layer.getLatLng().lat + ')';
-        }
     };
 
     return main;

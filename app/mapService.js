@@ -280,6 +280,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                         minWidth: 300,
                         feature: feature
                     });
+                    feature.properties.wkt = map.toWkt(layer);
                 }
                 map.featureGroup.addLayer(layer);
                 var newBounds = map.featureGroup.getBounds();
@@ -374,6 +375,24 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     function isIllegalKey(k) {
         return availableLayerKeys.indexOf(k) < 0;
     }
+
+    map.toWkt = function(layer) {
+        var coords = [];
+        if(layer instanceof L.Polygon || layer instanceof L.Polyline) {
+            var latlngs = layer.getLatLngs();
+            for(var i=0; i<latlngs.length; i++) {
+                coords.push(latlngs[i].lng + ' ' + latlngs[i].lat);
+            }
+            if (layer instanceof L.Polygon) {
+                var latlng = layer.getLatLngs()[0];
+                return 'POLYGON((' + coords.join(',') + ',' + latlng.lng + ' ' + latlng.lat + '))';
+            } else if (layer instanceof L.Polyline) {
+                return 'LINESTRING(' + coords.join(',') + ')';
+            }
+        } else if (layer instanceof L.CircleMarker) {
+            return 'POINT(' + layer.getLatLng().lng + ' ' + layer.getLatLng().lat + ')';
+        }
+    };
 
     return map;
 }]);
