@@ -118,7 +118,7 @@
                             </div>
                             <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple accept="image/*">{{'context-form.tabs.photos.upload-button'|translate}}</button>
                             <ul>
-                                <li ng-repeat="f in uploadingImages">
+                                <li ng-repeat="f in upload.files">
                                     {{ f.name }} {{ f.$errorParam }}
                                     <div class="progress">
                                         <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ f.progress }}%">
@@ -131,7 +131,7 @@
                                         </div>
                                     </div>
                                 </li>
-                                <li ng-repeat="f in errFiles">{{f.name}} {{f.$error}} {{f.$errorParam}}
+                                <li ng-repeat="f in upload.errFiles">{{f.name}} {{f.$error}} {{f.$errorParam}}
                                 </li>
                             </ul>
                         </div>

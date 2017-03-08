@@ -11,7 +11,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         'subdomains', 'attribution', 'opacity', 'layers', 'styles', 'format', 'version', 'visible'
     ];
 
-    initMapVariables();
     initMap();
 
     function cleanName(name) {
@@ -35,6 +34,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     //         }
     //     }
     // };
+
+    map.getPopupGeoId = function() {
+        return map.mapObject._popup.options.feature.id;
+    };
 
     map.addGeodata = function(type, coords, id) {
         var formData = new FormData();
@@ -128,6 +131,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         map.currentGeodata.id = gid;
     };
 
+    map.unsetCurrentGeodata = function() {
+        delete map.currentGeodata.id;
+    };
+
     map.linkGeodata = function(cid, gid) {
         return httpGetPromise.getData('api/context/link/geodata/' + cid + '/' + gid);
     };
@@ -188,6 +195,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             map.geoJson = geoJson;
         });
     }
+
+    map.reinitVariables = function() {
+        initMapVariables();
+    };
 
     function initMapVariables() {
         map.map = {};

@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', '$timeout', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, $timeout, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, $timeout, $translate) {
     var main = {};
     var modalFields;
 
@@ -34,6 +34,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         getArtifacts();
         getDropdownOptions();
         getContextList();
+        mapService.reinitVariables();
     }
 
     function getContexts() {
@@ -183,7 +184,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     main.createNewContext = function(data) {
         defaults = {
             reclevel: -1,
-            children: []
+            children: main.contextList
         };
         $translate('create-dialog.new-top-context').then(function(translation) {
             defaults.name = translation;
@@ -275,11 +276,24 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     }
 
     main.deleteElement = function(elem) {
-        modalFactory.deleteModal(elem.name, function() {
-            deleteElement(elem, function() {
-                //$itemScope.remove(); TODO remove from list
-            });
-        }, 'delete-confirm.warning');
+        var toDelete = true;
+        httpGetPromise.getData('api/context/get/parents/' + elem.id).then(
+            function(response) {
+                if(response.error) {
+                    modalFactory.errorModal(response.error);
+                    return;
+                }
+                var path = response.path;
+                modalFactory.deleteModal(elem.name, function() {
+                    deleteElement(elem, function() {
+                        updateContext(path, {}, toDelete);
+                        if(main.currentElement.element.id == elem.id) {
+                            main.unsetCurrentElement();
+                        }
+                    });
+                }, 'delete-confirm.warning');
+            }
+        );
     };
 
     function deleteElement(elem, onSuccess) {
@@ -292,6 +306,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     main.openSourceModal = function(fieldname, fieldid, currentVal, currentDesc) {
         var aid = fieldid;
         var cid = main.currentElement.element.id;
+        if(!main.currentElement.sources['#'+aid]) {
+            main.currentElement.sources['#'+aid] = [];
+        }
         modalFields = {
             name: fieldname,
             id: aid,
@@ -412,31 +429,36 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         return parsedData;
     }
 
-    main.updateContextById = function(id, newValues) {
+    main.updateContextById = function(id, newValues, toDelete) {
+        toDelete = toDelete || false;
         httpGetFactory('api/context/get/parents/' + id, function(response) {
             if(response.error) {
                 modalFactory.errorModal(response.error);
                 return;
             }
-            updateContext(response.path, newValues);
+            updateContext(response.path, newValues, toDelete);
         });
     };
 
-    function updateContext(path, values) {
+    function updateContext(path, values, toDelete) {
         var t = angular.element(document.getElementById('context-tree')).scope();
         var nodesScope = t.$nodesScope;
         var children = nodesScope.childNodes();
-        updateContextHelper(path, children, values, 0);
+        updateContextHelper(path, children, values, 0, toDelete);
     }
 
-    function updateContextHelper(pathArray, children, values, depth) {
+    function updateContextHelper(pathArray, children, values, depth, toDelete) {
         var level = pathArray[depth];
         for(var j=0; j<children.length; j++) {
             var child = children[j];
             if(level.id == child.$modelValue.id) {
-                if(path.length - 1 == i) {
-                    angular.merge(main.currentElement.element, values);
-                    angular.merge(child.$modelValue, values);
+                if(pathArray.length - 1 == depth) {
+                    if(toDelete) {
+                        child.remove();
+                    } else {
+                        angular.merge(main.currentElement.element, values);
+                        angular.merge(child.$modelValue, values);
+                    }
                     break;
                 }
                 // child.expand();
@@ -451,7 +473,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                     }
                     children = child.childNodes();
                     depth++;
-                    updateContextHelper(pathArray, children, values, depth);
+                    updateContextHelper(pathArray, children, values, depth, toDelete);
                 }, 0, false);
                 break;
             }
@@ -493,9 +515,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         }
     }
 
-    main.unsetCurrentElement = function() {
+    main.unsetCurrentElement = function(dontUnsetUnlinked) {
+        dontUnsetUnlinked = dontUnsetUnlinked || false;
         if(typeof main.currentElement == 'undefined') return;
-        // setMarker(main.currentElement, false);
+        if(dontUnsetUnlinked) {
+            console.log(main.currentElement.element.geodata_id);
+            if(typeof main.currentElement.element.geodata_id == 'undefined' || main.currentElement.element.geodata_id === null) {
+                return;
+            }
+        }
         main.currentElement.element = {};
         main.currentElement.data = {};
         main.currentElement.fields = {};
@@ -513,7 +541,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
     main.setCurrentElement = function(target, elem, openAgain) {
         if(typeof elem != 'undefined' && elem.id == target.id) {
             main.unsetCurrentElement();
-            mapService.closePopup();
+            if(mapService.getPopupGeoId() == elem.geodata_id) mapService.closePopup();
             return;
         }
         elem = target;
@@ -560,10 +588,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
         if(typeof openAgain == 'undefined') openAgain = true;
         if(elem.geodata_id !== null && openAgain) {
             mapService.openPopup(elem.geodata_id);
-        } else if(elem.geodata_id === null) {
-            mapService.closePopup();
         }
-        // setMarker(main.currentElement, true);
         loadLinkedImages(main.currentElement.element.id);
     };
 
@@ -622,23 +647,27 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             msg = 'create-dialog.new-artifact-description';
         }
         modalFactory.createModal(parent.name, msg, selection, function(name, type) {
-            var elem = {
-                name: name,
-                ctid: type.ctid,
-                root_cid: parent.id,
-                reclevel: parent.reclevel + 1,
-                typeid: type.type,
-                typename: type.index,
-                typelabel: type.title,
-                data: [],
-                children: []
-            };
             var formData = new FormData();
             formData.append('name', name);
             formData.append('ctid', type.ctid);
             if(typeof parent.id != 'undefined') formData.append('root_cid', parent.id);
-            httpPostFactory('api/context/set', formData, function(newElem) {
-                elem.id = newElem.id;
+            httpPostFactory('api/context/set', formData, function(response) {
+                var newContext = response.context;
+                var elem = {
+                    id: newContext.id,
+                    name: name,
+                    context_type_id: type.ctid,
+                    root_context_id: parent.id,
+                    reclevel: parent.reclevel + 1,
+                    typeid: type.type,
+                    typename: type.index,
+                    typelabel: type.title,
+                    data: [],
+                    children: [],
+                    lasteditor: newContext.lasteditor,
+                    updated_at: newContext.updated_at,
+                    created_at: newContext.created_at
+                };
                 parent.children.push(elem);
                 main.setCurrentElement(elem, main.currentElement);
                 $itemScope.expand();
