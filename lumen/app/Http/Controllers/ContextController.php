@@ -10,9 +10,11 @@ use App\Context;
 use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
+use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
 use Phaza\LaravelPostgis\Geometries\Polygon;
+use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Zizaco\Entrust;
 use \DB;
 use Illuminate\Http\Request;
@@ -99,9 +101,36 @@ class ContextController extends Controller {
                                         ->first();
                 }
                 $attr->val = json_encode($attrVal);
+            } else if($attr->datatype == 'geography') {
+                $attr->val = $attr->geography_val->toWkt();
             }
         }
         return $data;
+    }
+
+    private function parseWkt($wkt) {
+        try {
+            $geom = Geometry::getWKTClass($wkt);
+            $parsed = $geom::fromWKT($wkt);
+            return $parsed;
+        } catch(UnknownWKTTypeException $e) {
+            return -1;
+        }
+    }
+
+    public function wktToGeojson(Request $request) {
+        if(!$request->has('wkt')) return;
+        $wkt = $request->get('wkt');
+        $parsed = $this->parseWkt($wkt);
+        if($parsed !== -1) {
+            return response()->json([
+                'geometry' => $parsed
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'unsupported_wkt'
+            ]);
+        }
     }
 
     public function get() {
@@ -730,25 +759,25 @@ class ContextController extends Controller {
                         $attrValue->context_id = $cid;
                         $attrValue->attribute_id = $aid;
                     }
-                    $attrValue->lasteditor = $user['name'];
-                    if(is_object($jsonArr)) {
-                        $attrValue->json_val = json_encode($jsonArr);
-                    } else {
-                        $attrValue->str_val = $value;
-                    }
-                    $attrValue->save();
                 } else {
                     $attrValue = new AttributeValue();
                     $attrValue->context_id = $cid;
                     $attrValue->attribute_id = $aid;
-                    $attrValue->lasteditor = $user['name'];
-                    if(is_object($jsonArr)) {
-                        $attrValue->json_val = json_encode($jsonArr);
+                }
+                $attrValue->lasteditor = $user['name'];
+                if(is_object($jsonArr)) {
+                    $attrValue->json_val = json_encode($jsonArr);
+                } else {
+                    if($datatype == 'geography') {
+                        $parsed = $this->parseWkt($value);
+                        if($parsed !== -1) {
+                            $attrValue->geography_val = $parsed;
+                        }
                     } else {
                         $attrValue->str_val = $value;
                     }
-                    $attrValue->save();
                 }
+                $attrValue->save();
             }
         }
     }
