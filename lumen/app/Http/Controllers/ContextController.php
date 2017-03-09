@@ -102,7 +102,8 @@ class ContextController extends Controller {
                 }
                 $attr->val = json_encode($attrVal);
             } else if($attr->datatype == 'geography') {
-                $attr->val = $attr->geography_val->toWkt();
+                $tmp = AttributeValue::find($attr->id);
+                $attr->val = $tmp->geography_val->toWKT();
             }
         }
         return $data;
