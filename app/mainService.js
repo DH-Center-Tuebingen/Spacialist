@@ -568,15 +568,98 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     main.openGeographyModal = function($scope, aid) {
+        var inp = document.getElementById('a' + aid);
+        if(inp.value) {
+            var formData = new FormData();
+            formData.append('wkt', inp.value);
+            httpPostFactory('api/context/wktToGeojson', formData, function(response) {
+                if(response.error) return;
+                var feature = {
+                    type: 'Feature',
+                    id: 1,
+                    geometry: {
+                        type: response.geometry.type,
+                        coordinates: response.geometry.coordinates
+                    }
+                };
+                geojson.data.features.push(feature);
+            });
+        }
         var featureGroup = new L.FeatureGroup();
         var createdListener = $scope.$on('leafletDirectiveMap.placermap.draw:created', function(event, args) {
+            var type = args.leafletEvent.layerType;
+            switch(type) {
+                case 'marker':
+                    type = 'Point';
+                    break;
+                case 'polyline':
+                    type = 'LineString';
+                    break;
+                case 'polygon':
+                    type = 'Polygon';
+                    break;
+            }
+            console.log(type);
             var layer = args.leafletEvent.layer;
-            featureGroup.addLayer(layer);
+            var coords = [];
+            if(type == 'Point') {
+                var latlng = layer.getLatLng();
+                coords.push(latlng.lng);
+                coords.push(latlng.lat);
+            } else {
+                var latlngs = layer.getLatLngs();
+                for(var i=0; i<latlngs.length; i++) {
+                    var curr = latlngs[i];
+                    var arr = [];
+                    arr.push(curr.lng);
+                    arr.push(curr.lat);
+                    coords.push(arr);
+                }
+                if(type == 'Polygon') {
+                    coords.push(coords[0]);
+                    var newCoords = [];
+                    newCoords.push(coords);
+                    coords = newCoords;
+                }
+            }
+            var feature = {
+                type: 'Feature',
+                id: 1,
+                geometry: {
+                    type: type,
+                    coordinates: coords
+                }
+            };
+            geojson.data.features.push(feature);
         });
         var drawStartListener = $scope.$on('leafletDirectiveMap.placermap.draw:drawstart', function(event, args) {
             featureGroup.clearLayers();
+            geojson.data.features.length = 0;
         });
         var drawOptions = angular.copy(mapService.map.drawOptions);
+        var bounds = mapService.createBoundsFromArray([
+            [-90, 180],
+            [90, -180]
+        ]);
+        var geojson = {
+            data: {
+                type: 'FeatureCollection',
+                features: []
+            },
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng);
+            },
+            onEachFeature: function(feature, layer) {
+                featureGroup.addLayer(layer);
+                var newBounds = featureGroup.getBounds();
+                var newNE = newBounds.getNorthEast();
+                var newSW = newBounds.getSouthWest();
+                bounds.northEast.lat = newNE.lat;
+                bounds.northEast.lng = newNE.lng;
+                bounds.southWest.lat = newSW.lat;
+                bounds.southWest.lng = newSW.lng;
+            }
+        };
         drawOptions.edit.featureGroup = featureGroup;
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/map-placer.html',
@@ -585,6 +668,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             controller: function($uibModalInstance) {
                 this.drawOptions = drawOptions;
                 this.controls = mapService.map.controls;
+                this.bounds = bounds;
+                this.geojson = geojson;
                 this.layers = mapService.map.layers;
                 this.cancel = function(result) {
                     createdListener();
@@ -597,10 +682,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     var layers = featureGroup.getLayers();
                     if(layers.length == 1) {
                         var layer = layers[0];
-                        var wkt = main.toWkt(layer);
-                        var inp = document.getElementById('a' + aid);
+                        var wkt = mapService.toWkt(layer);
                         inp.value = wkt;
-                        console.log(wkt);
                     }
                     $uibModalInstance.dismiss('ok');
                 };
