@@ -638,10 +638,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             geojson.data.features.length = 0;
         });
         var drawOptions = angular.copy(mapService.map.drawOptions);
-        var bounds = mapService.createBoundsFromArray([
-            [-90, 180],
-            [90, -180]
-        ]);
+        var bounds = mapService.map.bounds;
         var geojson = {
             data: {
                 type: 'FeatureCollection',
