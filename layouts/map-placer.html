@@ -9,7 +9,7 @@
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-default"
-      ng-click="mc.finish()">{{ 'ok' | translate }}</button>
+      ng-click="mc.finish()" ng-disabled="mc.geojson.data.features.length > 1">{{ 'ok' | translate }}</button>
       <button type="button" class="btn btn-default"
         ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
 </div>
