@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <h4>Select location on map</h4>
+    <h4>{{ 'map-placer-popup.title' | translate }}</h4>
 </div>
 <div class="modal-body">
     <div class="col-md-12">
@@ -9,7 +9,7 @@
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-default"
-      ng-click="mc.finish()" ng-disabled="mc.geojson.data.features.length > 1">{{ 'ok' | translate }}</button>
+      ng-click="mc.finish()" ng-disabled="mc.geojson.data.features.length > 1">{{ 'Ok' | translate }}</button>
       <button type="button" class="btn btn-default"
         ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
 </div>

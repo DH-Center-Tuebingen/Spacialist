@@ -10,6 +10,7 @@
     "context-form.no-selection-info": "Um die Eigenschaften eines Elements anzuzeigen, klicken Sie in der Baumansicht auf ein Element.",
     "context-form.fields.placeholder-wkt": "Bitte WKT eingeben (z.B. POINT(9.06262 48.52425))",
     "context-form.fields.open-map": "Karte öffnen",
+    "map-placer-popup.title": "Markierung auf die Karte zeichnen",
     "context-form.tabs.map": "Karte",
     "context-form.tabs.further-properties": "Weitere Eigenschaften",
     "context-form.tabs.harris-matrix": "Harris-Matrix",
