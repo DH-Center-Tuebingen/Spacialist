@@ -8,6 +8,8 @@
     "context-form.delete-button": "Delete",
     "context-form.no-selection": "No element selected.",
     "context-form.no-selection-info": "To show and edit the properties of an element, select the element in the tree view on the left-hand side.",
+    "context-form.fields.placeholder-wkt": "Please Enter WKT (e.g. POINT(9.06262 48.52425))",
+    "context-form.fields.open-map": "Open Map",
     "context-form.tabs.map": "Map",
     "context-form.tabs.further-properties": "Further Properties",
     "context-form.tabs.harris-matrix": "Harris Matrix",

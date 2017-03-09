@@ -8,6 +8,8 @@
     "context-form.delete-button": "Löschen",
     "context-form.no-selection": "Kein Element ausgewählt.",
     "context-form.no-selection-info": "Um die Eigenschaften eines Elements anzuzeigen, klicken Sie in der Baumansicht auf ein Element.",
+    "context-form.fields.placeholder-wkt": "Bitte WKT eingeben (z.B. POINT(9.06262 48.52425))",
+    "context-form.fields.open-map": "Karte öffnen",
     "context-form.tabs.map": "Karte",
     "context-form.tabs.further-properties": "Weitere Eigenschaften",
     "context-form.tabs.harris-matrix": "Harris-Matrix",
