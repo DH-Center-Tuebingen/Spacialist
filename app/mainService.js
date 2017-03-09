@@ -601,7 +601,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     type = 'Polygon';
                     break;
             }
-            console.log(type);
             var layer = args.leafletEvent.layer;
             var coords = [];
             if(type == 'Point') {
@@ -687,6 +686,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                         var wkt = mapService.toWkt(layer);
                         inp.value = wkt;
                         angular.element(inp).change(); // hack to dirty the input field
+                    } else {
+                        inp.value = '';
+                        angular.element(inp).change();
                     }
                     $uibModalInstance.dismiss('ok');
                 };
