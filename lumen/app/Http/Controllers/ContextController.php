@@ -755,6 +755,10 @@ class ContextController extends Controller {
                             ['attribute_id', '=', $attr->attribute_id],
                             ['id', '=', $attr->id]
                         ])->first();
+                        if($value == '' || $value === null) {
+                            AttributeValue::find($attrValue->id)->delete();
+                            continue;
+                        }
                     } else {
                         $attrValue = new AttributeValue();
                         $attrValue->context_id = $cid;
