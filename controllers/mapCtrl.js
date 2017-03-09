@@ -50,10 +50,10 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
     /**
      * listener for different leaflet actions
      */
-    $scope.$on('leafletDirectiveMap.popupclose', function(event, args) {
+    $scope.$on('leafletDirectiveMap.mainmap.popupclose', function(event, args) {
         mapService.unsetCurrentGeodata();
     });
-    $scope.$on('leafletDirectiveMap.popupopen', function(event, args) {
+    $scope.$on('leafletDirectiveMap.mainmap.popupopen', function(event, args) {
         var popup = args.leafletEvent.popup;
         var newScope = $scope.$new();
         newScope.stream = popup.options.feature;
@@ -78,28 +78,17 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
         });
     });
 
-    var getCoords = function(layer, type) {
-        var coords;
-        if(type == 'marker' || type == 'Point') {
-            coords = [ layer.getLatLng() ];
-        } else {
-            coords = layer.getLatLngs();
-            if(type.toLowerCase() == 'polygon') coords.push(angular.copy(coords[0]));
-        }
-        return coords;
-    };
-
-    $scope.$on('leafletDirectiveDraw.draw:edited', function(event, args) {
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:edited', function(event, args) {
         var layers = args.leafletEvent.layers.getLayers();
         angular.forEach(layers, function(layer, key) {
             var type = layer.feature.geometry.type;
-            var coords = getCoords(layer, type);
+            var coords = mapService.getCoords(layer, type);
             var id = layer.feature.id;
             mapService.addGeodata(type, coords, id);
         });
     });
 
-    $scope.$on('leafletDirectiveDraw.draw:deleted', function(event, args) {
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:deleted', function(event, args) {
         var layers = args.leafletEvent.layers.getLayers();
         angular.forEach(layers, function(layer, key) {
             var id = layer.feature.id;
@@ -111,17 +100,11 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
     /**
      * If the marker has been created, add the marker to the marker-array and store it in the database
      */
-    $scope.$on('leafletDirectiveDraw.draw:created', function(event, args) {
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:created', function(event, args) {
         var type = args.leafletEvent.layerType;
         var layer = args.leafletEvent.layer;
-        var coords = getCoords(layer, type);
+        var coords = mapService.getCoords(layer, type);
         mapService.addGeodata(type, coords);
-    });
-    $scope.$on('leafletDirectiveDraw.draw:drawstart', function(event, args) {
-        $scope.markerPlaceMode = true;
-    });
-    $scope.$on('leafletDirectiveDraw.draw:drawstop', function(event, args) {
-        $scope.markerPlaceMode = false;
     });
 
     $scope.linkGeodata = function(cid, gid) {

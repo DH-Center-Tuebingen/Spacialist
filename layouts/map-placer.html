@@ -1,0 +1,15 @@
+<div class="modal-header">
+    <h4>{{ 'map-placer-popup.title' | translate }}</h4>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <leaflet id="placermap" layers="mc.layers" bounds="mc.bounds" geojson="mc.geojson" lf-draw="mc.drawOptions" controls="mc.controls" height="600px" width="100%">
+        </leaflet>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default"
+      ng-click="mc.finish()" ng-disabled="mc.geojson.data.features.length > 1">{{ 'Ok' | translate }}</button>
+      <button type="button" class="btn btn-default"
+        ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
+</div>

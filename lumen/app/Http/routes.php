@@ -59,6 +59,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('context/set/icon', 'ContextController@setIcon');
     $app->post('sources/add', 'SourceController@add');
     $app->post('context/set/possibility', 'ContextController@setPossibility');
+    $app->post('context/wktToGeojson', 'ContextController@wktToGeojson');
     $app->post('user/logout', 'UserController@logout');
     $app->post('user/switch', 'UserController@switchRole');
     $app->post('user/get', 'UserController@get');
