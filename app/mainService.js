@@ -202,7 +202,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         for(var key in data) {
             if(data.hasOwnProperty(key)) {
                 var value = data[key];
-                if(key != 'name' && !key.endsWith('pos')) {
+                if(key != 'name' && !key.endsWith('pos') && !key.endsWith('desc')) {
                     var attr = {};
                     attr.key = key;
                     attr.value = value;
@@ -239,7 +239,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
         for(var i=0; i<elem.data.length; i++) {
             var d = elem.data[i];
-            if(d.key.endsWith('_desc')) continue;
             var currValue = '';
             if (typeof d.value === 'object') {
                 currValue = angular.toJson(d.value);
@@ -399,6 +398,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
             } else if(dType == 'epoch') {
                 if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
+            } else if(dType == 'geography') {
+                console.log(value.val);
+                parsedData[index] = value.val;
             } else {
                 parsedData[index] = val;
             }
@@ -684,6 +686,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                         var layer = layers[0];
                         var wkt = mapService.toWkt(layer);
                         inp.value = wkt;
+                        angular.element(inp).change(); // hack to dirty the input field
                     }
                     $uibModalInstance.dismiss('ok');
                 };
