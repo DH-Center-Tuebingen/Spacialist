@@ -110,6 +110,17 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         }
     };
 
+    map.getCoords = function(layer, type) {
+        var coords;
+        if(type == 'marker' || type == 'Point') {
+            coords = [ layer.getLatLng() ];
+        } else {
+            coords = layer.getLatLngs();
+            if(type.toLowerCase() == 'polygon') coords.push(angular.copy(coords[0]));
+        }
+        return coords;
+    };
+
     map.closePopup = function() {
         map.mapObject.closePopup();
     };
@@ -200,9 +211,13 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         initMapVariables();
     };
 
+    map.createBoundsFromArray = function(arr) {
+        return leafletBoundsHelpers.createBoundsFromArray(arr);
+    };
+
     function initMapVariables() {
         map.map = {};
-        map.map.bounds = leafletBoundsHelpers.createBoundsFromArray([
+        map.map.bounds = map.createBoundsFromArray([
             [-90, 180],
             [90, -180]
         ]);
@@ -291,8 +306,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                         minWidth: 300,
                         feature: feature
                     });
-                    feature.properties.wkt = map.toWkt(layer);
                 }
+                feature.properties.wkt = map.toWkt(layer);
                 map.featureGroup.addLayer(layer);
                 var newBounds = map.featureGroup.getBounds();
                 var newNE = newBounds.getNorthEast();

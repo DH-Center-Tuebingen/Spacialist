@@ -78,22 +78,11 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
         });
     });
 
-    var getCoords = function(layer, type) {
-        var coords;
-        if(type == 'marker' || type == 'Point') {
-            coords = [ layer.getLatLng() ];
-        } else {
-            coords = layer.getLatLngs();
-            if(type.toLowerCase() == 'polygon') coords.push(angular.copy(coords[0]));
-        }
-        return coords;
-    };
-
     $scope.$on('leafletDirectiveDraw.mainmap.draw:edited', function(event, args) {
         var layers = args.leafletEvent.layers.getLayers();
         angular.forEach(layers, function(layer, key) {
             var type = layer.feature.geometry.type;
-            var coords = getCoords(layer, type);
+            var coords = mapService.getCoords(layer, type);
             var id = layer.feature.id;
             mapService.addGeodata(type, coords, id);
         });
@@ -114,7 +103,7 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
     $scope.$on('leafletDirectiveDraw.mainmap.draw:created', function(event, args) {
         var type = args.leafletEvent.layerType;
         var layer = args.leafletEvent.layer;
-        var coords = getCoords(layer, type);
+        var coords = mapService.getCoords(layer, type);
         mapService.addGeodata(type, coords);
     });
 
