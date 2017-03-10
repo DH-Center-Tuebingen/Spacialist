@@ -151,10 +151,14 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                 };
                 this.onEdit = function(roleinfo) {
                     var changes = {};
-                    for(var key in role) {
-                        if(role.hasOwnProperty(key)) {
-                            if(role[key] != roleinfo[key]) {
-                                changes[key] = roleinfo[key];
+                    if(!role) {
+                        changes = roleinfo;
+                    } else {
+                        for(var key in role) {
+                            if(role.hasOwnProperty(key)) {
+                                if(role[key] != roleinfo[key]) {
+                                    changes[key] = roleinfo[key];
+                                }
                             }
                         }
                     }

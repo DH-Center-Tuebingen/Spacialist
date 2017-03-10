@@ -72,11 +72,10 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService'
     };
 
     $scope.openAddRoleDialog = function() {
-        console.log("openAddRoleDialog");
+        userService.openEditRoleDialog();
     };
 
     $scope.openEditRoleDialog = function(role) {
-        console.log(role);
         userService.openEditRoleDialog(role);
     };
 

@@ -81,20 +81,25 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     };
 
     function editRole(role, changes) {
-        console.log(role);
         var formData = new FormData();
-        formData.append('role_id', role.id);
+        if(role) formData.append('role_id', role.id);
         for(var k in changes) {
             if(changes.hasOwnProperty(k)) {
                 formData.append(k, changes[k]);
             }
         }
         httpPostFactory('api/role/edit', formData, function(response) {
+            var isNew = false;
+            if(!role) {
+                role = {};
+                isNew = true;
+            }
             for(var k in response.role) {
                 if(response.role.hasOwnProperty(k)) {
                     role[k] = response.role[k];
                 }
             }
+            if(isNew) user.roles.push(role);
         });
     }
 

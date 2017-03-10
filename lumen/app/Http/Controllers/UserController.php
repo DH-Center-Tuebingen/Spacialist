@@ -196,8 +196,12 @@ class UserController extends Controller
     }
 
     public function editRole(Request $request) {
-        $role_id = $request->get('role_id');
-        $editedRole = Role::find($role_id);
+        if($request->has('role_id')) {
+            $role_id = $request->get('role_id');
+            $editedRole = Role::find($role_id);
+        } else {
+            $editedRole = new Role();
+        }
         $keys = ['name', 'display_name', 'description'];
         $updated = false;
         foreach($keys as $key) {
