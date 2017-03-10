@@ -92,6 +92,7 @@
     "delete-confirm.warning" : "Wenn Sie dieses Element löschen, werden auch alle Kind-Elemente gelöscht!",
     "user.edit.heading": "Benutzer Bearbeiten",
     "user.edit.new-password": "Neues Passwort",
+    "role.edit.heading": "Rolle Bearbeiten",
     "map-marker.not-linked-info": "Diese Markierung ist mit keinem Kontext verknüpft.",
     "map-marker.how-to-link": "Um eine Verknüpfung herzustellen, wählen Sie einen Kontext aus dem Baum. Dann erscheint hier ein Knopf zum Verknüpfen der Markierung mit dem gewählten Kontext.",
     "map-marker.options.label": "Optionen für Markierung",
