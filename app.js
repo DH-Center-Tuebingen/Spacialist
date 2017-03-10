@@ -141,6 +141,31 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function() {}, function() {});
     };
+    this.editRoleModal = function(onEdit, role) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/edit-role.html',
+            controller: function($uibModalInstance) {
+                this.roleinfo = angular.copy(role);
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.onEdit = function(roleinfo) {
+                    var changes = {};
+                    for(var key in role) {
+                        if(role.hasOwnProperty(key)) {
+                            if(role[key] != roleinfo[key]) {
+                                changes[key] = roleinfo[key];
+                            }
+                        }
+                    }
+                    onEdit(role, changes);
+                    $uibModalInstance.dismiss('ok');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function() {}, function() {});
+    };
     this.addLiteratureModal = function(onCreate, types, selectedType, fields, index) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/new-literature.html',
@@ -711,6 +736,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         .state('user', {
             url: '/user',
             templateUrl: 'user.html'
+        })
+        .state('roles', {
+            url: '/roles',
+            templateUrl: 'roles.html'
         })
         .state('literature', {
             url: '/literature',

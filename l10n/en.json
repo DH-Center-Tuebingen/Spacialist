@@ -32,6 +32,8 @@
     "main.menu.browse-data-analysis": "Browse Data Analysis",
     "main.menu.literature": "Bibliography",
     "main.menu.user-management": "User Management",
+    "main.menu.user-list": "Users",
+    "main.menu.role-list": "Roles",
     "spacialist": "Spacialist",
     "literature.bibtex.type" : "Type",
     "literature.bibtex.author" : "Authors",

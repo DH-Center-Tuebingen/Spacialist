@@ -95,10 +95,22 @@
                                 <span class="fa fa-fw fa-sign-out"></span> {{ currentUser.user.name }}
                             </a>
                         </li>
-                        <li ng-if="currentUser.permissions.view_users">
-                            <a href="" ng-click="openUserManagement()">
-                                {{'main.menu.user-management'|translate}}
+                        <li ng-if="currentUser.permissions.view_users" class="dropdown" uib-dropdown>
+                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                {{'main.menu.user-management'|translate}} <span class="caret"></span>
                             </a>
+                            <ul class="dropdown-menu" uib-dropdown-menu>
+                                <li>
+                                    <a href="" ng-click="openUserManagement()">
+                                        <i class="fa fa-fw fa-users"></i> {{'main.menu.user-list'|translate}}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="" ng-click="openRoleManagement()">
+                                        <i class="fa fa-fw fa-cog"></i> {{'main.menu.role-list'|translate}}
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
