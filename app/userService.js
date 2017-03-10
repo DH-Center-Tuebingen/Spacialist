@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$auth', '$state', '$http', function(httpPostFactory, httpGetFactory, $auth, $state, $http) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'modalFactory', '$auth', '$state', '$http', function(httpPostFactory, httpGetFactory, modalFactory, $auth, $state, $http) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -8,6 +8,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$aut
     user.loginError = {};
     user.users = [];
     user.roles = [];
+    user.permissions = [];
     user.can = function(to) {
         if(typeof user.currentUser == 'undefined') return false;
         if(typeof user.currentUser.permissions[to] == 'undefined') return false;
@@ -54,10 +55,86 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$aut
 
     user.getRoles = function() {
         user.roles.length = 0;
+        user.permissions.length = 0;
         httpGetFactory('api/user/get/roles/all', function(response) {
+            angular.forEach(response.permissions, function(perm) {
+                user.permissions.push(perm);
+            });
             angular.forEach(response.roles, function(role, key) {
+                role.permissions = [];
                 user.roles.push(role);
             });
+        });
+    };
+
+    user.getRolePermissions = function(role) {
+        if(role.permissions) role.permissions.length = 0;
+        httpGetFactory('api/user/get/role/permissions/' + role.id, function(response) {
+            angular.forEach(response.permissions, function(perm) {
+                role.permissions.push(perm);
+            });
+        });
+    };
+
+    user.openEditRoleDialog = function(role) {
+        modalFactory.editRoleModal(editRole, role);
+    };
+
+    function editRole(role, changes) {
+        var formData = new FormData();
+        if(role) formData.append('role_id', role.id);
+        for(var k in changes) {
+            if(changes.hasOwnProperty(k)) {
+                formData.append(k, changes[k]);
+            }
+        }
+        httpPostFactory('api/role/edit', formData, function(response) {
+            var isNew = false;
+            if(!role) {
+                role = {};
+                isNew = true;
+            }
+            for(var k in response.role) {
+                if(response.role.hasOwnProperty(k)) {
+                    role[k] = response.role[k];
+                }
+            }
+            if(isNew) user.roles.push(role);
+        });
+    }
+
+    user.deleteRole = function(role) {
+        httpGetFactory('api/role/delete/' + role.id, function(response) {
+            if(response.error) return;
+            var index = user.roles.indexOf(role);
+            if(index > -1) user.roles.splice(index, 1);
+        });
+    };
+
+    user.addRolePermission = function(item, role) {
+        var formData = new FormData();
+        formData.append('role_id', role.id);
+        formData.append('permission_id', item.id);
+        httpPostFactory('api/role/add/permission', formData, function(response) {
+            // if an error occurs, remove added permission
+            if(response.error) {
+                var index = role.permissions.indexOf(item);
+                if(index > -1) role.permissions.splice(index, 1);
+                return;
+            }
+        });
+    };
+
+    user.removeRolePermission = function(item, role) {
+        var formData = new FormData();
+        formData.append('role_id', role.id);
+        formData.append('permission_id', item.id);
+        httpPostFactory('api/role/remove/permission', formData, function(response) {
+            // if an error occurs, readd removed permission
+            if(response.error) {
+                role.permissions.push(item);
+                return;
+            }
         });
     };
 

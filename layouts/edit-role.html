@@ -1,0 +1,38 @@
+<div class="modal-header">
+    <h4>{{'role.edit.heading'|translate}}</h4>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label class="control-label col-md-3" for="name">
+                    {{'role.name'|translate}}:
+                </label>
+                <div class="col-md-9">
+                    <input class="form-control" type="text" id="name" ng-model="mc.roleinfo.name" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-3" for="display_name">
+                    {{'role.display_name'|translate}}
+                </label>
+                <div class="col-md-9">
+                    <input class="form-control" type="text" id="display_name" ng-model="mc.roleinfo.display_name" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-3" for="description">
+                    {{'role.description'|translate}}:
+                </label>
+                <div class="col-md-9">
+                    <input class="form-control" type="text" id="description" ng-model="mc.roleinfo.description" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" ng-click="mc.onEdit(mc.roleinfo)">{{ 'Save' | translate }}</button>
+    <button type="button" class="btn btn-danger"
+      ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
+</div>
