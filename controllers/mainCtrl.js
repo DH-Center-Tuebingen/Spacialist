@@ -1,5 +1,4 @@
 spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'analysisService', 'mainService', 'literatureService', 'modalFactory', '$translate', function($rootScope, $scope, userService, analysisService, mainService, literatureService, modalFactory, $translate) {
-    var vm = this;
     $scope.literature = literatureService.literature;
 
     $scope.currentUser = userService.currentUser;
@@ -78,7 +77,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     };
 
     $scope.setCurrentElement = function(target, elem, openAgain) {
-        mainService.setCurrentElement(target, elem, vm.elementProperties, openAgain);
+        mainService.setCurrentElement(target, elem, openAgain);
     };
 
     $scope.createNewContext = function(data) {

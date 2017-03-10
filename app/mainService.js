@@ -4,6 +4,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
 
     main.currentElement = {
         element: {},
+        form: {},
         data: {},
         fields: {},
         sources: {}
@@ -472,7 +473,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             var child = children[j];
             if(level.id == child.$modelValue.id) {
                 if(pathArray.length - 1 == depth) {
-                    main.setCurrentElement(child.$modelValue, undefined, undefined, false);
+                    main.setCurrentElement(child.$modelValue, undefined, false);
                     break;
                 }
                 // child.expand();
@@ -517,16 +518,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         main.currentElement.sources[index].push(source);
     }
 
-    main.setCurrentElement = function(target, elem, elementProperties, openAgain) {
-        if(elementProperties && elementProperties.$dirty) {
+    main.setCurrentElement = function(target, elem, openAgain) {
+        if(main.currentElement.form && main.currentElement.form.$dirty) {
             var onDiscard = function() {
-                elementProperties.$setPristine();
-                return main.setCurrentElement(target, elem, undefined, openAgain);
+                main.currentElement.form.$setPristine();
+                return main.setCurrentElement(target, elem, openAgain);
             };
             var onConfirm = function() {
-                elementProperties.$setPristine();
+                main.currentElement.form.$setPristine();
                 main.storeElement(main.currentElement.element, main.currentElement.data);
-                return main.setCurrentElement(target, elem, undefined, openAgain);
+                return main.setCurrentElement(target, elem, openAgain);
             };
             modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
             return;
