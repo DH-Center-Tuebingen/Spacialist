@@ -472,7 +472,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             var child = children[j];
             if(level.id == child.$modelValue.id) {
                 if(pathArray.length - 1 == depth) {
-                    main.setCurrentElement(child.$modelValue, undefined, false);
+                    main.setCurrentElement(child.$modelValue, undefined, undefined, false);
                     break;
                 }
                 // child.expand();
@@ -517,7 +517,20 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         main.currentElement.sources[index].push(source);
     }
 
-    main.setCurrentElement = function(target, elem, openAgain) {
+    main.setCurrentElement = function(target, elem, elementProperties, openAgain) {
+        if(elementProperties && elementProperties.$dirty) {
+            var onDiscard = function() {
+                elementProperties.$setPristine();
+                return main.setCurrentElement(target, elem, undefined, openAgain);
+            };
+            var onConfirm = function() {
+                elementProperties.$setPristine();
+                main.storeElement(main.currentElement.element, main.currentElement.data);
+                return main.setCurrentElement(target, elem, undefined, openAgain);
+            };
+            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
+            return;
+        }
         if(typeof elem != 'undefined' && elem.id == target.id) {
             main.unsetCurrentElement();
             if(mapService.getPopupGeoId() == elem.geodata_id) mapService.closePopup();

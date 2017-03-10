@@ -1,4 +1,4 @@
-<div ng-controller="mainCtrl" resize-watcher>
+<div ng-controller="mainCtrl as mc" resize-watcher>
     <div class="col-md-2" id="tree-container" ng-hide="activeAnalysis.isActive">
         <div ng-if="currentUser.permissions.view_concepts">
             <h3>{{'context-tree.heading'|translate}}</h3>
@@ -21,7 +21,7 @@
                         <a href="" ng-click="deleteElement(currentElement.element)"><span class="fa fa-fw fa-trash-o fa-red"></span></a>
                     </li>
                 </ul>
-                <form class="form-horizontal" role="form" ng-if="currentElement.fields">
+                <form class="form-horizontal" role="form" ng-if="currentElement.fields" name="mc.elementProperties">
                     <div class="form-group">
                         <label class="control-label col-md-3" for="name">
                             {{'context-form.name'|translate}}:

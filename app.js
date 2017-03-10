@@ -203,6 +203,26 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
+    this.warningModal = function(msg, onConfirm, onDiscard) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/warning.html',
+            controller: function($uibModalInstance) {
+                this.msg = msg;
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.onConfirm = function() {
+                    $uibModalInstance.dismiss('ok');
+                    onConfirm();
+                };
+                this.onDiscard = function() {
+                    $uibModalInstance.dismiss('ok');
+                    onDiscard();
+                };
+            },
+            controllerAs: 'mc'
+        });
+    };
 }]);
 
 spacialistApp.directive('spinner', function() {

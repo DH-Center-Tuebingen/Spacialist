@@ -1,4 +1,5 @@
 spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'analysisService', 'mainService', 'literatureService', 'modalFactory', '$translate', function($rootScope, $scope, userService, analysisService, mainService, literatureService, modalFactory, $translate) {
+    var vm = this;
     $scope.literature = literatureService.literature;
 
     $scope.currentUser = userService.currentUser;
@@ -13,7 +14,6 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.getColorForId = mainService.getColorForId;
     $scope.contextList = mainService.contextList;
     $scope.moduleExists = mainService.moduleExists;
-    $scope.setCurrentElement = mainService.setCurrentElement;
     $scope.unsetCurrentElement = mainService.unsetCurrentElement;
     $scope.analysisEntries = analysisService.entries;
     $scope.activeAnalysis = analysisService.activeAnalysis;
@@ -75,6 +75,10 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
 
     $scope.setActiveTab = function(tabId) {
         $scope.layerTwo.activeTab = tabId;
+    };
+
+    $scope.setCurrentElement = function(target, elem, openAgain) {
+        mainService.setCurrentElement(target, elem, vm.elementProperties, openAgain);
     };
 
     $scope.createNewContext = function(data) {
