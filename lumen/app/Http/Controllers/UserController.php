@@ -217,6 +217,11 @@ class UserController extends Controller
         ]);
     }
 
+    public function deleteRole($id) {
+        Role::find($id)->delete();
+        return response()->json();
+    }
+
     public function login(Request $request) {
         $this->validate($request, [
             'email'    => 'required|email|max:255',

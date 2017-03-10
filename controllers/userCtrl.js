@@ -67,8 +67,7 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService'
     };
 
     $scope.deleteRole = function(role) {
-        console.log("deleteRole");
-        console.log(role);
+        userService.deleteRole(role);
     };
 
     $scope.openAddRoleDialog = function() {

@@ -51,6 +51,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('user/get/roles/all', 'UserController@getRoles');
     $app->get('user/get/roles/{id}', 'UserController@getRolesByUser');
     $app->get('user/get/role/permissions/{id}', 'UserController@getPermissionsByRole');
+    $app->get('role/delete/{id}', 'UserController@deleteRole');
     $app->get('overlay/get/all', 'OverlayController@getAll');
     $app->post('image/upload', 'ImageController@uploadImage');
     $app->post('image/link', 'ImageController@link');

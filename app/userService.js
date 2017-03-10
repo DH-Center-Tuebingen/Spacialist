@@ -103,6 +103,14 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         });
     }
 
+    user.deleteRole = function(role) {
+        httpGetFactory('api/role/delete/' + role.id, function(response) {
+            if(response.error) return;
+            var index = user.roles.indexOf(role);
+            if(index > -1) user.roles.splice(index, 1);
+        });
+    };
+
     user.getUserRoles = function(id, $index) {
         httpGetFactory('api/user/get/roles/' + id, function(response) {
             user.users[$index].roles = response.roles;
