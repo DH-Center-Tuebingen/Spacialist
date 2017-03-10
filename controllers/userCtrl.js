@@ -2,6 +2,7 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService'
     $scope.currentUser = userService.currentUser;
     $scope.users = userService.users;
     $scope.roles = userService.roles;
+    $scope.permissions = userService.permissions;
     $scope.loginError = userService.loginError;
     $scope.analysisEntries = analysisService.entries;
     $scope.setAnalysisEntry = analysisService.setAnalysisEntry;
@@ -33,6 +34,10 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService'
         $state.go('user', {});
     };
 
+    $scope.openRoleManagement = function() {
+        $state.go('roles', {});
+    };
+
     $scope.openLiteratureView = function() {
         $state.go('literature', {});
     };
@@ -43,6 +48,36 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService'
 
     $scope.getRoles = function() {
         userService.getRoles();
+    };
+
+    $scope.getRolePermissions = function(role) {
+        userService.getRolePermissions(role);
+    };
+
+    $scope.addRolePermission = function(item, role) {
+        console.log("addRolePermission");
+        console.log(item);
+        console.log(role);
+    };
+
+    $scope.removeRolePermission = function(item, role) {
+        console.log("removeRolePermission");
+        console.log(item);
+        console.log(role);
+    };
+
+    $scope.deleteRole = function(role) {
+        console.log("deleteRole");
+        console.log(role);
+    };
+
+    $scope.openAddRoleDialog = function() {
+        console.log("openAddRoleDialog");
+    };
+
+    $scope.openEditRoleDialog = function(role) {
+        console.log(role);
+        userService.openEditRoleDialog(role);
     };
 
     $scope.getUserRoles = function(id, $index) {

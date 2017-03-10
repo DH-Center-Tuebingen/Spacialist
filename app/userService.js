@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$auth', '$state', '$http', function(httpPostFactory, httpGetFactory, $auth, $state, $http) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'modalFactory', '$auth', '$state', '$http', function(httpPostFactory, httpGetFactory, modalFactory, $auth, $state, $http) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -8,6 +8,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$aut
     user.loginError = {};
     user.users = [];
     user.roles = [];
+    user.permissions = [];
     user.can = function(to) {
         if(typeof user.currentUser == 'undefined') return false;
         if(typeof user.currentUser.permissions[to] == 'undefined') return false;
@@ -54,12 +55,48 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', '$aut
 
     user.getRoles = function() {
         user.roles.length = 0;
+        user.permissions.length = 0;
         httpGetFactory('api/user/get/roles/all', function(response) {
+            angular.forEach(response.permissions, function(perm) {
+                user.permissions.push(perm);
+            });
             angular.forEach(response.roles, function(role, key) {
+                role.permissions = [];
                 user.roles.push(role);
             });
         });
     };
+
+    user.getRolePermissions = function(role) {
+        if(role.permissions) role.permissions.length = 0;
+        httpGetFactory('api/user/get/role/permissions/' + role.id, function(response) {
+            angular.forEach(response.permissions, function(perm) {
+                role.permissions.push(perm);
+            });
+        });
+    };
+
+    user.openEditRoleDialog = function(role) {
+        modalFactory.editRoleModal(editRole, role);
+    };
+
+    function editRole(role, changes) {
+        console.log(role);
+        var formData = new FormData();
+        formData.append('role_id', role.id);
+        for(var k in changes) {
+            if(changes.hasOwnProperty(k)) {
+                formData.append(k, changes[k]);
+            }
+        }
+        httpPostFactory('api/role/edit', formData, function(response) {
+            for(var k in response.role) {
+                if(response.role.hasOwnProperty(k)) {
+                    role[k] = response.role[k];
+                }
+            }
+        });
+    }
 
     user.getUserRoles = function(id, $index) {
         httpGetFactory('api/user/get/roles/' + id, function(response) {
