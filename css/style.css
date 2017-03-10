@@ -292,12 +292,6 @@ ol li.list-group-item {
     border-radius: 0;
 }
 
-.ui-select-container, .ui-select-multiple.ui-select-bootstrap {
-    height: 34px;
-    font-size: 14px;
-    line-height: 1.42857;
-}
-
 .thumb-wrapper {
     max-height: 225px;
     overflow: hidden;
