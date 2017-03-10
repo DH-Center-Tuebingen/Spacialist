@@ -111,6 +111,33 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         });
     };
 
+    user.addRolePermission = function(item, role) {
+        var formData = new FormData();
+        formData.append('role_id', role.id);
+        formData.append('permission_id', item.id);
+        httpPostFactory('api/role/add/permission', formData, function(response) {
+            // if an error occurs, remove added permission
+            if(response.error) {
+                var index = role.permissions.indexOf(item);
+                if(index > -1) role.permissions.splice(index, 1);
+                return;
+            }
+        });
+    };
+
+    user.removeRolePermission = function(item, role) {
+        var formData = new FormData();
+        formData.append('role_id', role.id);
+        formData.append('permission_id', item.id);
+        httpPostFactory('api/role/remove/permission', formData, function(response) {
+            // if an error occurs, readd removed permission
+            if(response.error) {
+                role.permissions.push(item);
+                return;
+            }
+        });
+    };
+
     user.getUserRoles = function(id, $index) {
         httpGetFactory('api/user/get/roles/' + id, function(response) {
             user.users[$index].roles = response.roles;

@@ -71,6 +71,8 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('user/add/role', 'UserController@addRoleToUser');
     $app->post('user/remove/role', 'UserController@removeRoleFromUser');
     $app->post('role/edit', 'UserController@editRole');
+    $app->post('role/add/permission', 'UserController@addRolePermission');
+    $app->post('role/remove/permission', 'UserController@removeRolePermission');
     $app->post('literature/add', 'LiteratureController@add');
     $app->post('literature/edit', 'LiteratureController@edit');
 });

@@ -120,7 +120,7 @@ class UserController extends Controller
     public function getPermissionsByRole($id) {
         return response()->json([
             'permissions' => DB::table('permissions as p')
-                                ->select('p.id', 'p.display_name', 'p.description')
+                                ->select('p.*')
                                 ->join('permission_role as pr', 'pr.permission_id', '=', 'p.id')
                                 ->where('pr.role_id', '=', $id)
                                 ->get()
@@ -219,6 +219,29 @@ class UserController extends Controller
 
     public function deleteRole($id) {
         Role::find($id)->delete();
+        return response()->json();
+    }
+
+    public function addRolePermission(Request $request) {
+        $roleId = $request->get('role_id');
+        $permId = $request->get('permission_id');
+        DB::table('permission_role')
+            ->insert([
+                'role_id' => $roleId,
+                'permission_id' => $permId
+            ]);
+        return response()->json();
+    }
+
+    public function removeRolePermission(Request $request) {
+        $roleId = $request->get('role_id');
+        $permId = $request->get('permission_id');
+        DB::table('permission_role')
+            ->where([
+                ['role_id', '=', $roleId],
+                ['permission_id', '=', $permId]
+            ])
+            ->delete();
         return response()->json();
     }
 

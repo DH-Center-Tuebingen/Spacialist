@@ -55,15 +55,11 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService'
     };
 
     $scope.addRolePermission = function(item, role) {
-        console.log("addRolePermission");
-        console.log(item);
-        console.log(role);
+        userService.addRolePermission(item, role);
     };
 
     $scope.removeRolePermission = function(item, role) {
-        console.log("removeRolePermission");
-        console.log(item);
-        console.log(role);
+        userService.removeRolePermission(item, role);
     };
 
     $scope.deleteRole = function(role) {
