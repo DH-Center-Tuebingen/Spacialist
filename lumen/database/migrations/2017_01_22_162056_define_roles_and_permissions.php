@@ -174,66 +174,12 @@ class DefineRolesAndPermissions extends Migration
         $guest = new App\Role();
         $guest->name = 'guest';
         $guest->display_name = 'Guest';
-        $guest->description = 'Project Administrator';
+        $guest->description = 'Guest User';
         $guest->save();
         $guest->attachPermission($view_concepts);
         $guest->attachPermission($view_concept_props);
         $guest->attachPermission($view_photos);
         $guest->attachPermission($view_geodata);
-        // Map user
-        $map_user = new App\Role();
-        $map_user->name = 'map_user';
-        $map_user->display_name = 'Map user';
-        $map_user->description = 'User is allowed to see concepts and can manage geodata (upload, edit, delete, link)';
-        $map_user->save();
-        $map_user->attachPermission($view_concepts);
-        $map_user->attachPermission($view_geodata);
-        $map_user->attachPermission($create_edit_geodata);
-        $map_user->attachPermission($upload_remove_geodata);
-        $map_user->attachPermission($link_geodata);
-        // Photo user
-        $photo_user = new App\Role();
-        $photo_user->name = 'photo_user';
-        $photo_user->display_name = 'Photo user';
-        $photo_user->description = 'User is allowed to see concepts and can manage photos (upload, edit, delete, link)';
-        $photo_user->save();
-        $photo_user->attachPermission($view_concepts);
-        $photo_user->attachPermission($manage_photos);
-        $photo_user->attachPermission($link_photos);
-        $photo_user->attachPermission($edit_photo_props);
-        $photo_user->attachPermission($view_photos);
-        // Photo assistent
-        $photo_assistent = new App\Role();
-        $photo_assistent->name = 'photo_assistent';
-        $photo_assistent->display_name = 'Photo assistent';
-        $photo_assistent->description = 'User is allowed to see concepts and can edit photo properties';
-        $photo_assistent->save();
-        $photo_assistent->attachPermission($view_concepts);
-        $photo_assistent->attachPermission($edit_photo_props);
-        $photo_assistent->attachPermission($view_photos);
-        // Employee
-        $employee = new App\Role();
-        $employee->name = 'employee';
-        $employee->display_name = 'Employee';
-        $employee->description = 'User can do anything except user management';
-        $employee->save();
-        $employee->attachPermission($create_concepts);
-        $employee->attachPermission($delete_move_concepts);
-        $employee->attachPermission($duplicate_edit_concepts);
-        $employee->attachPermission($view_concepts);
-        $employee->attachPermission($view_concept_props);
-        $employee->attachPermission($edit_literature);
-        $employee->attachPermission($add_remove_literature);
-        $employee->attachPermission($manage_photos);
-        $employee->attachPermission($link_photos);
-        $employee->attachPermission($edit_photo_props);
-        $employee->attachPermission($view_photos);
-        $employee->attachPermission($export_photos);
-        $employee->attachPermission($view_geodata);
-        $employee->attachPermission($create_edit_geodata);
-        $employee->attachPermission($upload_remove_geodata);
-        $employee->attachPermission($link_geodata);
-        $employee->attachPermission($view_users);
     }
 
     /**
