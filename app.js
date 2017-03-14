@@ -328,6 +328,9 @@ spacialistApp.directive('formField', function() {
         scope: false,
         link: function(scope, element, attrs) {
             scope.listInput = {};
+            scope.isEditable = typeof attrs.editable != 'undefined' && (attrs.editable.length === 0 || attrs.editable == 'true');
+            scope.isDeletable = typeof attrs.deletable != 'undefined' && (attrs.deletable.length === 0 || attrs.deletable == 'true');
+            scope.isOrderable = typeof attrs.orderable != 'undefined' && (attrs.orderable.length === 0 || attrs.orderable == 'true');
             scope.$watch(function(scope) {
                 return scope.$eval(attrs.fields);
             }, function(newVal, oldVal) {

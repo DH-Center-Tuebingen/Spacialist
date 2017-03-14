@@ -19,6 +19,10 @@ a.activeLang {
     vertical-align: middle !important;
 }
 
+.hovered-row {
+    background-color: rgba(225, 225, 225, 0.25);
+}
+
 #navigation {
     padding-bottom: 20px;
 }
@@ -513,6 +517,10 @@ body > .angular-bootstrap-contextmenu.dropdown {
 
 .fa-red {
     color: red;
+}
+
+.fa-cyan {
+    color: DarkTurquoise;
 }
 
 .fa-addon {
