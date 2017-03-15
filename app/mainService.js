@@ -523,6 +523,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             if(mapService.getPopupGeoId() == elem.geodata_id) mapService.closePopup();
             return;
         }
+        var isCurrentlyLinked = mapService.getPopupGeoId() == elem.geodata_id;
         elem = target;
         console.log(elem);
         if(elem.typeid === 0) { //context
@@ -565,6 +566,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         if(typeof openAgain == 'undefined') openAgain = true;
         if(elem.geodata_id !== null && openAgain) {
             mapService.openPopup(elem.geodata_id);
+        } else if(elem.geodata_id === null && isCurrentlyLinked) {
+            mapService.closePopup();
         }
         loadLinkedImages(main.currentElement.element.id);
     };

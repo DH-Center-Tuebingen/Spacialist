@@ -36,6 +36,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     // };
 
     map.getPopupGeoId = function() {
+        if(!map.mapObject._popup) return -1;
         return map.mapObject._popup.options.feature.id;
     };
 
