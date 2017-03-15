@@ -35,7 +35,6 @@ class AddRoleManagementPermissions extends Migration
         $add_remove_permission->save();
 
         $admin = Role::where('name', '=', 'admin')->firstOrFail();
-        $admin->attachPermission($view_roles);
         $admin->attachPermission($add_edit_role);
         $admin->attachPermission($delete_role);
         $admin->attachPermission($add_remove_permission);
