@@ -138,6 +138,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         httpGetFactory('api/context/getRecursive', function(contextList) {
             for(var i=0; i<contextList.length; i++) {
                 var current = contextList[i];
+                current.collapsed = true;
                 main.contextList.push(current);
                 // if(!main.legendList[current.typelabel]) {
                 //     main.legendList[current.typelabel] = {
@@ -156,6 +157,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     function addMetadata(contexts) {
         for(var i=0; i<contexts.length; i++) {
             var current = contexts[i];
+            current.collapsed = true;
             // if(!main.legendList[current.typelabel]) {
             //     main.legendList[current.typelabel] = {
             //         name: current.typelabel,
@@ -459,39 +461,24 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
     }
 
-    main.expandTreeTo = function(path) {
-        var t = angular.element(document.getElementById('context-tree')).scope();
-        var nodesScope = t.$nodesScope;
-        var children = nodesScope.childNodes();
-        expandToTreeHelper(path, children, 0);
+    main.expandTreeTo = function(id) {
+        main.contextList.forEach(function(node) {
+            shouldExpand(node, id);
+        });
     };
 
-    function expandToTreeHelper(pathArray, children, depth) {
-        var level = pathArray[depth];
-        for(var j=0; j<children.length; j++) {
-            var child = children[j];
-            if(level.id == child.$modelValue.id) {
-                if(pathArray.length - 1 == depth) {
-                    main.setCurrentElement(child.$modelValue, undefined, false);
-                    break;
-                }
-                // child.expand();
-                // calling expand() on child should be enough, but child.childNodes() then returns an array with undefined values.
-                //Thus we use this "simple" DOM-based method to simulate a click on the element and toggle it.
-                //This only works because we broadcast the collapse-all event beforehand.
-                $timeout(function() {
-                    //we have to expand the element if it is collapsed to get access to the childnodes
-                    var wasCollapsed = child.collapsed;
-                    if(wasCollapsed) {
-                        child.$element[0].firstChild.childNodes[2].click();
-                    }
-                    children = child.childNodes();
-                    depth++;
-                    expandToTreeHelper(pathArray, children, depth);
-                }, 0, true);
-                break;
+    function shouldExpand(node, id) {
+        if(node.id == id) {
+            main.setCurrentElement(node, main.currentElement, false);
+            return true;
+        }
+        for(var i in node.children) {
+            if(shouldExpand(node.children[i], id)) {
+                node.collapsed = false;
+                return true;
             }
         }
+        return false;
     }
 
     main.unsetCurrentElement = function(dontUnsetUnlinked) {

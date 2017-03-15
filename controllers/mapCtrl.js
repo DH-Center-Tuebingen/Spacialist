@@ -67,9 +67,9 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
             if(response.error) {
                 modalFactory.errorModal(response.error);
             } else {
-                var path = response.path;
-                if(path !== null && path.length > 0) {
-                    mainService.expandTreeTo(path);
+                var matchingId = response.context_id;
+                if(matchingId !== null) {
+                    mainService.expandTreeTo(matchingId);
                 } else {
                     var dontUnsetUnlinked = true;
                     mainService.unsetCurrentElement(dontUnsetUnlinked);

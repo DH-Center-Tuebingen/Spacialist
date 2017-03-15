@@ -1,5 +1,4 @@
 spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'leafletData', 'userService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, leafletData, userService, leafletBoundsHelpers) {
-    var contextGeodata;
     var localContexts;
     var defaultColor = '#00FF00';
     var map = {};
@@ -156,10 +155,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     };
 
     map.getMatchingContext = function(featureId) {
-        // console.log(contextGeodata);
-        // console.log(localContexts);
-        // var cIndex = contextGeodata['#' + featureId];
-        // return localContexts[cIndex] || null;
         return httpGetPromise.getData('api/context/get/byGeodata/' + featureId);
     };
 
