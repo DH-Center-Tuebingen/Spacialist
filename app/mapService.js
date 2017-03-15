@@ -219,6 +219,9 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     function initMapVariables() {
         map.map = {};
         map.map.center = {};
+        map.map.defaults = {
+            maxZoom: 27
+        };
         map.map.bounds = map.createBoundsFromArray([
             [-90, 180],
             [90, -180]
