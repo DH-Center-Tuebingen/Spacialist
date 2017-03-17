@@ -183,6 +183,19 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     // };
 
     main.createNewContext = function(data) {
+        if(main.hasUnstagedChanges()) {
+            var onDiscard = function() {
+                main.currentElement.form.$setPristine();
+                return main.createNewContext(data);
+            };
+            var onConfirm = function() {
+                main.currentElement.form.$setPristine();
+                main.storeElement(main.currentElement.element, main.currentElement.data);
+                return main.createNewContext(data);
+            };
+            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
+            return;
+        }
         defaults = {
             reclevel: -1,
             children: main.contextList
@@ -518,8 +531,12 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         main.currentElement.sources[index].push(source);
     }
 
+    main.hasUnstagedChanges = function() {
+        return main.currentElement.form && main.currentElement.form.$dirty;
+    };
+
     main.setCurrentElement = function(target, elem, openAgain) {
-        if(main.currentElement.form && main.currentElement.form.$dirty) {
+        if(main.hasUnstagedChanges()) {
             var onDiscard = function() {
                 main.currentElement.form.$setPristine();
                 return main.setCurrentElement(target, elem, openAgain);
@@ -710,6 +727,19 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     main.createModalHelper = function($itemScope, elemType, copyPosition) {
+        if(main.hasUnstagedChanges()) {
+            var onDiscard = function() {
+                main.currentElement.form.$setPristine();
+                return main.createModalHelper($itemScope, elemType, copyPosition);
+            };
+            var onConfirm = function() {
+                main.currentElement.form.$setPristine();
+                main.storeElement(main.currentElement.element, main.currentElement.data);
+                return main.createModalHelper($itemScope, elemType, copyPosition);
+            };
+            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
+            return;
+        }
         var parent = $itemScope.parent;
         var selection = [];
         var msg = '';
