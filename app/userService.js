@@ -24,9 +24,11 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         });
     };
 
-    user.deleteUser = function(id, $index) {
-        httpGetFactory('api/user/delete/' + id, function(response) {
-            user.users.splice($index, 1);
+    user.deleteUser = function(u) {
+        console.log(u);
+        httpGetFactory('api/user/delete/' + u.id, function(response) {
+            var index = user.users.indexOf(u);
+            if(index > -1) user.users.splice(index, 1);
         });
     };
 
