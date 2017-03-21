@@ -6,6 +6,7 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService'
     $scope.loginError = userService.loginError;
     $scope.analysisEntries = analysisService.entries;
     $scope.setAnalysisEntry = analysisService.setAnalysisEntry;
+    $scope.deleteUser = userService.deleteUser;
 
     $scope.openStartPage = function() {
         analysisService.unsetAnalysisEntry();
