@@ -1,25 +1,28 @@
-<div ng-controller="editorCtrl" resize-watcher>
-    <h2>Attribute-Editor</h2>
+<div ng-controller="editorCtrl" resize-watcher id="attribute-editor">
+    <h2 id="editor-heading">Attribute-Editor</h2>
     <div class="col-md-12">
-        <div class="col-md-5">
+        <div class="col-md-5 attribute-editor-column">
             <h4>Available Attributes</h4>
             <form class="form-horizontal" role="form">
                 <form-field fields="existingAttributes" output="temp" label-width="3" input-width="9" offset="0" editable deletable>
                 </form-field>
             </form>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-2 attribute-editor-column">
             <h4>Available Context-Types</h4>
             <ul class="list-group">
                 <li class="list-group-item" ng-repeat="ct in existingContextTypes">
-                    <a href="" ng-click="setSelectedContext(ct)">{{ ct.title }} (Kontext)</a>
+                    <a href="" ng-click="setSelectedContext(ct)">{{ ct.title }} ({{'context-type.type.context'|translate}})</a>
                 </li>
                 <li class="list-group-item" ng-repeat="at in existingArtifactTypes">
-                    <a href="" ng-click="setSelectedContext(at)">{{ at.title }} (Fund)</a>
+                    <a href="" ng-click="setSelectedContext(at)">{{ at.title }} ({{'context-type.type.find'|translate}})</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="" ng-click="addNewContextType()"><i class="fa fa-fw fa-plus"></i> {{ 'context-type.add.new' | translate }}</a>
                 </li>
             </ul>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-5 attribute-editor-column">
             <div ng-if="selectedCt">
                 <h4>Attributes of {{ selectedCt.title }}</h4>
                 <form class="form-horizontal" role="form">

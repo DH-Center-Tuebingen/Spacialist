@@ -7,6 +7,7 @@ use App\Permission;
 use App\Role;
 use App\Geodata;
 use App\Context;
+use App\ContextType;
 use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
@@ -102,6 +103,55 @@ class ContextController extends Controller {
             }
         }
         return $data;
+    }
+
+    private function getLabel($thesaurus_url, $lang = 'de') {
+        $label = DB::table('th_concept_label as lbl')
+            ->join('th_language as lang', 'lang.id', '=', 'lbl.language_id')
+            ->join('th_concept as con', 'lbl.concept_id', '=', 'con.id')
+            ->where('con.concept_url', '=', $thesaurus_url)
+            ->orderBy('lbl.concept_label_type', 'asc')
+            ->orderByRaw("lang.short_name = '$lang' ASC")
+            ->value('lbl.label');
+        return $label;
+    }
+
+    public function search(Request $request) {
+        if(!$request->has('val')) return response()->json();
+        $val = $request->get('val');
+        if($request->has('lang')) $lang = $request->get('lang');
+        else $lang = 'de';
+
+        $matchedConcepts = DB::table('th_concept_label as l')
+            ->select('c.concept_url', 'c.id', 'l.label')
+            ->join('th_concept as c', 'c.id', '=', 'l.concept_id')
+            ->join('th_language as lng', 'l.language_id', '=', 'lng.id')
+            ->where([
+                ['label', 'ilike', '%' . $val . '%'],
+                ['lng.short_name', '=', $lang]
+            ])
+            ->groupBy('c.id', 'l.label')
+            ->orderBy('l.label')
+            ->get();
+        return response()->json($matchedConcepts);
+    }
+
+    public function addContextType(Request $request) {
+        if(!$request->has('concept_url') || !$request->has('type')) {
+            return response()->json([
+                'error' => 'Missing parameter'
+            ]);
+        }
+        $curl = $request->get('concept_url');
+        $type = $request->get('type');
+        $cType = new ContextType();
+        $cType->thesaurus_url = $curl;
+        $cType->type = $type;
+        $cType->save();
+        $cType->label = $this->getLabel($curl);
+        return response()->json([
+            'contexttype' => $cType
+        ]);
     }
 
     public function get() {

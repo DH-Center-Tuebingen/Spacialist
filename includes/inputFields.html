@@ -1,6 +1,6 @@
 <div>
     <div class="form-group" ng-repeat="attr in attributeFields" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered && (isDeletable || isEditable)}">
-        <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}">
+        <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}" uib-popover="{{attr.root_label}}" popover-trigger="'mouseenter'">
             {{ attr.val }}: <sup ng-click="openSourceModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'], attributeOutputs[attr.aid+'_'+attr.oid+'desc'])">
                 <i class="fa fa-fw fa-plus-circle source-link" aria-hidden="true" ng-if="!readonlyInput"></i><i ng-if="attributeSources['#'+attr.aid].length > 0" class="fa fa-circle fa-addon fa-limegreen"></i>
             </sup>

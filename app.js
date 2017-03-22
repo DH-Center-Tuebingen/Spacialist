@@ -174,6 +174,27 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
+    this.newContextTypeModal = function(labelCallback, onCreate) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/new-context-type.html',
+            controller: function($uibModalInstance) {
+                this.contextTypeTypes = [
+                    { id: 0, label: 'context-type.type.context'},
+                    { id: 1, label: 'context-type.type.find'}
+                ];
+                this.onSearch = labelCallback;
+                this.onCreate = function(label, type) {
+                    onCreate(label, type);
+                    $uibModalInstance.dismiss('ok');
+                };
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
 }]);
 
 spacialistApp.directive('spinner', function() {
@@ -205,6 +226,7 @@ spacialistApp.directive('resizeWatcher', function($window) {
                 $('#addon-container').css('height', '');
                 $('#literature-container').css('height', '');
                 $('analysis-frame').css('height', '');
+                $('#attribute-editor').css('height', '');
             } else {
                 var height = newValue.height;
                 var width = newValue.width;
@@ -215,6 +237,12 @@ spacialistApp.directive('resizeWatcher', function($window) {
                 if(addonNav) addonNavHeight = addonNav.offsetHeight;
                 var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
                 var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
+                var attributeEditor = document.getElementById('attribute-editor');
+                if(attributeEditor) {
+                    $(attributeEditor).css('height', containerHeight);
+                    var heading = document.getElementById('editor-heading');
+                    $('.attribute-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
+                }
                 var literatureContainer = document.getElementById('literature-container');
                 if(literatureContainer) {
                     var literatureHeight = containerHeight;

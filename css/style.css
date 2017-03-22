@@ -422,7 +422,7 @@ p, div {
     font-weight: normal;
 }
 
-#tree-container, #attribute-container, #addon-container, #literature-container {
+#tree-container, #attribute-container, #addon-container, #literature-container, .attribute-editor-column {
     overflow: auto;
 }
 

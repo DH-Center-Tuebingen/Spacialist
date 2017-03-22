@@ -20,6 +20,7 @@ $app->get('/', function () use ($app) {
 
 $app->post('user/login', 'UserController@login');
 
+$app->post('editor/contexttype/add', 'ContextController@addContextType');
 $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']], function($app) {
     $app->get('context/artifacts/get', 'ContextController@getArtifacts');
     $app->get('context/get/children/{id}', 'ContextController@getChildren');
@@ -71,4 +72,5 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('user/remove/role', 'UserController@removeRoleFromUser');
     $app->post('literature/add', 'LiteratureController@add');
     $app->post('literature/edit', 'LiteratureController@edit');
+    $app->post('editor/search', 'ContextController@search');
 });
