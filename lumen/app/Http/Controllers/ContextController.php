@@ -11,6 +11,7 @@ use App\ContextType;
 use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
+use App\ContextAttribute;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
 use Phaza\LaravelPostgis\Geometries\Polygon;
@@ -154,17 +155,95 @@ class ContextController extends Controller {
         ]);
     }
 
+    public function removeAttributeFromContextType(Request $request) {
+        if(!$request->has('aid') || !$request->has('ctid')) {
+            return response()->json([
+                'error' => 'Missing parameter. Either aid or ctid is missing.'
+            ]);
+        }
+        $aid = $request->get('aid');
+        $ctid = $request->get('ctid');
+
+        ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->delete();
+    }
+
+    public function moveAttributeUp(Request $request) {
+        if(!$request->has('aid') || !$request->has('ctid')) {
+            return response()->json([
+                'error' => 'Missing parameter. Either aid or ctid is missing.'
+            ]);
+        }
+        $aid = $request->get('aid');
+        $ctid = $request->get('ctid');
+
+        $ca = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        if($ca->position == 1) {
+            return response()->json([
+                'error' => 'Element is already topmost element'
+            ]);
+        }
+        $ca2 = ContextAttribute::where([
+            ['position', '=', $ca->position-1],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        $ca->position--;
+        $ca2->position++;
+        $ca->save();
+        $ca2->save();
+        return response()->json();
+    }
+
+    public function moveAttributeDown(Request $request) {
+        if(!$request->has('aid') || !$request->has('ctid')) {
+            return response()->json([
+                'error' => 'Missing parameter. Either aid or ctid is missing.'
+            ]);
+        }
+        $aid = $request->get('aid');
+        $ctid = $request->get('ctid');
+
+        $ca = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        if($ca->position == ContextAttribute::where('context_type_id', '=', $ctid)->count()) {
+            return response()->json([
+                'error' => 'Element is already bottommost element'
+            ]);
+        }
+        $ca2 = ContextAttribute::where([
+            ['position', '=', $ca->position+1],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        $ca->position++;
+        $ca2->position--;
+        $ca->save();
+        $ca2->save();
+        return response()->json();
+    }
+
     public function get() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
+                ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type', 'ca.position',
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de' limit 1) as title"),
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) as val")
                 )
                 ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
                 ->where('c.type', '=', '0')
-                ->orderBy('val')
+                ->orderBy('title', 'asc')
+                ->orderBy('ca.position', 'asc')
                 ->get()
         );
     }
@@ -465,7 +544,7 @@ class ContextController extends Controller {
             ], 403);
         }
         $rows = DB::table('context_types as c')
-        ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
+        ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root', 'ca.position',
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
         )
@@ -474,7 +553,8 @@ class ContextController extends Controller {
         ->where('a.datatype', '=', 'string-sc')
         ->orWhere('a.datatype', '=', 'string-mc')
         ->orWhere('a.datatype', '=', 'epoch')
-        ->orderBy('val')
+        ->orderBy('title', 'asc')
+        ->orderBy('ca.position', 'asc')
         ->get();
         foreach($rows as &$row) {
             if(!isset($row->root)) continue;
@@ -543,14 +623,15 @@ class ContextController extends Controller {
     public function getArtifacts() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
+                ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type', 'ca.position',
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
                 )
                 ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
                 ->where('c.type', '=', '1')
-                ->orderBy('val')
+                ->orderBy('title', 'asc')
+                ->orderBy('ca.position', 'asc')
                 ->get()
         );
     }

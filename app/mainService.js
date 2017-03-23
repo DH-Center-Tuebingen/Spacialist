@@ -48,7 +48,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                         title: title,
                         index: index,
                         type: value.type,
-                        ctid: value.ctid
+                        ctid: value.ctid,
+                        position: value.position
                     });
                 }
                 if(value.ctid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
@@ -56,7 +57,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                         aid: value.aid,
                         val: value.val,
                         ctid: value.ctid,
-                        datatype: value.datatype
+                        datatype: value.datatype,
+                        position: value.position
                     });
                 }
             });
@@ -74,7 +76,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                         title: title,
                         index: index,
                         type: value.type,
-                        ctid: value.ctid
+                        ctid: value.ctid,
+                        position: value.position
                     });
                 }
                 if (value.ctid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
@@ -82,7 +85,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                         aid: value.aid,
                         val: value.val,
                         ctid: value.ctid,
-                        datatype: value.datatype
+                        datatype: value.datatype,
+                        position: value.position
                     });
                 }
             });
@@ -125,7 +129,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                 lat: copy.lat,
                 lng: copy.lng,
                 data: copy.data,
-                children: []
+                children: [],
+                position: copy.position
             };
             $itemScope.$parent.$parent.$modelValue.push(elem);
             addMarker(elem);
@@ -556,7 +561,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             typeLabel: elem.typelabel,
             typeId: elem.typeid,
             ctid: elem.context_type_id,
-            geodata_id: elem.geodata_id
+            geodata_id: elem.geodata_id,
+            position: elem.position
         };
         if(typeof openAgain == 'undefined') openAgain = true;
         if(elem.geodata_id !== null && openAgain) {
@@ -583,6 +589,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             var elem = {
                 name: name,
                 ctid: type.ctid,
+                position: type.position,
                 root_cid: parent.id,
                 reclevel: parent.reclevel + 1,
                 typeid: type.type,

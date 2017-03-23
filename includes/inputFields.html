@@ -121,15 +121,15 @@
                 </a>
             </div>
             <div ng-if="isDeletable" style="float: left; padding-left: 5px;">
-                <a href="">
+                <a href="" ng-click="onDelete(attr)">
                     <i class="fa fa-fw fa-trash-o fa-red"></i>
                 </a>
             </div>
             <div ng-if="isOrderable" style="float: left; padding-left: 5px;">
-                <a href="" ng-if="!$first">
+                <a href="" ng-if="!$first" ng-click="onOrder.up(attr)">
                     <i class="fa fa-fw fa-caret-up"></i>
                 </a>
-                <a href="" ng-if="!$last">
+                <a href="" ng-if="!$last" ng-click="onOrder.down(attr)">
                     <i class="fa fa-fw fa-caret-down"></i>
                 </a>
             </div>

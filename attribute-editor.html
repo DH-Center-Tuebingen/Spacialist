@@ -4,7 +4,7 @@
         <div class="col-md-5 attribute-editor-column">
             <h4>Available Attributes</h4>
             <form class="form-horizontal" role="form">
-                <form-field fields="existingAttributes" output="temp" label-width="3" input-width="9" offset="0" editable deletable>
+                <form-field fields="existingAttributes" output="temp" label-width="3" input-width="9" offset="0" editable deletable on-delete="foo">
                 </form-field>
             </form>
         </div>
@@ -23,19 +23,19 @@
             </ul>
         </div>
         <div class="col-md-5 attribute-editor-column">
-            <div ng-if="selectedCt">
-                <h4>Attributes of {{ selectedCt.title }}</h4>
+            <div ng-if="ct.selected">
+                <h4>Attributes of {{ ct.selected.title }}</h4>
                 <form class="form-horizontal" role="form">
-                    <form-field fields="ctAttributes" output="tempx" label-width="3" input-width="9" offset="0" deletable orderable>
+                    <form-field fields="ct.attributes" output="tempx" label-width="3" input-width="9" offset="0" deletable orderable on-delete="onRemoveAttrFromCt" on-order="onOrderAttrOfCt">
                     </form-field>
                     <div class="col-md-offset-3">
                         <button type="button" class="btn btn-success">
-                            <i class="fa fa-fw fa-plus"></i> Add Attribute To Context-Type
+                            <i class="fa fa-fw fa-plus"></i> Add Attribute To <i>{{ ct.selected.title }}</i>
                         </button>
                     </div>
                 </form>
             </div>
-            <div ng-if="!selectedCt">
+            <div ng-if="!ct.selected">
                 <p>
                     Please select an element from the list on the left.
                 </p>

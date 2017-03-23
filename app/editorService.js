@@ -1,14 +1,76 @@
 spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, mainService) {
     var editor = {};
 
+    editor.ct = {
+        selected: {},
+        attributes: {}
+    };
     editor.attributeTypes = [];
     editor.existingAttributes = [];
     editor.contextAttributes = {};
     editor.existingContextTypes = mainService.contexts;
     editor.existingArtifactTypes =  mainService.artifacts;
+    editor.contextAttributes = mainService.contextReferences;
+    editor.dropdownOptions = mainService.dropdownOptions;
+
+    editor.setSelectedContext = function(c) {
+        editor.ct.selected = c;
+
+        if(c.type === 0) {
+            editor.ct.attributes = mainService.contextReferences[c.index];
+        }
+        else if(c.type == 1) {
+            editor.ct.attributes = mainService.artifactReferences[c.index];
+        }
+    };
 
     editor.addNewContextTypeWindow = function() {
         modalFactory.newContextTypeModal(searchForLabel, addNewContextType);
+    };
+
+    editor.removeAttributeFromContextType = function(attr, context) {
+        var formData = new FormData();
+        formData.append('aid', attr.aid);
+        formData.append('ctid', attr.ctid);
+        httpPostFactory('api/editor/contexttype/attribute/remove', formData, function(response) {
+            if(!response.error) {
+                var i = editor.ct.attributes.indexOf(attr);
+                if(i > -1) editor.ct.attributes.splice(i, 1);
+            }
+        });
+    };
+
+    editor.moveAttributeOfContextTypeUp = function(attr) {
+        if(attr.position == 1) return; //topmost element can not be moved up
+        var i = editor.ct.attributes.indexOf(attr);
+        if(i == -1) return; //element is not part of attributes
+        if(i+1 != attr.position) return; // array position does not match stored position
+        var formData = new FormData();
+        formData.append('ctid', attr.ctid);
+        formData.append('aid', attr.aid);
+        httpPostFactory('api/editor/contexttype/attribute/move/up', formData, function(response) {
+            if(!response.error) {
+                editor.ct.attributes[i].position--;
+                editor.ct.attributes[i-1].position++;
+                editor.ct.attributes.swap(i, i-1);
+            }
+        });
+    };
+    editor.moveAttributeOfContextTypeDown = function(attr) {
+        if(attr.position == editor.ct.attributes.length) return; //bottommost element can not be moved down
+        var i = editor.ct.attributes.indexOf(attr);
+        if(i == -1) return; //element is not part of attributes
+        if(i+1 != attr.position) return; // array position does not match stored position
+        var formData = new FormData();
+        formData.append('ctid', attr.ctid);
+        formData.append('aid', attr.aid);
+        httpPostFactory('api/editor/contexttype/attribute/move/down', formData, function(response) {
+            if(!response.error) {
+                editor.ct.attributes[i].position++;
+                editor.ct.attributes[i+1].position--;
+                editor.ct.attributes.swap(i, i+1);
+            }
+        });
     };
 
     function addNewContextType(label, type) {

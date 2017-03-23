@@ -322,7 +322,7 @@ spacialistApp.directive('imageList', function() {
     };
 });
 
-spacialistApp.directive('formField', function() {
+spacialistApp.directive('formField', function($log) {
     var updateInputFields = function(scope, element, attrs) {
         scope.attributeFields = scope.$eval(attrs.fields);
         scope.attributeOutputs = scope.$eval(attrs.output);
@@ -359,6 +359,19 @@ spacialistApp.directive('formField', function() {
             scope.isEditable = typeof attrs.editable != 'undefined' && (attrs.editable.length === 0 || attrs.editable == 'true');
             scope.isDeletable = typeof attrs.deletable != 'undefined' && (attrs.deletable.length === 0 || attrs.deletable == 'true');
             scope.isOrderable = typeof attrs.orderable != 'undefined' && (attrs.orderable.length === 0 || attrs.orderable == 'true');
+            if(scope.isDeletable && typeof attrs.onDelete == 'undefined') {
+                throw new Error('onDelete method is missing! The on-delete attribute is mandatory if you use the deletable attribute.');
+            }
+            if(scope.isOrderable) {
+                if(!attrs.onOrder) {
+                    throw new Error('onOrder method is missing! The on-order attribute is mandatory if you use the orderable attribute.');
+                }
+                scope.onOrder = scope.$eval(attrs.onOrder);
+                if(!scope.onOrder.up || !scope.onOrder.down) {
+                    throw new Error('onOrder must be an object with two fields: up and down, which are both functions.');
+                }
+            }
+            scope.onDelete = scope.$eval(attrs.onDelete);
             scope.$watch(function(scope) {
                 return scope.$eval(attrs.fields);
             }, function(newVal, oldVal) {
