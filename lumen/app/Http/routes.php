@@ -77,4 +77,5 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('editor/contexttype/attribute/remove', 'ContextController@removeAttributeFromContextType');
     $app->post('editor/contexttype/attribute/move/up', 'ContextController@moveAttributeUp');
     $app->post('editor/contexttype/attribute/move/down', 'ContextController@moveAttributeDown');
+    $app->post('editor/attribute/add', 'ContextController@addAttribute');
 });

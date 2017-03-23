@@ -11,8 +11,6 @@ spacialistApp.controller('editorCtrl', ['$scope', 'mainService', 'editorService'
     $scope.contextAttributes = editorService.contextReferences;
     $scope.dropdownOptions = editorService.dropdownOptions;
     $scope.ct = editorService.ct;
-    // $scope.selectedCt = editorService.ct.selected;
-    // $scope.ctAttributes = editorService.ct.attributes;
 
     $scope.onRemoveAttrFromCt = function(attr) {
         editorService.removeAttributeFromContextType(attr, $scope.ct.selected);

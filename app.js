@@ -199,10 +199,25 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/add-attribute.html',
             controller: function($uibModalInstance) {
-                this.datatypes = []; // datatypes;
+                this.needsRoot = {
+                    'string-sc': 1,
+                    'string-mc': 1,
+                    epoch: 1
+                };
+                this.datatypes = [
+                    { name: 'string', label: 'Textfeld' },
+                    { name: 'stringf', label: 'Textbox' },
+                    { name: 'date', label: 'Datumsangabe' },
+                    { name: 'epoch', label: 'Epoche' },
+                    { name: 'string-sc', label: 'Dropdown (Einzel)' },
+                    { name: 'string-mc', label: 'Dropdown (Mehrfach)' },
+                    { name: 'geography', label: 'Kartenposition' },
+                    { name: 'list', label: 'Liste (Freitext)' },
+                    { name: 'dimension', label: 'Abmessung (3D)' }
+                ];
                 this.onSearch = labelCallback;
-                this.onCreate = function(label, type) {
-                    onCreate(label, type);
+                this.onCreate = function(label, datatype, parent) {
+                    onCreate(label, datatype, parent);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {

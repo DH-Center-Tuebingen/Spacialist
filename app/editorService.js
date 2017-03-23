@@ -18,22 +18,12 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         editor.ct.attributes = getCtAttributes(c);
     };
 
-    function getCtAttributes(ct) {
-        if(ct.type === 0) {
-            return mainService.contextReferences[ct.index];
-        }
-        else if(ct.type == 1) {
-            return mainService.artifactReferences[ct.index];
-        }
-        return [];
-    }
-
     editor.addNewContextTypeWindow = function() {
         modalFactory.newContextTypeModal(searchForLabel, addNewContextType);
     };
 
     editor.addNewAttributeWindow = function() {
-        modalFactory.addNewAttributeModal(searchForLabel);
+        modalFactory.addNewAttributeModal(searchForLabel, addNewAttribute);
     };
 
     editor.addAttributeToContextTypeWindow = function(ct) {
@@ -97,6 +87,16 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         });
     };
 
+    function getCtAttributes(ct) {
+        if(ct.type === 0) {
+            return mainService.contextReferences[ct.index];
+        }
+        else if(ct.type == 1) {
+            return mainService.artifactReferences[ct.index];
+        }
+        return [];
+    }
+
     function addNewContextType(label, type) {
         if(!label || !type)  return;
         var formData = new FormData();
@@ -117,6 +117,25 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
                 editor.existingContextTypes.push(newType);
             } else if(response.contexttype.type == 1) {
                 editor.existingArtifactTypes.push(newType);
+            }
+        });
+    }
+
+    function addNewAttribute(label, datatype, parent) {
+        var formData = new FormData();
+        formData.append('label_id', label.id);
+        formData.append('datatype', datatype.name);
+        if(parent) formData.append('parent_id', parent.id);
+        httpPostFactory('api/editor/attribute/add', formData, function(response) {
+            if(!response.error) {
+                var a = response.attribute;
+                var addedAttr = {
+                    aid: a.id,
+                    datatype: a.datatype,
+                    val: a.label
+                };
+                if(a.root_label) addedAttr.root_label = a.root_label;
+                editor.existingAttributes.push(addedAttr);
             }
         });
     }

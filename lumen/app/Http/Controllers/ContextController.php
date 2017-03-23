@@ -155,6 +155,32 @@ class ContextController extends Controller {
         ]);
     }
 
+    public function addAttribute(Request $request) {
+        if(!$request->has('label_id') || !$request->has('datatype')) {
+            return response()->json([
+                'error' => 'Missing parameter.'
+            ]);
+        }
+        $lid = $request->get('label_id');
+        $datatype = $request->get('datatype');
+        $curl = ThConcept::find($lid)->concept_url;
+        $attr = new Attribute();
+        $attr->thesaurus_url = $curl;
+        $attr->datatype = $datatype;
+        if($request->has('parent_id')) {
+            $pid = $request->get('parent_id');
+            $purl = ThConcept::find($pid)->concept_url;
+            $attr->thesaurus_root_url = $purl;
+        }
+        $attr->save();
+        $attr->label = $this->getLabel($curl);
+        if(isset($purl)) $attr->root_label = $this->getLabel($purl);
+
+        return response()->json([
+            'attribute' => $attr
+        ]);
+    }
+
     public function addAttributeToContextType(Request $request) {
         if(!$request->has('aid') || !$request->has('ctid')) {
             return response()->json([
@@ -196,10 +222,18 @@ class ContextController extends Controller {
         $pos = $ca->position;
         $ca->delete();
 
-        $successors = ContextAttribute::where('position', '>', $pos)->get();
+        $successors = ContextAttribute::where([
+                ['position', '>', $pos],
+                ['context_type_id', '=', $ctid]
+            ])->get();
         foreach($successors as $s) {
             $s->position--;
+            $s->save();
         }
+    }
+
+    public function deleteAttribute($id) {
+        Attribute::find($id)->delete();
     }
 
     public function moveAttributeUp(Request $request) {

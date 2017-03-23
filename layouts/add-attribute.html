@@ -1,0 +1,53 @@
+<div class="modal-header">
+    <h4>{{'attribute.add.heading'|translate}}</h4>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-md-3" for="type">{{'attribute.add.label'|translate}}:</label>
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-model="mc.label" ng-model-options="{ debounce: 250 }" placeholder="Search" uib-typeahead="result as result.label for result in mc.onSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel">
+                        <span class="input-group-addon"><i class="fa fa-fw fa-search"></i></span>
+                    </div>
+                    <i ng-show="loadingResultsLabel" class="fa fa-fw fa-refresh"></i>
+                    <div ng-show="noResultsLabel && mc.label.length >= 3">
+                        <i class="fa fa-fw fa-times"></i> No Results Found
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-3">{{ 'attribute.add.datatype' | translate }}</label>
+                <div class="col-md-9">
+                    <ui-select ng-model="mc.datatype">
+                        <ui-select-match>
+                            <span>{{ $select.selected.label | translate }}</span>
+                        </ui-select-match>
+                        <ui-select-choices repeat="datatype in mc.datatypes">
+                            <span>{{ datatype.label | translate }}</span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="form-group" ng-if="mc.needsRoot[mc.datatype.name]">
+                <label class="control-label col-md-3" for="type">{{'attribute.add.parent'|translate}}:</label>
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-model="mc.parent" ng-model-options="{ debounce: 250 }" placeholder="Search" uib-typeahead="result as result.label for result in mc.onSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsParent" typeahead-no-results="noResultsParent">
+                        <span class="input-group-addon"><i class="fa fa-fw fa-search"></i></span>
+                    </div>
+                    <i ng-show="loadingResultsParent" class="fa fa-fw fa-refresh"></i>
+                    <div ng-show="noResultsParent && mc.parent.length >= 3">
+                        <i class="fa fa-fw fa-times"></i> No Results Found
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.label, mc.datatype, mc.parent)" ng-disabled="!mc.label || !mc.datatype || (mc.needsRoot[mc.datatype.name] && !mc.parent)">{{ 'create' | translate }}</button>
+    <button type="button" class="btn btn-danger"
+      ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
+</div>
