@@ -73,6 +73,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('literature/edit', 'LiteratureController@edit');
     $app->post('editor/search', 'ContextController@search');
     $app->post('editor/contexttype/add', 'ContextController@addContextType');
+    $app->post('editor/contexttype/attribute/add', 'ContextController@addAttributeToContextType');
     $app->post('editor/contexttype/attribute/remove', 'ContextController@removeAttributeFromContextType');
     $app->post('editor/contexttype/attribute/move/up', 'ContextController@moveAttributeUp');
     $app->post('editor/contexttype/attribute/move/down', 'ContextController@moveAttributeDown');

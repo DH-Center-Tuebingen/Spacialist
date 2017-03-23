@@ -195,6 +195,42 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
+    this.addNewAttributeModal = function(labelCallback, onCreate) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/add-attribute.html',
+            controller: function($uibModalInstance) {
+                this.datatypes = []; // datatypes;
+                this.onSearch = labelCallback;
+                this.onCreate = function(label, type) {
+                    onCreate(label, type);
+                    $uibModalInstance.dismiss('ok');
+                };
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
+    this.addAttributeToContextTypeModal = function(ct, attrs, onCreate) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/add-attribute-contexttype.html',
+            controller: function($uibModalInstance) {
+                this.ct = ct;
+                this.attributes = attrs;
+                this.onCreate = function(attr) {
+                    onCreate(attr, ct);
+                    $uibModalInstance.dismiss('ok');
+                };
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
 }]);
 
 spacialistApp.directive('spinner', function() {

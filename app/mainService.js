@@ -41,18 +41,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
             angular.forEach(callback, function(value, key) {
                 var index = value.index;
                 var title = value.title;
-                console.log(value);
                 if(typeof main.contextReferences[index] === 'undefined') {
                     main.contextReferences[index] = [];
                     main.contexts.push({
                         title: title,
                         index: index,
                         type: value.type,
-                        ctid: value.ctid,
-                        position: value.position
+                        ctid: value.ctid
                     });
                 }
-                if(value.ctid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
+                if(value.ctid && value.aid && value.val && value.datatype) {
                     main.contextReferences[index].push({
                         aid: value.aid,
                         val: value.val,
@@ -76,11 +74,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpPostFactory', 'http
                         title: title,
                         index: index,
                         type: value.type,
-                        ctid: value.ctid,
-                        position: value.position
+                        ctid: value.ctid
                     });
                 }
-                if (value.ctid !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
+                if (value.ctid && value.aid && value.val && value.datatype) {
                     main.artifactReferences[index].push({
                         aid: value.aid,
                         val: value.val,

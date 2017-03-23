@@ -15,17 +15,36 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
 
     editor.setSelectedContext = function(c) {
         editor.ct.selected = c;
-
-        if(c.type === 0) {
-            editor.ct.attributes = mainService.contextReferences[c.index];
-        }
-        else if(c.type == 1) {
-            editor.ct.attributes = mainService.artifactReferences[c.index];
-        }
+        editor.ct.attributes = getCtAttributes(c);
     };
+
+    function getCtAttributes(ct) {
+        if(ct.type === 0) {
+            return mainService.contextReferences[ct.index];
+        }
+        else if(ct.type == 1) {
+            return mainService.artifactReferences[ct.index];
+        }
+        return [];
+    }
 
     editor.addNewContextTypeWindow = function() {
         modalFactory.newContextTypeModal(searchForLabel, addNewContextType);
+    };
+
+    editor.addNewAttributeWindow = function() {
+        modalFactory.addNewAttributeModal(searchForLabel);
+    };
+
+    editor.addAttributeToContextTypeWindow = function(ct) {
+        var setAttrs = getCtAttributes(ct);
+        var attrs =  editor.existingAttributes.filter(function(i) {
+            for(var j=0; j<setAttrs.length; j++) {
+                if(setAttrs[j].aid == i.aid) return false;
+            }
+            return true;
+        });
+        modalFactory.addAttributeToContextTypeModal(ct, attrs, addAttributeToContextType);
     };
 
     editor.removeAttributeFromContextType = function(attr, context) {
@@ -35,7 +54,12 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         httpPostFactory('api/editor/contexttype/attribute/remove', formData, function(response) {
             if(!response.error) {
                 var i = editor.ct.attributes.indexOf(attr);
-                if(i > -1) editor.ct.attributes.splice(i, 1);
+                if(i > -1) {
+                    editor.ct.attributes.splice(i, 1);
+                    for(var j=i; j<editor.ct.attributes.length; j++) {
+                        editor.ct.attributes[j].position--;
+                    }
+                }
             }
         });
     };
@@ -93,6 +117,26 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
                 editor.existingContextTypes.push(newType);
             } else if(response.contexttype.type == 1) {
                 editor.existingArtifactTypes.push(newType);
+            }
+        });
+    }
+
+    function addAttributeToContextType(attr, ct) {
+        var formData = new FormData();
+        formData.append('ctid', ct.ctid);
+        formData.append('aid', attr.aid);
+
+        httpPostFactory('api/editor/contexttype/attribute/add', formData, function(response) {
+            if(!response.error) {
+                var a = response.attribute;
+                var addedAttribute = {
+                    aid: parseInt(a.attribute_id),
+                    ctid: parseInt(a.context_type_id),
+                    val: a.val,
+                    datatype: a.datatype,
+                    position: a.position
+                };
+                getCtAttributes(ct).push(addedAttribute);
             }
         });
     }

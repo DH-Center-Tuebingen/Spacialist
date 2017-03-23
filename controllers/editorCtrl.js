@@ -1,5 +1,7 @@
 spacialistApp.controller('editorCtrl', ['$scope', 'mainService', 'editorService', function($scope, mainService, editorService) {
     $scope.addNewContextType = editorService.addNewContextTypeWindow;
+    $scope.addNewAttribute = editorService.addNewAttributeWindow;
+    $scope.addAttributeToContextType = editorService.addAttributeToContextTypeWindow;
     $scope.setSelectedContext = editorService.setSelectedContext;
 
     $scope.attributeTypes = editorService.attributeTypes;
@@ -13,8 +15,6 @@ spacialistApp.controller('editorCtrl', ['$scope', 'mainService', 'editorService'
     // $scope.ctAttributes = editorService.ct.attributes;
 
     $scope.onRemoveAttrFromCt = function(attr) {
-        console.log("deleting...");
-        console.log(attr);
         editorService.removeAttributeFromContextType(attr, $scope.ct.selected);
     };
 

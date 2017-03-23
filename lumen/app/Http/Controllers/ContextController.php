@@ -155,6 +155,31 @@ class ContextController extends Controller {
         ]);
     }
 
+    public function addAttributeToContextType(Request $request) {
+        if(!$request->has('aid') || !$request->has('ctid')) {
+            return response()->json([
+                'error' => 'Missing parameter. Either aid or ctid is missing.'
+            ]);
+        }
+        $aid = $request->get('aid');
+        $ctid = $request->get('ctid');
+
+        $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
+        $ca = new ContextAttribute();
+        $ca->context_type_id = $ctid;
+        $ca->attribute_id = $aid;
+        $ca->position = $attrsCnt + 1; // add new attribute to the end
+        $ca->save();
+
+        $a = Attribute::find($aid);
+        $ca->val = $this->getLabel($a->thesaurus_url);
+        $ca->datatype = $a->datatype;
+
+        return response()->json([
+            'attribute' => $ca
+        ]);
+    }
+
     public function removeAttributeFromContextType(Request $request) {
         if(!$request->has('aid') || !$request->has('ctid')) {
             return response()->json([
@@ -164,10 +189,17 @@ class ContextController extends Controller {
         $aid = $request->get('aid');
         $ctid = $request->get('ctid');
 
-        ContextAttribute::where([
+        $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]
-        ])->delete();
+        ])->first();
+        $pos = $ca->position;
+        $ca->delete();
+
+        $successors = ContextAttribute::where('position', '>', $pos)->get();
+        foreach($successors as $s) {
+            $s->position--;
+        }
     }
 
     public function moveAttributeUp(Request $request) {
@@ -235,7 +267,7 @@ class ContextController extends Controller {
     public function get() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type', 'ca.position',
+                ->select('c.thesaurus_url as index', 'c.id as ctid', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de' limit 1) as title"),
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) as val")
                 )
@@ -544,7 +576,7 @@ class ContextController extends Controller {
             ], 403);
         }
         $rows = DB::table('context_types as c')
-        ->select('ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root', 'ca.position',
+        ->select('c.id as ctid', 'a.id as aid', 'a.datatype', 'a.thesaurus_root_url as root', 'ca.position',
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
         )
@@ -623,7 +655,7 @@ class ContextController extends Controller {
     public function getArtifacts() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'ca.context_type_id as ctid', 'ca.attribute_id as aid', 'a.datatype', 'c.type', 'ca.position',
+                ->select('c.thesaurus_url as index', 'c.id as ctid', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
                 )
