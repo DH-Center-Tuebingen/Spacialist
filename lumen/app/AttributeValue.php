@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
 
 class AttributeValue extends Model
 {
+    use PostgisTrait;
+
     protected $table = 'attribute_values';
     /**
      * The attributes that are assignable.
@@ -24,5 +27,9 @@ class AttributeValue extends Model
         'lasteditor',
         'thesaurus_val',
         'json_val'
+    ];
+
+    protected $postgisFields = [
+        'geography_val',
     ];
 }

@@ -52,6 +52,8 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('user/delete/{id}', 'UserController@delete');
     $app->get('user/get/roles/all', 'UserController@getRoles');
     $app->get('user/get/roles/{id}', 'UserController@getRolesByUser');
+    $app->get('user/get/role/permissions/{id}', 'UserController@getPermissionsByRole');
+    $app->get('role/delete/{id}', 'UserController@deleteRole');
     $app->get('overlay/get/all', 'OverlayController@getAll');
     $app->get('editor/attribute/delete/{id}', 'ContextController@deleteAttribute');
     $app->post('image/upload', 'ImageController@uploadImage');
@@ -62,6 +64,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('context/set/icon', 'ContextController@setIcon');
     $app->post('sources/add', 'SourceController@add');
     $app->post('context/set/possibility', 'ContextController@setPossibility');
+    $app->post('context/wktToGeojson', 'ContextController@wktToGeojson');
     $app->post('user/logout', 'UserController@logout');
     $app->post('user/switch', 'UserController@switchRole');
     $app->post('user/get', 'UserController@get');
@@ -70,6 +73,9 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('user/edit', 'UserController@edit');
     $app->post('user/add/role', 'UserController@addRoleToUser');
     $app->post('user/remove/role', 'UserController@removeRoleFromUser');
+    $app->post('role/edit', 'UserController@editRole');
+    $app->post('role/add/permission', 'UserController@addRolePermission');
+    $app->post('role/remove/permission', 'UserController@removeRolePermission');
     $app->post('literature/add', 'LiteratureController@add');
     $app->post('literature/edit', 'LiteratureController@edit');
     $app->post('editor/search', 'ContextController@search');

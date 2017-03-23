@@ -12,9 +12,11 @@ use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
 use App\ContextAttribute;
+use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
 use Phaza\LaravelPostgis\Geometries\Polygon;
+use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Zizaco\Entrust;
 use \DB;
 use Illuminate\Http\Request;
@@ -101,6 +103,9 @@ class ContextController extends Controller {
                                         ->first();
                 }
                 $attr->val = json_encode($attrVal);
+            } else if($attr->datatype == 'geography') {
+                $tmp = AttributeValue::find($attr->id);
+                $attr->val = $tmp->geography_val->toWKT();
             }
         }
         return $data;
@@ -297,11 +302,36 @@ class ContextController extends Controller {
         $ca2->save();
         return response()->json();
     }
+      
+    private function parseWkt($wkt) {
+        try {
+            $geom = Geometry::getWKTClass($wkt);
+            $parsed = $geom::fromWKT($wkt);
+            return $parsed;
+        } catch(UnknownWKTTypeException $e) {
+            return -1;
+        }
+    }
+
+    public function wktToGeojson(Request $request) {
+        if(!$request->has('wkt')) return;
+        $wkt = $request->get('wkt');
+        $parsed = $this->parseWkt($wkt);
+        if($parsed !== -1) {
+            return response()->json([
+                'geometry' => $parsed
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'unsupported_wkt'
+            ]);
+        }
+    }
 
     public function get() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'c.id as ctid', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
+                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de' limit 1) as title"),
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) as val")
                 )
@@ -494,24 +524,8 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $path = DB::select("
-        WITH RECURSIVE
-        q AS (
-	        SELECT  c.*, 0 as reclevel
-	        FROM    contexts c
-	        WHERE   geodata_id = $id
-	        UNION ALL
-	        SELECT  cc.*, reclevel+1
-	        FROM    q
-	        JOIN    contexts cc
-	        ON      q.root_context_id = cc.id
-        )
-        SELECT  q.id
-        FROM    q
-        ORDER BY reclevel DESC
-        ");
         return response()->json([
-            'path' => $path
+            'context_id' => Context::where('geodata_id', '=', $id)->value('id')
         ]);
     }
 
@@ -610,7 +624,7 @@ class ContextController extends Controller {
             ], 403);
         }
         $rows = DB::table('context_types as c')
-        ->select('c.id as ctid', 'a.id as aid', 'a.datatype', 'a.thesaurus_root_url as root', 'ca.position',
+        ->select('c.id as context_type_id', 'a.id as aid', 'a.datatype', 'a.thesaurus_root_url as root', 'ca.position',
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
         )
@@ -689,7 +703,7 @@ class ContextController extends Controller {
     public function getArtifacts() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'c.id as ctid', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
+                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
                 )
@@ -755,17 +769,17 @@ class ContextController extends Controller {
             $context = new Context();
         }
         if($request->has('name')) $context->name = $request->get('name');
-        if($request->has('ctid')) $context->context_type_id = $request->get('ctid');
+        if($request->has('context_type_id')) $context->context_type_id = $request->get('context_type_id');
         if($request->has('root_cid')) $context->root_context_id = $request->get('root_cid');
         $context->lasteditor = $user['name'];
         $context->save();
 
         $id = $context->id;
-        $message = $this->updateOrInsert($request->except(['id', 'name', 'ctid', 'root_cid']), $id, $isUpdate, $user);
+        $message = $this->updateOrInsert($request->except(['id', 'name', 'context_type_id', 'root_cid']), $id, $isUpdate, $user);
         if(isset($message['error'])){
             return response()->json($message);
         }
-        return response()->json(['id' => $id]);
+        return response()->json(['context' => $context]);
     }
 
     public function setIcon(Request $request) {
@@ -879,6 +893,7 @@ class ContextController extends Controller {
             if($value == 'null' || $value === null) continue;
             $ids = explode("_", $key);
             $aid = $ids[0];
+            if(isset($ids[1]) && $ids[1] == 'desc') continue;
             $datatype = Attribute::find($aid)->datatype;
             $jsonArr = json_decode($value);
             if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
@@ -913,8 +928,13 @@ class ContextController extends Controller {
                                 $set = $v->name;
                                 $val = $row->str_val;
                             } else {
-                                $set = ThConcept::find($v->narrower_id)->concept_url;
-                                $val = $row->thesaurus_val;
+                                try {
+                                    $con = ThConcept::findOrFail($v->narrower_id);
+                                    $set = $con->concept_url;
+                                    $val = $row->thesaurus_val;
+                                } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                                    continue;
+                                }
                             }
                             if($val === $set) {
                                 unset($jsonArr[$k]);
@@ -965,30 +985,34 @@ class ContextController extends Controller {
                             ['attribute_id', '=', $attr->attribute_id],
                             ['id', '=', $attr->id]
                         ])->first();
+                        if($value == '' || $value === null) {
+                            AttributeValue::find($attrValue->id)->delete();
+                            continue;
+                        }
                     } else {
                         $attrValue = new AttributeValue();
                         $attrValue->context_id = $cid;
                         $attrValue->attribute_id = $aid;
                     }
-                    $attrValue->lasteditor = $user['name'];
-                    if(is_object($jsonArr)) {
-                        $attrValue->json_val = json_encode($jsonArr);
-                    } else {
-                        $attrValue->str_val = $value;
-                    }
-                    $attrValue->save();
                 } else {
                     $attrValue = new AttributeValue();
                     $attrValue->context_id = $cid;
                     $attrValue->attribute_id = $aid;
-                    $attrValue->lasteditor = $user['name'];
-                    if(is_object($jsonArr)) {
-                        $attrValue->json_val = json_encode($jsonArr);
+                }
+                $attrValue->lasteditor = $user['name'];
+                if(is_object($jsonArr)) {
+                    $attrValue->json_val = json_encode($jsonArr);
+                } else {
+                    if($datatype == 'geography') {
+                        $parsed = $this->parseWkt($value);
+                        if($parsed !== -1) {
+                            $attrValue->geography_val = $parsed;
+                        }
                     } else {
                         $attrValue->str_val = $value;
                     }
-                    $attrValue->save();
                 }
+                $attrValue->save();
             }
         }
     }

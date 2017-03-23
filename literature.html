@@ -164,12 +164,12 @@
                     	{{ entry.howpublished }}
                     </td>
                     <td ng-if="currentUser.permissions.add_remove_literature">
-                        <button type="button" class="btn btn-danger" ng-click="deleteLiteratureEntry(entry.id, $index)">
+                        <button type="button" class="btn btn-danger" ng-click="deleteLiteratureEntry(entry)">
                             <i class="fa fa-fw fa-trash-o"></i>
                         </button>
                     </td>
                     <td ng-if="currentUser.permissions.edit_literature">
-                        <button type="button" class="btn btn-info" ng-click="editLiteratureEntry(entry.id, $index)">
+                        <button type="button" class="btn btn-info" ng-click="editLiteratureEntry(entry)">
                             <i class="fa fa-fw fa-pencil"></i>
                         </button>
                     </td>

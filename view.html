@@ -21,7 +21,7 @@
                         <a href="" ng-click="deleteElement(currentElement.element)"><span class="fa fa-fw fa-trash-o fa-red"></span></a>
                     </li>
                 </ul>
-                <form class="form-horizontal" role="form" ng-if="currentElement.fields">
+                <form class="form-horizontal" role="form" ng-if="currentElement.fields" name="currentElement.form">
                     <div class="form-group">
                         <label class="control-label col-md-3" for="name">
                             {{'context-form.name'|translate}}:
@@ -83,7 +83,7 @@
         <div ng-if="layerTwo.activeTab == 'map'">
             <div ng-if="currentUser.permissions.view_geodata" ng-controller="mapCtrl">
                 <div id="map-container" ng-if="map">
-                    <leaflet layers="map.layers" bounds="map.bounds" lf-draw="map.drawOptions" controls="map.controls" geojson="map.geojson" height="{{addonContainerHeight}}px" width="100%">
+                    <leaflet id="mainmap" layers="map.layers" lf-center="map.center" bounds="map.bounds" defaults="map.defaults" lf-draw="map.drawOptions" controls="map.controls" geojson="map.geojson" height="{{addonContainerHeight}}px" width="100%">
                     </leaflet><!-- legend="map.legend" -->
                 </div>
             </div>
@@ -118,7 +118,7 @@
                             </div>
                             <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple accept="image/*">{{'context-form.tabs.photos.upload-button'|translate}}</button>
                             <ul>
-                                <li ng-repeat="f in uploadingImages">
+                                <li ng-repeat="f in upload.files">
                                     {{ f.name }} {{ f.$errorParam }}
                                     <div class="progress">
                                         <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ f.progress }}%">
@@ -131,7 +131,7 @@
                                         </div>
                                     </div>
                                 </li>
-                                <li ng-repeat="f in errFiles">{{f.name}} {{f.$error}} {{f.$errorParam}}
+                                <li ng-repeat="f in upload.errFiles">{{f.name}} {{f.$error}} {{f.$errorParam}}
                                 </li>
                             </ul>
                         </div>
@@ -152,7 +152,7 @@
         </div>
         <div ng-if="layerTwo.activeTab == 'bibliography'" class="padded-content">
             <div ng-if="currentUser.permissions.duplicate_edit_concepts">
-                <p class="alert alert-warning" ng-if="!hasSources(currentElement)" ng-bind-html="{{'context-form.tabs.sources.empty'|translate}}"></p>
+                <p class="alert alert-warning" ng-if="!hasSources(currentElement)" ng-bind-html="'context-form.tabs.sources.empty'|translate"></p>
                 <div ng-repeat="(key, attr) in currentElement.sources">
                     <h4><a href="" ng-click="openSourceModal(attr[0].attribute_name, attr[0].attribute_id, currentElement.data[attr[0].attribute_id+'_pos'])">{{ attr[0].attribute_name }}</a></h4>
                     <table class="table table-striped table-bordered table-hover">

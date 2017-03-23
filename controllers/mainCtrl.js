@@ -13,7 +13,6 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.getColorForId = mainService.getColorForId;
     $scope.contextList = mainService.contextList;
     $scope.moduleExists = mainService.moduleExists;
-    $scope.setCurrentElement = mainService.setCurrentElement;
     $scope.unsetCurrentElement = mainService.unsetCurrentElement;
     $scope.analysisEntries = analysisService.entries;
     $scope.activeAnalysis = analysisService.activeAnalysis;
@@ -60,15 +59,12 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         null,
         [
             function() {
-                return '<span class="fa fa-fw fa-trash-o fa-light fa-red"></span> ' + $translate.instant('context-menu.delete')
+                return '<span class="fa fa-fw fa-trash-o fa-light fa-red"></span> ' + $translate.instant('context-menu.delete');
             },
-                function($itemScope, $event, modelValue, text, $li) {
-            modalFactory.deleteModal($itemScope.parent.name, function() {
-                deleteElement($itemScope.parent, function() {
-                    $itemScope.remove();
-                });
-            }, 'delete-confirm.warning');
-        }]
+            function($itemScope, $event, modelValue, text, $li) {
+                mainService.deleteElement($itemScope.parent);
+            }
+        ]
     ];
 
     $scope.layerTwo = {
@@ -78,6 +74,10 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
 
     $scope.setActiveTab = function(tabId) {
         $scope.layerTwo.activeTab = tabId;
+    };
+
+    $scope.setCurrentElement = function(target, elem, openAgain) {
+        mainService.setCurrentElement(target, elem, openAgain);
     };
 
     $scope.createNewContext = function(data) {
@@ -182,5 +182,9 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
      */
     $scope.openSourceModal = function(fieldname, fieldid, currentVal, currentDesc) {
         mainService.openSourceModal(fieldname, fieldid, currentVal, currentDesc);
+    };
+
+    $scope.openGeographyPlacer = function(aid) {
+        mainService.openGeographyModal($scope, aid);
     };
 }]);

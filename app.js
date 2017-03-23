@@ -141,6 +141,35 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function() {}, function() {});
     };
+    this.editRoleModal = function(onEdit, role) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/edit-role.html',
+            controller: function($uibModalInstance) {
+                this.roleinfo = angular.copy(role);
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.onEdit = function(roleinfo) {
+                    var changes = {};
+                    if(!role) {
+                        changes = roleinfo;
+                    } else {
+                        for(var key in role) {
+                            if(role.hasOwnProperty(key)) {
+                                if(role[key] != roleinfo[key]) {
+                                    changes[key] = roleinfo[key];
+                                }
+                            }
+                        }
+                    }
+                    onEdit(role, changes);
+                    $uibModalInstance.dismiss('ok');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function() {}, function() {});
+    };
     this.addLiteratureModal = function(onCreate, types, selectedType, fields, index) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/new-literature.html',
@@ -168,6 +197,27 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                 this.msg = msg;
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
+    this.warningModal = function(msg, onConfirm, onDiscard) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/warning.html',
+            controller: function($uibModalInstance) {
+                this.msg = msg;
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.onConfirm = function() {
+                    $uibModalInstance.dismiss('ok');
+                    onConfirm();
+                };
+                this.onDiscard = function() {
+                    $uibModalInstance.dismiss('ok');
+                    onDiscard();
                 };
             },
             controllerAs: 'mc'
@@ -705,7 +755,7 @@ spacialistApp.config(function($translateProvider) {
         'en_US': 'en'
     });
     $translateProvider.determinePreferredLanguage();
-    $translateProvider.useSanitizeValueStrategy('escape');
+    $translateProvider.useSanitizeValueStrategy('sce');
     $translateProvider.useLocalStorage();
 });
 
@@ -806,6 +856,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         .state('user', {
             url: '/user',
             templateUrl: 'user.html'
+        })
+        .state('roles', {
+            url: '/roles',
+            templateUrl: 'roles.html'
         })
         .state('literature', {
             url: '/literature',

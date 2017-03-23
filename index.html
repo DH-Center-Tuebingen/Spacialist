@@ -90,15 +90,27 @@
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        <li ng-if="currentUser">
+                        <li ng-if="currentUser.user.name">
                             <a href="" ng-click="logoutUser()">
                                 <span class="fa fa-fw fa-sign-out"></span> {{ currentUser.user.name }}
                             </a>
                         </li>
-                        <li ng-if="currentUser.permissions.view_users">
-                            <a href="" ng-click="openUserManagement()">
-                                {{'main.menu.user-management'|translate}}
+                        <li ng-if="currentUser.permissions.view_users || currentUser.permissions.add_edit_role" class="dropdown" uib-dropdown>
+                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                {{'main.menu.user-management'|translate}} <span class="caret"></span>
                             </a>
+                            <ul class="dropdown-menu" uib-dropdown-menu>
+                                <li ng-if="currentUser.permissions.view_users">
+                                    <a href="" ng-click="openUserManagement()">
+                                        <i class="fa fa-fw fa-users"></i> {{'main.menu.user-list'|translate}}
+                                    </a>
+                                </li>
+                                <li ng-if="currentUser.permissions.add_edit_role">
+                                    <a href="" ng-click="openRoleManagement()">
+                                        <i class="fa fa-fw fa-cog"></i> {{'main.menu.role-list'|translate}}
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
