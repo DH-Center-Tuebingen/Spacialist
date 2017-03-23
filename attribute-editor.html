@@ -32,7 +32,7 @@
                     <form-field fields="ct.attributes" output="tempx" label-width="3" input-width="9" offset="0" deletable orderable on-delete="onRemoveAttrFromCt" on-order="onOrderAttrOfCt">
                     </form-field>
                     <div class="col-md-offset-3">
-                        <button type="button" class="btn btn-success" ng-click="addAttributeToContextType(ct.selected)" ng-if="ct.selected.ctid">
+                        <button type="button" class="btn btn-success" ng-click="addAttributeToContextType(ct.selected)" ng-if="ct.selected.context_type_id">
                             <i class="fa fa-fw fa-plus"></i> <span translate="attribute-editor.add-attr-button" translate-values="{ name: ct.selected.title }"></span>
                         </button>
                     </div>

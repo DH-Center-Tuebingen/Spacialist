@@ -3,7 +3,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
 
     editor.ct = {
         selected: {},
-        attributes: {}
+        attributes: []
     };
     editor.attributeTypes = [];
     editor.existingAttributes = [];
@@ -16,6 +16,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     editor.setSelectedContext = function(c) {
         editor.ct.selected = c;
         editor.ct.attributes = getCtAttributes(c);
+        console.log(editor.ct.attributes);
     };
 
     editor.addNewContextTypeWindow = function() {
@@ -40,7 +41,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     editor.removeAttributeFromContextType = function(attr, context) {
         var formData = new FormData();
         formData.append('aid', attr.aid);
-        formData.append('ctid', attr.ctid);
+        formData.append('ctid', attr.context_type_id);
         httpPostFactory('api/editor/contexttype/attribute/remove', formData, function(response) {
             if(!response.error) {
                 var i = editor.ct.attributes.indexOf(attr);
@@ -60,7 +61,8 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         if(i == -1) return; //element is not part of attributes
         if(i+1 != attr.position) return; // array position does not match stored position
         var formData = new FormData();
-        formData.append('ctid', attr.ctid);
+        console.log(attr);
+        formData.append('ctid', attr.context_type_id);
         formData.append('aid', attr.aid);
         httpPostFactory('api/editor/contexttype/attribute/move/up', formData, function(response) {
             if(!response.error) {
@@ -76,7 +78,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         if(i == -1) return; //element is not part of attributes
         if(i+1 != attr.position) return; // array position does not match stored position
         var formData = new FormData();
-        formData.append('ctid', attr.ctid);
+        formData.append('ctid', attr.context_type_id);
         formData.append('aid', attr.aid);
         httpPostFactory('api/editor/contexttype/attribute/move/down', formData, function(response) {
             if(!response.error) {
@@ -134,7 +136,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
                 title: c.label,
                 index: c.thesaurus_url,
                 type: parseInt(c.type),
-                ctid: c.id
+                context_type_id: c.id
             };
             if(newType.type === 0) {
                 editor.existingContextTypes.push(newType);
@@ -165,7 +167,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
 
     function addAttributeToContextType(attr, ct) {
         var formData = new FormData();
-        formData.append('ctid', ct.ctid);
+        formData.append('ctid', ct.context_type_id);
         formData.append('aid', attr.aid);
 
         httpPostFactory('api/editor/contexttype/attribute/add', formData, function(response) {
@@ -173,7 +175,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
                 var a = response.attribute;
                 var addedAttribute = {
                     aid: parseInt(a.attribute_id),
-                    ctid: parseInt(a.context_type_id),
+                    context_type_id: parseInt(a.context_type_id),
                     val: a.val,
                     datatype: a.datatype,
                     position: a.position

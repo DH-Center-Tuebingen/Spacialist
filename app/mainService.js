@@ -52,7 +52,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                         context_type_id: value.context_type_id
                     });
                 }
-                if(value.ctid && value.aid && value.val && value.datatype) {
+                if(value.context_type_id && value.aid && value.val && value.datatype) {
                     main.contextReferences[index].push({
                         aid: value.aid,
                         val: value.val,
@@ -79,7 +79,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                         context_type_id: value.context_type_id
                     });
                 }
-                if (value.ctid && value.aid && value.val && value.datatype) {
+                if (value.context_type_id && value.aid && value.val && value.datatype) {
                     main.artifactReferences[index].push({
                         aid: value.aid,
                         val: value.val,
