@@ -53,6 +53,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('user/get/roles/all', 'UserController@getRoles');
     $app->get('user/get/roles/{id}', 'UserController@getRolesByUser');
     $app->get('overlay/get/all', 'OverlayController@getAll');
+    $app->get('editor/attribute/delete/{id}', 'ContextController@deleteAttribute');
     $app->post('image/upload', 'ImageController@uploadImage');
     $app->post('image/link', 'ImageController@link');
     $app->post('image/unlink', 'ImageController@unlink');

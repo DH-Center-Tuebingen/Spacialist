@@ -87,6 +87,29 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         });
     };
 
+    editor.deleteAttribute = function(attr) {
+        httpGetFactory('api/editor/attribute/delete/' + attr.aid, function(response) {
+            if(!response.error) {
+                var i = editor.existingAttributes.indexOf(attr);
+                if(i > -1) {
+                    editor.existingAttributes.splice(i, 1);
+                    angular.forEach(editor.existingContextTypes, function(t) {
+                        var attrs = getCtAttributes(t);
+                        var found = false;
+                        angular.forEach(attrs, function(a, k) {
+                            if(!found) {
+                                if(a.aid == attr.aid) {
+                                    attrs.splice(k, 1);
+                                    found = true;
+                                }
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    };
+
     function getCtAttributes(ct) {
         if(ct.type === 0) {
             return mainService.contextReferences[ct.index];

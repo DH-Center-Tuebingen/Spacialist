@@ -12,6 +12,10 @@ spacialistApp.controller('editorCtrl', ['$scope', 'mainService', 'editorService'
     $scope.dropdownOptions = editorService.dropdownOptions;
     $scope.ct = editorService.ct;
 
+    $scope.onDeleteAttribute = function(attr) {
+        editorService.deleteAttribute(attr);
+    };
+
     $scope.onRemoveAttrFromCt = function(attr) {
         editorService.removeAttributeFromContextType(attr, $scope.ct.selected);
     };
