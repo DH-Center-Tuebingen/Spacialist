@@ -42,10 +42,10 @@
                     </div>
                     <div class="col-md-offset-3" ng-if="currentUser.permissions.duplicate_edit_concepts">
                         <button type="button" class="btn btn-success" ng-click="storeElement(currentElement.element, currentElement.data)">
-                            <span class="fa fa-fw fa-floppy-o"></span> {{ 'context-form.save-button' | translate }}
+                            <span class="material-icons">save</span> {{ 'context-form.save-button' | translate }}
                         </button>
                         <button type="button" class="btn btn-danger" ng-click="deleteElement(currentElement.element)">
-                            <span class="fa fa-fw fa-trash-o"></span> {{ 'context-form.delete-button' | translate }}
+                            <span class="material-icons">delete</span> {{ 'context-form.delete-button' | translate }}
                         </button>
                     </div>
                 </form>
@@ -65,7 +65,7 @@
     <div class="col-md-5" id="addon-container" ng-hide="activeAnalysis.isActive">
         <ul class="nav nav-tabs" id="addon-nav">
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'map'}" ng-if="moduleExists('mapCtrl')">
-                <a href="" ng-click="setActiveTab('map')"><span class="fa fa-fw fa-map-marker"></span><span class="tab-desc"> {{'context-form.tabs.map'|translate}}</span></a>
+                <a href="" ng-click="setActiveTab('map')"><i class="material-icons">place</i><span class="tab-desc"> {{'context-form.tabs.map'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'properties'}" ng-if="currentElement.element.furtherProperties">
                 <a href="" ng-click="setActiveTab('properties')"><span class="fa fa-fw fa-sliders"></span><span class="tab-desc"> {{'context-form.tabs.further-properties'|translate}}</span></a>
@@ -74,10 +74,10 @@
                 <a href="" ng-click="setActiveTab('harris')"><span class="fa fa-fw fa-object-group"></span><span class="tab-desc"> {{'context-form.tabs.harris-matrix'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'images'}" ng-if="moduleExists('imageCtrl')">
-                <a href="" ng-click="setActiveTab('images')"><span class="fa fa-fw fa-image"></span><span class="tab-desc"> {{'context-form.tabs.photos'|translate}}</span></a>
+                <a href="" ng-click="setActiveTab('images')"><i class="material-icons">image</i><span class="tab-desc"> {{'context-form.tabs.photos'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'bibliography'}" ng-if="moduleExists('literatureCtrl') && currentElement.element.id">
-                <a href="" ng-click="setActiveTab('bibliography')"><span class="fa fa-fw fa-book"></span><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
+                <a href="" ng-click="setActiveTab('bibliography')"><i class="material-icons">book</i><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
             </li>
         </ul>
         <div ng-if="layerTwo.activeTab == 'map'">

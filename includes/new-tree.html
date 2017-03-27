@@ -1,13 +1,13 @@
 <div ui-tree data-nodrop-enabled="true" data-drag-enabled="false" id="context-tree">
     <ul ui-tree-nodes ng-model="itemList" style="margin-bottom: 8px;">
         <li class="clickable" ng-click="createNewContext()">
-            <i class="fa fa-fw"></i><i class="fa fa-fw fa-plus fa-light fa-small"></i>
+            <i class="material-icons placeholder"></i><i class="material-icons md-18">add</i>
             <span class="contextPrefix">{{'context-tree.new-toplevel-context'|translate}}</span>
         </li>
         <li ng-repeat="parent in itemList" ui-tree-node data-collapsed="true" ng-include="'includes/new-tree-child.html'" context-menu="setContextMenu">
         </li>
         <li class="clickable" ng-click="createNewContext()">
-            <i class="fa fa-fw"></i><i class="fa fa-fw fa-plus fa-light fa-small"></i>
+            <i class="material-icons placeholder"></i><i class="material-icons md-18">add</i>
             <span class="contextPrefix">{{'context-tree.new-toplevel-context'|translate}}</span>
         </li>
     </ul>

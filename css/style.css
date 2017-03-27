@@ -542,3 +542,26 @@ g.compound > rect {
   stroke-opacity: 1;
   fill: none;
 }
+
+/* Material Icons (should be part of the bower component) */
+.material-icons.md-18 {
+    font-size: 18px;
+}
+
+.material-icons.placeholder {
+    width: 24px;
+    height: 24px;
+}
+
+.material-icons.placeholder.md-18 {
+    width: 18px;
+    height: 18px;
+}
+
+.material-addon {
+    cursor: pointer;
+    font-size: 12px !important;
+    position: absolute;
+    right: 1px;
+    top: 2px;
+}

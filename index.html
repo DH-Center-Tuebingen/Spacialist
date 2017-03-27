@@ -63,7 +63,7 @@
                             </ul>
                         </li>-->
                         <li class="dropdown" uib-dropdown>
-                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'main.menu.data-analysis' | translate }} <span class="caret"></span>
+                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'main.menu.data-analysis' | translate }} <i class="material-icons">arrow_drop_down</i>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu>
                                 <li ng-repeat="entry in analysisEntries">
@@ -80,7 +80,7 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown" uib-dropdown ng-controller="LangCtrl">
                             <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                <flag country="{{ currentLanguage.flagCode }}" size="16"></flag> <span class="caret"></span>
+                                <flag country="{{ currentLanguage.flagCode }}" size="16"></flag> <i class="material-icons">arrow_drop_down</i>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu ng-init="setInitLanguage()">
                                 <li ng-repeat="(code,lang) in availableLanguages">
@@ -100,17 +100,17 @@
                         </li>
                         <li ng-if="currentUser.permissions.view_users || currentUser.permissions.add_edit_role" class="dropdown" uib-dropdown>
                             <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                {{'main.menu.user-management'|translate}} <span class="caret"></span>
+                                {{'main.menu.user-management'|translate}} <i class="material-icons">arrow_drop_down</i>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu>
                                 <li ng-if="currentUser.permissions.view_users">
                                     <a href="" ng-click="openUserManagement()">
-                                        <i class="fa fa-fw fa-users"></i> {{'main.menu.user-list'|translate}}
+                                        <i class="material-icons">group</i> {{'main.menu.user-list'|translate}}
                                     </a>
                                 </li>
                                 <li ng-if="currentUser.permissions.add_edit_role">
                                     <a href="" ng-click="openRoleManagement()">
-                                        <i class="fa fa-fw fa-cog"></i> {{'main.menu.role-list'|translate}}
+                                        <i class="material-icons">verified_user</i> {{'main.menu.role-list'|translate}}
                                     </a>
                                 </li>
                             </ul>

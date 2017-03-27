@@ -1,15 +1,15 @@
 <div ui-tree-handle style="display: table;">
     <div style="display: table-cell;">
         <a ng-click="parent.collapsed = !parent.collapsed" ng-if="parent.children && parent.children.length > 0" class="expandable-toggle">
-            <span class="fa fa-fw" ng-class="{ 'fa-chevron-right': parent.collapsed, 'fa-chevron-down': !parent.collapsed}" aria-hidden="true">
-            </span>
+            <i class="material-icons" aria-hidden="true">{{ parent.collapsed ? 'chevron_right' : 'expand_more' }}
+            </i>
         </a>
-        <span ng-if="!parent.children || parent.children.length == 0" class="fa fa-fw">
-        </span>
+        <i ng-if="!parent.children || parent.children.length == 0" class="material-icons placeholder">
+        </i>
     </div>
     <span ng-click="onClickCallback({target:parent, elem: element})" ng-class="{ 'selected-leaf': element.id == parent.id }" style="display: table-cell; padding-left: 4px;">
-        <i class="fa fa-university fa-fw fa-light fa-small" aria-hidden="true" ng-if="parent.typeid == 0"></i>
-        <i class="fa fa-tag fa-fw fa-light fa-small" aria-hidden="true" ng-if="parent.typeid == 1"></i>
+        <i class="material-icons md-18" aria-hidden="true" ng-if="parent.typeid == 0">android</i>
+        <i class="material-icons md-18" aria-hidden="true" ng-if="parent.typeid == 1">bug_report</i>
         <span ng-style="getColorForId(parent[typeAttribute])" ng-class="{ 'selected-leaf-child': element.id == parent.id }">{{ parent[displayAttribute] }}</span> <span ng-if="parent[prefixAttribute]" class="contextPrefix">{{ parent[prefixAttribute]}}</span>
     </span>
 </div>

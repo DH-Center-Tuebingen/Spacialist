@@ -1,8 +1,8 @@
 <div>
     <div class="form-group" ng-repeat="attr in attributeFields">
         <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}">
-            {{ attr.val }}: <sup ng-click="openSourceModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'], attributeOutputs[attr.aid+'_'+attr.oid+'desc'])">
-                <i class="fa fa-fw fa-plus-circle source-link" aria-hidden="true" ng-if="!readonlyInput"></i><i ng-if="attributeSources['#'+attr.aid].length > 0" class="fa fa-circle fa-addon fa-limegreen"></i>
+            {{ attr.val }}: <sup class="clickable" ng-click="openSourceModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'], attributeOutputs[attr.aid+'_'+attr.oid+'desc'])">
+                <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="attributeSources['#'+attr.aid].length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
             </sup>
         </label>
         <div class="col-md-{{inputWidth}}" ng-switch on="attr.datatype">
@@ -18,7 +18,7 @@
             <p class="input-group" ng-switch-when="date">
                 <input type="text" class="form-control" id="a{{ attr.aid }}_{{ attr.oid }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(attributeOutputs[attr.aid+'_'+attr.oid])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-default" ng-init="date.opened=false" ng-click="date.opened=!date.opened" ng-disabled="readonlyInput"><i class="fa fa-calendar"></i></button>
+                    <button type="button" class="btn btn-default" ng-init="date.opened=false" ng-click="date.opened=!date.opened" ng-disabled="readonlyInput"><i class="material-icons">event</i></button>
                 </span>
             </p>
             <div ng-switch-when="string-mc">
@@ -43,14 +43,14 @@
                 <div class="input-group">
                     <span class="input-group-btn">
                         <button class="btn btn-default" type="button" ng-click="hiddenLists[attr.aid+'_'+attr.oid] = !hiddenLists[attr.aid+'_'+attr.oid]" ng-init="hiddenLists[attr.aid+'_'+attr.oid] = true">
-                            <i class="fa fa-caret-down" style="font-size: 0.9em; top: 0;" ng-show="hiddenLists[attr.aid+'_'+attr.oid]"></i>
-                            <i class="fa fa-caret-up" style="font-size: 0.9em" ng-hide="hiddenLists[attr.aid+'_'+attr.oid]"></i>
+                            <i class="material-icons" ng-show="hiddenLists[attr.aid+'_'+attr.oid]">arrow_drop_down</i>
+                            <i class="material-icons" ng-hide="hiddenLists[attr.aid+'_'+attr.oid]">arrow_drop_up</i>
                         </button>
                     </span>
                     <input class="form-control" type="text" id="{{ attr.aid }}_{{ attr.oid }}" ng-model="listInput[attr.aid+'_'+attr.oid]" placeholder="{{'field-types.list.new-placeholder'|translate}}" ng-readonly="readonlyInput"/>
                     <span class="input-group-btn">
                         <button class="btn btn-success" type="button" ng-click="addListEntry(attr.aid, attr.oid, 'listInput', 'attributeOutputs')" ng-disabled="!listInput[attr.aid+'_'+attr.oid] || readonlyInput">
-                            <i class="fa fa-plus"></i>
+                            <i class="material-icons">add</i>
                         </button>
                     </span>
                 </div>
@@ -58,13 +58,13 @@
                     <ol class="list-group inline-list">
                         <li ng-repeat="li in attributeOutputs[attr.aid+'_'+attr.oid] track by $index" class="list-group-item animated-item" ng-mouseenter="hovered = true;" ng-mouseleave="hovered = false;">
                             <span class="delete-icon" ng-show="hovered && !editEntry[attr.aid+'_'+attr.oid][$index]" ng-click="removeListItem(attr.aid, attr.oid, 'attributeOutputs', $index)">
-                                <i class="fa fa-remove"></i>
+                                <i class="material-icons">delete</i>
                             </span>
                             <span ng-hide="editEntry[attr.aid+'_'+attr.oid][$index]" ng-click="editListEntry(attr.aid, attr.oid, $index, li)">{{ li.name }}</span>
                             <div class="item-edit-tab" ng-show="editEntry[attr.aid+'_'+attr.oid][$index]">
                                 <input type="text" ng-model="attributeOutputs[attr.aid+'_'+attr.oid][$index].name" class="list-item-edit" />
-                                <button type="button" class="btn btn-success" ng-click="storeEditListEntry()"><i class="fa fa-check"></i></button>
-                                <button type="button" class="btn btn-danger" ng-click="cancelEditListEntry()"><i class="fa fa-ban"></i></button>
+                                <button type="button" class="btn btn-success" ng-click="storeEditListEntry()"><i class="material-icons">check</i></button>
+                                <button type="button" class="btn btn-danger" ng-click="cancelEditListEntry()"><i class="material-icons">block</i></button>
                             </div>
                         </li>
                     </ol>
