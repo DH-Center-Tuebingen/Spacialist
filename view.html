@@ -13,14 +13,14 @@
         <div ng-if="currentUser.permissions.view_concept_props">
             <div ng-show="currentElement.element.id">
                 <h3>{{ currentElement.element.name }}<span ng-if="currentElement.element.typeLabel" class="type-desc">{{ currentElement.element.typeLabel }}</span> <small>{{'context-form.heading'|translate}}</small></h3>
-                <ul class="nav nav-tabs nav-undecorated nav-inline">
-                    <li role="presentation">
-                        <a href="" ng-click="storeElement(currentElement.element, currentElement.data)"><span class="fa fa-fw fa-floppy-o fa-green"></span></a>
-                    </li>
-                    <li role="presentation">
-                        <a href="" ng-click="deleteElement(currentElement.element)"><span class="fa fa-fw fa-trash-o fa-red"></span></a>
-                    </li>
-                </ul>
+                <p class="btn-group-sm nav-inline">
+                    <a class="btn btn-success btn-fab btn-fab-mini" href="" ng-click="storeElement(currentElement.element, currentElement.data)">
+                        <i class="material-icons">save</i>
+                    </a>
+                    <a class="btn btn-danger btn-fab btn-fab-mini" href="" ng-click="deleteElement(currentElement.element)">
+                        <i class="material-icons">delete</i>
+                    </a>
+                </p>
                 <form class="form-horizontal" role="form" ng-if="currentElement.fields" name="currentElement.form">
                     <div class="form-group">
                         <label class="control-label col-md-3" for="name">
