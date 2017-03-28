@@ -19,7 +19,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
     };
 
     var linkImageContextMenu = [function() {
-       var dflt = '<i class="fa fa-fw fa-plus-circle"></i> Mit aktuellem Kontext verbinden';
+       var dflt = '<i class="material-icons md-18">add_circle_outline</i> Mit aktuellem Kontext verbinden';
        //get element by dom, because $scope seems to be the isolated template (image-list.html) scope
        var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
        if(tmpScope) {
@@ -40,7 +40,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
        return typeof tmpScope.element != 'undefined';
     }];
     var unlinkImageContextMenu = [function() {
-       var dflt = '<i class="fa fa-fw fa-plus-circle"></i> Von aktuellem Kontext lösen';
+       var dflt = '<i class="material-icons md-18">remove_circle_outline</i> Von aktuellem Kontext lösen';
        //get element by dom, because $scope seems to be the isolated template (image-list.html) scope
        var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
        if(tmpScope) {
@@ -60,7 +60,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
        if(!tmpScope) return false;
        return typeof tmpScope.element != 'undefined';
     }];
-    var contextMenuSearch = ['<i class="fa fa-fw fa-search"></i> Nach Kontexten suchen', function ($itemScope, $event, modelValue, text, $li) {
+    var contextMenuSearch = ['<i class="material-icons md-18">search</i> Nach Kontexten suchen', function ($itemScope, $event, modelValue, text, $li) {
        //TODO implement (open modal with search field or inline)
     }];
 

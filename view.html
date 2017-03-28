@@ -68,10 +68,10 @@
                 <a href="" ng-click="setActiveTab('map')"><i class="material-icons">place</i><span class="tab-desc"> {{'context-form.tabs.map'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'properties'}" ng-if="currentElement.element.furtherProperties">
-                <a href="" ng-click="setActiveTab('properties')"><span class="fa fa-fw fa-sliders"></span><span class="tab-desc"> {{'context-form.tabs.further-properties'|translate}}</span></a>
+                <a href="" ng-click="setActiveTab('properties')"><i class="material-icons">tune</i><span class="tab-desc"> {{'context-form.tabs.further-properties'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'harris'}" ng-if="moduleExists('harrisCtrl')">
-                <a href="" ng-click="setActiveTab('harris')"><span class="fa fa-fw fa-object-group"></span><span class="tab-desc"> {{'context-form.tabs.harris-matrix'|translate}}</span></a>
+                <a href="" ng-click="setActiveTab('harris')"><i class="material-icons">format_shapes</i><span class="tab-desc"> {{'context-form.tabs.harris-matrix'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'images'}" ng-if="moduleExists('imageCtrl')">
                 <a href="" ng-click="setActiveTab('images')"><i class="material-icons">image</i><span class="tab-desc"> {{'context-form.tabs.photos'|translate}}</span></a>
