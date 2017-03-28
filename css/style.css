@@ -1,3 +1,10 @@
+.logo {
+    height: 24px;
+    width: 24px;
+    display: inline-block !important;
+    vertical-align: middle;
+}
+
 #literature-table thead {
     background: white;
 }
@@ -339,9 +346,9 @@ ol li.list-group-item {
 }
 
 /* use the 'Open Sans' font */
-/*h1, h2, h3, h4, h5, h6, p, div*/body, .leaflet-container, text {
+/*h1, h2, h3, h4, h5, h6, p, divbody, .leaflet-container, text {
     font-family: 'Segoe UI', 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
+}*/
 
 /* use mozilla's 'Fira Sans' font */
 /*h1, h2, h3, h4, h5, h6 {
@@ -549,4 +556,31 @@ g.compound > rect {
   stroke-width: 0.5px;
   stroke-opacity: 1;
   fill: none;
+}
+
+/* Material Icons (should be part of the bower component) */
+ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons {
+    vertical-align: bottom;
+}
+
+.material-icons.md-18 {
+    font-size: 18px;
+}
+
+.material-icons.placeholder {
+    width: 24px;
+    height: 24px;
+}
+
+.material-icons.placeholder.md-18 {
+    width: 18px;
+    height: 18px;
+}
+
+.material-addon {
+    cursor: pointer;
+    font-size: 12px !important;
+    position: absolute;
+    right: 1px;
+    top: 2px;
 }

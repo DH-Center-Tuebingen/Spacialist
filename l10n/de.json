@@ -23,7 +23,7 @@
     "context-form.tabs.photos.upload-finished": "Hochladen abgeschlossen",
     "context-form.tabs.photos.all": "Gesamte Fotosammlung",
     "context-form.tabs.sources": "Quellenangaben",
-    "context-form.tabs.sources.empty": "Noch keine Quellen hinzugefügt.<br/>Um Quellen hinzuzufügen klicken Sie auf das <sup><i class='fa fa-plus-circle source-link' aria-hidden='true'></i></sup>-Symbol neben den Element-Eigenschaften.",
+    "context-form.tabs.sources.empty": "Noch keine Quellen hinzugefügt.<br/>Um Quellen hinzuzufügen klicken Sie auf das <sup><i class='material-icons' aria-hidden='true'>stars</i></sup>-Symbol neben den Element-Eigenschaften.",
     "context-new.type-placeholder": "Wählen Sie den Typ",
     "context-new.name": "Name",
     "context-new.type": "Typ",

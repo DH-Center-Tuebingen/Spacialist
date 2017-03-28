@@ -7,15 +7,15 @@
         <div class="external-content">
             <a href="" ng-click="modalOptions.openImageInTab(modalOptions.img.id)">
                 <dfn title="Open {{ modalOptions.img.filename }} in a new tab">
-                    <i class="fa fa-fw fa-2x fa-external-link" aria-hidden="true"></i>
+                    <i class="material-icons" aria-hidden="true">open_in_new</i>
                 </dfn>
             </a>
         </div>
     </div>
     <div class="col-md-5">
         <ul class="nav nav-tabs nav-justified">
-            <li role="presentation" ng-class="{active: modalOptions.modalNav.propTab}" ng-click="modalOptions.modalNav.setPropTab()"><a><i class="fa fa-cog"></i> {{'photos.properties.heading'|translate}}</a></li>
-            <li role="presentation" ng-class="{active: modalOptions.modalNav.linkTab}" ng-click="modalOptions.modalNav.setLinkTab()"><a><i class="fa fa-link"></i> {{'photos.linkages.heading'|translate}}</a></li>
+            <li role="presentation" ng-class="{active: modalOptions.modalNav.propTab}" ng-click="modalOptions.modalNav.setPropTab()"><a><i class="material-icons">tune</i> {{'photos.properties.heading'|translate}}</a></li>
+            <li role="presentation" ng-class="{active: modalOptions.modalNav.linkTab}" ng-click="modalOptions.modalNav.setLinkTab()"><a><i class="material-icons">link</i> {{'photos.linkages.heading'|translate}}</a></li>
         </ul>
         <div ng-show="modalOptions.modalNav.propTab" class="col-md-10 col-md-offset-1">
             <h3>{{'photos.properties.heading'|translate}}</h3>

@@ -158,42 +158,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         return httpGetPromise.getData('api/context/get/byGeodata/' + featureId);
     };
 
-    map.renameMarker = function(oldName, newName) {
-        var messageScope = function() { return $scope; };
-        var oldKey = getKeyForName(oldName);
-        var oldMarker = map.map.markers[oldKey];
-        if(typeof oldMarker == 'undefined') return;
-        var oldInfo = oldMarker.contextInfo;
-        var iconOpts = {
-            className: 'fa fa-fw fa-lg fa-' + oldInfo.icon,
-            color: oldInfo.color,
-            iconSize: [20, 20]
-        };
-        //add the current marker and load it's stored attribute values
-        var id = oldInfo.id;
-        var latlng = {
-            lat: oldMarker.lat,
-            lng: oldMarker.lng
-        };
-        var title = addMarker(latlng, iconOpts, newName, id);
-        map.map.markers[title].message = "<div ng-include src=\"'layouts/marker.html'\"></div>";
-        map.map.markers[title].getMessageScope = messageScope;
-        // add values to own object. Easier to read relevant values
-        map.map.markers[title].contextInfo = {
-            data: oldInfo.data,
-            id: id,
-            title: title,
-            name: newName,
-            root_cid: oldInfo.root_cid,
-            typeid: oldInfo.typeid,
-            typename: oldInfo.typename,
-            context_type_id: oldInfo.context_type_id,
-            color: oldInfo.color,
-            icon: oldInfo.icon
-        };
-        delete map.map.markers[oldKey];
-    };
-
     function initMap() {
         leafletData.getMap('mainmap').then(function(mapObject) {
             map.mapObject = mapObject;
@@ -327,10 +291,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             position: "bottomright",
             draw: {
                 polyline: {
-                    metric: false
                 },
                 polygon: {
-                    metric: false,
                     showArea: true,
                     drawError: {
                         color: '#b00b00',
@@ -341,10 +303,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                     }
                 },
                 marker: {
-                    icon: L.divIcon({
-                        className: 'fa fa-fw fa-plus',
-                        iconSize: [20, 20]
-                    })
                 },
                 circle: false,
                 rectangle: false

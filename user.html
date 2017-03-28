@@ -32,7 +32,7 @@
             </td>
             <td ng-if="currentUser.permissions.change_password">
                 <button type="button" class="btn btn-info" ng-click="openEditUserDialog(user, $index)">
-                    <i class="fa fa-fw fa-pencil"></i> {{'user.change-password'|translate}}
+                    <i class="material-icons">edit</i> {{'user.change-password'|translate}}
                 </button>
             </td>
             <td ng-if="currentUser.permissions.add_remove_role" ng-init="getUserRoles(user.id, $index)">
@@ -45,7 +45,7 @@
             </td>
             <td ng-if="currentUser.permissions.delete_users">
                 <button type="button" class="btn btn-danger" ng-click="deleteUser(user)">
-                    <i class="fa fa-fw fa-trash-o"></i>
+                    <i class="material-icons">delete</i>
                 </button>
             </td>
             <td>
@@ -57,6 +57,6 @@
         </tr>
     </table>
     <button type="button" class="btn btn-success" ng-click="openAddUserDialog()" ng-if="currentUser.permissions.create_users">
-        <i class="fa fa-fw fa-plus"></i> {{'user.add'|translate}}
+        <i class="material-icons">add</i> {{'user.add'|translate}}
     </button>
 </div>

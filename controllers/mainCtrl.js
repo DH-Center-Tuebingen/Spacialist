@@ -32,7 +32,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         null,
         [
             function() {
-                return '<span class="fa fa-fw fa-plus-circle fa-light fa-green"></span> ' + $translate.instant('context-menu.new-artifact');
+                return '<i class="material-icons md-18 fa-light fa-green">add_circle_outline</i> ' + $translate.instant('context-menu.new-artifact');
             },
             function($itemScope, $event, modelValue, text, $li) {
             createModalHelper($itemScope, 'find', false);
@@ -41,7 +41,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         }],
         [
             function() {
-                return '<span class="fa fa-fw fa-plus-circle fa-light fa-green"></span> ' + $translate.instant('context-menu.new-context');
+                return '<i class="material-icons md-18 fa-light fa-green">add_circle_outline</i> ' + $translate.instant('context-menu.new-context');
             },
             function($itemScope, $event, modelValue, text, $li) {
             createModalHelper($itemScope, 'context', false);
@@ -51,7 +51,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         null,
         [
             function() {
-                return '<span class="fa fa-fw fa-clone fa-light fa-green"></span> ' + $translate.instant('context-menu.duplicate-element');
+                return '<i class="material-icons md-18 fa-light fa-green">content_copy</i> ' + $translate.instant('context-menu.duplicate-element');
             },
                 function($itemScope, $event, modelValue, text, $li) {
             mainService.duplicateElement($itemScope);
@@ -59,7 +59,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         null,
         [
             function() {
-                return '<span class="fa fa-fw fa-trash-o fa-light fa-red"></span> ' + $translate.instant('context-menu.delete');
+                return '<i class="material-icons md-18 fa-light fa-red">delete</i> ' + $translate.instant('context-menu.delete');
             },
             function($itemScope, $event, modelValue, text, $li) {
                 mainService.deleteElement($itemScope.parent);

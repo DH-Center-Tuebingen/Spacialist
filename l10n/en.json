@@ -23,7 +23,7 @@
     "context-form.tabs.photos.upload-finished": "Upload complete",
     "context-form.tabs.photos.all": "Complete Photo Gallery",
     "context-form.tabs.sources": "References",
-    "context-form.tabs.sources.empty": "No references assigned yet.<br/>To add references, click the <sup><i class='fa fa-plus-circle source-link' aria-hidden='true'></i></sup> symbol next to the label of any property in the form.",
+    "context-form.tabs.sources.empty": "No references assigned yet.<br/>To add references, click the <sup><i class='material-icons' aria-hidden='true'>stars</i></sup> symbol next to the label of any property in the form.",
     "context-new.type-placeholder": "Choose the type",
     "context-new.name": "Name",
     "context-new.type": "Type",

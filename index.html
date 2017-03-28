@@ -10,8 +10,10 @@
         <link rel="stylesheet" href="bower_components/leaflet-draw/dist/leaflet.draw.css" />
         <link rel="stylesheet" href="css/animate.css" />
         <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.min.css" />
-        <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css" />
         <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="bower_components/material-design-icons/iconfont/material-icons.css">
+        <link rel="stylesheet" href="bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.min.css"/>
+        <link rel="stylesheet" href="bower_components/bootstrap-material-design/dist/css/ripples.min.css"/>
         <!--<link href='https://fonts.googleapis.com/css?family=Fira+Sans:400,300italic,300,400italic,500,500italic,700,700italic' rel='stylesheet' type='text/css'>-->
         <link rel="stylesheet" href="css/style.css" />
         <title>{{'spacialist'|translate}}</title>
@@ -28,7 +30,7 @@
                         <span class="icon-bar"></span>
                     </button>
                     <a class="navbar-brand" href="" ng-click="openStartPage()">
-                        <img src="favicon.png" alt="spacialist logo" style="height: 20px; width: 20px; display: inline; vertical-align: top;"/>
+                        <img src="favicon.png" class="logo" alt="spacialist logo"/>
                         {{'spacialist'|translate}}
                     </a>
                 </div>
@@ -41,7 +43,7 @@
                                         <input type="text" class="form-control" placeholder="Search|translate">
                                         <span class="input-group-btn">
                                             <button class="btn btn-default" type="button">
-                                                <i class="fa fa-fw fa-search" aria-hidden="true"></i>
+                                                <i class="material-icons" aria-hidden="true">search</i>
                                             </button>
                                         </span>
                                     </div>
@@ -53,14 +55,14 @@
                                 {{ 'import_export' | translate }} <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu>
-                                <li ><a class="nav-link" href="#/file/import"><i class="fa fa-cloud-upload"></i> {{ 'import' | translate }}</a>
+                                <li ><a class="nav-link" href="#/file/import"><i class="material-icons">cloud_upload</i> {{ 'import' | translate }}</a>
                                 </li>
-                                <li ><a class="nav-link" href="#/file/export"><i class="fa fa-cloud-download"></i> {{ 'export' | translate }}</a>
+                                <li ><a class="nav-link" href="#/file/export"><i class="material-icons">cloud_download</i> {{ 'export' | translate }}</a>
                                 </li>
                             </ul>
                         </li>-->
                         <li class="dropdown" uib-dropdown>
-                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'main.menu.data-analysis' | translate }} <span class="caret"></span>
+                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <i class="material-icons">arrow_drop_down</i>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu>
                                 <li ng-repeat="entry in analysisEntries">
@@ -70,14 +72,14 @@
                         </li>
                         <li ng-if="currentUser.permissions.edit_literature">
                             <a href="" ng-click="openLiteratureView()">
-                                {{'main.menu.literature'|translate}}
+                                <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
                             </a>
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown" uib-dropdown ng-controller="LangCtrl">
                             <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                <flag country="{{ currentLanguage.flagCode }}" size="16"></flag> <span class="caret"></span>
+                                <flag country="{{ currentLanguage.flagCode }}" size="16"></flag> <i class="material-icons">arrow_drop_down</i>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu ng-init="setInitLanguage()">
                                 <li ng-repeat="(code,lang) in availableLanguages">
@@ -92,22 +94,22 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li ng-if="currentUser.user.name">
                             <a href="" ng-click="logoutUser()">
-                                <span class="fa fa-fw fa-sign-out"></span> {{ currentUser.user.name }}
+                                <i class="material-icons">power_settings_new</i> {{ currentUser.user.name }}
                             </a>
                         </li>
                         <li ng-if="currentUser.permissions.view_users || currentUser.permissions.add_edit_role" class="dropdown" uib-dropdown>
                             <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                {{'main.menu.user-management'|translate}} <span class="caret"></span>
+                                {{'main.menu.user-management'|translate}} <i class="material-icons">arrow_drop_down</i>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu>
                                 <li ng-if="currentUser.permissions.view_users">
                                     <a href="" ng-click="openUserManagement()">
-                                        <i class="fa fa-fw fa-users"></i> {{'main.menu.user-list'|translate}}
+                                        <i class="material-icons">group</i> {{'main.menu.user-list'|translate}}
                                     </a>
                                 </li>
                                 <li ng-if="currentUser.permissions.add_edit_role">
                                     <a href="" ng-click="openRoleManagement()">
-                                        <i class="fa fa-fw fa-cog"></i> {{'main.menu.role-list'|translate}}
+                                        <i class="material-icons">verified_user</i> {{'main.menu.role-list'|translate}}
                                     </a>
                                 </li>
                             </ul>
@@ -149,6 +151,8 @@
         <script src="bower_components/d3/d3.min.js"></script>
         <script src="bower_components/klayjs-d3/dist/klayjs-d3.min.js"></script>
         <script src="bower_components/klayjs/klay.js"></script>
+        <script src="bower_components/bootstrap-material-design/dist/js/material.min.js"></script>
+        <script src="bower_components/bootstrap-material-design/dist/js/ripples.min.js"></script>
         <script src="helpers.js"></script>
         <script src="app.js"></script>
         <script src="app/langService.js"></script>
