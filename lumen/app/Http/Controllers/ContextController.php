@@ -608,7 +608,8 @@ class ContextController extends Controller {
         foreach($geoms as $geom) {
             $geodataList[] = [
                 'geodata' => $geom->geom->jsonSerialize(),
-                'id' => $geom->id
+                'id' => $geom->id,
+                'color' => $geom->color,
             ];
         }
         return response()->json([
@@ -782,7 +783,7 @@ class ContextController extends Controller {
         return response()->json(['context' => $context]);
     }
 
-    public function setIcon(Request $request) {
+    public function setColor(Request $request) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
@@ -792,18 +793,12 @@ class ContextController extends Controller {
         $id = $request->get('id');
         $upd = [];
 
-        if($request->has('icon')) $upd['icon'] = $request->get('icon');
-        if($request->has('color')) $upd['color'] = $request->get('color');
 
-        DB::table('contexts')
-            ->where('id', $id)
-            ->update($upd);
-        $icon = DB::table('contexts')
-                ->where('id', $id)
-                ->first();
+        $geodata = Geodata::find($id);
+        $geodata->color = $request->get('color');
+        $geodata->save();
         return response()->json([
-            'icon' => $icon->icon,
-            'color' => $icon->color
+            'color' => $geodata->color
         ]);
     }
 

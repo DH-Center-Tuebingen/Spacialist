@@ -1,4 +1,4 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'leafletData', 'userService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, leafletData, userService, leafletBoundsHelpers) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'httpPostPromise', 'leafletData', 'userService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, httpPostPromise, leafletData, userService, leafletBoundsHelpers) {
     var localContexts;
     var defaultColor = '#00FF00';
     var map = {};
@@ -78,16 +78,13 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         if(!userService.can('view_geodata')) {
             return;
         }
-        var defaultIcon = map.markerIcons[0].icon;
         for(var i=0; i<geodataList.length; i++) {
             var geodata = geodataList[i];
-            var color, icon;
+            var color;
             // if(localContexts[cIndex]) {
             //     color = localContexts[cIndex].color;
-            //     icon = localContexts[cIndex].icon;
             // } else {
-                color = defaultColor;
-                icon = defaultIcon;
+            color = geodata.color;
             // }
             var feature = {
                 type: 'Feature',
@@ -96,7 +93,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 properties: {
                     name: 'Geodata #' + geodata.id,
                     color: color,
-                    icon: icon,
                     popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
                 }
             };
@@ -158,6 +154,24 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         return httpGetPromise.getData('api/context/get/byGeodata/' + featureId);
     };
 
+    map.updateMarker = function(geodata_id, color) {
+        if(typeof geodata_id == 'undefined') return;
+        if(geodata_id <= 0) return;
+        var formData = new FormData();
+        formData.append('id', geodata_id);
+        if(typeof color != 'undefined') formData.append('color', color);
+        httpPostPromise.getData('api/context/set/color', formData).then(
+            function(response) {
+                var layers = map.featureGroup.getLayers();
+                angular.forEach(layers, function(layer, key) {
+                    if(layer.feature.id == geodata_id) {
+                        layer.feature.properties.color = response.color;
+                    }
+                });
+            }
+        );
+    };
+
     function initMap() {
         leafletData.getMap('mainmap').then(function(mapObject) {
             map.mapObject = mapObject;
@@ -185,64 +199,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             [-90, 180],
             [90, -180]
         ]);
-        map.markerIcons = [
-            {
-                icon: 'plus',
-                name: 'plus'
-            },
-            {
-                icon: 'close',
-                name: 'close'
-            },
-            {
-                icon: 'circle',
-                name: 'circle'
-            },
-            {
-                icon: 'circle-o',
-                name: 'circle-o'
-            },
-            {
-                icon: 'dot-circle-o',
-                name: 'dot-circle-o'
-            },
-            {
-                icon: 'square',
-                name: 'square'
-            },
-            {
-                icon: 'square-o',
-                name: 'square-o'
-            },
-            {
-                icon: 'star',
-                name: 'star'
-            },
-            {
-                icon: 'asterisk',
-                name: 'asterisk'
-            },
-            {
-                icon: 'flag',
-                name: 'flag'
-            },
-            {
-                icon: 'flag-o',
-                name: 'flag-o'
-            },
-            {
-                icon: 'map-marker',
-                name: 'map-marker'
-            },
-            {
-                icon: 'map-pin',
-                name: 'map-pin'
-            },
-            {
-                icon: 'university',
-                name: 'university'
-            }
-        ];
         var style = {
             fillColor: "green",
             weight: 2,

@@ -204,8 +204,7 @@ class DefineRolesAndPermissions extends Migration
             $entry->delete();
         }
         $roles = [
-            'admin', 'guest', 'map_user', 'photo_user',
-            'photo_assistent', 'employee'
+            'admin', 'guest',
         ];
         foreach($roles as $r) {
             $entry = App\Role::where('name', '=', $r)->firstOrFail();
