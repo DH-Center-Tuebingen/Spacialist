@@ -15,6 +15,27 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         return user.currentUser.permissions[to] == 1;
     };
 
+    init();
+
+    function init() {
+        if(!userSet()) {
+            $auth.logout().then(function() {
+                user.currentUser.user = {};
+                user.currentUser.permissions = {};
+                localStorage.removeItem('user');
+                $state.go('auth', {});
+            });
+        }
+    }
+
+    function userSet() {
+        var user = localStorage.getItem('user');
+        if(user === '') return false;
+        var parsedUser = JSON.parse(user);
+        if(!parsedUser) return false;
+        return true;
+    }
+
     user.getUserList = function() {
         user.users.length = 0;
         httpPostFactory('api/user/get/all', new FormData(), function(response) {
