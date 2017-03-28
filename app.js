@@ -222,6 +222,79 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
             },
             controllerAs: 'mc'
         });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
+    this.newContextTypeModal = function(labelCallback, onCreate) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/new-context-type.html',
+            controller: function($uibModalInstance) {
+                this.contextTypeTypes = [
+                    { id: 0, label: 'context-type.type.context'},
+                    { id: 1, label: 'context-type.type.find'}
+                ];
+                this.onSearch = labelCallback;
+                this.onCreate = function(label, type) {
+                    onCreate(label, type);
+                    $uibModalInstance.dismiss('ok');
+                };
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
+    this.addNewAttributeModal = function(labelCallback, onCreate) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/add-attribute.html',
+            controller: function($uibModalInstance) {
+                this.needsRoot = {
+                    'string-sc': 1,
+                    'string-mc': 1,
+                    epoch: 1
+                };
+                this.datatypes = [
+                    { name: 'string', label: 'Textfeld' },
+                    { name: 'stringf', label: 'Textbox' },
+                    { name: 'date', label: 'Datumsangabe' },
+                    { name: 'epoch', label: 'Epoche' },
+                    { name: 'string-sc', label: 'Dropdown (Einzel)' },
+                    { name: 'string-mc', label: 'Dropdown (Mehrfach)' },
+                    { name: 'geography', label: 'Kartenposition' },
+                    { name: 'list', label: 'Liste (Freitext)' },
+                    { name: 'dimension', label: 'Abmessung (3D)' }
+                ];
+                this.onSearch = labelCallback;
+                this.onCreate = function(label, datatype, parent) {
+                    onCreate(label, datatype, parent);
+                    $uibModalInstance.dismiss('ok');
+                };
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
+    };
+    this.addAttributeToContextTypeModal = function(ct, attrs, onCreate) {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/add-attribute-contexttype.html',
+            controller: function($uibModalInstance) {
+                this.ct = ct;
+                this.attributes = attrs;
+                this.onCreate = function(attr) {
+                    onCreate(attr, ct);
+                    $uibModalInstance.dismiss('ok');
+                };
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function(selectedItem) {}, function() {});
     };
 }]);
 
@@ -254,6 +327,7 @@ spacialistApp.directive('resizeWatcher', function($window) {
                 $('#addon-container').css('height', '');
                 $('#literature-container').css('height', '');
                 $('analysis-frame').css('height', '');
+                $('#attribute-editor').css('height', '');
             } else {
                 var height = newValue.height;
                 var width = newValue.width;
@@ -264,6 +338,12 @@ spacialistApp.directive('resizeWatcher', function($window) {
                 if(addonNav) addonNavHeight = addonNav.offsetHeight;
                 var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
                 var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
+                var attributeEditor = document.getElementById('attribute-editor');
+                if(attributeEditor) {
+                    $(attributeEditor).css('height', containerHeight);
+                    var heading = document.getElementById('editor-heading');
+                    $('.attribute-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
+                }
                 var literatureContainer = document.getElementById('literature-container');
                 if(literatureContainer) {
                     var literatureHeight = containerHeight;
@@ -343,7 +423,7 @@ spacialistApp.directive('imageList', function() {
     };
 });
 
-spacialistApp.directive('formField', function() {
+spacialistApp.directive('formField', function($log) {
     var updateInputFields = function(scope, element, attrs) {
         scope.attributeFields = scope.$eval(attrs.fields);
         scope.attributeOutputs = scope.$eval(attrs.output);
@@ -377,6 +457,22 @@ spacialistApp.directive('formField', function() {
         scope: false,
         link: function(scope, element, attrs) {
             scope.listInput = {};
+            scope.isEditable = typeof attrs.editable != 'undefined' && (attrs.editable.length === 0 || attrs.editable == 'true');
+            scope.isDeletable = typeof attrs.deletable != 'undefined' && (attrs.deletable.length === 0 || attrs.deletable == 'true');
+            scope.isOrderable = typeof attrs.orderable != 'undefined' && (attrs.orderable.length === 0 || attrs.orderable == 'true');
+            if(scope.isDeletable && typeof attrs.onDelete == 'undefined') {
+                throw new Error('onDelete method is missing! The on-delete attribute is mandatory if you use the deletable attribute.');
+            }
+            if(scope.isOrderable) {
+                if(!attrs.onOrder) {
+                    throw new Error('onOrder method is missing! The on-order attribute is mandatory if you use the orderable attribute.');
+                }
+                scope.onOrder = scope.$eval(attrs.onOrder);
+                if(!scope.onOrder.up || !scope.onOrder.down) {
+                    throw new Error('onOrder must be an object with two fields: up and down, which are both functions.');
+                }
+            }
+            scope.onDelete = scope.$eval(attrs.onDelete);
             scope.$watch(function(scope) {
                 return scope.$eval(attrs.fields);
             }, function(newVal, oldVal) {
@@ -768,6 +864,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         .state('literature', {
             url: '/literature',
             templateUrl: 'literature.html'
+        })
+        .state('attribute-editor', {
+            url: '/attribute-editor',
+            templateUrl: 'attribute-editor.html'
         });
 });
 

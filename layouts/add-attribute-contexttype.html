@@ -1,0 +1,28 @@
+<div class="modal-header">
+    <h4>{{'context-type.add-attribute.heading'|translate}}</h4>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-md-3">{{ 'context-type.add-attribute-ct.attribute' | translate }}</label>
+                <div class="col-md-9">
+                    <ui-select ng-model="mc.attribute">
+                        <ui-select-match>
+                            <span>{{ $select.selected.val | translate }}</span>
+                        </ui-select-match>
+                        <ui-select-choices repeat="attribute in mc.attributes">
+                            <span>{{ attribute.val | translate }}</span>
+                        </ui-select-choices>
+                    </ui-select>
+                    {{ mc.attribute.datatype }}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.attribute)" ng-disabled="!mc.attribute">{{ 'add' | translate }}</button>
+    <button type="button" class="btn btn-danger"
+      ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
+</div>
