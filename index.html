@@ -63,7 +63,7 @@
                             </ul>
                         </li>-->
                         <li class="dropdown" uib-dropdown>
-                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'main.menu.data-analysis' | translate }} <i class="material-icons">arrow_drop_down</i>
+                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <i class="material-icons">arrow_drop_down</i>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu>
                                 <li ng-repeat="entry in analysisEntries">
@@ -73,7 +73,7 @@
                         </li>
                         <li ng-if="currentUser.permissions.edit_literature">
                             <a href="" ng-click="openLiteratureView()">
-                                {{'main.menu.literature'|translate}}
+                                <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
                             </a>
                         </li>
                     </ul>
@@ -95,7 +95,7 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li ng-if="currentUser.user.name">
                             <a href="" ng-click="logoutUser()">
-                                <span class="fa fa-fw fa-sign-out"></span> {{ currentUser.user.name }}
+                                <i class="material-icons">power_settings_new</i> {{ currentUser.user.name }}
                             </a>
                         </li>
                         <li ng-if="currentUser.permissions.view_users || currentUser.permissions.add_edit_role" class="dropdown" uib-dropdown>
