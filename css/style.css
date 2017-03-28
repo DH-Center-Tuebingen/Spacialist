@@ -26,6 +26,10 @@ a.activeLang {
     vertical-align: middle !important;
 }
 
+.hovered-row {
+    background-color: rgba(225, 225, 225, 0.25);
+}
+
 #navigation {
     padding-bottom: 20px;
 }
@@ -419,7 +423,7 @@ p, div {
     font-weight: normal;
 }
 
-#tree-container, #attribute-container, #addon-container, #literature-container {
+#tree-container, #attribute-container, #addon-container, #literature-container, .attribute-editor-column {
     overflow: auto;
 }
 
@@ -514,6 +518,10 @@ body > .angular-bootstrap-contextmenu.dropdown {
 
 .fa-red {
     color: red;
+}
+
+.fa-cyan {
+    color: DarkTurquoise;
 }
 
 .fa-addon {

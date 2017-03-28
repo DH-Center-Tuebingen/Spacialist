@@ -24,6 +24,8 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('context/artifacts/get', 'ContextController@getArtifacts');
     $app->get('context/get/children/{id}', 'ContextController@getChildren');
     $app->get('context/get', 'ContextController@get');
+    $app->get('context/get/attributes', 'ContextController@getAttributes');
+    $app->get('context/get/attributes/types', 'ContextController@getAvailableAttributeTypes');
     $app->get('context/get/data/{id}', 'ContextController@getContextData');
     $app->get('context/get/geodata', 'ContextController@getGeodata');
     $app->get('context/get/byGeodata/{id}', 'ContextController@getContextByGeodata');
@@ -53,6 +55,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('user/get/role/permissions/{id}', 'UserController@getPermissionsByRole');
     $app->get('role/delete/{id}', 'UserController@deleteRole');
     $app->get('overlay/get/all', 'OverlayController@getAll');
+    $app->get('editor/attribute/delete/{id}', 'ContextController@deleteAttribute');
     $app->post('image/upload', 'ImageController@uploadImage');
     $app->post('image/link', 'ImageController@link');
     $app->post('image/unlink', 'ImageController@unlink');
@@ -75,4 +78,11 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('role/remove/permission', 'UserController@removeRolePermission');
     $app->post('literature/add', 'LiteratureController@add');
     $app->post('literature/edit', 'LiteratureController@edit');
+    $app->post('editor/search', 'ContextController@search');
+    $app->post('editor/contexttype/add', 'ContextController@addContextType');
+    $app->post('editor/contexttype/attribute/add', 'ContextController@addAttributeToContextType');
+    $app->post('editor/contexttype/attribute/remove', 'ContextController@removeAttributeFromContextType');
+    $app->post('editor/contexttype/attribute/move/up', 'ContextController@moveAttributeUp');
+    $app->post('editor/contexttype/attribute/move/down', 'ContextController@moveAttributeDown');
+    $app->post('editor/attribute/add', 'ContextController@addAttribute');
 });

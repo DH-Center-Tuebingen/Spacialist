@@ -1,0 +1,48 @@
+<div ng-controller="editorCtrl" resize-watcher id="attribute-editor">
+    <h2 id="editor-heading" translate="attribute-editor.heading"></h2>
+    <div class="col-md-12">
+        <div class="col-md-5 attribute-editor-column">
+            <h4 translate="attribute-editor.available-attributes.heading"></h4>
+            <form class="form-horizontal" role="form">
+                <form-field fields="existingAttributes" output="temp" label-width="3" input-width="9" offset="0" editable deletable on-delete="onDeleteAttribute">
+                </form-field>
+            </form>
+            <button type="button" class="btn btn-success" ng-click="addNewAttribute()">
+                <i class="fa fa-fw fa-plus"></i> {{ 'attribute.add-button' | translate }}</i>
+            </button>
+        </div>
+        <div class="col-md-2 attribute-editor-column">
+            <h4 translate="attribute-editor.available-ct.heading"></h4>
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat="ct in existingContextTypes">
+                    <a href="" ng-click="setSelectedContext(ct)">{{ ct.title }} ({{'context-type.type.context'|translate}})</a>
+                </li>
+                <li class="list-group-item" ng-repeat="at in existingArtifactTypes">
+                    <a href="" ng-click="setSelectedContext(at)">{{ at.title }} ({{'context-type.type.find'|translate}})</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="" ng-click="addNewContextType()"><i class="fa fa-fw fa-plus"></i> {{ 'context-type.add.new' | translate }}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-5 attribute-editor-column">
+            <div ng-if="ct.selected">
+                <h4 translate="attribute-editor.attr-of.heading" translate-values="{ name: ct.selected.title }"></h4>
+                <form class="form-horizontal" role="form">
+                    <form-field fields="ct.attributes" output="tempx" label-width="3" input-width="9" offset="0" deletable orderable on-delete="onRemoveAttrFromCt" on-order="onOrderAttrOfCt">
+                    </form-field>
+                    <div class="col-md-offset-3">
+                        <button type="button" class="btn btn-success" ng-click="addAttributeToContextType(ct.selected)" ng-if="ct.selected.context_type_id">
+                            <i class="fa fa-fw fa-plus"></i> <span translate="attribute-editor.add-attr-button" translate-values="{ name: ct.selected.title }"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div ng-if="!ct.selected">
+                <p class="alert alert-info" translate="attribute-editor.please-select-element">
+                    Please select an element from the list on the left.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

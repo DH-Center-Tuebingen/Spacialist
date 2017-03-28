@@ -7,9 +7,11 @@ use App\Permission;
 use App\Role;
 use App\Geodata;
 use App\Context;
+use App\ContextType;
 use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
+use App\ContextAttribute;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
@@ -109,6 +111,198 @@ class ContextController extends Controller {
         return $data;
     }
 
+    private function getLabel($thesaurus_url, $lang = 'de') {
+        $label = DB::table('th_concept_label as lbl')
+            ->join('th_language as lang', 'lang.id', '=', 'lbl.language_id')
+            ->join('th_concept as con', 'lbl.concept_id', '=', 'con.id')
+            ->where('con.concept_url', '=', $thesaurus_url)
+            ->orderBy('lbl.concept_label_type', 'asc')
+            ->orderByRaw("lang.short_name = '$lang' ASC")
+            ->value('lbl.label');
+        return $label;
+    }
+
+    public function search(Request $request) {
+        if(!$request->has('val')) return response()->json();
+        $val = $request->get('val');
+        if($request->has('lang')) $lang = $request->get('lang');
+        else $lang = 'de';
+
+        $matchedConcepts = DB::table('th_concept_label as l')
+            ->select('c.concept_url', 'c.id', 'l.label')
+            ->join('th_concept as c', 'c.id', '=', 'l.concept_id')
+            ->join('th_language as lng', 'l.language_id', '=', 'lng.id')
+            ->where([
+                ['label', 'ilike', '%' . $val . '%'],
+                ['lng.short_name', '=', $lang]
+            ])
+            ->groupBy('c.id', 'l.label')
+            ->orderBy('l.label')
+            ->get();
+        return response()->json($matchedConcepts);
+    }
+
+    public function addContextType(Request $request) {
+        if(!$request->has('concept_url') || !$request->has('type')) {
+            return response()->json([
+                'error' => 'Missing parameter'
+            ]);
+        }
+        $curl = $request->get('concept_url');
+        $type = $request->get('type');
+        $cType = new ContextType();
+        $cType->thesaurus_url = $curl;
+        $cType->type = $type;
+        $cType->save();
+        $cType->label = $this->getLabel($curl);
+        return response()->json([
+            'contexttype' => $cType
+        ]);
+    }
+
+    public function addAttribute(Request $request) {
+        if(!$request->has('label_id') || !$request->has('datatype')) {
+            return response()->json([
+                'error' => 'Missing parameter.'
+            ]);
+        }
+        $lid = $request->get('label_id');
+        $datatype = $request->get('datatype');
+        $curl = ThConcept::find($lid)->concept_url;
+        $attr = new Attribute();
+        $attr->thesaurus_url = $curl;
+        $attr->datatype = $datatype;
+        if($request->has('parent_id')) {
+            $pid = $request->get('parent_id');
+            $purl = ThConcept::find($pid)->concept_url;
+            $attr->thesaurus_root_url = $purl;
+        }
+        $attr->save();
+        $attr->label = $this->getLabel($curl);
+        if(isset($purl)) $attr->root_label = $this->getLabel($purl);
+
+        return response()->json([
+            'attribute' => $attr
+        ]);
+    }
+
+    public function addAttributeToContextType(Request $request) {
+        if(!$request->has('aid') || !$request->has('ctid')) {
+            return response()->json([
+                'error' => 'Missing parameter. Either aid or ctid is missing.'
+            ]);
+        }
+        $aid = $request->get('aid');
+        $ctid = $request->get('ctid');
+
+        $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
+        $ca = new ContextAttribute();
+        $ca->context_type_id = $ctid;
+        $ca->attribute_id = $aid;
+        $ca->position = $attrsCnt + 1; // add new attribute to the end
+        $ca->save();
+
+        $a = Attribute::find($aid);
+        $ca->val = $this->getLabel($a->thesaurus_url);
+        $ca->datatype = $a->datatype;
+
+        return response()->json([
+            'attribute' => $ca
+        ]);
+    }
+
+    public function removeAttributeFromContextType(Request $request) {
+        if(!$request->has('aid') || !$request->has('ctid')) {
+            return response()->json([
+                'error' => 'Missing parameter. Either aid or ctid is missing.'
+            ]);
+        }
+        $aid = $request->get('aid');
+        $ctid = $request->get('ctid');
+
+        $ca = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+        $pos = $ca->position;
+        $ca->delete();
+
+        $successors = ContextAttribute::where([
+                ['position', '>', $pos],
+                ['context_type_id', '=', $ctid]
+            ])->get();
+        foreach($successors as $s) {
+            $s->position--;
+            $s->save();
+        }
+    }
+
+    public function deleteAttribute($id) {
+        Attribute::find($id)->delete();
+    }
+
+    public function moveAttributeUp(Request $request) {
+        if(!$request->has('aid') || !$request->has('ctid')) {
+            return response()->json([
+                'error' => 'Missing parameter. Either aid or ctid is missing.'
+            ]);
+        }
+        $aid = $request->get('aid');
+        $ctid = $request->get('ctid');
+
+        $ca = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        if($ca->position == 1) {
+            return response()->json([
+                'error' => 'Element is already topmost element'
+            ]);
+        }
+        $ca2 = ContextAttribute::where([
+            ['position', '=', $ca->position-1],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        $ca->position--;
+        $ca2->position++;
+        $ca->save();
+        $ca2->save();
+        return response()->json();
+    }
+
+    public function moveAttributeDown(Request $request) {
+        if(!$request->has('aid') || !$request->has('ctid')) {
+            return response()->json([
+                'error' => 'Missing parameter. Either aid or ctid is missing.'
+            ]);
+        }
+        $aid = $request->get('aid');
+        $ctid = $request->get('ctid');
+
+        $ca = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        if($ca->position == ContextAttribute::where('context_type_id', '=', $ctid)->count()) {
+            return response()->json([
+                'error' => 'Element is already bottommost element'
+            ]);
+        }
+        $ca2 = ContextAttribute::where([
+            ['position', '=', $ca->position+1],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        $ca->position++;
+        $ca2->position--;
+        $ca->save();
+        $ca2->save();
+        return response()->json();
+    }
+      
     private function parseWkt($wkt) {
         try {
             $geom = Geometry::getWKTClass($wkt);
@@ -137,16 +331,66 @@ class ContextController extends Controller {
     public function get() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'ca.context_type_id', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
+                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de' limit 1) as title"),
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) as val")
                 )
                 ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
                 ->where('c.type', '=', '0')
-                ->orderBy('val')
+                ->orderBy('title', 'asc')
+                ->orderBy('ca.position', 'asc')
                 ->get()
         );
+    }
+
+    public function getAvailableAttributeTypes() {
+        return response()->json([
+            'types' => [
+                [
+                    'datatype' => 'string',
+                    'description' => 'Einfaches Eingabefeld'
+                ],
+                [
+                    'datatype' => 'stringf',
+                    'description' => 'Einfaches großes Textfeld'
+                ],
+                [
+                    'datatype' => 'string-sc',
+                    'description' => 'Einfachauswahl als Dropdown'
+                ],
+                [
+                    'datatype' => 'string-mc',
+                    'description' => 'Mehrfachauswahl als Dropdown'
+                ],
+                [
+                    'datatype' => 'epoch',
+                    'description' => 'Kombiniertes Eingabefeld aus Zeitangabe und Epochenangabe (als Dropdown)'
+                ],
+                [
+                    'datatype' => 'date',
+                    'description' => 'Eingabefeld für Datumsangaben, mit Kalender-Widget'
+                ],
+                [
+                    'datatype' => 'dimension',
+                    'description' => 'Eingabefeld für Volumen (BxHxT)'
+                ],
+                [
+                    'datatype' => 'list',
+                    'description' => 'Einfaches Eingabefeld, was die Einträge in einer Liste speichert'
+                ],
+                [
+                    'datatype' => 'geography',
+                    'description' => 'Eingabefeld für WKT-Daten. Unterstützt das Platzieren der Marker über eine Karte.'
+                ]
+            ]
+        ]);
+    }
+
+    public function getAttributes() {
+        return response()->json([
+            'attributes' => Attribute::select('*', DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as label"), DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_root_url and short_name = 'de' limit 1) as root_label"))->orderBy('label', 'asc')->get()
+        ]);
     }
 
     public function getRecursive() {
@@ -380,7 +624,7 @@ class ContextController extends Controller {
             ], 403);
         }
         $rows = DB::table('context_types as c')
-        ->select('ca.context_type_id', 'ca.attribute_id as aid', 'a.datatype', 'a.thesaurus_root_url as root',
+        ->select('c.id as context_type_id', 'a.id as aid', 'a.datatype', 'a.thesaurus_root_url as root', 'ca.position',
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
             DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
         )
@@ -389,7 +633,8 @@ class ContextController extends Controller {
         ->where('a.datatype', '=', 'string-sc')
         ->orWhere('a.datatype', '=', 'string-mc')
         ->orWhere('a.datatype', '=', 'epoch')
-        ->orderBy('val')
+        ->orderBy('title', 'asc')
+        ->orderBy('ca.position', 'asc')
         ->get();
         foreach($rows as &$row) {
             if(!isset($row->root)) continue;
@@ -458,14 +703,15 @@ class ContextController extends Controller {
     public function getArtifacts() {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'ca.context_type_id', 'ca.attribute_id as aid', 'a.datatype', 'c.type',
+                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
                     DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
                 )
                 ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
                 ->where('c.type', '=', '1')
-                ->orderBy('val')
+                ->orderBy('title', 'asc')
+                ->orderBy('ca.position', 'asc')
                 ->get()
         );
     }

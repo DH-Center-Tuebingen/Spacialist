@@ -52,12 +52,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                         context_type_id: value.context_type_id
                     });
                 }
-                if(value.context_type_id !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
+                if(value.context_type_id && value.aid && value.val && value.datatype) {
                     main.contextReferences[index].push({
                         aid: value.aid,
                         val: value.val,
                         context_type_id: value.context_type_id,
-                        datatype: value.datatype
+                        datatype: value.datatype,
+                        position: value.position
                     });
                 }
             });
@@ -78,12 +79,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                         context_type_id: value.context_type_id
                     });
                 }
-                if (value.context_type_id !== null || value.aid !== null || value.val !== null || value.datatype !== null) {
+                if (value.context_type_id && value.aid && value.val && value.datatype) {
                     main.artifactReferences[index].push({
                         aid: value.aid,
                         val: value.val,
                         context_type_id: value.context_type_id,
-                        datatype: value.datatype
+                        datatype: value.datatype,
+                        position: value.position
                     });
                 }
             });
@@ -126,7 +128,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 lat: copy.lat,
                 lng: copy.lng,
                 data: copy.data,
-                children: []
+                children: [],
+                position: copy.position
             };
             $itemScope.$parent.$parent.$modelValue.push(elem);
             addMarker(elem);

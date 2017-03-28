@@ -1,7 +1,7 @@
 <div>
-    <div class="form-group" ng-repeat="attr in attributeFields">
-        <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}">
-            {{ attr.val }}: <sup class="clickable" ng-click="openSourceModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'], attributeOutputs[attr.aid+'_'+attr.oid+'desc'])">
+    <div class="form-group" ng-repeat="attr in attributeFields" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered && (isDeletable || isEditable)}">
+        <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}" uib-popover="{{attr.root_label}}" popover-trigger="'mouseenter'">
+            {{ attr.val }}: <sup ng-click="openSourceModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'], attributeOutputs[attr.aid+'_'+attr.oid+'desc'])">
                 <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="attributeSources['#'+attr.aid].length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
             </sup>
         </label>
@@ -119,6 +119,26 @@
                 </div>
             </div>
             <input class="form-control" ng-switch-default type="text" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" placeholder="{{ attr.val }}" ng-readonly="readonlyInput"/>
+        </div>
+        <div ng-if="hovered" style="position: absolute;">
+            <div ng-if="isEditable" style="float: left;">
+                <a href="">
+                    <i class="fa fa-fw fa-pencil fa-cyan"></i>
+                </a>
+            </div>
+            <div ng-if="isDeletable" style="float: left; padding-left: 5px;">
+                <a href="" ng-click="onDelete(attr)">
+                    <i class="fa fa-fw fa-trash-o fa-red"></i>
+                </a>
+            </div>
+            <div ng-if="isOrderable" style="float: left; padding-left: 5px;">
+                <a href="" ng-if="!$first" ng-click="onOrder.up(attr)">
+                    <i class="fa fa-fw fa-caret-up"></i>
+                </a>
+                <a href="" ng-if="!$last" ng-click="onOrder.down(attr)">
+                    <i class="fa fa-fw fa-caret-down"></i>
+                </a>
+            </div>
         </div>
     </div>
 </div>
