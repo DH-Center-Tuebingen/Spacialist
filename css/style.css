@@ -335,9 +335,9 @@ ol li.list-group-item {
 }
 
 /* use the 'Open Sans' font */
-/*h1, h2, h3, h4, h5, h6, p, div*/body, .leaflet-container, text {
+/*h1, h2, h3, h4, h5, h6, p, divbody, .leaflet-container, text {
     font-family: 'Segoe UI', 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
+}*/
 
 /* use mozilla's 'Fira Sans' font */
 /*h1, h2, h3, h4, h5, h6 {
@@ -544,6 +544,10 @@ g.compound > rect {
 }
 
 /* Material Icons (should be part of the bower component) */
+ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons {
+    vertical-align: bottom;
+}
+
 .material-icons.md-18 {
     font-size: 18px;
 }
