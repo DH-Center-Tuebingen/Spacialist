@@ -195,6 +195,19 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         return [];
     }
 
+    function initReferences(ct) {
+        if(ct.type === 0) {
+            if(!mainService.contextReferences[ct.index]) {
+                mainService.contextReferences[ct.index] = [];
+            }
+        }
+        else if(ct.type == 1) {
+            if(!mainService.artifactReferences[ct.index]) {
+                mainService.artifactReferences[ct.index] = [];
+            }
+        }
+    }
+
     function addNewContextType(label, type) {
         if(!label || !type)  return;
         var formData = new FormData();
@@ -211,6 +224,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
                 type: parseInt(c.type),
                 context_type_id: c.id
             };
+            initReferences(newType);
             if(newType.type === 0) {
                 editor.existingContextTypes.push(newType);
             } else if(response.contexttype.type == 1) {
