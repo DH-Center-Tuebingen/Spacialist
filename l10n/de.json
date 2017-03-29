@@ -113,6 +113,8 @@
     "attribute.add.parent": "Elternelement",
     "context-type.add-attribute-ct.attribute": "Attribut",
     "context-type.add-attribute-ct.heading": "Attribut zu Kontexttyp hinzufügen",
+    "context-type.edit.heading": "Kontext-Typ editieren",
+    "context-type.edit.label": "Name",
     "context-type.delete-warning": "Wenn Sie {{ element }} löschen, werden {{cnt}} Elemente dieses Typs gelöscht. Möchten Sie fortfahren?",
     "user.name": "Name",
     "user.email": "Email-Adresse",

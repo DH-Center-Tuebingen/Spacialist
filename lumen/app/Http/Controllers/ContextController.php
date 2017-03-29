@@ -164,6 +164,14 @@ class ContextController extends Controller {
         ]);
     }
 
+    public function editContextType(Request $request) {
+        $id = $request->get('ctid');
+        $newUrl = $request->get('new_url');
+        $ct = ContextType::find($id);
+        $ct->thesaurus_url = $newUrl;
+        $ct->save();
+    }
+
     public function addAttribute(Request $request) {
         if(!$request->has('label_id') || !$request->has('datatype')) {
             return response()->json([

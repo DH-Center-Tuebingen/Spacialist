@@ -1,0 +1,27 @@
+<div class="modal-header">
+    <h4>{{'context-type.edit.heading'|translate}}</h4>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label class="control-label col-md-3" for="type">{{'context-type.new.label'|translate}}:</label>
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <input type="text" class="form-control" ng-model="mc.name" ng-model-options="{ debounce: 250 }" placeholder="Search" uib-typeahead="result as result.label for result in mc.onSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResults" typeahead-no-results="noResults">
+                        <span class="input-group-addon"><i class="fa fa-fw fa-search"></i></span>
+                    </div>
+                    <i ng-show="loadingResults" class="material-icons">loop</i>
+                    <div ng-show="noResults && mc.name.length >= 3">
+                        <i class="material-icons">clear</i> No Results Found
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" ng-click="mc.onEdit(mc.name)">{{ 'Save' | translate }}</button>
+    <button type="button" class="btn btn-danger"
+      ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
+</div>

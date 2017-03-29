@@ -11,6 +11,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     editor.existingContextTypes = mainService.contexts;
     editor.existingArtifactTypes =  mainService.artifacts;
     editor.contextAttributes = mainService.contextReferences;
+    editor.contextList = mainService.contextList;
     editor.dropdownOptions = mainService.dropdownOptions;
 
     editor.setSelectedContext = function(c) {
@@ -112,6 +113,33 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         });
     };
 
+    editor.editContextType = function(e) {
+        modalFactory.editContextTypeModal(editContextType, searchForLabel, e, e.title);
+    };
+
+    function editContextType(e, newType) {
+        var formData = new FormData();
+        formData.append('ctid', e.context_type_id);
+        formData.append('new_url', newType.concept_url);
+        httpPostFactory('api/editor/contexttype/edit', formData, function(response) {
+            if(!response.error) {
+                var refs;
+                if(e.type === 0) {
+                    refs = mainService.contextReferences;
+                }
+                else if(e.type == 1) {
+                    refs = mainService.artifactReferences;
+                }
+                refs[newType.concept_url] = refs[e.index];
+                delete refs[e.index];
+                var oldUrl = e.index;
+                e.title = newType.label;
+                e.index = newType.concept_url;
+                updateContextList(oldUrl, newType);
+            }
+        });
+    }
+
     editor.deleteElementType = function(e) {
         httpGetFactory('api/editor/occurrences/' + e.context_type_id, function(response) {
             $translate('context-type.delete-warning', {
@@ -136,6 +164,22 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
                 } else if(e.type == 1) {
                     id = editor.existingArtifactTypes.indexOf(e);
                     editor.existingArtifactTypes.splice(id, 1);
+                }
+                updateContextList(e.index, undefined);
+            }
+        });
+    }
+
+    function updateContextList(oldUrl, newType) {
+        if(!oldUrl || oldUrl.length === 0) return;
+        var isDelete = !newType;
+        angular.forEach(editor.contextList, function(c, i) {
+            if(c.typename == oldUrl) {
+                if(isDelete) {
+                    editor.contextList.splice(i, 1);
+                } else {
+                    c.typename = newType.concept_url;
+                    c.typelabel = newType.label;
                 }
             }
         });

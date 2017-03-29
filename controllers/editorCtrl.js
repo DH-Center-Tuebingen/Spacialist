@@ -29,6 +29,10 @@ spacialistApp.controller('editorCtrl', ['$scope', 'mainService', 'editorService'
         }
     };
 
+    $scope.editElementType = function(e) {
+        editorService.editContextType(e);
+    };
+
     $scope.deleteElementType = function(e) {
         editorService.deleteElementType(e);
     };

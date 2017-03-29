@@ -78,6 +78,7 @@
     "attribute.add.parent": "Parent Element",
     "context-type.add-attribute-ct.attribute": "Attribute",
     "context-type.add-attribute-ct.heading": "Add Attribute To Context-Type",
+    "context-type.edit.heading": "Edit Context-Type",
     "context-type.delete-warning": "If you delete {{ element }}, {{cnt}} elements of this type will be deleted as well. Do you want to continue?",
     "user.name": "Name",
     "user.email": "Email Address",
