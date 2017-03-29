@@ -214,12 +214,12 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     $uibModalInstance.dismiss('cancel');
                 };
                 this.onConfirm = function() {
-                    $uibModalInstance.dismiss('ok');
                     onConfirm();
+                    $uibModalInstance.dismiss('ok');
                 };
                 this.onDiscard = function() {
-                    $uibModalInstance.dismiss('ok');
                     onDiscard();
+                    $uibModalInstance.dismiss('ok');
                 };
             },
             controllerAs: 'mc'
@@ -867,7 +867,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             url: '/literature',
             templateUrl: 'literature.html'
         })
-        .state('attribute-editor', {
+        .state('attributes', {
             url: '/attribute-editor',
             templateUrl: 'attribute-editor.html'
         });
