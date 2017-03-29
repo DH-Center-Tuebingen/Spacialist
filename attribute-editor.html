@@ -11,7 +11,7 @@
                 </form-field>
             </form>
             <button type="button" class="btn btn-success" ng-click="addNewAttribute()">
-                <i class="fa fa-fw fa-plus"></i> {{ 'attribute.add-button' | translate }}
+                <i class="material-icons">add</i> {{ 'attribute.add-button' | translate }}
             </button>
         </div>
         <div class="col-md-2 attribute-editor-column">
@@ -40,7 +40,7 @@
                     </span>
                 </li>
                 <li class="list-group-item">
-                    <a href="" ng-click="addNewContextType()"><i class="fa fa-fw fa-plus"></i> {{ 'context-type.add.new' | translate }}</a>
+                    <a href="" ng-click="addNewContextType()"><i class="material-icons">add</i> {{ 'context-type.add.new' | translate }}</a>
                 </li>
             </ul>
         </div>
@@ -52,7 +52,7 @@
                     </form-field>
                     <div class="col-md-offset-3">
                         <button type="button" class="btn btn-success" ng-click="addAttributeToContextType(ct.selected)" ng-if="ct.selected.context_type_id">
-                            <i class="fa fa-fw fa-plus"></i> <span translate="attribute-editor.add-attr-button" translate-values="{ name: ct.selected.title }"></span>
+                            <i class="material-icons">add</i> <span translate="attribute-editor.add-attr-button" translate-values="{ name: ct.selected.title }"></span>
                         </button>
                     </div>
                 </form>
