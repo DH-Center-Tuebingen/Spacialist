@@ -1,4 +1,4 @@
-spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, mainService) {
+spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, mainService, $translate) {
     var editor = {};
 
     editor.ct = {
@@ -111,6 +111,35 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
             }
         });
     };
+
+    editor.deleteElementType = function(e) {
+        httpGetFactory('api/editor/occurrences/' + e.context_type_id, function(response) {
+            $translate('context-type.delete-warning', {
+                element: e.title,
+                cnt: response.count
+            }).then(function(t) {
+                var onConfirm = function() {
+                    return deleteElementType(e);
+                };
+                modalFactory.deleteModal(e.title, onConfirm, t);
+            });
+        });
+    };
+
+    function deleteElementType(e) {
+        httpGetFactory('api/editor/contexttype/delete/' + e.context_type_id, function(response) {
+            if(!response.error) {
+                var id;
+                if(e.type === 0) {
+                    id = editor.existingContextTypes.indexOf(e);
+                    editor.existingContextTypes.splice(id, 1);
+                } else if(e.type == 1) {
+                    id = editor.existingArtifactTypes.indexOf(e);
+                    editor.existingArtifactTypes.splice(id, 1);
+                }
+            }
+        });
+    }
 
     function getCtAttributes(ct) {
         if(ct.type === 0) {

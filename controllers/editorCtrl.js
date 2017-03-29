@@ -28,4 +28,8 @@ spacialistApp.controller('editorCtrl', ['$scope', 'mainService', 'editorService'
             editorService.moveAttributeOfContextTypeDown(attr);
         }
     };
+
+    $scope.deleteElementType = function(e) {
+        editorService.deleteElementType(e);
+    };
 }]);

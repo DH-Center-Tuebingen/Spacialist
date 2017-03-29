@@ -142,6 +142,10 @@ class ContextController extends Controller {
         return response()->json($matchedConcepts);
     }
 
+    public function deleteContextType($id) {
+        ContextType::find($id)->delete();
+    }
+
     public function addContextType(Request $request) {
         if(!$request->has('concept_url') || !$request->has('type')) {
             return response()->json([
@@ -302,7 +306,14 @@ class ContextController extends Controller {
         $ca2->save();
         return response()->json();
     }
-      
+
+    public function getOccurrenceCount($id) {
+        $cnt = Context::where('context_type_id', '=', $id)->count();
+        return response()->json([
+            'count' => $cnt
+        ]);
+    }
+
     private function parseWkt($wkt) {
         try {
             $geom = Geometry::getWKTClass($wkt);
