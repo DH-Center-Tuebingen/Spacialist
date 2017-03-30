@@ -1,9 +1,10 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'leafletData', 'userService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, leafletData, userService, leafletBoundsHelpers) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'httpPostPromise', 'leafletData', 'userService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, httpPostPromise, leafletData, userService, leafletBoundsHelpers) {
     var localContexts;
     var defaultColor = '#00FF00';
     var map = {};
-    map.geodataList = [];
+    map.geodataList = {};
     map.currentGeodata = {};
+    map.currentLayer = {};
     map.featureGroup = new L.FeatureGroup();
 
     var availableLayerKeys = [
@@ -66,7 +67,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 var geodatas = response.geodata;
                 for(var i=0; i<geodatas.length; i++) {
                     var current = geodatas[i];
-                    map.geodataList.push(current);
+                    map.geodataList['#' + current.id] = current;
                 }
                 map.addListToMarkers(map.geodataList, true);
             }
@@ -78,35 +79,21 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         if(!userService.can('view_geodata')) {
             return;
         }
-        var defaultIcon = map.markerIcons[0].icon;
-        for(var i=0; i<geodataList.length; i++) {
-            var geodata = geodataList[i];
-            var color, icon;
-            // if(localContexts[cIndex]) {
-            //     color = localContexts[cIndex].color;
-            //     icon = localContexts[cIndex].icon;
-            // } else {
-                color = defaultColor;
-                icon = defaultIcon;
-            // }
-            var feature = {
-                type: 'Feature',
-                id: geodata.id,
-                geometry: geodata.geodata,
-                properties: {
-                    name: 'Geodata #' + geodata.id,
-                    color: color,
-                    icon: icon,
-                    popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
-                }
-            };
-            map.map.geojson.data.features.push(feature);
-            // workaround, because calling `bringToBack()` in the `onEachFeature` throws an error (this._map is undefined)
-            // var currentLayers = map.geoJson.getLayers();
-            // var currentLayer = currentLayers[currentLayers.length - 1];
-            // if(feature.geometry.type != 'Point') {
-            //     currentLayer.bringToBack();
-            // }
+        for(var k in geodataList) {
+            if(geodataList.hasOwnProperty(k)) {
+                var geodata = geodataList[k];
+                var feature = {
+                    type: 'Feature',
+                    id: geodata.id,
+                    geometry: geodata.geodata,
+                    properties: {
+                        name: 'Geodata #' + geodata.id,
+                        color: geodata.color,
+                        popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
+                    }
+                };
+                map.map.geojson.data.features.push(feature);
+            }
         }
     };
 
@@ -133,6 +120,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 if(layer.feature.id == geodataId) {
                     alreadyFound = true;
                     layer.openPopup();
+                    map.currentLayer = layer;
                 }
             }
         });
@@ -156,6 +144,21 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
     map.getMatchingContext = function(featureId) {
         return httpGetPromise.getData('api/context/get/byGeodata/' + featureId);
+    };
+
+    map.updateMarker = function(geodata_id, color) {
+        if(typeof geodata_id == 'undefined') return;
+        if(geodata_id <= 0) return;
+        var formData = new FormData();
+        formData.append('id', geodata_id);
+        if(typeof color != 'undefined') formData.append('color', color);
+        httpPostPromise.getData('api/context/set/color', formData).then(
+            function(response) {
+                map.currentLayer.feature.properties.color = response.color;
+                map.currentLayer.setStyle({fillColor: response.color});
+                map.geodataList['#' + geodata_id].color = response.color;
+            }
+        );
     };
 
     function initMap() {
@@ -185,64 +188,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             [-90, 180],
             [90, -180]
         ]);
-        map.markerIcons = [
-            {
-                icon: 'plus',
-                name: 'plus'
-            },
-            {
-                icon: 'close',
-                name: 'close'
-            },
-            {
-                icon: 'circle',
-                name: 'circle'
-            },
-            {
-                icon: 'circle-o',
-                name: 'circle-o'
-            },
-            {
-                icon: 'dot-circle-o',
-                name: 'dot-circle-o'
-            },
-            {
-                icon: 'square',
-                name: 'square'
-            },
-            {
-                icon: 'square-o',
-                name: 'square-o'
-            },
-            {
-                icon: 'star',
-                name: 'star'
-            },
-            {
-                icon: 'asterisk',
-                name: 'asterisk'
-            },
-            {
-                icon: 'flag',
-                name: 'flag'
-            },
-            {
-                icon: 'flag-o',
-                name: 'flag-o'
-            },
-            {
-                icon: 'map-marker',
-                name: 'map-marker'
-            },
-            {
-                icon: 'map-pin',
-                name: 'map-pin'
-            },
-            {
-                icon: 'university',
-                name: 'university'
-            }
-        ];
         var style = {
             fillColor: "green",
             weight: 2,
@@ -269,6 +214,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                     layer.bindPopup(feature.properties.popupContent, {
                         minWidth: 300,
                         feature: feature
+                    });
+                    layer.on('click', function(){
+                        layer.openPopup();
+                        map.currentLayer = layer;
                     });
                 }
                 feature.properties.wkt = map.toWkt(layer);

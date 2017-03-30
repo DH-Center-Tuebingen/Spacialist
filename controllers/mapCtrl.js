@@ -1,8 +1,7 @@
 spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'modalFactory', 'httpGetFactory', '$compile', function($scope, mapService, mainService, modalFactory, httpGetFactory, $compile) {
     $scope.map = mapService.map;
     $scope.mapObject = mapService.mapObject;
-    $scope.markerIcons = mapService.markerIcons;
-    $scope.markers = mapService.markers;
+    $scope.geodataList = mapService.geodataList;
     $scope.currentElement = mainService.currentElement;
     $scope.currentGeodata = mapService.currentGeodata;
     ////
@@ -29,22 +28,8 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
         mapService.addContextToMarkers(elem);
     };
 
-    $scope.updateMarkerOptions = function(markerId, markerKey, color, icon) {
-        if(typeof markerId == 'undefined') return;
-        if(markerId <= 0) return;
-        var formData = new FormData();
-        formData.append('id', markerId);
-        if(typeof color != 'undefined') formData.append('color', color);
-        if(typeof icon != 'undefined') formData.append('icon', icon.icon);
-        httpPostPromise.getData('api/context/set/icon', formData).then(
-            function(icon) {
-                console.log(icon);
-                angular.extend($scope.markers[markerKey].icon, {
-                    className: 'fa fa-fw fa-lg fa-' + icon.icon,
-                    color: icon.color
-                });
-            }
-        );
+    $scope.updateMarkerOptions = function(geodata_id, color) {
+        mapService.updateMarker(geodata_id, color);
     };
 
     /**
@@ -60,9 +45,9 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
         $compile(popup._contentNode)(newScope);
         var center = popup._source.getBounds().getCenter();
         popup.setLatLng(center);
-        var featureId = args.leafletEvent.popup._source.feature.id;
-        mapService.setCurrentGeodata(featureId);
-        var promise = mapService.getMatchingContext(featureId);
+        var geodataId = args.leafletEvent.popup._source.feature.id;
+        mapService.setCurrentGeodata(geodataId);
+        var promise = mapService.getMatchingContext(geodataId);
         promise.then(function(response) {
             if(response.error) {
                 modalFactory.errorModal(response.error);
@@ -76,6 +61,8 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
                 }
             }
         });
+
+        $scope.markerOptions.color = $scope.geodataList['#' + geodataId].color;
     });
 
     $scope.$on('leafletDirectiveDraw.mainmap.draw:edited', function(event, args) {

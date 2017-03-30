@@ -48,7 +48,7 @@ class AddRoleManagementPermissions extends Migration
     public function down()
     {
         $permissions = [
-            'view_roles', 'add_edit_role',
+            'add_edit_role',
             'delete_role', 'add_remove_permission'
         ];
         foreach($permissions as $p) {

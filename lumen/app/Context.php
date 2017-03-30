@@ -16,8 +16,6 @@ class Context extends Model
         'root_context_id',
         'name',
         'lasteditor',
-        'icon',
-        'color',
         'geodata_id',
     ];
 }
