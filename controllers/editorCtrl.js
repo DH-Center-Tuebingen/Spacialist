@@ -4,7 +4,6 @@ spacialistApp.controller('editorCtrl', ['$scope', 'mainService', 'editorService'
     $scope.addAttributeToContextType = editorService.addAttributeToContextTypeWindow;
     $scope.setSelectedContext = editorService.setSelectedContext;
 
-    $scope.attributeTypes = editorService.attributeTypes;
     $scope.existingAttributes = editorService.existingAttributes;
     $scope.existingContextTypes = editorService.existingContextTypes;
     $scope.existingArtifactTypes =  editorService.existingArtifactTypes;
@@ -27,5 +26,13 @@ spacialistApp.controller('editorCtrl', ['$scope', 'mainService', 'editorService'
         down: function(attr) {
             editorService.moveAttributeOfContextTypeDown(attr);
         }
+    };
+
+    $scope.editElementType = function(e) {
+        editorService.editContextType(e);
+    };
+
+    $scope.deleteElementType = function(e) {
+        editorService.deleteElementType(e);
     };
 }]);

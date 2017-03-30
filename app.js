@@ -214,12 +214,12 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     $uibModalInstance.dismiss('cancel');
                 };
                 this.onConfirm = function() {
-                    $uibModalInstance.dismiss('ok');
                     onConfirm();
+                    $uibModalInstance.dismiss('ok');
                 };
                 this.onDiscard = function() {
-                    $uibModalInstance.dismiss('ok');
                     onDiscard();
+                    $uibModalInstance.dismiss('ok');
                 };
             },
             controllerAs: 'mc'
@@ -247,7 +247,26 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-    this.addNewAttributeModal = function(labelCallback, onCreate) {
+    this.editContextTypeModal = function(onEdit, labelCallback, ct, name) {
+        var origName = name;
+        var modalInstance = $uibModal.open({
+            templateUrl: 'layouts/edit-contexttype.html',
+            controller: function($uibModalInstance) {
+                this.name = name;
+                this.onSearch = labelCallback;
+                this.cancel = function(result) {
+                    $uibModalInstance.dismiss('cancel');
+                };
+                this.onEdit = function(newType) {
+                    if(origName != newType.label) onEdit(ct, newType);
+                    $uibModalInstance.dismiss('ok');
+                };
+            },
+            controllerAs: 'mc'
+        });
+        modalInstance.result.then(function() {}, function() {});
+    };
+    this.addNewAttributeModal = function(labelCallback, onCreate, datatypes) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/add-attribute.html',
             controller: function($uibModalInstance) {
@@ -256,17 +275,7 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     'string-mc': 1,
                     epoch: 1
                 };
-                this.datatypes = [
-                    { name: 'string', label: 'Textfeld' },
-                    { name: 'stringf', label: 'Textbox' },
-                    { name: 'date', label: 'Datumsangabe' },
-                    { name: 'epoch', label: 'Epoche' },
-                    { name: 'string-sc', label: 'Dropdown (Einzel)' },
-                    { name: 'string-mc', label: 'Dropdown (Mehrfach)' },
-                    { name: 'geography', label: 'Kartenposition' },
-                    { name: 'list', label: 'Liste (Freitext)' },
-                    { name: 'dimension', label: 'Abmessung (3D)' }
-                ];
+                this.datatypes = datatypes;
                 this.onSearch = labelCallback;
                 this.onCreate = function(label, datatype, parent) {
                     onCreate(label, datatype, parent);
@@ -867,7 +876,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             url: '/literature',
             templateUrl: 'literature.html'
         })
-        .state('attribute-editor', {
+        .state('attributes', {
             url: '/attribute-editor',
             templateUrl: 'attribute-editor.html'
         });

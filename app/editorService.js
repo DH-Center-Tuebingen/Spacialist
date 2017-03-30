@@ -1,4 +1,4 @@
-spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, mainService) {
+spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, mainService, $translate) {
     var editor = {};
 
     editor.ct = {
@@ -11,12 +11,12 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     editor.existingContextTypes = mainService.contexts;
     editor.existingArtifactTypes =  mainService.artifacts;
     editor.contextAttributes = mainService.contextReferences;
+    editor.contextList = mainService.contextList;
     editor.dropdownOptions = mainService.dropdownOptions;
 
     editor.setSelectedContext = function(c) {
         editor.ct.selected = c;
         editor.ct.attributes = getCtAttributes(c);
-        console.log(editor.ct.attributes);
     };
 
     editor.addNewContextTypeWindow = function() {
@@ -24,7 +24,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     };
 
     editor.addNewAttributeWindow = function() {
-        modalFactory.addNewAttributeModal(searchForLabel, addNewAttribute);
+        modalFactory.addNewAttributeModal(searchForLabel, addNewAttribute, editor.attributeTypes);
     };
 
     editor.addAttributeToContextTypeWindow = function(ct) {
@@ -112,6 +112,78 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         });
     };
 
+    editor.editContextType = function(e) {
+        modalFactory.editContextTypeModal(editContextType, searchForLabel, e, e.title);
+    };
+
+    function editContextType(e, newType) {
+        var formData = new FormData();
+        formData.append('ctid', e.context_type_id);
+        formData.append('new_url', newType.concept_url);
+        httpPostFactory('api/editor/contexttype/edit', formData, function(response) {
+            if(!response.error) {
+                var refs;
+                if(e.type === 0) {
+                    refs = mainService.contextReferences;
+                }
+                else if(e.type == 1) {
+                    refs = mainService.artifactReferences;
+                }
+                refs[newType.concept_url] = refs[e.index];
+                delete refs[e.index];
+                var oldUrl = e.index;
+                e.title = newType.label;
+                e.index = newType.concept_url;
+                updateContextList(oldUrl, newType);
+            }
+        });
+    }
+
+    editor.deleteElementType = function(e) {
+        httpGetFactory('api/editor/occurrences/' + e.context_type_id, function(response) {
+            $translate('context-type.delete-warning', {
+                element: e.title,
+                cnt: response.count
+            }).then(function(t) {
+                var onConfirm = function() {
+                    return deleteElementType(e);
+                };
+                modalFactory.deleteModal(e.title, onConfirm, t);
+            });
+        });
+    };
+
+    function deleteElementType(e) {
+        httpGetFactory('api/editor/contexttype/delete/' + e.context_type_id, function(response) {
+            if(!response.error) {
+                var id;
+                if(e.type === 0) {
+                    id = editor.existingContextTypes.indexOf(e);
+                    editor.existingContextTypes.splice(id, 1);
+                } else if(e.type == 1) {
+                    id = editor.existingArtifactTypes.indexOf(e);
+                    editor.existingArtifactTypes.splice(id, 1);
+                }
+                updateContextList(e.index, undefined);
+            }
+        });
+    }
+
+    function updateContextList(oldUrl, newType) {
+        if(!oldUrl || oldUrl.length === 0) return;
+        var isDelete = !newType;
+        angular.forEach(editor.contextList, function(c, i) {
+            if(c.typename == oldUrl) {
+                if(isDelete) {
+                    editor.contextList.splice(i, 1);
+                } else {
+                    c.typename = newType.concept_url;
+                    c.typelabel = newType.label;
+                }
+            }
+        });
+    }
+
     function getCtAttributes(ct) {
         if(ct.type === 0) {
             return mainService.contextReferences[ct.index];
@@ -120,6 +192,19 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
             return mainService.artifactReferences[ct.index];
         }
         return [];
+    }
+
+    function initReferences(ct) {
+        if(ct.type === 0) {
+            if(!mainService.contextReferences[ct.index]) {
+                mainService.contextReferences[ct.index] = [];
+            }
+        }
+        else if(ct.type == 1) {
+            if(!mainService.artifactReferences[ct.index]) {
+                mainService.artifactReferences[ct.index] = [];
+            }
+        }
     }
 
     function addNewContextType(label, type) {
@@ -138,6 +223,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
                 type: parseInt(c.type),
                 context_type_id: c.id
             };
+            initReferences(newType);
             if(newType.type === 0) {
                 editor.existingContextTypes.push(newType);
             } else if(response.contexttype.type == 1) {

@@ -360,6 +360,10 @@ p, div {
     font-family: 'Fira Sans';
 }*/
 
+.is-right {
+    float: right;
+}
+
 /* right-side nav */
 .tabs-right > .nav-tabs {
   border-bottom: 0;
@@ -563,6 +567,12 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     vertical-align: bottom;
 }
 
+.btn-fab-minime {
+    height: 24px !important;
+    min-width: 24px !important;
+    width: 24px !important;
+}
+
 .material-icons.md-18 {
     font-size: 18px;
 }
@@ -583,4 +593,8 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     position: absolute;
     right: 1px;
     top: 2px;
+}
+
+.list-group-item {
+    margin: 5px 0 5px 0;
 }

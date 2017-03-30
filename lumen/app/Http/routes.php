@@ -56,6 +56,8 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('role/delete/{id}', 'UserController@deleteRole');
     $app->get('overlay/get/all', 'OverlayController@getAll');
     $app->get('editor/attribute/delete/{id}', 'ContextController@deleteAttribute');
+    $app->get('editor/occurrences/{id}', 'ContextController@getOccurrenceCount');
+    $app->get('editor/contexttype/delete/{id}', 'ContextController@deleteContextType');
     $app->post('image/upload', 'ImageController@uploadImage');
     $app->post('image/link', 'ImageController@link');
     $app->post('image/unlink', 'ImageController@unlink');
@@ -80,6 +82,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('literature/edit', 'LiteratureController@edit');
     $app->post('editor/search', 'ContextController@search');
     $app->post('editor/contexttype/add', 'ContextController@addContextType');
+    $app->post('editor/contexttype/edit', 'ContextController@editContextType');
     $app->post('editor/contexttype/attribute/add', 'ContextController@addAttributeToContextType');
     $app->post('editor/contexttype/attribute/remove', 'ContextController@removeAttributeFromContextType');
     $app->post('editor/contexttype/attribute/move/up', 'ContextController@moveAttributeUp');
