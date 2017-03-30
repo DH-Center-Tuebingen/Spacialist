@@ -235,7 +235,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     function addNewAttribute(label, datatype, parent) {
         var formData = new FormData();
         formData.append('label_id', label.id);
-        formData.append('datatype', datatype.name);
+        formData.append('datatype', datatype.datatype);
         if(parent) formData.append('parent_id', parent.id);
         httpPostFactory('api/editor/attribute/add', formData, function(response) {
             if(!response.error) {
