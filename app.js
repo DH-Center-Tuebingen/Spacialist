@@ -2,6 +2,50 @@ var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'u
 
 $.material.init();
 
+spacialistApp.service('snackbarService', [function() {
+    var defaults = {
+        autoclose: {
+            timeout: 2000,
+            htmlAllowed: true
+        },
+        persistent: {
+            timeout: 0,
+            htmlAllowed: true
+        }
+    };
+
+    function getAutocloseSnack() {
+        return angular.merge({}, defaults.autoclose);
+    }
+    function getPersistentSnack() {
+        return angular.merge({}, defaults.persistent);
+    }
+
+    var snack = {};
+    snack.snacks = {};
+
+    snack.addAutocloseSnack = function(content) {
+        var options = getAutocloseSnack();
+        options.content = content;
+        $.snackbar(options);
+    };
+    snack.addPersistentSnack = function(id, content) {
+        if(snack.snacks[id]) return;
+        var options = getPersistentSnack();
+        options.content = content;
+        snack.snacks[id] = $.snackbar(options);
+    };
+    snack.closeSnack = function(id, keepAsKey) {
+        if(!snack.snacks[id]) return;
+        snack.snacks[id].snackbar('hide');
+        if(keepAsKey !== false) {
+            delete snack.snacks[id];
+        }
+    };
+
+    return snack;
+}]);
+
 spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($uibModal, httpGetFactory) {
     var defaults = {
         backdrop: true,

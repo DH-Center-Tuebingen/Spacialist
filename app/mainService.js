@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, $timeout, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', 'snackbarService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, snackbarService, $timeout, $translate) {
     var main = {};
     var modalFields;
 
@@ -552,12 +552,17 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         } else if(elem.typeid == 1) { //find
             elem.fields = main.artifactReferences[elem.typename].slice();
         }
+        var content = 'Loading data of ' + elem.name;
+        snackbarService.addPersistentSnack('getElemData', content);
         var data = {};
         httpGetFactory('api/context/get/data/' + elem.id, function(response) {
             if(response.error) {
                 modalFactory.errorModal(response.error);
                 return;
             }
+            snackbarService.closeSnack('getElemData');
+            var content = '<i class="material-icons fa-green">check</i> Successfully loaded data of ' + elem.name;
+            snackbarService.addAutocloseSnack(content);
             data = parseData(response.data);
             main.currentElement.data = data;
         });
