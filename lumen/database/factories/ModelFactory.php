@@ -111,7 +111,7 @@ $factory->define(App\Attribute::class, function(Faker\Generator $faker) {
     return [
         'thesaurus_url' => $concept->concept_url,
         'thesaurus_root_url' => $faker->optional()->randomElement([$root_concept->concept_url]),
-        'datatype' => $faker->randomElement(['string', 'list', 'date', 'stringf', 'epoch', 'string-sc', 'string-mc']),
+        'datatype' => $faker->randomElement(['string', 'list', 'date', 'stringf', 'epoch', 'string-sc', 'string-mc', 'dimension']),
     ];
 });
 
@@ -176,6 +176,7 @@ $factory->define(App\Geodata::class, function(Faker\Generator $faker) {
 
     return [
         'geom' => $geom,
+        'color' => $faker->randomElement([$faker->hexcolor]),
     ];
 });
 
@@ -184,10 +185,8 @@ $factory->define(App\Context::class, function(Faker\Generator $faker) {
     if(!isset($contextType)){
         $contextType = factory(App\ContextType::class)->create();
     }
-    $geodata = App\Geodata::inRandomOrder()->first();
-    if(!isset($geodata)){
-        $geodata = factory(App\Geodata::class)->create();
-    }
+    $geodata = factory(App\Geodata::class)->create();
+
     $rootContext = App\Context::inRandomOrder()->first();
     if(!isset($rootContext)){
         // if there is no entry in the Contexts table, do not recursively call this factory
@@ -197,9 +196,7 @@ $factory->define(App\Context::class, function(Faker\Generator $faker) {
         'context_type_id' => $contextType->id,
         'root_context_id' => $faker->optional()->randomElement([$rootContext->id]),
         'name' => $faker->word,
-        'icon' => $faker->optional($weight=0.9)->randomElement(['plus','close','circle','circle-o','dot-circle-o','square','square-o','star','asterisk','flag','flag-o','map-marker','map-pin','university']),
-        'color' => $faker->optional()->randomElement([$faker->hexcolor]),
-        'geodata_id' => $faker->optional($weight=0.7)->randomElement([$geodata->id]),
+        'geodata_id' => $geodata->id,
         'lasteditor' => $faker->name,
     ];
 });
