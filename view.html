@@ -80,7 +80,7 @@
                 <a href="" ng-click="setActiveTab('bibliography')"><i class="material-icons">book</i><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
             </li>
         </ul>
-        <div ng-if="layerTwo.activeTab == 'map'">
+        <div ng-show="layerTwo.activeTab == 'map'">
             <div ng-if="currentUser.permissions.view_geodata" ng-controller="mapCtrl">
                 <div id="map-container" ng-if="map">
                     <leaflet id="mainmap" layers="map.layers" lf-center="map.center" bounds="map.bounds" defaults="map.defaults" lf-draw="map.drawOptions" controls="map.controls" geojson="map.geojson" height="{{addonContainerHeight}}px" width="100%">
