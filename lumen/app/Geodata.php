@@ -16,8 +16,9 @@ class Geodata extends Model
      * @var array
      */
     protected $fillable = [
+        'color',
     ];
-    
+
     protected $postgisFields = [
         'geom',
     ];
