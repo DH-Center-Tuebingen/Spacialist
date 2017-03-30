@@ -99,22 +99,23 @@
                         </li>
                         <li ng-if="currentUser.permissions.view_users || currentUser.permissions.add_edit_role" class="dropdown" uib-dropdown>
                             <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                {{'main.menu.user-management'|translate}} <i class="material-icons">arrow_drop_down</i>
+                                <i class="material-icons">settings</i>
+                                {{'main.menu.settings'|translate}} <i class="material-icons">arrow_drop_down</i>
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu>
                                 <li ng-if="currentUser.permissions.view_users">
                                     <a href="" ng-click="openUserManagement()">
-                                        <i class="material-icons">group</i> {{'main.menu.user-list'|translate}}
+                                        <i class="material-icons">group</i> {{'main.menu.user-management'|translate}}
                                     </a>
                                 </li>
                                 <li ng-if="currentUser.permissions.add_edit_role">
                                     <a href="" ng-click="openRoleManagement()">
-                                        <i class="material-icons">verified_user</i> {{'main.menu.role-list'|translate}}
+                                        <i class="material-icons">verified_user</i> {{'main.menu.role-management'|translate}}
                                     </a>
                                 </li>
                                 <li>
                                     <a href="" ng-click="openAttributeEditor()">
-                                        <i class="fa fa-fw fa-cog"></i> {{'main.menu.attr-editor'|translate}}
+                                        <i class="material-icons">view_list</i> {{'main.menu.data-model-editor'|translate}}
                                     </a>
                                 </li>
                             </ul>
