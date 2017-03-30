@@ -76,7 +76,9 @@ class MoveColorToGeodata extends Migration
                     '#99FF33'   =>  'flag-o',
                     '#FFFF33'   =>  'map-marker',
             ];
-            App\Context::where('geodata_id', $geodata->id)->update(['icon' => $translate[$geodata->color]]);
+            if(array_key_exists($geodata->color, $translate)) {
+                App\Context::where('geodata_id', $geodata->id)->update(['icon' => $translate[$geodata->color]]);
+            }
         });
 
         Schema::table('geodata', function(Blueprint $table) {
