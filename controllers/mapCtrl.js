@@ -45,9 +45,9 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
         $compile(popup._contentNode)(newScope);
         var center = popup._source.getBounds().getCenter();
         popup.setLatLng(center);
-        var featureId = args.leafletEvent.popup._source.feature.id;
-        mapService.setCurrentGeodata(featureId);
-        var promise = mapService.getMatchingContext(featureId);
+        var geodataId = args.leafletEvent.popup._source.feature.id;
+        mapService.setCurrentGeodata(geodataId);
+        var promise = mapService.getMatchingContext(geodataId);
         promise.then(function(response) {
             if(response.error) {
                 modalFactory.errorModal(response.error);
@@ -61,6 +61,8 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
                 }
             }
         });
+
+        $scope.markerOptions.color = $scope.geodataList['#' + geodataId].color;
     });
 
     $scope.$on('leafletDirectiveDraw.mainmap.draw:edited', function(event, args) {

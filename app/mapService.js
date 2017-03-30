@@ -2,8 +2,9 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     var localContexts;
     var defaultColor = '#00FF00';
     var map = {};
-    map.geodataList = [];
+    map.geodataList = {};
     map.currentGeodata = {};
+    map.currentLayer = {};
     map.featureGroup = new L.FeatureGroup();
 
     var availableLayerKeys = [
@@ -66,7 +67,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 var geodatas = response.geodata;
                 for(var i=0; i<geodatas.length; i++) {
                     var current = geodatas[i];
-                    map.geodataList.push(current);
+                    map.geodataList['#' + current.id] = current;
                 }
                 map.addListToMarkers(map.geodataList, true);
             }
@@ -78,31 +79,21 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         if(!userService.can('view_geodata')) {
             return;
         }
-        for(var i=0; i<geodataList.length; i++) {
-            var geodata = geodataList[i];
-            var color;
-            // if(localContexts[cIndex]) {
-            //     color = localContexts[cIndex].color;
-            // } else {
-            color = geodata.color;
-            // }
-            var feature = {
-                type: 'Feature',
-                id: geodata.id,
-                geometry: geodata.geodata,
-                properties: {
-                    name: 'Geodata #' + geodata.id,
-                    color: color,
-                    popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
-                }
-            };
-            map.map.geojson.data.features.push(feature);
-            // workaround, because calling `bringToBack()` in the `onEachFeature` throws an error (this._map is undefined)
-            // var currentLayers = map.geoJson.getLayers();
-            // var currentLayer = currentLayers[currentLayers.length - 1];
-            // if(feature.geometry.type != 'Point') {
-            //     currentLayer.bringToBack();
-            // }
+        for(var k in geodataList) {
+            if(geodataList.hasOwnProperty(k)) {
+                var geodata = geodataList[k];
+                var feature = {
+                    type: 'Feature',
+                    id: geodata.id,
+                    geometry: geodata.geodata,
+                    properties: {
+                        name: 'Geodata #' + geodata.id,
+                        color: geodata.color,
+                        popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
+                    }
+                };
+                map.map.geojson.data.features.push(feature);
+            }
         }
     };
 
@@ -129,6 +120,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 if(layer.feature.id == geodataId) {
                     alreadyFound = true;
                     layer.openPopup();
+                    map.currentLayer = layer;
                 }
             }
         });
@@ -162,12 +154,9 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         if(typeof color != 'undefined') formData.append('color', color);
         httpPostPromise.getData('api/context/set/color', formData).then(
             function(response) {
-                var layers = map.featureGroup.getLayers();
-                angular.forEach(layers, function(layer, key) {
-                    if(layer.feature.id == geodata_id) {
-                        layer.feature.properties.color = response.color;
-                    }
-                });
+                map.currentLayer.feature.properties.color = response.color;
+                map.currentLayer.setStyle({fillColor: response.color});
+                map.geodataList['#' + geodata_id].color = response.color;
             }
         );
     };
@@ -225,6 +214,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                     layer.bindPopup(feature.properties.popupContent, {
                         minWidth: 300,
                         feature: feature
+                    });
+                    layer.on('click', function(){
+                        layer.openPopup();
+                        map.currentLayer = layer;
                     });
                 }
                 feature.properties.wkt = map.toWkt(layer);
