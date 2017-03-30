@@ -22,10 +22,10 @@
                 <div class="col-md-9">
                     <ui-select ng-model="mc.datatype">
                         <ui-select-match>
-                            <span>{{ $select.selected.label | translate }}</span>
+                            <span>{{ $select.selected.description | translate }}</span>
                         </ui-select-match>
                         <ui-select-choices repeat="datatype in mc.datatypes">
-                            <span>{{ datatype.label | translate }}</span>
+                            <span>{{ datatype.description | translate }}</span>
                         </ui-select-choices>
                     </ui-select>
                 </div>

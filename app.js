@@ -266,7 +266,7 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function() {}, function() {});
     };
-    this.addNewAttributeModal = function(labelCallback, onCreate) {
+    this.addNewAttributeModal = function(labelCallback, onCreate, datatypes) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/add-attribute.html',
             controller: function($uibModalInstance) {
@@ -275,17 +275,7 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     'string-mc': 1,
                     epoch: 1
                 };
-                this.datatypes = [
-                    { name: 'string', label: 'Textfeld' },
-                    { name: 'stringf', label: 'Textbox' },
-                    { name: 'date', label: 'Datumsangabe' },
-                    { name: 'epoch', label: 'Epoche' },
-                    { name: 'string-sc', label: 'Dropdown (Einzel)' },
-                    { name: 'string-mc', label: 'Dropdown (Mehrfach)' },
-                    { name: 'geography', label: 'Kartenposition' },
-                    { name: 'list', label: 'Liste (Freitext)' },
-                    { name: 'dimension', label: 'Abmessung (3D)' }
-                ];
+                this.datatypes = datatypes;
                 this.onSearch = labelCallback;
                 this.onCreate = function(label, datatype, parent) {
                     onCreate(label, datatype, parent);

@@ -368,39 +368,43 @@ class ContextController extends Controller {
             'types' => [
                 [
                     'datatype' => 'string',
-                    'description' => 'Einfaches Eingabefeld'
+                    'description' => 'attribute.string.desc'
                 ],
                 [
                     'datatype' => 'stringf',
-                    'description' => 'Einfaches großes Textfeld'
+                    'description' => 'attribute.stringf.desc'
+                ],
+                [
+                    'datatype' => 'double',
+                    'description' => 'attribute.double.desc'
                 ],
                 [
                     'datatype' => 'string-sc',
-                    'description' => 'Einfachauswahl als Dropdown'
+                    'description' => 'attribute.string-sc.desc'
                 ],
                 [
                     'datatype' => 'string-mc',
-                    'description' => 'Mehrfachauswahl als Dropdown'
+                    'description' => 'attribute.string-mc.desc'
                 ],
                 [
                     'datatype' => 'epoch',
-                    'description' => 'Kombiniertes Eingabefeld aus Zeitangabe und Epochenangabe (als Dropdown)'
+                    'description' => 'attribute.epoch.desc'
                 ],
                 [
                     'datatype' => 'date',
-                    'description' => 'Eingabefeld für Datumsangaben, mit Kalender-Widget'
+                    'description' => 'attribute.date.desc'
                 ],
                 [
                     'datatype' => 'dimension',
-                    'description' => 'Eingabefeld für Volumen (BxHxT)'
+                    'description' => 'attribute.dimension.desc'
                 ],
                 [
                     'datatype' => 'list',
-                    'description' => 'Einfaches Eingabefeld, was die Einträge in einer Liste speichert'
+                    'description' => 'attribute.list.desc'
                 ],
                 [
                     'datatype' => 'geography',
-                    'description' => 'Eingabefeld für WKT-Daten. Unterstützt das Platzieren der Marker über eine Karte.'
+                    'description' => 'attribute.geography.desc'
                 ]
             ]
         ]);

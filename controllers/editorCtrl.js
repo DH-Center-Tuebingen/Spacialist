@@ -4,7 +4,6 @@ spacialistApp.controller('editorCtrl', ['$scope', 'mainService', 'editorService'
     $scope.addAttributeToContextType = editorService.addAttributeToContextTypeWindow;
     $scope.setSelectedContext = editorService.setSelectedContext;
 
-    $scope.attributeTypes = editorService.attributeTypes;
     $scope.existingAttributes = editorService.existingAttributes;
     $scope.existingContextTypes = editorService.existingContextTypes;
     $scope.existingArtifactTypes =  editorService.existingArtifactTypes;

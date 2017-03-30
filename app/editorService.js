@@ -17,7 +17,6 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     editor.setSelectedContext = function(c) {
         editor.ct.selected = c;
         editor.ct.attributes = getCtAttributes(c);
-        console.log(editor.ct.attributes);
     };
 
     editor.addNewContextTypeWindow = function() {
@@ -25,7 +24,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     };
 
     editor.addNewAttributeWindow = function() {
-        modalFactory.addNewAttributeModal(searchForLabel, addNewAttribute);
+        modalFactory.addNewAttributeModal(searchForLabel, addNewAttribute, editor.attributeTypes);
     };
 
     editor.addAttributeToContextTypeWindow = function(ct) {
