@@ -183,6 +183,14 @@
     "context-menu.duplicate-element": "Element duplizieren",
     "context-menu.delete": "Löschen",
 
+    "snackbar.data-stored.success": "Daten erfolgreich gespeichert.",
+    "snackbar.data-updated.success": "Daten erfolgreich aktualisiert.",
+    "snackbar.data-updated.error": "Fehler beim Aktualisieren der Daten.",
+    "snackbar.element-deleted.success": "{{ name }} gelöscht.",
+    "snackbar.image-linked.success": "Bild mit Kontext verknüpft.",
+    "snackbar.image-unlinked.success": "Bild von Kontext gelöst.",
+    "snackbar.image-upload.success": "{{ cnt }} Bilder hochgeladen.",
+
     "dates_list": "Zeitangaben",
     "map": "Karte",
     "doc_info": "Dokument-Informationen",

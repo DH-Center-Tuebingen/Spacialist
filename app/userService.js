@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'modalFactory', '$auth', '$state', '$http', function(httpPostFactory, httpGetFactory, modalFactory, $auth, $state, $http) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', function(httpPostFactory, httpGetFactory, modalFactory, snackbarService, $auth, $state, $http) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -73,6 +73,8 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         }
         httpPostFactory('api/user/edit', formData, function(response) {
             user.users[$index] = response.user;
+            var content = $translate.instant(snackbar.data-updated.success);
+            snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 
@@ -122,7 +124,14 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
                     role[k] = response.role[k];
                 }
             }
-            if(isNew) user.roles.push(role);
+            if(isNew) {
+                user.roles.push(role);
+                var content = $translate.instant(snackbar.data-stored.success);
+                snackbarService.addAutocloseSnack(content, 'success');
+            } else {
+                var content = $translate.instant(snackbar.data-updated.success);
+                snackbarService.addAutocloseSnack(content, 'success');
+            }
         });
     }
 
@@ -156,8 +165,12 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
             // if an error occurs, readd removed permission
             if(response.error) {
                 role.permissions.push(item);
+                var content = $translate.instant(snackbar.data-updated.error);
+                snackbarService.addAutocloseSnack(content, 'error');
                 return;
             }
+            var content = $translate.instant(snackbar.data-updated.success);
+            snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 
@@ -173,6 +186,8 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         formData.append('user_id', user_id);
         httpPostFactory('api/user/add/role', formData, function(response) {
             // TODO only remove/add role if function returns no error
+            var content = $translate.instant(snackbar.data-updated.success);
+            snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 
@@ -182,6 +197,8 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         formData.append('user_id', user_id);
         httpPostFactory('api/user/remove/role', formData, function(response) {
             // TODO only remove/add role if function returns no error
+            var content = $translate.instant(snackbar.data-updated.success);
+            snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 

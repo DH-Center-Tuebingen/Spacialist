@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, $timeout, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', 'snackbarService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, snackbarService, $timeout, $translate) {
     var main = {};
     var modalFields;
 
@@ -232,6 +232,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         elem.data = parsedData;
         var promise = storeElement(elem);
         promise.then(function(response){
+            var content = $translate.instant('snackbar.data-stored.success');
+            snackbarService.addAutocloseSnack(content, 'success');
             if(response.error){
                 modalFactory.errorModal(response.error);
                 return;
@@ -278,6 +280,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     modalFactory.errorModal(response.error);
                     return;
                 }
+                var content = $translate.instant('snackbar.element-deleted.success', { name: elem.title  });
+                snackbarService.addAutocloseSnack(content, 'success');
                 var path = response.path;
                 modalFactory.deleteModal(elem.name, function() {
                     deleteElement(elem, function() {
@@ -340,6 +344,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     formData.append('possibility', modalFields.value);
                     if(modalFields.description) formData.append('possibility_description', modalFields.description);
                     httpPostFactory('api/context/set/possibility', formData, function(callback) {
+                        var content = $translate.instant('snackbar.data-stored.success');
+                        snackbarService.addAutocloseSnack(content, 'success');
                         main.currentElement.data[aid+'_pos'] = modalFields.value;
                         main.currentElement.data[aid+'_desc'] = modalFields.description;
                     });

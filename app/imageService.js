@@ -1,4 +1,4 @@
-spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'modalService', 'Upload', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, modalService, Upload, $timeout) {
+spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'modalService', 'snackbarService', 'Upload', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, modalService, snackbarService, Upload, $timeout) {
     var images = {
         all: [],
         linked: [],
@@ -86,6 +86,10 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
                         $timeout(function() {
                             images.upload.files.length = 0;
                         }, 1000);
+                        var content = $translate.instant('snackbar.image-upload.success', {
+                            cnt: images.upload.finished
+                        });
+                        snackbarService.addAutocloseSnack(content, 'success');
                     }
                 });
             }, function(response) {
@@ -106,7 +110,8 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         formData.append('imgId', imgId);
         formData.append('ctxId', contextId);
         httpPostFactory('api/image/link', formData, function(response) {
-            console.log("image " + imgId + " is now linked to " + contextId);
+            var content = $translate.instant('snackbar.image-linked.success');
+            snackbarService.addAutocloseSnack(content, 'success');
             images.getImagesForContext(contextId);
         });
     };
@@ -116,7 +121,8 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         formData.append('imgId', imgId);
         formData.append('ctxId', contextId);
         httpPostFactory('api/image/unlink', formData, function(response) {
-            console.log("unlinked image " + imgId + " from " + contextId);
+            var content = $translate.instant('snackbar.image-unlinked.success');
+            snackbarService.addAutocloseSnack(content, 'success');
             images.getImagesForContext(contextId);
         });
     };
