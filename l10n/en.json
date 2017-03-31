@@ -172,6 +172,14 @@
     "context-menu.duplicate-element": "Duplicate element",
     "context-menu.delete": "Delete",
 
+    "snackbar.data-stored.success": "Successfully stored data.",
+    "snackbar.data-updated.success": "Successfully updated data.",
+    "snackbar.data-updated.error": "Error while updating data.",
+    "snackbar.element-deleted.success": "{{ name }} deleted.",
+    "snackbar.image-linked.success": "Linked photo to context.",
+    "snackbar.image-unlinked.success": "Unlinked photo from context.",
+    "snackbar.image-upload.success": "{{ cnt }} photos uploaded.",
+
     "dates_list": "Dates list",
     "map": "Map",
     "doc_info": "Document",
