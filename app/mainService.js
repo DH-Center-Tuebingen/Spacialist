@@ -552,17 +552,12 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         } else if(elem.typeid == 1) { //find
             elem.fields = main.artifactReferences[elem.typename].slice();
         }
-        var content = 'Loading data of ' + elem.name;
-        snackbarService.addPersistentSnack('getElemData', content);
         var data = {};
         httpGetFactory('api/context/get/data/' + elem.id, function(response) {
             if(response.error) {
                 modalFactory.errorModal(response.error);
                 return;
             }
-            snackbarService.closeSnack('getElemData');
-            var content = 'Successfully loaded data of ' + elem.name;
-            snackbarService.addAutocloseSnack(content, 'warning');
             data = parseData(response.data);
             main.currentElement.data = data;
         });
