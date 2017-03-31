@@ -25,11 +25,11 @@
     "lodash": "^4.16.0",
     "ng-file-upload": "^12.2.9",
     "angular-ui-tree": "^2.22.0",
-    "leaflet": "^0.7.7",
-    "leaflet-draw": "^0.3.2",
+    "leaflet": "^1.0.0",
+    "leaflet-draw": "^0.4.9",
     "angular-simple-logger": "^0.1.7",
-    "ui-leaflet": "^1.0.1",
-    "ui-leaflet-draw": "^0.0.3",
+    "ui-leaflet": "^2.0.0",
+    "ui-leaflet-draw": "^0.0.5",
     "angular-ui-select": "^0.19.4",
     "ng-flags": "^0.0.2",
     "angular-messages": "~1.5.8",
@@ -50,6 +50,8 @@
   },
   "resolutions": {
     "angular": "~1.5.8",
-    "leaflet-draw": "^0.3.2"
+    "leaflet-draw": "^0.4.9",
+    "leaflet": "^1.0.0",
+    "ui-leaflet": "1.x"
   }
 }
