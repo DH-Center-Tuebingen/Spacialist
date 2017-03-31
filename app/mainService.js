@@ -561,8 +561,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 return;
             }
             snackbarService.closeSnack('getElemData');
-            var content = '<i class="material-icons fa-green">check</i> Successfully loaded data of ' + elem.name;
-            snackbarService.addAutocloseSnack(content);
+            var content = 'Successfully loaded data of ' + elem.name;
+            snackbarService.addAutocloseSnack(content, 'warning');
             data = parseData(response.data);
             main.currentElement.data = data;
         });

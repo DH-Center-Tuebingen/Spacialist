@@ -20,18 +20,34 @@ spacialistApp.service('snackbarService', [function() {
     function getPersistentSnack() {
         return angular.merge({}, defaults.persistent);
     }
+    function getPrefix(snackType) {
+        switch(snackType) {
+            case 'success':
+                return '<i class="material-icons text-success">check</i> ';
+            case 'info':
+                return '<i class="material-icons text-info">info_outline</i> ';
+            case 'warning':
+                return '<i class="material-icons text-warning">warning</i> ';
+            case 'error':
+                return '<i class="material-icons text-danger">error_outline</i> ';
+            default:
+                return '';
+        }
+    }
 
     var snack = {};
     snack.snacks = {};
 
-    snack.addAutocloseSnack = function(content) {
+    snack.addAutocloseSnack = function(content, snackType) {
         var options = getAutocloseSnack();
+        content = getPrefix(snackType) + content;
         options.content = content;
         $.snackbar(options);
     };
-    snack.addPersistentSnack = function(id, content) {
+    snack.addPersistentSnack = function(id, content, snackType) {
         if(snack.snacks[id]) return;
         var options = getPersistentSnack();
+        content = getPrefix(snackType) + content;
         options.content = content;
         snack.snacks[id] = $.snackbar(options);
     };
