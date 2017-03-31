@@ -1,11 +1,10 @@
 spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'modalFactory', 'httpGetFactory', '$compile', function($scope, mapService, mainService, modalFactory, httpGetFactory, $compile) {
     $scope.map = mapService.map;
     $scope.mapObject = mapService.mapObject;
-    $scope.geodataList = mapService.geodataList;
     $scope.currentElement = mainService.currentElement;
     $scope.currentGeodata = mapService.currentGeodata;
     ////
-    $scope.markerOptions = {};
+    $scope.selectedLayer = mapService.selectedLayer;
     $scope.closedAlerts = {};
     $scope.output = {};
     $scope.relations = [];
@@ -43,8 +42,6 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
         var newScope = $scope.$new();
         newScope.stream = popup.options.feature;
         $compile(popup._contentNode)(newScope);
-        var center = popup._source.getBounds().getCenter();
-        popup.setLatLng(center);
         var geodataId = args.leafletEvent.popup._source.feature.id;
         mapService.setCurrentGeodata(geodataId);
         var promise = mapService.getMatchingContext(geodataId);
@@ -54,15 +51,13 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
             } else {
                 var matchingId = response.context_id;
                 if(matchingId !== null) {
-                    mainService.expandTreeTo(matchingId);
+                    mainService.expandTreeTo(matchingId, function(node){mainService.setCurrentElement(node, mainService.currentElement, false)});
                 } else {
                     var dontUnsetUnlinked = true;
                     mainService.unsetCurrentElement(dontUnsetUnlinked);
                 }
             }
         });
-
-        $scope.markerOptions.color = $scope.geodataList['#' + geodataId].color;
     });
 
     $scope.$on('leafletDirectiveDraw.mainmap.draw:edited', function(event, args) {

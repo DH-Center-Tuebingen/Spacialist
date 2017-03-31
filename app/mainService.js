@@ -440,7 +440,19 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 modalFactory.errorModal(response.error);
                 return;
             }
-            updateContext(response.path, newValues, toDelete);
+            main.expandTreeTo(id, function(node) {
+                var index = main.contextList.indexOf(node);
+                if(toDelete) {
+                    if(index != -1){
+                        main.contextList.splice(index, 1);
+                    }
+                } else {
+                    angular.merge(main.currentElement.element, newValues);
+                    if(index != -1){
+                        angular.merge(main.contextList[index], newValues);
+                    }
+                }
+            });
         });
     };
 
@@ -484,19 +496,19 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
     }
 
-    main.expandTreeTo = function(id) {
+    main.expandTreeTo = function(id, callback) {
         main.contextList.forEach(function(node) {
-            shouldExpand(node, id);
+            shouldExpand(node, id, callback);
         });
     };
 
-    function shouldExpand(node, id) {
+    function shouldExpand(node, id, callback) {
         if(node.id == id) {
-            main.setCurrentElement(node, main.currentElement, false);
+            callback(node);
             return true;
         }
         for(var i in node.children) {
-            if(shouldExpand(node.children[i], id)) {
+            if(shouldExpand(node.children[i], id, callback)) {
                 node.collapsed = false;
                 return true;
             }
