@@ -12,5 +12,5 @@ class PhotoTag extends Model
      * @var array
      */
     protected $primaryKay = '';
-    protected $incrementing = false;
+    public $incrementing = false;
 }
