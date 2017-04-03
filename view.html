@@ -99,14 +99,23 @@
         </div>
         <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" class="padded-content" style="max-height: 100%;">
             <div ng-if="currentUser.permissions.view_photos">
-                <uib-accordion close-others="true">
+                <div class="container col-md-12">
+                    <div class="well">
+                        <form class="form-horizontal">
+                            <label>
+                                <input type="checkbox" ng-model="showTags" /> {{ 'tags.show-tags' | translate }}
+                            </label>
+                        </form>
+                    </div>
+                </div>
+                <uib-accordion close-others="true" class="col-md-12">
                     <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!currentElement.element">
                         <uib-accordion-heading>
                             <span ng-click="!currentElement.element || updateLinkedImages(layerTwo.imageTab.linkedOpen)">
                                 {{'context-form.tabs.photos.linked'|translate}}
                             </span>
                         </uib-accordion-heading>
-                        <image-list on-scroll-load="loadImages(len, type)" image-data="images.linked" image-type="'linked'" scroll-container="'#addon-container'"></image-list>
+                        <image-list on-scroll-load="loadImages(len, type)" image-data="images.linked" show-tags="showTags" image-type="'linked'" scroll-container="'#addon-container'"></image-list>
                     </div>
                     <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.newOpen">
                         <uib-accordion-heading>
@@ -142,7 +151,7 @@
                                 {{'context-form.tabs.photos.all'|translate}}
                             </span>
                         </uib-accordion-heading>
-                        <image-list on-scroll-load="loadImages(len, type)" image-data="images.all" image-type="'all'" scroll-container="'#addon-container'"></image-list>
+                        <image-list on-scroll-load="loadImages(len, type)" image-data="images.all" show-tags="showTags" image-type="'all'" scroll-container="'#addon-container'"></image-list>
                     </div>
                 </uib-accordion>
             </div>

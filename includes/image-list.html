@@ -15,6 +15,16 @@
                          </div>
                      </div>
                 </a>
+                <div ng-show="showTags">
+                   <ui-select multiple tagging tagging-label="false" ng-model="ctrl.multipleDemo.colors" theme="bootstrap" sortable="true" close-on-select="false">
+                       <ui-select-match placeholder="{{ 'tags.add' | translate }}">
+                           {{ $item }}
+                       </ui-select-match>
+                       <ui-select-choices repeat="tag in availableTags | filter:$select.search">
+                           {{ tag }}
+                       </ui-select-choices>
+                   </ui-select>
+                </div>
             </div>
         </div>
         <div class="col-sm-6 col-md-4 unlinked-item" ng-if="hasMoreImages(tmpData[imageType].length, imageType) > 0">
