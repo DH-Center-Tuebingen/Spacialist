@@ -82,6 +82,50 @@ class LiteratureController extends Controller
             $ins['address'] = $request->get('address');
         }
 
+        if($request->has('annote')) {
+            $ins['annote'] = $request->get('annote');
+        }
+
+        if($request->has('chapter')) {
+            $ins['chapter'] = $request->get('chapter');
+        }
+
+        if($request->has('crossref')) {
+            $ins['crossref'] = $request->get('crossref');
+        }
+
+        if($request->has('edition')) {
+            $ins['edition'] = $request->get('edition');
+        }
+
+        if($request->has('institution')) {
+            $ins['institution'] = $request->get('institution');
+        }
+
+        if($request->has('key')) {
+            $ins['key'] = $request->get('key');
+        }
+
+        if($request->has('month')) {
+            $ins['month'] = $request->get('month');
+        }
+
+        if($request->has('note')) {
+            $ins['note'] = $request->get('note');
+        }
+
+        if($request->has('organization')) {
+            $ins['organization'] = $request->get('organization');
+        }
+
+        if($request->has('school')) {
+            $ins['school'] = $request->get('school');
+        }
+
+        if($request->has('series')) {
+            $ins['series'] = $request->get('series');
+        }
+
         return $ins;
     }
 

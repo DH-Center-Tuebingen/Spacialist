@@ -10,33 +10,136 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
                 'author', 'title', 'journal', 'year'
             ],
             optionalFields: [
-                'volume', 'number', 'pages'
+                'volume', 'number', 'pages', 'month', 'note'
             ]
-        }, {
+        },
+        {
             name: 'book',
             id: 1,
             mandatoryFields: [
-                'author', 'title', 'publisher', 'year'
+                'title', 'publisher', 'year'
             ],
             optionalFields: [
-                'editor', 'volume', 'number', 'address'
+                'author', 'editor', 'volume', 'number', 'address', 'series', 'address', 'edition', 'month', 'note'
             ]
-        }, {
+        },
+        {
             name: 'incollection',
             id: 2,
             mandatoryFields: [
                 'author', 'title', 'booktitle', 'publisher', 'year'
             ],
             optionalFields: [
-                'editor', 'volume', 'number', 'pages', 'address'
+                'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
             ]
-        }, {
+        },
+        {
             name: 'misc',
             id: 3,
             mandatoryFields: [
             ],
             optionalFields: [
-                'author', 'title', 'howpublished', 'year'
+                'author', 'title', 'howpublished', 'month', 'year', 'note'
+            ]
+        },
+        {
+            name: 'booklet',
+            id: 4,
+            mandatoryFields: [
+                'title'
+            ],
+            optionalFields: [
+                'author', 'howpublished', 'address', 'month', 'year', 'note'
+            ]
+        },
+        {
+            name: 'conference',
+            id: 5,
+            mandatoryFields: [
+                 'author', 'title', 'booktitle', 'year'
+            ],
+            optionalFields: [
+                'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
+            ]
+        },
+        {
+            name: 'inbook',
+            id: 6,
+            mandatoryFields: [
+                'title', 'publisher', 'year'
+            ],
+            optionalFields: [
+                'author', 'editor', 'chapter', 'pages', 'volume', 'number', 'series', 'address', 'edition', 'month', 'note'
+            ]
+        },
+        {
+            name: 'inproceedings',
+            id: 7,
+            mandatoryFields: [
+                 'author', 'title', 'booktitle', 'year'
+            ],
+            optionalFields: [
+                'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
+            ]
+        },
+        {
+            name: 'manual',
+            id: 8,
+            mandatoryFields: [
+                'title'
+            ],
+            optionalFields: [
+                'author', 'organization', 'address', 'edition', 'month', 'year', 'note'
+            ]
+        },
+        {
+            name: 'mastersthesis',
+            id: 9,
+            mandatoryFields: [
+                'author', 'title', 'school', 'year'
+            ],
+            optionalFields: [
+                'address', 'month', 'note'
+            ]
+        },
+        {
+            name: 'phdthesis',
+            id: 10,
+            mandatoryFields: [
+                'author', 'title', 'school', 'year'
+            ],
+            optionalFields: [
+                'address', 'month', 'note'
+            ]
+        },
+        {
+            name: 'proceedings',
+            id: 11,
+            mandatoryFields: [
+                'title', 'year'
+            ],
+            optionalFields: [
+                'editor', 'volume', 'number', 'series', 'address', 'month', 'organization', 'publisher', 'note'
+            ]
+        },
+        {
+            name: 'techreport',
+            id: 12,
+            mandatoryFields: [
+                'author', 'title', 'institution', 'year'
+            ],
+            optionalFields: [
+                'number', 'address', 'month', 'note'
+            ]
+        },
+        {
+            name: 'unpublished',
+            id: 13,
+            mandatoryFields: [
+                'author', 'title', 'note'
+            ],
+            optionalFields: [
+                'month', 'year'
             ]
         }
     ];
