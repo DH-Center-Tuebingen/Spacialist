@@ -1,4 +1,4 @@
-spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', function($scope, imageService, mainService) {
+spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 'snackbarService', function($scope, imageService, mainService, snackbarService) {
     $scope.images = {};
     $scope.images.all = imageService.all;
     $scope.images.linked = imageService.linked;
@@ -63,16 +63,23 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
     var contextMenuSearch = ['<i class="material-icons md-18">search</i> Nach Kontexten suchen', function ($itemScope, $event, modelValue, text, $li) {
        //TODO implement (open modal with search field or inline)
     }];
+    var deleteImage = [function() {
+       return '<i class="material-icons md-18">delete</i> Bild löschen';
+    }, function ($itemScope, $event, modelValue, text, $li) {
+       imageService.deleteImage($itemScope.img);
+    }];
 
     $scope.imageContextMenu = {
        all: [
            linkImageContextMenu,
            null,
+           deleteImage,
            contextMenuSearch
        ],
        linked: [
            unlinkImageContextMenu,
            null,
+           deleteImage,
            contextMenuSearch
        ]
     };

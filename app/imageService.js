@@ -127,6 +127,18 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         });
     };
 
+    images.deleteImage = function(img) {
+        // console.log(images.all.indexOf(img));
+        httpGetFactory('api/image/delete/' + img.id, function(response) {
+            if(!response.error) {
+                var content = $translate.instant('snackbar.image-deleted.success');
+                snackbarService.addAutocloseSnack(content, 'success');
+                var i = images.all.indexOf(img);
+                if(i > -1) images.all.splice(i, 1);
+            }
+        });
+    };
+
     images.getAllImages = function(forceUpdate) {
         forceUpdate = forceUpdate || false;
         var currentTime = (new Date()).getTime();

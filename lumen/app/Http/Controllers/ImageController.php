@@ -294,4 +294,11 @@ class ImageController extends Controller
         }
         return response()->json($images);
     }
+
+    public function delete($id) {
+        $photo = Photo::find($id);
+        $url = 'images/' . $photo->filename;
+        Storage::delete($url);
+        $photo->delete();
+    }
 }

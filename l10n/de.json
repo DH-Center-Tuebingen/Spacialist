@@ -190,6 +190,7 @@
     "snackbar.image-linked.success": "Bild mit Kontext verknüpft.",
     "snackbar.image-unlinked.success": "Bild von Kontext gelöst.",
     "snackbar.image-upload.success": "{{ cnt }} Bilder hochgeladen.",
+    "snackbar.image-deleted.success": "Bild gelöscht.",
 
     "dates_list": "Zeitangaben",
     "map": "Karte",

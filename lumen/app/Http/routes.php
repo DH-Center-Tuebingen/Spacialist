@@ -43,6 +43,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('image/get/{id}', 'ImageController@getImageObject');
     $app->get('image/get/preview/{id}', 'ImageController@getImagePreviewObject');
     $app->get('image/getByContext/{id}', 'ImageController@getByContext');
+    $app->get('image/delete/{id}', 'ImageController@delete');
     $app->get('context/delete/{id}', 'ContextController@delete');
     $app->get('context/delete/geodata/{id}', 'ContextController@deleteGeodata');
     $app->get('sources/get/{aid}/{fid}', 'SourceController@getByAttribute');
