@@ -27,32 +27,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
 
     images.getLinkedImages = function(id) {
         if(!id) return;
-        httpGetFactory('api/image/getByContext/' + id, function(response) {
-            var oneUpdated = false;
-            var linkedCopy = images.linked.slice();
-            for(var i=0; i<response.images.length; i++) {
-                var newLinked = response.images[i];
-                var alreadyLinked = false;
-                for(var j=0; j<linkedCopy.length; j++) {
-                    var linked = linkedCopy[j];
-                    if(newLinked.id == linked.id) {
-                        if(!angular.equals(newLinked, linked)) {
-                            oneUpdated = true;
-                            images.linked[j] = newLinked;
-                        }
-                        alreadyLinked = true;
-                        break;
-                    }
-                }
-                if(!alreadyLinked) {
-                    oneUpdated = true;
-                    images.linked.push(newLinked);
-                }
-            }
-            if(oneUpdated) {
-                $rootScope.$emit('image:updated:linked');
-            }
-        });
+        images.linked = filterLinkedImages(id);
     };
 
     images.loadImages = function(len, type) {
@@ -128,7 +103,6 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     };
 
     images.deleteImage = function(img) {
-        // console.log(images.all.indexOf(img));
         httpGetFactory('api/image/delete/' + img.id, function(response) {
             if(!response.error) {
                 var content = $translate.instant('snackbar.image-deleted.success');
@@ -175,6 +149,17 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
             });
         }
     };
+
+    function filterLinkedImages(id) {
+        return images.all.filter(function(img) {
+            for(var i=0; i<img.linked_images.length; i++) {
+                if(img.linked_images[i].context_id == id) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
 
     return images;
 }]);

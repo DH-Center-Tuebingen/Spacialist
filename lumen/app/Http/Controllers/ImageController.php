@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\User;
+use App\ContextPhoto;
 use \DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -140,8 +141,6 @@ class ImageController extends Controller
             $description = '';
         }
 
-        $lasteditor = 'postgres';
-
         $id = \DB::table('photos')
             ->insertGetId([
                 'modified' => $mod,
@@ -152,7 +151,7 @@ class ImageController extends Controller
                 'orientation' => $orientation,
                 'copyright' => $copyright,
                 'description' => $description,
-                'lasteditor' => $lasteditor,
+                'lasteditor' => $user['name'],
                 'photographer_id' => 1
             ]);
         return response()->json($this->getImageById($id));
@@ -177,7 +176,7 @@ class ImageController extends Controller
             ->insert([
                 'photo_id' => $imgId,
                 'context_id' => $ctxId,
-                'lasteditor' => 'postgres'
+                'lasteditor' => $user['name']
             ]);
         return response()->json();
     }
@@ -218,12 +217,13 @@ class ImageController extends Controller
 
     private function getImageById($id) {
         $img = \DB::table('photos as ph')
-                ->select('ph.id as id', 'ph.modified', 'ph.created', 'ph.name as filename', 'ph.thumb as thumbname', 'ph.cameraname', 'ph.orientation', 'ph.description', 'ph.copyright', 'ph.photographer_id')
-                ->where('ph.id', $id)
+                ->select('id', 'modified', 'created', 'name as filename', 'thumb as thumbname', 'cameraname', 'orientation', 'description', 'copyright', 'photographer_id')
+                ->where('id', $id)
                 ->first();
         if($img == null) return null;
         $img->url = 'images/' . $img->filename;
         $img->thumb_url = 'images/' . $img->thumbname;
+        $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
         // try to get file to check if it exists
         try {
             Storage::get($img->url);
@@ -283,6 +283,7 @@ class ImageController extends Controller
         foreach($images as &$img) {
             $img->url = 'images/' . $img->filename;
             $img->thumb_url = 'images/' . $img->thumbname;
+            $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
             // try to get file to check if it exists
             try {
                 Storage::get($img->url);
