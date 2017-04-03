@@ -56,7 +56,7 @@
     "literature.bibtex.crossref" : "Querverweis",
     "literature.bibtex.edition" : "Edition",
     "literature.bibtex.institution" : "Institution",
-    "literature.bibtex.kay" : "Schlüssel",
+    "literature.bibtex.key" : "Schlüssel",
     "literature.bibtex.month" : "Monat",
     "literature.bibtex.note" : "Notiz",
     "literature.bibtex.organization" : "Organisation",

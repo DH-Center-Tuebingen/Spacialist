@@ -78,6 +78,10 @@ class LiteratureController extends Controller
             $ins['publisher'] = $request->get('publisher');
         }
 
+        if($request->has('address')) {
+            $ins['address'] = $request->get('address');
+        }
+
         if($request->has('annote')) {
             $ins['annote'] = $request->get('annote');
         }
