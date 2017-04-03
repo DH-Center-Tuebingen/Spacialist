@@ -37,6 +37,11 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         return loaded;
     };
 
+    images.hasMoreImages = function(len, type) {
+        var src = images[type];
+        return src.length - len;
+    };
+
     /**
      * Upload the image files `files` to the server, one by one and store their paths in the database.
      */

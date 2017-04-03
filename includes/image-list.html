@@ -17,5 +17,14 @@
                 </a>
             </div>
         </div>
+        <div class="col-sm-6 col-md-4 unlinked-item" ng-if="hasMoreImages(tmpData[imageType].length, imageType) > 0">
+            <div class="thumbnail">
+                <div class="thumb-wrapper centered-full">
+                    <i class="material-icons md-96 md-dark">file_download</i>
+                    <p translate="photos.load-more" translate-values="{ cnt: hasMoreImages(tmpData[imageType].length, imageType) }">
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

@@ -136,6 +136,7 @@
     "map-marker.save": "Save",
     "restricted-access": "You are not allowed to access this page. Pick a role with higher privileges (if possible) or contact your administrator.",
     "photos.empty": "Photo list is empty.",
+    "photos.load-more": "Load {{ cnt }} more photos",
     "photos.properties.heading": "Properties",
     "photos.properties.location-general": "Location (general)",
     "photos.properties.location-specific": "Location (specific)",

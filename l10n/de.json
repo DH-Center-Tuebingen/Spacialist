@@ -147,6 +147,7 @@
     "map-marker.save": "Speichern",
     "restricted-access": "Diese Seite ist für sie gesperrt. Sie besitzen nicht die erforderlichen Rechte. Bitte wechseln sie ihre Rolle oder fragen sie den Administrator.",
     "photos.empty": "Keine Bilder vorhanden",
+    "photos.load-more": "{{ cnt }} weitere Bilder laden",
     "photos.properties.heading": "Eigenschaften",
     "photos.properties.location-general": "Ort (allgemein)",
     "photos.properties.location-specific": "Ort (spezifisch)",
