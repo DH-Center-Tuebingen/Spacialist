@@ -290,6 +290,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
     function setLayerOptions(l) {
         var layerOptions = {};
+        layerOptions.maxZoom = map.map.defaults.maxZoom;
         layerOptions.noWrap = true;
         layerOptions.detectRetina = true;
         if(l.is_overlay) {
