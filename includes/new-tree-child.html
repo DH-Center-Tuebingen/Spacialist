@@ -1,19 +1,19 @@
 <div ui-tree-handle style="display: table;">
     <div style="display: table-cell;">
-        <a ng-click="parent.collapsed = !parent.collapsed" ng-if="parent.children && parent.children.length > 0" class="expandable-toggle">
-            <i class="material-icons" aria-hidden="true">{{ parent.collapsed ? 'chevron_right' : 'expand_more' }}
+        <a ng-click="contexts.data[id].collapsed = !contexts.data[id].collapsed" ng-if="contexts.children[id] && contexts.children[id].length > 0" class="expandable-toggle">
+            <i class="material-icons" aria-hidden="true">{{ contexts.data[id].collapsed ? 'chevron_right' : 'expand_more' }}
             </i>
         </a>
-        <i ng-if="!parent.children || parent.children.length == 0" class="material-icons placeholder">
+        <i ng-if="!contexts.children[id] || contexts.children[id].length == 0" class="material-icons placeholder">
         </i>
     </div>
-    <span ng-click="onClickCallback({target:parent, elem: element})" ng-class="{ 'selected-leaf': element.id == parent.id }" style="display: table-cell; padding-left: 4px;">
-        <i class="material-icons md-18" aria-hidden="true" ng-if="parent.typeid == 0">account_balance</i>
-        <i class="material-icons md-18" aria-hidden="true" ng-if="parent.typeid == 1">spa</i>
-        <span ng-style="getColorForId(parent[typeAttribute])" ng-class="{ 'selected-leaf-child': element.id == parent.id }">{{ parent[displayAttribute] }}</span> <span ng-if="parent[prefixAttribute]" class="contextPrefix">{{ parent[prefixAttribute]}}</span>
+    <span ng-click="onClickCallback({target:contexts.data[id], elem: element})" ng-class="{ 'selected-leaf': element.id == id }" style="display: table-cell; padding-left: 4px;">
+        <i class="material-icons md-18" aria-hidden="true" ng-if="contexts.data[id].typeid == 0">account_balance</i>
+        <i class="material-icons md-18" aria-hidden="true" ng-if="contexts.data[id].typeid == 1">spa</i>
+        <span ng-style="getColorForId(contexts.data[id][typeAttribute])" ng-class="{ 'selected-leaf-child': element.id == id }">{{ contexts.data[id][displayAttribute] }}</span> <span ng-if="contexts.data[id][prefixAttribute]" class="contextPrefix">{{ contexts.data[id][prefixAttribute]}}</span>
     </span>
 </div>
-<ul ui-tree-nodes="" ng-model="parent.children" ng-if="!parent.collapsed">
-    <li ng-repeat="parent in parent.children" data-collapsed="parent.collapsed" ng-include="'includes/new-tree-child.html'" ui-tree-node context-menu="setContextMenu">
+<ul ui-tree-nodes="" ng-model="contexts.children[id]" ng-if="!contexts.data[id].collapsed">
+    <li ng-repeat="id in contexts.children[id]" data-collapsed="contexts.data[id].collapsed" ng-include="'includes/new-tree-child.html'" ui-tree-node context-menu="setContextMenu">
     </li>
 </ul>
