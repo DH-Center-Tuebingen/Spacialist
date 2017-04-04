@@ -1,4 +1,4 @@
-spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'httpGetPromise', 'httpPostFactory', '$http', function(modalFactory, httpGetFactory, httpGetPromise, httpPostFactory, $http) {
+spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'httpGetPromise', 'httpPostFactory', '$http', '$timeout', 'Upload', function(modalFactory, httpGetFactory, httpGetPromise, httpPostFactory, $http, $timeout, Upload) {
     var literature = {};
     literature.literature = [];
     literature.literatureOptions = {};
@@ -180,6 +180,28 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
 
     literature.openAddLiteratureDialog = function() {
         modalFactory.addLiteratureModal(literature.addLiterature, literature.literatureOptions.availableTypes);
+    };
+
+    literature.importBibTexFile = function(file, invalidFiles) {
+        if(file) {
+            file.upload = Upload.upload({
+                 url: 'api/literature/import/bib',
+                 data: { file: file }
+            });
+            file.upload.then(function(response) {
+                $timeout(function() {
+                    file.result = response.data;
+                    console.log(response);
+                    // TODO
+                });
+            }, function(reponse) {
+                if(response.status > 0) {
+                    $scope.errorMsg = response.status + ': ' + response.data;
+                }
+            }, function(evt) {
+                file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+            });
+        }
     };
 
     literature.addLiterature = function(fields, type, index) {
