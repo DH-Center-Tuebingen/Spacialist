@@ -464,7 +464,7 @@ spacialistApp.directive('myTree', function($parse) {
         templateUrl: 'includes/new-tree.html',
         scope: {
             onClickCallback: '&',
-            itemList: '=',
+            contexts: '=',
             element: '=',
             displayAttribute: '=',
             typeAttribute: '=',

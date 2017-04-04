@@ -61,6 +61,7 @@ class ContextController extends Controller {
             } else if($attr->datatype == 'dimension') {
                 $jsonVal = json_decode($attr->json_val);
                 if(!isset($jsonVal)) continue;
+                else $attrVal = array();
 
                 if(isset($jsonVal->B)){
                     $attrVal['B'] = $jsonVal->B;
@@ -423,39 +424,71 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $rootFields = DB::select("
-        WITH RECURSIVE
-        q AS (
-	        SELECT  c.*, 0 as reclevel
-	        FROM    contexts c
-	        WHERE   root_context_id IS NULL
-	        UNION ALL
-	        SELECT  cc.*, reclevel+1
-	        FROM    q
-	        JOIN    contexts cc
-	        ON      cc.root_context_id = q.id
-        )
-        SELECT  q.*, ct.type as typeid, ct.thesaurus_url AS typename, (select label from getconceptlabelsfromurl where concept_url = ct.thesaurus_url and short_name = 'de' limit 1) as typelabel
-        FROM    q
-        JOIN context_types AS ct
-        ON q.context_type_id = ct.id
-        ORDER BY reclevel DESC
-        ");
-        $children = [];
-        foreach($rootFields as $key => $field) {
-            if(array_key_exists($field->id, $children)) $tmpChildren = $children[$field->id];
-            else $tmpChildren = array();
-            $rootFields[$key]->children = $tmpChildren;
-            $children[$field->root_context_id][] = $field;
-            if($field->reclevel != 0) unset($rootFields[$key]);
 
+
+        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type as typeid', 'thesaurus_url as typename', DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as typelabel"))->get();
+
+        $roots = array();
+        $contexts = array();
+        $children = array();
+
+        foreach($contextEntries as $key => $context) {
+            $contexts[$context->id] = $context;
             if(!$user->can('view_geodata')) {
-                if(isset($rootFields[$key]->geodata_id)){
-                    unset($rootFields[$key]->geodata_id);
+                if(isset($contexts[$context->id]->geodata_id)){
+                    unset($contexts[$context->id]->geodata_id);
                 }
             }
+            if(!isset($context->root_context_id)) {
+                array_push($roots, $context->id);
+            }
+            else {
+                if(!array_key_exists($context->root_context_id, $children)) {
+                    $children[$context->root_context_id] = array();
+                }
+                array_push($children[$context->root_context_id], $context->id);
+            }
         }
-        return response()->json(array_values($rootFields));
+
+        $response = [   'contexts' => $contexts,
+                        'roots' => $roots,
+                        'children' => $children];
+
+
+        // $rootFields = DB::select("
+        // WITH RECURSIVE
+        // q AS (
+	    //     SELECT  c.*, 0 as reclevel
+	    //     FROM    contexts c
+	    //     WHERE   root_context_id IS NULL
+	    //     UNION ALL
+	    //     SELECT  cc.*, reclevel+1
+	    //     FROM    q
+	    //     JOIN    contexts cc
+	    //     ON      cc.root_context_id = q.id
+        // )
+        // SELECT  q.*, ct.type as typeid, ct.thesaurus_url AS typename, (select label from getconceptlabelsfromurl where concept_url = ct.thesaurus_url and short_name = 'de' limit 1) as typelabel
+        // FROM    q
+        // JOIN context_types AS ct
+        // ON q.context_type_id = ct.id
+        // ORDER BY reclevel DESC
+        // ");
+        // $children = [];
+        // foreach($rootFields as $key => $field) {
+        //     if(array_key_exists($field->id, $children)) $tmpChildren = $children[$field->id];
+        //     else $tmpChildren = array();
+        //     $rootFields[$key]->children = $tmpChildren;
+        //     $children[$field->root_context_id][] = $field;
+        //     if($field->reclevel != 0) unset($rootFields[$key]);
+        //
+        //     if(!$user->can('view_geodata')) {
+        //         if(isset($rootFields[$key]->geodata_id)){
+        //             unset($rootFields[$key]->geodata_id);
+        //         }
+        //     }
+        // }
+
+        return response()->json($response);
     }
 
     public function linkGeodata($cid, $gid) {
@@ -700,6 +733,7 @@ class ContextController extends Controller {
             ->where('id', $id)
             ->first();
         unset($toDuplicate->id);
+        unset($toDuplicate->geodata_id);
         $dupCounter = 0;
         do {
             $dupCounter++;
@@ -967,7 +1001,7 @@ class ContextController extends Controller {
                             );
                             if($datatype === 'list') $del[] = ['str_val', $row->str_val];
                             else $del[] = ['thesaurus_val', $row->thesaurus_val];
-                            $AttributeValue::where($del)->delete();
+                            AttributeValue::where($del)->delete();
                         }
                     }
                 }

@@ -8,10 +8,10 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     editor.attributeTypes = [];
     editor.existingAttributes = [];
     editor.contextAttributes = {};
-    editor.existingContextTypes = mainService.contexts;
+    editor.existingContextTypes = mainService.contextTypes;
     editor.existingArtifactTypes =  mainService.artifacts;
     editor.contextAttributes = mainService.contextReferences;
-    editor.contextList = mainService.contextList;
+    editor.contexts = mainService.contexts;
     editor.dropdownOptions = mainService.dropdownOptions;
 
     editor.setSelectedContext = function(c) {
@@ -172,10 +172,10 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     function updateContextList(oldUrl, newType) {
         if(!oldUrl || oldUrl.length === 0) return;
         var isDelete = !newType;
-        angular.forEach(editor.contextList, function(c, i) {
+        angular.forEach(editor.contexts.data, function(c, i) {
             if(c.typename == oldUrl) {
                 if(isDelete) {
-                    editor.contextList.splice(i, 1);
+                    editor.contexts.data.splice(i, 1);
                 } else {
                     c.typename = newType.concept_url;
                     c.typelabel = newType.label;

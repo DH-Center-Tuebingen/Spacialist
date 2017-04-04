@@ -5,6 +5,8 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
     $scope.currentGeodata = mapService.currentGeodata;
     ////
     $scope.selectedLayer = mapService.selectedLayer;
+    $scope.geodata = mapService.geodata;
+    $scope.contexts = mainService.contexts;
     $scope.closedAlerts = {};
     $scope.output = {};
     $scope.relations = [];
@@ -51,7 +53,8 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
             } else {
                 var matchingId = response.context_id;
                 if(matchingId !== null) {
-                    mainService.expandTreeTo(matchingId, function(node){mainService.setCurrentElement(node, mainService.currentElement, false)});
+                    mainService.expandTree(matchingId);
+                    mainService.setCurrentElement(mainService.contexts.data[matchingId], mainService.currentElement, false);
                 } else {
                     var dontUnsetUnlinked = true;
                     mainService.unsetCurrentElement(dontUnsetUnlinked);
@@ -75,7 +78,13 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
         angular.forEach(layers, function(layer, key) {
             var id = layer.feature.id;
             httpGetFactory('api/context/delete/geodata/' + id, function(response) {
-                //
+                if(response.error) {
+                    modalFactory.errorModal(response.error);
+                    return;
+                }
+                else {
+                    delete $scope.geodata.linkedContexts[id];
+                }
             });
         });
     });
@@ -101,6 +110,8 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
                 geodata_id: updatedContext.geodata_id
             };
             mainService.updateContextById(cid, updatedValues);
+            $scope.geodata.linkedContexts[gid] = cid;
+            $scope.geodata.linkedLayers[gid].bindTooltip($scope.contexts.data[cid].name);
         });
     };
 
@@ -115,6 +126,9 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
                 geodata_id: undefined
             };
             mainService.updateContextById(cid, updatedValues);
+            delete $scope.geodata.linkedContexts[$scope.currentGeodata.id];
+            linkedLayer = $scope.geodata.linkedLayers[$scope.currentGeodata.id]
+            linkedLayer.bindTooltip(linkedLayer.feature.properties.name);
         });
     };
 
