@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'imageService', 'literatureService', 'mapService', 'snackbarService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, imageService, literatureService, mapService, snackbarService, $timeout, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, $timeout, $translate) {
     var main = {};
     var modalFields;
 
@@ -9,8 +9,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         fields: {},
         sources: {}
     };
-    main.contextList = [];
-    main.contexts = [];
+    main.contextTypes = [];
+    main.contexts = environmentService.contexts;
     main.contextReferences = {};
     main.artifacts = [];
     main.artifactReferences = {};
@@ -34,7 +34,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         getContexts();
         getArtifacts();
         getDropdownOptions();
-        getContextList();
+        mapService.getGeodata();
         mapService.reinitVariables();
     }
 
@@ -45,7 +45,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 var title = value.title;
                 if(typeof main.contextReferences[index] === 'undefined') {
                     main.contextReferences[index] = [];
-                    main.contexts.push({
+                    main.contextTypes.push({
                         title: title,
                         index: index,
                         type: value.type,
@@ -109,83 +109,29 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     }
 
-    main.duplicateElement = function($itemScope) {
-        var parent = $itemScope.parent;
-        var id = parent.id;
+    main.duplicateElement = function(id) {
         httpGetFactory('api/context/duplicate/' + id, function(newElem) {
+            var parent = main.contexts.data[main.contexts.data[id].root_context_id];
             var copy = newElem.obj;
             var elem = {
                 id: copy.id,
                 name: copy.name,
                 context_type_id: copy.context_type_id,
-                root_cid: parent.root_cid,
-                reclevel: parent.reclevel,
-                typeid: parent.typeid,
-                typename: parent.typename,
-                typelabel: parent.typelabel,
-                icon: copy.icon,
+                root_cid: copy.root_cid,
+                typeid: copy.typeid,
+                typename: copy.typename,
+                typelabel: copy.typelabel,
                 color: copy.color,
                 lat: copy.lat,
                 lng: copy.lng,
                 data: copy.data,
-                children: [],
                 position: copy.position
             };
-            $itemScope.$parent.$parent.$modelValue.push(elem);
-            addMarker(elem);
+            main.addContextToTree(elem, parent);
             main.setCurrentElement(elem, main.currentElement);
         });
     };
 
-    function getContextList() {
-        //main.getContextListStarted = true;
-        httpGetFactory('api/context/getRecursive', function(contextList) {
-            for(var i=0; i<contextList.length; i++) {
-                var current = contextList[i];
-                current.collapsed = true;
-                main.contextList.push(current);
-                // if(!main.legendList[current.typelabel]) {
-                //     main.legendList[current.typelabel] = {
-                //         name: current.typelabel,
-                //         color: main.getColorForId(current.typename)
-                //     };
-                // }
-                if(current.children) addMetadata(current.children);
-            }
-            // mapService.addLegend(main.legendList);
-            mapService.getGeodata(main.contextList);
-            //main.getContextListStarted = false;
-        });
-    }
-
-    function addMetadata(contexts) {
-        for(var i=0; i<contexts.length; i++) {
-            var current = contexts[i];
-            current.collapsed = true;
-            // if(!main.legendList[current.typelabel]) {
-            //     main.legendList[current.typelabel] = {
-            //         name: current.typelabel,
-            //         color: main.getColorForId(current.typename)
-            //     };
-            // }
-            if(current.children) addMetadata(current.children);
-        }
-    }
-
-    // function displayMarkers(contextList) {
-    //     if(!moduleHelper.controllerExists('mapCtrl')) return;
-    //     mapService.displayMarkers(contextList);
-    // }
-
-    // var addMarker = function(elem) {
-    //     if(!moduleHelper.controllerExists('mapCtrl')) return;
-    //     scopeService.addMarker(elem);
-    // };
-
-    // var setMarker = function(currentElement, focus) {
-    //     var name = currentElement.name.replace(/-/, '');
-    //     if(typeof scopeService.markers[name] != 'undefined') scopeService.markers[name].focus = focus;
-    // };
 
     main.createNewContext = function(data) {
         if(main.hasUnstagedChanges()) {
@@ -201,18 +147,11 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
             return;
         }
-        defaults = {
-            reclevel: -1,
-            children: main.contextList
-        };
+
         $translate('create-dialog.new-top-context').then(function(translation) {
-            defaults.name = translation;
-            var parent = defaults;
+            var parent = {name : translation};
             angular.extend(parent, data);
-            main.createModalHelper({
-                parent: parent,
-                expand: function() {}
-            }, 'context', true);
+            main.createModalHelper(parent, 'context', true);
         });
     };
 
@@ -232,6 +171,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         elem.data = parsedData;
         var promise = storeElement(elem);
         promise.then(function(response){
+            main.currentElement.form.$setPristine();
             var content = $translate.instant('snackbar.data-stored.success');
             snackbarService.addAutocloseSnack(content, 'success');
             if(response.error){
@@ -280,12 +220,12 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     modalFactory.errorModal(response.error);
                     return;
                 }
-                var content = $translate.instant('snackbar.element-deleted.success', { name: elem.title  });
-                snackbarService.addAutocloseSnack(content, 'success');
                 var path = response.path;
                 modalFactory.deleteModal(elem.name, function() {
                     deleteElement(elem, function() {
-                        updateContext(path, {}, toDelete);
+                        deleteContext(elem.id);
+                        var content = $translate.instant('snackbar.element-deleted.success', { name: elem.title  });
+                        snackbarService.addAutocloseSnack(content, 'success');
                         if(main.currentElement.element.id == elem.id) {
                             main.unsetCurrentElement();
                         }
@@ -433,76 +373,68 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         return parsedData;
     }
 
-    main.updateContextById = function(id, newValues, toDelete) {
-        toDelete = toDelete || false;
+    main.updateContextById = function(id, newValues) {
         httpGetFactory('api/context/get/parents/' + id, function(response) {
             if(response.error) {
                 modalFactory.errorModal(response.error);
                 return;
             }
-            updateContext(response.path, newValues, toDelete);
+            main.expandTree(id);
+
+            angular.merge(main.currentElement.element, newValues);
+            angular.merge(main.contexts.data[id], newValues);
         });
     };
 
-    function updateContext(path, values, toDelete) {
-        var t = angular.element(document.getElementById('context-tree')).scope();
-        var nodesScope = t.$nodesScope;
-        var children = nodesScope.childNodes();
-        updateContextHelper(path, children, values, 0, toDelete);
-    }
-
-    function updateContextHelper(pathArray, children, values, depth, toDelete) {
-        var level = pathArray[depth];
-        for(var j=0; j<children.length; j++) {
-            var child = children[j];
-            if(level.id == child.$modelValue.id) {
-                if(pathArray.length - 1 == depth) {
-                    if(toDelete) {
-                        child.remove();
-                    } else {
-                        angular.merge(main.currentElement.element, values);
-                        angular.merge(child.$modelValue, values);
-                    }
-                    break;
-                }
-                // child.expand();
-                // calling expand() on child should be enough, but child.childNodes() then returns an array with undefined values.
-                //Thus we use this "simple" DOM-based method to simulate a click on the element and toggle it.
-                //This only works because we broadcast the collapse-all event beforehand.
-                $timeout(function() {
-                    //we have to expand the element if it is collapsed to get access to the childnodes
-                    var wasCollapsed = child.collapsed;
-                    if(wasCollapsed) {
-                        child.$element[0].firstChild.childNodes[2].click();
-                    }
-                    children = child.childNodes();
-                    depth++;
-                    updateContextHelper(pathArray, children, values, depth, toDelete);
-                }, 0, false);
-                break;
+    function deleteContext(id) {
+        rootId = main.contexts.data[id].root_context_id;
+        if(rootId && rootId > 0) {
+            index = main.contexts.children[rootId].indexOf(id);
+            if(index && index > 0){
+                main.contexts.children[rootId].splice(index, 1);
             }
         }
+        else {
+            index = main.contexts.roots.indexOf(id);
+            if(index && index > 0){
+                main.contexts.roots.splice(index, 1);
+            }
+        }
+        delete main.contexts.data[id];
     }
 
-    main.expandTreeTo = function(id) {
-        main.contextList.forEach(function(node) {
-            shouldExpand(node, id);
-        });
+    /**
+    *   This function expands the tree up the selected element
+    */
+    main.expandTree = function(id) {
+        main.contexts.data[id].collapsed = false;
+        rootId = main.contexts.data[id].root_context_id;
+        if(rootId && rootId > 0) {
+            main.expandTree(rootId);
+        }
     };
 
-    function shouldExpand(node, id) {
-        if(node.id == id) {
-            main.setCurrentElement(node, main.currentElement, false);
-            return true;
-        }
-        for(var i in node.children) {
-            if(shouldExpand(node.children[i], id)) {
-                node.collapsed = false;
-                return true;
+    /**
+    *   This function adds a new context to the tree
+    */
+    main.addContextToTree = function(elem, parent) {
+        // insert the context into the context list
+        main.contexts.data[elem.id] = elem;
+
+        // insert the context into the tree
+        if(parent && parent.id && parent.id > 0) { // elem is no root context
+            if(!main.contexts.children[parent.id]) { // parent was leaf before, create children list
+                main.contexts.children[parent.id] = [];
             }
+            main.contexts.children[parent.id].push(elem.id);
         }
-        return false;
-    }
+        else { // elem is root context
+            main.contexts.roots.push(elem.id);
+        }
+
+        main.setCurrentElement(elem, main.currentElement);
+    };
+
 
     main.unsetCurrentElement = function(dontUnsetUnlinked) {
         dontUnsetUnlinked = dontUnsetUnlinked || false;
@@ -546,11 +478,11 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             return;
         }
         if(typeof elem != 'undefined' && elem.id == target.id) {
-            main.unsetCurrentElement();
             if(mapService.getPopupGeoId() == elem.geodata_id) mapService.closePopup();
+            main.unsetCurrentElement();
             return;
         }
-        var isCurrentlyLinked = mapService.getPopupGeoId() == elem.geodata_id;
+        var isCurrentlyLinked = mapService.geodata.linkedContexts[elem.geodata_id] && mapService.geodata.linkedContexts[elem.geodata_id] > 0;
         elem = target;
         console.log(elem);
         if(elem.typeid === 0) { //context
@@ -725,25 +657,24 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
 
-    main.createModalHelper = function($itemScope, elemType, copyPosition) {
+    main.createModalHelper = function(parent, elemType, copyPosition) {
         if(main.hasUnstagedChanges()) {
             var onDiscard = function() {
                 main.currentElement.form.$setPristine();
-                return main.createModalHelper($itemScope, elemType, copyPosition);
+                return main.createModalHelper(parent, elemType, copyPosition);
             };
             var onConfirm = function() {
                 main.currentElement.form.$setPristine();
                 main.storeElement(main.currentElement.element, main.currentElement.data);
-                return main.createModalHelper($itemScope, elemType, copyPosition);
+                return main.createModalHelper(parent, elemType, copyPosition);
             };
             modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
             return;
         }
-        var parent = $itemScope.parent;
         var selection = [];
         var msg = '';
         if(elemType == 'context') {
-            selection = main.contexts.slice();
+            selection = main.contextTypes.slice();
             msg = 'create-dialog.new-context-description';
         } else if(elemType == 'find') {
             selection = main.artifacts.slice();
@@ -761,19 +692,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     name: name,
                     context_type_id: type.context_type_id,
                     root_context_id: parent.id,
-                    reclevel: parent.reclevel + 1,
                     typeid: type.type,
                     typename: type.index,
                     typelabel: type.title,
                     data: [],
-                    children: [],
                     lasteditor: newContext.lasteditor,
                     updated_at: newContext.updated_at,
                     created_at: newContext.created_at
                 };
-                parent.children.push(elem);
-                main.setCurrentElement(elem, main.currentElement);
-                $itemScope.expand();
+                console.log(parent);
+                main.addContextToTree(elem, parent);
             });
         });
     };

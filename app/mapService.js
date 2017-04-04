@@ -1,10 +1,12 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'httpPostPromise', 'leafletData', 'userService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, httpPostPromise, leafletData, userService, leafletBoundsHelpers) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'httpPostPromise', 'leafletData', 'userService', 'environmentService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, httpPostPromise, leafletData, userService, environmentService, leafletBoundsHelpers) {
     var localContexts;
     var defaultColor = '#00FF00';
     var map = {};
-    map.geodataList = {};
     map.currentGeodata = {};
-    map.currentLayer = {};
+    map.contexts = environmentService.contexts;
+    map.geodata = {};
+    map.geodata.linkedContexts = [];
+    map.geodata.linkedLayers = [];
     map.featureGroup = new L.FeatureGroup();
 
     var availableLayerKeys = [
@@ -57,19 +59,19 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         });
     };
 
-    map.getGeodata = function(contexts) {
-        localContexts = contexts;
+    map.getGeodata = function() {
         httpGetFactory('api/context/get/geodata', function(response) {
             if(response.error) {
                 //TODO show modal
                 console.log("ERROR OCCURED");
             } else {
-                var geodatas = response.geodata;
-                for(var i=0; i<geodatas.length; i++) {
-                    var current = geodatas[i];
-                    map.geodataList['#' + current.id] = current;
-                }
-                map.addListToMarkers(map.geodataList, true);
+                var geodata = response.geodata;
+                map.addListToMarkers(geodata, true);
+                angular.forEach(map.contexts.data, function(elem) {
+                    if(elem.geodata_id && elem.geodata_id > 0){
+                        map.geodata.linkedContexts[elem.geodata_id] = elem.id;
+                    }
+                });
             }
         });
     };
@@ -120,7 +122,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 if(layer.feature.id == geodataId) {
                     alreadyFound = true;
                     layer.openPopup();
-                    map.currentLayer = layer;
+                    map.selectedLayer = layer;
                 }
             }
         });
@@ -154,9 +156,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         if(typeof color != 'undefined') formData.append('color', color);
         httpPostPromise.getData('api/context/set/color', formData).then(
             function(response) {
-                map.currentLayer.feature.properties.color = response.color;
-                map.currentLayer.setStyle({fillColor: response.color});
-                map.geodataList['#' + geodata_id].color = response.color;
+                map.map.selectedLayer.feature.properties.color = response.color || '#000000';
+                map.map.selectedLayer.setStyle({fillColor: response.color});
             }
         );
     };
@@ -215,13 +216,21 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                         minWidth: 300,
                         feature: feature
                     });
+                    if(map.geodata.linkedContexts[feature.id]){
+                        name = environmentService.contexts.data[map.geodata.linkedContexts[feature.id]].name;
+                        layer.bindTooltip(name);
+                    }
+                    else{
+                        layer.bindTooltip(feature.properties.name);
+                    }
                     layer.on('click', function(){
+                        map.map.selectedLayer = layer;
                         layer.openPopup();
-                        map.currentLayer = layer;
                     });
                 }
                 feature.properties.wkt = map.toWkt(layer);
                 map.featureGroup.addLayer(layer);
+                map.geodata.linkedLayers[feature.id] = layer;
                 var newBounds = map.featureGroup.getBounds();
                 var newNE = newBounds.getNorthEast();
                 var newSW = newBounds.getSouthWest();
@@ -231,7 +240,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 map.map.bounds.southWest.lng = newSW.lng;
             }
         };
-        map.map.markers = {};
+        map.map.selectedLayer = {};
         map.map.controls = {
             scale: true
         };
