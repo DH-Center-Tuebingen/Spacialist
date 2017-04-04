@@ -475,7 +475,7 @@ spacialistApp.directive('myTree', function($parse) {
     };
 });
 
-spacialistApp.directive('imageList', function(mainService) {
+spacialistApp.directive('imageList', function(imageService) {
     return {
         restrict: 'E',
         templateUrl: 'includes/image-list.html',
@@ -488,7 +488,7 @@ spacialistApp.directive('imageList', function(mainService) {
         },
         controller: 'imageCtrl',
         link: function(scope, elements, attrs) {
-            scope.availableTags = mainService.availableTags;
+            scope.availableTags = imageService.availableTags;
             scope.$root.$on('image:delete:linked', function(event, args) {
                 scope.tmpData.linked = [];
             });

@@ -9,7 +9,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         fields: {},
         sources: {}
     };
-    main.availableTags = [];
     main.contextList = [];
     main.contexts = [];
     main.contextReferences = {};

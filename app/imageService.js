@@ -5,6 +5,10 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         upload: {}
     };
 
+    init();
+
+    images.availableTags = [];
+
     var lastTimeImageChecked = 0;
 
     images.openImageModal = function(img) {
@@ -154,6 +158,45 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
             });
         }
     };
+
+    images.addTag = function(img, tag) {
+        var formData = new FormData();
+        formData.append('photo_id', img.id);
+        formData.append('tag_id', tag.id);
+        httpPostFactory('api/image/tags/add', formData, function(response) {
+            if(response.error) {
+                // TODO remove from img.tags
+                return;
+            }
+        });
+    };
+
+    images.removeTag = function(img, tag) {
+        var formData = new FormData();
+        formData.append('photo_id', img.id);
+        formData.append('tag_id', tag.id);
+        httpPostFactory('api/image/tags/remove', formData, function(response) {
+            if(response.error) {
+                // TODO add back to img.tags
+                return;
+            }
+        });
+    };
+
+    function init() {
+        getAvailableTags();
+    }
+
+    function getAvailableTags() {
+        httpGetFactory('api/image/tags/get', function(response) {
+            if(response.error) {
+                return;
+            }
+            angular.forEach(response.tags, function(tag) {
+                images.availableTags.push(tag);
+            });
+        });
+    }
 
     function filterLinkedImages(id) {
         return images.all.filter(function(img) {

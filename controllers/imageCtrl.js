@@ -19,6 +19,14 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
         }
     };
 
+    $scope.addTag = function(img, item) {
+        imageService.addTag(img, item);
+    };
+
+    $scope.removeTag = function(img, item) {
+        imageService.removeTag(img, item);
+    };
+
     var linkImageContextMenu = [function() {
        var dflt = '<i class="material-icons md-18">add_circle_outline</i> Mit aktuellem Kontext verbinden';
        //get element by dom, because $scope seems to be the isolated template (image-list.html) scope

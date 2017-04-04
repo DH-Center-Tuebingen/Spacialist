@@ -16,12 +16,12 @@
                      </div>
                 </a>
                 <div ng-show="showTags">
-                   <ui-select multiple tagging tagging-label="false" ng-model="ctrl.multipleDemo.colors" theme="bootstrap" sortable="true" close-on-select="false">
+                   <ui-select multiple tagging tagging-label="false" ng-model="img.tags" on-select="addTag(img, $item)" on-remove="removeTag(img, $item)" theme="bootstrap" sortable="true" close-on-select="false">
                        <ui-select-match placeholder="{{ 'tags.add' | translate }}">
-                           {{ $item }}
+                           {{ $item.label }}
                        </ui-select-match>
                        <ui-select-choices repeat="tag in availableTags | filter:$select.search">
-                           {{ tag }}
+                           {{ tag.label }}
                        </ui-select-choices>
                    </ui-select>
                 </div>

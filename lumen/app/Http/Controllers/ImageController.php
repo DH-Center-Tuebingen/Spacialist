@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use App\User;
 use App\ContextPhoto;
+use App\PhotoTag;
+use App\ThConcept;
 use \DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -224,6 +226,7 @@ class ImageController extends Controller
         $img->url = 'images/' . $img->filename;
         $img->thumb_url = 'images/' . $img->thumbname;
         $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
+        $img->tags = PhotoTag::where('photo_id', '=', $img->id)->get();
         // try to get file to check if it exists
         try {
             Storage::get($img->url);
@@ -284,6 +287,20 @@ class ImageController extends Controller
             $img->url = 'images/' . $img->filename;
             $img->thumb_url = 'images/' . $img->thumbname;
             $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
+
+            $img->tags = DB::table('photo_tags as p')
+                ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
+                ->join('getconceptlabelsfromurl as v', 'v.concept_url', '=', 'p.concept_url')
+                ->select('c.id', 'v.label')
+                ->where('p.photo_id', '=', $img->id)
+                ->get();
+            // foreach($img->tags as &$tag) {
+            //     unset($tag->photo_id);
+            //     unset($tag->created_at);
+            //     unset($tag->updated_at);
+            //     // TODO get label of tag
+            // }
+
             // try to get file to check if it exists
             try {
                 Storage::get($img->url);
@@ -301,5 +318,54 @@ class ImageController extends Controller
         $url = 'images/' . $photo->filename;
         Storage::delete($url);
         $photo->delete();
+    }
+
+    public function getAvailableTags() {
+        $tags = DB::select("
+            WITH RECURSIVE
+            top AS (
+                SELECT br.narrower_id as id,
+                    (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as label
+                FROM th_broaders br
+                JOIN th_concept c ON c.id = br.broader_id
+                WHERE c.concept_url = 'http://thesaurus.archeoinf.de/SpTestthesaurus/false_126'
+                UNION
+                SELECT br.narrower_id as id,
+                    (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as label
+                FROM top t, th_broaders br
+                WHERE t.id = br.broader_id
+            )
+            SELECT *
+            FROM top
+            ORDER BY label
+        ");
+
+        return response()->json([
+            'tags' => $tags
+        ]);
+    }
+
+    public function addTag(Request $request) {
+        $photoId = $request->get('photo_id');
+        $tagId = $request->get('tag_id');
+
+        $url = ThConcept::find($tagId)->concept_url;
+
+        $tag = new PhotoTag();
+        $tag->photo_id = $photoId;
+        $tag->concept_url = $url;
+        $tag->save();
+    }
+
+    public function removeTag(Request $request) {
+        $photoId = $request->get('photo_id');
+        $tagId = $request->get('tag_id');
+
+        $url = ThConcept::find($tagId)->concept_url;
+
+        $tag = PhotoTag::where([
+            [ 'photo_id', '=', $photoId ],
+            [ 'concept_url', '=', $url ]
+        ])->delete();
     }
 }

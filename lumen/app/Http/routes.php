@@ -38,6 +38,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('literature/getAll', 'LiteratureController@getAll');
     $app->get('literature/get/{id}', 'LiteratureController@getById');
     $app->get('literature/delete/{id}', 'LiteratureController@delete');
+    $app->get('image/tags/get', 'ImageController@getAvailableTags');
     $app->get('image/getAll', 'ImageController@getAll');
     $app->get('image/get/info/{id}', 'ImageController@getImage');
     $app->get('image/get/{id}', 'ImageController@getImageObject');
@@ -62,6 +63,8 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('image/upload', 'ImageController@uploadImage');
     $app->post('image/link', 'ImageController@link');
     $app->post('image/unlink', 'ImageController@unlink');
+    $app->post('image/tags/add', 'ImageController@addTag');
+    $app->post('image/tags/remove', 'ImageController@removeTag');
     $app->post('context/add/geodata', 'ContextController@addGeodata');
     $app->post('context/set', 'ContextController@set');
     $app->post('context/set/color', 'ContextController@setColor');
