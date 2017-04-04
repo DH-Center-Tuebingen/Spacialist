@@ -80,6 +80,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('role/remove/permission', 'UserController@removeRolePermission');
     $app->post('literature/add', 'LiteratureController@add');
     $app->post('literature/edit', 'LiteratureController@edit');
+    $app->post('literature/import/bib', 'LiteratureController@importBibtex');
     $app->post('editor/search', 'ContextController@search');
     $app->post('editor/contexttype/add', 'ContextController@addContextType');
     $app->post('editor/contexttype/edit', 'ContextController@editContextType');
