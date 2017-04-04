@@ -2,6 +2,14 @@ var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'u
 
 $.material.init();
 
+spacialistApp.service('searchService', [function() {
+    var search = {};
+
+    search.availableSearchTerms = [];
+
+    return search;
+}]);
+
 spacialistApp.service('snackbarService', [function() {
     var defaults = {
         autoclose: {
@@ -484,7 +492,8 @@ spacialistApp.directive('imageList', function(imageService) {
             scrollContainer: '=',
             imageData: '=',
             imageType: '=',
-            showTags: '='
+            showTags: '=',
+            searchTerms: '='
         },
         controller: 'imageCtrl',
         link: function(scope, elements, attrs) {
@@ -585,6 +594,25 @@ spacialistApp.directive("number", function() {
                 return isFinite(modelValue);
             };
         }
+    };
+});
+
+spacialistApp.filter('imageFilter', function() {
+    var found = function(haystack, needle) {
+        return needle.some(function(v) {
+            return haystack.indexOf(v) >= 0;
+        });
+    };
+    return function(items, searchTerms) {
+        if(searchTerms.tags.length === 0) return items;
+        var filtered = [];
+        for(var i=0; i<items.length; i++) {
+            var item = items[i];
+            if(found(item.tags, searchTerms.tags)) {
+                filtered.push(item);
+            }
+        }
+        return filtered;
     };
 });
 

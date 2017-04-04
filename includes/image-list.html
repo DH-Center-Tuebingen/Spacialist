@@ -5,7 +5,7 @@
         </div>
     </div>
     <div class="row" infinite-scroll="tmpData[imageType]=onScrollLoad({len: tmpData[imageType].length, type: imageType})" infinite-scroll-distance="0" infinite-scroll-container="scrollContainer" infinite-scroll-listen-for-event="image:updated:{{imageType}}">
-        <div class="col-sm-6 col-md-4 unlinked-item" context-menu="imageContextMenu[imageType]" ng-repeat="img in tmpData[imageType]">
+        <div class="col-sm-6 col-md-4 unlinked-item" context-menu="imageContextMenu[imageType]" ng-repeat="img in tmpData[imageType] | imageFilter:searchTerms">
             <div class="thumbnail">
                 <a ng-click="openImageModal(img)">
                     <div class="thumb-wrapper">

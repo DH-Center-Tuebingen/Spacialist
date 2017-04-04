@@ -1,4 +1,4 @@
-spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'modalService', 'snackbarService', 'Upload', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, modalService, snackbarService, Upload, $timeout) {
+spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'modalService', 'snackbarService', 'searchService', 'Upload', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, modalService, snackbarService, searchService, Upload, $timeout) {
     var images = {
         all: [],
         linked: [],
@@ -12,6 +12,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     var lastTimeImageChecked = 0;
 
     images.openImageModal = function(img) {
+        console.log(img.tags);
         modalOptions = {};
         // modalOptions.markers = angular.extend({}, scopeService.markers);
         modalOptions.img = angular.extend({}, img);
@@ -141,6 +142,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
                         if(newImg.id == one.id) {
                             if(!angular.equals(newImg, one)) {
                                 oneUpdated = true;
+                                updateTags(newImg);
                                 images.all[j] = newImg;
                             }
                             alreadyLinked = true;
@@ -149,6 +151,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
                     }
                     if(!alreadyLinked) {
                         oneUpdated = true;
+                        updateTags(newImg);
                         images.all.push(newImg);
                     }
                 }
@@ -194,8 +197,26 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
             }
             angular.forEach(response.tags, function(tag) {
                 images.availableTags.push(tag);
+                searchService.availableSearchTerms.push(tag);
             });
         });
+    }
+
+    function updateTags(img) {
+        for(var i=0; i<img.tags.length; i++) {
+            var tag = img.tags[i];
+            var found = false;
+            for(var j=0; j<images.availableTags.length; j++) {
+                var aTag = images.availableTags[j];
+                if(tag.id == aTag.id) {
+                    found = true;
+                    img.tags[i] = images.availableTags[j];
+                }
+            }
+            if(!found) {
+                delete img.tags[i];
+            }
+        }
     }
 
     function filterLinkedImages(id) {

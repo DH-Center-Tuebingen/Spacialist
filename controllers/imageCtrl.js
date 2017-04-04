@@ -5,6 +5,11 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
     $scope.currentElement = mainService.currentElement;
     $scope.upload = imageService.upload;
     $scope.hasMoreImages = imageService.hasMoreImages;
+    $scope.search = {
+        terms: {
+            tags: []
+        }
+    };
 
     $scope.initImageTab = function() {
         $scope.layerTwo.imageTab.newOpen = false;

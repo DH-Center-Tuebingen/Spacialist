@@ -218,6 +218,7 @@ class ImageController extends Controller
     }
 
     private function getImageById($id) {
+        $user = \Auth::user();
         $img = \DB::table('photos as ph')
                 ->select('id', 'modified', 'created', 'name as filename', 'thumb as thumbname', 'cameraname', 'orientation', 'description', 'copyright', 'photographer_id')
                 ->where('id', $id)
@@ -226,7 +227,15 @@ class ImageController extends Controller
         $img->url = 'images/' . $img->filename;
         $img->thumb_url = 'images/' . $img->thumbname;
         $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
-        $img->tags = PhotoTag::where('photo_id', '=', $img->id)->get();
+
+        if($user->can('edit_photo_props')) {
+            $img->tags = DB::table('photo_tags as p')
+            ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
+            ->select('c.id')
+            ->where('p.photo_id', '=', $img->id)
+            ->get();
+        }
+
         // try to get file to check if it exists
         try {
             Storage::get($img->url);
@@ -288,18 +297,13 @@ class ImageController extends Controller
             $img->thumb_url = 'images/' . $img->thumbname;
             $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
 
-            $img->tags = DB::table('photo_tags as p')
+            if($user->can('edit_photo_props')) {
+                $img->tags = DB::table('photo_tags as p')
                 ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
-                ->join('getconceptlabelsfromurl as v', 'v.concept_url', '=', 'p.concept_url')
-                ->select('c.id', 'v.label')
+                ->select('c.id')
                 ->where('p.photo_id', '=', $img->id)
                 ->get();
-            // foreach($img->tags as &$tag) {
-            //     unset($tag->photo_id);
-            //     unset($tag->created_at);
-            //     unset($tag->updated_at);
-            //     // TODO get label of tag
-            // }
+            }
 
             // try to get file to check if it exists
             try {
@@ -314,6 +318,12 @@ class ImageController extends Controller
     }
 
     public function delete($id) {
+        $user = \Auth::user();
+        if(!$user->can('manage_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $photo = Photo::find($id);
         $url = 'images/' . $photo->filename;
         Storage::delete($url);
@@ -346,6 +356,12 @@ class ImageController extends Controller
     }
 
     public function addTag(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('edit_photo_props')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $photoId = $request->get('photo_id');
         $tagId = $request->get('tag_id');
 
@@ -358,6 +374,12 @@ class ImageController extends Controller
     }
 
     public function removeTag(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('edit_photo_props')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $photoId = $request->get('photo_id');
         $tagId = $request->get('tag_id');
 
