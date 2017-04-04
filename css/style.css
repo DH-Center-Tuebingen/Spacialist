@@ -90,6 +90,12 @@ textarea {
     resize: vertical;
 }
 
+.inline-edit {
+    border: none;
+    border-bottom: 1px solid gray;
+    font-style: italic;
+}
+
 .inline-list {
     margin-bottom: 0;
     margin-top: 8px;

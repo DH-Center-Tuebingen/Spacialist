@@ -146,6 +146,7 @@
     "photos.properties.dating": "Dating",
     "photos.properties.direction": "Direction of view",
     "photos.properties.type": "Image type",
+    "photos.properties.team": "Team",
     "photos.properties.author": "Photographer",
     "photos.properties.image.heading": "Image Properties",
     "photos.properties.image.created": "Created",

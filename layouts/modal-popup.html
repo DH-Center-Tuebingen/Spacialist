@@ -1,7 +1,7 @@
 <div class="modal-header">
     <h4>{{ modalOptions.img.filename }}</h4>
 </div>
-<div class="modal-body col-md-12">
+<div class="modal-body col-md-12" ng-init="imageEdits = {}">
     <div class="col-md-7 external-container">
         <img protected-src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" />
         <div class="external-content">
@@ -19,10 +19,28 @@
         </ul>
         <div ng-show="modalOptions.modalNav.propTab" class="col-md-10 col-md-offset-1">
             <h3>{{'photos.properties.heading'|translate}}</h3>
-            <table class="table table-striped" style="width: 100%;">
-                <tr>
+            <table class="table" style="width: 100%;">
+                <tr ng-init="modalOptions.img['location-general'] = 'Tübingen'" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
                     <td style="text-align:left; font-weight: bold;">{{'photos.properties.location-general'|translate}}</td>
-                    <td style="text-align:right;"><i style="color: gray;">Tübingen</i></td>
+                    <td style="text-align:right;">
+                        <div ng-show="!imageEdits['location-general'].editMode">
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="modalOptions.setImagePropertyEdit(imageEdits, 'location-general', modalOptions.img['location-general'])" ng-if="hovered">
+                                <i class="material-icons md-18 fa-green">edit</i>
+                            </a>
+                            <i>
+                                <i style="color: gray;">{{ modalOptions.img['location-general'] }}</i>
+                            </i>
+                        </div>
+                        <div ng-if="imageEdits['location-general'].editMode">
+                            <a class="btn btn-success btn-fab btn-fab-minime" href="" ng-click="modalOptions.storeImagePropertyEdit(imageEdits, 'location-general', modalOptions.img)">
+                                <i class="material-icons md-18">check</i>
+                            </a>
+                            <a class="btn btn-danger btn-fab btn-fab-minime" href="" ng-click="modalOptions.cancelImagePropertyEdit(imageEdits, 'location-general')">
+                                <i class="material-icons md-18">clear</i>
+                            </a>
+                            <input type="text" class="inline-edit" style="text-align: right;" ng-model="imageEdits['location-general'].text" />
+                        </div>
+                    </td>
                 </tr>
                 <tr>
                     <td style="text-align:left; font-weight: bold;">{{'photos.properties.location-specific'|translate}}</td>
@@ -45,7 +63,7 @@
                     <td style="text-align:right;"><i style="color: gray;">Arbeitsfoto</i></td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.'|translate}}</td>
+                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.team'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">Team eScience-Center</i></td>
                 </tr>
                 <tr>
@@ -56,25 +74,46 @@
                     <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.description'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.description }}</i></td>
                 </tr>
+            </table>
+            <h3>{{'photos.properties.image.heading'|translate}}</h3>
+            <table class="table" style="width: 100%;">
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">
+                        {{'photos.properties.image.created'|translate}}
+                    </td>
+                    <td style="text-align:right;">
+                        <i style="color: gray;">{{ modalOptions.img.created*1000 | date:'d.MM.yyyy H:mm:ss' }}</i>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">
+                        {{'photos.properties.image.modified'|translate}}
+                    </td>
+                    <td style="text-align:right;">
+                        <i style="color: gray;">{{ modalOptions.img.modified*1000 | date:'d.MM.yyyy H:mm:ss' }}</i>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">
+                        {{'photos.properties.image.cameraname'|translate}}
+                    </td>
+                    <td style="text-align:right;">
+                        <i style="color: gray;">{{ modalOptions.img.cameraname }}</i>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:left; font-weight: bold;">
+                        {{'photos.properties.image.filesize'|translate}}
+                    </td>
+                    <td style="text-align:right;">
+                        <i style="color: gray;">{{ modalOptions.img.filesize | bytes:2 }}</i>
+                    </td>
+                </tr>
                 <tr>
                     <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.orientation'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.orientation }}</i></td>
                 </tr>
             </table>
-            <hr/>
-            <h3>{{'photos.properties.image.heading'|translate}}</h3>
-            <p class="left">
-                <b>{{'photos.properties.image.created'|translate}}:</b> <span style="color: gray;">{{ modalOptions.img.created | date:'d.MM.yyyy H:mm:ss' }}</span>
-            </p>
-            <p class="left">
-                <b>{{'photos.properties.image.cameraname'|translate}}:</b> <i style="color: gray;">{{ modalOptions.img.cameraname }}</i>
-            </p>
-            <p class="left">
-                <b>{{'photos.properties.image.modified'|translate}}:</b> <span style="color: gray;">{{ modalOptions.img.modified * 1000 | date:'d.MM.yyyy H:mm:ss' }}</span>
-            </p>
-            <p class="left">
-                <b>{{'photos.properties.image.filesize'|translate}}:</b> <span style="color: gray;">{{ modalOptions.img.filesize | bytes:2 }}</span>
-            </p>
         </div>
         <div ng-show="modalOptions.modalNav.linkTab" style="padding-right: 10px;">
             <h3>{{'photos.linkages.heading'|translate}}</h3>

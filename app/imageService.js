@@ -12,16 +12,38 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     var lastTimeImageChecked = 0;
 
     images.openImageModal = function(img) {
-        console.log(img.tags);
         modalOptions = {};
         // modalOptions.markers = angular.extend({}, scopeService.markers);
         modalOptions.img = angular.extend({}, img);
         modalOptions.linkImage = images.linkImage;
         modalOptions.unlinkImage = images.unlinkImage;
+        modalOptions.setImagePropertyEdit = setImagePropertyEdit;
+        modalOptions.storeImagePropertyEdit = storeImagePropertyEdit;
+        modalOptions.cancelImagePropertyEdit = cancelImagePropertyEdit;
         // modalOptions.isEmpty = $scope.isEmpty;
         // modalOptions.modalNav = angular.extend({}, $scope.modalNav);
         modalService.showModal({}, modalOptions);
     };
+
+    function setImagePropertyEdit(editArray, index, initValue) {
+        editArray[index] = {
+            text: initValue || 'Hallooooo',
+            editMode: true
+        };
+    }
+
+    function storeImagePropertyEdit(editArray, index, refArray) {
+        console.log(refArray[index]);
+        refArray[index] = editArray[index].text;
+        console.log(refArray[index]);
+        editArray[index].text = '';
+        editArray[index].editMode = false;
+    }
+
+    function cancelImagePropertyEdit(editArray, index) {
+        editArray[index].text = '';
+        editArray[index].editMode = false;
+    }
 
     images.getImagesForContext = function(id) {
         if(!id) return;
