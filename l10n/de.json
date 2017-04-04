@@ -201,6 +201,7 @@
     "snackbar.image-linked.success": "Bild mit Kontext verknüpft.",
     "snackbar.image-unlinked.success": "Bild von Kontext gelöst.",
     "snackbar.image-upload.success": "{{ cnt }} Bilder hochgeladen.",
+    "snackbar.bibtex-upload.success": "{{ cnt }} Einträge hinzugefügt.",
 
     "dates_list": "Zeitangaben",
     "map": "Karte",

@@ -1,4 +1,4 @@
-spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'httpGetPromise', 'httpPostFactory', '$http', '$timeout', 'Upload', function(modalFactory, httpGetFactory, httpGetPromise, httpPostFactory, $http, $timeout, Upload) {
+spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'snackbarService', '$http', '$translate', 'Upload', function(modalFactory, httpGetFactory, httpGetPromise, httpPostFactory, snackbarService, $http, $translate, Upload) {
     var literature = {};
     literature.literature = [];
     literature.literatureOptions = {};
@@ -189,11 +189,14 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
                  data: { file: file }
             });
             file.upload.then(function(response) {
-                $timeout(function() {
-                    file.result = response.data;
-                    console.log(response);
-                    // TODO
+                var entries = response.data.entries;
+                for(var i=0; i<entries.length; i++) {
+                    literature.literature.push(entries[i]);
+                }
+                var content = $translate.instant('snackbar.bibtex-upload.success', {
+                    cnt: entries.length
                 });
+                snackbarService.addAutocloseSnack(content, 'success');
             }, function(reponse) {
                 if(response.status > 0) {
                     $scope.errorMsg = response.status + ': ' + response.data;

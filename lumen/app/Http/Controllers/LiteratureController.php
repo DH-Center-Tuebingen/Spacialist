@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\User;
+use App\Literature;
 use \DB;
 use Illuminate\Http\Request;
 
@@ -187,12 +188,12 @@ class LiteratureController extends Controller
     }
 
     public function importBibtex(Request $request) {
-        // $user = \Auth::user();
-        // if(!$user->can('add_remove_literature')) {
-        //     return response([
-        //         'error' => 'You do not have the permission to call this method'
-        //     ], 403);
-        // }
+        $user = \Auth::user();
+        if(!$user->can('add_remove_literature')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         if(!$request->hasFile('file') || !$request->file('file')->isValid()) return response()->json([
             'error' => 'No or invalid file provided'
         ]);
@@ -206,10 +207,15 @@ class LiteratureController extends Controller
         $newEntries = [];
         foreach($entries as $entry) {
             $insArray = $this->getFields($entry);
-            $newEntries[] = $insArray;
-            // $insEntry = new Literature();
-            // $insEntry->type =
+            if(Literature::where($insArray)->first() === null) {
+                $literature = new Literature($insArray);
+                $literature->save();
+                $newEntries[] = $literature;
+            }
         }
+        return response()->json([
+            'entries' => $newEntries
+        ]);
     }
 
     public function getAll() {
