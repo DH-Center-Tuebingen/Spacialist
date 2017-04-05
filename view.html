@@ -117,7 +117,7 @@
                                 </ui-select>
                             </div>
                             <div class="form-group label-floating">
-                                <label class="control-label">Date</label>
+                                <label class="control-label" translate="photos.properties.image.created"></label>
                                 <ui-select multiple ng-disabled="readonlyInput" ng-model="search.terms.dates" close-on-select="false">
                                     <ui-select-match>{{$item}}</ui-select-match>
                                     <ui-select-choices repeat="choice in availableSearchTerms.dates | filter:$select.search">
@@ -126,7 +126,7 @@
                                 </ui-select>
                             </div>
                             <div class="form-group label-floating">
-                                <label class="control-label">Camera</label>
+                                <label class="control-label" translate="photos.properties.image.cameraname"></label>
                                 <ui-select multiple ng-disabled="readonlyInput" ng-model="search.terms.cameras" close-on-select="false">
                                     <ui-select-match>{{$item}}</ui-select-match>
                                     <ui-select-choices repeat="choice in availableSearchTerms.cameras | filter:$select.search">
