@@ -75,7 +75,7 @@ spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($
         backdrop: true,
         keyboard: true,
         modalFade: true,
-        templateUrl: 'layouts/modal-popup.html',
+        templateUrl: 'layouts/image-properties.html',
         windowClass: 'wide-modal'
     };
     var options = {};
