@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\User;
 use App\ContextPhoto;
+use App\Photo;
 use App\PhotoTag;
 use App\ThConcept;
 use \DB;
@@ -291,6 +292,7 @@ class ImageController extends Controller
         }
         $images = DB::table('photos as ph')
                     ->select("ph.id as id", "ph.modified", "ph.created", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id")
+                    ->orderBy('id', 'asc')
                     ->get();
         foreach($images as &$img) {
             $img->url = 'images/' . $img->filename;
@@ -328,6 +330,15 @@ class ImageController extends Controller
         $url = 'images/' . $photo->filename;
         Storage::delete($url);
         $photo->delete();
+    }
+
+    public function setProperty(Request $request) {
+        $id = $request->get('photo_id');
+        $prop = $request->get('property');
+        $val = $request->get('value');
+        $photo = Photo::find($id);
+        $photo->{$prop} = $val;
+        $photo->save();
     }
 
     public function getAvailableTags() {

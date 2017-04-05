@@ -135,6 +135,7 @@
     "map-marker.actions.context-unlink": "Unlink From {{ context }}",
     "map-marker.save": "Save",
     "restricted-access": "You are not allowed to access this page. Pick a role with higher privileges (if possible) or contact your administrator.",
+    "tags.name": "Tags",
     "tags.add": "Add Tag",
     "tags.show-tags": "Show Tags",
     "photos.empty": "Photo list is empty.",

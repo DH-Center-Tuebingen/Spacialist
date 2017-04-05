@@ -14,7 +14,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     images.openImageModal = function(img) {
         modalOptions = {};
         // modalOptions.markers = angular.extend({}, scopeService.markers);
-        modalOptions.img = angular.extend({}, img);
+        modalOptions.img = img;
         modalOptions.linkImage = images.linkImage;
         modalOptions.unlinkImage = images.unlinkImage;
         modalOptions.setImagePropertyEdit = setImagePropertyEdit;
@@ -25,19 +25,37 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         modalService.showModal({}, modalOptions);
     };
 
+    function resetEditFields(editArray) {
+        for(var k in editArray) {
+            if(editArray.hasOwnProperty(k)) {
+                if(editArray[k].editMode) {
+                    editArray[k].text = '';
+                    editArray[k].editMode = false;
+                }
+            }
+        }
+    }
+
     function setImagePropertyEdit(editArray, index, initValue) {
         editArray[index] = {
-            text: initValue || 'Hallooooo',
+            text: initValue,
             editMode: true
         };
     }
 
-    function storeImagePropertyEdit(editArray, index, refArray) {
-        console.log(refArray[index]);
-        refArray[index] = editArray[index].text;
-        console.log(refArray[index]);
-        editArray[index].text = '';
-        editArray[index].editMode = false;
+    function storeImagePropertyEdit(editArray, index, img) {
+        var formData = new FormData();
+        formData.append('photo_id', img.id);
+        formData.append('property', index);
+        formData.append('value', editArray[index].text);
+        httpPostFactory('api/image/property/set', formData, function(response) {
+            if(response.error) {
+                cancelImagePropertyEdit(editArray, index);
+                return;
+            }
+            img[index] = editArray[index].text;
+            cancelImagePropertyEdit(editArray, index);
+        });
     }
 
     function cancelImagePropertyEdit(editArray, index) {

@@ -146,6 +146,7 @@
     "map-marker.actions.context-unlink": "Verknüpfung mit {{ context }} entfernen",
     "map-marker.save": "Speichern",
     "restricted-access": "Diese Seite ist für sie gesperrt. Sie besitzen nicht die erforderlichen Rechte. Bitte wechseln sie ihre Rolle oder fragen sie den Administrator.",
+    "tags.name": "Schlagwörter",
     "tags.add": "Schlagwort hinzufügen",
     "tags.show-tags": "Schlagwörter anzeigen",
     "photos.empty": "Keine Bilder vorhanden",

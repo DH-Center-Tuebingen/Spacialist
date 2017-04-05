@@ -20,59 +20,31 @@
         <div ng-show="modalOptions.modalNav.propTab" class="col-md-10 col-md-offset-1">
             <h3>{{'photos.properties.heading'|translate}}</h3>
             <table class="table" style="width: 100%;">
-                <tr ng-init="modalOptions.img['location-general'] = 'Tübingen'" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.location-general'|translate}}</td>
+                <tr ng-repeat="prop in ['copyright', 'description']" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
+                    <td style="text-align:left; font-weight: bold;">
+                        {{'photos.properties.image.'+prop|translate}}
+                    </td>
                     <td style="text-align:right;">
-                        <div ng-show="!imageEdits['location-general'].editMode">
-                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="modalOptions.setImagePropertyEdit(imageEdits, 'location-general', modalOptions.img['location-general'])" ng-if="hovered">
+                        <div ng-show="!imageEdits[prop].editMode">
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="modalOptions.setImagePropertyEdit(imageEdits, prop, modalOptions.img[prop])" ng-if="hovered">
                                 <i class="material-icons md-18 fa-green">edit</i>
                             </a>
                             <i>
-                                <i style="color: gray;">{{ modalOptions.img['location-general'] }}</i>
+                                <i style="color: gray;">
+                                    {{ modalOptions.img[prop] }}
+                                </i>
                             </i>
                         </div>
-                        <div ng-if="imageEdits['location-general'].editMode">
-                            <a class="btn btn-success btn-fab btn-fab-minime" href="" ng-click="modalOptions.storeImagePropertyEdit(imageEdits, 'location-general', modalOptions.img)">
+                        <div ng-if="imageEdits[prop].editMode">
+                            <a class="btn btn-success btn-fab btn-fab-minime" href="" ng-click="modalOptions.storeImagePropertyEdit(imageEdits, prop, modalOptions.img)">
                                 <i class="material-icons md-18">check</i>
                             </a>
-                            <a class="btn btn-danger btn-fab btn-fab-minime" href="" ng-click="modalOptions.cancelImagePropertyEdit(imageEdits, 'location-general')">
+                            <a class="btn btn-danger btn-fab btn-fab-minime" href="" ng-click="modalOptions.cancelImagePropertyEdit(imageEdits, prop)">
                                 <i class="material-icons md-18">clear</i>
                             </a>
-                            <input type="text" class="inline-edit" style="text-align: right;" ng-model="imageEdits['location-general'].text" />
+                            <input type="text" class="inline-edit" style="text-align: right;" ng-model="imageEdits[prop].text" />
                         </div>
                     </td>
-                </tr>
-                <tr>
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.location-specific'|translate}}</td>
-                    <td style="text-align:right;"><i style="color: gray;">Österberg</i></td>
-                </tr>
-                <tr>
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.befund'|translate}}</td>
-                    <td style="text-align:right;"><i style="color: gray;">Fundstelle 123, Installation 45 und 86, Fundnr. 990</i></td>
-                </tr>
-                <tr>
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.dating'|translate}}</td>
-                    <td style="text-align:right;"><i style="color: gray;">Spätbronzezeit, moderne Befunde</i></td>
-                </tr>
-                <tr>
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.direction'|translate}}</td>
-                    <td style="text-align:right;"><i style="color: gray;">SSW</i></td>
-                </tr>
-                <tr>
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.type'|translate}}</td>
-                    <td style="text-align:right;"><i style="color: gray;">Arbeitsfoto</i></td>
-                </tr>
-                <tr>
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.team'|translate}}</td>
-                    <td style="text-align:right;"><i style="color: gray;">Team eScience-Center</i></td>
-                </tr>
-                <tr>
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.copyright'|translate}}</td>
-                    <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.copyright }}</i></td>
-                </tr>
-                <tr>
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.description'|translate}}</td>
-                    <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.description }}</i></td>
                 </tr>
             </table>
             <h3>{{'photos.properties.image.heading'|translate}}</h3>
@@ -114,6 +86,24 @@
                     <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.orientation }}</i></td>
                 </tr>
             </table>
+            <h3 translate="tags.name"></h3>
+            <div>
+                <div class="form-group label-floating">
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <i class="material-icons">local_offer</i>
+                        </span>
+                       <ui-select multiple tagging tagging-label="false" ng-model="modalOptions.img.tags" on-select="addTag(modalOptions.img, $item)" on-remove="removeTag(modalOptions.img, $item)" theme="bootstrap" sortable="true" close-on-select="false">
+                           <ui-select-match placeholder="{{ 'tags.add' | translate }}">
+                               {{ $item.label }}
+                           </ui-select-match>
+                           <ui-select-choices repeat="tag in modalOptions.availableTags | filter:$select.search">
+                               {{ tag.label }}
+                           </ui-select-choices>
+                       </ui-select>
+                    </div>
+                </div>
+            </div>
         </div>
         <div ng-show="modalOptions.modalNav.linkTab" style="padding-right: 10px;">
             <h3>{{'photos.linkages.heading'|translate}}</h3>
