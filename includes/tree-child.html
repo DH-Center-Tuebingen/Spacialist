@@ -14,6 +14,6 @@
     </span>
 </div>
 <ul ui-tree-nodes="" ng-model="contexts.children[id]" ng-if="!contexts.data[id].collapsed">
-    <li ng-repeat="id in contexts.children[id]" data-collapsed="contexts.data[id].collapsed" ng-include="'includes/new-tree-child.html'" ui-tree-node context-menu="setContextMenu">
+    <li ng-repeat="id in contexts.children[id]" data-collapsed="contexts.data[id].collapsed" ng-include="'includes/tree-child.html'" ui-tree-node context-menu="setContextMenu">
     </li>
 </ul>

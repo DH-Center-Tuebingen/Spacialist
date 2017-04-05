@@ -3,7 +3,6 @@
         <div ng-if="currentUser.permissions.view_concepts">
             <h3>{{'context-tree.heading'|translate}}</h3>
             <my-tree on-click-callback="setCurrentElement(target, elem)" contexts="contexts" element="currentElement.element" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
-            <spinner ng-if="getContextListStarted"></spinner>
         </div>
         <div ng-if="!currentUser.permissions.view_concepts">
             <div ng-include="'layouts/restricted-access.html'"></div>

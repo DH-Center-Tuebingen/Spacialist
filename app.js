@@ -461,7 +461,7 @@ spacialistApp.directive('myDirective', function(httpPostFactory) {
 spacialistApp.directive('myTree', function($parse) {
     return {
         restrict: 'E',
-        templateUrl: 'includes/new-tree.html',
+        templateUrl: 'includes/tree.html',
         scope: {
             onClickCallback: '&',
             contexts: '=',
