@@ -608,7 +608,7 @@ spacialistApp.directive("number", function() {
 
 spacialistApp.filter('imageFilter', function() {
     var found = function(haystack, needle) {
-        return needle.some(function(v) {
+        return needle.every(function(v) {
             return haystack.indexOf(v) >= 0;
         });
     };
