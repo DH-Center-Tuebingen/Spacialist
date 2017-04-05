@@ -2,12 +2,12 @@ var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'u
 
 $.material.init();
 
-spacialistApp.service('searchService', [function() {
+spacialistApp.service('searchService', ['$translate', function($translate) {
     var search = {};
 
     search.formatUnixDate = function(ts) {
         var d = new Date(ts);
-        return d.getDate() + '-' + (d.getMonth()+1) + '-' + d.getFullYear();
+        return d.toLocaleDateString($translate.use());
     };
 
     search.availableSearchTerms = {
