@@ -278,7 +278,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         var camTerms = searchService.availableSearchTerms.cameras;
         if(camTerms.indexOf(img.cameraname) == -1) {
             camTerms.push(img.cameraname);
-            dateTerms.sort();
+            camTerms.sort();
         }
     }
 
