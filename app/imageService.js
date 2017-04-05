@@ -182,7 +182,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
                         if(newImg.id == one.id) {
                             if(!angular.equals(newImg, one)) {
                                 oneUpdated = true;
-                                updateTags(newImg);
+                                updateSearchOptions(newImg);
                                 images.all[j] = newImg;
                             }
                             alreadyLinked = true;
@@ -191,7 +191,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
                     }
                     if(!alreadyLinked) {
                         oneUpdated = true;
-                        updateTags(newImg);
+                        updateSearchOptions(newImg);
                         images.all.push(newImg);
                     }
                 }
@@ -237,9 +237,15 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
             }
             angular.forEach(response.tags, function(tag) {
                 images.availableTags.push(tag);
-                searchService.availableSearchTerms.push(tag);
+                searchService.availableSearchTerms.tags.push(tag);
             });
         });
+    }
+
+    function updateSearchOptions(img) {
+        updateTags(img);
+        updateDates(img);
+        updateCameras(img);
     }
 
     function updateTags(img) {
@@ -256,6 +262,23 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
             if(!found) {
                 delete img.tags[i];
             }
+        }
+    }
+
+    function updateDates(img) {
+        var dateTerms = searchService.availableSearchTerms.dates;
+        var createdDay = searchService.formatUnixDate(img.created*1000);
+        if(dateTerms.indexOf(createdDay) == -1) {
+            dateTerms.push(createdDay);
+            dateTerms.sort();
+        }
+    }
+
+    function updateCameras(img) {
+        var camTerms = searchService.availableSearchTerms.cameras;
+        if(camTerms.indexOf(img.cameraname) == -1) {
+            camTerms.push(img.cameraname);
+            dateTerms.sort();
         }
     }
 

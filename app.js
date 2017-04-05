@@ -5,7 +5,16 @@ $.material.init();
 spacialistApp.service('searchService', [function() {
     var search = {};
 
-    search.availableSearchTerms = [];
+    search.formatUnixDate = function(ts) {
+        var d = new Date(ts);
+        return d.getDate() + '-' + (d.getMonth()+1) + '-' + d.getFullYear();
+    };
+
+    search.availableSearchTerms = {
+        tags: [],
+        dates: [],
+        cameras: []
+    };
 
     return search;
 }]);
