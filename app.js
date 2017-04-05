@@ -606,18 +606,32 @@ spacialistApp.directive("number", function() {
     };
 });
 
-spacialistApp.filter('imageFilter', function() {
-    var found = function(haystack, needle) {
+spacialistApp.filter('imageFilter', function(searchService) {
+    var foundAll = function(haystack, needle) {
+        if(!needle || needle.length === 0) return true;
         return needle.every(function(v) {
             return haystack.indexOf(v) >= 0;
         });
     };
+
+    var foundSingle = function(haystack, needle) {
+        if(!haystack || haystack.length === 0) return true;
+        return haystack.indexOf(needle) > -1;
+    };
+
+    var matchesAllFilters = function(item, searchTerms) {
+        if(!foundAll(item.tags, searchTerms.tags)) return false;
+        if(!foundSingle(searchTerms.cameras, item.cameraname)) return false;
+        if(!foundSingle(searchTerms.dates, searchService.formatUnixDate(item.created*1000))) return false;
+        return true;
+    };
+
     return function(items, searchTerms) {
         if(searchTerms.tags.length === 0) return items;
         var filtered = [];
         for(var i=0; i<items.length; i++) {
             var item = items[i];
-            if(found(item.tags, searchTerms.tags)) {
+            if(matchesAllFilters(item, searchTerms)) {
                 filtered.push(item);
             }
         }
