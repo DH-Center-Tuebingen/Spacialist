@@ -202,7 +202,13 @@ class LiteratureController extends Controller
         $listener = new \RenanBr\BibTexParser\Listener;
         $parser = new \RenanBr\BibTexParser\Parser;
         $parser->addListener($listener);
-        $parser->parseFile($file->getRealPath());
+        try {
+            $parser->parseFile($file->getRealPath());
+        } catch(\RenanBr\BibTexParser\ParseException $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
         $entries = $listener->export();
         $newEntries = [];
         foreach($entries as $entry) {
