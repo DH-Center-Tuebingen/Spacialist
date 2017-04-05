@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\User;
+use App\Literature;
 use \DB;
 use Illuminate\Http\Request;
 
@@ -31,99 +32,99 @@ class LiteratureController extends Controller
             ->delete();
     }
 
-    private function getFields(Request $request) {
+    private function getFields($request) {
         $ins = [];
 
-        if($request->has('type')) {
-            $ins['type'] = $request->get('type');
+        if(isset($request['type'])) {
+            $ins['type'] = $request['type'];
         }
 
-        if($request->has('title')) {
-            $ins['title'] = $request->get('title');
+        if(isset($request['title'])) {
+            $ins['title'] = $request['title'];
         }
 
-        if($request->has('author')) {
-            $ins['author'] = $request->get('author');
+        if(isset($request['author'])) {
+            $ins['author'] = $request['author'];
         }
 
-        if($request->has('editor')) {
-            $ins['editor'] = $request->get('editor');
+        if(isset($request['editor'])) {
+            $ins['editor'] = $request['editor'];
         }
 
-        if($request->has('journal')) {
-            $ins['journal'] = $request->get('journal');
+        if(isset($request['journal'])) {
+            $ins['journal'] = $request['journal'];
         }
 
-        if($request->has('year')) {
-            $ins['year'] = $request->get('year');
+        if(isset($request['year'])) {
+            $ins['year'] = $request['year'];
         }
 
-        if($request->has('pages')) {
-            $ins['pages'] = $request->get('pages');
+        if(isset($request['pages'])) {
+            $ins['pages'] = $request['pages'];
         }
 
-        if($request->has('volume')) {
-            $ins['volume'] = $request->get('volume');
+        if(isset($request['volume'])) {
+            $ins['volume'] = $request['volume'];
         }
 
-        if($request->has('number')) {
-            $ins['number'] = $request->get('number');
+        if(isset($request['number'])) {
+            $ins['number'] = $request['number'];
         }
 
-        if($request->has('booktitle')) {
-            $ins['booktitle'] = $request->get('booktitle');
+        if(isset($request['booktitle'])) {
+            $ins['booktitle'] = $request['booktitle'];
         }
 
-        if($request->has('publisher')) {
-            $ins['publisher'] = $request->get('publisher');
+        if(isset($request['publisher'])) {
+            $ins['publisher'] = $request['publisher'];
         }
 
-        if($request->has('address')) {
-            $ins['address'] = $request->get('address');
+        if(isset($request['address'])) {
+            $ins['address'] = $request['address'];
         }
 
-        if($request->has('annote')) {
-            $ins['annote'] = $request->get('annote');
+        if(isset($request['annote'])) {
+            $ins['annote'] = $request['annote'];
         }
 
-        if($request->has('chapter')) {
-            $ins['chapter'] = $request->get('chapter');
+        if(isset($request['chapter'])) {
+            $ins['chapter'] = $request['chapter'];
         }
 
-        if($request->has('crossref')) {
-            $ins['crossref'] = $request->get('crossref');
+        if(isset($request['crossref'])) {
+            $ins['crossref'] = $request['crossref'];
         }
 
-        if($request->has('edition')) {
-            $ins['edition'] = $request->get('edition');
+        if(isset($request['edition'])) {
+            $ins['edition'] = $request['edition'];
         }
 
-        if($request->has('institution')) {
-            $ins['institution'] = $request->get('institution');
+        if(isset($request['institution'])) {
+            $ins['institution'] = $request['institution'];
         }
 
-        if($request->has('key')) {
-            $ins['key'] = $request->get('key');
+        if(isset($request['key'])) {
+            $ins['key'] = $request['key'];
         }
 
-        if($request->has('month')) {
-            $ins['month'] = $request->get('month');
+        if(isset($request['month'])) {
+            $ins['month'] = $request['month'];
         }
 
-        if($request->has('note')) {
-            $ins['note'] = $request->get('note');
+        if(isset($request['note'])) {
+            $ins['note'] = $request['note'];
         }
 
-        if($request->has('organization')) {
-            $ins['organization'] = $request->get('organization');
+        if(isset($request['organization'])) {
+            $ins['organization'] = $request['organization'];
         }
 
-        if($request->has('school')) {
-            $ins['school'] = $request->get('school');
+        if(isset($request['school'])) {
+            $ins['school'] = $request['school'];
         }
 
-        if($request->has('series')) {
-            $ins['series'] = $request->get('series');
+        if(isset($request['series'])) {
+            $ins['series'] = $request['series'];
         }
 
         return $ins;
@@ -142,7 +143,7 @@ class LiteratureController extends Controller
             ]);
         }
 
-        $ins = $this->getFields($request);
+        $ins = $this->getFields($request->toArray());
         $ins['lasteditor'] = $user['name'];
 
         if($request->has('id')) {
@@ -178,12 +179,43 @@ class LiteratureController extends Controller
 
         $id = $request->get('id');
 
-        $upd = $this->getFields($request);
+        $upd = $this->getFields($request->toArray());
         $upd = $user['name'];
 
         DB::table('literature')
             ->where('id', '=', $id)
             ->update($upd);
+    }
+
+    public function importBibtex(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('add_remove_literature')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        if(!$request->hasFile('file') || !$request->file('file')->isValid()) return response()->json([
+            'error' => 'No or invalid file provided'
+        ]);
+        $file = $request->file('file');
+
+        $listener = new \RenanBr\BibTexParser\Listener;
+        $parser = new \RenanBr\BibTexParser\Parser;
+        $parser->addListener($listener);
+        $parser->parseFile($file->getRealPath());
+        $entries = $listener->export();
+        $newEntries = [];
+        foreach($entries as $entry) {
+            $insArray = $this->getFields($entry);
+            if(Literature::where($insArray)->first() === null) {
+                $literature = new Literature($insArray);
+                $literature->save();
+                $newEntries[] = $literature;
+            }
+        }
+        return response()->json([
+            'entries' => $newEntries
+        ]);
     }
 
     public function getAll() {

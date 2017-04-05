@@ -1,4 +1,4 @@
-spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'httpGetPromise', 'httpPostFactory', '$http', function(modalFactory, httpGetFactory, httpGetPromise, httpPostFactory, $http) {
+spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'snackbarService', '$http', '$translate', 'Upload', function(modalFactory, httpGetFactory, httpGetPromise, httpPostFactory, snackbarService, $http, $translate, Upload) {
     var literature = {};
     literature.literature = [];
     literature.literatureOptions = {};
@@ -180,6 +180,31 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
 
     literature.openAddLiteratureDialog = function() {
         modalFactory.addLiteratureModal(literature.addLiterature, literature.literatureOptions.availableTypes);
+    };
+
+    literature.importBibTexFile = function(file, invalidFiles) {
+        if(file) {
+            file.upload = Upload.upload({
+                 url: 'api/literature/import/bib',
+                 data: { file: file }
+            });
+            file.upload.then(function(response) {
+                var entries = response.data.entries;
+                for(var i=0; i<entries.length; i++) {
+                    literature.literature.push(entries[i]);
+                }
+                var content = $translate.instant('snackbar.bibtex-upload.success', {
+                    cnt: entries.length
+                });
+                snackbarService.addAutocloseSnack(content, 'success');
+            }, function(reponse) {
+                if(response.status > 0) {
+                    $scope.errorMsg = response.status + ': ' + response.data;
+                }
+            }, function(evt) {
+                file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+            });
+        }
     };
 
     literature.addLiterature = function(fields, type, index) {

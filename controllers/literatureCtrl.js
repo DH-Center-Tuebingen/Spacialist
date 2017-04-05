@@ -18,4 +18,8 @@ spacialistApp.controller('literatureCtrl', function($scope, literatureService, u
     $scope.openAddLiteratureDialog = function() {
         literatureService.openAddLiteratureDialog();
     };
+
+    $scope.importBibTexFile = function(file, invalidFiles) {
+        literatureService.importBibTexFile(file, invalidFiles);
+    };
 });
