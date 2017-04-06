@@ -627,7 +627,6 @@ spacialistApp.filter('imageFilter', function(searchService) {
     };
 
     return function(items, searchTerms) {
-        if(searchTerms.tags.length === 0) return items;
         var filtered = [];
         for(var i=0; i<items.length; i++) {
             var item = items[i];
