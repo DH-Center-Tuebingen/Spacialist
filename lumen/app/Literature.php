@@ -28,5 +28,16 @@ class Literature extends Model
         'misc',
         'howpublished',
         'type',
+        'annote',
+        'chapter',
+        'crossref',
+        'edition',
+        'institution',
+        'key',
+        'month',
+        'note',
+        'organization',
+        'school',
+        'series'
     ];
 }

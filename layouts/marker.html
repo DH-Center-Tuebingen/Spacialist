@@ -40,11 +40,11 @@
                     {{'map-marker.options.color'|translate}}:
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="color" name="color_{{ currentGeodata.id }}" ng-model="markerOptions.color" id="color_{{ currentGeodata.id }}" ng-disabled="!currentUser.permissions.duplicate_edit_concepts"/>
+                    <input class="form-control" type="color" name="color_{{ currentGeodata.id }}" ng-model="map.selectedLayer.feature.properties.color" id="color_{{ currentGeodata.id }}" ng-disabled="!currentUser.permissions.duplicate_edit_concepts"/>
                 </div>
             </div>
 
-            <button type="button" class="btn btn-xs btn-success" ng-click="updateMarkerOptions(currentGeodata.id, markerOptions.color)" ng-if="currentUser.permissions.duplicate_edit_concepts"><i class="fa fa-fw fa-floppy-o"></i> {{'map-marker.save'|translate}}</button>
+            <button type="button" class="btn btn-xs btn-success" ng-click="updateMarkerOptions(currentGeodata.id, map.selectedLayer.feature.properties.color)" ng-if="currentUser.permissions.duplicate_edit_concepts"><i class="fa fa-fw fa-floppy-o"></i> {{'map-marker.save'|translate}}</button>
 
         </form>
     </div>

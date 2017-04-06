@@ -11,7 +11,8 @@
             <div ng-switch-when="geography">
                 <input class="form-control" type="text" id="a{{ attr.aid }}" placeholder="{{ 'context-form.fields.placeholder-wkt' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput" />
                 <button type="button" class="btn btn-default" style="margin-top: 10px;" ng-click="openGeographyPlacer(attr.aid)">
-                    {{ 'context-form.fields.open-map' | translate }}
+                    <i class="material-icons">place</i>
+                    <span translate="context-form.fields.open-map"/>
                 </button>
             </div>
             <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"></textarea>

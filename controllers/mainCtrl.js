@@ -5,18 +5,19 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.can = userService.can;
 
     $scope.currentElement = mainService.currentElement;
-    $scope.contexts = mainService.contexts;
+    $scope.contextTypes = mainService.contextTypes;
     $scope.contextReferences = mainService.contextReferences;
     $scope.artifacts = mainService.artifacts;
     $scope.artifactReferences = mainService.artifactReferences;
     $scope.dropdownOptions = mainService.dropdownOptions;
     $scope.getColorForId = mainService.getColorForId;
-    $scope.contextList = mainService.contextList;
+    $scope.contexts = mainService.contexts;
     $scope.moduleExists = mainService.moduleExists;
     $scope.unsetCurrentElement = mainService.unsetCurrentElement;
     $scope.analysisEntries = analysisService.entries;
     $scope.activeAnalysis = analysisService.activeAnalysis;
     $scope.availableSearchTerms = searchService.availableSearchTerms;
+    $scope.filterTree = mainService.filterTree;
     var createModalHelper = mainService.createModalHelper;
 
     $scope.storedQueries = analysisService.storedQueries;
@@ -24,7 +25,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.newElementContextMenu = [
         [
             function($itemScope, $event, modelValue, text, $li) {
-                return $translate('context-menu.options-of', { object: $itemScope.parent.name });
+                return $translate('context-menu.options-of', { object: $scope.contexts.data[$itemScope.$parent.id].name });
             },
             function($itemScope, $event, modelValue, text, $li) {
             },
@@ -36,18 +37,18 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
                 return '<i class="material-icons md-18 fa-light fa-green">add_circle_outline</i> ' + $translate.instant('context-menu.new-artifact');
             },
             function($itemScope, $event, modelValue, text, $li) {
-            createModalHelper($itemScope, 'find', false);
+            createModalHelper($scope.contexts.data[$itemScope.$parent.id], 'find', false);
         }, function($itemScope) {
-            return $itemScope.parent.typeid === 0;
+            return $scope.contexts.data[$itemScope.$parent.id].typeid === 0;
         }],
         [
             function() {
                 return '<i class="material-icons md-18 fa-light fa-green">add_circle_outline</i> ' + $translate.instant('context-menu.new-context');
             },
             function($itemScope, $event, modelValue, text, $li) {
-            createModalHelper($itemScope, 'context', false);
+            createModalHelper($scope.contexts.data[$itemScope.$parent.id], 'context', false);
         }, function($itemScope) {
-            return $itemScope.parent.typeid === 0;
+            return $scope.contexts.data[$itemScope.$parent.id].typeid === 0;
         }],
         null,
         [
@@ -55,7 +56,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
                 return '<i class="material-icons md-18 fa-light fa-green">content_copy</i> ' + $translate.instant('context-menu.duplicate-element');
             },
                 function($itemScope, $event, modelValue, text, $li) {
-            mainService.duplicateElement($itemScope);
+            mainService.duplicateElement($itemScope.$parent.id);
         }],
         null,
         [
@@ -63,7 +64,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
                 return '<i class="material-icons md-18 fa-light fa-red">delete</i> ' + $translate.instant('context-menu.delete');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                mainService.deleteElement($itemScope.parent);
+                mainService.deleteElement($scope.contexts.data[$itemScope.$parent.id]);
             }
         ]
     ];

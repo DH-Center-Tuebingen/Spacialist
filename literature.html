@@ -56,6 +56,9 @@
                         </a>
                     </td>
                     <td>
+                    	{{'literature.bibtex.month'|translate}}
+                    </td>
+                    <td>
                     	{{'literature.bibtex.pages'|translate}}
                     </td>
                     <td>
@@ -63,6 +66,15 @@
                     </td>
                     <td>
                         {{'literature.bibtex.number'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.chapter'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.edition'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.series'|translate}}
                     </td>
                     <td>
                         <a href="" ng-click="sortType = 'booktitle'; sortReverse = !sortReverse">
@@ -86,6 +98,9 @@
                         </a>
                     </td>
                     <td>
+                    	{{'literature.bibtex.note'|translate}}
+                    </td>
+                    <td>
                     	{{'literature.created-at'|translate}}
                     </td>
                     <td>
@@ -104,6 +119,15 @@
                             <i ng-show="sortType == 'howpublished' && !sortReverse" class="material-icons">arrow_drop_down</i>
                             <i ng-show="sortType == 'howpublished' && sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.institution'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.organization'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.school'|translate}}
                     </td>
                     <td ng-if="currentUser.permissions.add_remove_literature">
                         {{'literature.delete'|translate}}
@@ -134,6 +158,9 @@
                     	{{ entry.year }}
                     </td>
                     <td>
+                    	{{ entry.month }}
+                    </td>
+                    <td>
                     	{{ entry.pages }}
                     </td>
                     <td>
@@ -143,6 +170,15 @@
                     	{{ entry.number }}
                     </td>
                     <td>
+                    	{{ entry.chapter }}
+                    </td>
+                    <td>
+                    	{{ entry.edition }}
+                    </td>
+                    <td>
+                    	{{ entry.series }}
+                    </td>
+                    <td>
                     	{{ entry.booktitle }}
                     </td>
                     <td>
@@ -150,6 +186,9 @@
                     </td>
                     <td>
                     	{{ entry.address }}
+                    </td>
+                    <td>
+                    	{{ entry.note }}
                     </td>
                     <td>
                     	{{ entry.created_at }}
@@ -162,6 +201,15 @@
                     </td>
                     <td>
                     	{{ entry.howpublished }}
+                    </td>
+                    <td>
+                    	{{ entry.institution }}
+                    </td>
+                    <td>
+                    	{{ entry.organization }}
+                    </td>
+                    <td>
+                    	{{ entry.school }}
                     </td>
                     <td ng-if="currentUser.permissions.add_remove_literature">
                         <button type="button" class="btn btn-danger" ng-click="deleteLiteratureEntry(entry)">
@@ -179,5 +227,8 @@
     </div>
     <button type="button" class="btn btn-success" id="literature-add-button" ng-click="openAddLiteratureDialog()" ng-if="currentUser.permissions.add_remove_literature">
         <i class="material-icons">add</i> {{'literature.add'|translate}}
+    </button>
+    <button type="file" id="literature-import-button" class="btn btn-primary" ngf-select="importBibTexFile($file, $invalidFiles)" accept="application/rdf+xml,text/plain,application/x-turtle" ngf-max-size="10MB" ng-if="currentUser.permissions.add_remove_literature">
+        Import BibTex File
     </button>
 </div>

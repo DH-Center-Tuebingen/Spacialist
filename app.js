@@ -478,10 +478,10 @@ spacialistApp.directive('myDirective', function(httpPostFactory) {
 spacialistApp.directive('myTree', function($parse) {
     return {
         restrict: 'E',
-        templateUrl: 'includes/new-tree.html',
+        templateUrl: 'includes/tree.html',
         scope: {
             onClickCallback: '&',
-            itemList: '=',
+            contexts: '=',
             element: '=',
             displayAttribute: '=',
             typeAttribute: '=',
@@ -648,39 +648,6 @@ spacialistApp.filter('urlify', function() {
     };
 });
 
-spacialistApp.filter('dateBcAc', ['$q', '$translate', function($q, $translate) {
-    var bcStr = null;
-    var adStr = null;
-    var translated = false;
-
-    function appendDate(date) {
-        if(date < 0) {
-            return Math.abs(date) + " " + bcStr;
-        } else {
-            return date + " " + adStr;
-        }
-    }
-
-    filterStub.$stateful = true;
-    function filterStub(date) {
-        if(bcStr === null || adStr === null) {
-            if(!translated) {
-                translated = true;
-                $translate('bc').then(function(bc) {
-                    bcStr = bc;
-                });
-                $translate('ad').then(function(ad) {
-                    adStr = ad;
-                });
-            }
-            return date;
-        } else {
-            return appendDate(date);
-        }
-    }
-    return filterStub;
-}]);
-
 spacialistApp.filter('bytes', function() {
 	return function(bytes, precision) {
         var units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
@@ -689,98 +656,6 @@ spacialistApp.filter('bytes', function() {
 		var number = Math.floor(Math.log(bytes) / Math.log(1024));
 		return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) +  ' ' + units[number];
 	};
-});
-
-spacialistApp.filter('overallLength', function() {
-    return function(obj) {
-        var count = 0;
-        angular.forEach(obj, function(value, key) {
-            count += value.length;
-        });
-        return count;
-    };
-});
-
-spacialistApp.filter('filterByMarkerName', function() {
-    return function(markers, search) {
-        var searchPattern = new RegExp(search, "i");
-        var tempMarkers = angular.extend({}, markers);
-        angular.forEach(tempMarkers, function(mV, mK) {
-            if(!searchPattern.test(mV.myOptions.name)) {
-                delete tempMarkers[mK];
-            }
-        });
-        return tempMarkers;
-    };
-});
-
-spacialistApp.filter('filterUnlinkedMarker', function() {
-    return function(markers, linkIds) {
-        if(linkIds.length === 0) return {};
-        var tempIds = linkIds.slice();
-        var tempMarkers = angular.extend({}, markers);
-        var linkedMarkers = {};
-        angular.forEach(tempMarkers, function(mV, mK) {
-            for(var i=0; i<tempIds.length; i++) {
-                var lV = tempIds[i];
-                if(lV == mV.id) {
-                    linkedMarkers[mK] = mV;
-                    delete tempMarkers[mK];
-                    tempIds.splice(i, 1);
-                    break;
-                }
-            }
-        });
-        return linkedMarkers;
-    };
-});
-
-spacialistApp.filter('filterLinkedMarker', function() {
-    return function(markers, linkIds) {
-        if(linkIds.length === 0) return markers;
-        var tempIds = linkIds.slice();
-        var tempMarkers = angular.extend({}, markers);
-        angular.forEach(tempMarkers, function(mV, mK) {
-            for(var i=0; i<tempIds.length; i++) {
-                var lV = tempIds[i];
-                if(lV == mV.id) {
-                    delete tempMarkers[mK];
-                    tempIds.splice(i, 1);
-                    break;
-                }
-            }
-        });
-        return tempMarkers;
-    };
-});
-
-spacialistApp.filter('linkedFilter', function() {
-    return function(imgs, linked, unlinked) {
-        var filteredImgs = [];
-        if(typeof linked === 'undefined') linked = false;
-        if(typeof unlinked === 'undefined') unlinked = false;
-        if(linked && unlinked) {
-            return filteredImgs;
-        }
-        if(!linked && !unlinked) {
-            return imgs;
-        }
-        angular.forEach(imgs, function(value, key) {
-            if(linked && typeof value.linked !== 'undefined' && value.linked > 0) {
-                filteredImgs.push(value);
-            } else if(unlinked && (typeof value.linked === 'undefined' || value.linked <= 0)) {
-                filteredImgs.push(value);
-            }
-        });
-        return filteredImgs;
-    };
-});
-
-spacialistApp.filter('contextFilter', function() {
-    return function(imgs, contexts) {
-        //TODO implement contexts (beside libraries)
-        return imgs;
-    };
 });
 
 spacialistApp.filter('truncate', function () {
