@@ -32,7 +32,7 @@
 </p>
 
 <div ng-init="collapsed=true">
-    <h5 ng-click="collapsed=!collapsed" class="clickable">{{'map-marker.options.label'|translate}} <small><i class="fa fa-fw" ng-class="collapsed ? 'fa-caret-right' : 'fa-caret-down'"></i></small></h5>
+    <button ng-click="collapsed=!collapsed" class="btn btn-primary clickable">{{'map-marker.options.label'|translate}} <i class="material-icons">{{ collapsed ? 'arrow_drop_down' : 'arrow_drop_up' }}</i></button>
     <div ng-if="!collapsed">
         <form class="form-horizontal" role="form">
             <div class="form-group">
@@ -44,7 +44,7 @@
                 </div>
             </div>
 
-            <button type="button" class="btn btn-xs btn-success" ng-click="updateMarkerOptions(currentGeodata.id, map.selectedLayer.feature.properties.color)" ng-if="currentUser.permissions.duplicate_edit_concepts"><i class="fa fa-fw fa-floppy-o"></i> {{'map-marker.save'|translate}}</button>
+            <button type="button" class="btn btn-xs btn-success" ng-click="updateMarkerOptions(currentGeodata.id, map.selectedLayer.feature.properties.color)" ng-if="currentUser.permissions.duplicate_edit_concepts"><i class="material-icons">save</i> {{'map-marker.save'|translate}}</button>
 
         </form>
     </div>
