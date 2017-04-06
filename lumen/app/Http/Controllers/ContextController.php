@@ -635,7 +635,7 @@ class ContextController extends Controller {
             case 'polygon':
             case 'Polygon':
                 $lines = [];
-                foreach($coords as $coord) {
+                foreach($coords[0] as $coord) {
                     $lines[] = new Point($coord->lat, $coord->lng);
                 }
                 $linestring = new LineString($lines);

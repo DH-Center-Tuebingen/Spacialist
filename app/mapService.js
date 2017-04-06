@@ -105,7 +105,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             coords = [ layer.getLatLng() ];
         } else {
             coords = layer.getLatLngs();
-            if(type.toLowerCase() == 'polygon') coords.push(angular.copy(coords[0]));
+            if(type.toLowerCase() == 'polygon') coords[0].push(angular.copy(coords[0][0]));
         }
         return coords;
     };
