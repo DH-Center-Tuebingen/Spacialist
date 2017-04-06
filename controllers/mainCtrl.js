@@ -16,6 +16,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.unsetCurrentElement = mainService.unsetCurrentElement;
     $scope.analysisEntries = analysisService.entries;
     $scope.activeAnalysis = analysisService.activeAnalysis;
+    $scope.filterTree = mainService.filterTree;
     var createModalHelper = mainService.createModalHelper;
 
     $scope.storedQueries = analysisService.storedQueries;

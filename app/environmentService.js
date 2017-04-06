@@ -20,9 +20,9 @@ spacialistApp.service('environmentService', ['httpGetFactory', function(httpGetF
             env.contexts.roots = response.roots;
             env.contexts.children = response.children;
 
-
             angular.forEach(env.contexts.data, function(context) {
                 context.collapsed = true;
+                context.visible = true;
             });
         });
     }

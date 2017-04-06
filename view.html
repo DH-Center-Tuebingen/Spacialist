@@ -2,7 +2,19 @@
     <div class="col-md-2" id="tree-container" ng-hide="activeAnalysis.isActive">
         <div ng-if="currentUser.permissions.view_concepts">
             <h3>{{'context-tree.heading'|translate}}</h3>
-            <my-tree on-click-callback="setCurrentElement(target, elem)" contexts="contexts" element="currentElement.element" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
+            <div class="col-md-12">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="material-icons">search</i>
+                            </span>
+                            <input class="form-control" type="text" ng-change="filterTree(contexts, treeSearchTerm)" ng-model="treeSearchTerm" placeholder="{{ 'search_val' | translate }}" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <my-tree class="col-md-12" on-click-callback="setCurrentElement(target, elem)" contexts="contexts" element="currentElement.element" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
         </div>
         <div ng-if="!currentUser.permissions.view_concepts">
             <div ng-include="'layouts/restricted-access.html'"></div>
