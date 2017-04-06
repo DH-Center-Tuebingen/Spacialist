@@ -182,6 +182,46 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     };
 
+    main.filterTree = function(elements, term) {
+        angular.forEach(elements.roots, function(r) {
+            isVisible(elements, r, term.toUpperCase());
+        });
+    };
+
+    function isVisible(elems, id, term) {
+        var noSearchTerm = !term || term.length === 0;
+        var data = elems.data;
+        var children = elems.children;
+        if(noSearchTerm) {
+            data[id].visible = true;
+            data[id].collapsed = true;
+        }
+        else if(filters(data[id], term)) {
+            data[id].visible = true;
+            data[id].collapsed = false;
+        } else {
+            data[id].visible = false;
+            data[id].collapsed = true;
+        }
+        if(children[id]) {
+            for(var i=0; i<children[id].length; i++) {
+                if(isVisible(elems, children[id][i], term)) {
+                    data[id].visible = true;
+                    if(noSearchTerm) {
+                        data[id].collapsed = true;
+                    } else {
+                        data[id].collapsed = false;
+                    }
+                }
+            }
+        }
+        return data[id].visible;
+    }
+
+    function filters(elem, term) {
+        return elem.name.toUpperCase().indexOf(term) > -1;
+    }
+
     /**
      * Stores a single element of the context tree in the database
      * @return: returns a promise which returns the ID of the newly inserted context
