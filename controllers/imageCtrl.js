@@ -1,9 +1,15 @@
-spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', function($scope, imageService, mainService) {
+spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 'snackbarService', function($scope, imageService, mainService, snackbarService) {
     $scope.images = {};
     $scope.images.all = imageService.all;
     $scope.images.linked = imageService.linked;
     $scope.currentElement = mainService.currentElement;
     $scope.upload = imageService.upload;
+    $scope.hasMoreImages = imageService.hasMoreImages;
+    $scope.search = {
+        terms: {
+            tags: []
+        }
+    };
 
     $scope.initImageTab = function() {
         $scope.layerTwo.imageTab.newOpen = false;
@@ -16,6 +22,14 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
             $scope.layerTwo.imageTab.allOpen = true;
             imageService.getAllImages();
         }
+    };
+
+    $scope.addTag = function(img, item) {
+        imageService.addTag(img, item);
+    };
+
+    $scope.removeTag = function(img, item) {
+        imageService.removeTag(img, item);
     };
 
     var linkImageContextMenu = [function() {
@@ -63,16 +77,23 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
     var contextMenuSearch = ['<i class="material-icons md-18">search</i> Nach Kontexten suchen', function ($itemScope, $event, modelValue, text, $li) {
        //TODO implement (open modal with search field or inline)
     }];
+    var deleteImage = [function() {
+       return '<i class="material-icons md-18">delete</i> Bild löschen';
+    }, function ($itemScope, $event, modelValue, text, $li) {
+       imageService.deleteImage($itemScope.img);
+    }];
 
     $scope.imageContextMenu = {
        all: [
            linkImageContextMenu,
            null,
+           deleteImage,
            contextMenuSearch
        ],
        linked: [
            unlinkImageContextMenu,
            null,
+           deleteImage,
            contextMenuSearch
        ]
     };

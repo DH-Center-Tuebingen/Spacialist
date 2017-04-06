@@ -1,22 +1,67 @@
-spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'modalService', 'snackbarService', 'Upload', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, modalService, snackbarService, Upload, $timeout) {
+spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'modalService', 'snackbarService', 'searchService', 'Upload', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, modalService, snackbarService, searchService, Upload, $timeout) {
     var images = {
         all: [],
         linked: [],
         upload: {}
     };
 
+    init();
+
+    images.availableTags = [];
+
     var lastTimeImageChecked = 0;
 
     images.openImageModal = function(img) {
         modalOptions = {};
         // modalOptions.markers = angular.extend({}, scopeService.markers);
-        modalOptions.img = angular.extend({}, img);
+        modalOptions.img = img;
         modalOptions.linkImage = images.linkImage;
         modalOptions.unlinkImage = images.unlinkImage;
+        modalOptions.setImagePropertyEdit = setImagePropertyEdit;
+        modalOptions.storeImagePropertyEdit = storeImagePropertyEdit;
+        modalOptions.cancelImagePropertyEdit = cancelImagePropertyEdit;
         // modalOptions.isEmpty = $scope.isEmpty;
         // modalOptions.modalNav = angular.extend({}, $scope.modalNav);
         modalService.showModal({}, modalOptions);
     };
+
+    function resetEditFields(editArray) {
+        for(var k in editArray) {
+            if(editArray.hasOwnProperty(k)) {
+                if(editArray[k].editMode) {
+                    editArray[k].text = '';
+                    editArray[k].editMode = false;
+                }
+            }
+        }
+    }
+
+    function setImagePropertyEdit(editArray, index, initValue) {
+        editArray[index] = {
+            text: initValue,
+            editMode: true
+        };
+    }
+
+    function storeImagePropertyEdit(editArray, index, img) {
+        var formData = new FormData();
+        formData.append('photo_id', img.id);
+        formData.append('property', index);
+        formData.append('value', editArray[index].text);
+        httpPostFactory('api/image/property/set', formData, function(response) {
+            if(response.error) {
+                cancelImagePropertyEdit(editArray, index);
+                return;
+            }
+            img[index] = editArray[index].text;
+            cancelImagePropertyEdit(editArray, index);
+        });
+    }
+
+    function cancelImagePropertyEdit(editArray, index) {
+        editArray[index].text = '';
+        editArray[index].editMode = false;
+    }
 
     images.getImagesForContext = function(id) {
         if(!id) return;
@@ -27,32 +72,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
 
     images.getLinkedImages = function(id) {
         if(!id) return;
-        httpGetFactory('api/image/getByContext/' + id, function(response) {
-            var oneUpdated = false;
-            var linkedCopy = images.linked.slice();
-            for(var i=0; i<response.images.length; i++) {
-                var newLinked = response.images[i];
-                var alreadyLinked = false;
-                for(var j=0; j<linkedCopy.length; j++) {
-                    var linked = linkedCopy[j];
-                    if(newLinked.id == linked.id) {
-                        if(!angular.equals(newLinked, linked)) {
-                            oneUpdated = true;
-                            images.linked[j] = newLinked;
-                        }
-                        alreadyLinked = true;
-                        break;
-                    }
-                }
-                if(!alreadyLinked) {
-                    oneUpdated = true;
-                    images.linked.push(newLinked);
-                }
-            }
-            if(oneUpdated) {
-                $rootScope.$emit('image:updated:linked');
-            }
-        });
+        images.linked = filterLinkedImages(id);
     };
 
     images.loadImages = function(len, type) {
@@ -60,6 +80,11 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         if(len == src.length) return src;
         var loaded = src.slice(0, len + 10);
         return loaded;
+    };
+
+    images.hasMoreImages = function(len, type) {
+        var src = images[type];
+        return src.length - len;
     };
 
     /**
@@ -127,6 +152,17 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         });
     };
 
+    images.deleteImage = function(img) {
+        httpGetFactory('api/image/delete/' + img.id, function(response) {
+            if(!response.error) {
+                var content = $translate.instant('snackbar.image-deleted.success');
+                snackbarService.addAutocloseSnack(content, 'success');
+                var i = images.all.indexOf(img);
+                if(i > -1) images.all.splice(i, 1);
+            }
+        });
+    };
+
     images.getAllImages = function(forceUpdate) {
         forceUpdate = forceUpdate || false;
         var currentTime = (new Date()).getTime();
@@ -146,6 +182,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
                         if(newImg.id == one.id) {
                             if(!angular.equals(newImg, one)) {
                                 oneUpdated = true;
+                                updateSearchOptions(newImg);
                                 images.all[j] = newImg;
                             }
                             alreadyLinked = true;
@@ -154,6 +191,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
                     }
                     if(!alreadyLinked) {
                         oneUpdated = true;
+                        updateSearchOptions(newImg);
                         images.all.push(newImg);
                     }
                 }
@@ -163,6 +201,97 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
             });
         }
     };
+
+    images.addTag = function(img, tag) {
+        var formData = new FormData();
+        formData.append('photo_id', img.id);
+        formData.append('tag_id', tag.id);
+        httpPostFactory('api/image/tags/add', formData, function(response) {
+            if(response.error) {
+                // TODO remove from img.tags
+                return;
+            }
+        });
+    };
+
+    images.removeTag = function(img, tag) {
+        var formData = new FormData();
+        formData.append('photo_id', img.id);
+        formData.append('tag_id', tag.id);
+        httpPostFactory('api/image/tags/remove', formData, function(response) {
+            if(response.error) {
+                // TODO add back to img.tags
+                return;
+            }
+        });
+    };
+
+    function init() {
+        getAvailableTags();
+    }
+
+    function getAvailableTags() {
+        httpGetFactory('api/image/tags/get', function(response) {
+            if(response.error) {
+                return;
+            }
+            angular.forEach(response.tags, function(tag) {
+                images.availableTags.push(tag);
+                searchService.availableSearchTerms.tags.push(tag);
+            });
+        });
+    }
+
+    function updateSearchOptions(img) {
+        updateTags(img);
+        updateDates(img);
+        updateCameras(img);
+    }
+
+    function updateTags(img) {
+        for(var i=0; i<img.tags.length; i++) {
+            var tag = img.tags[i];
+            var found = false;
+            for(var j=0; j<images.availableTags.length; j++) {
+                var aTag = images.availableTags[j];
+                if(tag.id == aTag.id) {
+                    found = true;
+                    img.tags[i] = images.availableTags[j];
+                }
+            }
+            if(!found) {
+                delete img.tags[i];
+            }
+        }
+    }
+
+    function updateDates(img) {
+        var dateTerms = searchService.availableSearchTerms.dates;
+        var createdDay = searchService.formatUnixDate(img.created*1000);
+        if(dateTerms.indexOf(createdDay) == -1) {
+            dateTerms.push(createdDay);
+            dateTerms.sort();
+        }
+    }
+
+    function updateCameras(img) {
+        var camTerms = searchService.availableSearchTerms.cameras;
+        if(camTerms.indexOf(img.cameraname) == -1) {
+            camTerms.push(img.cameraname);
+            camTerms.sort();
+        }
+    }
+
+    function filterLinkedImages(id) {
+        return images.all.filter(function(img) {
+            for(var i=0; i<img.linked_images.length; i++) {
+                if(img.linked_images[i].context_id == id) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
 
     return images;
 }]);

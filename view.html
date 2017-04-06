@@ -110,14 +110,52 @@
         </div>
         <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" class="padded-content" style="max-height: 100%;">
             <div ng-if="currentUser.permissions.view_photos">
-                <uib-accordion close-others="true">
+                <div class="container col-md-12">
+                    <div class="well">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" ng-model="showTags" ng-disabled="readonlyInput" /> {{ 'tags.show-tags' | translate }}
+                                </label>
+                            </div>
+                            <div class="form-group label-floating">
+                                <label class="control-label" translate="tags.name"></label>
+                                <ui-select multiple ng-disabled="readonlyInput" ng-model="search.terms.tags" close-on-select="false">
+                                    <ui-select-match>{{$item.label}}</ui-select-match>
+                                    <ui-select-choices repeat="choice in availableSearchTerms.tags | filter:$select.search">
+                                        {{choice.label}}
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                            <div class="form-group label-floating">
+                                <label class="control-label" translate="photos.properties.image.created"></label>
+                                <ui-select multiple ng-disabled="readonlyInput" ng-model="search.terms.dates" close-on-select="false">
+                                    <ui-select-match>{{$item}}</ui-select-match>
+                                    <ui-select-choices repeat="choice in availableSearchTerms.dates | filter:$select.search">
+                                        {{choice}}
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                            <div class="form-group label-floating">
+                                <label class="control-label" translate="photos.properties.image.cameraname"></label>
+                                <ui-select multiple ng-disabled="readonlyInput" ng-model="search.terms.cameras" close-on-select="false">
+                                    <ui-select-match>{{$item}}</ui-select-match>
+                                    <ui-select-choices repeat="choice in availableSearchTerms.cameras | filter:$select.search">
+                                        {{choice}}
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <uib-accordion close-others="true" class="col-md-12">
                     <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!currentElement.element">
                         <uib-accordion-heading>
                             <span ng-click="!currentElement.element || updateLinkedImages(layerTwo.imageTab.linkedOpen)">
                                 {{'context-form.tabs.photos.linked'|translate}}
                             </span>
                         </uib-accordion-heading>
-                        <image-list on-scroll-load="loadImages(len, type)" image-data="images.linked" image-type="'linked'" scroll-container="'#addon-container'"></image-list>
+                        <image-list on-scroll-load="loadImages(len, type)" image-data="images.linked" show-tags="showTags" search-terms="search.terms" image-type="'linked'" scroll-container="'#addon-container'"></image-list>
                     </div>
                     <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.newOpen">
                         <uib-accordion-heading>
@@ -153,7 +191,7 @@
                                 {{'context-form.tabs.photos.all'|translate}}
                             </span>
                         </uib-accordion-heading>
-                        <image-list on-scroll-load="loadImages(len, type)" image-data="images.all" image-type="'all'" scroll-container="'#addon-container'"></image-list>
+                        <image-list on-scroll-load="loadImages(len, type)" image-data="images.all" show-tags="showTags" search-terms="search.terms" image-type="'all'" scroll-container="'#addon-container'"></image-list>
                     </div>
                 </uib-accordion>
             </div>

@@ -5,7 +5,7 @@
         </div>
     </div>
     <div class="row" infinite-scroll="tmpData[imageType]=onScrollLoad({len: tmpData[imageType].length, type: imageType})" infinite-scroll-distance="0" infinite-scroll-container="scrollContainer" infinite-scroll-listen-for-event="image:updated:{{imageType}}">
-        <div class="col-sm-6 col-md-4 unlinked-item" context-menu="imageContextMenu[imageType]" ng-repeat="img in tmpData[imageType]">
+        <div class="col-sm-6 col-md-4 unlinked-item" context-menu="imageContextMenu[imageType]" ng-repeat="img in tmpData[imageType] | imageFilter:searchTerms">
             <div class="thumbnail">
                 <a ng-click="openImageModal(img)">
                     <div class="thumb-wrapper">
@@ -15,6 +15,25 @@
                          </div>
                      </div>
                 </a>
+                <div ng-show="showTags">
+                   <ui-select multiple tagging tagging-label="false" ng-model="img.tags" on-select="addTag(img, $item)" on-remove="removeTag(img, $item)" theme="bootstrap" sortable="true" close-on-select="false">
+                       <ui-select-match placeholder="{{ 'tags.add' | translate }}">
+                           {{ $item.label }}
+                       </ui-select-match>
+                       <ui-select-choices repeat="tag in availableTags | filter:$select.search">
+                           {{ tag.label }}
+                       </ui-select-choices>
+                   </ui-select>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4 unlinked-item" ng-if="hasMoreImages(tmpData[imageType].length, imageType) > 0">
+            <div class="thumbnail">
+                <div class="thumb-wrapper centered-full">
+                    <i class="material-icons md-96 md-dark">file_download</i>
+                    <p translate="photos.load-more" translate-values="{ cnt: hasMoreImages(tmpData[imageType].length, imageType) }">
+                    </p>
+                </div>
             </div>
         </div>
     </div>

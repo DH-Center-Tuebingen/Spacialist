@@ -2,6 +2,23 @@ var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'u
 
 $.material.init();
 
+spacialistApp.service('searchService', ['$translate', function($translate) {
+    var search = {};
+
+    search.formatUnixDate = function(ts) {
+        var d = new Date(ts);
+        return d.toLocaleDateString($translate.use());
+    };
+
+    search.availableSearchTerms = {
+        tags: [],
+        dates: [],
+        cameras: []
+    };
+
+    return search;
+}]);
+
 spacialistApp.service('snackbarService', [function() {
     var defaults = {
         autoclose: {
@@ -67,7 +84,7 @@ spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($
         backdrop: true,
         keyboard: true,
         modalFade: true,
-        templateUrl: 'layouts/modal-popup.html',
+        templateUrl: 'layouts/image-properties.html',
         windowClass: 'wide-modal'
     };
     var options = {};
@@ -475,7 +492,7 @@ spacialistApp.directive('myTree', function($parse) {
     };
 });
 
-spacialistApp.directive('imageList', function() {
+spacialistApp.directive('imageList', function(imageService) {
     return {
         restrict: 'E',
         templateUrl: 'includes/image-list.html',
@@ -483,10 +500,13 @@ spacialistApp.directive('imageList', function() {
             onScrollLoad: '&',
             scrollContainer: '=',
             imageData: '=',
-            imageType: '='
+            imageType: '=',
+            showTags: '=',
+            searchTerms: '='
         },
         controller: 'imageCtrl',
         link: function(scope, elements, attrs) {
+            scope.availableTags = imageService.availableTags;
             scope.$root.$on('image:delete:linked', function(event, args) {
                 scope.tmpData.linked = [];
             });
@@ -583,6 +603,38 @@ spacialistApp.directive("number", function() {
                 return isFinite(modelValue);
             };
         }
+    };
+});
+
+spacialistApp.filter('imageFilter', function(searchService) {
+    var foundAll = function(haystack, needle) {
+        if(!needle || needle.length === 0) return true;
+        return needle.every(function(v) {
+            return haystack.indexOf(v) >= 0;
+        });
+    };
+
+    var foundSingle = function(haystack, needle) {
+        if(!haystack || haystack.length === 0) return true;
+        return haystack.indexOf(needle) > -1;
+    };
+
+    var matchesAllFilters = function(item, searchTerms) {
+        if(!foundAll(item.tags, searchTerms.tags)) return false;
+        if(!foundSingle(searchTerms.cameras, item.cameraname)) return false;
+        if(!foundSingle(searchTerms.dates, searchService.formatUnixDate(item.created*1000))) return false;
+        return true;
+    };
+
+    return function(items, searchTerms) {
+        var filtered = [];
+        for(var i=0; i<items.length; i++) {
+            var item = items[i];
+            if(matchesAllFilters(item, searchTerms)) {
+                filtered.push(item);
+            }
+        }
+        return filtered;
     };
 });
 

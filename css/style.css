@@ -90,6 +90,12 @@ textarea {
     resize: vertical;
 }
 
+.inline-edit {
+    border: none;
+    border-bottom: 1px solid gray;
+    font-style: italic;
+}
+
 .inline-list {
     margin-bottom: 0;
     margin-top: 8px;
@@ -477,6 +483,14 @@ p, div {
     text-align: center;
 }
 
+.centered-full {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+}
+
 .contextPrefix {
     color: gray;
 }
@@ -575,6 +589,26 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
 
 .material-icons.md-18 {
     font-size: 18px;
+}
+
+.material-icons.md-96 {
+    font-size: 96px;
+}
+
+.material-icons.md-dark {
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.material-icons.md-dark.md-inactive {
+    color: rgba(0, 0, 0, 0.26);
+}
+
+.material-icons.md-light {
+    color: rgba(255, 255, 255, 1);
+}
+
+.material-icons.md-light.md-inactive {
+    color: rgba(255, 255, 255, 0.3);
 }
 
 .material-icons.placeholder {

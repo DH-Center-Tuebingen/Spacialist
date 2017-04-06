@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, $timeout, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, searchService, $timeout, $translate) {
     var main = {};
     var modalFields;
 
