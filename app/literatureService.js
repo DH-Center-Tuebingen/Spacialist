@@ -189,6 +189,10 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
                  data: { file: file }
             });
             file.upload.then(function(response) {
+                if(response.data.error) {
+                    modalFactory.errorModal(response.data.error);
+                    return;
+                }
                 var entries = response.data.entries;
                 for(var i=0; i<entries.length; i++) {
                     literature.literature.push(entries[i]);
