@@ -189,12 +189,11 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             [-90, 180],
             [90, -180]
         ]);
-        var style = {
-            fillColor: "green",
-            weight: 2,
+        map.style = {
+            fillColor: "#000000",
+            weight: 1,
             opacity: 1,
-            color: 'black',
-            dashArray: '3',
+            color: '#808080',
             fillOpacity: 0.5
         };
         map.map.geojson = {
@@ -203,12 +202,14 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 features: []
             },
             style: function(feature) {
-                var currentStyle = angular.copy(style);
+                var currentStyle = angular.copy(map.style);
                 currentStyle.fillColor = feature.properties.color;
                 return currentStyle;
             },
             pointToLayer: function(feature, latlng) {
-                return L.circleMarker(latlng, style);
+                var m = L.circleMarker(latlng, map.style);
+                m.setRadius(m.getRadius() / 2);
+                return m;
             },
             onEachFeature: function(feature, layer) {
                 if(feature.properties && feature.properties.popupContent) {
@@ -249,18 +250,13 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             position: "bottomright",
             draw: {
                 polyline: {
+                    shapeOptions: map.style
                 },
                 polygon: {
-                    showArea: true,
-                    drawError: {
-                        color: '#b00b00',
-                        timeout: 1000
-                    },
-                    shapeOptions: {
-                        color: 'blue'
-                    }
+                    shapeOptions: map.style
                 },
                 marker: {
+                    shapeOptions: map.style
                 },
                 circle: false,
                 rectangle: false
