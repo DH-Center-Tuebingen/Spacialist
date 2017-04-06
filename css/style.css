@@ -627,4 +627,13 @@ span.btn {
 .ui-select-toggle {
     margin-top: 0 !important;
 }
+/* btn-xs is barely legible at 10px */
+.btn.btn-xs, .btn.btn-sm {
+    font-size: 13px !important;
+}
 /* << MATERIAL DESIGN PATCHES */
+
+/* Leaflet popups have fixed width, and buttons have nowrap, so buttons with longer text cross the popup border. This should fix that */
+.leaflet-popup .btn {
+    white-space: normal !important;
+}
