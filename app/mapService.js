@@ -217,13 +217,14 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                         minWidth: 300,
                         feature: feature
                     });
+                    var name;
                     if(map.geodata.linkedContexts[feature.id]){
                         name = environmentService.contexts.data[map.geodata.linkedContexts[feature.id]].name;
-                        layer.bindTooltip(name);
                     }
                     else{
-                        layer.bindTooltip(feature.properties.name);
+                        name = feature.properties.name;
                     }
+                    layer.bindTooltip(name);
                     layer.on('click', function(){
                         map.map.selectedLayer = layer;
                         layer.openPopup();
