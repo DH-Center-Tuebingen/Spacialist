@@ -129,7 +129,18 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     };
 
     map.setCurrentGeodata = function(gid) {
+        var layer = map.geodata.linkedLayers[gid];
         map.currentGeodata.id = gid;
+        map.currentGeodata.type = layer.feature.geometry.type;
+        map.currentGeodata.color = layer.feature.properties.color;
+        if(map.currentGeodata.type == 'Point') {
+            var latlng = layer.getLatLng();
+            map.currentGeodata.lat = latlng.lat;
+            map.currentGeodata.lng = latlng.lng;
+        } else {
+            map.currentGeodata.lat = undefined;
+            map.currentGeodata.lng = undefined;
+        }
     };
 
     map.unsetCurrentGeodata = function() {
@@ -148,16 +159,29 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         return httpGetPromise.getData('api/context/get/byGeodata/' + featureId);
     };
 
-    map.updateMarker = function(geodata_id, color) {
-        if(typeof geodata_id == 'undefined') return;
-        if(geodata_id <= 0) return;
+    map.updateMarker = function(geodata) {
+        if(typeof geodata.id == 'undefined') return;
+        if(geodata.id <= 0) return;
+        var color = geodata.color;
+        var lat = geodata.lat;
+        var lng = geodata.lng;
         var formData = new FormData();
-        formData.append('id', geodata_id);
+        formData.append('id', geodata.id);
         if(typeof color != 'undefined') formData.append('color', color);
-        httpPostPromise.getData('api/context/set/color', formData).then(
+        if(typeof lat != 'undefined' && typeof lng != 'undefined') {
+            formData.append('lat', lat);
+            formData.append('lng', lng);
+        }
+        httpPostPromise.getData('api/context/set/props', formData).then(
             function(response) {
                 map.map.selectedLayer.feature.properties.color = response.color || '#000000';
                 map.map.selectedLayer.setStyle({fillColor: response.color});
+                if(map.map.selectedLayer.feature.geometry.type == 'Point') {
+                    if(typeof response.lat != 'undefined' && typeof response.lng != 'undefined') {
+                        var latlng = L.latLng(response.lat, response.lng);
+                        map.map.selectedLayer.setLatLng(latlng);
+                    }
+                }
             }
         );
     };
