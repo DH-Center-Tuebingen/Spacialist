@@ -129,7 +129,18 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     };
 
     map.setCurrentGeodata = function(gid) {
+        var layer = map.geodata.linkedLayers[gid];
         map.currentGeodata.id = gid;
+        map.currentGeodata.type = layer.feature.geometry.type;
+        map.currentGeodata.color = layer.feature.properties.color;
+        if(map.currentGeodata.type == 'Point') {
+            var latlng = layer.getLatLng();
+            map.currentGeodata.lat = latlng.lat;
+            map.currentGeodata.lng = latlng.lng;
+        } else {
+            map.currentGeodata.lat = undefined;
+            map.currentGeodata.lng = undefined;
+        }
     };
 
     map.unsetCurrentGeodata = function() {
@@ -148,16 +159,29 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         return httpGetPromise.getData('api/context/get/byGeodata/' + featureId);
     };
 
-    map.updateMarker = function(geodata_id, color) {
-        if(typeof geodata_id == 'undefined') return;
-        if(geodata_id <= 0) return;
+    map.updateMarker = function(geodata) {
+        if(typeof geodata.id == 'undefined') return;
+        if(geodata.id <= 0) return;
+        var color = geodata.color;
+        var lat = geodata.lat;
+        var lng = geodata.lng;
         var formData = new FormData();
-        formData.append('id', geodata_id);
+        formData.append('id', geodata.id);
         if(typeof color != 'undefined') formData.append('color', color);
-        httpPostPromise.getData('api/context/set/color', formData).then(
+        if(typeof lat != 'undefined' && typeof lng != 'undefined') {
+            formData.append('lat', lat);
+            formData.append('lng', lng);
+        }
+        httpPostPromise.getData('api/context/set/props', formData).then(
             function(response) {
                 map.map.selectedLayer.feature.properties.color = response.color || '#000000';
                 map.map.selectedLayer.setStyle({fillColor: response.color});
+                if(map.map.selectedLayer.feature.geometry.type == 'Point') {
+                    if(typeof response.lat != 'undefined' && typeof response.lng != 'undefined') {
+                        var latlng = L.latLng(response.lat, response.lng);
+                        map.map.selectedLayer.setLatLng(latlng);
+                    }
+                }
             }
         );
     };
@@ -189,12 +213,11 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             [-90, 180],
             [90, -180]
         ]);
-        var style = {
-            fillColor: "green",
-            weight: 2,
+        map.style = {
+            fillColor: "#000000",
+            weight: 1,
             opacity: 1,
-            color: 'black',
-            dashArray: '3',
+            color: '#808080',
             fillOpacity: 0.5
         };
         map.map.geojson = {
@@ -203,12 +226,14 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 features: []
             },
             style: function(feature) {
-                var currentStyle = angular.copy(style);
+                var currentStyle = angular.copy(map.style);
                 currentStyle.fillColor = feature.properties.color;
                 return currentStyle;
             },
             pointToLayer: function(feature, latlng) {
-                return L.circleMarker(latlng, style);
+                var m = L.circleMarker(latlng, map.style);
+                m.setRadius(m.getRadius() / 2);
+                return m;
             },
             onEachFeature: function(feature, layer) {
                 if(feature.properties && feature.properties.popupContent) {
@@ -216,13 +241,14 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                         minWidth: 300,
                         feature: feature
                     });
+                    var name;
                     if(map.geodata.linkedContexts[feature.id]){
                         name = environmentService.contexts.data[map.geodata.linkedContexts[feature.id]].name;
-                        layer.bindTooltip(name);
                     }
                     else{
-                        layer.bindTooltip(feature.properties.name);
+                        name = feature.properties.name;
                     }
+                    layer.bindTooltip(name);
                     layer.on('click', function(){
                         map.map.selectedLayer = layer;
                         layer.openPopup();
@@ -249,18 +275,13 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             position: "bottomright",
             draw: {
                 polyline: {
+                    shapeOptions: map.style
                 },
                 polygon: {
-                    showArea: true,
-                    drawError: {
-                        color: '#b00b00',
-                        timeout: 1000
-                    },
-                    shapeOptions: {
-                        color: 'blue'
-                    }
+                    shapeOptions: map.style
                 },
                 marker: {
+                    shapeOptions: map.style
                 },
                 circle: false,
                 rectangle: false

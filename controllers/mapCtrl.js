@@ -29,8 +29,8 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
         mapService.addContextToMarkers(elem);
     };
 
-    $scope.updateMarkerOptions = function(geodata_id, color) {
-        mapService.updateMarker(geodata_id, color);
+    $scope.updateMarkerOptions = function(geodata) {
+        mapService.updateMarker(geodata);
     };
 
     /**

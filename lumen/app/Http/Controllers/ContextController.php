@@ -840,7 +840,7 @@ class ContextController extends Controller {
         return response()->json(['context' => $context]);
     }
 
-    public function setColor(Request $request) {
+    public function setProperties(Request $request) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
@@ -850,13 +850,22 @@ class ContextController extends Controller {
         $id = $request->get('id');
         $upd = [];
 
-
         $geodata = Geodata::find($id);
-        $geodata->color = $request->get('color');
+        if($request->has('color')) {
+            $geodata->color = $request->get('color');
+        }
+        if($request->has('lat') && $request->has('lng') && $geodata->geom instanceof Point) {
+            $geodata->geom = new Point($request->get('lat'), $request->get('lng'));
+        }
         $geodata->save();
-        return response()->json([
+        $ret = [
             'color' => $geodata->color
-        ]);
+        ];
+        if($geodata->geom instanceof Point) {
+            $ret['lat'] = $geodata->geom->getLat();
+            $ret['lng'] = $geodata->geom->getLng();
+        }
+        return response()->json($ret);
     }
 
     public function setPossibility(Request $request) {

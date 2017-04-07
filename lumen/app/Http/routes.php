@@ -68,7 +68,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('image/tags/remove', 'ImageController@removeTag');
     $app->post('context/add/geodata', 'ContextController@addGeodata');
     $app->post('context/set', 'ContextController@set');
-    $app->post('context/set/color', 'ContextController@setColor');
+    $app->post('context/set/props', 'ContextController@setProperties');
     $app->post('sources/add', 'SourceController@add');
     $app->post('context/set/possibility', 'ContextController@setPossibility');
     $app->post('context/wktToGeojson', 'ContextController@wktToGeojson');

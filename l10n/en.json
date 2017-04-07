@@ -142,6 +142,8 @@
     "map-marker.options.label": "Marker Options",
     "map-marker.options.color": "Color",
     "map-marker.options.icon": "Icon",
+    "map-marker.options.lat": "Latitude",
+    "map-marker.options.lng": "Longitude",
     "map-marker.actions.context-link": "Link With {{ context }}",
     "map-marker.actions.context-unlink": "Unlink From {{ context }}",
     "map-marker.save": "Save",
