@@ -49,7 +49,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 modalFactory.errorModal(response.error);
                 return;
             }
+            // element has not been moved
+            if(((!hasParent && !hadParent) || parent == oldParent) && index == oldIndex) {
+                return;
+            }
             var oldIndex = main.contexts.data[id].rank - 1;
+            var startIndex = oldIndex;
+            if(((!hasParent && !hadParent) || parent == oldParent) && index < oldIndex) {
+                startIndex++;
+            }
             var children;
             var oldChildren;
             if(hasParent) {
@@ -63,7 +71,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 oldChildren = main.contexts.roots;
             }
             var i;
-            for(i=oldIndex; i<oldChildren.length; i++) {
+            for(i=startIndex; i<oldChildren.length; i++) {
                 main.contexts.data[oldChildren[i]].rank--;
             }
             main.contexts.data[id].rank = rank;
