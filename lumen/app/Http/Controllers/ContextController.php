@@ -879,7 +879,24 @@ class ContextController extends Controller {
         $rank = $request->get('rank');
         $hasParent = $request->has('parent_id');
         $context = Context::find($id);
+        $oldRank = $context->rank;
         $context->rank = $rank;
+
+        $oldContexts;
+        if($context->root_context_id !== null) {
+            $oldContexts = Context::where('root_context_id', '=', $context->root_context_id)
+                ->where('rank', '>', $oldRank)
+                ->get();
+        } else {
+            $oldContexts = Context::whereNull('root_context_id')
+                ->where('rank', '>', $oldRank)
+                ->get();
+        }
+        foreach($oldContexts as $oc) {
+            $oc->rank--;
+            $oc->save();
+        }
+
         $contexts;
         if($hasParent) {
             $parent = $request->get('parent_id');
