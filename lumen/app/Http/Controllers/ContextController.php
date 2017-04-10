@@ -868,6 +868,39 @@ class ContextController extends Controller {
         return response()->json($ret);
     }
 
+    public function move(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $id = $request->get('id');
+        $rank = $request->get('rank');
+        $hasParent = $request->has('parent_id');
+        $context = Context::find($id);
+        $context->rank = $rank;
+        $contexts;
+        if($hasParent) {
+            $parent = $request->get('parent_id');
+            $context->root_context_id = $parent;
+            $contexts = Context::where('root_context_id', '=', $parent)
+                ->where('rank', '>=', $rank)
+                ->get();
+        } else {
+            $context->root_context_id = null;
+            $contexts = Context::whereNull('root_context_id')
+                ->where('rank', '>=', $rank)
+                ->get();
+        }
+        foreach($contexts as $c) {
+            $c->rank++;
+            $c->save();
+        }
+        $context->save();
+
+    }
+
     public function setPossibility(Request $request) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
