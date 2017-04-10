@@ -12,7 +12,10 @@ spacialistApp.service('environmentService', ['httpGetFactory', function(httpGetF
         getContextList();
     }
 
-
+    env.getParentId = function(id) {
+        if(!env.contexts.data[id]) return null;
+        return env.contexts.data[id].root_context_id;
+    };
 
     function getContextList() {
         httpGetFactory('api/context/getRecursive', function(response) {

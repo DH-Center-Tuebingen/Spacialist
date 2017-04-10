@@ -31,12 +31,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
 
     main.treeCallbacks.dropped = function(event) {
         var hasParent = event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue;
+        var oldParent = environmentService.getParentId(id);
+        var hadParent = oldParent !== null;
         var id = event.source.nodeScope.$modelValue;
-        var index = event.dest.index + 1;
+        var index = event.dest.index;
+        var rank = index + 1;
         var parent;
         var formData = new FormData();
         formData.append('id', id);
-        formData.append('rank', index);
+        formData.append('rank', rank);
         if(hasParent) {
             parent = event.dest.nodesScope.$nodeScope.$modelValue;
             formData.append('parent_id', parent);
@@ -46,15 +49,25 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 modalFactory.errorModal(response.error);
                 return;
             }
+            var oldIndex = main.contexts.data[id].rank - 1;
             var children;
+            var oldChildren;
             if(hasParent) {
                 children = main.contexts.children[parent];
             } else {
                 children = main.contexts.roots;
             }
-            children.splice(index, 0, id);
-            main.contexts.data[id].rank = index;
-            for(var i=index+1; i<children.length; i++) {
+            if(hadParent) {
+                oldChildren = main.contexts.children[oldParent];
+            } else {
+                oldChildren = main.contexts.roots;
+            }
+            var i;
+            for(i=oldIndex; i<oldChildren.length; i++) {
+                main.contexts.data[oldChildren[i]].rank--;
+            }
+            main.contexts.data[id].rank = rank;
+            for(i=index+1; i<children.length; i++) {
                 main.contexts.data[children[i]].rank++;
             }
         });
