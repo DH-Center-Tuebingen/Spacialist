@@ -13,6 +13,10 @@
     text-align: right;
 }
 
+li .angular-ui-tree-placeholder {
+    background-color: rgba(0, 50, 120, 0.25);
+}
+
 .activeLang > span.f16 {
     filter: grayscale(0.75);
 }

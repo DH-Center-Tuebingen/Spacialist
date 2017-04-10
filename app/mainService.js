@@ -15,6 +15,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.artifacts = [];
     main.artifactReferences = {};
     main.dropdownOptions = {};
+    main.treeCallbacks = {};
     main.dimensionUnits = [
         'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
     ];
@@ -27,6 +28,40 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     // $scope.date = {
     //     opened: false
     // };
+
+    main.treeCallbacks.dropped = function(event) {
+        var hasParent = event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue;
+        var id = event.source.nodeScope.$modelValue;
+        var index = event.dest.index + 1;
+        var parent;
+        var formData = new FormData();
+        formData.append('id', id);
+        formData.append('rank', index);
+        if(hasParent) {
+            parent = event.dest.nodesScope.$nodeScope.$modelValue;
+            formData.append('parent_id', parent);
+        }
+        httpPostFactory('api/context/move', formData, function(response) {
+            if(response.error) {
+                modalFactory.errorModal(response.error);
+                return;
+            }
+            var children;
+            if(hasParent) {
+                children = main.contexts.children[parent];
+            } else {
+                children = main.contexts.roots;
+            }
+            children.splice(index, 0, id);
+            main.contexts.data[id].rank = index;
+            for(var i=index+1; i<children.length; i++) {
+                main.contexts.data[children[i]].rank++;
+            }
+        });
+    };
+    main.treeCallbacks.toggle = function(collapsed, sourceNodeScope) {
+        main.contexts.data[sourceNodeScope.$modelValue].collapsed = collapsed;
+    };
 
     init();
 

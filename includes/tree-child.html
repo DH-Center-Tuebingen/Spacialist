@@ -1,6 +1,6 @@
 <div ui-tree-handle style="display: table;" ng-show="contexts.data[id].visible">
     <div style="display: table-cell;">
-        <a ng-click="contexts.data[id].collapsed = !contexts.data[id].collapsed" ng-if="contexts.children[id] && contexts.children[id].length > 0" class="expandable-toggle">
+        <a ng-click="toggle(this)" ng-if="contexts.children[id] && contexts.children[id].length > 0" class="expandable-toggle">
             <i class="material-icons" aria-hidden="true">{{ contexts.data[id].collapsed ? 'chevron_right' : 'expand_more' }}
             </i>
         </a>
@@ -14,6 +14,6 @@
     </span>
 </div>
 <ul ui-tree-nodes="" ng-model="contexts.children[id]" ng-if="!contexts.data[id].collapsed">
-    <li ng-repeat="id in contexts.children[id]" ng-show="contexts.data[id].visible" data-collapsed="contexts.data[id].collapsed" ng-include="'includes/tree-child.html'" ui-tree-node context-menu="setContextMenu">
+    <li ng-repeat="id in contexts.children[id]" data-collapsed="contexts.data[id].collapsed" ng-show="contexts.data[id].visible" data-expand-on-hover="500" ng-include="'includes/tree-child.html'" ui-tree-node context-menu="setContextMenu">
     </li>
 </ul>
