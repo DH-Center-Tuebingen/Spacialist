@@ -45,7 +45,6 @@
     "satellizer": "^0.15.5",
     "angular-ui-router": "^0.3.2",
     "bootstrap-material-design": "^v0.5.10",
-    "material-design-icons": "^3.0.1",
     "snackbarjs": "^1.1.0"
   },
   "resolutions": {
