@@ -327,8 +327,9 @@ class ImageController extends Controller
             ], 403);
         }
         $photo = Photo::find($id);
-        $url = 'images/' . $photo->filename;
-        Storage::delete($url);
+        $pathPrefix = 'images/';
+        Storage::delete($pathPrefix . $photo->name);
+        Storage::delete($pathPrefix . $photo->thumb);
         $photo->delete();
     }
 
