@@ -95,6 +95,12 @@ textarea {
     resize: vertical;
 }
 
+.form-group {
+    margin: 0 0 0 0 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 .inline-edit {
     border: none;
     border-bottom: 1px solid gray;
