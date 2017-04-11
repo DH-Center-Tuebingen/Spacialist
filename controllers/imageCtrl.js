@@ -1,4 +1,4 @@
-spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 'snackbarService', function($scope, imageService, mainService, snackbarService) {
+spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 'snackbarService', '$translate', function($scope, imageService, mainService, snackbarService, $translate) {
     $scope.images = {};
     $scope.images.all = imageService.all;
     $scope.images.linked = imageService.linked;
@@ -32,71 +32,52 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
         imageService.removeTag(img, item);
     };
 
-    var linkImageContextMenu = [function() {
-       var dflt = '<i class="material-icons md-18">add_circle_outline</i> Mit aktuellem Kontext verbinden';
-       //get element by dom, because $scope seems to be the isolated template (image-list.html) scope
-       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
-       if(tmpScope) {
-           var currentElement = tmpScope.element;
-           dflt += ' <i style="opacity: 0.5;">' + currentElement.name + '</i>';
-       }
-       return dflt;
-    }, function ($itemScope, $event, modelValue, text, $li) {
-       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
-       if(!tmpScope) return;
-       var currentElement = tmpScope.element;
-       var imgId = $itemScope.img.id;
-       var contextId = currentElement.id;
-       imageService.linkImage(imgId, contextId);
+    var linkImageContextMenu = [function($itemScope) {
+        var img = $itemScope.img;
+        var content;
+        for(var i=0; i<img.linked_images.length; i++) {
+            if(img.linked_images[i].context_id == mainService.currentElement.element.id) {
+                content = $translate.instant('photo.unlink-from', { name: mainService.currentElement.element.name });
+                break;
+            }
+        }
+        if(!content) {
+            content = $translate.instant('photo.link-to', { name: mainService.currentElement.element.name });
+        }
+        return '<i class="material-icons md-18">add_circle_outline</i> ' + content;
+    }, function ($itemScope) {
+        var img = $itemScope.img;
+        var imgId = img.id;
+        var contextId = mainService.currentElement.element.id;
+        for(var i=0; i<img.linked_images.length; i++) {
+           if(img.linked_images[i].context_id == mainService.currentElement.element.id) {
+               imageService.unlinkImage(imgId, contextId);
+               return;
+           }
+        }
+        imageService.linkImage(imgId, contextId);
     }, function() {
-       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
-       if(!tmpScope) return false;
-       return typeof tmpScope.element != 'undefined';
+        return mainService.currentElement.element.id > 0;
     }];
-    var unlinkImageContextMenu = [function() {
-       var dflt = '<i class="material-icons md-18">remove_circle_outline</i> Von aktuellem Kontext lösen';
-       //get element by dom, because $scope seems to be the isolated template (image-list.html) scope
-       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
-       if(tmpScope) {
-           var currentElement = tmpScope.element;
-           dflt += ' <i style="opacity: 0.5;">' + currentElement.name + '</i>';
-       }
-       return dflt;
+    var contextMenuSearch = [function() {
+        var content = $translate.instant('photo.context-search');
+        return '<i class="material-icons md-18">search</i> ' + content;
     }, function ($itemScope, $event, modelValue, text, $li) {
-       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
-       if(!tmpScope) return;
-       var currentElement = tmpScope.element;
-       var imgId = $itemScope.img.id;
-       var contextId = currentElement.id;
-       imageService.unlinkImage(imgId, contextId);
-    }, function() {
-       var tmpScope =  angular.element(document.getElementsByClassName('selected-leaf-child')[0]).scope();
-       if(!tmpScope) return false;
-       return typeof tmpScope.element != 'undefined';
-    }];
-    var contextMenuSearch = ['<i class="material-icons md-18">search</i> Nach Kontexten suchen', function ($itemScope, $event, modelValue, text, $li) {
        //TODO implement (open modal with search field or inline)
     }];
-    var deleteImage = [function() {
-       return '<i class="material-icons md-18">delete</i> Bild löschen';
+    var deleteImage = [function($itemScope) {
+        var content = $translate.instant('photo.delete', { name: $itemScope.img.filename });
+       return '<i class="material-icons md-18">delete</i> ' + content;
     }, function ($itemScope, $event, modelValue, text, $li) {
        imageService.deleteImage($itemScope.img);
     }];
 
-    $scope.imageContextMenu = {
-       all: [
-           linkImageContextMenu,
-           null,
-           deleteImage,
-           contextMenuSearch
-       ],
-       linked: [
-           unlinkImageContextMenu,
-           null,
-           deleteImage,
-           contextMenuSearch
-       ]
-    };
+    $scope.imageContextMenu = [
+        linkImageContextMenu,
+        null,
+        deleteImage,
+        contextMenuSearch
+    ];
 
     /**
      * Opens a modal for a given image `img`. This modal displays a zoomable image container and other relevant information of the image
