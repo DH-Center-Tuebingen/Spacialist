@@ -41,7 +41,7 @@ Beside these packages we use a couple of packages you have to install on your ow
     ```bash
     sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring php-gd ufraw memcached python3 python-pip python-rdflib python-psycopg2 phpunit nodejs npm
     ```
-    
+
 2. Clone This Repository
 
     ```bash
@@ -75,7 +75,7 @@ One solution is to setup a proxy on the same machine and re-route all requests f
     ```bash
     sudo a2enmod proxy proxy_http rewrite
     ```
-    
+
 2. Add a new entry to your hosts file, because your proxy needs a (imaginary) domain.
 
     ```bash
@@ -83,21 +83,21 @@ One solution is to setup a proxy on the same machine and re-route all requests f
     # Add an entry to "redirect" a domain to your local machine (localhost)
     127.0.0.1 spacialist-lumen.tld # or anything you want
     ```
-    
+
 3. Add a new vHost file to your apache
 
     ```bash
     cd /etc/apache2/sites-available
     sudo nano spacialist-lumen.conf
     ```
-     
+
     Paste the following snippet into the file:
     ```apache
     <VirtualHost *:80>
       ServerName spacialist-lumen.tld
       ServerAdmin webmaster@localhost
       DocumentRoot /var/www/html/Spacialist/lumen/public
-    
+
       DirectoryIndex index.php
 
       <Directory "/var/www/html/Spacialist/lumen/public">
@@ -106,14 +106,14 @@ One solution is to setup a proxy on the same machine and re-route all requests f
       </Directory>
     </VirtualHost>
     ```
-    
+
 4. Add the proxy route to your default vHost file (e.g. `/etc/apache2/sites-available/000-default.conf`)
 
     ```apache
     ProxyPass "/Spacialist/api" "http://spacialist-lumen.tld"
     ProxyPassReverse "/Spacialist/api" "http://spacialist-lumen.tld"
     ```
-    
+
 5. Enable the new vHost file and restart the webserver
 
     ```bash
@@ -122,8 +122,8 @@ One solution is to setup a proxy on the same machine and re-route all requests f
     ```
 
 ### Configure Lumen
-Lumen should now work, but to test it you need to create a `.env` file which stores the Lumen configuration. 
-Inside the `lumen`-subfolder in the Spacialist installation, create the `.env` file: 
+Lumen should now work, but to test it you need to create a `.env` file which stores the Lumen configuration.
+Inside the `lumen`-subfolder in the Spacialist installation, create the `.env` file:
 ```bash
 cd /var/www/html/Spacialist/lumen
 sudo nano .env
@@ -163,6 +163,54 @@ Example:
 Lumen (5.3.2) (Laravel Components 5.3.*)
 ```
 
+#### External storage
+Lumen supports different filesystems. Some of the most popular adapters:
+- AWS S3
+- Dropbox
+- Rackspace
+- SFTP
+- WebDAV
+
+To enable one of these adapters you need to add the driver to your `composer.json`. For a list of available adapters, see [here](https://github.com/thephpleague/flysystem). To use one of the drivers add it to the `config => filesystems => disks` array in `bootstrap/app.php`. The `local` driver is already configured and set as default. To switch to another default adapter simply add the configuration to the `disks` array and set the `default` to the key of your added driver.
+
+For further informations regarding the cotent of `config => filesystems => disks` see these documentations:
+- [Laravel Filesystem](https://laravel.com/docs/5.4/filesystem)
+- [Laravel Sample Config](https://github.com/laravel/laravel/blob/master/config/filesystems.php)
+- [Flysystem Github Page](https://github.com/thephpleague/flysystem)
+- [Flysystem Laravel Integration](https://github.com/GrahamCampbell/Laravel-Flysystem)
+
+##### Example:
+```php
+// bootstrap/app.php
+<?php
+....
+config([
+    "filesystems" => [
+        'default' => 'ftp',
+        'disks' => [
+            'local' => [
+                'driver' => 'local',
+                'root' => storage_path('app'),
+            ],
+            'ftp' => [
+                'driver'   => 'ftp',
+                'host'     => 'ftp.example.com',
+                'username' => 'your-username',
+                'password' => 'your-password',
+                // Optional FTP Settings...
+                // 'port'     => 21,
+                // 'root'     => '',
+                // 'passive'  => true,
+                // 'ssl'      => true,
+                // 'timeout'  => 30,
+            ]
+        ],
+    ],
+]);
+....
+?>
+```
+
 ### Optional Lumen Installation
 Spacialist ships with Lumen preinstalled. If you ever have or want to install it on your own, please follow these instructions.
 
@@ -173,7 +221,7 @@ Spacialist ships with Lumen preinstalled. If you ever have or want to install it
     ```bash
     composer global require "laravel/lumen-installer"
     ```
-    
+
 2. Change directory to the desired installation path (e.g. `/var/www/html/`)
 3. Run `lumen new lumen` (you can replace the second "lumen" with any name you want. This is the folder name in which lumen will be installed). If the command `lumen` is not found, you can add it to your `PATH` or use the absolute path of the executable
     1. Change directory to `/usr/local/bin`
