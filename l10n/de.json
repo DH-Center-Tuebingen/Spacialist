@@ -191,7 +191,7 @@
     "field-types.dimension.height-placeholder": "H",
     "field-types.dimension.depth-placeholder": "T",
     "evidence.heading": "Weiterführende Information",
-    "evidence.certainty.heading": "Konfidenz in die Wertzuweisung",
+    "evidence.certainty.heading": "Sicherheit der Angabe",
     "evidence.certainty.comment": "Kommentar",
     "evidence.certainty.save": "Speichern",
     "evidence.certainty.save+close": "Speichern und Schließen",
