@@ -459,8 +459,11 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             } else if(dType == 'epoch') {
                 if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
             } else if(dType == 'geography') {
-                console.log(value.val);
                 parsedData[index] = value.val;
+            } else if(dType == 'integer' || dType == 'percentage') {
+                parsedData[index] = parseInt(val);
+            } else if(dType == 'double') {
+                parsedData[index] = parseFloat(val);
             } else {
                 parsedData[index] = val;
             }
