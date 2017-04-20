@@ -426,7 +426,7 @@ class ContextController extends Controller {
         }
 
 
-        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type as typeid', 'thesaurus_url as typename', DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as typelabel"))->orderBy('name')->get();
+        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type as typeid', 'thesaurus_url as typename', DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as typelabel"))->orderBy('rank')->get();
 
         $roots = array();
         $contexts = array();
@@ -729,11 +729,10 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $toDuplicate = DB::table('contexts')
-            ->where('id', $id)
-            ->first();
-        unset($toDuplicate->id);
-        unset($toDuplicate->geodata_id);
+        $toDuplicate = Context::find($id);
+        $newDuplicate = $toDuplicate->replicate([
+            'geodata_id'
+        ]);
         $dupCounter = 0;
         do {
             $dupCounter++;
@@ -741,21 +740,31 @@ class ContextController extends Controller {
                 ->where('name', '=', $toDuplicate->name . " ($dupCounter)")
                 ->first();
         } while($sameName != null);
-        $toDuplicate->name .= " ($dupCounter)";
-        $cid = DB::table('contexts')
-            ->insertGetId(get_object_vars($toDuplicate));
-        $toDuplicate->id = $cid;
-        $toDuplicateValues = DB::table('attribute_values')
-            ->where('context_id', $id)
+        $newDuplicate->name .= " ($dupCounter)";
+        $siblings;
+        if($toDuplicate->root_context_id === null) {
+            $siblings = Context::whereNull('root_context_id')
+                ->where('rank', '>', $toDuplicate->rank)
+                ->get();
+        } else {
+            $siblings = Context::where('root_context_id', '=', $toDuplicate->root_context_id)
+                ->where('rank', '>', $toDuplicate->rank)
+                ->get();
+        }
+        foreach($siblings as $s) {
+            $s->rank++;
+            $s->save();
+        }
+        $newDuplicate->rank = $toDuplicate->rank + 1;
+        $newDuplicate->save();
+        $toDuplicateValues = AttributeValue::where('context_id', $id)
             ->get();
         foreach($toDuplicateValues as $value) {
-            unset($value->id);
-            $value->context_id = $cid;
-            DB::table('attribute_values')
-                ->insertGetId(get_object_vars($value));
+            $newValue = $value->replicate();
+            $newValue->context_id = $newDuplicate->id;
+            $newValue->save();
         }
-        $toDuplicate->data = $this->getData($cid);
-        return response()->json(['obj' => $toDuplicate]);
+        return response()->json(['obj' => $newDuplicate]);
     }
 
     public function getArtifacts() {
@@ -825,6 +834,13 @@ class ContextController extends Controller {
             $context = Context::find($id);
         } else {
             $context = new Context();
+            $rank;
+            if($request->has('root_cid')) {
+                $rank = Context::where('root_context_id', '=', $request->get('root_cid'))->max('rank') + 1;
+            } else {
+                $rank = Context::whereNull('root_context_id')->max('rank') + 1;
+            }
+            $context->rank = $rank;
         }
         if($request->has('name')) $context->name = $request->get('name');
         if($request->has('context_type_id')) $context->context_type_id = $request->get('context_type_id');
@@ -866,6 +882,56 @@ class ContextController extends Controller {
             $ret['lng'] = $geodata->geom->getLng();
         }
         return response()->json($ret);
+    }
+
+    public function move(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $id = $request->get('id');
+        $rank = $request->get('rank');
+        $hasParent = $request->has('parent_id');
+        $context = Context::find($id);
+        $oldRank = $context->rank;
+        $context->rank = $rank;
+
+        $oldContexts;
+        if($context->root_context_id !== null) {
+            $oldContexts = Context::where('root_context_id', '=', $context->root_context_id)
+                ->where('rank', '>', $oldRank)
+                ->get();
+        } else {
+            $oldContexts = Context::whereNull('root_context_id')
+                ->where('rank', '>', $oldRank)
+                ->get();
+        }
+        foreach($oldContexts as $oc) {
+            $oc->rank--;
+            $oc->save();
+        }
+
+        $contexts;
+        if($hasParent) {
+            $parent = $request->get('parent_id');
+            $context->root_context_id = $parent;
+            $contexts = Context::where('root_context_id', '=', $parent)
+                ->where('rank', '>=', $rank)
+                ->get();
+        } else {
+            $context->root_context_id = null;
+            $contexts = Context::whereNull('root_context_id')
+                ->where('rank', '>=', $rank)
+                ->get();
+        }
+        foreach($contexts as $c) {
+            $c->rank++;
+            $c->save();
+        }
+        $context->save();
+
     }
 
     public function setPossibility(Request $request) {
@@ -919,34 +985,25 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        DB::select("
-            with recursive deletes as
-            (
-                select id
-                from contexts
-                where id = $id
-                union all
-                select c.id
-                from contexts as c
-                inner join deletes p on c.root_context_id = p.id
-            )
-            delete from attribute_values where context_id in (select id from deletes)
-        ");
-        DB::select("
-            with recursive deletes as
-            (
-                select id
-                from contexts
-                where id = $id
-                union all
-                select c.id
-                from contexts as c
-                inner join deletes p on c.root_context_id = p.id
-            )
-            delete from contexts where id in (select id from deletes)
-        ");
 
-        return response()->json(array("id"=>$id));
+        $context = Context::find($id);
+        $siblings;
+        if($context->root_context_id === null) {
+            $siblings = Context::whereNull('root_context_id')
+                ->where('rank', '>', $context->rank)
+                ->get();
+        } else {
+            $siblings = Context::where('root_context_id', '=', $context->root_context_id)
+                ->where('rank', '>', $context->rank)
+                ->get();
+        }
+        foreach($siblings as $s) {
+            $s->rank--;
+            $s->save();
+        }
+        $context->delete();
+
+        return response()->json();
     }
 
     public function updateOrInsert($request, $cid, $isUpdate, $user) {

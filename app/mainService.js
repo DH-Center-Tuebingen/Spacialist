@@ -15,6 +15,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.artifacts = [];
     main.artifactReferences = {};
     main.dropdownOptions = {};
+    main.treeCallbacks = {};
     main.dimensionUnits = [
         'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
     ];
@@ -27,6 +28,61 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     // $scope.date = {
     //     opened: false
     // };
+
+    main.treeCallbacks.dropped = function(event) {
+        var hasParent = event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue;
+        var oldParent = environmentService.getParentId(id);
+        var hadParent = oldParent !== null;
+        var id = event.source.nodeScope.$modelValue;
+        var index = event.dest.index;
+        var rank = index + 1;
+        var parent;
+        var formData = new FormData();
+        formData.append('id', id);
+        formData.append('rank', rank);
+        if(hasParent) {
+            parent = event.dest.nodesScope.$nodeScope.$modelValue;
+            formData.append('parent_id', parent);
+        }
+        httpPostFactory('api/context/move', formData, function(response) {
+            if(response.error) {
+                modalFactory.errorModal(response.error);
+                return;
+            }
+            // element has not been moved
+            if(((!hasParent && !hadParent) || parent == oldParent) && index == oldIndex) {
+                return;
+            }
+            var oldIndex = main.contexts.data[id].rank - 1;
+            var startIndex = oldIndex;
+            if(((!hasParent && !hadParent) || parent == oldParent) && index < oldIndex) {
+                startIndex++;
+            }
+            var children;
+            var oldChildren;
+            if(hasParent) {
+                children = main.contexts.children[parent];
+            } else {
+                children = main.contexts.roots;
+            }
+            if(hadParent) {
+                oldChildren = main.contexts.children[oldParent];
+            } else {
+                oldChildren = main.contexts.roots;
+            }
+            var i;
+            for(i=startIndex; i<oldChildren.length; i++) {
+                main.contexts.data[oldChildren[i]].rank--;
+            }
+            main.contexts.data[id].rank = rank;
+            for(i=index+1; i<children.length; i++) {
+                main.contexts.data[children[i]].rank++;
+            }
+        });
+    };
+    main.treeCallbacks.toggle = function(collapsed, sourceNodeScope) {
+        main.contexts.data[sourceNodeScope.$modelValue].collapsed = collapsed;
+    };
 
     init();
 
@@ -117,15 +173,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 id: copy.id,
                 name: copy.name,
                 context_type_id: copy.context_type_id,
-                root_cid: copy.root_cid,
+                root_context_id: copy.root_context_id,
+                rank: copy.rank,
                 typeid: copy.typeid,
                 typename: copy.typename,
                 typelabel: copy.typelabel,
-                color: copy.color,
-                lat: copy.lat,
-                lng: copy.lng,
-                data: copy.data,
-                position: copy.position
+                data: [],
+                lasteditor: copy.lasteditor,
+                updated_at: copy.updated_at,
+                created_at: copy.created_at
             };
             main.addContextToTree(elem, parent);
             main.setCurrentElement(elem, main.currentElement);
@@ -276,7 +332,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     function deleteElement(elem, onSuccess) {
-        console.log("Removing element " + elem.name + " with ID " + elem.id);
         httpGetFactory('api/context/delete/' + elem.id, function(callback) {
             onSuccess();
         });
@@ -428,17 +483,21 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
 
     function deleteContext(id) {
         rootId = main.contexts.data[id].root_context_id;
+        var index;
+        var children;
         if(rootId && rootId > 0) {
             index = main.contexts.children[rootId].indexOf(id);
-            if(index && index > 0){
-                main.contexts.children[rootId].splice(index, 1);
-            }
+            children = main.contexts.children[rootId];
         }
         else {
             index = main.contexts.roots.indexOf(id);
-            if(index && index > 0){
-                main.contexts.roots.splice(index, 1);
-            }
+            children = main.contexts.roots;
+        }
+        if(index > -1) {
+            children.splice(index, 1);
+        }
+        for(var i=index; i<children.length; i++) {
+            main.contexts.data[children[i]].rank--;
         }
         delete main.contexts.data[id];
     }
@@ -459,20 +518,27 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     */
     main.addContextToTree = function(elem, parent) {
         // insert the context into the context list
+        elem.collapsed = true;
+        elem.visible = true;
         main.contexts.data[elem.id] = elem;
 
+        var children;
         // insert the context into the tree
         if(parent && parent.id && parent.id > 0) { // elem is no root context
             if(!main.contexts.children[parent.id]) { // parent was leaf before, create children list
                 main.contexts.children[parent.id] = [];
             }
-            main.contexts.children[parent.id].push(elem.id);
+            children = main.contexts.children[parent.id];
         }
         else { // elem is root context
-            main.contexts.roots.push(elem.id);
+            children = main.contexts.roots;
         }
-
-        main.setCurrentElement(elem, main.currentElement);
+        var index = elem.rank - 1; // rank is 1-n, index 0-(n-1)
+        // insert elem at index and update other indices
+        children.splice(index, 0, elem.id);
+        for(var i=index+1; i<children.length; i++) {
+            children[i].rank++;
+        }
     };
 
 
@@ -732,6 +798,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     name: name,
                     context_type_id: type.context_type_id,
                     root_context_id: parent.id,
+                    rank: newContext.rank,
                     typeid: type.type,
                     typename: type.index,
                     typelabel: type.title,
@@ -740,8 +807,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     updated_at: newContext.updated_at,
                     created_at: newContext.created_at
                 };
-                console.log(parent);
                 main.addContextToTree(elem, parent);
+                main.setCurrentElement(elem, main.currentElement);
             });
         });
     };
