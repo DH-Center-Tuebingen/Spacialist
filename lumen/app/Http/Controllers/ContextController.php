@@ -406,6 +406,14 @@ class ContextController extends Controller {
                 [
                     'datatype' => 'geography',
                     'description' => 'attribute.geography.desc'
+                ],
+                [
+                    'datatype' => 'integer',
+                    'description' => 'attribute.integer.desc'
+                ],
+                [
+                    'datatype' => 'percentage',
+                    'description' => 'attribute.percentage.desc'
                 ]
             ]
         ]);
