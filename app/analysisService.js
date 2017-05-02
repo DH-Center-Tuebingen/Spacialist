@@ -19,6 +19,7 @@ spacialistApp.service('analysisService', ['httpGetFactory', function(httpGetFact
                 analysis.activeAnalysis[k] = entry[k];
             }
         }
+        analysis.activeAnalysis.url = analysis.activeAnalysis.url + '&ts=' + Date.now();
         analysis.activeAnalysis.isActive = true;
     };
 
