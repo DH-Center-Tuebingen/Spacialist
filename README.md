@@ -7,6 +7,15 @@ Spacialist will be a customizable Web-based platform for collecting, managing, a
 ## Installation
 Installation procedures and system requirements are described [here](INSTALL.md).
 
+## Screenshots
+
+For all screenshots have a look at the [screenshot folder][scr_folder]
+
+![scr_start]
+
 ## Acknowledgments
 
 Development of Spacialist is co-funded by the Ministry of Science, Research and the Arts Baden-Württemberg in the "E-Science" funding programme.
+
+[scr_start]: screenshots/start.png "Spacialist Start View"
+[scr_folder]: screenshots/
