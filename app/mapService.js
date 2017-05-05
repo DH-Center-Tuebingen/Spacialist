@@ -298,7 +298,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         };
 
         httpGetFactory('api/overlay/get/all', function(response) {
-            console.log(response.layers);
             angular.forEach(response.layers, function(layer, key) {
                 var id = layer.id;
                 var currentLayer = {};
@@ -313,7 +312,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 } else {
                     map.map.layers.baselayers[id] = currentLayer;
                 }
-                console.log(currentLayer);
             });
         });
     }
