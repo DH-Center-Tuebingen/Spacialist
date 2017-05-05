@@ -305,26 +305,24 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 currentLayer.name = layer.name;
                 currentLayer.type = layer.type;
                 currentLayer.visible = layer.visible;
+                currentLayer.layerOptions = setLayerOptions(layer);
                 switch(layer.type.toUpperCase()) {
                     case 'GOOGLE':
                         if(!gKeyLoaded) {
-                            var s = $document.createElement('script');
+                            var s = document.createElement('script');
                             s.src = 'https://maps.googleapis.com/maps/api/js?key=' + layer.api_key + '&language=' + langService.getCurrentLanguage();
-                            $document.body.appendChild(s);
+                            document.body.appendChild(s);
                             console.log(s.src);
                             gKeyLoaded = true;
                         }
                         currentLayer.layerType = layer.layer_type;
-                        currentLayer.layerOptions = setBasicLayerOptions();
                         break;
                     case 'BING':
                         currentLayer.key = layer.api_key;
-                        currentLayer.layerOptions = setBasicLayerOptions();
                         currentLayer.layerOptions.type = layer.layer_type;
                         break;
                     default:
                         currentLayer.url = layer.url;
-                        currentLayer.layerOptions = setLayerOptions(layer);
                         break;
                 }
                 if(layer.is_overlay) {
@@ -336,7 +334,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         });
     }
 
-    function setBasicLayerOptions() {
+    function setLayerOptions(l) {
         var layerOptions = {};
         layerOptions.maxZoom = map.map.defaults.maxZoom;
         layerOptions.noWrap = true;
@@ -344,11 +342,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         if(l.is_overlay) {
             layerOptions.transparent = true;
         }
-        return layerOptions;
-    }
-
-    function setLayerOptions(l) {
-        var layerOptions = setBasicLayerOptions();
         for(var k in l) {
             if(l.hasOwnProperty(k)) {
                 if(!isIllegalKey(k) && l[k] !== null) {

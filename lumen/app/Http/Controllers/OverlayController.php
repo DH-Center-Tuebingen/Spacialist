@@ -16,7 +16,7 @@ class OverlayController extends Controller {
 
     public function getAll() {
         return response()->json([
-            'layers' => AvailableLayer::all()
+            'layers' => AvailableLayer::orderBy('position', 'asc')->get()
         ]);
     }
 }
