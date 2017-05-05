@@ -45,12 +45,15 @@
     "satellizer": "^0.15.5",
     "angular-ui-router": "^0.3.2",
     "bootstrap-material-design": "^v0.5.10",
-    "snackbarjs": "^1.1.0"
+    "snackbarjs": "^1.1.0",
+    "ui-leaflet-layers": "^0.1.3",
+    "Leaflet.GridLayer.GoogleMutant": "https://gitlab.com/IvanSanchez/Leaflet.GridLayer.GoogleMutant.git",
+    "leaflet-plugins": "^3.0.0"
   },
   "resolutions": {
     "angular": "~1.5.8",
     "leaflet-draw": "^0.4.9",
     "leaflet": "^1.0.0",
-    "ui-leaflet": "1.x"
+    "ui-leaflet": "^2.0.0"
   }
 }
