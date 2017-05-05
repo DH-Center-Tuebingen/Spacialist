@@ -1,4 +1,4 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'httpPostPromise', 'leafletData', 'userService', 'environmentService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, httpPostPromise, leafletData, userService, environmentService, leafletBoundsHelpers) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'httpPostPromise', 'leafletData', 'userService', 'environmentService', 'langService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, httpPostPromise, leafletData, userService, environmentService, langService, leafletBoundsHelpers) {
     var localContexts;
     var defaultColor = '#00FF00';
     var map = {};
@@ -298,15 +298,35 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         };
 
         httpGetFactory('api/overlay/get/all', function(response) {
+            var gKeyLoaded = false;
             angular.forEach(response.layers, function(layer, key) {
                 var id = layer.id;
                 var currentLayer = {};
                 currentLayer.name = layer.name;
-                currentLayer.url = layer.url;
                 currentLayer.type = layer.type;
                 currentLayer.visible = layer.visible;
-                var layerOptions = {};
-                currentLayer.layerOptions = setLayerOptions(layer);
+                switch(layer.type.toUpperCase()) {
+                    case 'GOOGLE':
+                        if(!gKeyLoaded) {
+                            var s = $document.createElement('script');
+                            s.src = 'https://maps.googleapis.com/maps/api/js?key=' + layer.api_key + '&language=' + langService.getCurrentLanguage();
+                            $document.body.appendChild(s);
+                            console.log(s.src);
+                            gKeyLoaded = true;
+                        }
+                        currentLayer.layerType = layer.layer_type;
+                        currentLayer.layerOptions = setBasicLayerOptions();
+                        break;
+                    case 'BING':
+                        currentLayer.key = layer.api_key;
+                        currentLayer.layerOptions = setBasicLayerOptions();
+                        currentLayer.layerOptions.type = layer.layer_type;
+                        break;
+                    default:
+                        currentLayer.url = layer.url;
+                        currentLayer.layerOptions = setLayerOptions(layer);
+                        break;
+                }
                 if(layer.is_overlay) {
                     map.map.layers.overlays[id] = currentLayer;
                 } else {
@@ -316,7 +336,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         });
     }
 
-    function setLayerOptions(l) {
+    function setBasicLayerOptions() {
         var layerOptions = {};
         layerOptions.maxZoom = map.map.defaults.maxZoom;
         layerOptions.noWrap = true;
@@ -324,6 +344,11 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         if(l.is_overlay) {
             layerOptions.transparent = true;
         }
+        return layerOptions;
+    }
+
+    function setLayerOptions(l) {
+        var layerOptions = setBasicLayerOptions();
         for(var k in l) {
             if(l.hasOwnProperty(k)) {
                 if(!isIllegalKey(k) && l[k] !== null) {
