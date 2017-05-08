@@ -342,7 +342,7 @@ class ImageController extends Controller
         $photo = Photo::find($id);
         $pathPrefix = 'images/';
         Storage::delete($pathPrefix . $photo->name);
-        Storage::delete($pathPrefix . $photo->thumb);
+        if($photo->thumb != null) Storage::delete($pathPrefix . $photo->thumb);
         $photo->delete();
     }
 
