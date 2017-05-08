@@ -7,6 +7,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     map.geodata = {};
     map.geodata.linkedContexts = [];
     map.geodata.linkedLayers = [];
+    map.geodata.linkedGeolayer = {};
     map.featureGroup = new L.FeatureGroup();
 
     var availableLayerKeys = [
@@ -66,12 +67,17 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 console.log("ERROR OCCURED");
             } else {
                 var geodata = response.geodata;
-                map.addListToMarkers(geodata, true);
-                angular.forEach(map.contexts.data, function(elem) {
-                    if(elem.geodata_id && elem.geodata_id > 0){
-                        map.geodata.linkedContexts[elem.geodata_id] = elem.id;
+                for(var k in map.contexts.data) {
+                // angular.forEach(map.contexts.data, function(elem) {
+                    if(map.contexts.data.hasOwnProperty(k)) {
+                        var elem = map.contexts.data[k];
+                        if(elem.geodata_id && elem.geodata_id > 0){
+                            map.geodata.linkedContexts[elem.geodata_id] = elem.id;
+                        }
                     }
-                });
+                }
+                // });
+                map.addListToMarkers(geodata, true);
             }
         });
     };
@@ -94,7 +100,17 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                         popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
                     }
                 };
-                map.map.geojson.data.features.push(feature);
+                if(map.geodata.linkedContexts[geodata.id]) {
+                    var cid = map.geodata.linkedContexts[geodata.id];
+                    var c = map.contexts.data[cid];
+                    var ctid = c.context_type_id;
+                    var lid = map.geodata.linkedGeolayer[ctid];
+                    map.map.layers.overlays[lid].data.features.push(feature);
+                    console.log(map.map.layers.overlays[lid]);
+                } else {
+                    map.map.layers.overlays.untitled.data.features.push(feature);
+                }
+                //map.map.geojson.data.features.push(feature);
             }
         }
     };
@@ -302,34 +318,139 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             angular.forEach(response.layers, function(layer, key) {
                 var id = layer.id;
                 var currentLayer = {};
-                currentLayer.name = layer.name;
-                currentLayer.type = layer.type;
                 currentLayer.visible = layer.visible;
                 currentLayer.layerOptions = setLayerOptions(layer);
-                switch(layer.type.toUpperCase()) {
-                    case 'GOOGLE':
-                        if(!gKeyLoaded) {
-                            var s = document.createElement('script');
-                            s.src = 'https://maps.googleapis.com/maps/api/js?key=' + layer.api_key + '&language=' + langService.getCurrentLanguage();
-                            document.body.appendChild(s);
-                            console.log(s.src);
-                            gKeyLoaded = true;
+                if(layer.context_type_id) {
+                    // var contextType = differentTypes.find(function(t) {
+                    //     return t.context_type_id == layer.context_type_id;
+                    // });
+                    currentLayer.name = 'layer.context_type_id';
+                    currentLayer.type = 'geoJSONShape';
+                    currentLayer.data = {
+                        type: 'FeatureCollection',
+                        features: []
+                    };
+                    map.geodata.linkedGeolayer[layer.context_type_id] = id;
+                    currentLayer.style = function(feature) {
+                        var currentStyle = angular.copy(map.style);
+                        currentStyle.fillColor = feature.properties.color;
+                        return currentStyle;
+                    };
+                    currentLayer.pointToLayer = function(feature, latlng) {
+                        var m = L.circleMarker(latlng, map.style);
+                        m.setRadius(m.getRadius() / 2);
+                        return m;
+                    };
+                    currentLayer.onEachFeature = function(feature, layer) {
+                        console.log("adding...");
+                        if(feature.properties && feature.properties.popupContent) {
+                            layer.bindPopup(feature.properties.popupContent, {
+                                minWidth: 300,
+                                feature: feature
+                            });
+                            var name;
+                            if(map.geodata.linkedContexts[feature.id]){
+                                name = environmentService.contexts.data[map.geodata.linkedContexts[feature.id]].name;
+                            }
+                            else{
+                                name = feature.properties.name;
+                            }
+                            layer.bindTooltip(name);
+                            layer.on('click', function(){
+                                map.map.selectedLayer = layer;
+                                layer.openPopup();
+                            });
                         }
-                        currentLayer.layerType = layer.layer_type;
-                        break;
-                    case 'BING':
-                        currentLayer.key = layer.api_key;
-                        currentLayer.layerOptions.type = layer.layer_type;
-                        break;
-                    default:
-                        currentLayer.url = layer.url;
-                        break;
+                        feature.properties.wkt = map.toWkt(layer);
+                        map.featureGroup.addLayer(layer);
+                        map.geodata.linkedLayers[feature.id] = layer;
+                        var newBounds = map.featureGroup.getBounds();
+                        var newNE = newBounds.getNorthEast();
+                        var newSW = newBounds.getSouthWest();
+                        map.map.bounds.northEast.lat = newNE.lat;
+                        map.map.bounds.northEast.lng = newNE.lng;
+                        map.map.bounds.southWest.lat = newSW.lat;
+                        map.map.bounds.southWest.lng = newSW.lng;
+                    };
+                } else {
+                    currentLayer.name = layer.name;
+                    currentLayer.type = layer.type;
+                    switch(layer.type.toUpperCase()) {
+                        case 'GOOGLE':
+                            if(!gKeyLoaded) {
+                                var s = document.createElement('script');
+                                s.src = 'https://maps.googleapis.com/maps/api/js?key=' + layer.api_key + '&language=' + langService.getCurrentLanguage();
+                                console.log(s.src);
+                                document.body.appendChild(s);
+                                gKeyLoaded = true;
+                            }
+                            currentLayer.layerType = layer.layer_type;
+                            break;
+                        case 'BING':
+                            currentLayer.key = layer.api_key;
+                            currentLayer.layerOptions.type = layer.layer_type;
+                            break;
+                        case 'UNLINKED':
+                            id = 'untitled';
+                            currentLayer.data = {
+                                type: 'FeatureCollection',
+                                features: []
+                            };
+                            currentLayer.name = layer.name;
+                            currentLayer.type = 'geoJSONShape';
+                            currentLayer.layerOptions = setLayerOptions(layer);
+                            currentLayer.style = function(feature) {
+                                var currentStyle = angular.copy(map.style);
+                                currentStyle.fillColor = feature.properties.color;
+                                return currentStyle;
+                            };
+                            currentLayer.pointToLayer = function(feature, latlng) {
+                                var m = L.circleMarker(latlng, map.style);
+                                m.setRadius(m.getRadius() / 2);
+                                return m;
+                            };
+                            currentLayer.onEachFeature = function(feature, layer) {
+                                if(feature.properties && feature.properties.popupContent) {
+                                    layer.bindPopup(feature.properties.popupContent, {
+                                        minWidth: 300,
+                                        feature: feature
+                                    });
+                                    var name;
+                                    if(map.geodata.linkedContexts[feature.id]){
+                                        name = environmentService.contexts.data[map.geodata.linkedContexts[feature.id]].name;
+                                    }
+                                    else{
+                                        name = feature.properties.name;
+                                    }
+                                    layer.bindTooltip(name);
+                                    layer.on('click', function(){
+                                        map.map.selectedLayer = layer;
+                                        layer.openPopup();
+                                    });
+                                }
+                                feature.properties.wkt = map.toWkt(layer);
+                                map.featureGroup.addLayer(layer);
+                                map.geodata.linkedLayers[feature.id] = layer;
+                                var newBounds = map.featureGroup.getBounds();
+                                var newNE = newBounds.getNorthEast();
+                                var newSW = newBounds.getSouthWest();
+                                map.map.bounds.northEast.lat = newNE.lat;
+                                map.map.bounds.northEast.lng = newNE.lng;
+                                map.map.bounds.southWest.lat = newSW.lat;
+                                map.map.bounds.southWest.lng = newSW.lng;
+                            };
+                            break;
+                        default:
+                            currentLayer.url = layer.url;
+                            break;
+                    }
                 }
                 if(layer.is_overlay) {
                     map.map.layers.overlays[id] = currentLayer;
                 } else {
                     map.map.layers.baselayers[id] = currentLayer;
                 }
+                console.log(map.map.layers);
             });
         });
     }
