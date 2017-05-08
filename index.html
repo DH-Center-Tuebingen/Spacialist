@@ -11,6 +11,7 @@
         <link rel="stylesheet" href="css/animate.css" />
         <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.min.css" />
         <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="bower_components/highlightjs/styles/github.css">
         <link rel="stylesheet" href="css/material-icons.css">
         <link rel="stylesheet" href="bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.min.css"/>
         <link rel="stylesheet" href="bower_components/bootstrap-material-design/dist/css/ripples.min.css"/>
@@ -129,6 +130,8 @@
         <div>
             <div ui-view class="col-md-12"></div>
         </div>
+        <script src="bower_components/pdfjs-dist/build/pdf.min.js"></script>
+        <script src="bower_components/highlightjs/highlight.pack.min.js"></script>
         <script src="bower_components/jquery/dist/jquery.min.js"></script>
         <script src="bower_components/lodash/dist/lodash.min.js"></script>
         <script src="bower_components/angular/angular.min.js"></script>
@@ -144,6 +147,8 @@
         <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
         <script src="bower_components/ng-file-upload/ng-file-upload-all.min.js"></script>
         <script src="bower_components/angular-ui-tree/dist/angular-ui-tree.min.js"></script>
+        <script src="bower_components/angular-pdf-viewer/dist/angular-pdf-viewer.min.js"></script>
+        <script src="bower_components/angular-highlightjs/build/angular-highlightjs.min.js"></script>
         <script src="bower_components/leaflet/dist/leaflet.js"></script>
         <script src="bower_components/leaflet-draw/dist/leaflet.draw.js"></script>
         <script src="bower_components/ui-leaflet/dist/ui-leaflet.min.js"></script>
@@ -180,5 +185,6 @@
         <script src="controllers/imageCtrl.js"></script>
         <script src="controllers/literatureCtrl.js"></script>
         <script src="controllers/editorCtrl.js"></script>
+        <script src="controllers/pdfCtrl.js"></script>
     </body>
 </html>
