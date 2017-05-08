@@ -18,6 +18,10 @@ class AddExternalLayerFields extends Migration
             $table->text('api_key')->nullable();
             $table->text('layer_type')->nullable();
             $table->integer('position')->nullable();
+            $table->integer('context_type_id')->nullable();
+            $table->text('color')->nullable();
+
+            $table->foreign('context_type_id')->references('id')->on('context_types')->onDelete('cascade');
         });
 
         $blCnt = 1;
@@ -46,6 +50,8 @@ class AddExternalLayerFields extends Migration
             $table->dropColumn('api_key');
             $table->dropColumn('layer_type');
             $table->dropColumn('position');
+            $table->dropColumn('context_type_id');
+            $table->dropColumn('color');
         });
     }
 }
