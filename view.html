@@ -162,10 +162,10 @@
                             {{ 'context-form.tabs.photos.upload' | translate }}
                         </uib-accordion-heading>
                         <div class="col-md-12">
-                            <div class="alert alert-info drop-box" ngf-drop ngf-select ng-model="dropFiles" ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="false" accept="image/*" ngf-pattern="'image/*'">
+                            <div class="alert alert-info drop-box" ngf-drop ngf-select ng-model="dropFiles" ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true" ngf-accept="'*'" ngf-pattern="'*'">
                                 {{'context-form.tabs.photos.drag+drop'|translate}}
                             </div>
-                            <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple accept="image/*">{{'context-form.tabs.photos.upload-button'|translate}}</button>
+                            <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple ngf-allow-dir="true" ngf-accept="'*'">{{'context-form.tabs.photos.upload-button'|translate}}</button>
                             <ul>
                                 <li ng-repeat="f in upload.files">
                                     {{ f.name }} {{ f.$errorParam }}

@@ -35,65 +35,71 @@ class ImageController extends Controller
             ], 403);
         }
         if(!$request->hasFile('file') || !$request->file('file')->isValid()) return response()->json('null');
-        $THUMB_SUFFIX = "_thumb";
-        $THUMB_WIDTH = 256;
-        $EXP_SUFFIX = ".jpg";
-        $EXP_FORMAT = "jpg";
         $file = $request->file('file');
         $filename = $file->getClientOriginalName();
-        $ext = $file->getClientOriginalExtension();
-        $cleanName = substr($filename, 0, strlen($filename)-strlen($ext)-1);
-        $thumbName = $cleanName . $THUMB_SUFFIX . $EXP_SUFFIX;
-        $url = storage_path() . '/app/images';
-        //$file->move($url, $filename);
         Storage::put(
             'images/' . $filename,
             file_get_contents($file->getRealPath())
         );
+        $url = storage_path() . '/app/images';
+        //$file->move($url, $filename);
         $fileUrl = $url . '/' . $filename;
-        $thumbUrl = $url . '/' . $thumbName;
+        $imgMime = 'image/';
+        $mimeType = $file->getMimeType();
+        $isImage = substr($mimeType, 0, strlen($imgMime)) === $imgMime;
+        // check if current file is image
+        if($isImage) {
+            $THUMB_SUFFIX = "_thumb";
+            $THUMB_WIDTH = 256;
+            $EXP_SUFFIX = ".jpg";
+            $EXP_FORMAT = "jpg";
+            $ext = $file->getClientOriginalExtension();
+            $cleanName = substr($filename, 0, strlen($filename)-strlen($ext)-1);
+            $thumbName = $cleanName . $THUMB_SUFFIX . $EXP_SUFFIX;
+            $thumbUrl = $url . '/' . $thumbName;
 
-        $imageInfo = getimagesize($fileUrl);
-        $width = $imageInfo[0];
-        $height = $imageInfo[1];
-        $mime = $imageInfo[2];//$imageInfo['mime'];
-        if($width > $THUMB_WIDTH) {
-            switch($mime) {
-                case IMAGETYPE_JPEG:
-                    $image = imagecreatefromjpeg($fileUrl);
-                    break;
-                case IMAGETYPE_PNG:
-                    $image = imagecreatefrompng($fileUrl);
-                    break;
-                case IMAGETYPE_GIF:
-                    $image = imagecreatefromgif($fileUrl);
-                    break;
-                default:
-                    //echo "is of UNSUPPORTED type " . $imageInfo['mime'];
-                    // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
-                    $im = new Imagick($fileUrl);
-                    $fileUrl = $url . '/' . $cleanName . $EXP_SUFFIX;
-                    $im->setImageFormat($EXP_FORMAT);
-                    $im->writeImage($fileUrl);
-                    $im->clear();
-                    $im->destroy();
-                    $image = imagecreatefromjpeg($fileUrl);
+            $imageInfo = getimagesize($fileUrl);
+            $width = $imageInfo[0];
+            $height = $imageInfo[1];
+            $mime = $imageInfo[2];//$imageInfo['mime'];
+            if($width > $THUMB_WIDTH) {
+                switch($mime) {
+                    case IMAGETYPE_JPEG:
+                        $image = imagecreatefromjpeg($fileUrl);
+                        break;
+                    case IMAGETYPE_PNG:
+                        $image = imagecreatefrompng($fileUrl);
+                        break;
+                    case IMAGETYPE_GIF:
+                        $image = imagecreatefromgif($fileUrl);
+                        break;
+                    default:
+                        //echo "is of UNSUPPORTED type " . $imageInfo['mime'];
+                        // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
+                        $im = new Imagick($fileUrl);
+                        $fileUrl = $url . '/' . $cleanName . $EXP_SUFFIX;
+                        $im->setImageFormat($EXP_FORMAT);
+                        $im->writeImage($fileUrl);
+                        $im->clear();
+                        $im->destroy();
+                        $image = imagecreatefromjpeg($fileUrl);
+                }
+                $scaled = imagescale($image, $THUMB_WIDTH);
+                ob_start();
+                imagejpeg($scaled/*, $thumbUrl*/);
+                $image = ob_get_clean();
+                Storage::put(
+                    'images/' . $thumbName,
+                    $image
+                );
+            } else {
+                Storage::copy('images/' . $filename, 'images/' . $thumbName);
             }
-            $scaled = imagescale($image, $THUMB_WIDTH);
-            ob_start();
-            imagejpeg($scaled/*, $thumbUrl*/);
-            $image = ob_get_clean();
-            Storage::put(
-                'images/' . $thumbName,
-                $image
-            );
-        } else {
-            Storage::copy('images/' . $filename, 'images/' . $thumbName);
         }
 
         $mod = date('Y-m-d H:i:s', filemtime($fileUrl));
         $exifFound = false;
-        if($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM) {
+        if($isImage && ($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM)) {
             $exif = exif_read_data($fileUrl, 'ANY_TAG', true);
             if($exif !== false) {
                 if($this->exifDataExists($exif, 'IFD0', 'Make')) {
@@ -136,28 +142,29 @@ class ImageController extends Controller
             }
         }
 
-        if(!$exifFound) {
-            $dateOrig = $mod;
-            $model = '';
-            $orientation = 0;
-            $copyright = '';
-            $description = '';
+        $photo = new Photo();
+        $photo->modified = $mod;
+        $photo->lasteditor = $user['name'];
+        $photo->mime_type = $mimeType;
+        $photo->name = $filename;
+
+        if($isImage) {
+            $photo->thumb = $thumbName;
+            $photo->photographer_id = 1;
+        }
+        if($exifFound) {
+            $photo->created = $dateOrig;
+            $photo->cameraname = $model;
+            $photo->orientation = $orientation;
+            $photo->copyright = $copyright;
+            $photo->description = $description;
+        } else {
+            $photo->created = $mod;
         }
 
-        $id = \DB::table('photos')
-            ->insertGetId([
-                'modified' => $mod,
-                'created' => $dateOrig,
-                'name' => $filename,
-                'thumb' => $thumbName,
-                'cameraname' => $model,
-                'orientation' => $orientation,
-                'copyright' => $copyright,
-                'description' => $description,
-                'lasteditor' => $user['name'],
-                'photographer_id' => 1
-            ]);
-        return response()->json($this->getImageById($id));
+        $photo->save();
+
+        return response()->json($this->getImageById($photo->id));
     }
 
     public function link(Request $request) {
@@ -221,7 +228,7 @@ class ImageController extends Controller
     private function getImageById($id) {
         $user = \Auth::user();
         $img = \DB::table('photos as ph')
-                ->select('id', 'modified', 'created', 'name as filename', 'thumb as thumbname', 'cameraname', 'orientation', 'description', 'copyright', 'photographer_id')
+                ->select('id', 'modified', 'created', 'name as filename', 'thumb as thumbname', 'cameraname', 'orientation', 'description', 'copyright', 'photographer_id', 'mime_type')
                 ->where('id', $id)
                 ->first();
         if($img == null) return null;
@@ -268,8 +275,8 @@ class ImageController extends Controller
         $img = $this->getImageById($id);
         // try to get file to check if it exists
         try {
-            $file = Storage::get($img->thumb_url);
-            return 'data:image/jpeg;base64,' . base64_encode($file);
+            $content = Storage::get($img->thumb_url);
+            return 'data:image/jpeg;base64,' . base64_encode($content);
         } catch(FileNotFoundException $e) {
             return response()->json([
                 'error' => 'image not found'
@@ -279,8 +286,14 @@ class ImageController extends Controller
 
     public function getImageObject($id) {
         $img = $this->getImageById($id);
-        $file = Storage::get($img->url);
-        return 'data:image/jpeg;base64,' . base64_encode($file);
+        $content = Storage::get($img->url);
+        return 'data:' . $img->mime_type . ';base64,' . base64_encode($content);
+    }
+
+    public function getDecodedImageObject($id) {
+        $img = $this->getImageById($id);
+        $content = Storage::get($img->url);
+        return $content;
     }
 
     public function getAll() {
@@ -291,7 +304,7 @@ class ImageController extends Controller
             ], 403);
         }
         $images = DB::table('photos as ph')
-                    ->select("ph.id as id", "ph.modified", "ph.created", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id")
+                    ->select("ph.id as id", "ph.modified", "ph.created", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id", "ph.mime_type")
                     ->orderBy('id', 'asc')
                     ->get();
         foreach($images as &$img) {
