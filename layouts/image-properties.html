@@ -3,13 +3,44 @@
 </div>
 <div class="modal-body col-md-12" ng-init="imageEdits = {}">
     <div class="col-md-7 external-container">
-        <img protected-src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" />
-        <div class="external-content">
-            <a href="" ng-click="modalOptions.openImageInTab(modalOptions.img.id)">
-                <dfn title="Open {{ modalOptions.img.filename }} in a new tab">
-                    <i class="material-icons" aria-hidden="true">open_in_new</i>
-                </dfn>
-            </a>
+        <div ng-switch="modalOptions.getMimeType(modalOptions.img.mime_type)">
+            <div ng-switch-when="image">
+                <img protected-src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" />
+                <div class="external-content">
+                    <a href="" ng-click="modalOptions.openImageInTab(modalOptions.img.id)">
+                        <dfn title="Open {{ modalOptions.img.filename }} in a new tab">
+                            <i class="material-icons" aria-hidden="true">open_in_new</i>
+                        </dfn>
+                    </a>
+                </div>
+            </div>
+            <div ng-switch-when="pdf" ng-controller="pdfCtrl" ng-init="getFileContent(modalOptions.img)">
+                <div ng-if="fileLoaded">
+                    <div class="pdf-header">
+                        <a class="btn btn-default" ng-click="prev()">
+                            <i class="material-icons" aria-hidden="true">navigate_before</i>
+                        </a>
+                        <a class="btn btn-default" ng-click="next()">
+                            <i class="material-icons" aria-hidden="true">navigate_next</i>
+                        </a>
+                        <a class="btn btn-default" ng-click="zoomIn()">
+                            <i class="material-icons" aria-hidden="true">zoom_in</i>
+                        </a>
+                        <a class="btn btn-default" ng-click="zoomOut()">
+                            <i class="material-icons" aria-hidden="true">zoom_out</i>
+                        </a>
+                        <a class="btn btn-default" ng-click="rotate()">
+                            <i class="material-icons" aria-hidden="true">rotate_right</i>
+                        </a>
+                        <span class="page-counter">{{getCurrentPage()}}/{{getPageCount()}}</span>
+                    </div>
+                    <pdf-viewer url="fileContent" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
+                </div>
+            </div>
+            <div ng-switch-default ng-controller="pdfCtrl" ng-init="getFileContent(modalOptions.img, true)">
+                <div hljs hljs-source="fileContent">
+                </div>
+            </div>
         </div>
     </div>
     <div class="col-md-5">

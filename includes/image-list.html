@@ -8,8 +8,35 @@
         <div class="col-sm-6 col-md-4 unlinked-item" context-menu="imageContextMenu" ng-repeat="img in tmpData[imageType] | imageFilter:searchTerms">
             <div class="thumbnail">
                 <a ng-click="openImageModal(img)">
-                    <div class="thumb-wrapper">
-                        <img class="thumb" protected-src="api/image/get/preview/{{img.id}}" />
+                    <div class="thumb-wrapper centered-full" ng-switch="getMimeType(img.mime_type)">
+                        <div ng-switch-when="image">
+                            <img class="thumb" protected-src="api/image/get/preview/{{img.id}}" />
+                        </div>
+                        <div ng-switch-when="pdf">
+                            <i class="material-icons md-96">attach_file</i>
+                            <h4>PDF</h4>
+                            {{ img.filename }}
+                        </div>
+                        <div ng-switch-when="xml">
+                            <i class="material-icons md-96">code</i>
+                            <h4>XML</h4>
+                            {{ img.filename }}
+                        </div>
+                        <div ng-switch-when="html">
+                            <i class="material-icons md-96">code</i>
+                            <h4>HTML</h4>
+                            {{ img.filename }}
+                        </div>
+                        <div ng-switch-when="text">
+                            <i class="material-icons md-96">format_align_left</i>
+                            <h4>Plain text</h4>
+                            {{ img.filename }}
+                        </div>
+                        <div ng-switch-default>
+                            <i class="material-icons md-96">format_align_left</i>
+                            <h4>Plain text</h4>
+                            {{ img.filename }}
+                        </div>
                          <div class="overlay">
                              <i class="material-icons overlay-icon" aria-hidden="true">loupe</i>
                          </div>
