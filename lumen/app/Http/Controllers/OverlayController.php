@@ -5,6 +5,10 @@ use App\AvailableLayer;
 use Illuminate\Http\Request;
 
 class OverlayController extends Controller {
+    public $availableGeometryTypes = [
+        'Point', 'Linestring', 'Polygon', 'Multipoint', 'Multilinestring', 'Multipolygon'
+    ];
+
     /**
      * Create a new controller instance.
      *
