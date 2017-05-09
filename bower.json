@@ -48,7 +48,8 @@
     "snackbarjs": "^1.1.0",
     "angular-highlightjs": "^0.7.1",
     "angular-pdf-viewer": "^0.2.13",
-    "highlightjs": "^9.10.0"
+    "highlightjs": "^9.10.0",
+    "angular-marked": "^1.2.2"
   },
   "resolutions": {
     "angular": "~1.5.8",
