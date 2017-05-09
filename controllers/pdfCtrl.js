@@ -1,5 +1,6 @@
 spacialistApp.controller('pdfCtrl', ['$scope', 'httpGetFactory', 'pdfDelegate', function($scope, httpGetFactory, pdfDelegate) {
     $scope.fileLoaded = false;
+    $scope.isPreview = false;
 
     var pdfHandle = 'pdf-handle';
     var pdfDelegateHandle = pdfDelegate.$getByHandle(pdfHandle);
@@ -12,6 +13,15 @@ spacialistApp.controller('pdfCtrl', ['$scope', 'httpGetFactory', 'pdfDelegate', 
             $scope.fileContent = response;
             $scope.fileLoaded = true;
         });
+    };
+
+    $scope.togglePreview = function() {
+        $scope.isPreview = !$scope.isPreview;
+        if($scope.isPreview) {
+            $scope.previewContent = marked($scope.fileContent);
+        } else {
+            $scope.previewContent = '';
+        }
     };
 
     // Delegate functions
