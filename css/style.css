@@ -230,6 +230,11 @@ ol li.list-group-item {
     /*text-align: left;*/
 }
 
+.scrollable-modal {
+    max-height: calc(100vh - 20vh);
+    overflow-x: auto;
+}
+
 .thumb-wrapper {
     position: relative;
     height: 225px;
