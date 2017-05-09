@@ -223,6 +223,10 @@ ol li.list-group-item {
     text-align: left;
 }
 
+.width-90 {
+    width: 90%;
+}
+
 .modal-list {
     max-height: 200px;
     overflow-y: auto;

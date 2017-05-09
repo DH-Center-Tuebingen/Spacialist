@@ -27,6 +27,16 @@
                             <h4>HTML</h4>
                             {{ img.filename }}
                         </div>
+                        <div ng-switch-when="audio">
+                            <i class="material-icons md-96 md-dark">music_note</i> <!-- volume_up -->
+                            <h4>Audio file</h4>
+                            {{ img.filename }}
+                        </div>
+                        <div ng-switch-when="video">
+                            <i class="material-icons md-96 md-dark">local_movies</i> <!-- videocam -->
+                            <h4>Audio file</h4>
+                            {{ img.filename }}
+                        </div>
                         <div ng-switch-default>
                             <i class="material-icons md-96 md-dark">format_align_left</i>
                             <h4>Plain text</h4>

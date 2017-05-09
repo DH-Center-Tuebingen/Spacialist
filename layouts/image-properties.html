@@ -36,9 +36,29 @@
                     </div>
                     <pdf-viewer url="fileContent" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
                 </div>
+                <spinner ng-if="!fileLoaded"></spinner>
+            </div>
+            <div ng-switch-when="audio" ng-controller="pdfCtrl" ng-init="getFileContent(modalOptions.img, false)">
+                <audio controls ng-if="fileLoaded" class="width-90">
+                    <source ng-src="{{fileContent}}" />
+                </audio>
+                <spinner ng-if="!fileLoaded"></spinner>
+            </div>
+            <div ng-switch-when="video" ng-controller="pdfCtrl" ng-init="getFileContent(modalOptions.img, false)">
+                <video controls ng-if="fileLoaded" class="width-90">
+                    <source ng-src="{{fileContent}}" />
+                </video>
+                <spinner ng-if="!fileLoaded"></spinner>
             </div>
             <div ng-switch-default ng-controller="pdfCtrl" ng-init="getFileContent(modalOptions.img, true)">
-                <div class="left scrollable-modal" hljs hljs-source="fileContent">
+                <div ng-if="modalOptions.img.filename.endsWith('.md')">
+                    <button type="button" class="btn btn-default" ng-click="togglePreview()">
+                        <span translate="photos.properties.md-preview.toggle"></span>
+                    </button>
+                </div>
+                <div ng-if="!isPreview" class="left scrollable-modal" hljs hljs-source="fileContent">
+                </div>
+                <div ng-if="isPreview" class="left scrollable-modal" marked="previewContent">
                 </div>
             </div>
         </div>

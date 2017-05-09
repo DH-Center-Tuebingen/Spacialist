@@ -16,6 +16,8 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         if(mt == 'application/pdf') return 'pdf';
         if(mt == 'application/xml' || mt == 'text/xml') return 'xml';
         if(mt == 'application/xhtml+xml' || mt == 'text/html') return 'html';
+        if(mt.startsWith('audio/')) return 'audio';
+        if(mt.startsWith('video/')) return 'video';
         return 'text';
     };
 
