@@ -13,34 +13,34 @@
                             <img class="thumb" protected-src="api/image/get/preview/{{img.id}}" />
                         </div>
                         <div ng-switch-when="pdf">
+                            <h3>{{ img.filename }}</h3>
                             <i class="material-icons md-96 md-dark">attach_file</i>
-                            <h4>PDF</h4>
-                            {{ img.filename }}
+                            <h4 translate="file-type.pdf"></h4>
                         </div>
                         <div ng-switch-when="xml">
+                            <h3>{{ img.filename }}</h3>
                             <i class="material-icons md-96 md-dark">code</i>
-                            <h4>XML</h4>
-                            {{ img.filename }}
+                            <h4 translate="file-type.xml"></h4>
                         </div>
                         <div ng-switch-when="html">
+                            <h3>{{ img.filename }}</h3>
                             <i class="material-icons md-96 md-dark">code</i>
-                            <h4>HTML</h4>
-                            {{ img.filename }}
+                            <h4 translate="file-type.html"></h4>
                         </div>
                         <div ng-switch-when="audio">
+                            <h3>{{ img.filename }}</h3>
                             <i class="material-icons md-96 md-dark">music_note</i> <!-- volume_up -->
-                            <h4>Audio file</h4>
-                            {{ img.filename }}
+                            <h4 translate="file-type.audio"></h4>
                         </div>
                         <div ng-switch-when="video">
-                            <i class="material-icons md-96 md-dark">local_movies</i> <!-- videocam -->
-                            <h4>Video file</h4>
-                            {{ img.filename }}
+                            <h3>{{ img.filename }}</h3>
+                            <i class="material-icons md-96 md-dark">theaters</i> <!-- videocam -->
+                            <h4 translate="file-type.video"></h4>
                         </div>
                         <div ng-switch-default>
+                            <h3>{{ img.filename }}</h3>
                             <i class="material-icons md-96 md-dark">format_align_left</i>
-                            <h4>Plain text</h4>
-                            {{ img.filename }}
+                            <h4 translate="file-type.plain-text"></h4>
                         </div>
                          <div class="overlay">
                              <i class="material-icons overlay-icon" aria-hidden="true">loupe</i>
