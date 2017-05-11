@@ -112,7 +112,7 @@ class ContextController extends Controller {
         return $data;
     }
 
-    private function getLabel($thesaurus_url, $lang = 'de') {
+    public static function getLabel($thesaurus_url, $lang = 'de') {
         $label = DB::table('th_concept_label as lbl')
             ->join('th_language as lang', 'lang.id', '=', 'lbl.language_id')
             ->join('th_concept as con', 'lbl.concept_id', '=', 'con.id')

@@ -341,7 +341,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             currentLayer.visible = layer.visible;
             currentLayer.layerOptions = setLayerOptions(layer);
             if(layer.context_type_id) {
-                currentLayer.name = 'ContextType #' + layer.context_type_id;
+                currentLayer.name = layer.label;
                 currentLayer.type = 'geoJSONShape';
                 currentLayer.data = {
                     type: 'FeatureCollection',

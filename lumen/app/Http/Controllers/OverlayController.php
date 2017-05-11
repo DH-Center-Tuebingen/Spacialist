@@ -19,8 +19,18 @@ class OverlayController extends Controller {
     }
 
     public function getAll() {
+        $layers = \DB::table('available_layers as al')
+            ->select('al.*', 'ct.thesaurus_url')
+            ->orderBy('position', 'asc')
+            ->leftJoin('context_types as ct', 'context_type_id', '=', 'ct.id')
+            ->get();
+        foreach($layers as $l) {
+            $label = ContextController::getLabel($l->thesaurus_url);
+            $l->label = $label;
+            unset($l->thesaurus_url);
+        }
         return response()->json([
-            'layers' => AvailableLayer::orderBy('position', 'asc')->get()
+            'layers' => $layers
         ]);
     }
 }
