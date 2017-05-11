@@ -23,18 +23,20 @@
                         <a class="btn btn-default" ng-click="next()">
                             <i class="material-icons" aria-hidden="true">navigate_next</i>
                         </a>
-                        <a class="btn btn-default" ng-click="zoomIn()">
-                            <i class="material-icons" aria-hidden="true">zoom_in</i>
+                        <a class="btn btn-default" ng-click="rotate()">
+                            <i class="material-icons" aria-hidden="true">rotate_right</i>
                         </a>
                         <a class="btn btn-default" ng-click="zoomOut()">
                             <i class="material-icons" aria-hidden="true">zoom_out</i>
                         </a>
-                        <a class="btn btn-default" ng-click="rotate()">
-                            <i class="material-icons" aria-hidden="true">rotate_right</i>
+                        <a class="btn btn-default" ng-click="zoomIn()">
+                            <i class="material-icons" aria-hidden="true">zoom_in</i>
                         </a>
                         <span class="page-counter">{{getCurrentPage()}}/{{getPageCount()}}</span>
                     </div>
-                    <pdf-viewer url="fileContent" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
+                    <div class="scrollable-modal">
+                        <pdf-viewer url="fileContent" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
+                    </div>
                 </div>
                 <spinner ng-if="!fileLoaded"></spinner>
             </div>
