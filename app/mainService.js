@@ -90,8 +90,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         getContexts();
         getArtifacts();
         getDropdownOptions();
-        mapService.getGeodata();
-        mapService.reinitVariables();
+        mapService.initMapService();
     }
 
     function getContexts() {
