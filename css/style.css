@@ -95,9 +95,8 @@ textarea {
     resize: vertical;
 }
 
-.form-group {
-    margin: 0 0 0 0 !important;
-    margin-bottom: 0 !important;
+.form-group-unpadded {
+    margin: 0 !important;
     padding-bottom: 0 !important;
 }
 
