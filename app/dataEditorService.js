@@ -1,4 +1,4 @@
-spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, mainService, $translate) {
+spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, mainService, $translate) {
     var editor = {};
 
     editor.ct = {
