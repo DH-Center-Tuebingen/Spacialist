@@ -14,53 +14,48 @@
                     </a>
                 </div>
             </div>
-            <div ng-switch-when="pdf" ng-controller="pdfCtrl" ng-init="getFileContent(modalOptions.img)">
-                <div ng-if="fileLoaded">
-                    <div class="pdf-header">
-                        <a class="btn btn-default" ng-click="prev()">
-                            <i class="material-icons" aria-hidden="true">navigate_before</i>
-                        </a>
-                        <a class="btn btn-default" ng-click="next()">
-                            <i class="material-icons" aria-hidden="true">navigate_next</i>
-                        </a>
-                        <a class="btn btn-default" ng-click="rotate()">
-                            <i class="material-icons" aria-hidden="true">rotate_right</i>
-                        </a>
-                        <a class="btn btn-default" ng-click="zoomOut()">
-                            <i class="material-icons" aria-hidden="true">zoom_out</i>
-                        </a>
-                        <a class="btn btn-default" ng-click="zoomIn()">
-                            <i class="material-icons" aria-hidden="true">zoom_in</i>
-                        </a>
-                        <span class="page-counter">{{getCurrentPage()}}/{{getPageCount()}}</span>
-                    </div>
-                    <div class="scrollable-modal">
-                        <pdf-viewer url="fileContent" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
-                    </div>
+            <div ng-switch-when="pdf" ng-controller="pdfCtrl">
+                <div class="pdf-header">
+                    <a class="btn btn-default" ng-click="prev()">
+                        <i class="material-icons" aria-hidden="true">navigate_before</i>
+                    </a>
+                    <a class="btn btn-default" ng-click="next()">
+                        <i class="material-icons" aria-hidden="true">navigate_next</i>
+                    </a>
+                    <a class="btn btn-default" ng-click="rotate()">
+                        <i class="material-icons" aria-hidden="true">rotate_right</i>
+                    </a>
+                    <a class="btn btn-default" ng-click="zoomOut()">
+                        <i class="material-icons" aria-hidden="true">zoom_out</i>
+                    </a>
+                    <a class="btn btn-default" ng-click="zoomIn()">
+                        <i class="material-icons" aria-hidden="true">zoom_in</i>
+                    </a>
+                    <span class="page-counter">{{getCurrentPage()}}/{{getPageCount()}}</span>
                 </div>
-                <spinner ng-if="!fileLoaded"></spinner>
+                <div class="scrollable-modal">
+                    <pdf-viewer url="modalOptions.img.url" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
+                </div>
             </div>
-            <div ng-switch-when="audio" ng-controller="pdfCtrl" ng-init="getFileContent(modalOptions.img, false)">
-                <audio controls ng-if="fileLoaded" class="width-90">
-                    <source ng-src="{{fileContent}}" />
+            <div ng-switch-when="audio">
+                <audio controls class="width-90">
+                    <source ng-src="{{modalOptions.img.url}}" />
                 </audio>
-                <spinner ng-if="!fileLoaded"></spinner>
             </div>
-            <div ng-switch-when="video" ng-controller="pdfCtrl" ng-init="getFileContent(modalOptions.img, false)">
-                <video controls ng-if="fileLoaded" class="width-90">
-                    <source ng-src="{{fileContent}}" />
+            <div ng-switch-when="video">
+                <video controls class="width-90">
+                    <source ng-src="{{modalOptions.img.url}}" />
                 </video>
-                <spinner ng-if="!fileLoaded"></spinner>
             </div>
-            <div ng-switch-default ng-controller="pdfCtrl" ng-init="getFileContent(modalOptions.img, true)">
+            <div ng-switch-default ng-controller="pdfCtrl">
                 <div ng-if="modalOptions.img.filename.endsWith('.md')">
                     <button type="button" class="btn btn-default" ng-click="togglePreview()">
                         <span translate="photos.properties.md-preview.toggle"></span>
                     </button>
                 </div>
-                <div ng-if="!isPreview" class="left scrollable-modal" hljs hljs-source="fileContent">
+                <div ng-if="!isPreview" class="left scrollable-modal" hljs hljs-include="modalOptions.img.url">
                 </div>
-                <div ng-if="isPreview" class="left scrollable-modal" marked="previewContent">
+                <div ng-if="isPreview" class="left scrollable-modal" marked src="modalOptions.img.url">
                 </div>
             </div>
         </div>

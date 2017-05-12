@@ -10,7 +10,7 @@
                 <a ng-click="openImageModal(img)">
                     <div class="thumb-wrapper centered-full" ng-switch="getMimeType(img.mime_type)">
                         <div ng-switch-when="image">
-                            <img class="thumb" protected-src="api/image/get/preview/{{img.id}}" />
+                            <img class="thumb" ng-src="{{img.thumb_url}}" />
                         </div>
                         <div ng-switch-when="pdf">
                             <h3>{{ img.filename }}</h3>

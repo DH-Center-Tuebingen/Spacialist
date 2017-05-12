@@ -152,6 +152,23 @@ JWT_REFRESH_TTL=* #the ttl (in minutes) in which you can generate a new token. D
 JWT_BLACKLIST_GRACE_PERIOD=* #a time span in seconds which allows you to use the same token several times in this time span without blacklisting it (good for async api calls)
 ```
 
+#### Protected Files
+Your uploaded files are stored in a public folder. To increase security it is recommended to define a random path in your `.env` file. The matching key is `SP_IMAGE_PATH`. You also have to create the path on your system (Do not actually create the last part of the path, you have to create it as a softlink later).
+
+**Example:**
+```bash
+# added to .env file
+SP_IMAGE_PATH=mysecret/anothersecret/privateFolderXYZ
+```
+```bash
+cd /var/www/html/Spacialist/lumen/public
+mkdir -p storage/mysecret/anothersecret
+cd storage/mysecret/anothersecret
+ln -s /var/www/html/Spacialist/lumen/storage/app/images privateFolderXYZ
+```
+
+### Migrations
+
 After the `.env` file has been configured you should run the migrations to setup your database.
 ```bash
 php artisan migrate

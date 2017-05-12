@@ -5,23 +5,8 @@ spacialistApp.controller('pdfCtrl', ['$scope', 'httpGetFactory', 'pdfDelegate', 
     var pdfHandle = 'pdf-handle';
     var pdfDelegateHandle = pdfDelegate.$getByHandle(pdfHandle);
 
-    $scope.getFileContent = function(img, decodeBase64) {
-        $scope.fileLoaded = false;
-        var url = 'api/image/get/' + img.id;
-        if(decodeBase64) url += '/decoded';
-        httpGetFactory(url, function(response) {
-            $scope.fileContent = response;
-            $scope.fileLoaded = true;
-        });
-    };
-
     $scope.togglePreview = function() {
         $scope.isPreview = !$scope.isPreview;
-        if($scope.isPreview) {
-            $scope.previewContent = marked($scope.fileContent);
-        } else {
-            $scope.previewContent = '';
-        }
     };
 
     // Delegate functions

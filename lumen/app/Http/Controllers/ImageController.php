@@ -308,8 +308,9 @@ class ImageController extends Controller
                     ->orderBy('id', 'asc')
                     ->get();
         foreach($images as &$img) {
-            $img->url = 'images/' . $img->filename;
-            $img->thumb_url = 'images/' . $img->thumbname;
+            $img->url = Storage::disk('public')->url(env('SP_IMAGE_PATH') .'/'. $img->filename);
+            if(substr($img->mime_type, 0, 6) === 'image/');
+            $img->thumb_url = Storage::disk('public')->url(env('SP_IMAGE_PATH') .'/'. $img->thumbname);
             $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
 
             if($user->can('edit_photo_props')) {
