@@ -48,7 +48,9 @@
     "snackbarjs": "^1.1.0",
     "ui-leaflet-layers": "^0.1.3",
     "Leaflet.GridLayer.GoogleMutant": "https://gitlab.com/IvanSanchez/Leaflet.GridLayer.GoogleMutant.git",
-    "leaflet-plugins": "^3.0.0"
+    "leaflet-plugins": "^3.0.0",
+    "Leaflet.Snap": "https://github.com/makinacorpus/Leaflet.Snap.git",
+    "Leaflet.GeometryUtil": "https://github.com/makinacorpus/Leaflet.GeometryUtil.git"
   },
   "resolutions": {
     "angular": "~1.5.8",

@@ -225,6 +225,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         map.map.defaults = {
             maxZoom: 27
         };
+        map.map.layers = {
+            baselayers: {},
+            overlays: {}
+        };
         map.map.bounds = map.createBoundsFromArray([
             [-90, 180],
             [90, -180]
@@ -287,14 +291,21 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             scale: true
         };
 
+        var guideLayers = [
+            map.featureGroup
+        ];
         map.map.drawOptions = {
             position: "bottomright",
             draw: {
                 polyline: {
-                    shapeOptions: map.style
+                    shapeOptions: map.style,
+                    allowIntersection: false,
+                    guideLayers: guideLayers
                 },
                 polygon: {
-                    shapeOptions: map.style
+                    shapeOptions: map.style,
+                    guideLayers: guideLayers,
+                    snapDistance: 5
                 },
                 marker: {
                     shapeOptions: map.style
@@ -304,13 +315,12 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             },
             edit: {
                 featureGroup: map.featureGroup,
-                remove: true
+                remove: true,
+                snapOptions: {
+                    guideLayers: guideLayers,
+                    snapDistance: 5
+                }
             }
-        };
-
-        map.map.layers = {
-            baselayers: {},
-            overlays: {}
         };
     }
 
