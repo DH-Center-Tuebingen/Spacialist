@@ -416,6 +416,7 @@ spacialistApp.directive('resizeWatcher', function($window) {
                 $('#literature-container').css('height', '');
                 $('analysis-frame').css('height', '');
                 $('#attribute-editor').css('height', '');
+                $('#layer-editor').css('height', '');
             } else {
                 var height = newValue.height;
                 var width = newValue.width;
@@ -431,6 +432,12 @@ spacialistApp.directive('resizeWatcher', function($window) {
                     $(attributeEditor).css('height', containerHeight);
                     var heading = document.getElementById('editor-heading');
                     $('.attribute-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
+                }
+                var layerEditor = document.getElementById('layer-editor');
+                if(layerEditor) {
+                    $(layerEditor).css('height', containerHeight);
+                    var heading = document.getElementById('editor-heading');
+                    $('.layer-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
                 }
                 var literatureContainer = document.getElementById('literature-container');
                 if(literatureContainer) {
@@ -866,6 +873,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         .state('attributes', {
             url: '/attribute-editor',
             templateUrl: 'attribute-editor.html'
+        })
+        .state('layers', {
+            url: '/layer-editor',
+            templateUrl: 'layer-editor.html'
         });
 });
 

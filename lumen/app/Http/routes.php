@@ -57,6 +57,9 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('user/get/role/permissions/{id}', 'UserController@getPermissionsByRole');
     $app->get('role/delete/{id}', 'UserController@deleteRole');
     $app->get('overlay/get/all', 'OverlayController@getAll');
+    $app->get('overlay/delete/{id}', 'OverlayController@deleteLayer');
+    $app->get('overlay/move/{id}/up', 'OverlayController@moveUp');
+    $app->get('overlay/move/{id}/down', 'OverlayController@moveDown');
     $app->get('editor/attribute/delete/{id}', 'ContextController@deleteAttribute');
     $app->get('editor/occurrences/{id}', 'ContextController@getOccurrenceCount');
     $app->get('editor/contexttype/delete/{id}', 'ContextController@deleteContextType');

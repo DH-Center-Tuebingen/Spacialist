@@ -18,6 +18,31 @@ class OverlayController extends Controller {
         //
     }
 
+    public function deleteLayer($id) {
+        AvailableLayer::find($id)->delete();
+        return response()->json([]);
+    }
+
+    public function moveUp($id) {
+        $layer = AvailableLayer::find($id);
+        $layer2 = AvailableLayer::where('position', '=', $layer->position - 1)->first();
+        $layer->position--;
+        $layer2->position++;
+        $layer->save();
+        $layer2->save();
+        return response()->json([]);
+    }
+
+    public function moveDown($id) {
+        $layer = AvailableLayer::find($id);
+        $layer2 = AvailableLayer::where('position', '=', $layer->position + 1)->first();
+        $layer->position++;
+        $layer2->position--;
+        $layer->save();
+        $layer2->save();
+        return response()->json([]);
+    }
+
     public function getAll() {
         $layers = \DB::table('available_layers as al')
             ->select('al.*', 'ct.thesaurus_url')

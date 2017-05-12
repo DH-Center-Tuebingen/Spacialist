@@ -352,6 +352,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             currentLayer.layerOptions = setLayerOptions(layer);
             if(layer.context_type_id) {
                 currentLayer.name = layer.label;
+                angular.merge(currentLayer.layerOptions, setContextLayerOptions(layer));
                 currentLayer.type = 'geoJSONShape';
                 currentLayer.data = {
                     type: 'FeatureCollection',
@@ -405,16 +406,27 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         layerOptions.noWrap = true;
         layerOptions.detectRetina = true;
         layerOptions.layer_id = l.id;
+        layerOptions.position = l.position;
+        layerOptions.is_overlay = l.is_overlay;
         if(l.is_overlay) {
             layerOptions.transparent = true;
         }
         for(var k in l) {
             if(l.hasOwnProperty(k)) {
                 if(!isIllegalKey(k) && l[k] !== null) {
-                    layerOptions[k] = l[k];
+                    var lk = l[k];
+                    if(k == 'opacity') lk = parseFloat(lk);
+                    layerOptions[k] = lk;
                 }
             }
         }
+        return layerOptions;
+    }
+
+    function setContextLayerOptions(l) {
+        var layerOptions = {};
+        layerOptions.context_type_id = l.context_type_id;
+        layerOptions.color = l.color;
         return layerOptions;
     }
 
