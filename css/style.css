@@ -651,6 +651,12 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     margin: 5px 0 5px 0;
 }
 
+/* three.js */
+#threejs-container > canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
 /* MATERIAL DESIGN PATCHES >> */
 /* input controls */
 span.btn {

@@ -169,6 +169,7 @@
     "file-type.html": "HTML",
     "file-type.audio": "Audiodatei",
     "file-type.video": "Videodatei",
+    "file-type.3d": "3D-Datei",
     "file-type.plain-text": "Textdatei",
     "photos.empty": "Keine Dateien vorhanden",
     "photos.load-more": "{{ cnt }} weitere Dateien laden",

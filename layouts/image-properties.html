@@ -3,7 +3,7 @@
 </div>
 <div class="modal-body col-md-12" ng-init="imageEdits = {}">
     <div class="col-md-7 external-container">
-        <div ng-switch="modalOptions.getMimeType(modalOptions.img.mime_type)">
+        <div ng-switch="modalOptions.getMimeType(modalOptions.img.mime_type, modalOptions.img.filename)">
             <div ng-switch-when="image">
                 <img protected-src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" />
                 <div class="external-content">
@@ -46,6 +46,18 @@
                 <video controls class="width-90">
                     <source ng-src="{{modalOptions.img.url}}" />
                 </video>
+            </div>
+            <div ng-switch-when="3d" ng-controller="threeCtrl">
+                <div id="threejs-container" ng-init="initThree(modalOptions.img.url)">
+                    <div style="position: absolute; top: 10px; left: 10px;">
+                        <button class="btn btn-primary" style="display: block;" ng-click="zoomOut()"><i class="material-icons">zoom_out</i></button>
+                        <button class="btn btn-primary" style="display: block;" ng-click="zoomIn()"><i class="material-icons">zoom_in</i></button>
+                        <button class="btn btn-primary" style="display: block;" ng-click="toggleMeasurement()"><i class="material-icons">straighten</i></button>
+                    </div>
+                </div>
+                <p>
+                    Gemessene Länge: {{ props.length }}m
+                </p>
             </div>
             <div ng-switch-default ng-controller="pdfCtrl">
                 <div ng-if="modalOptions.img.filename.endsWith('.md')">

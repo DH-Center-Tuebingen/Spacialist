@@ -8,7 +8,7 @@
         <div class="col-sm-6 col-md-4 unlinked-item" context-menu="imageContextMenu" ng-repeat="img in tmpData[imageType] | imageFilter:searchTerms">
             <div class="thumbnail">
                 <a ng-click="openImageModal(img)">
-                    <div class="thumb-wrapper centered-full" ng-switch="getMimeType(img.mime_type)">
+                    <div class="thumb-wrapper centered-full" ng-switch="getMimeType(img.mime_type, img.filename)">
                         <div ng-switch-when="image">
                             <img class="thumb" ng-src="{{img.thumb_url}}" />
                         </div>
@@ -34,8 +34,13 @@
                         </div>
                         <div ng-switch-when="video">
                             <h3>{{ img.filename }}</h3>
-                            <i class="material-icons md-96 md-dark">theaters</i> <!-- videocam -->
+                            <i class="material-icons md-96 md-dark">movie</i> <!-- videocam, theaters -->
                             <h4 translate="file-type.video"></h4>
+                        </div>
+                        <div ng-switch-when="3d">
+                            <h3>{{ img.filename }}</h3>
+                            <i class="material-icons md-96 md-dark">3d_rotation</i>
+                            <h4 translate="file-type.3d"></h4>
                         </div>
                         <div ng-switch-default>
                             <h3>{{ img.filename }}</h3>
