@@ -47,9 +47,24 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         camera.updateProjectionMatrix();
     };
 
+    function loadObj(path, objFile, materials) {
+        var objLoader = new THREE.OBJLoader();
+        objLoader.setPath(path);
+        if(materials) {
+            objLoader.setMaterials(materials);
+        }
+        objLoader.load(objFile, function(object) {
+            scene.add(object);
+            sceneObjects.push(object);
+            onWindowResize();
+        }, function() {}, function(xhr) {});
+    }
+
     function init() {
         container = document.getElementById($scope.threeContainer);
-		camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
+        width = container.clientWidth;
+        height = container.clientHeight;
+		camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 2000);
 		camera.position.set(7, 5, 7);
 		scene = new THREE.Scene();
 
@@ -60,9 +75,26 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     			var object = collada.scene;
     			scene.add(object);
                 sceneObjects.push(object);
+                onWindowResize();
     		} );
         } else if(extension == 'obj') { // obj
-
+            var sep = fileUrl.lastIndexOf('/')+1;
+            var path = fileUrl.substr(0, sep);
+            var objUrl = fileUrl.substr(sep);
+            // we assume that the mtl file has the same name as the obj file
+            var mtlUrl = objUrl.substr(0, objUrl.lastIndexOf('.obj')) + '.mtl';
+            THREE.Loader.Handlers.add(/\.dds$/i, new THREE.DDSLoader());
+            var mtlLoader = new THREE.MTLLoader();
+            mtlLoader.setPath(path);
+            // try to load mtl file
+            mtlLoader.load(mtlUrl, function(materials) {
+                // load obj file with loaded materials
+                materials.preload();
+                loadObj(path, objUrl, materials);
+            }, function() {}, function() {
+                // onError: try to load obj without materials
+                loadObj(path, objUrl);
+            });
         }
 
 		var gridHelper = new THREE.GridHelper(10, 20);
@@ -78,7 +110,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
             antialias: true
         });
 		renderer.setPixelRatio(window.devicePixelRatio);
-		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setSize(width, height);
 		container.appendChild(renderer.domElement);
 
 		controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -88,9 +120,11 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     }
 
     function onWindowResize() {
-		camera.aspect = window.innerWidth / window.innerHeight;
+        width = renderer.domElement.clientWidth;
+        height = renderer.domElement.clientHeight;
+		camera.aspect = width/height;
 		camera.updateProjectionMatrix();
-		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setSize(width, height);
 	}
 
     function onDocumentMouseDown(event) {
@@ -107,8 +141,8 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
             particles.length = 0;
         }
 		event.preventDefault();
-		mouse.x = (event.offsetX/renderer.domElement.clientWidth)*2 - 1;
-		mouse.y = -(event.offsetY/renderer.domElement.clientHeight)*2 + 1;
+		mouse.x = (event.offsetX/width)*2 - 1;
+		mouse.y = -(event.offsetY/height)*2 + 1;
 		raycaster.setFromCamera(mouse, camera);
 		var intersects = raycaster.intersectObjects(sceneObjects, true);
 		if(intersects.length > 0) {
@@ -144,12 +178,21 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         cancelAnimationFrame(animationId);
         for(var i=0; i<sceneObjects.length; i++) {
             scene.remove(sceneObjects[i]);
+            sceneObjects[i] = null;
         }
         for(var i=0; i<particles.length; i++) {
             scene.remove(particles[i]);
+            particles[i] = null;
         }
+        sceneObjects.length = 0;
+        particles.length = 0;
+        sceneObjects = null;
+        particles = null;
 		window.addEventListener('resize', null, false);
         renderer.domElement.addEventListener('mousedown', null, false);
+        var domParent = renderer.domElement.parentElement;
+        domParent.removeChild(renderer.domElement);
+        renderer = null;
         scene = null;
         controls = null;
         camera = null;
