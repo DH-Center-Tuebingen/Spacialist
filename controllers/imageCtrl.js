@@ -32,8 +32,8 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
         imageService.removeTag(img, item);
     };
 
-    $scope.getMimeType = function(mt) {
-        return imageService.getMimeType(mt);
+    $scope.getMimeType = function(mt, f) {
+        return imageService.getMimeType(mt, f);
     };
 
     var linkImageContextMenu = [function($itemScope) {
