@@ -173,6 +173,7 @@
     "file-type.plain-text": "Textdatei",
     "photos.empty": "Keine Dateien vorhanden",
     "photos.load-more": "{{ cnt }} weitere Dateien laden",
+    "photos.filter.heading": "Filter",
     "photos.properties.heading": "Eigenschaften",
     "photos.properties.location-general": "Ort (allgemein)",
     "photos.properties.location-specific": "Ort (spezifisch)",

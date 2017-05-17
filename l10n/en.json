@@ -162,6 +162,7 @@
     "file-type.plain-text": "Text File",
     "photos.empty": "File list is empty.",
     "photos.load-more": "Load {{ cnt }} more files",
+    "photos.filter.heading": "Filter",
     "photos.properties.heading": "Properties",
     "photos.properties.location-general": "Location (general)",
     "photos.properties.location-specific": "Location (specific)",

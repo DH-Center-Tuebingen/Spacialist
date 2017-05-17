@@ -110,8 +110,15 @@
         </div>
         <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" class="padded-content" style="max-height: 100%;">
             <div ng-if="currentUser.permissions.view_photos">
-                <div class="container col-md-12">
-                    <div class="well">
+                <div class="container col-md-12" ng-init="filter_collapsed=true">
+                    <div ng-click="filter_collapsed=!filter_collapsed">
+                        <h4 translate="photos.filter.heading" style="float:left;"></h4>
+                        <div style="padding-top: 8px;">
+                            <i class="material-icons" ng-if="filter_collapsed">expand_more</i>
+                            <i class="material-icons" ng-if="!filter_collapsed">expand_less</i>
+                        </div>
+                    </div>
+                    <div class="well" ng-if="!filter_collapsed">
                         <form class="form-horizontal">
                             <div class="form-group">
                                 <label>
