@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\AvailableLayer;
 use Illuminate\Http\Request;
+use \Log;
 
 class OverlayController extends Controller {
     public $availableGeometryTypes = [
@@ -20,6 +21,17 @@ class OverlayController extends Controller {
 
     public function deleteLayer($id) {
         AvailableLayer::find($id)->delete();
+        return response()->json([]);
+    }
+
+    public function updateLayer(Request $request) {
+        $id = $request->get('id');
+        $layer = AvailableLayer::find($id);
+        foreach($request->except(['id']) as $k => $v) {
+            if(!$layer->getAttribute($k)) continue;
+            $layer->{$k} = $v;
+        }
+        $layer->save();
         return response()->json([]);
     }
 

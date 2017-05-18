@@ -86,6 +86,8 @@
     "data-model-editor.please-select-element": "Please select an element from the list on the left.",
     "layer-editor.heading": "Layer Editor",
     "layer-editor.available-layers.heading": "Available Layers",
+    "layer-editor.baselayers.heading": "Baselayers",
+    "layer-editor.overlays.heading": "Overlays",
     "layer-editor.properties": "Properties",
     "layer-editor.please-select-element": "Please select an element from the list on the left.",
     "attribute.add-button": "Add Attribute",
@@ -210,6 +212,7 @@
     "snackbar.image-upload.success": "{{ cnt }} photos uploaded.",
     "snackbar.image-deleted.success": "Photo deleted.",
     "snackbar.bibtex-upload.success": "{{ cnt }} entries added.",
+    "snackbar.layer-update.success": "Layer successfully updated.",
 
     "dates_list": "Dates list",
     "map": "Map",

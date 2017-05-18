@@ -96,6 +96,8 @@
     "data-model-editor.please-select-element": "Bitte wählen Sie ein Element aus der Liste auf der linken Seite aus.",
     "layer-editor.heading": "Ebenen-Editor",
     "layer-editor.available-layers.heading": "Verfügbare Ebenen",
+    "layer-editor.baselayers.heading": "Basis-Ebenen",
+    "layer-editor.overlays.heading": "Overlays",
     "layer-editor.properties": "Eigenschaften",
     "layer-editor.please-select-element": "Bitte wählen Sie ein Element aus der Liste auf der linken Seite aus.",
     "attribute.add-button": "Attribut hinzufügen",
@@ -221,6 +223,7 @@
     "snackbar.image-upload.success": "{{ cnt }} Bilder hochgeladen.",
     "snackbar.image-deleted.success": "Bild gelöscht.",
     "snackbar.bibtex-upload.success": "{{ cnt }} Einträge hinzugefügt.",
+    "snackbar.layer-update.success": "Ebene erfolgreich aktualisiert.",
 
     "dates_list": "Zeitangaben",
     "map": "Karte",

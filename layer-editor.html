@@ -3,10 +3,10 @@
     <div class="col-md-12">
         <div class="col-md-3 layer-editor-column">
             <h4 translate="layer-editor.available-layers.heading"></h4>
-            <h5>Basis-Ebenen</h5>
+            <h5 translate="layer-editor.baselayers.heading"></h5>
             <ul class="list-group">
-                <li class="list-group-item" ng-repeat="cl in contextLayers.baselayers" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered}">
-                    <a href="" ng-click="setSelectedLayer(cl)" style="float: left;"><i class="material-icons">map</i> {{ cl.name }}</a>
+                <li class="list-group-item" ng-repeat="(key, cl) in contextLayers.baselayers" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered}">
+                    <a href="" ng-click="setSelectedLayer(cl, key)" style="float: left;"><i class="material-icons">map</i> {{ cl.name }}</a>
                     <div ng-if="hovered">
                         <div style="float: left; padding-left: 5px;">
                             <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="onDelete(cl)">
@@ -24,10 +24,10 @@
                     </div>
                 </li>
             </ul>
-            <h5>Overlays</h5>
+            <h5 translate="layer-editor.overlays.heading"></h5>
             <ul class="list-group">
-                <li class="list-group-item" ng-repeat="cl in contextLayers.overlays" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered}">
-                    <a href="" ng-click="setSelectedLayer(cl)" style="float: left;"><i class="material-icons">map</i> {{ cl.name }}</a>
+                <li class="list-group-item" ng-repeat="(key, cl) in contextLayers.overlays" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered}">
+                    <a href="" ng-click="setSelectedLayer(cl, key)" style="float: left;"><i class="material-icons">map</i> {{ cl.name }}</a>
                     <div ng-if="hovered">
                         <div ng-if="!cl.layerOptions.context_type_id && cl.layerOptions.layer_id != 'unlinked'" style="float: left; padding-left: 5px;">
                             <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="onDelete(cl)">
@@ -49,7 +49,7 @@
         <div class="col-md-9 layer-editor-column">
             <h4 translate="layer-editor.properties"></h4>
             <div ng-if="selectedLayer.layer.name">
-                <form class="form-horizontal">
+                <form class="form-horizontal" ng-submit="updateLayer(selectedLayer.layer, selectedLayer.key)">
                     <div ng-if="selectedLayer.layer.layerOptions.context_type_id || selectedLayer.layer.layerOptions.layer_id == 'unlinked'">
                         <div class="form-group col-md-12">
                             <label class="control-label col-md-2">
@@ -182,8 +182,10 @@
                             <input class="form-control" type="number" step="0.01" min="0" max="1" ng-model="selectedLayer.layer.layerOptions.opacity" />
                         </div>
                     </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="material-icons">save</i> <span translate="Save"></span>
+                    </button>
                 </form>
-                {{ selectedLayer.layer }}
             </div>
             <div ng-if="!selectedLayer.layer.name">
                 <p class="alert alert-info" translate="layer-editor.please-select-element">
