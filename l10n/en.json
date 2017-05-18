@@ -76,6 +76,7 @@
     "context-type.new.heading": "Create New Context-Type",
     "context-type.new.label": "Name",
     "context-type.new.type": "Context Type",
+    "context-type.new.geomtype": "Geometry Type",
     "context-type.type.context": "Context",
     "context-type.type.find": "Find",
     "data-model-editor.heading": "Data Model Editor",
