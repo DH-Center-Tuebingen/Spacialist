@@ -149,6 +149,7 @@
     "role.edit.heading": "Edit Role",
     "map-marker.not-linked-info": "This marker is not linked to any context.",
     "map-marker.how-to-link": "To link the marker with a context, select a context in the tree on the left-hand side.",
+    "map-marker.wrong-type.info": "The selected geodata object cannot be linked to the selected context, because their allowed geometry types ({{gtype}} and {{ctype}}) does not match.",
     "map-marker.options.label": "Marker Options",
     "map-marker.options.color": "Color",
     "map-marker.options.icon": "Icon",

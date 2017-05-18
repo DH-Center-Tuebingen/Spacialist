@@ -160,6 +160,7 @@
     "role.edit.heading": "Rolle Bearbeiten",
     "map-marker.not-linked-info": "Diese Markierung ist mit keinem Kontext verknüpft.",
     "map-marker.how-to-link": "Um eine Verknüpfung herzustellen, wählen Sie einen Kontext aus dem Baum. Dann erscheint hier ein Knopf zum Verknüpfen der Markierung mit dem gewählten Kontext.",
+    "map-marker.wrong-type.info": "Das ausgewählte Geodaten-Objekt kann nicht mit dem ausgewählten Kontext verknüpft werden, weil die erlaubten Geometrietypen ({{gtype}} und {{ctype}}) nicht übereinstimmen.",
     "map-marker.options.label": "Optionen für Markierung",
     "map-marker.options.color": "Farbe",
     "map-marker.options.icon": "Symbol",
