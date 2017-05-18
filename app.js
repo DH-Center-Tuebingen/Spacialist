@@ -303,7 +303,7 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-    this.newContextTypeModal = function(labelCallback, onCreate) {
+    this.newContextTypeModal = function(labelCallback, onCreate, availableGeometryTypes) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/new-context-type.html',
             controller: function($uibModalInstance) {
@@ -311,9 +311,10 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     { id: 0, label: 'context-type.type.context'},
                     { id: 1, label: 'context-type.type.find'}
                 ];
+                this.availableGeometryTypes = availableGeometryTypes;
                 this.onSearch = labelCallback;
-                this.onCreate = function(label, type) {
-                    onCreate(label, type);
+                this.onCreate = function(label, type, geomtype) {
+                    onCreate(label, type, geomtype);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {

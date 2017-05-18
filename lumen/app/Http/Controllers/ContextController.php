@@ -12,6 +12,7 @@ use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
 use App\ContextAttribute;
+use App\AvailableLayer;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
@@ -155,13 +156,28 @@ class ContextController extends Controller {
         }
         $curl = $request->get('concept_url');
         $type = $request->get('type');
+        $geomtype = $request->get('geomtype');
         $cType = new ContextType();
         $cType->thesaurus_url = $curl;
         $cType->type = $type;
         $cType->save();
         $cType->label = $this->getLabel($curl);
+
+        $layer = new AvailableLayer();
+        $layer->name = '';
+        $layer->url = '';
+        $layer->type = $geomtype;
+        $layer->opacity = 1;
+        $layer->visible = true;
+        $layer->is_overlay = true;
+        $layer->position = AvailableLayer::where('is_overlay', '=', true)->max('position') + 1;
+        $layer->context_type_id = $cType->id;
+        $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        $layer->save();
+
         return response()->json([
-            'contexttype' => $cType
+            'contexttype' => $cType,
+            'layer' => $layer
         ]);
     }
 

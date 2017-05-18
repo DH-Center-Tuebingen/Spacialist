@@ -329,7 +329,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
         var promise = httpGetPromise.getData('api/overlay/get/all');
         promise.then(function(response) {
-            map.setLayers(response);
+            map.setLayers(response.layers);
             // wait a random amount of time, so mapObject.eachLayer has all layers
             $timeout(function() {
                 map.mapObject.eachLayer(function(l) {
@@ -342,10 +342,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         });
     };
 
-    map.setLayers = function(response) {
+    map.setLayers = function(layers) {
         var gKeyLoaded = false;
-        for(var i=0; i<response.layers.length; i++) {
-            var layer = response.layers[i];
+        for(var i=0; i<layers.length; i++) {
+            var layer = layers[i];
             var id = layer.id;
             var currentLayer = {};
             currentLayer.visible = layer.visible;
@@ -427,6 +427,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         var layerOptions = {};
         layerOptions.context_type_id = l.context_type_id;
         layerOptions.color = l.color;
+        layerOptions.type = l.type;
         return layerOptions;
     }
 

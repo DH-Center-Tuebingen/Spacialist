@@ -60,6 +60,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('overlay/delete/{id}', 'OverlayController@deleteLayer');
     $app->get('overlay/move/{id}/up', 'OverlayController@moveUp');
     $app->get('overlay/move/{id}/down', 'OverlayController@moveDown');
+    $app->get('overlay/geometrytypes/get', 'OverlayController@getGeometryTypes');
     $app->get('editor/attribute/delete/{id}', 'ContextController@deleteAttribute');
     $app->get('editor/occurrences/{id}', 'ContextController@getOccurrenceCount');
     $app->get('editor/contexttype/delete/{id}', 'ContextController@deleteContextType');

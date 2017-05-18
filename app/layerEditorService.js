@@ -57,14 +57,23 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
                 // TODO errorModal
                 return;
             }
-            for(var k in tmpLayer) {
-                if(tmpLayer.hasOwnProperty(k)) {
-                    if(tmpLayer[k] !== null && tmpLayer[k] instanceof Object) {
-                        tgt[k] = angular.merge({}, tmpLayer[k]);
+            var dfltBaselayerChanged = false;
+            if(!isOverlay(layer)) {
+                dfltBaselayerChanged = layer.layerOptions.visible != tgt.layerOptions.visible;
+            }
+            for(var k in layer) {
+                if(layer.hasOwnProperty(k)) {
+                    if(layer[k] !== null && layer[k] instanceof Object) {
+                        tgt[k] = angular.merge({}, layer[k]);
                     } else {
-                        tgt[k] = tmpLayer[k];
+                        tgt[k] = layer[k];
                     }
                 }
+            }
+            if(dfltBaselayerChanged) {
+                angular.forEach(editor.contextLayers.baselayers, function(l) {
+                    l.layerOptions.visible = l.layerOptions.layer_id == layer.layerOptions.layer_id;
+                });
             }
             var content = $translate.instant('snackbar.layer-update.success');
             snackbarService.addAutocloseSnack(content, 'success');

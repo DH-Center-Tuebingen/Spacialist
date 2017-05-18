@@ -7,7 +7,7 @@ use \Log;
 
 class OverlayController extends Controller {
     public $availableGeometryTypes = [
-        'Point', 'Linestring', 'Polygon', 'Multipoint', 'Multilinestring', 'Multipolygon'
+        'Point', 'Linestring', 'Polygon', 'MultiPoint', 'MultiLinestring', 'MultiPolygon'
     ];
 
     /**
@@ -19,6 +19,10 @@ class OverlayController extends Controller {
         //
     }
 
+    public function getGeometryTypes() {
+        return response()->json($this->availableGeometryTypes);
+    }
+
     public function deleteLayer($id) {
         AvailableLayer::find($id)->delete();
         return response()->json([]);
@@ -27,8 +31,21 @@ class OverlayController extends Controller {
     public function updateLayer(Request $request) {
         $id = $request->get('id');
         $layer = AvailableLayer::find($id);
+        if($request->has('visible') && $request->get('visible') == 'true') {
+            if(!$layer->visible) {
+                $layers = AvailableLayer::where('is_overlay', '=', false)
+                ->where('id', '!=', $layer->id)
+                ->get();
+                foreach($layers as $l) {
+                    $l->visible = false;
+                    $l->save();
+                }
+            }
+        }
         foreach($request->except(['id']) as $k => $v) {
-            if(!$layer->getAttribute($k)) continue;
+            // cast boolean strings
+            if($v == 'true') $v = true;
+            else if($v == 'false') $v = false;
             $layer->{$k} = $v;
         }
         $layer->save();
