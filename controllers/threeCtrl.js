@@ -73,6 +73,17 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     		loader.options.convertUpAxis = true;
     		loader.load(fileUrl, function(collada) {
     			var object = collada.scene;
+                var material, children;
+                var parent = object;
+                do {
+                    children = parent.children;
+                    if(!children) break;
+                    material = children[0].material;
+                    parent = children[0];
+                } while(!material);
+                if(material) {
+                    material.side = THREE.DoubleSide;
+                }
     			scene.add(object);
                 sceneObjects.push(object);
                 onWindowResize();
@@ -85,6 +96,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
             var mtlUrl = objUrl.substr(0, objUrl.lastIndexOf('.obj')) + '.mtl';
             THREE.Loader.Handlers.add(/\.dds$/i, new THREE.DDSLoader());
             var mtlLoader = new THREE.MTLLoader();
+            mtlLoader.setMaterialOptions({
+                side: THREE.DoubleSide
+            });
             mtlLoader.setPath(path);
             // try to load mtl file
             mtlLoader.load(mtlUrl, function(materials) {
@@ -103,7 +117,8 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		var ambientLight = new THREE.AmbientLight(0xcccccc);
 		scene.add(ambientLight);
 		var directionalLight = new THREE.DirectionalLight(0xffffff);
-		directionalLight.position.set(0, 1, -1).normalize();
+		// directionalLight.position.set(0, 1, -1).normalize();
+        directionalLight.position = camera.position;
 		scene.add(directionalLight);
 
 		renderer = new THREE.WebGLRenderer({
