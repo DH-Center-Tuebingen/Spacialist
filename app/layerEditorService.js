@@ -14,6 +14,7 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
     editor.updateLayer = function(layer, key) {
         var tmpLayer = angular.merge({}, layer);
         delete tmpLayer.visible;
+        delete tmpLayer.layerParams;
         if(tmpLayer.layerOptions.context_type_id) {
             delete tmpLayer.type;
             delete tmpLayer.data;
