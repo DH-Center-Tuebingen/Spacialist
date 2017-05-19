@@ -91,23 +91,33 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         for(var k in geodataList) {
             if(geodataList.hasOwnProperty(k)) {
                 var geodata = geodataList[k];
+                var lid;
+                var color;
+                if(map.geodata.linkedContexts[geodata.id]) {
+                    var cid = map.geodata.linkedContexts[geodata.id];
+                    var c = map.contexts.data[cid];
+                    var ctid = c.context_type_id;
+                    lid = map.geodata.linkedGeolayer[ctid];
+                    if(map.mapLayers[lid]) {
+                        color = map.mapLayers[lid].options.color;
+                    }
+                }
+                if(!color) {
+                    color = geodata.color;
+                }
                 var feature = {
                     type: 'Feature',
                     id: geodata.id,
                     geometry: geodata.geodata,
                     properties: {
                         name: 'Geodata #' + geodata.id,
-                        color: geodata.color,
+                        color: color,
                         popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
                     }
                 };
                 // Add geodata to contexttype layer if it is linked to it
-                if(map.geodata.linkedContexts[geodata.id]) {
-                    var cid = map.geodata.linkedContexts[geodata.id];
-                    var c = map.contexts.data[cid];
-                    var ctid = c.context_type_id;
-                    var lid = map.geodata.linkedGeolayer[ctid];
-                    if(map.mapLayers[lid]) map.mapLayers[lid].addData(feature);
+                if(lid && map.mapLayers[lid]) {
+                    map.mapLayers[lid].addData(feature);
                 } else {
                     map.mapLayers.unlinked.addData(feature);
                 }
