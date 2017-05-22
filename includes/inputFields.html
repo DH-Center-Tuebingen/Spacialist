@@ -20,6 +20,13 @@
                     <span translate="context-form.fields.open-map"/>
                 </button>
             </div>
+            <div ng-switch-when="context">
+                <input class="form-control" type="text" id="a{{ attr.aid }}" placeholder="{{ 'context-form.fields.placeholder-context' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-model-options="{ debounce: 250 }" ng-readonly="readonlyInput" uib-typeahead="result as result.name for result in contextSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel" />
+                <i ng-show="loadingResultsLabel" class="material-icons">refresh</i>
+                <div ng-show="noResultsLabel && result.name.length >= 3">
+                    <i class="material-icons md-18">clear</i> No Results Found
+                </div>
+            </div>
             <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"></textarea>
             <p class="input-group" ng-switch-when="date">
                 <input type="text" class="form-control" id="a{{ attr.aid }}_{{ attr.oid }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(attributeOutputs[attr.aid+'_'+attr.oid])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
