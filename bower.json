@@ -45,7 +45,12 @@
     "satellizer": "^0.15.5",
     "angular-ui-router": "^0.3.2",
     "bootstrap-material-design": "^v0.5.10",
-    "snackbarjs": "^1.1.0"
+    "snackbarjs": "^1.1.0",
+    "angular-highlightjs": "^0.7.1",
+    "angular-pdf-viewer": "^0.2.13",
+    "highlightjs": "^9.10.0",
+    "angular-marked": "^1.2.2",
+    "three.js": "three#*"
   },
   "resolutions": {
     "angular": "~1.5.8",

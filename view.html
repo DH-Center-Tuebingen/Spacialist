@@ -85,7 +85,7 @@
                 <a href="" ng-click="setActiveTab('harris')"><i class="material-icons">format_shapes</i><span class="tab-desc"> {{'context-form.tabs.harris-matrix'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'images'}" ng-if="moduleExists('imageCtrl')">
-                <a href="" ng-click="setActiveTab('images')"><i class="material-icons">image</i><span class="tab-desc"> {{'context-form.tabs.photos'|translate}}</span></a>
+                <a href="" ng-click="setActiveTab('images')"><i class="material-icons">folder</i><span class="tab-desc"> {{'context-form.tabs.photos'|translate}}</span></a>
             </li>
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'bibliography'}" ng-if="moduleExists('literatureCtrl') && currentElement.element.id">
                 <a href="" ng-click="setActiveTab('bibliography')"><i class="material-icons">book</i><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
@@ -110,8 +110,15 @@
         </div>
         <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" class="padded-content" style="max-height: 100%;">
             <div ng-if="currentUser.permissions.view_photos">
-                <div class="container col-md-12">
-                    <div class="well">
+                <div class="container col-md-12" ng-init="filter_collapsed=true">
+                    <div ng-click="filter_collapsed=!filter_collapsed" style="cursor: pointer;">
+                        <h4 translate="photos.filter.heading" style="float:left;"></h4>
+                        <div style="padding-top: 8px;">
+                            <i class="material-icons" ng-if="filter_collapsed">expand_more</i>
+                            <i class="material-icons" ng-if="!filter_collapsed">expand_less</i>
+                        </div>
+                    </div>
+                    <div class="well" ng-if="!filter_collapsed">
                         <form class="form-horizontal">
                             <div class="form-group">
                                 <label>
@@ -162,10 +169,10 @@
                             {{ 'context-form.tabs.photos.upload' | translate }}
                         </uib-accordion-heading>
                         <div class="col-md-12">
-                            <div class="alert alert-info drop-box" ngf-drop ngf-select ng-model="dropFiles" ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="false" accept="image/*" ngf-pattern="'image/*'">
+                            <div class="alert alert-info drop-box" ngf-drop ngf-select ng-model="dropFiles" ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true" ngf-accept="'*'" ngf-pattern="'*'">
                                 {{'context-form.tabs.photos.drag+drop'|translate}}
                             </div>
-                            <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple accept="image/*">{{'context-form.tabs.photos.upload-button'|translate}}</button>
+                            <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple ngf-allow-dir="true" ngf-accept="'*'">{{'context-form.tabs.photos.upload-button'|translate}}</button>
                             <ul>
                                 <li ng-repeat="f in upload.files">
                                     {{ f.name }} {{ f.$errorParam }}

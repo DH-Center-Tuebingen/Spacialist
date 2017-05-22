@@ -42,6 +42,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('image/getAll', 'ImageController@getAll');
     $app->get('image/get/info/{id}', 'ImageController@getImage');
     $app->get('image/get/{id}', 'ImageController@getImageObject');
+    $app->get('image/get/{id}/decoded', 'ImageController@getDecodedImageObject');
     $app->get('image/get/preview/{id}', 'ImageController@getImagePreviewObject');
     $app->get('image/getByContext/{id}', 'ImageController@getByContext');
     $app->get('image/delete/{id}', 'ImageController@delete');
