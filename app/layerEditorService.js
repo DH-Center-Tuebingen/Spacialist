@@ -30,6 +30,7 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
         formData.append('id', tmpLayer.layerOptions.layer_id);
         delete tmpLayer.layerOptions.layer_id;
         var updated = false;
+        var colorUpdated = tgt.layerOptions.color != layer.layerOptions.color;
         for(var k in tmpLayer) {
             if(tmpLayer.hasOwnProperty(k)) {
                 if(tmpLayer[k] !== null && tmpLayer[k] instanceof Object && !angular.equals(tmpLayer[k], tgt[k])) {
@@ -74,6 +75,11 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
             if(dfltBaselayerChanged) {
                 angular.forEach(editor.contextLayers.baselayers, function(l) {
                     l.layerOptions.visible = l.layerOptions.layer_id == layer.layerOptions.layer_id;
+                });
+            }
+            if(colorUpdated) {
+                angular.forEach(mapService.mapLayers[tgt.layerOptions.layer_id].getLayers(), function(l) {
+                    l.options.fillColor = tgt.layerOptions.color;
                 });
             }
             var content = $translate.instant('snackbar.layer-update.success');
