@@ -635,8 +635,8 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     cursor: pointer;
     font-size: 12px !important;
     position: absolute;
-    right: 1px;
-    top: 2px;
+    right: -2px;
+    top: 8px;
 }
 
 .list-group-item {
