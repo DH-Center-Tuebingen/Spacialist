@@ -87,6 +87,15 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
         });
     };
 
+
+    editor.addNewBaselayer = function() {
+        addNewLayer(false);
+    };
+
+    editor.addNewOverlay = function() {
+        addNewLayer(true);
+    };
+
     editor.onDelete = function(cl) {
         httpGetFactory('api/overlay/delete/' + cl.layerOptions.layer_id, function(response) {
             if(response.error) {
@@ -135,6 +144,27 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
             });
         }
     };
+
+    function addNewLayer(isOverlay) {
+        var layers;
+        if(isOverlay) {
+            layers = editor.contextLayers.overlays;
+        } else {
+            layers = editor.contextLayers.baselayers;
+        }
+        var name = $translate.instant('layer-editor.default-name');
+        var formData = new FormData();
+        formData.append('name', name);
+        formData.append('is_overlay', isOverlay);
+        httpPostFactory('api/overlay/add', formData, function(response) {
+            if(response.error) {
+                return;
+            }
+            var l = response.layer;
+            console.log(l);
+            layers[l.id] = l;
+        });
+    }
 
     function needsUpdate(valueTgt, valueSrc) {
         if(typeof valueSrc == 'function') return false;

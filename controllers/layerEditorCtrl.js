@@ -6,4 +6,6 @@ spacialistApp.controller('layerEditorCtrl', ['$scope', 'mainService', 'layerEdit
     $scope.onDelete = layerEditorService.onDelete;
     $scope.onOrder = layerEditorService.onOrder;
     $scope.updateLayer = layerEditorService.updateLayer;
+    $scope.addNewBaselayer = layerEditorService.addNewBaselayer;
+    $scope.addNewOverlay = layerEditorService.addNewOverlay;
 }]);

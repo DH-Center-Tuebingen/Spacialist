@@ -28,6 +28,21 @@ class OverlayController extends Controller {
         return response()->json([]);
     }
 
+    public function addLayer(Request $request) {
+        $name = $request->get('name');
+        $isOverlay = $request->has('is_overlay') && $request->get('is_overlay') == 'true';
+        $layer = new AvailableLayer();
+        $layer->name = $name;
+        $layer->url = '';
+        $layer->type = '';
+        $layer->is_overlay = $isOverlay;
+        $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        $layer->save();
+        return response()->json([
+            'layer' => $layer
+        ]);
+    }
+
     public function updateLayer(Request $request) {
         $id = $request->get('id');
         $layer = AvailableLayer::find($id);

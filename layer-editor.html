@@ -24,6 +24,9 @@
                     </div>
                 </li>
             </ul>
+            <button type="button" class="btn btn-success" ng-click="addNewBaselayer()">
+                <i class="material-icons">add</i> {{ 'layer-editor.add-new.baselayer' | translate }}
+            </button>
             <h5 translate="layer-editor.overlays.heading"></h5>
             <ul class="list-group">
                 <li class="list-group-item" ng-repeat="(key, cl) in contextLayers.overlays" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered}">
@@ -45,9 +48,12 @@
                     </div>
                 </li>
             </ul>
+            <button type="button" class="btn btn-success" ng-click="addNewOverlay()">
+                <i class="material-icons">add</i> {{ 'layer-editor.add-new.overlay' | translate }}
+            </button>
         </div>
         <div class="col-md-9 layer-editor-column">
-            <h4 translate="layer-editor.properties"></h4>
+            <h4 translate="layer-editor.properties-of.heading" translate-values="{ name: selectedLayer.layer.name }"></h4>
             <div ng-if="selectedLayer.layer.name">
                 <form class="form-horizontal" ng-submit="updateLayer(selectedLayer.layer, selectedLayer.key)">
                     <div ng-if="selectedLayer.layer.layerOptions.context_type_id || selectedLayer.layer.layerOptions.layer_id == 'unlinked'">

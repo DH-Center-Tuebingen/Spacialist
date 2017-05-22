@@ -92,6 +92,7 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('literature/edit', 'LiteratureController@edit');
     $app->post('literature/import/bib', 'LiteratureController@importBibtex');
     $app->post('overlay/update', 'OverlayController@updateLayer');
+    $app->post('overlay/add', 'OverlayController@addLayer');
     $app->post('editor/search', 'ContextController@search');
     $app->post('editor/contexttype/add', 'ContextController@addContextType');
     $app->post('editor/contexttype/edit', 'ContextController@editContextType');
