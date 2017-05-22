@@ -17,6 +17,9 @@ use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
 use Phaza\LaravelPostgis\Geometries\Polygon;
+use Phaza\LaravelPostgis\Geometries\MultiPoint;
+use Phaza\LaravelPostgis\Geometries\MultiLineString;
+use Phaza\LaravelPostgis\Geometries\MultiPolygon;
 use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Zizaco\Entrust;
 use \DB;
@@ -535,11 +538,29 @@ class ContextController extends Controller {
             ]);
         }
         try {
-            Geodata::findOrFail($gid);
+            $geodata = Geodata::findOrFail($gid);
         } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This geodata does not exist'
             ]);
+        }
+        $layer = AvailableLayer::where('context_type_id', '=', $context->context_type_id)->first();
+
+        $undefinedError = [
+            'error' => 'Layer Type doesn\'t match Geodata Type'
+        ];
+        if($geodata->geom instanceof Point && $layer->type != 'Point') {
+            return response()->json($undefinedError);
+        } else if($geodata->geom instanceof MultiPoint && $layer->type != 'MultiPoint') {
+            return response()->json($undefinedError);
+        } else if($geodata->geom instanceof LineString && $layer->type != 'Linestring') {
+            return response()->json($undefinedError);
+        } else if($geodata->geom instanceof MultiLineString && $layer->type != 'MultiLinestring') {
+            return response()->json($undefinedError);
+        } else if($geodata->geom instanceof Polygon && $layer->type != 'Polygon') {
+            return response()->json($undefinedError);
+        } else if($geodata->geom instanceof MultiPolygon && $layer->type != 'MultiPolygon') {
+            return response()->json($undefinedError);
         }
         $context->geodata_id = $gid;
         $context->save();
