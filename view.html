@@ -23,7 +23,9 @@
     <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive">
         <div ng-if="currentUser.permissions.view_concept_props">
             <div ng-show="currentElement.element.id">
-                <h3>{{ currentElement.element.name }}<span ng-if="currentElement.element.typeLabel" class="type-desc">{{ currentElement.element.typeLabel }}</span> <small>{{'context-form.heading'|translate}}</small></h3>
+                <h3>{{ currentElement.element.name }}<br>
+                    <small><span ng-if="currentElement.element.typelabel">{{ currentElement.element.typelabel }} &mdash; </span>{{'context-form.heading'|translate}}</small>
+                </h3>
                 <p class="btn-group-sm nav-inline">
                     <a class="btn btn-success btn-fab btn-fab-mini" href="" ng-click="storeElement(currentElement.element, currentElement.data)">
                         <i class="material-icons">save</i>
