@@ -11,6 +11,12 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     map.geodata.linkedGeolayer = {};
     map.featureGroup = new L.FeatureGroup();
 
+    map.availableGeometryTypes = {
+        point: 'POINT',
+        linestring: 'LINESTRING',
+        polygon: 'POLYGON'
+    };
+
     var availableLayerKeys = [
         'subdomains', 'attribution', 'opacity', 'layers', 'styles', 'format', 'version', 'visible'
     ];
@@ -123,6 +129,22 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 }
             }
         }
+    };
+
+    map.isLinkPossible = function(geodataType, layerType) {
+        var gt = geodataType.toUpperCase();
+        var lt = layerType.toUpperCase();
+
+        return (
+            gt.endsWith(map.availableGeometryTypes.point) &&
+            lt.endsWith(map.availableGeometryTypes.point)
+        ) || (
+            gt.endsWith(map.availableGeometryTypes.linestring) &&
+            lt.endsWith(map.availableGeometryTypes.linestring)
+        ) || (
+            gt.endsWith(map.availableGeometryTypes.polygon) &&
+            lt.endsWith(map.availableGeometryTypes.polygon)
+        );
     };
 
     map.getCoords = function(layer, type) {
