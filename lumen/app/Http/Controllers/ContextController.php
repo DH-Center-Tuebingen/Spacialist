@@ -13,6 +13,7 @@ use App\AttributeValue;
 use App\ThConcept;
 use App\ContextAttribute;
 use App\AvailableLayer;
+use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
@@ -549,17 +550,11 @@ class ContextController extends Controller {
         $undefinedError = [
             'error' => 'Layer Type doesn\'t match Geodata Type'
         ];
-        if($geodata->geom instanceof Point && $layer->type != 'Point') {
+        if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && !Helpers::endsWith($layer->type, 'Point')) {
             return response()->json($undefinedError);
-        } else if($geodata->geom instanceof MultiPoint && $layer->type != 'MultiPoint') {
+        } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && !Helpers::endsWith($layer->type, 'Linestring')) {
             return response()->json($undefinedError);
-        } else if($geodata->geom instanceof LineString && $layer->type != 'Linestring') {
-            return response()->json($undefinedError);
-        } else if($geodata->geom instanceof MultiLineString && $layer->type != 'MultiLinestring') {
-            return response()->json($undefinedError);
-        } else if($geodata->geom instanceof Polygon && $layer->type != 'Polygon') {
-            return response()->json($undefinedError);
-        } else if($geodata->geom instanceof MultiPolygon && $layer->type != 'MultiPolygon') {
+        } else if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && !Helpers::endsWith($layer->type, 'Polygon')) {
             return response()->json($undefinedError);
         }
         $context->geodata_id = $gid;
@@ -667,7 +662,7 @@ class ContextController extends Controller {
             case 'marker':
             case 'Point':
                 $coords = $coords[0];
-                $geodata->geom = new Point($coords->lat, $coords->lng);
+                $geodata->geom = new MultiPoint([new Point($coords->lat, $coords->lng)]);
                 break;
             case 'polyline':
             case 'LineString':
@@ -675,7 +670,7 @@ class ContextController extends Controller {
                 foreach($coords as $coord) {
                     $lines[] = new Point($coord->lat, $coord->lng);
                 }
-                $geodata->geom = new LineString($lines);
+                $geodata->geom = new MultiLineString([new LineString($lines)]);
                 break;
             case 'polygon':
             case 'Polygon':
@@ -684,7 +679,7 @@ class ContextController extends Controller {
                     $lines[] = new Point($coord->lat, $coord->lng);
                 }
                 $linestring = new LineString($lines);
-                $geodata->geom = new Polygon([ $linestring ]);
+                $geodata->geom = new MultiPolygon([new Polygon([ $linestring ])]);
                 break;
         }
         $geodata->lasteditor = $user['name'];

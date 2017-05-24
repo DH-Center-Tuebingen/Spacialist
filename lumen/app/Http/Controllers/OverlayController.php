@@ -7,7 +7,7 @@ use \Log;
 
 class OverlayController extends Controller {
     public $availableGeometryTypes = [
-        'Point', 'Linestring', 'Polygon', 'MultiPoint', 'MultiLinestring', 'MultiPolygon'
+        'Point', 'Linestring', 'Polygon'
     ];
 
     /**
