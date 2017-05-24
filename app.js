@@ -749,6 +749,18 @@ spacialistApp.factory('httpPatchFactory', function($http) {
     };
 });
 
+spacialistApp.factory('httpPutFactory', function($http) {
+    return function(url, data, callback) {
+        $http.put(url, data, {
+            headers: {
+                'Content-Type': undefined
+            }
+        }).success(function(response) {
+            callback(response);
+        });
+    };
+});
+
 spacialistApp.config(['markedProvider', function (markedProvider) {
   markedProvider.setOptions({
     gfm: true,
