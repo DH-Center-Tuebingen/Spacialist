@@ -16,7 +16,7 @@ class AnalysisController extends Controller {
         //
     }
 
-    public function getAll() {
+    public function getAnalyses() {
         return response()->json(
             DB::table('stored_queries')
                 ->get()

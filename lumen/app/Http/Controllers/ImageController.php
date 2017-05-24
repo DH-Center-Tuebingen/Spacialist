@@ -182,34 +182,26 @@ class ImageController extends Controller
         $imgId = $request->get('imgId');
         $ctxId = $request->get('ctxId');
 
-        DB::table('context_photos')
-            ->insert([
+        $link = ContextPhoto::firstOrNew([
                 'photo_id' => $imgId,
                 'context_id' => $ctxId,
-                'lasteditor' => $user['name']
-            ]);
+        ]);
+        $link->lasteditor = $user['name'];
+        $link->save();
         return response()->json();
     }
 
-    public function unlink(Request $request) {
+    public function unlink($pid, $cid) {
         $user = \Auth::user();
         if(!$user->can('link_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        if(!$request->has('imgId') || !$request->has('ctxId')) {
-            return response()->json([
-                'error' => 'Either the ID for the image or the context is missing.'
-            ]);
-        }
-        $imgId = $request->get('imgId');
-        $ctxId = $request->get('ctxId');
-
         DB::table('context_photos')
             ->where([
-                ['photo_id', '=', $imgId],
-                ['context_id', '=', $ctxId]
+                ['photo_id', '=', $pid],
+                ['context_id', '=', $cid]
             ])
             ->delete();
         return response()->json();
@@ -271,32 +263,13 @@ class ImageController extends Controller
         ]);
     }
 
-    public function getImagePreviewObject($id) {
-        $img = $this->getImageById($id);
-        // try to get file to check if it exists
-        try {
-            $content = Storage::get($img->thumb_url);
-            return 'data:image/jpeg;base64,' . base64_encode($content);
-        } catch(FileNotFoundException $e) {
-            return response()->json([
-                'error' => 'image not found'
-            ]);
-        }
-    }
-
     public function getImageObject($id) {
         $img = $this->getImageById($id);
         $content = Storage::get($img->url);
         return 'data:' . $img->mime_type . ';base64,' . base64_encode($content);
     }
 
-    public function getDecodedImageObject($id) {
-        $img = $this->getImageById($id);
-        $content = Storage::get($img->url);
-        return $content;
-    }
-
-    public function getAll() {
+    public function getImages() {
         $user = \Auth::user();
         if(!$user->can('view_photos')) {
             return response([
@@ -347,8 +320,7 @@ class ImageController extends Controller
         $photo->delete();
     }
 
-    public function setProperty(Request $request) {
-        $id = $request->get('photo_id');
+    public function patchPhotoProperty(Request $request, $id) {
         $prop = $request->get('property');
         $val = $request->get('value');
         $photo = Photo::find($id);
@@ -393,10 +365,10 @@ class ImageController extends Controller
 
         $url = ThConcept::find($tagId)->concept_url;
 
-        $tag = new PhotoTag();
-        $tag->photo_id = $photoId;
-        $tag->concept_url = $url;
-        $tag->save();
+        PhotoTag::firstOrCreate([
+            'photo_id' => $photoId,
+            'concept_url' => $url
+        ]);
     }
 
     public function removeTag(Request $request) {

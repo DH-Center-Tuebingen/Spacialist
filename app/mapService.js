@@ -297,7 +297,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             overlays: {}
         };
 
-        httpGetFactory('api/overlay/get/all', function(response) {
+        httpGetFactory('api/overlay', function(response) {
             console.log(response.layers);
             angular.forEach(response.layers, function(layer, key) {
                 var id = layer.id;

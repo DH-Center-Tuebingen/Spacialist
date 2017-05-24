@@ -14,7 +14,7 @@ class OverlayController extends Controller {
         //
     }
 
-    public function getAll() {
+    public function getOverlays() {
         return response()->json([
             'layers' => AvailableLayer::all()
         ]);

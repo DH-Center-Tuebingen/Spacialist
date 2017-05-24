@@ -18,7 +18,7 @@ spacialistApp.service('environmentService', ['httpGetFactory', function(httpGetF
     };
 
     function getContextList() {
-        httpGetFactory('api/context/getRecursive', function(response) {
+        httpGetFactory('api/context', function(response) {
             env.contexts.data = response.contexts;
             env.contexts.roots = response.roots;
             env.contexts.children = response.children;

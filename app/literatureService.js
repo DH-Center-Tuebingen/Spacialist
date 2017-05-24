@@ -145,7 +145,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
     ];
 
     literature.getLiterature = function() {
-        var promise = httpGetFactory('api/literature/getAll', function(response) {
+        var promise = httpGetFactory('api/literature', function(response) {
             literature.literature.length = 0;
             angular.forEach(response, function(entry, key) {
                 literature.literature.push(entry);
@@ -157,7 +157,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
 
     literature.deleteLiteratureEntry = function(entry) {
         var index = literature.literature.indexOf(entry);
-        httpGetFactory('api/literature/delete/' + entry.id, function(response) {
+        httpDeleteFactory('api/literature/' + entry.id, function(response) {
             literature.literature.splice(index, 1);
         });
     };

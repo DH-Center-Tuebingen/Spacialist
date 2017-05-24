@@ -121,7 +121,7 @@ spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($
                     $uibModalInstance.dismiss('cancel');
                 };
                 $scope.modalOptions.openImageInTab = function(id) {
-                    httpGetFactory('api/image/get/' + id, function(data) {
+                    httpGetFactory('api/image/' + id + '/object', function(data) {
                         window.open(data);
                     });
                 };

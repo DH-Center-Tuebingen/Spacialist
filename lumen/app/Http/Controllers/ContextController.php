@@ -123,18 +123,15 @@ class ContextController extends Controller {
         return $label;
     }
 
-    public function search(Request $request) {
-        if(!$request->has('val')) return response()->json();
-        $val = $request->get('val');
-        if($request->has('lang')) $lang = $request->get('lang');
-        else $lang = 'de';
+    public function searchForLabel($label, $lang = 'de') {
+        if($label == null) return response()->json();
 
         $matchedConcepts = DB::table('th_concept_label as l')
             ->select('c.concept_url', 'c.id', 'l.label')
             ->join('th_concept as c', 'c.id', '=', 'l.concept_id')
             ->join('th_language as lng', 'l.language_id', '=', 'lng.id')
             ->where([
-                ['label', 'ilike', '%' . $val . '%'],
+                ['label', 'ilike', '%' . $label . '%'],
                 ['lng.short_name', '=', $lang]
             ])
             ->groupBy('c.id', 'l.label')
@@ -165,10 +162,9 @@ class ContextController extends Controller {
         ]);
     }
 
-    public function editContextType(Request $request) {
-        $id = $request->get('ctid');
+    public function editContextType($ctid, Request $request) {
         $newUrl = $request->get('new_url');
-        $ct = ContextType::find($id);
+        $ct = ContextType::find($ctid);
         $ct->thesaurus_url = $newUrl;
         $ct->save();
     }
@@ -199,14 +195,13 @@ class ContextController extends Controller {
         ]);
     }
 
-    public function addAttributeToContextType(Request $request) {
-        if(!$request->has('aid') || !$request->has('ctid')) {
+    public function addAttributeToContextType($ctid, Request $request) {
+        if(!$request->has('aid')) {
             return response()->json([
                 'error' => 'Missing parameter. Either aid or ctid is missing.'
             ]);
         }
         $aid = $request->get('aid');
-        $ctid = $request->get('ctid');
 
         $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
         $ca = new ContextAttribute();
@@ -224,15 +219,7 @@ class ContextController extends Controller {
         ]);
     }
 
-    public function removeAttributeFromContextType(Request $request) {
-        if(!$request->has('aid') || !$request->has('ctid')) {
-            return response()->json([
-                'error' => 'Missing parameter. Either aid or ctid is missing.'
-            ]);
-        }
-        $aid = $request->get('aid');
-        $ctid = $request->get('ctid');
-
+    public function removeAttributeFromContextType($ctid, $aid, Request $request) {
         $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]
@@ -254,15 +241,7 @@ class ContextController extends Controller {
         Attribute::find($id)->delete();
     }
 
-    public function moveAttributeUp(Request $request) {
-        if(!$request->has('aid') || !$request->has('ctid')) {
-            return response()->json([
-                'error' => 'Missing parameter. Either aid or ctid is missing.'
-            ]);
-        }
-        $aid = $request->get('aid');
-        $ctid = $request->get('ctid');
-
+    public function moveAttributeUp($ctid, $aid, Request $request) {
         $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]
@@ -285,15 +264,7 @@ class ContextController extends Controller {
         return response()->json();
     }
 
-    public function moveAttributeDown(Request $request) {
-        if(!$request->has('aid') || !$request->has('ctid')) {
-            return response()->json([
-                'error' => 'Missing parameter. Either aid or ctid is missing.'
-            ]);
-        }
-        $aid = $request->get('aid');
-        $ctid = $request->get('ctid');
-
+    public function moveAttributeDown($ctid, $aid, Request $request) {
         $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]
@@ -348,7 +319,7 @@ class ContextController extends Controller {
         }
     }
 
-    public function get() {
+    public function getContextTypes() {
         return response()->json(
             DB::table('context_types as c')
                 ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
@@ -421,11 +392,13 @@ class ContextController extends Controller {
 
     public function getAttributes() {
         return response()->json([
-            'attributes' => Attribute::select('*', DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as label"), DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_root_url and short_name = 'de' limit 1) as root_label"))->orderBy('label', 'asc')->get()
+            'attributes' => Attribute::select('*',
+            DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as label"),
+            DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_root_url and short_name = 'de' limit 1) as root_label"))->orderBy('label', 'asc')->get()
         ]);
     }
 
-    public function getRecursive() {
+    public function getContexts() {
         $user = \Auth::user();
         if(!$user->can('view_concepts')) {
             return response([
@@ -553,34 +526,6 @@ class ContextController extends Controller {
         ]);
     }
 
-    public function getContextParents($id) {
-        $user = \Auth::user();
-        if(!$user->can('view_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $path = DB::select("
-        WITH RECURSIVE
-        q AS (
-	        SELECT  c.*, 0 as reclevel
-	        FROM    contexts c
-	        WHERE   id = $id
-	        UNION ALL
-	        SELECT  cc.*, reclevel+1
-	        FROM    q
-	        JOIN    contexts cc
-	        ON      q.root_context_id = cc.id
-        )
-        SELECT  q.id
-        FROM    q
-        ORDER BY reclevel DESC
-        ");
-        return response()->json([
-            'path' => $path
-        ]);
-    }
-
     public function getContextByGeodata($id) {
         $user = \Auth::user();
         if(!$user->can('view_geodata') || !$user->can('view_concepts')) {
@@ -681,7 +626,7 @@ class ContextController extends Controller {
         ]);
     }
 
-    public function getChoices() {
+    public function getDropdownOptions() {
         $user = \Auth::user();
         if(!$user->can('view_concepts')) {
             return response([
@@ -730,7 +675,7 @@ class ContextController extends Controller {
         return response()->json($rows);
     }
 
-    public function duplicate($id) {
+    public function duplicate($id, Request $request) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
@@ -789,42 +734,6 @@ class ContextController extends Controller {
                 ->orderBy('ca.position', 'asc')
                 ->get()
         );
-    }
-
-    public function getChildren($id) {
-        $intId = filter_var($id, FILTER_VALIDATE_INT);
-        if($intId === false || $intId <= 0) return;
-        $user = \Auth::user();
-        if(!$user->can('view_concept_props')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $rows = DB::select(
-            "WITH RECURSIVE
-            q AS (
-                SELECT  c.*
-                FROM    contexts c
-                WHERE   id = $id
-                UNION ALL
-                SELECT  cc.*
-                FROM    q
-                JOIN    contexts cc
-                ON      cc.root_context_id = q.id
-            )
-            SELECT  q.*, ct.type, ct.thesaurus_url AS typename, (select label from getconceptlabelsfromurl where concept_url = ct.thesaurus_url and short_name = 'de' limit 1) as typelabel
-            FROM    q
-            JOIN context_types AS ct
-            ON q.context_type_id = ct.id
-            ORDER BY id ASC"
-        );
-        $roots = array();
-        foreach($rows as $row) {
-            if(empty($row)) continue;
-            $row->data = DB::table('attribute_values as av')->select('av.*', 'a.datatype')->join('attributes as a', 'av.attribute_id', '=', 'a.id')->where('context_id', $row->id)->get();
-            if(!empty($row->root_context_id)) $roots[$row->root_context_id][] = $row;
-        }
-        return response()->json($roots);
     }
 
     public function set(Request $request) {

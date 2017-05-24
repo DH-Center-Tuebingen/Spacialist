@@ -39,10 +39,9 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     };
 
     editor.removeAttributeFromContextType = function(attr, context) {
-        var formData = new FormData();
-        formData.append('aid', attr.aid);
-        formData.append('ctid', attr.context_type_id);
-        httpPostFactory('api/editor/contexttype/attribute/remove', formData, function(response) {
+        var ctid = attr.context_type_id;
+        var aid = attr.aid;
+        httpDeleteFactory('api/editor/context_type/' + ctid + '/attribute/' + aid, function(response) {
             if(!response.error) {
                 var i = editor.ct.attributes.indexOf(attr);
                 if(i > -1) {
@@ -61,10 +60,9 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         if(i == -1) return; //element is not part of attributes
         if(i+1 != attr.position) return; // array position does not match stored position
         var formData = new FormData();
-        console.log(attr);
-        formData.append('ctid', attr.context_type_id);
-        formData.append('aid', attr.aid);
-        httpPostFactory('api/editor/contexttype/attribute/move/up', formData, function(response) {
+        var ctid = attr.context_type_id;
+        var aid = attr.aid;
+        httpPatchFactory('api/editor/context_type/' + ctid + '/attribute/' + aid + '/move/up', formData, function(response) {
             if(!response.error) {
                 editor.ct.attributes[i].position--;
                 editor.ct.attributes[i-1].position++;
@@ -78,9 +76,9 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         if(i == -1) return; //element is not part of attributes
         if(i+1 != attr.position) return; // array position does not match stored position
         var formData = new FormData();
-        formData.append('ctid', attr.context_type_id);
-        formData.append('aid', attr.aid);
-        httpPostFactory('api/editor/contexttype/attribute/move/down', formData, function(response) {
+        var ctid = attr.context_type_id;
+        var aid = attr.aid;
+        httpPatchFactory('api/editor/context_type/' + ctid + '/attribute/' + aid + '/move/down', formData, function(response) {
             if(!response.error) {
                 editor.ct.attributes[i].position++;
                 editor.ct.attributes[i+1].position--;
@@ -90,7 +88,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     };
 
     editor.deleteAttribute = function(attr) {
-        httpGetFactory('api/editor/attribute/delete/' + attr.aid, function(response) {
+        httpDeleteFactory('api/editor/attribute/' + attr.aid, function(response) {
             if(!response.error) {
                 var i = editor.existingAttributes.indexOf(attr);
                 if(i > -1) {
@@ -118,9 +116,9 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
 
     function editContextType(e, newType) {
         var formData = new FormData();
-        formData.append('ctid', e.context_type_id);
+        var ctid = e.context_type_id;
         formData.append('new_url', newType.concept_url);
-        httpPostFactory('api/editor/contexttype/edit', formData, function(response) {
+        httpPatchFactory('api/editor/context_type/' + ctid, formData, function(response) {
             if(!response.error) {
                 var refs;
                 if(e.type === 0) {
@@ -140,7 +138,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     }
 
     editor.deleteElementType = function(e) {
-        httpGetFactory('api/editor/occurrences/' + e.context_type_id, function(response) {
+        httpGetFactory('api/editor/occurence_count/' + e.context_type_id, function(response) {
             $translate('context-type.delete-warning', {
                 element: e.title,
                 cnt: response.count
@@ -154,7 +152,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     };
 
     function deleteElementType(e) {
-        httpGetFactory('api/editor/contexttype/delete/' + e.context_type_id, function(response) {
+        httpDeleteFactory('api/editor/contexttype/' + e.context_type_id, function(response) {
             if(!response.error) {
                 var id;
                 if(e.type === 0) {
@@ -212,7 +210,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         var formData = new FormData();
         formData.append('concept_url', label.concept_url);
         formData.append('type', type.id);
-        httpPostFactory('api/editor/contexttype/add', formData, function(response) {
+        httpPostFactory('api/editor/context_type', formData, function(response) {
             if(response.error) {
                 return;
             }
@@ -237,7 +235,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         formData.append('label_id', label.id);
         formData.append('datatype', datatype.datatype);
         if(parent) formData.append('parent_id', parent.id);
-        httpPostFactory('api/editor/attribute/add', formData, function(response) {
+        httpPostFactory('api/editor/attribute', formData, function(response) {
             if(!response.error) {
                 var a = response.attribute;
                 var addedAttr = {
@@ -253,10 +251,10 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
 
     function addAttributeToContextType(attr, ct) {
         var formData = new FormData();
-        formData.append('ctid', ct.context_type_id);
         formData.append('aid', attr.aid);
 
-        httpPostFactory('api/editor/contexttype/attribute/add', formData, function(response) {
+        var ctid = ct.context_type_id;
+        httpPostFactory('api/editor/context_type/' + ctid + '/attribute', formData, function(response) {
             if(!response.error) {
                 var a = response.attribute;
                 var addedAttribute = {
@@ -272,9 +270,9 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     }
 
     function searchForLabel(searchString) {
-        var formData = new FormData();
-        formData.append('val', searchString);
-        return httpPostPromise.getData('api/editor/search', formData)
+        //TODO might want to specify language of the label aswell, default is 'de'
+        // api call for that case is 'api/editor/search/label=' + searchString + "/" + lang
+        return httpGetPromise.getData('api/editor/search/label=' + searchString, formData)
         .then(function(response) {
             return response;
         });
@@ -283,7 +281,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     init();
 
     function init() {
-        httpGetFactory('api/context/get/attributes', function(response) {
+        httpGetFactory('api/context/attribute', function(response) {
             angular.forEach(response.attributes, function(a) {
                 var entry = {
                     aid: a.id,

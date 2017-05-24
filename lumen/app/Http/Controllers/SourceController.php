@@ -17,25 +17,6 @@ class SourceController extends Controller {
         //
     }
 
-    public function getByAttribute($aid, $cid) {
-        $user = \Auth::user();
-        if(!$user->can('view_concept_props')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $src = DB::table('sources')
-            ->where([
-                ['attribute_id', '=', $aid],
-                ['context_id', '=', $cid]
-            ])
-            ->get();
-        foreach($src as &$s) {
-            $s->literature = Literature::find($s->literature_id);
-        }
-        return response()->json($src);
-    }
-
     public function getByContext($id) {
         $user = \Auth::user();
         if(!$user->can('view_concept_props')) {

@@ -95,7 +95,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     }
 
     function getContexts() {
-        httpGetFactory('api/context/get', function(callback) {
+        httpGetFactory('api/context/context_type', function(callback) {
             angular.forEach(callback, function(value, key) {
                 var index = value.index;
                 var title = value.title;
@@ -122,7 +122,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     }
 
     function getArtifacts() {
-        httpGetFactory('api/context/artifacts/get', function(callback) {
+        httpGetFactory('api/context/artifact', function(callback) {
             angular.forEach(callback, function(value, key) {
                 var index = value.index;
                 var title = value.title;
@@ -149,7 +149,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     }
 
     function getDropdownOptions() {
-        httpGetFactory('api/context/getChoices', function(callback) {
+        httpGetFactory('api/context/dropdown_options', function(callback) {
             for(var i=0; i<callback.length; i++) {
                 var value = callback[i];
                 var index = value.aid + "_";
@@ -166,7 +166,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     }
 
     main.duplicateElement = function(id) {
-        httpGetFactory('api/context/duplicate/' + id, function(newElem) {
+        httpPostFactory('api/context/' + id + '/duplicate', new FormData(), function(newElem) {
             var parent = main.contexts.data[main.contexts.data[id].root_context_id];
             var copy = newElem.obj;
             var elem = {
@@ -309,30 +309,20 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     }
 
     main.deleteElement = function(elem) {
-        var toDelete = true;
-        httpGetPromise.getData('api/context/get/parents/' + elem.id).then(
-            function(response) {
-                if(response.error) {
-                    modalFactory.errorModal(response.error);
-                    return;
+        modalFactory.deleteModal(elem.name, function() {
+            deleteElement(elem, function() {
+                deleteContext(elem.id);
+                var content = $translate.instant('snackbar.element-deleted.success', { name: elem.title  });
+                snackbarService.addAutocloseSnack(content, 'success');
+                if(main.currentElement.element.id == elem.id) {
+                    main.unsetCurrentElement();
                 }
-                var path = response.path;
-                modalFactory.deleteModal(elem.name, function() {
-                    deleteElement(elem, function() {
-                        deleteContext(elem.id);
-                        var content = $translate.instant('snackbar.element-deleted.success', { name: elem.title  });
-                        snackbarService.addAutocloseSnack(content, 'success');
-                        if(main.currentElement.element.id == elem.id) {
-                            main.unsetCurrentElement();
-                        }
-                    });
-                }, 'delete-confirm.warning');
-            }
-        );
+            });
+        }, 'delete-confirm.warning');
     };
 
     function deleteElement(elem, onSuccess) {
-        httpGetFactory('api/context/delete/' + elem.id, function(callback) {
+        httpDeleteFactory('api/context/' + elem.id, function(callback) {
             onSuccess();
         });
     }
@@ -427,7 +417,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         var id = src.id;
         var title = src.literature.title + ' (' + src.description + ')';
         modalFactory.deleteModal(title, function() {
-            httpGetFactory('api/sources/delete/'+id, function(callback) {
+            httpDeleteFactory('api/source/'+id, function(callback) {
                 main.currentElement.sources[key].splice(index, 1);
             });
         }, '');
@@ -472,16 +462,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     }
 
     main.updateContextById = function(id, newValues) {
-        httpGetFactory('api/context/get/parents/' + id, function(response) {
-            if(response.error) {
-                modalFactory.errorModal(response.error);
-                return;
-            }
-            main.expandTree(id);
+        main.expandTree(id);
 
-            angular.merge(main.currentElement.element, newValues);
-            angular.merge(main.contexts.data[id], newValues);
-        });
+        angular.merge(main.currentElement.element, newValues);
+        angular.merge(main.contexts.data[id], newValues);
     };
 
     function deleteContext(id) {
@@ -600,7 +584,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             elem.fields = main.artifactReferences[elem.typename].slice();
         }
         var data = {};
-        httpGetFactory('api/context/get/data/' + elem.id, function(response) {
+        httpGetFactory('api/context/' + elem.id + '/data', function(response) {
             if(response.error) {
                 modalFactory.errorModal(response.error);
                 return;
@@ -609,7 +593,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             main.currentElement.data = data;
         });
         main.currentElement.sources = {};
-        httpGetFactory('api/sources/get/' + elem.id, function(response) {
+        httpGetFactory('api/source/by_context/' + elem.id, function(response) {
             if(response.error) {
                 modalFactory.errorModal(response.error);
                 return;

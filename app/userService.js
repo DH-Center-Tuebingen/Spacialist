@@ -47,7 +47,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
 
     user.deleteUser = function(u) {
         console.log(u);
-        httpGetFactory('api/user/delete/' + u.id, function(response) {
+        httpDeleteFactory('api/user/' + u.id, function(response) {
             var index = user.users.indexOf(u);
             if(index > -1) user.users.splice(index, 1);
         });
@@ -81,7 +81,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     user.getRoles = function() {
         user.roles.length = 0;
         user.permissions.length = 0;
-        httpGetFactory('api/user/get/roles/all', function(response) {
+        httpGetFactory('api/user/role', function(response) {
             angular.forEach(response.permissions, function(perm) {
                 user.permissions.push(perm);
             });
@@ -94,7 +94,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
 
     user.getRolePermissions = function(role) {
         if(role.permissions) role.permissions.length = 0;
-        httpGetFactory('api/user/get/role/permissions/' + role.id, function(response) {
+        httpGetFactory('api/user/role/' + role.id + '/permission', function(response) {
             angular.forEach(response.permissions, function(perm) {
                 role.permissions.push(perm);
             });
@@ -136,7 +136,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     }
 
     user.deleteRole = function(role) {
-        httpGetFactory('api/role/delete/' + role.id, function(response) {
+        httpDeleteFactory('api/user/role/' + role.id, function(response) {
             if(response.error) return;
             var index = user.roles.indexOf(role);
             if(index > -1) user.roles.splice(index, 1);
@@ -175,7 +175,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     };
 
     user.getUserRoles = function(id, $index) {
-        httpGetFactory('api/user/get/roles/' + id, function(response) {
+        httpGetFactory('api/user/role/by_user/' + id, function(response) {
             user.users[$index].roles = response.roles;
         });
     };

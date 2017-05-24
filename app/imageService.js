@@ -68,10 +68,9 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
 
     function storeImagePropertyEdit(editArray, index, img) {
         var formData = new FormData();
-        formData.append('photo_id', img.id);
         formData.append('property', index);
         formData.append('value', editArray[index].text);
-        httpPostFactory('api/image/property/set', formData, function(response) {
+        httpPatchFactory('api/image/' + img.id + '/property', formData, function(response) {
             if(response.error) {
                 cancelImagePropertyEdit(editArray, index);
                 return;
@@ -157,7 +156,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         var formData = new FormData();
         formData.append('imgId', imgId);
         formData.append('ctxId', contextId);
-        httpPostFactory('api/image/link', formData, function(response) {
+        httpPutFactory('api/image/link', formData, function(response) {
             var content = $translate.instant('snackbar.image-linked.success');
             snackbarService.addAutocloseSnack(content, 'success');
             images.getImagesForContext(contextId);
@@ -165,10 +164,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     };
 
     images.unlinkImage = function(imgId, contextId) {
-        var formData = new FormData();
-        formData.append('imgId', imgId);
-        formData.append('ctxId', contextId);
-        httpPostFactory('api/image/unlink', formData, function(response) {
+        httpDeleteFactory('api/image/link/' + imgId + '/' + contextId, function(response) {
             var content = $translate.instant('snackbar.image-unlinked.success');
             snackbarService.addAutocloseSnack(content, 'success');
             images.getImagesForContext(contextId);
@@ -176,7 +172,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     };
 
     images.deleteImage = function(img) {
-        httpGetFactory('api/image/delete/' + img.id, function(response) {
+        httpDeleteFactory('api/image/' + img.id, function(response) {
             if(!response.error) {
                 var content = $translate.instant('snackbar.image-deleted.success');
                 snackbarService.addAutocloseSnack(content, 'success');
@@ -194,7 +190,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
             return;
         } else {
             lastTimeImageChecked = currentTime;
-            httpGetFactory('api/image/getAll', function(response) {
+            httpGetFactory('api/image', function(response) {
                 var oneUpdated = false;
                 var allCopy = images.all.slice();
                 for(var i=0; i<response.length; i++) {
@@ -229,7 +225,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         var formData = new FormData();
         formData.append('photo_id', img.id);
         formData.append('tag_id', tag.id);
-        httpPostFactory('api/image/tags/add', formData, function(response) {
+        httpPutFactory('api/image/tag', formData, function(response) {
             if(response.error) {
                 // TODO remove from img.tags
                 return;
@@ -238,10 +234,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     };
 
     images.removeTag = function(img, tag) {
-        var formData = new FormData();
-        formData.append('photo_id', img.id);
-        formData.append('tag_id', tag.id);
-        httpPostFactory('api/image/tags/remove', formData, function(response) {
+        httpDeleteFactory('api/image/' + img.id + '/tag/' + tag.id,  function(response) {
             if(response.error) {
                 // TODO add back to img.tags
                 return;
@@ -254,7 +247,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     }
 
     function getAvailableTags() {
-        httpGetFactory('api/image/tags/get', function(response) {
+        httpGetFactory('api/tags', function(response) {
             if(response.error) {
                 return;
             }

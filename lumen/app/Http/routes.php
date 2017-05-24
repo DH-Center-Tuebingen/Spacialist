@@ -18,55 +18,130 @@ $app->get('/', function () use ($app) {
     return $app->version();
 });
 
-$app->post('user/login', 'UserController@login');
+$app->post('user/login', 'UserController@login');//TODO
+$app->group([
+        'prefix' => 'context',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+    $app->get('', 'ContextController@getContexts');
+    $app->get('artifact', 'ContextController@getArtifacts');
+    $app->get('context_type', 'ContextController@getContextTypes');
+    $app->get('attribute', 'ContextController@getAttributes'); //TODO probably wrong controller/group
+    $app->get('{id}/data', 'ContextController@getContextData');
+    $app->get('dropdown_options', 'ContextController@getDropdownOptions');
+
+    $app->post('{id}/duplicate', 'ContextController@duplicate');
+
+    $app->delete('{id}', 'ContextController@delete');
+});
+
+$app->group([
+        'prefix' => 'literature',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'LiteratureController@getLiteratures');
+        $app->get('{id}', 'LiteratureController@getLiterature');
+
+        $app->delete('{id}', 'LiteratureController@delete');
+});
+
+$app->group([
+        'prefix' => 'image',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'ImageController@getImages');
+        $app->get('tag', 'ImageController@getAvailableTags');
+        $app->get('{id}', 'ImageController@getImage');
+        $app->get('{id}/object', 'ImageController@getImageObject');
+        $app->get('by_context/{id}', 'ImageController@getByContext');
+
+        $app->post('upload', 'ImageController@uploadImage');
+
+        $app->patch('{id}/property', 'ImageController@patchPhotoProperty');
+
+        $app->put('link', 'ImageController@link');
+        $app->put('tag', 'ImageController@addTag');
+
+        $app->delete('{id}', 'ImageController@delete');
+        $app->delete('link/{pid}/{cid}', 'ImageController@unlink');
+        $app->delete('{pid}/tag/{tid}', 'ImageController@removeTag');
+});
+
+$app->group([
+        'prefix' => 'source',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('by_context/{cid}', 'SourceController@getByContext');
+
+        $app->delete('{id}', 'SourceController@delete');
+});
+
+$app->group([
+        'prefix' => 'analysis',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'AnalysisController@getAnalyses');
+});
+
+$app->group([
+        'prefix' => 'user',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('role', 'UserController@getRoles');
+        $app->get('role/by_user/{id}', 'UserController@getRolesByUser');
+        $app->get('role/{id}/permission', 'UserController@getPermissionsByRole');
+
+        $app->delete('{id}', 'UserController@delete');
+        $app->delete('role/{id}', 'UserController@deleteRole');
+});
+
+$app->group([
+        'prefix' => 'overlay',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'OverlayController@getOverlays');
+});
+
+$app->group([
+        'prefix' => 'editor',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('occurrence_count/{id}', 'ContextController@getOccurrenceCount'); //TODO: own Controller?
+
+        //TODO: this is actually just a get but with formdata
+        // old call:
+        // $app->post('editor/search/', 'ContextController@search'); //TODO: own Controller?
+        //  new call
+        $app->get('search/label={label}/{lang?}', 'ContextController@searchForLabel'); //TODO: own Controller?
+
+
+        $app->post('context_type/', 'ContextController@addContextType'); //TODO: own Controller?
+        $app->post('context_type/{ctid}/attribute', 'ContextController@addAttributeToContextType'); //TODO: own Controller?
+        $app->post('attribute', 'ContextController@addAttribute'); //TODO: own Controller?
+
+        $app->patch('context_type/{ctid}', 'ContextController@editContextType'); //TODO: own Controller?
+        $app->patch('context_type/{ctid}/attribute/{aid}/move/up', 'ContextController@moveAttributeUp'); //TODO: own Controller?
+        $app->patch('context_type/{ctid}/attribute/{aid}/move/down', 'ContextController@moveAttributeDown'); //TODO: own Controller?
+
+        $app->delete('attribute/{id}', 'ContextController@deleteAttribute'); //TODO: own Controller?
+        $app->delete('contexttype/{id}', 'ContextController@deleteContextType'); //TODO: own Controller?
+        $app->delete('editor/context_type/{ctid}/attribute/{aid}', 'ContextController@removeAttributeFromContextType'); //TODO: own Controller?
+});
+
+// $app->group([
+//         'prefix' => '',//TODO api v1
+//         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+//     ], function($app) {
+//
+// });
 
 $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']], function($app) {
-    $app->get('context/artifacts/get', 'ContextController@getArtifacts');
-    $app->get('context/get/children/{id}', 'ContextController@getChildren');
-    $app->get('context/get', 'ContextController@get');
-    $app->get('context/get/attributes', 'ContextController@getAttributes');
-    $app->get('context/get/attributes/types', 'ContextController@getAvailableAttributeTypes');
-    $app->get('context/get/data/{id}', 'ContextController@getContextData');
-    $app->get('context/get/geodata', 'ContextController@getGeodata');
-    $app->get('context/get/byGeodata/{id}', 'ContextController@getContextByGeodata');
-    $app->get('context/link/geodata/{cid}/{gid}', 'ContextController@linkGeodata');
-    $app->get('context/unlink/geodata/{cid}', 'ContextController@unlinkGeodata');
-    $app->get('context/get/parents/{id}', 'ContextController@getContextParents');
-    $app->get('context/getRecursive', 'ContextController@getRecursive');
-    $app->get('context/getChoices', 'ContextController@getChoices');
-    $app->get('context/duplicate/{id}', 'ContextController@duplicate');
-    $app->get('literature/getAll', 'LiteratureController@getAll');
-    $app->get('literature/get/{id}', 'LiteratureController@getById');
-    $app->get('literature/delete/{id}', 'LiteratureController@delete');
-    $app->get('image/tags/get', 'ImageController@getAvailableTags');
-    $app->get('image/getAll', 'ImageController@getAll');
-    $app->get('image/get/info/{id}', 'ImageController@getImage');
-    $app->get('image/get/{id}', 'ImageController@getImageObject');
-    $app->get('image/get/{id}/decoded', 'ImageController@getDecodedImageObject');
-    $app->get('image/get/preview/{id}', 'ImageController@getImagePreviewObject');
-    $app->get('image/getByContext/{id}', 'ImageController@getByContext');
-    $app->get('image/delete/{id}', 'ImageController@delete');
-    $app->get('context/delete/{id}', 'ContextController@delete');
-    $app->get('context/delete/geodata/{id}', 'ContextController@deleteGeodata');
-    $app->get('sources/get/{aid}/{fid}', 'SourceController@getByAttribute');
-    $app->get('sources/get/{id}', 'SourceController@getByContext');
-    $app->get('sources/delete/{id}', 'SourceController@delete');
-    $app->get('analysis/queries/getAll', 'AnalysisController@getAll');
-    $app->get('user/delete/{id}', 'UserController@delete');
-    $app->get('user/get/roles/all', 'UserController@getRoles');
-    $app->get('user/get/roles/{id}', 'UserController@getRolesByUser');
-    $app->get('user/get/role/permissions/{id}', 'UserController@getPermissionsByRole');
-    $app->get('role/delete/{id}', 'UserController@deleteRole');
-    $app->get('overlay/get/all', 'OverlayController@getAll');
-    $app->get('editor/attribute/delete/{id}', 'ContextController@deleteAttribute');
-    $app->get('editor/occurrences/{id}', 'ContextController@getOccurrenceCount');
-    $app->get('editor/contexttype/delete/{id}', 'ContextController@deleteContextType');
-    $app->post('image/upload', 'ImageController@uploadImage');
-    $app->post('image/link', 'ImageController@link');
-    $app->post('image/unlink', 'ImageController@unlink');
-    $app->post('image/property/set', 'ImageController@setProperty');
-    $app->post('image/tags/add', 'ImageController@addTag');
-    $app->post('image/tags/remove', 'ImageController@removeTag');
+    $app->get('context/get/geodata', 'ContextController@getGeodata');//TODO own Controller for Geodata?
+    $app->get('context/get/byGeodata/{id}', 'ContextController@getContextByGeodata');//TODO own Controller for Geodata?
+    $app->get('context/link/geodata/{cid}/{gid}', 'ContextController@linkGeodata');//TODO own Controller for Geodata?
+    $app->get('context/unlink/geodata/{cid}', 'ContextController@unlinkGeodata');//TODO own Controller for Geodata?
+    $app->get('context/delete/geodata/{id}', 'ContextController@deleteGeodata');//TODO own Controller for Geodata?
+    $app->get('get/attributes/types', 'ContextController@getAvailableAttributeTypes'); //TODO correct Controller?
     $app->post('context/add/geodata', 'ContextController@addGeodata');
     $app->post('context/set', 'ContextController@set');
     $app->post('context/set/props', 'ContextController@setProperties');
@@ -88,12 +163,4 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('literature/add', 'LiteratureController@add');
     $app->post('literature/edit', 'LiteratureController@edit');
     $app->post('literature/import/bib', 'LiteratureController@importBibtex');
-    $app->post('editor/search', 'ContextController@search');
-    $app->post('editor/contexttype/add', 'ContextController@addContextType');
-    $app->post('editor/contexttype/edit', 'ContextController@editContextType');
-    $app->post('editor/contexttype/attribute/add', 'ContextController@addAttributeToContextType');
-    $app->post('editor/contexttype/attribute/remove', 'ContextController@removeAttributeFromContextType');
-    $app->post('editor/contexttype/attribute/move/up', 'ContextController@moveAttributeUp');
-    $app->post('editor/contexttype/attribute/move/down', 'ContextController@moveAttributeDown');
-    $app->post('editor/attribute/add', 'ContextController@addAttribute');
 });

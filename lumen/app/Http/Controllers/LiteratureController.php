@@ -18,11 +18,9 @@ class LiteratureController extends Controller
         //
     }
 
-    public function getById($id) {
+    public function getLiterature($id) {
         return response()->json(
-            DB::table('literature')
-                ->where('id', '=', $id)
-                ->get()
+            Literature::find($id)
         );
     }
 
@@ -224,7 +222,7 @@ class LiteratureController extends Controller
         ]);
     }
 
-    public function getAll() {
+    public function getLiteratures() {
         return response()->json(
             DB::table('literature')
             ->orderBy('author', 'asc')
