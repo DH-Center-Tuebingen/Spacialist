@@ -380,7 +380,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             var layer = layers[i];
             var id = layer.id;
             var currentLayer = {};
-            currentLayer.visible = layer.visible;
+            currentLayer.visible = currentLayer.top = layer.visible;
             currentLayer.layerOptions = setLayerOptions(layer);
             if(layer.context_type_id) {
                 currentLayer.name = layer.label;
