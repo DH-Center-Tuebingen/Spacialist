@@ -428,6 +428,37 @@ p, div {
   *border-left-color: #ffffff;
 }
 
+.resizeable-button-left, .resizeable-button-right {
+    cursor: pointer;
+    height: 100px;
+    width: 30px;
+    position: absolute;
+    top: 50%;
+    z-index: 99999;
+    box-shadow: 4px 4px 10px -5px rgba(0,0,0,0.75);
+    background-color: #eeeeee;
+    border-radius: 3px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    visibility: hidden;
+}
+
+.resizeable-button-left {
+    left: 0;
+    margin-left: 5px;
+}
+
+.resizeable-button-right {
+    right: 0;
+    margin-right: 5px;
+}
+
+div:hover .resizeable-button-left, div:hover .resizeable-button-right {
+    visibility: visible;
+}
+
 /* modal */
 .modal-header {
     text-align: center;
