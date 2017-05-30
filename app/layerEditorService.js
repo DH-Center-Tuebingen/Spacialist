@@ -161,8 +161,7 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
                 return;
             }
             var l = response.layer;
-            console.log(l);
-            layers[l.id] = l;
+            mapService.setLayers([l]);
         });
     }
 
