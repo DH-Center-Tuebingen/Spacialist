@@ -583,6 +583,83 @@ spacialistApp.directive('formField', function($log) {
     };
 });
 
+spacialistApp.directive('resizeable', function($log) {
+    var extendContainer = function(extend, shrink) {
+        var cls = extend.className;
+        var gridClass = getCurrentDeviceClass();
+        var matchingClass = nextMatchingDeviceClass(cls, gridClass);
+        if(matchingClass === null) {
+            console.log("grid breakpoint not specified");
+            return;
+        }
+        var mClass = 'col-' + matchingClass + '-';
+        var regex = new RegExp(mClass+ '\\d+');
+        var selfClass = cls.match(regex);
+        if(selfClass === null) {
+            console.log(matchingClass + " not found in " + cls);
+            return;
+        }
+        var clsl = shrink.className;
+        var leftClass = clsl.match(regex);
+        if(leftClass === null) {
+            console.log("Shrink-container doesn't have a matching class.");
+            return;
+        }
+        var widthRegex = new RegExp(mClass + '(\\d+)');
+        var width = cls.match(widthRegex);
+        var widthLeft = clsl.match(widthRegex);
+        if(width === null || widthLeft === null) {
+            console.log("Shouldn't happen ;)");
+            return;
+        }
+        width = parseInt(width[1]);
+        widthLeft = parseInt(widthLeft[1]);
+        if(width == 11 || widthLeft === 1) {
+            console.log("Container can not be shrinked/extended");
+            return;
+        }
+        extend.classList.add(mClass+(width+1));
+        extend.classList.remove(mClass+width);
+        shrink.classList.add(mClass+(widthLeft-1));
+        shrink.classList.remove(mClass+widthLeft);
+    };
+    var clickLeft = function(e) {
+        if(!e.data.ctr || e.data.ctr === 0) return;
+        var i = e.data.ctr;
+        var c = resizeableContainers[i];
+        var cl = resizeableContainers[i-1];
+        extendContainer(c, cl);
+    };
+    var clickRight = function(e) {
+        if(e.data.ctr >= resizeableContainers.length-1) return;
+        var i = e.data.ctr;
+        var c = resizeableContainers[i];
+        var cl = resizeableContainers[i+1];
+        extendContainer(c, cl);
+    };
+
+    var resizeableContainers = document.querySelectorAll('[resizeable]');
+    var idxCtr = 0;
+
+    return {
+        restrict: 'A',
+        scope: false,
+        link: function(scope, element, attrs) {
+            if(idxCtr !== 0) {
+                var left = angular.element('<div class="resizeable-button-left"><i class="material-icons">chevron_left</i></div>');
+                var lBind = left.bind('click', {ctr: idxCtr}, clickLeft);
+                element.prepend(left);
+            }
+            if(idxCtr < resizeableContainers.length - 1) {
+                var right = angular.element('<div class="resizeable-button-right"><i class="material-icons">chevron_right</i></div>');
+                var rBind = right.bind('click', {ctr: idxCtr}, clickRight);
+                element.append(right);
+            }
+            idxCtr++;
+        }
+    };
+});
+
 spacialistApp.directive('protectedSrc', ['httpGetFactory', function(httpGetFactory) {
     return {
         restrict: 'A',
