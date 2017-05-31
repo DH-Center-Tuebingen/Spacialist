@@ -1,9 +1,11 @@
 <div>
-    <div class="form-group" ng-repeat="attr in attributeFields" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered && (isDeletable || isEditable)}">
+    <div class="form-group form-group-unpadded" ng-repeat="attr in attributeFields" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered && (isDeletable || isEditable)}">
         <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}" uib-popover="{{attr.root_label}}" popover-trigger="'mouseenter'">
-            {{ attr.val }}: <sup ng-click="openSourceModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'], attributeOutputs[attr.aid+'_'+attr.oid+'desc'])">
-                <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="attributeSources['#'+attr.aid].length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
-            </sup>
+            <div style="display: table; float: right;">
+                <span style="display: table-cell">{{ attr.val }}:</span><sup ng-click="openSourceModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'], attributeOutputs[attr.aid+'_'+attr.oid+'desc'])" style="display: table-cell">
+                    <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="attributeSources['#'+attr.aid].length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
+                </sup>
+            </div>
         </label>
         <div class="col-md-{{inputWidth}}" ng-switch on="attr.datatype">
             <input class="form-control" ng-switch-when="string" type="text" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
