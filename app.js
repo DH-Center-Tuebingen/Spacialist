@@ -846,6 +846,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             },
             responseError: function(rejection) {
                 console.log("Something went wrong...");
+                var userService = $injector.get('userService');
                 var reasonIndex = rejectReasons.indexOf(rejection.data.error);
                 if(rejection.data && reasonIndex > -1) {
                     localStorage.removeItem('user');
@@ -853,10 +854,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     userService.loginError.message = rejectTranslationKeys[reasonIndex];
                 } else if(rejection.status == 400 || rejection.status == 401) {
                     var $state = $injector.get('$state');
-                    var userService = $injector.get('userService');
                     userService.loginError.message = 'login.error.400-or-401';
                     localStorage.removeItem('user');
                     $state.go('auth');
+                } else if(rejection.data.error) {
+                    updateToken(rejection, $injector);
+                    userService.loginError.errors = rejection.data.error;
                 } else {
                     updateToken(rejection, $injector);
                     var parser = new DOMParser();
