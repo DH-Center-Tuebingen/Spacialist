@@ -247,7 +247,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     }
 
     function getAvailableTags() {
-        httpGetFactory('api/tags', function(response) {
+        httpGetFactory('api/image/tag', function(response) {
             if(response.error) {
                 return;
             }

@@ -50,7 +50,7 @@ class UserController extends Controller
         return $hash;
     }
 
-    public function get() {
+    public function getActiveUser() {
         $user = \Auth::user();
         $permissions = $this->getUserPermissionsById($user->id);
         return response()->json([
@@ -59,7 +59,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function getAll() {
+    public function getUsers() {
         $user = \Auth::user();
         if(!$user->can('view_users')) {
             return response([
@@ -149,7 +149,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function addRoleToUser(Request $request) {
+    public function addRoleToUser(Request $request, $id) {
         $user = \Auth::user();
         if(!$user->can('add_remove_role')) {
             return response([
@@ -157,12 +157,11 @@ class UserController extends Controller
             ], 403);
         }
         $role_id = $request->get('role_id');
-        $user_id = $request->get('user_id');
-        $selectedUser = User::find($user_id);
+        $selectedUser = User::find($id);
         $selectedUser->attachRole($role_id);
     }
 
-    public function removeRoleFromUser(Request $request) {
+    public function removeRoleFromUser(Request $request, $id) {
         $user = \Auth::user();
         if(!$user->can('add_remove_role')) {
             return response([
@@ -170,20 +169,18 @@ class UserController extends Controller
             ], 403);
         }
         $role_id = $request->get('role_id');
-        $user_id = $request->get('user_id');
-        $selectedUser = User::find($user_id);
+        $selectedUser = User::find($id);
         $selectedUser->detachRole($role_id);
     }
 
-    public function edit(Request $request) {
+    public function patch(Request $request, $id) {
         $user = \Auth::user();
         if(!$user->can('change_password')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $user_id = $request->get('user_id');
-        $editedUser = User::find($user_id);
+        $editedUser = User::find($id);
         //$keys = ['name', 'email', 'password'];
         $keys = ['password']; //currently only password is supported
         $updated = false;
@@ -201,29 +198,43 @@ class UserController extends Controller
         ]);
     }
 
-    public function editRole(Request $request) {
+    public function addRole(Request $request) {
         $user = \Auth::user();
         if(!$user->can('add_edit_role')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        if($request->has('role_id')) {
-            $role_id = $request->get('role_id');
-            $editedRole = Role::find($role_id);
-        } else {
-            $editedRole = new Role();
-        }
+        $role = new Role();
         $keys = ['name', 'display_name', 'description'];
-        $updated = false;
+        foreach($keys as $key) {
+            if($request->has($key)) {
+                $value = $request->get($key);
+                $role->{$key} = $value;
+            }
+        }
+        $role->save();
+        return response()->json([
+            'role' => $role
+        ]);
+    }
+
+    public function editRole(Request $request, $id) {
+        $user = \Auth::user();
+        if(!$user->can('add_edit_role')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $editedRole = Role::find($id);
+        $keys = ['name', 'display_name', 'description'];
         foreach($keys as $key) {
             if($request->has($key)) {
                 $value = $request->get($key);
                 $editedRole->{$key} = $value;
-                $updated = true;
             }
         }
-        if($updated) $editedRole->save();
+        $editedRole->save();
         return response()->json([
             'role' => $editedRole
         ]);

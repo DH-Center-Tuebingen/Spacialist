@@ -38,7 +38,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
 
     user.getUserList = function() {
         user.users.length = 0;
-        httpPostFactory('api/user/get/all', new FormData(), function(response) {
+        httpGetFactory('api/user', function(response) {
             angular.forEach(response.users, function(u, key) {
                 user.users.push(u);
             });
@@ -58,20 +58,19 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         formData.append('name', name);
         formData.append('email', email);
         formData.append('password', password);
-        httpPostFactory('api/user/add', formData, function(response) {
+        httpPostFactory('api/user', formData, function(response) {
             user.users.push(response.user);
         });
     };
 
     user.editUser = function(changes, id, $index) {
         var formData = new FormData();
-        formData.append('user_id', id);
         for(var k in changes) {
             if(changes.hasOwnProperty(k)) {
                 formData.append(k, changes[k]);
             }
         }
-        httpPostFactory('api/user/edit', formData, function(response) {
+        httpPatchFactory('api/user/' + id, formData, function(response) {
             user.users[$index] = response.user;
             var content = $translate.instant(snackbar.data-updated.success);
             snackbarService.addAutocloseSnack(content, 'success');
@@ -183,8 +182,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     user.addUserRole = function($item, user_id) {
         var formData = new FormData();
         formData.append('role_id', $item.id);
-        formData.append('user_id', user_id);
-        httpPostFactory('api/user/add/role', formData, function(response) {
+        httpPutFactory('api/user/' + user_id + '/attachRole', formData, function(response) {
             // TODO only remove/add role if function returns no error
             var content = $translate.instant(snackbar.data-updated.success);
             snackbarService.addAutocloseSnack(content, 'success');
@@ -194,8 +192,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     user.removeUserRole = function($item, user_id) {
         var formData = new FormData();
         formData.append('role_id', $item.id);
-        formData.append('user_id', user_id);
-        httpPostFactory('api/user/remove/role', formData, function(response) {
+        httpPatchFactory('api/user/' + user_id + '/detachRole', formData, function(response) {
             // TODO only remove/add role if function returns no error
             var content = $translate.instant(snackbar.data-updated.success);
             snackbarService.addAutocloseSnack(content, 'success');
@@ -204,7 +201,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
 
     user.loginUser = function(credentials) {
         $auth.login(credentials).then(function() {
-            return $http.post('api/user/get');
+            return $http.get('api/user/active');
         }).then(function(response) {
             if(typeof response === 'undefined' || response.status !== 200) {
                 $state.go('auth', {});

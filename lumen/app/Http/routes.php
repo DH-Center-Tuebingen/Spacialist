@@ -50,9 +50,9 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('', 'ImageController@getImages');
+        $app->get('{id:[0-9]+}', 'ImageController@getImage');
+        $app->get('{id:[0-9]+}/object', 'ImageController@getImageObject');
         $app->get('tag', 'ImageController@getAvailableTags');
-        $app->get('{id}', 'ImageController@getImage');
-        $app->get('{id}/object', 'ImageController@getImageObject');
         $app->get('by_context/{id}', 'ImageController@getByContext');
 
         $app->post('upload', 'ImageController@uploadImage');
@@ -87,12 +87,26 @@ $app->group([
         'prefix' => 'user',//TODO api v1
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
+        $app->get('', 'UserController@getUsers');
+        $app->get('active', 'UserController@getActiveUser');
         $app->get('role', 'UserController@getRoles');
         $app->get('role/by_user/{id}', 'UserController@getRolesByUser');
         $app->get('role/{id}/permission', 'UserController@getPermissionsByRole');
 
+        $app->post('', 'UserController@add');//TODO: should be put as soon as email is unique
+
+        $app->patch('{id}/', 'UserController@patch');
+        $app->patch('{id}/attachRole', 'UserController@addRoleToUser');
+        $app->patch('{id}/detachRole', 'UserController@removeRoleFromUser');
+
         $app->delete('{id}', 'UserController@delete');
         $app->delete('role/{id}', 'UserController@deleteRole');
+
+
+        //TODO
+        $app->post('role/edit', 'UserController@editRole');
+        $app->post('role/add/permission', 'UserController@addRolePermission');
+        $app->post('role/remove/permission', 'UserController@removeRolePermission');
 });
 
 $app->group([
@@ -107,15 +121,10 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('occurrence_count/{id}', 'ContextController@getOccurrenceCount'); //TODO: own Controller?
-
-        //TODO: this is actually just a get but with formdata
-        // old call:
-        // $app->post('editor/search/', 'ContextController@search'); //TODO: own Controller?
-        //  new call
         $app->get('search/label={label}/{lang?}', 'ContextController@searchForLabel'); //TODO: own Controller?
 
 
-        $app->post('context_type/', 'ContextController@addContextType'); //TODO: own Controller?
+        $app->post('context_type', 'ContextController@addContextType'); //TODO: own Controller?
         $app->post('context_type/{ctid}/attribute', 'ContextController@addAttributeToContextType'); //TODO: own Controller?
         $app->post('attribute', 'ContextController@addAttribute'); //TODO: own Controller?
 
@@ -149,17 +158,6 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('context/set/possibility', 'ContextController@setPossibility');
     $app->post('context/wktToGeojson', 'ContextController@wktToGeojson');
     $app->post('sources/add', 'SourceController@add');
-    $app->post('user/logout', 'UserController@logout');
-    $app->post('user/switch', 'UserController@switchRole');
-    $app->post('user/get', 'UserController@get');
-    $app->post('user/get/all', 'UserController@getAll');
-    $app->post('user/add', 'UserController@add');
-    $app->post('user/edit', 'UserController@edit');
-    $app->post('user/add/role', 'UserController@addRoleToUser');
-    $app->post('user/remove/role', 'UserController@removeRoleFromUser');
-    $app->post('role/edit', 'UserController@editRole');
-    $app->post('role/add/permission', 'UserController@addRolePermission');
-    $app->post('role/remove/permission', 'UserController@removeRolePermission');
     $app->post('literature/add', 'LiteratureController@add');
     $app->post('literature/edit', 'LiteratureController@edit');
     $app->post('literature/import/bib', 'LiteratureController@importBibtex');

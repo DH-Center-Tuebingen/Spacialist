@@ -162,7 +162,7 @@ class ContextController extends Controller {
         ]);
     }
 
-    public function editContextType($ctid, Request $request) {
+    public function editContextType(Request $request, $ctid) {
         $newUrl = $request->get('new_url');
         $ct = ContextType::find($ctid);
         $ct->thesaurus_url = $newUrl;
@@ -195,7 +195,7 @@ class ContextController extends Controller {
         ]);
     }
 
-    public function addAttributeToContextType($ctid, Request $request) {
+    public function addAttributeToContextType(Request $request, $ctid) {
         if(!$request->has('aid')) {
             return response()->json([
                 'error' => 'Missing parameter. Either aid or ctid is missing.'
@@ -219,7 +219,7 @@ class ContextController extends Controller {
         ]);
     }
 
-    public function removeAttributeFromContextType($ctid, $aid, Request $request) {
+    public function removeAttributeFromContextType(Request $request, $ctid, $aid) {
         $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]
@@ -241,7 +241,7 @@ class ContextController extends Controller {
         Attribute::find($id)->delete();
     }
 
-    public function moveAttributeUp($ctid, $aid, Request $request) {
+    public function moveAttributeUp(Request $request, $ctid, $aid) {
         $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]
@@ -264,7 +264,7 @@ class ContextController extends Controller {
         return response()->json();
     }
 
-    public function moveAttributeDown($ctid, $aid, Request $request) {
+    public function moveAttributeDown(Request $request, $ctid, $aid) {
         $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]
@@ -675,7 +675,7 @@ class ContextController extends Controller {
         return response()->json($rows);
     }
 
-    public function duplicate($id, Request $request) {
+    public function duplicate(Request $request, $id) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
