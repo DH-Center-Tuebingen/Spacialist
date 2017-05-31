@@ -244,6 +244,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     };
 
+    main.contextSearch = function(searchString) {
+        var formData = new FormData();
+        formData.append('val', searchString);
+        return httpPostPromise.getData('api/context/search', formData)
+        .then(function(response) {
+            return response;
+        });
+    };
+
     function isVisible(elems, id, term) {
         var noSearchTerm = !term || term.length === 0;
         var data = elems.data;
@@ -459,6 +468,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             } else if(dType == 'epoch') {
                 if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
             } else if(dType == 'geography') {
+                parsedData[index] = value.val;
+            } else if(dType == 'context') {
                 parsedData[index] = value.val;
             } else if(dType == 'integer' || dType == 'percentage') {
                 parsedData[index] = parseInt(val);

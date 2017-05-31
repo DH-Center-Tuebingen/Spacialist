@@ -103,6 +103,7 @@
     "attribute.double.desc": "Eingabefeld für Zahlen (Gleitkomma)",
     "attribute.integer.desc": "Eingabefeld für Zahlen (Ganzzahl)",
     "attribute.percentage.desc": "Prozentangabe",
+    "attribute.context.desc": "Kontext",
     "attribute.string-sc.desc": "Einfachauswahl als Dropdown",
     "attribute.string-mc.desc": "Mehrfachauswahl als Dropdown",
     "attribute.epoch.desc": "Zeitspanne & Epochenauswahl",

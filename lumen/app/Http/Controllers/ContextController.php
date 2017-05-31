@@ -107,6 +107,12 @@ class ContextController extends Controller {
             } else if($attr->datatype == 'geography') {
                 $tmp = AttributeValue::find($attr->id);
                 $attr->val = $tmp->geography_val->toWKT();
+            } else if($attr->datatype == 'context') {
+                $ctx = Context::find($attr->context_val);
+                $attr->val = [
+                    'name' => $ctx->name,
+                    'id' => $ctx->id
+                ];
             }
         }
         return $data;
@@ -141,6 +147,17 @@ class ContextController extends Controller {
             ->orderBy('l.label')
             ->get();
         return response()->json($matchedConcepts);
+    }
+
+    public function searchContext(Request $request) {
+        if(!$request->has('val')) return response()->json();
+        $val = $request->get('val');
+
+        $matchingContexts = Context::where('name', 'ilike', '%'.$val.'%')
+            ->select('name', 'id')
+            ->orderBy('name')
+            ->get();
+        return response()->json($matchingContexts);
     }
 
     public function deleteContextType($id) {
@@ -414,6 +431,10 @@ class ContextController extends Controller {
                 [
                     'datatype' => 'percentage',
                     'description' => 'attribute.percentage.desc'
+                ],
+                [
+                    'datatype' => 'context',
+                    'description' => 'attribute.context.desc'
                 ]
             ]
         ]);
@@ -1040,7 +1061,7 @@ class ContextController extends Controller {
                 }
             }
 
-            if(is_array($jsonArr)) { //only string-sc and string-mc should be arrays
+            if(is_array($jsonArr) && ($datatype == 'string-sc' || $datatype == 'string-mc')) { //only string-sc and string-mc should be arrays
                 if($isUpdate) {
                     $dbEntries = array(
                         ['context_id', $cid],
@@ -1127,7 +1148,11 @@ class ContextController extends Controller {
                 }
                 $attrValue->lasteditor = $user['name'];
                 if(is_object($jsonArr)) {
-                    $attrValue->json_val = json_encode($jsonArr);
+                    if($datatype == 'context') {
+                        $attrValue->context_val = $jsonArr->id;
+                    } else {
+                        $attrValue->json_val = json_encode($jsonArr);
+                    }
                 } else {
                     if($datatype == 'geography') {
                         $parsed = $this->parseWkt($value);
