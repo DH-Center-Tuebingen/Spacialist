@@ -583,7 +583,7 @@ spacialistApp.directive('formField', function($log) {
     };
 });
 
-spacialistApp.directive('resizeable', function($log) {
+spacialistApp.directive('resizeable', function($compile) {
     var extendContainer = function(extend, shrink) {
         var cls = extend.className;
         var gridClass = getCurrentDeviceClass();
@@ -623,20 +623,6 @@ spacialistApp.directive('resizeable', function($log) {
         shrink.classList.add(mClass+(widthLeft-1));
         shrink.classList.remove(mClass+widthLeft);
     };
-    var clickLeft = function(e) {
-        if(!e.data.ctr || e.data.ctr === 0) return;
-        var i = e.data.ctr;
-        var c = resizeableContainers[i];
-        var cl = resizeableContainers[i-1];
-        extendContainer(c, cl);
-    };
-    var clickRight = function(e) {
-        if(e.data.ctr >= resizeableContainers.length-1) return;
-        var i = e.data.ctr;
-        var c = resizeableContainers[i];
-        var cl = resizeableContainers[i+1];
-        extendContainer(c, cl);
-    };
 
     var resizeableContainers = document.querySelectorAll('[resizeable]');
     var idxCtr = 0;
@@ -645,17 +631,36 @@ spacialistApp.directive('resizeable', function($log) {
         restrict: 'A',
         scope: false,
         link: function(scope, element, attrs) {
-            if(idxCtr !== 0) {
-                var left = angular.element('<div class="resizeable-button-left"><i class="material-icons">chevron_left</i></div>');
-                var lBind = left.bind('click', {ctr: idxCtr}, clickLeft);
-                element.prepend(left);
-            }
+            // scope.idxCtr = idxCtr;
+            scope.clickLeft = function(i) {
+                if(!i) return;
+                var c = resizeableContainers[i];
+                var cl = resizeableContainers[i-1];
+                extendContainer(c, cl);
+            };
+            scope.clickRight = function(i) {
+                if(i >= resizeableContainers.length-1) return;
+                var c = resizeableContainers[i];
+                var cl = resizeableContainers[i+1];
+                extendContainer(c, cl);
+            };
+            scope.resizeToggle = scope.$eval(attrs.resizeable);
             if(idxCtr < resizeableContainers.length - 1) {
-                var right = angular.element('<div class="resizeable-button-right"><i class="material-icons">chevron_right</i></div>');
-                var rBind = right.bind('click', {ctr: idxCtr}, clickRight);
-                element.append(right);
+                var right = angular.element('<div class="resizeable-button-right" ng-if="resizeToggle" ng-click="clickRight('+idxCtr+')"><i class="material-icons">chevron_right</i></div>');
+                element.prepend(right);
+                $compile(right)(scope);
+            }
+            if(idxCtr !== 0) {
+                var left = angular.element('<div class="resizeable-button-left" ng-if="resizeToggle" ng-click="clickLeft('+idxCtr+')"><i class="material-icons">chevron_left</i></div>');
+                element.prepend(left);
+                $compile(left)(scope);
             }
             idxCtr++;
+            scope.$watch(function(scope) {
+                return scope.$eval(attrs.resizeable);
+            }, function(newVal, oldVal) {
+                scope.resizeToggle = newVal;
+            });
         }
     };
 });
