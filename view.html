@@ -1,5 +1,5 @@
 <div ng-controller="mainCtrl" resize-watcher>
-    <div class="col-md-2" id="tree-container" ng-hide="activeAnalysis.isActive" resizeable>
+    <div class="col-md-2" id="tree-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled">
         <div ng-if="currentUser.permissions.view_concepts">
             <h3>{{'context-tree.heading'|translate}}</h3>
             <div class="col-md-12">
@@ -20,7 +20,7 @@
             <div ng-include="'layouts/restricted-access.html'"></div>
         </div>
     </div>
-    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable>
+    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled">
         <div ng-if="currentUser.permissions.view_concept_props">
             <div ng-show="currentElement.element.id">
                 <h3>{{ currentElement.element.name }}<br>
@@ -75,7 +75,7 @@
             <div ng-include="'layouts/restricted-access.html'"></div>
         </div>
     </div>
-    <div class="col-md-5" id="addon-container" ng-hide="activeAnalysis.isActive" resizeable>
+    <div class="col-md-5" id="addon-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled">
         <ul class="nav nav-tabs" id="addon-nav">
             <li role="presentation" ng-class="{ active: layerTwo.activeTab == 'map'}" ng-if="moduleExists('mapCtrl')">
                 <a href="" ng-click="setActiveTab('map')"><i class="material-icons">place</i><span class="tab-desc"> {{'context-form.tabs.map'|translate}}</span></a>
