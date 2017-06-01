@@ -20,6 +20,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.filterTree = mainService.filterTree;
     $scope.treeCallbacks = mainService.treeCallbacks;
     $scope.storedQueries = analysisService.storedQueries;
+    $scope.editMode = mainService.editMode;
     var createModalHelper = mainService.createModalHelper;
 
     $scope.newElementContextMenu = [

@@ -2,6 +2,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     var main = {};
     var modalFields;
 
+    main.editMode = {
+        enabled: false
+    };
+
     main.currentElement = {
         element: {},
         form: {},
@@ -164,6 +168,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             }
         });
     }
+
+    main.toggleEditMode = function() {
+        main.editMode.enabled = !main.editMode.enabled;
+    };
 
     main.duplicateElement = function(id) {
         httpGetFactory('api/context/duplicate/' + id, function(newElem) {
