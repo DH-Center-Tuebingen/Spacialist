@@ -435,6 +435,15 @@ p, div {
   *border-left-color: #ffffff;
 }
 
+.removed {
+    display: none;
+}
+
+.removed-edit {
+    display: block !important;
+    width: 100px;
+}
+
 .resizeable-button-left, .resizeable-button-right {
     cursor: pointer;
     height: 100px;

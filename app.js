@@ -614,7 +614,7 @@ spacialistApp.directive('resizeable', function($compile) {
         }
         width = parseInt(width[1]);
         widthLeft = parseInt(widthLeft[1]);
-        if(width == 11 || widthLeft === 1) {
+        if(width == 11 || widthLeft === 0) {
             console.log("Container can not be shrinked/extended");
             return;
         }
@@ -622,6 +622,14 @@ spacialistApp.directive('resizeable', function($compile) {
         extend.classList.remove(mClass+width);
         shrink.classList.add(mClass+(widthLeft-1));
         shrink.classList.remove(mClass+widthLeft);
+        if(widthLeft === 1) { // hide container if it gets shrinked to 0
+            shrink.classList.add('removed');
+            shrink.classList.add('removed-edit');
+        }
+        if(extend.className.indexOf('removed') > -1) { // show container if it is removed, but gets extended again
+            extend.classList.remove('removed');
+            extend.classList.remove('removed-edit');
+        }
     };
 
     var resizeableContainers = document.querySelectorAll('[resizeable]');
@@ -660,6 +668,17 @@ spacialistApp.directive('resizeable', function($compile) {
                 return scope.$eval(attrs.resizeable);
             }, function(newVal, oldVal) {
                 scope.resizeToggle = newVal;
+                if(scope.resizeToggle) {
+                    var removedElements = document.getElementsByClassName('removed');
+                    angular.forEach(removedElements, function(e) {
+                        e.classList.add('removed-edit');
+                    });
+                } else {
+                    var removedElements = document.getElementsByClassName('removed');
+                    angular.forEach(removedElements, function(e) {
+                        e.classList.remove('removed-edit');
+                    });
+                }
             });
         }
     };
