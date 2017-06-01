@@ -454,7 +454,7 @@ p, div {
     margin-left: 100%;
 }
 
-div:hover .resizeable-button-left, div:hover .resizeable-button-right {
+div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
     visibility: visible;
 }
 
