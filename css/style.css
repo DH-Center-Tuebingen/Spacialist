@@ -432,7 +432,7 @@ p, div {
     cursor: pointer;
     height: 100px;
     width: 30px;
-    position: absolute;
+    position: sticky;
     top: 50%;
     z-index: 99999;
     box-shadow: 4px 4px 10px -5px rgba(0,0,0,0.75);
@@ -447,12 +447,11 @@ p, div {
 
 .resizeable-button-left {
     left: 0;
-    margin-left: 5px;
 }
 
 .resizeable-button-right {
     right: 0;
-    margin-right: 5px;
+    margin-left: 100%;
 }
 
 div:hover .resizeable-button-left, div:hover .resizeable-button-right {
