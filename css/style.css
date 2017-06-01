@@ -148,6 +148,13 @@ ol li.list-group-item {
     animation: fadeOutUp 0.5s;
 }
 
+div[resizeable] {
+    -webkit-transition: width 0.5s ease;
+    -moz-transition: width 0.5s ease;
+    -o-transition: width 0.5s ease;
+    transition: width 0.5s ease;
+}
+
 .spinner-container {
     width: 25px;
     height: 25px; /*added*/
