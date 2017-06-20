@@ -1046,15 +1046,23 @@ class ContextController extends Controller {
             if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
 
             if($datatype === 'epoch') {
-                $start = $jsonArr->start;
-                if(isset($jsonArr->startLabel) && $jsonArr->startLabel === 'bc') {
-                    $start = -$start;
+                $startExists = false;
+                if(isset($jsonArr->start)) {
+                    $startExists = true;
+                    $start = $jsonArr->start;
+                    if(isset($jsonArr->startLabel) && $jsonArr->startLabel === 'bc') {
+                        $start = -$start;
+                    }
                 }
-                $end = $jsonArr->end;
-                if(isset($jsonArr->endLabel) && $jsonArr->endLabel === 'bc') {
-                    $end = -$end;
+                $endExists = false;
+                if(isset($jsonArr->end)) {
+                    $endExists = true;
+                    $end = $jsonArr->end;
+                    if(isset($jsonArr->endLabel) && $jsonArr->endLabel === 'bc') {
+                        $end = -$end;
+                    }
                 }
-                if($end < $start){
+                if($endExists && $startExists && $end < $start){
                     return [
                         'error' => 'End date should be later than start date.'
                     ];
