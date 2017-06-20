@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Remove input field placeholders
 ### Fixed
 - Display context-type in properties tab again
+- Store epochs (without exact date span)
 ### Removed/Deprecated
 
 ## 0.2 - Babylon
