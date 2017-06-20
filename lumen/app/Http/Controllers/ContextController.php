@@ -93,14 +93,16 @@ class ContextController extends Controller {
                     $attrVal['end'] = $jsonVal->end;
                 }
                 if(isset($jsonVal->epoch)){
+                    \Log::info('$jsonVal->epoch');
+                    \Log::info(print_r($jsonVal->epoch, true));
                     $attrVal['epoch'] = DB::table('th_concept')
                                         ->select('id as narrower_id',
-                                            DB::raw("'".DB::table('getconceptlabelsfromurl')
-                                            ->where('concept_url', $jsonVal->epoch)
+                                            DB::raw("'".DB::table('getconceptlabelsfromid')
+                                            ->where('concept_id', $jsonVal->epoch->narrower_id)
                                             ->where('short_name', 'de')
                                             ->value('label')."' as narr")
                                         )
-                                        ->where('concept_url', '=', $jsonVal->epoch)
+                                        ->where('id', '=', $jsonVal->epoch->narrower_id)
                                         ->first();
                 }
                 $attr->val = json_encode($attrVal);
@@ -1046,15 +1048,23 @@ class ContextController extends Controller {
             if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
 
             if($datatype === 'epoch') {
-                $start = $jsonArr->start;
-                if(isset($jsonArr->startLabel) && $jsonArr->startLabel === 'bc') {
-                    $start = -$start;
+                $startExists = false;
+                if(isset($jsonArr->start)) {
+                    $startExists = true;
+                    $start = $jsonArr->start;
+                    if(isset($jsonArr->startLabel) && $jsonArr->startLabel === 'bc') {
+                        $start = -$start;
+                    }
                 }
-                $end = $jsonArr->end;
-                if(isset($jsonArr->endLabel) && $jsonArr->endLabel === 'bc') {
-                    $end = -$end;
+                $endExists = false;
+                if(isset($jsonArr->end)) {
+                    $endExists = true;
+                    $end = $jsonArr->end;
+                    if(isset($jsonArr->endLabel) && $jsonArr->endLabel === 'bc') {
+                        $end = -$end;
+                    }
                 }
-                if($end < $start){
+                if($endExists && $startExists && $end < $start){
                     return [
                         'error' => 'End date should be later than start date.'
                     ];
