@@ -650,6 +650,8 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
+        \Log::info($request->get('coords'));
+        \Log::info(print_r(json_decode($request->get('coords')), true));
         $coords = json_decode($request->get('coords'));
         $type = $request->get('type');
         if($request->has('id')) {
@@ -662,7 +664,7 @@ class ContextController extends Controller {
             case 'marker':
             case 'Point':
                 $coords = $coords[0];
-                $geodata->geom = new MultiPoint([new Point($coords->lat, $coords->lng)]);
+                $geodata->geom = new Point($coords->lat, $coords->lng);
                 break;
             case 'polyline':
             case 'LineString':
