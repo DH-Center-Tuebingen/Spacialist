@@ -374,7 +374,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             $timeout(function() {
                 map.mapObject.eachLayer(function(l) {
                     if(l.options.layer_id) {
-                        console.log(l.options.layer_id);
                         map.mapLayers[l.options.layer_id] = l;
                     }
                 });
