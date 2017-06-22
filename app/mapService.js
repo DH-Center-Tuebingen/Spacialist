@@ -1,6 +1,7 @@
 spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'httpPostPromise', 'leafletData', 'userService', 'environmentService', 'langService', 'leafletBoundsHelpers', '$timeout', function(httpGetFactory, httpPostFactory, httpGetPromise, httpPostPromise, leafletData, userService, environmentService, langService, leafletBoundsHelpers, $timeout) {
     var localContexts;
     var defaultColor = '#00FF00';
+    var invisibleLayers;
     var map = {};
     map.mapLayers = {};
     map.currentGeodata = {};
@@ -85,9 +86,16 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 }
                 // });
                 map.addListToMarkers(geodata, true);
+                initHiddenLayers();
             }
         });
     };
+
+    function initHiddenLayers() {
+        for(var i=0; i<invisibleLayers.length; i++) {
+            map.mapLayers[invisibleLayers[i]].remove();
+        }
+    }
 
     map.addListToMarkers = function(geodataList, isInit) {
         isInit = isInit || false;
@@ -366,6 +374,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             $timeout(function() {
                 map.mapObject.eachLayer(function(l) {
                     if(l.options.layer_id) {
+                        console.log(l.options.layer_id);
                         map.mapLayers[l.options.layer_id] = l;
                     }
                 });
@@ -376,11 +385,15 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
     map.setLayers = function(layers) {
         var gKeyLoaded = false;
+        invisibleLayers = [];
         for(var i=0; i<layers.length; i++) {
             var layer = layers[i];
             var id = layer.id;
             var currentLayer = {};
-            currentLayer.visible = currentLayer.top = layer.visible;
+            currentLayer.visible = true; //all layers need to be visible first due to non-creation of invisible layers
+            if(!layer.visible && layer.is_overlay) {
+                invisibleLayers.push(id);
+            }
             currentLayer.layerOptions = setLayerOptions(layer);
             if(layer.context_type_id) {
                 currentLayer.name = layer.label;
@@ -427,6 +440,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             if(layer.is_overlay) {
                 map.map.layers.overlays[id] = currentLayer;
             } else {
+                currentLayer.top = layer.visible;
                 map.map.layers.baselayers[id] = currentLayer;
             }
         }
