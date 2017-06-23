@@ -1169,6 +1169,8 @@ class ContextController extends Controller {
                         if($parsed !== -1) {
                             $attrValue->geography_val = $parsed;
                         }
+                    } else if($datatype == 'date') {
+                        $attrValue->dt_val = $value;
                     } else {
                         $attrValue->str_val = $value;
                     }

@@ -20,6 +20,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.filterTree = mainService.filterTree;
     $scope.contextSearch = mainService.contextSearch;
     $scope.treeCallbacks = mainService.treeCallbacks;
+    $scope.datepickerOptions = mainService.datepickerOptions;
     $scope.storedQueries = analysisService.storedQueries;
     var createModalHelper = mainService.createModalHelper;
 

@@ -475,6 +475,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 parsedData[index] = parseInt(val);
             } else if(dType == 'double') {
                 parsedData[index] = parseFloat(val);
+            } else if(dType == 'date') {
+                parsedData[index] = new Date(value.dt_val);
             } else {
                 parsedData[index] = val;
             }
