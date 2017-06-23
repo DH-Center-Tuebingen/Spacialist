@@ -624,11 +624,9 @@ spacialistApp.directive('resizeable', function($compile) {
         shrink.classList.remove(mClass+widthLeft);
         if(widthLeft === 1) { // hide container if it gets shrinked to 0
             shrink.classList.add('removed');
-            shrink.classList.add('removed-edit');
         }
         if(extend.className.indexOf('removed') > -1) { // show container if it is removed, but gets extended again
             extend.classList.remove('removed');
-            extend.classList.remove('removed-edit');
         }
     };
 
@@ -642,24 +640,24 @@ spacialistApp.directive('resizeable', function($compile) {
             // scope.idxCtr = idxCtr;
             scope.clickLeft = function(i) {
                 if(!i) return;
-                var c = resizeableContainers[i];
-                var cl = resizeableContainers[i-1];
+                var c = resizeableContainers[i-1];
+                var cl = resizeableContainers[i];
                 extendContainer(c, cl);
             };
             scope.clickRight = function(i) {
                 if(i >= resizeableContainers.length-1) return;
-                var c = resizeableContainers[i];
-                var cl = resizeableContainers[i+1];
+                var c = resizeableContainers[i+1];
+                var cl = resizeableContainers[i];
                 extendContainer(c, cl);
             };
             scope.resizeToggle = scope.$eval(attrs.resizeable);
             if(idxCtr < resizeableContainers.length - 1) {
-                var right = angular.element('<div class="resizeable-button-right" ng-if="resizeToggle" ng-click="clickRight('+idxCtr+')"><i class="material-icons">chevron_right</i></div>');
+                var right = angular.element('<div class="resizeable-button-right" ng-if="resizeToggle" ng-click="clickRight('+idxCtr+')"><i class="material-icons">chevron_left</i></div>');
                 element.prepend(right);
                 $compile(right)(scope);
             }
             if(idxCtr !== 0) {
-                var left = angular.element('<div class="resizeable-button-left" ng-if="resizeToggle" ng-click="clickLeft('+idxCtr+')"><i class="material-icons">chevron_left</i></div>');
+                var left = angular.element('<div class="resizeable-button-left" ng-if="resizeToggle" ng-click="clickLeft('+idxCtr+')"><i class="material-icons">chevron_right</i></div>');
                 element.prepend(left);
                 $compile(left)(scope);
             }
@@ -668,17 +666,6 @@ spacialistApp.directive('resizeable', function($compile) {
                 return scope.$eval(attrs.resizeable);
             }, function(newVal, oldVal) {
                 scope.resizeToggle = newVal;
-                if(scope.resizeToggle) {
-                    var removedElements = document.getElementsByClassName('removed');
-                    angular.forEach(removedElements, function(e) {
-                        e.classList.add('removed-edit');
-                    });
-                } else {
-                    var removedElements = document.getElementsByClassName('removed');
-                    angular.forEach(removedElements, function(e) {
-                        e.classList.remove('removed-edit');
-                    });
-                }
             });
         }
     };
