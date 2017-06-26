@@ -12,11 +12,12 @@ class UserControllerTest extends TestCase
      */
     public function testGetLoggedInUser()
     {
+        $this->withoutMiddleware();
         $user = factory(App\User::class)->create();
-
-        $response = $this->actingAs($user)
-                ->call('POST', '/user/get');
-
-        $this->assertEquals(200, $response->status());
+        $req = 'user/get/roles/'.$user['id'];
+        \Log::info(print_r($user, true));
+        \Log::info($req);
+        $response = $this->get($req);
+        $this->assertResponseOk();
     }
 }
