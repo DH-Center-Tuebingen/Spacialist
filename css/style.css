@@ -282,6 +282,10 @@ ol li.list-group-item {
     padding-top: 10px;
 }
 
+.progress {
+    height: 20px !important;}
+}
+
 .external-container {
     position: relative;
 }
