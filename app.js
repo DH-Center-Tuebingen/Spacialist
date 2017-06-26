@@ -614,7 +614,7 @@ spacialistApp.directive('resizeable', function($compile) {
         }
         width = parseInt(width[1]);
         widthLeft = parseInt(widthLeft[1]);
-        if(width == 11 || widthLeft === 0) {
+        if(width == 12 || widthLeft === 0) {
             console.log("Container can not be shrinked/extended");
             return;
         }
