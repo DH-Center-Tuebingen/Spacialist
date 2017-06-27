@@ -31,6 +31,12 @@ config([
                 'driver' => 'local',
                 'root' => storage_path('app'),
             ],
+            'public' => [
+                'driver' => 'local',
+                'root' => app()->basePath('/public/storage'),
+                'url' => './lumen/public/storage',
+                'visibility' => 'public',
+            ],
         ],
     ],
 ]);

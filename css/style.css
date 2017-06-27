@@ -99,6 +99,11 @@ textarea {
     resize: vertical;
 }
 
+.form-group-unpadded {
+    margin: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 .inline-edit {
     border: none;
     border-bottom: 1px solid gray;
@@ -223,11 +228,20 @@ ol li.list-group-item {
     text-align: left;
 }
 
+.width-90 {
+    width: 90%;
+}
+
 .modal-list {
     max-height: 200px;
     overflow-y: auto;
     overflow-x: hidden;
     /*text-align: left;*/
+}
+
+.scrollable-modal {
+    max-height: calc(100vh - 20vh);
+    overflow-x: auto;
 }
 
 .thumb-wrapper {
@@ -266,6 +280,10 @@ ol li.list-group-item {
 
 .padded-content {
     padding-top: 10px;
+}
+
+.progress {
+    height: 20px !important;
 }
 
 .external-container {
@@ -634,12 +652,22 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     cursor: pointer;
     font-size: 12px !important;
     position: absolute;
-    right: 1px;
-    top: 2px;
+    right: -2px;
+    top: 8px;
 }
 
 .list-group-item {
     margin: 5px 0 5px 0;
+}
+
+.hg-100 {
+    height: 100%;
+}
+
+/* three.js */
+#threejs-container > canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 /* MATERIAL DESIGN PATCHES >> */

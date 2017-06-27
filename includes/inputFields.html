@@ -1,12 +1,14 @@
 <div>
-    <div class="form-group" ng-repeat="attr in attributeFields" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered && (isDeletable || isEditable)}">
+    <div class="form-group form-group-unpadded" ng-repeat="attr in attributeFields" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered && (isDeletable || isEditable)}">
         <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}" uib-popover="{{attr.root_label}}" popover-trigger="'mouseenter'">
-            {{ attr.val }}: <sup ng-click="openSourceModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'], attributeOutputs[attr.aid+'_'+attr.oid+'desc'])">
-                <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="attributeSources['#'+attr.aid].length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
-            </sup>
+            <div style="display: table; float: right;">
+                <span style="display: table-cell">{{ attr.val }}:</span><sup ng-click="openSourceModal(attr.val, attr.aid, attributeOutputs[attr.aid+'_'+attr.oid+'pos'], attributeOutputs[attr.aid+'_'+attr.oid+'desc'])" style="display: table-cell">
+                    <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="attributeSources['#'+attr.aid].length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
+                </sup>
+            </div>
         </label>
         <div class="col-md-{{inputWidth}}" ng-switch on="attr.datatype">
-            <input class="form-control" ng-switch-when="string" type="text" placeholder="{{ attr.val }}" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
+            <input class="form-control" ng-switch-when="string" type="text" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
             <input class="form-control" ng-switch-when="double" type="number" step="any" min="0" placeholder="0.0" id="a{{ attr.aid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
             <input class="form-control" ng-switch-when="integer" type="number" step="1" placeholder="0" id="a{{ attr.aid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
             <div ng-switch-when="percentage">
@@ -19,6 +21,13 @@
                     <i class="material-icons">place</i>
                     <span translate="context-form.fields.open-map"/>
                 </button>
+            </div>
+            <div ng-switch-when="context">
+                <input class="form-control" type="text" id="a{{ attr.aid }}" placeholder="{{ 'context-form.fields.placeholder-context' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-model-options="{ debounce: 250 }" ng-readonly="readonlyInput" uib-typeahead="result as result.name for result in contextSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel" />
+                <i ng-show="loadingResultsLabel" class="material-icons">refresh</i>
+                <div ng-show="noResultsLabel && result.name.length >= 3">
+                    <i class="material-icons md-18">clear</i> No Results Found
+                </div>
             </div>
             <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"></textarea>
             <p class="input-group" ng-switch-when="date">
@@ -124,7 +133,7 @@
                     </div>
                 </div>
             </div>
-            <input class="form-control" ng-switch-default type="text" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" placeholder="{{ attr.val }}" ng-readonly="readonlyInput"/>
+            <input class="form-control" ng-switch-default type="text" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
         </div>
         <div ng-if="hovered" style="position: absolute;">
             <div ng-if="isEditable" style="float: left;">

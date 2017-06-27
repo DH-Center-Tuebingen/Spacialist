@@ -1,4 +1,4 @@
-var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ngCookies', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
+var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ngCookies', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'hljs', 'hc.marked', 'pdf', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
 
 $.material.init();
 
@@ -742,6 +742,25 @@ spacialistApp.factory('httpGetFactory', function($http) {
         });
     };
 });
+
+spacialistApp.config(['markedProvider', function (markedProvider) {
+  markedProvider.setOptions({
+    gfm: true,
+    tables: true,
+    highlight: function (code, lang) {
+      if (lang) {
+        return hljs.highlight(lang, code, true).value;
+      } else {
+        return hljs.highlightAuto(code).value;
+      }
+    }
+  });
+  markedProvider.setRenderer({
+    link: function(href, title, text) {
+      return "<a href='" + href + "'" + (title ? " title='" + title + "'" : '') + " target='_blank'>" + text + "</a>";
+    }
+  });
+}]);
 
 spacialistApp.config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({

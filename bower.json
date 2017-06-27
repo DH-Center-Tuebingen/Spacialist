@@ -50,7 +50,12 @@
     "Leaflet.GridLayer.GoogleMutant": "https://gitlab.com/IvanSanchez/Leaflet.GridLayer.GoogleMutant.git",
     "leaflet-plugins": "^3.0.0",
     "Leaflet.Snap": "https://github.com/makinacorpus/Leaflet.Snap.git",
-    "Leaflet.GeometryUtil": "https://github.com/makinacorpus/Leaflet.GeometryUtil.git"
+    "Leaflet.GeometryUtil": "https://github.com/makinacorpus/Leaflet.GeometryUtil.git",
+    "angular-highlightjs": "^0.7.1",
+    "angular-pdf-viewer": "^0.2.13",
+    "highlightjs": "^9.10.0",
+    "angular-marked": "^1.2.2",
+    "three.js": "three#*"
   },
   "resolutions": {
     "angular": "~1.5.8",

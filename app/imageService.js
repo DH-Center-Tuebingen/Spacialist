@@ -11,6 +11,28 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
 
     var lastTimeImageChecked = 0;
 
+    images.getMimeType = function(mt, f) {
+        // check for extension before mime-type check
+        if(f) {
+            var suffix = f.substr(f.lastIndexOf('.')+1);
+            switch(suffix) {
+                case 'dae':
+                case 'obj':
+                    return '3d';
+            }
+        }
+
+        if(mt.startsWith('image/')) return 'image';
+        if(mt == 'application/pdf') return 'pdf';
+        if(mt == 'application/xml' || mt == 'text/xml') return 'xml';
+        if(mt == 'application/xhtml+xml' || mt == 'text/html') return 'html';
+        if(mt.startsWith('audio/')) return 'audio';
+        if(mt.startsWith('video/')) return 'video';
+
+        // default is simple text
+        return 'text';
+    };
+
     images.openImageModal = function(img) {
         modalOptions = {};
         // modalOptions.markers = angular.extend({}, scopeService.markers);
@@ -20,6 +42,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         modalOptions.setImagePropertyEdit = setImagePropertyEdit;
         modalOptions.storeImagePropertyEdit = storeImagePropertyEdit;
         modalOptions.cancelImagePropertyEdit = cancelImagePropertyEdit;
+        modalOptions.getMimeType = images.getMimeType;
         // modalOptions.isEmpty = $scope.isEmpty;
         // modalOptions.modalNav = angular.extend({}, $scope.modalNav);
         modalService.showModal({}, modalOptions);

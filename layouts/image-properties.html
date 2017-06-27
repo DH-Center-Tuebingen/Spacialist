@@ -1,18 +1,78 @@
 <div class="modal-header">
     <h4>{{ modalOptions.img.filename }}</h4>
 </div>
-<div class="modal-body col-md-12" ng-init="imageEdits = {}">
-    <div class="col-md-7 external-container">
-        <img protected-src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" />
-        <div class="external-content">
-            <a href="" ng-click="modalOptions.openImageInTab(modalOptions.img.id)">
-                <dfn title="Open {{ modalOptions.img.filename }} in a new tab">
-                    <i class="material-icons" aria-hidden="true">open_in_new</i>
-                </dfn>
-            </a>
+<div class="modal-body col-md-12" ng-init="imageEdits = {}" style="display: flex;">
+    <div class="col-md-7 external-container" style="align-items: stretch;">
+        <div class="hg-100" ng-switch="modalOptions.getMimeType(modalOptions.img.mime_type, modalOptions.img.filename)">
+            <div class="hg-100" ng-switch-when="image">
+                <img protected-src="api/image/get/{{ modalOptions.img.id }}" id="modalImage" />
+                <div class="external-content">
+                    <a href="" ng-click="modalOptions.openImageInTab(modalOptions.img.id)">
+                        <dfn title="Open {{ modalOptions.img.filename }} in a new tab">
+                            <i class="material-icons" aria-hidden="true">open_in_new</i>
+                        </dfn>
+                    </a>
+                </div>
+            </div>
+            <div class="hg-100" ng-switch-when="pdf" ng-controller="pdfCtrl">
+                <div class="pdf-header">
+                    <a class="btn btn-default" ng-click="prev()">
+                        <i class="material-icons" aria-hidden="true">navigate_before</i>
+                    </a>
+                    <a class="btn btn-default" ng-click="next()">
+                        <i class="material-icons" aria-hidden="true">navigate_next</i>
+                    </a>
+                    <a class="btn btn-default" ng-click="rotate()">
+                        <i class="material-icons" aria-hidden="true">rotate_right</i>
+                    </a>
+                    <a class="btn btn-default" ng-click="zoomOut()">
+                        <i class="material-icons" aria-hidden="true">zoom_out</i>
+                    </a>
+                    <a class="btn btn-default" ng-click="zoomIn()">
+                        <i class="material-icons" aria-hidden="true">zoom_in</i>
+                    </a>
+                    <span class="page-counter">{{getCurrentPage()}}/{{getPageCount()}}</span>
+                </div>
+                <div class="scrollable-modal">
+                    <pdf-viewer url="modalOptions.img.url" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
+                </div>
+            </div>
+            <div ng-switch-when="audio">
+                <audio controls class="width-90">
+                    <source ng-src="{{modalOptions.img.url}}" />
+                </audio>
+            </div>
+            <div ng-switch-when="video">
+                <video controls class="width-90">
+                    <source ng-src="{{modalOptions.img.url}}" />
+                </video>
+            </div>
+            <div class="hg-100" ng-switch-when="3d" ng-controller="threeCtrl">
+                <div class="hg-100" id="threejs-container" ng-init="initThree(modalOptions.img.url)">
+                    <div style="position: absolute; top: 10px; left: 10px;">
+                        <button class="btn btn-primary" style="display: block;" ng-click="zoomOut()"><i class="material-icons">zoom_out</i></button>
+                        <button class="btn btn-primary" style="display: block;" ng-click="zoomIn()"><i class="material-icons">zoom_in</i></button>
+                        <button class="btn btn-primary" style="display: block;" ng-click="toggleMeasurement()"><i class="material-icons">straighten</i></button>
+                    </div>
+                </div>
+                <p>
+                    Gemessene Länge: {{ props.length }}m
+                </p>
+            </div>
+            <div ng-switch-default ng-controller="pdfCtrl">
+                <div ng-if="modalOptions.img.filename.endsWith('.md')">
+                    <button type="button" class="btn btn-default" ng-click="togglePreview()">
+                        <span translate="photos.properties.md-preview.toggle"></span>
+                    </button>
+                </div>
+                <div ng-if="!isPreview" class="left scrollable-modal" hljs hljs-include="modalOptions.img.url">
+                </div>
+                <div ng-if="isPreview" class="left scrollable-modal" marked src="modalOptions.img.url">
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-5" style="align-items: stretch;">
         <ul class="nav nav-tabs nav-justified">
             <li role="presentation" ng-class="{active: modalOptions.modalNav.propTab}" ng-click="modalOptions.modalNav.setPropTab()"><a><i class="material-icons">tune</i> {{'photos.properties.heading'|translate}}</a></li>
             <li role="presentation" ng-class="{active: modalOptions.modalNav.linkTab}" ng-click="modalOptions.modalNav.setLinkTab()"><a><i class="material-icons">link</i> {{'photos.linkages.heading'|translate}}</a></li>
