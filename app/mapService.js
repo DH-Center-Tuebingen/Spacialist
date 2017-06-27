@@ -291,8 +291,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 return currentStyle;
             },
             pointToLayer: function(feature, latlng) {
-                var m = L.circleMarker(latlng, map.style);
-                m.setRadius(m.getRadius() / 2);
+                var m = L.marker(latlng, map.style);
                 return m;
             },
             onEachFeature: function(feature, layer) {
@@ -483,8 +482,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             return currentStyle;
         };
         lo.pointToLayer = function(feature, latlng) {
-            var m = L.circleMarker(latlng, map.style);
-            m.setRadius(m.getRadius() / 2);
+            var m = L.marker(latlng, map.style);
             return m;
         };
         lo.onEachFeature = function(feature, layer) {
@@ -536,7 +534,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
             } else if (layer instanceof L.Polyline) {
                 return 'LINESTRING(' + coords.join(',') + ')';
             }
-        } else if (layer instanceof L.CircleMarker) {
+        } else if (layer instanceof L.Marker) {
             return 'POINT(' + layer.getLatLng().lng + ' ' + layer.getLatLng().lat + ')';
         }
     };
