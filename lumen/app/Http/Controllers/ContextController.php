@@ -12,10 +12,15 @@ use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
 use App\ContextAttribute;
+use App\AvailableLayer;
+use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
 use Phaza\LaravelPostgis\Geometries\Polygon;
+use Phaza\LaravelPostgis\Geometries\MultiPoint;
+use Phaza\LaravelPostgis\Geometries\MultiLineString;
+use Phaza\LaravelPostgis\Geometries\MultiPolygon;
 use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Zizaco\Entrust;
 use \DB;
@@ -120,7 +125,7 @@ class ContextController extends Controller {
         return $data;
     }
 
-    private function getLabel($thesaurus_url, $lang = 'de') {
+    public static function getLabel($thesaurus_url, $lang = 'de') {
         $label = DB::table('th_concept_label as lbl')
             ->join('th_language as lang', 'lang.id', '=', 'lbl.language_id')
             ->join('th_concept as con', 'lbl.concept_id', '=', 'con.id')
@@ -174,13 +179,28 @@ class ContextController extends Controller {
         }
         $curl = $request->get('concept_url');
         $type = $request->get('type');
+        $geomtype = $request->get('geomtype');
         $cType = new ContextType();
         $cType->thesaurus_url = $curl;
         $cType->type = $type;
         $cType->save();
         $cType->label = $this->getLabel($curl);
+
+        $layer = new AvailableLayer();
+        $layer->name = '';
+        $layer->url = '';
+        $layer->type = $geomtype;
+        $layer->opacity = 1;
+        $layer->visible = true;
+        $layer->is_overlay = true;
+        $layer->position = AvailableLayer::where('is_overlay', '=', true)->max('position') + 1;
+        $layer->context_type_id = $cType->id;
+        $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        $layer->save();
+
         return response()->json([
-            'contexttype' => $cType
+            'contexttype' => $cType,
+            'layer' => $layer
         ]);
     }
 
@@ -542,11 +562,23 @@ class ContextController extends Controller {
             ]);
         }
         try {
-            Geodata::findOrFail($gid);
+            $geodata = Geodata::findOrFail($gid);
         } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This geodata does not exist'
             ]);
+        }
+        $layer = AvailableLayer::where('context_type_id', '=', $context->context_type_id)->first();
+
+        $undefinedError = [
+            'error' => 'Layer Type doesn\'t match Geodata Type'
+        ];
+        if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && !Helpers::endsWith($layer->type, 'Point')) {
+            return response()->json($undefinedError);
+        } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && !Helpers::endsWith($layer->type, 'Linestring')) {
+            return response()->json($undefinedError);
+        } else if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && !Helpers::endsWith($layer->type, 'Polygon')) {
+            return response()->json($undefinedError);
         }
         $context->geodata_id = $gid;
         $context->save();
@@ -641,6 +673,8 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
+        \Log::info($request->get('coords'));
+        \Log::info(print_r(json_decode($request->get('coords')), true));
         $coords = json_decode($request->get('coords'));
         $type = $request->get('type');
         if($request->has('id')) {
@@ -661,7 +695,7 @@ class ContextController extends Controller {
                 foreach($coords as $coord) {
                     $lines[] = new Point($coord->lat, $coord->lng);
                 }
-                $geodata->geom = new LineString($lines);
+                $geodata->geom = new MultiLineString([new LineString($lines)]);
                 break;
             case 'polygon':
             case 'Polygon':
@@ -670,7 +704,7 @@ class ContextController extends Controller {
                     $lines[] = new Point($coord->lat, $coord->lng);
                 }
                 $linestring = new LineString($lines);
-                $geodata->geom = new Polygon([ $linestring ]);
+                $geodata->geom = new MultiPolygon([new Polygon([ $linestring ])]);
                 break;
         }
         $geodata->lasteditor = $user['name'];

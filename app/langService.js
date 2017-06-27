@@ -60,6 +60,10 @@ spacialistApp.service('langService', ['$translate', function($translate) {
         }
     }
 
+    lang.getCurrentLanguage = function() {
+        return $translate.use();
+    };
+
     lang.switchLanguage = function(key) {
         var langPromise = $translate.use(key);
         if(typeof langPromise == 'object') {
