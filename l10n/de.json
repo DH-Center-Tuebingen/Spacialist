@@ -36,6 +36,7 @@
     "main.menu.user-management": "Benutzerverwaltung",
     "main.menu.role-management": "Rollenverwaltung",
     "main.menu.data-model-editor": "Datenmodell-Editor",
+    "main.menu.toggle-edit-mode": "Editier-Modus umschalten",
     "main.menu.layer-editor": "Ebenen-Editor",
     "spacialist": "Spacialist",
     "literature.bibtex.type" : "Typ",

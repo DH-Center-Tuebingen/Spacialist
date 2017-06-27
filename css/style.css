@@ -153,6 +153,13 @@ ol li.list-group-item {
     animation: fadeOutUp 0.5s;
 }
 
+div[resizeable] {
+    -webkit-transition: width 0.5s ease;
+    -moz-transition: width 0.5s ease;
+    -o-transition: width 0.5s ease;
+    transition: width 0.5s ease;
+}
+
 .spinner-container {
     width: 25px;
     height: 25px; /*added*/
@@ -435,6 +442,39 @@ p, div {
 .tabs-right > .nav-tabs .active > a:focus {
   border-color: #ddd #ddd #ddd transparent;
   *border-left-color: #ffffff;
+}
+
+.removed {
+    display: none;
+}
+.resizeable-button-left, .resizeable-button-right {
+    cursor: pointer;
+    height: 100px;
+    width: 30px;
+    position: sticky;
+    top: 50%;
+    z-index: 99999;
+    box-shadow: 4px 4px 10px -5px rgba(0,0,0,0.75);
+    background-color: #eeeeee;
+    border-radius: 3px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    visibility: hidden;
+}
+
+.resizeable-button-left {
+    left: 0;
+}
+
+.resizeable-button-right {
+    right: 0;
+    margin-left: 100%;
+}
+
+div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
+    visibility: visible;
 }
 
 /* modal */

@@ -122,6 +122,8 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a href="" ng-click="toggleEditMode()">
+                                        <i class="material-icons">mode_edit</i> {{'main.menu.toggle-edit-mode'|translate}}
                                     <a href="" ng-click="openLayerEditor()">
                                         <i class="material-icons">layers</i> {{'main.menu.layer-editor'|translate}}
                                     </a>
@@ -208,5 +210,12 @@
         <script src="controllers/editorCtrl.js"></script>
         <script src="controllers/pdfCtrl.js"></script>
         <script src="controllers/threeCtrl.js"></script>
+
+        <div id="current-device-class">
+            <div id="xs" class="visible-xs"></div>
+            <div id="sm" class="visible-sm"></div>
+            <div id="md" class="visible-md"></div>
+            <div id="lg" class="visible-lg"></div>
+        </div>
     </body>
 </html>

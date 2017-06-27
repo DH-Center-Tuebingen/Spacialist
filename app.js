@@ -591,6 +591,94 @@ spacialistApp.directive('formField', function($log) {
     };
 });
 
+spacialistApp.directive('resizeable', function($compile) {
+    var extendContainer = function(extend, shrink) {
+        var cls = extend.className;
+        var gridClass = getCurrentDeviceClass();
+        var matchingClass = nextMatchingDeviceClass(cls, gridClass);
+        if(matchingClass === null) {
+            console.log("grid breakpoint not specified");
+            return;
+        }
+        var mClass = 'col-' + matchingClass + '-';
+        var regex = new RegExp(mClass+ '\\d+');
+        var selfClass = cls.match(regex);
+        if(selfClass === null) {
+            console.log(matchingClass + " not found in " + cls);
+            return;
+        }
+        var clsl = shrink.className;
+        var leftClass = clsl.match(regex);
+        if(leftClass === null) {
+            console.log("Shrink-container doesn't have a matching class.");
+            return;
+        }
+        var widthRegex = new RegExp(mClass + '(\\d+)');
+        var width = cls.match(widthRegex);
+        var widthLeft = clsl.match(widthRegex);
+        if(width === null || widthLeft === null) {
+            console.log("Shouldn't happen ;)");
+            return;
+        }
+        width = parseInt(width[1]);
+        widthLeft = parseInt(widthLeft[1]);
+        if(width == 12 || widthLeft === 0) {
+            console.log("Container can not be shrinked/extended");
+            return;
+        }
+        extend.classList.add(mClass+(width+1));
+        extend.classList.remove(mClass+width);
+        shrink.classList.add(mClass+(widthLeft-1));
+        shrink.classList.remove(mClass+widthLeft);
+        if(widthLeft === 1) { // hide container if it gets shrinked to 0
+            shrink.classList.add('removed');
+        }
+        if(extend.className.indexOf('removed') > -1) { // show container if it is removed, but gets extended again
+            extend.classList.remove('removed');
+        }
+    };
+
+    var resizeableContainers = document.querySelectorAll('[resizeable]');
+    var idxCtr = 0;
+
+    return {
+        restrict: 'A',
+        scope: false,
+        link: function(scope, element, attrs) {
+            // scope.idxCtr = idxCtr;
+            scope.clickLeft = function(i) {
+                if(!i) return;
+                var c = resizeableContainers[i-1];
+                var cl = resizeableContainers[i];
+                extendContainer(c, cl);
+            };
+            scope.clickRight = function(i) {
+                if(i >= resizeableContainers.length-1) return;
+                var c = resizeableContainers[i+1];
+                var cl = resizeableContainers[i];
+                extendContainer(c, cl);
+            };
+            scope.resizeToggle = scope.$eval(attrs.resizeable);
+            if(idxCtr < resizeableContainers.length - 1) {
+                var right = angular.element('<div class="resizeable-button-right" ng-if="resizeToggle" ng-click="clickRight('+idxCtr+')"><i class="material-icons">chevron_left</i></div>');
+                element.prepend(right);
+                $compile(right)(scope);
+            }
+            if(idxCtr !== 0) {
+                var left = angular.element('<div class="resizeable-button-left" ng-if="resizeToggle" ng-click="clickLeft('+idxCtr+')"><i class="material-icons">chevron_right</i></div>');
+                element.prepend(left);
+                $compile(left)(scope);
+            }
+            idxCtr++;
+            scope.$watch(function(scope) {
+                return scope.$eval(attrs.resizeable);
+            }, function(newVal, oldVal) {
+                scope.resizeToggle = newVal;
+            });
+        }
+    };
+});
+
 spacialistApp.directive('protectedSrc', ['httpGetFactory', function(httpGetFactory) {
     return {
         restrict: 'A',
