@@ -58,6 +58,10 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->get('user/get/role/permissions/{id}', 'UserController@getPermissionsByRole');
     $app->get('role/delete/{id}', 'UserController@deleteRole');
     $app->get('overlay/get/all', 'OverlayController@getAll');
+    $app->get('overlay/delete/{id}', 'OverlayController@deleteLayer');
+    $app->get('overlay/move/{id}/up', 'OverlayController@moveUp');
+    $app->get('overlay/move/{id}/down', 'OverlayController@moveDown');
+    $app->get('overlay/geometrytypes/get', 'OverlayController@getGeometryTypes');
     $app->get('editor/attribute/delete/{id}', 'ContextController@deleteAttribute');
     $app->get('editor/occurrences/{id}', 'ContextController@getOccurrenceCount');
     $app->get('editor/contexttype/delete/{id}', 'ContextController@deleteContextType');
@@ -88,7 +92,10 @@ $app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']]
     $app->post('literature/add', 'LiteratureController@add');
     $app->post('literature/edit', 'LiteratureController@edit');
     $app->post('literature/import/bib', 'LiteratureController@importBibtex');
+    $app->post('overlay/update', 'OverlayController@updateLayer');
+    $app->post('overlay/add', 'OverlayController@addLayer');
     $app->post('editor/search', 'ContextController@search');
+    $app->post('context/search', 'ContextController@searchContext');
     $app->post('editor/contexttype/add', 'ContextController@addContextType');
     $app->post('editor/contexttype/edit', 'ContextController@editContextType');
     $app->post('editor/contexttype/attribute/add', 'ContextController@addAttributeToContextType');

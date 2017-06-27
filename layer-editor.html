@@ -1,0 +1,202 @@
+<div ng-controller="layerEditorCtrl" resize-watcher id="layer-editor">
+    <h2 id="editor-heading" translate="layer-editor.heading"></h2>
+    <div class="col-md-12">
+        <div class="col-md-3 layer-editor-column">
+            <h4 translate="layer-editor.available-layers.heading"></h4>
+            <h5 translate="layer-editor.baselayers.heading"></h5>
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat="(key, cl) in contextLayers.baselayers" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered}">
+                    <a href="" ng-click="setSelectedLayer(cl, key)" style="float: left;"><i class="material-icons">map</i> {{ cl.name }}</a>
+                    <div ng-if="hovered">
+                        <div style="float: left; padding-left: 5px;">
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="onDelete(cl)">
+                                <i class="material-icons md-18 fa-red">delete</i>
+                            </a>
+                        </div>
+                        <!-- <div style="float: left; padding-left: 5px;">
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="onOrder.up(cl)">
+                                <i class="material-icons md-18">arrow_drop_up</i>
+                            </a>
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="onOrder.down(cl)">
+                                <i class="material-icons md-18">arrow_drop_down</i>
+                            </a>
+                        </div> -->
+                    </div>
+                </li>
+            </ul>
+            <button type="button" class="btn btn-success" ng-click="addNewBaselayer()">
+                <i class="material-icons">add</i> {{ 'layer-editor.add-new.baselayer' | translate }}
+            </button>
+            <h5 translate="layer-editor.overlays.heading"></h5>
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat="(key, cl) in contextLayers.overlays" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered}">
+                    <a href="" ng-click="setSelectedLayer(cl, key)" style="float: left;"><i class="material-icons">map</i> {{ cl.name }}</a>
+                    <div ng-if="hovered">
+                        <div ng-if="!cl.layerOptions.context_type_id && cl.layerOptions.layer_id != 'unlinked'" style="float: left; padding-left: 5px;">
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="onDelete(cl)">
+                                <i class="material-icons md-18 fa-red">delete</i>
+                            </a>
+                        </div>
+                        <!--<div style="float: left; padding-left: 5px;">
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="onOrder.up(cl)">
+                                <i class="material-icons md-18">arrow_drop_up</i>
+                            </a>
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="onOrder.down(cl)">
+                                <i class="material-icons md-18">arrow_drop_down</i>
+                            </a>
+                        </div>-->
+                    </div>
+                </li>
+            </ul>
+            <button type="button" class="btn btn-success" ng-click="addNewOverlay()">
+                <i class="material-icons">add</i> {{ 'layer-editor.add-new.overlay' | translate }}
+            </button>
+        </div>
+        <div class="col-md-9 layer-editor-column">
+            <h4 translate="layer-editor.properties-of.heading" translate-values="{ name: selectedLayer.layer.name }"></h4>
+            <div ng-if="selectedLayer.layer.name">
+                <form class="form-horizontal" ng-submit="updateLayer(selectedLayer.layer, selectedLayer.key)">
+                    <div ng-if="selectedLayer.layer.layerOptions.context_type_id || selectedLayer.layer.layerOptions.layer_id == 'unlinked'">
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Color:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="color" ng-model="selectedLayer.layer.layerOptions.color" />
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="!selectedLayer.layer.layerOptions.context_type_id && selectedLayer.layer.layerOptions.layer_id != 'unlinked'">
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Name:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="text" ng-model="selectedLayer.layer.name" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                URL:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="text" ng-model="selectedLayer.layer.url" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Type:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="text" ng-model="selectedLayer.layer.type" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Subdomains:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="text" ng-model="selectedLayer.layer.layerOptions.subdsubdomains" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Attribution:
+                            </label>
+                            <div class="col-md-4">
+                                <textarea class="form-control" ng-model="selectedLayer.layer.layerOptions.attribution"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Layers:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="text" ng-model="selectedLayer.layer.layerOptions.layers" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Styles:
+                            </label>
+                            <div class="col-md-4">
+                                <textarea class="form-control" ng-model="selectedLayer.layer.layerOptions.styles"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Format:
+                            </label>
+                            <div class="col-md-4">
+                                <textarea class="form-control" ng-model="selectedLayer.layer.layerOptions.format"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Version:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="text" ng-model="selectedLayer.layer.layerOptions.version" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Overlay:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="checkbox" ng-model="selectedLayer.layer.layerOptions.is_overlay" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                API-Key:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="text" ng-model="selectedLayer.layer.layerOptions.api_key" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Layer Type:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="text" ng-model="selectedLayer.layer.layerOptions.layer_type" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-2">
+                                Color:
+                            </label>
+                            <div class="col-md-4">
+                                <input class="form-control" type="color" ng-model="selectedLayer.layer.layerOptions.color" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label class="control-label col-md-2">
+                            Visible:
+                        </label>
+                        <div class="col-md-4">
+                            <input class="form-control" type="checkbox" ng-model="selectedLayer.layer.layerOptions.visible" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label class="control-label col-md-2">
+                            Opacity:
+                        </label>
+                        <div class="col-md-4">
+                            <input class="form-control" type="number" step="0.01" min="0" max="1" ng-model="selectedLayer.layer.layerOptions.opacity" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="material-icons">save</i> <span translate="Save"></span>
+                    </button>
+                </form>
+            </div>
+            <div ng-if="!selectedLayer.layer.name">
+                <p class="alert alert-info" translate="layer-editor.please-select-element">
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

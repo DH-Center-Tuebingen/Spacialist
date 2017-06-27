@@ -10,6 +10,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         element: {},
         form: {},
         data: {},
+        geometryType: '',
         fields: {},
         sources: {}
     };
@@ -94,8 +95,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         getContexts();
         getArtifacts();
         getDropdownOptions();
-        mapService.getGeodata();
-        mapService.reinitVariables();
+        mapService.initMapService();
     }
 
     function getContexts() {
@@ -249,6 +249,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.filterTree = function(elements, term) {
         angular.forEach(elements.roots, function(r) {
             isVisible(elements, r, term.toUpperCase());
+        });
+    };
+
+    main.contextSearch = function(searchString) {
+        var formData = new FormData();
+        formData.append('val', searchString);
+        return httpPostPromise.getData('api/context/search', formData)
+        .then(function(response) {
+            return response;
         });
     };
 
@@ -468,10 +477,14 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
             } else if(dType == 'geography') {
                 parsedData[index] = value.val;
+            } else if(dType == 'context') {
+                parsedData[index] = value.val;
             } else if(dType == 'integer' || dType == 'percentage') {
                 parsedData[index] = parseInt(val);
             } else if(dType == 'double') {
                 parsedData[index] = parseFloat(val);
+            } else if(dType == 'date') {
+                parsedData[index] = new Date(value.dt_val);
             } else {
                 parsedData[index] = val;
             }
@@ -601,6 +614,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
         var isCurrentlyLinked = mapService.geodata.linkedContexts[elem.geodata_id] && mapService.geodata.linkedContexts[elem.geodata_id] > 0;
         elem = target;
+        var layerId = mapService.geodata.linkedGeolayer[elem.context_type_id];
+        var layer = mapService.map.layers.overlays[layerId];
+        main.currentElement.geometryType = layer.layerOptions.type;
         console.log(elem);
         if(elem.typeid === 0) { //context
             elem.fields = main.contextReferences[elem.typename].slice();

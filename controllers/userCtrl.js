@@ -44,6 +44,10 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', 'a
         $state.go('attributes', {});
     };
 
+    $scope.openLayerEditor = function() {
+        $state.go('layers', {});
+    };
+
     $scope.openLiteratureView = function() {
         $state.go('literature', {});
     };

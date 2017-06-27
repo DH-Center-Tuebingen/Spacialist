@@ -99,6 +99,11 @@ textarea {
     resize: vertical;
 }
 
+.form-group-unpadded {
+    margin: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 .inline-edit {
     border: none;
     border-bottom: 1px solid gray;
@@ -282,6 +287,10 @@ div[resizeable] {
 
 .padded-content {
     padding-top: 10px;
+}
+
+.progress {
+    height: 20px !important;
 }
 
 .external-container {
@@ -491,7 +500,7 @@ div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
     font-weight: normal;
 }
 
-#tree-container, #attribute-container, #addon-container, #literature-container, .attribute-editor-column {
+#tree-container, #attribute-container, #addon-container, #literature-container, .attribute-editor-column, .layer-editor-column {
     overflow: auto;
 }
 
@@ -683,8 +692,8 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     cursor: pointer;
     font-size: 12px !important;
     position: absolute;
-    right: 1px;
-    top: 2px;
+    right: -2px;
+    top: 8px;
 }
 
 .list-group-item {
