@@ -1,4 +1,4 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'httpPostPromise', 'leafletData', 'userService', 'environmentService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, httpPostPromise, leafletData, userService, environmentService, leafletBoundsHelpers) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'httpPostPromise', 'httpPutPromise', 'leafletData', 'userService', 'environmentService', 'leafletBoundsHelpers', function(httpGetFactory, httpPostFactory, httpGetPromise, httpPostPromise, httpPutPromise, leafletData, userService, environmentService, leafletBoundsHelpers) {
     var localContexts;
     var defaultColor = '#00FF00';
     var map = {};
@@ -44,23 +44,25 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
 
     map.addGeodata = function(type, coords, id) {
         var formData = new FormData();
-        if(id) {
-            formData.append('id', id);
-        }
         formData.append('type', type);
         formData.append('coords', angular.toJson(coords));
-        httpPostFactory('api/context/add/geodata', formData, function(response) {
-            console.log(response);
-            if(!id) {
+        if(id) {
+            httpPutFactory('api/geodata/'+id, formData, function(response) {
+                if (response.error) {
+                    snackbarService.addAutocloseSnack(response.error, 'error');
+                }
+            });
+        } else {
+            httpPostFactory('api/geodata', formData, function(response) {
                 map.addListToMarkers([
                     response.geodata
                 ]);
-            }
-        });
+            });
+        }
     };
 
     map.getGeodata = function() {
-        httpGetFactory('api/context/get/geodata', function(response) {
+        httpGetFactory('api/geodata', function(response) {
             if(response.error) {
                 //TODO show modal
                 console.log("ERROR OCCURED");
@@ -148,15 +150,15 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     };
 
     map.linkGeodata = function(cid, gid) {
-        return httpGetPromise.getData('api/context/link/geodata/' + cid + '/' + gid);
+        return httpPatchPromise.getData('api/context/geodata/' + cid + '/' + gid);
     };
 
     map.unlinkGeodata = function(cid) {
-        return httpGetPromise.getData('api/context/unlink/geodata/' + cid);
+        return httpPatchPromise.getData('api/context/geodata/' + cid);
     };
 
     map.getMatchingContext = function(featureId) {
-        return httpGetPromise.getData('api/context/get/byGeodata/' + featureId);
+        return httpGetPromise.getData('api/context/byGeodata/' + featureId);
     };
 
     map.updateMarker = function(geodata) {
@@ -166,13 +168,12 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         var lat = geodata.lat;
         var lng = geodata.lng;
         var formData = new FormData();
-        formData.append('id', geodata.id);
         if(typeof color != 'undefined') formData.append('color', color);
         if(typeof lat != 'undefined' && typeof lng != 'undefined') {
             formData.append('lat', lat);
             formData.append('lng', lng);
         }
-        httpPostPromise.getData('api/context/set/props', formData).then(
+        httpPutPromise.getData('api/context/geodata/' + geodata.id, formData).then(
             function(response) {
                 map.map.selectedLayer.feature.properties.color = response.color || '#000000';
                 map.map.selectedLayer.setStyle({fillColor: response.color});

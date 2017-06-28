@@ -738,8 +738,9 @@ spacialistApp.factory('httpDeleteFactory', function($http) {
 });
 
 spacialistApp.factory('httpPatchFactory', function($http) {
-    return function(url, callback) {
-        $http.patch(url, {
+    return function(url, data, callback) {
+        data.append('_method', 'PATCH');
+        $http.post(url, data, {
             headers: {
                 'Content-Type': undefined
             }
@@ -751,7 +752,8 @@ spacialistApp.factory('httpPatchFactory', function($http) {
 
 spacialistApp.factory('httpPutFactory', function($http) {
     return function(url, data, callback) {
-        $http.put(url, data, {
+        data.append('_method', 'PUT');
+        $http.post(url, data, {
             headers: {
                 'Content-Type': undefined
             }
@@ -759,6 +761,20 @@ spacialistApp.factory('httpPutFactory', function($http) {
             callback(response);
         });
     };
+});
+
+spacialistApp.factory('httpPutPromise', function($http) {
+    var getData = function(url, data) {
+        data.append('_method', 'PUT');
+        return $http.post(url, data, {
+            headers: {
+                'Content-Type': undefined
+            }
+        }).then(function(result) {
+            return result.data;
+        });
+    };
+    return { getData: getData };
 });
 
 spacialistApp.config(['markedProvider', function (markedProvider) {

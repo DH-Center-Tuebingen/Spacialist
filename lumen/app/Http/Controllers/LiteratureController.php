@@ -141,48 +141,43 @@ class LiteratureController extends Controller
             ]);
         }
 
-        $ins = $this->getFields($request->toArray());
-        $ins['lasteditor'] = $user['name'];
+        $literature = new Literature();
 
-        if($request->has('id')) {
-            $id = $request->get('id');
-            DB::table('literature')
-                ->where('id', '=', $id)
-                ->update($ins);
-        } else {
-            $id = DB::table('literature')
-                ->insertGetId($ins);
+        foreach($request->toArray() as $key => $value){
+            $literature->{$key} = $value;
         }
 
-        $lit = DB::table('literature')
-            ->where('id', '=', $id)
-            ->get();
+        $literature->lasteditor = $user['name'];
+
+        $literature->save();
+
+
         return response()->json([
-            'literature' => $lit
+            'literature' => $literature
         ]);
     }
 
-    public function edit(Request $request) {
+    public function edit(Request $request, $id) {
         $user = \Auth::user();
         if(!$user->can('edit_literature')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        if(!$request->has('id')) {
-            return response()->json([
-                'error' => 'No ID given.'
-            ]);
+        $literature = Literature::find($id); //TODO findorfail
+
+        $upd = $this->getFields($request->all());
+        $upd['lasteditor'] = $user['name'];
+
+        foreach ($upd as $k => $v) {
+            $literature->{$k} = $v;
         }
 
-        $id = $request->get('id');
+        $literature->save();
 
-        $upd = $this->getFields($request->toArray());
-        $upd = $user['name'];
-
-        DB::table('literature')
-            ->where('id', '=', $id)
-            ->update($upd);
+        return response()->json([
+            'literature' => $literature
+        ]);
     }
 
     public function importBibtex(Request $request) {

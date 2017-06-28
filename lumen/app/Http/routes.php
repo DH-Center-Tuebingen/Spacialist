@@ -26,13 +26,24 @@ $app->group([
     $app->get('', 'ContextController@getContexts');
     $app->get('artifact', 'ContextController@getArtifacts');
     $app->get('context_type', 'ContextController@getContextTypes');
-    $app->get('attribute', 'ContextController@getAttributes'); //TODO probably wrong controller/group
+    $app->get('attribute', 'ContextController@getAttributes');
     $app->get('{id}/data', 'ContextController@getContextData');
     $app->get('dropdown_options', 'ContextController@getDropdownOptions');
+    $app->get('byGeodata/{id}', 'ContextController@getContextByGeodata');
 
+    $app->post('', 'ContextController@add');
     $app->post('{id}/duplicate', 'ContextController@duplicate');
 
+    $app->patch('{id}/rank', 'ContextController@patchRank');
+    $app->patch('geodata/{cid}/{gid?}', 'ContextController@linkGeodata');
+
+    $app->put('{id}', 'ContextController@put');
+    $app->put('geodata/{id}', 'ContextController@putGeodata');
+    $app->put('attribute_value/{cid}/{aid}', 'ContextController@putPossibility');
+
     $app->delete('{id}', 'ContextController@delete');
+
+    $app->get('attributetypes', 'ContextController@getAvailableAttributeTypes');
 });
 
 $app->group([
@@ -42,7 +53,13 @@ $app->group([
         $app->get('', 'LiteratureController@getLiteratures');
         $app->get('{id}', 'LiteratureController@getLiterature');
 
+        $app->post('', 'LiteratureController@add');
+
+        $app->patch('{id}', 'LiteratureController@edit');
+
         $app->delete('{id}', 'LiteratureController@delete');
+
+        $app->put('importBibtex', 'LiteratureController@importBibtex');
 });
 
 $app->group([
@@ -73,7 +90,10 @@ $app->group([
     ], function($app) {
         $app->get('by_context/{cid}', 'SourceController@getByContext');
 
+        $app->post('', 'SourceController@add');
+
         $app->delete('{id}', 'SourceController@delete');
+
 });
 
 $app->group([
@@ -93,20 +113,19 @@ $app->group([
         $app->get('role/by_user/{id}', 'UserController@getRolesByUser');
         $app->get('role/{id}/permission', 'UserController@getPermissionsByRole');
 
-        $app->post('', 'UserController@add');//TODO: should be put as soon as email is unique
+        $app->post('', 'UserController@add');
 
         $app->patch('{id}/', 'UserController@patch');
+        $app->patch('role/{name}', 'UserController@patchRole');
         $app->patch('{id}/attachRole', 'UserController@addRoleToUser');
         $app->patch('{id}/detachRole', 'UserController@removeRoleFromUser');
 
+        $app->put('role/{name}', 'UserController@putRole');
+        $app->put('permission_role/{rid}/{pid}', 'UserController@putRolePermission');
+
         $app->delete('{id}', 'UserController@delete');
         $app->delete('role/{id}', 'UserController@deleteRole');
-
-
-        //TODO
-        $app->post('role/edit', 'UserController@editRole');
-        $app->post('role/add/permission', 'UserController@addRolePermission');
-        $app->post('role/remove/permission', 'UserController@removeRolePermission');
+        $app->delete('permission_role/{rid}/{pid}', 'UserController@removeRolePermission');
 });
 
 $app->group([
@@ -120,45 +139,33 @@ $app->group([
         'prefix' => 'editor',//TODO api v1
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
-        $app->get('occurrence_count/{id}', 'ContextController@getOccurrenceCount'); //TODO: own Controller?
-        $app->get('search/label={label}/{lang?}', 'ContextController@searchForLabel'); //TODO: own Controller?
+        $app->get('occurrence_count/{id}', 'ContextController@getOccurrenceCount');
+        $app->get('search/label={label}/{lang?}', 'ContextController@searchForLabel');
 
 
-        $app->post('context_type', 'ContextController@addContextType'); //TODO: own Controller?
-        $app->post('context_type/{ctid}/attribute', 'ContextController@addAttributeToContextType'); //TODO: own Controller?
-        $app->post('attribute', 'ContextController@addAttribute'); //TODO: own Controller?
+        $app->post('context_type', 'ContextController@addContextType');
+        $app->post('context_type/{ctid}/attribute', 'ContextController@addAttributeToContextType');
+        $app->post('attribute', 'ContextController@addAttribute');
 
-        $app->patch('context_type/{ctid}', 'ContextController@editContextType'); //TODO: own Controller?
-        $app->patch('context_type/{ctid}/attribute/{aid}/move/up', 'ContextController@moveAttributeUp'); //TODO: own Controller?
-        $app->patch('context_type/{ctid}/attribute/{aid}/move/down', 'ContextController@moveAttributeDown'); //TODO: own Controller?
+        $app->patch('context_type/{ctid}', 'ContextController@editContextType');
+        $app->patch('context_type/{ctid}/attribute/{aid}/move/up', 'ContextController@moveAttributeUp');
+        $app->patch('context_type/{ctid}/attribute/{aid}/move/down', 'ContextController@moveAttributeDown');
 
-        $app->delete('attribute/{id}', 'ContextController@deleteAttribute'); //TODO: own Controller?
-        $app->delete('contexttype/{id}', 'ContextController@deleteContextType'); //TODO: own Controller?
-        $app->delete('editor/context_type/{ctid}/attribute/{aid}', 'ContextController@removeAttributeFromContextType'); //TODO: own Controller?
+        $app->delete('attribute/{id}', 'ContextController@deleteAttribute');
+        $app->delete('contexttype/{id}', 'ContextController@deleteContextType');
+        $app->delete('editor/context_type/{ctid}/attribute/{aid}', 'ContextController@removeAttributeFromContextType');
 });
 
-// $app->group([
-//         'prefix' => '',//TODO api v1
-//         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
-//     ], function($app) {
-//
-// });
+$app->group([
+        'prefix' => 'geodata',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'GeodataController@get');
+        $app->get('wktToGeojson/{wkt}', 'GeodataController@wktToGeojson');
 
-$app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']], function($app) {
-    $app->get('context/get/geodata', 'ContextController@getGeodata');//TODO own Controller for Geodata?
-    $app->get('context/get/byGeodata/{id}', 'ContextController@getContextByGeodata');//TODO own Controller for Geodata?
-    $app->get('context/link/geodata/{cid}/{gid}', 'ContextController@linkGeodata');//TODO own Controller for Geodata?
-    $app->get('context/unlink/geodata/{cid}', 'ContextController@unlinkGeodata');//TODO own Controller for Geodata?
-    $app->get('context/delete/geodata/{id}', 'ContextController@deleteGeodata');//TODO own Controller for Geodata?
-    $app->get('get/attributes/types', 'ContextController@getAvailableAttributeTypes'); //TODO correct Controller?
-    $app->post('context/add/geodata', 'ContextController@addGeodata');
-    $app->post('context/set', 'ContextController@set');
-    $app->post('context/set/props', 'ContextController@setProperties');
-    $app->post('context/move', 'ContextController@move');
-    $app->post('context/set/possibility', 'ContextController@setPossibility');
-    $app->post('context/wktToGeojson', 'ContextController@wktToGeojson');
-    $app->post('sources/add', 'SourceController@add');
-    $app->post('literature/add', 'LiteratureController@add');
-    $app->post('literature/edit', 'LiteratureController@edit');
-    $app->post('literature/import/bib', 'LiteratureController@importBibtex');
+        $app->post('', 'GeodataController@add');
+
+        $app->put('{id}', 'GeodataController@put');
+
+        $app->delete('{id}', 'GeodataController@delete');
 });

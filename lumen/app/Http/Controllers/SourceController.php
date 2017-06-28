@@ -57,7 +57,6 @@ class SourceController extends Controller {
             ], 403);
         }
         $user = \Auth::user();
-        if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
         $aid = $request->get('aid');
         $cid = $request->get('cid');
         $lid = $request->get('lid');

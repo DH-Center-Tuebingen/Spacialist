@@ -292,7 +292,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
                 editor.existingAttributes.push(entry);
             });
         });
-        httpGetFactory('api/context/get/attributes/types', function(response) {
+        httpGetFactory('api/context/attributetypes', function(response) {
             angular.forEach(response.types, function(t) {
                 editor.attributeTypes.push({
                     datatype: t.datatype,

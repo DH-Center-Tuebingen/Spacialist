@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, searchService, $timeout, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutPromise', 'httpPatchFactory', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutPromise, httpPatchFactory, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, searchService, $timeout, $translate) {
     var main = {};
     var modalFields;
 
@@ -38,13 +38,12 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         var rank = index + 1;
         var parent;
         var formData = new FormData();
-        formData.append('id', id);
         formData.append('rank', rank);
         if(hasParent) {
             parent = event.dest.nodesScope.$nodeScope.$modelValue;
             formData.append('parent_id', parent);
         }
-        httpPostFactory('api/context/move', formData, function(response) {
+        httpPatchFactory('api/context/' + id + "/rank", formData, function(response) {
             if(response.error) {
                 modalFactory.errorModal(response.error);
                 return;
@@ -291,9 +290,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         if(root_cid != -1) {
             formData.append('root_cid', root_cid);
         }
-        if(typeof elem.id !== 'undefined' && elem.id != -1) {
-            formData.append('id', elem.id);
-        }
         for(var i=0; i<elem.data.length; i++) {
             var d = elem.data[i];
             var currValue = '';
@@ -304,7 +300,14 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             }
             formData.append(d.key, currValue);
         }
-        var promise = httpPostPromise.getData('api/context/set', formData);
+        var promise;
+        if(typeof elem.id !== 'undefined' && elem.id != -1) {
+            formData.append('id', elem.id);
+            promise = httpPutPromise.getData('api/context/' + elem.id, formData);
+        }
+        else {
+            promise = httpPostPromise.getData('api/context', formData);
+        }
         return promise;
     }
 
@@ -364,11 +367,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 };
                 this.savePossibility = function() {
                     var formData = new FormData();
-                    formData.append('cid', cid);
-                    formData.append('aid', aid);
                     formData.append('possibility', modalFields.value);
                     if(modalFields.description) formData.append('possibility_description', modalFields.description);
-                    httpPostFactory('api/context/set/possibility', formData, function(callback) {
+                    httpPutFactory('api/context/attribute_value/'+cid+'/'+aid, formData, function(callback) {
                         var content = $translate.instant('snackbar.data-stored.success');
                         snackbarService.addAutocloseSnack(content, 'success');
                         main.currentElement.data[aid+'_pos'] = modalFields.value;
@@ -401,7 +402,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         formData.append('aid', aid);
         formData.append('lid', currentSource.id);
         formData.append('desc', currentDesc);
-        httpPostFactory('api/sources/add', formData, function(response) {
+        httpPostFactory('api/source', formData, function(response) {
             var source = response.source;
             addContextSource(source);
         });
@@ -627,9 +628,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.openGeographyModal = function($scope, aid) {
         var inp = document.getElementById('a' + aid);
         if(inp.value) {
-            var formData = new FormData();
-            formData.append('wkt', inp.value);
-            httpPostFactory('api/context/wktToGeojson', formData, function(response) {
+            httpGetFactory('api/geodata/wktToGeojson/'+inp.value, function(response) {
                 if(response.error) return;
                 var feature = {
                     type: 'Feature',
@@ -778,7 +777,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             formData.append('name', name);
             formData.append('context_type_id', type.context_type_id);
             if(typeof parent.id != 'undefined') formData.append('root_cid', parent.id);
-            httpPostFactory('api/context/set', formData, function(response) {
+            httpPostFactory('api/context', formData, function(response) {
                 var newContext = response.context;
                 var elem = {
                     id: newContext.id,

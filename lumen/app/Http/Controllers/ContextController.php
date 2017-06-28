@@ -294,31 +294,6 @@ class ContextController extends Controller {
         ]);
     }
 
-    private function parseWkt($wkt) {
-        try {
-            $geom = Geometry::getWKTClass($wkt);
-            $parsed = $geom::fromWKT($wkt);
-            return $parsed;
-        } catch(UnknownWKTTypeException $e) {
-            return -1;
-        }
-    }
-
-    public function wktToGeojson(Request $request) {
-        if(!$request->has('wkt')) return;
-        $wkt = $request->get('wkt');
-        $parsed = $this->parseWkt($wkt);
-        if($parsed !== -1) {
-            return response()->json([
-                'geometry' => $parsed
-            ]);
-        } else {
-            return response()->json([
-                'error' => 'unsupported_wkt'
-            ]);
-        }
-    }
-
     public function getContextTypes() {
         return response()->json(
             DB::table('context_types as c')
@@ -435,44 +410,10 @@ class ContextController extends Controller {
                         'roots' => $roots,
                         'children' => $children];
 
-
-        // $rootFields = DB::select("
-        // WITH RECURSIVE
-        // q AS (
-	    //     SELECT  c.*, 0 as reclevel
-	    //     FROM    contexts c
-	    //     WHERE   root_context_id IS NULL
-	    //     UNION ALL
-	    //     SELECT  cc.*, reclevel+1
-	    //     FROM    q
-	    //     JOIN    contexts cc
-	    //     ON      cc.root_context_id = q.id
-        // )
-        // SELECT  q.*, ct.type as typeid, ct.thesaurus_url AS typename, (select label from getconceptlabelsfromurl where concept_url = ct.thesaurus_url and short_name = 'de' limit 1) as typelabel
-        // FROM    q
-        // JOIN context_types AS ct
-        // ON q.context_type_id = ct.id
-        // ORDER BY reclevel DESC
-        // ");
-        // $children = [];
-        // foreach($rootFields as $key => $field) {
-        //     if(array_key_exists($field->id, $children)) $tmpChildren = $children[$field->id];
-        //     else $tmpChildren = array();
-        //     $rootFields[$key]->children = $tmpChildren;
-        //     $children[$field->root_context_id][] = $field;
-        //     if($field->reclevel != 0) unset($rootFields[$key]);
-        //
-        //     if(!$user->can('view_geodata')) {
-        //         if(isset($rootFields[$key]->geodata_id)){
-        //             unset($rootFields[$key]->geodata_id);
-        //         }
-        //     }
-        // }
-
         return response()->json($response);
     }
 
-    public function linkGeodata($cid, $gid) {
+    public function linkGeodata($cid, $gid=null) {
         $user = \Auth::user();
         if(!$user->can('link_geodata')) {
             return response([
@@ -486,40 +427,23 @@ class ContextController extends Controller {
                 'error' => 'This context does not exist'
             ]);
         }
-        if(isset($context->geodata_id)) {
-            return response()->json([
-                'error' => 'This context is already linked to a geodata'
-            ]);
+        if ($gid === null) { // if only cid is given, unlink the geodata of that context
+            $context->geodata_id = null;
+        } else {
+            if(isset($context->geodata_id)) {
+                return response()->json([
+                    'error' => 'This context is already linked to a geodata'
+                ]);
+            }
+            try {
+                Geodata::findOrFail($gid);
+            } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => 'This geodata does not exist'
+                ]);
+            }
+            $context->geodata_id = $gid;
         }
-        try {
-            Geodata::findOrFail($gid);
-        } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'error' => 'This geodata does not exist'
-            ]);
-        }
-        $context->geodata_id = $gid;
-        $context->save();
-        return response()->json([
-            'context' => $context
-        ]);
-    }
-
-    public function unlinkGeodata($cid) {
-        $user = \Auth::user();
-        if(!$user->can('link_geodata')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        try {
-            $context = Context::findOrFail($cid);
-        } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'error' => 'This context does not exist'
-            ]);
-        }
-        $context->geodata_id = null;
         $context->save();
         return response()->json([
             'context' => $context
@@ -538,93 +462,6 @@ class ContextController extends Controller {
         ]);
     }
 
-    public function deleteGeodata($id) {
-        $user = \Auth::user();
-        if(!$user->can('upload_remove_geodata')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $linkedContexts = Context::where('geodata_id', '=', $id)->get();
-        foreach($linkedContexts as $context) {
-            $context->geodata_id = null;
-            $context->save();
-        }
-        Geodata::find($id)->delete();
-        return response()->json([
-            'success' => ''
-        ]);
-    }
-
-    public function addGeodata(Request $request) {
-        $user = \Auth::user();
-        if(!$user->can('create_edit_geodata')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $coords = json_decode($request->get('coords'));
-        $type = $request->get('type');
-        if($request->has('id')) {
-            $id = $request->get('id');
-            $geodata = Geodata::find($id);
-        } else {
-            $geodata = new Geodata();
-        }
-        switch($type) {
-            case 'marker':
-            case 'Point':
-                $coords = $coords[0];
-                $geodata->geom = new Point($coords->lat, $coords->lng);
-                break;
-            case 'polyline':
-            case 'LineString':
-                $lines = [];
-                foreach($coords as $coord) {
-                    $lines[] = new Point($coord->lat, $coord->lng);
-                }
-                $geodata->geom = new LineString($lines);
-                break;
-            case 'polygon':
-            case 'Polygon':
-                $lines = [];
-                foreach($coords[0] as $coord) {
-                    $lines[] = new Point($coord->lat, $coord->lng);
-                }
-                $linestring = new LineString($lines);
-                $geodata->geom = new Polygon([ $linestring ]);
-                break;
-        }
-        $geodata->lasteditor = $user['name'];
-        $geodata->save();
-        return response()->json([
-            'geodata' => [
-                'geodata' => $geodata->geom->jsonSerialize(),
-                'id' => $geodata->id
-            ]
-        ]);
-    }
-
-    public function getGeodata() {
-        $user = \Auth::user();
-        if(!$user->can('view_geodata')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $geoms = Geodata::all();
-        $geodataList = [];
-        foreach($geoms as $geom) {
-            $geodataList[] = [
-                'geodata' => $geom->geom->jsonSerialize(),
-                'id' => $geom->id,
-                'color' => $geom->color,
-            ];
-        }
-        return response()->json([
-            'geodata' => $geodataList
-        ]);
-    }
 
     public function getDropdownOptions() {
         $user = \Auth::user();
@@ -736,79 +573,61 @@ class ContextController extends Controller {
         );
     }
 
-    public function set(Request $request) {
+    public function add(Request $request) {
         $user = \Auth::user();
-        $id = $request->get('id');
 
-        if((isset($id) && !$user->can('duplicate_edit_concepts')) || (!isset($id) && !$user->can('create_concepts'))) {
+        if(!$user->can('create_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
 
-        $isUpdate = isset($id) && $id > 0;
-        if($isUpdate) {
-            $context = Context::find($id);
+        $context = new Context();
+        $rank;
+        if($request->has('root_cid')) {
+            $rank = Context::where('root_context_id', '=', $request->get('root_cid'))->max('rank') + 1;
         } else {
-            $context = new Context();
-            $rank;
-            if($request->has('root_cid')) {
-                $rank = Context::where('root_context_id', '=', $request->get('root_cid'))->max('rank') + 1;
-            } else {
-                $rank = Context::whereNull('root_context_id')->max('rank') + 1;
-            }
-            $context->rank = $rank;
+            $rank = Context::whereNull('root_context_id')->max('rank') + 1;
         }
-        if($request->has('name')) $context->name = $request->get('name');
-        if($request->has('context_type_id')) $context->context_type_id = $request->get('context_type_id');
-        if($request->has('root_cid')) $context->root_context_id = $request->get('root_cid');
+        $context->rank = $rank;
+
+        foreach($request->all() as $key) {
+            $context->{$key} = $request->{$key};
+        }
         $context->lasteditor = $user['name'];
         $context->save();
 
-        $id = $context->id;
-        $message = $this->updateOrInsert($request->except(['id', 'name', 'context_type_id', 'root_cid']), $id, $isUpdate, $user);
-        if(isset($message['error'])){
-            return response()->json($message);
-        }
         return response()->json(['context' => $context]);
     }
 
-    public function setProperties(Request $request) {
+    public function put(Request $request, $id){
         $user = \Auth::user();
-        if(!$user->can('duplicate_edit_concepts')) {
+
+        if(isset($id) && !$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $id = $request->get('id');
-        $upd = [];
 
-        $geodata = Geodata::find($id);
-        if($request->has('color')) {
-            $geodata->color = $request->get('color');
+        $context = Context::find($id);
+
+        foreach($request->all() as $key) {
+            $context->{$key} = $request->{$key};
         }
-        if($request->has('lat') && $request->has('lng') && $geodata->geom instanceof Point) {
-            $geodata->geom = new Point($request->get('lat'), $request->get('lng'));
-        }
-        $geodata->save();
-        $ret = [
-            'color' => $geodata->color
-        ];
-        if($geodata->geom instanceof Point) {
-            $ret['lat'] = $geodata->geom->getLat();
-            $ret['lng'] = $geodata->geom->getLng();
-        }
-        return response()->json($ret);
+        $context->lasteditor = $user['name'];
+        $context->save();
+
+        return response()->json(['context' => $context]);
     }
 
-    public function move(Request $request) {
+
+    public function patchRank(Request $request, $id) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $id = $request->get('id');
         $rank = $request->get('rank');
         $hasParent = $request->has('parent_id');
         $context = Context::find($id);
@@ -851,47 +670,38 @@ class ContextController extends Controller {
 
     }
 
-    public function setPossibility(Request $request) {
+    public function putPossibility(Request $request, $cid, $aid) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $user = \Auth::user();
-        if($user == null) $user = ['name' => 'postgres']; //TODO remove after user auth has been fixed!
-        $cid = $request->get('cid');
-        $aid = $request->get('aid');
         $possibility = $request->get('possibility');
         $description = $request->get('possibility_description');
 
-        $where = array(
-            ['context_id', '=', $cid],
-            ['attribute_id', '=', $aid]
-        );
-        $isSet = DB::table('attribute_values')
-            ->where($where)
-            ->count();
-        if($isSet == null) { //insert
-            DB::table('attribute_values')
-                ->insert([
-                    'context_id' => $cid,
-                    'attribute_id' => $aid,
-                    'possibility' => $possibility,
-                    'possibility_description' => $description,
-                    'lasteditor' => $user['name']
-                ]);
+        $av = AttributeValue::where([
+                ['context_id', '=', $cid],
+                ['attribute_id', '=', $aid]
+            ])->first();
+        if($av === null) { //insert
+            $av = new AttributeValue();
+
+            $av->context_id = $cid;
+            $av->attribute_id = $aid;
+            $av->possibility = $possibility;
+            $av->possibility_description = $description;
+            $av->lasteditor = $user['name'];
+
+            $av->save();
         } else { //update
-            DB::table('attribute_values')
-                ->where($where)
-                ->update([
-                    'possibility' => $possibility,
-                    'possibility_description' => $description,
-                    'lasteditor' => $user['name']
-                ]);
+            $av->possibility = $possibility;
+            $av->possibility_description = $description;
+            $av->lasteditor = $user['name'];
+
+            $av->save();
         }
-        return response()->json(DB::table('attribute_values')
-            ->where($where)->get());
+        return response()->json($av);
     }
 
 
