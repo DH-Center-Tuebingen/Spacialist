@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Drag & Drop Support for Element Tree
 - More Datatypes (Integer, Geography, Slider)
+- Dynamic UI (The three columns on the main view can be shrinked/extended, enable Edit Mode in the Settings Dropdown menu)
 ### Changed
 - Photo Viewer => File Viewer
   - PDFs (pdf.js)
@@ -14,6 +15,16 @@ All notable changes to this project will be documented in this file.
   - Markdown files (marked.js)
   - Audio/Video files
 - Remove input field placeholders
+- Layer Control
+  - Add layers for all existing contexttypes + one layer for unlinked geodata objects
+  - Contexttype layers are restricted to a type (either MultiPoint, MultiLinestring or Multipolygon)
+  - Geodata snapping
+  - Add Bing and Google Maps as Tile-Provider
+  - Layer Editor
+    - Change color
+    - Enable/Disable layers (overlays, on startup)
+    - Set opacity
+    - Set default baselayer
 ### Fixed
 - Display context-type in properties tab again
 - Store epochs (without exact date span)
