@@ -168,32 +168,4 @@ class GeodataController extends Controller {
             'geodata' => $geodataList
         ]);
     }
-
-
-    public function putGeodata(Request $request, $id) {
-        $user = \Auth::user();
-        if(!$user->can('duplicate_edit_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-
-        $geodata = Geodata::find($id);
-        if($request->has('color')) {
-            $geodata->color = $request->get('color');
-        }
-        if($request->has('lat') && $request->has('lng') && $geodata->geom instanceof Point) {
-            $geodata->geom = new Point($request->get('lat'), $request->get('lng'));
-        }
-        $geodata->save();
-        $ret = [
-            'color' => $geodata->color
-        ];
-        if($geodata->geom instanceof Point) {
-            $ret['lat'] = $geodata->geom->getLat();
-            $ret['lng'] = $geodata->geom->getLng();
-        }
-        return response()->json($ret);
-    }
-
 }
