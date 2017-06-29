@@ -31,14 +31,27 @@ class GeodataController extends Controller {
         //
     }
 
-    private function parseWkt($wkt) {
-        try {
-            $geom = Geometry::getWKTClass($wkt);
-            $parsed = $geom::fromWKT($wkt);
-            return $parsed;
-        } catch(UnknownWKTTypeException $e) {
-            return -1;
+    // GET
+
+    public function get() {
+        $user = \Auth::user();
+        if(!$user->can('view_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
         }
+        $geoms = Geodata::all();
+        $geodataList = [];
+        foreach($geoms as $geom) {
+            $geodataList[] = [
+                'geodata' => $geom->geom->jsonSerialize(),
+                'id' => $geom->id,
+                'color' => $geom->color,
+            ];
+        }
+        return response()->json([
+            'geodata' => $geodataList
+        ]);
     }
 
     public function wktToGeojson($wkt) {
@@ -54,6 +67,70 @@ class GeodataController extends Controller {
             ]);
         }
     }
+
+    // POST
+
+    public function add(Request $request) {
+        $this->validate($request, [
+            'coords' => 'required|array',
+            'type' => 'required|alpha'
+        ]);
+
+        $user = \Auth::user();
+        if(!$user->can('create_edit_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $coords = json_decode($request->get('coords'));
+        $type = $request->get('type');
+        $geodata = new Geodata();
+
+        parseTypeCoords($type, $coords, $geodata);
+
+        $geodata->lasteditor = $user['name'];
+        $geodata->save();
+        return response()->json([
+            'geodata' => [
+                'geodata' => $geodata->geom->jsonSerialize(),
+                'id' => $geodata->id
+            ]
+        ]);
+    }
+
+    // PATCH
+
+    // PUT
+
+    public function put(Request $request, $id){
+        $this->validate($request, [
+            'coords' => 'required|array',
+            'type' => 'required|alpha'
+        ]);
+
+        $user = \Auth::user();
+        if(!$user->can('create_edit_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $coords = json_decode($request->get('coords'));
+        $type = $request->get('type');
+        $geodata = Geodata::find($id);
+
+        parseTypeCoords($type, $coords, $geodata);
+
+        $geodata->lasteditor = $user['name'];
+        $geodata->save();
+        return response()->json([
+            'geodata' => [
+                'geodata' => $geodata->geom->jsonSerialize(),
+                'id' => $geodata->id
+            ]
+        ]);
+    }
+
+    // DELETE
 
     public function delete($id) {
         $user = \Auth::user();
@@ -71,6 +148,18 @@ class GeodataController extends Controller {
         return response()->json([
             'success' => ''
         ]);
+    }
+
+    // OTHER FUNCTIONS
+
+    private function parseWkt($wkt) {
+        try {
+            $geom = Geometry::getWKTClass($wkt);
+            $parsed = $geom::fromWKT($wkt);
+            return $parsed;
+        } catch(UnknownWKTTypeException $e) {
+            return -1;
+        }
     }
 
     private function parseTypeCoords($type, $coords, $geodata) {
@@ -98,74 +187,5 @@ class GeodataController extends Controller {
                 $geodata->geom = new Polygon([ $linestring ]);
                 break;
         }
-    }
-
-    public function put(Request $request, $id){
-        $user = \Auth::user();
-        if(!$user->can('create_edit_geodata')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $coords = json_decode($request->get('coords'));
-        $type = $request->get('type');
-        $geodata = Geodata::find($id);
-
-        parseTypeCoords($type, $coords, $geodata);
-
-        $geodata->lasteditor = $user['name'];
-        $geodata->save();
-        return response()->json([
-            'geodata' => [
-                'geodata' => $geodata->geom->jsonSerialize(),
-                'id' => $geodata->id
-            ]
-        ]);
-    }
-
-    public function add(Request $request) {
-        $user = \Auth::user();
-        if(!$user->can('create_edit_geodata')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $coords = json_decode($request->get('coords'));
-        $type = $request->get('type');
-        $geodata = new Geodata();
-
-        parseTypeCoords($type, $coords, $geodata);
-
-        $geodata->lasteditor = $user['name'];
-        $geodata->save();
-        return response()->json([
-            'geodata' => [
-                'geodata' => $geodata->geom->jsonSerialize(),
-                'id' => $geodata->id
-            ]
-        ]);
-    }
-
-
-
-    public function get() {
-        $user = \Auth::user();
-        if(!$user->can('view_geodata')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $geoms = Geodata::all();
-        $geodataList = [];
-        foreach($geoms as $geom) {
-            $geodataList[] = [
-                'geodata' => $geom->geom->jsonSerialize(),
-                'id' => $geom->id,
-                'color' => $geom->color,
-            ];
-        }
-        return response()->json([
-            'geodata' => $geodataList
-        ]);
     }
 }

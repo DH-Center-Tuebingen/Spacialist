@@ -30,20 +30,19 @@ $app->group([
     $app->get('{id:[0-9]+}/data', 'ContextController@getContextData');
     $app->get('dropdown_options', 'ContextController@getDropdownOptions');
     $app->get('byGeodata/{id:[0-9]+}', 'ContextController@getContextByGeodata');
+    $app->get('attributetypes', 'ContextController@getAvailableAttributeTypes');
 
     $app->post('', 'ContextController@add');
     $app->post('{id:[0-9]+}/duplicate', 'ContextController@duplicate');
 
     $app->patch('{id:[0-9]+}/rank', 'ContextController@patchRank');
-    $app->patch('geodata/{cid:[0-9]+}/{gid?}', 'ContextController@linkGeodata');
+    $app->patch('geodata/{cid:[0-9]+}/{gid?}', 'ContextController@linkGeodata'); // TODO validate gid
 
     $app->put('{id:[0-9]+}', 'ContextController@put');
     $app->put('geodata/{id:[0-9]+}', 'ContextController@putGeodata');
     $app->put('attribute_value/{cid:[0-9]+}/{aid:[0-9]+}', 'ContextController@putPossibility');
 
     $app->delete('{id:[0-9]+}', 'ContextController@delete');
-
-    $app->get('attributetypes', 'ContextController@getAvailableAttributeTypes');
 });
 
 $app->group([
@@ -57,9 +56,9 @@ $app->group([
 
         $app->patch('{id:[0-9]+}', 'LiteratureController@edit');
 
-        $app->delete('{id:[0-9]+}', 'LiteratureController@delete');
-
         $app->put('importBibtex', 'LiteratureController@importBibtex');
+
+        $app->delete('{id:[0-9]+}', 'LiteratureController@delete');
 });
 
 $app->group([
@@ -141,7 +140,6 @@ $app->group([
     ], function($app) {
         $app->get('occurrence_count/{id:[0-9]+}', 'ContextController@getOccurrenceCount');
         $app->get('search/label={label}/{lang?}', 'ContextController@searchForLabel');
-
 
         $app->post('context_type', 'ContextController@addContextType');
         $app->post('context_type/{ctid:[0-9]+}/attribute', 'ContextController@addAttributeToContextType');

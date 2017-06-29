@@ -18,17 +18,130 @@ class LiteratureController extends Controller
         //
     }
 
+    // GET
+
+    public function getLiteratures() {
+        return response()->json(
+            DB::table('literature')
+            ->orderBy('author', 'asc')
+            ->get()
+        );
+    }
+
     public function getLiterature($id) {
         return response()->json(
             Literature::find($id)
         );
     }
 
+    // POST
+
+    public function add(Request $request) {
+        $this->validate($request, [
+            'type' => 'required|alpha',
+            'title' => 'required|string'
+        ]);
+
+        $user = \Auth::user();
+        if(!$user->can('add_remove_literature')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $literature = new Literature();
+
+        foreach($request->toArray() as $key => $value){
+            $literature->{$key} = $value;
+        }
+
+        $literature->lasteditor = $user['name'];
+
+        $literature->save();
+
+
+        return response()->json([
+            'literature' => $literature
+        ]);
+    }
+
+    // PATCH
+
+    public function edit(Request $request, $id) {
+        // TODO variable keys
+        $this->validate($request, []);
+
+        $user = \Auth::user();
+        if(!$user->can('edit_literature')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $literature = Literature::find($id); //TODO findorfail
+
+        $upd = $this->getFields($request->all());
+        $upd['lasteditor'] = $user['name'];
+
+        foreach ($upd as $k => $v) {
+            $literature->{$k} = $v;
+        }
+
+        $literature->save();
+
+        return response()->json([
+            'literature' => $literature
+        ]);
+    }
+
+    // PUT
+
+    public function importBibtex(Request $request) {
+        $this->validate($request, [
+            'file' => 'required|file'
+        ]);
+
+        $user = \Auth::user();
+        if(!$user->can('add_remove_literature')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $file = $request->file('file');
+        $listener = new \RenanBr\BibTexParser\Listener;
+        $parser = new \RenanBr\BibTexParser\Parser;
+        $parser->addListener($listener);
+        try {
+            $parser->parseFile($file->getRealPath());
+        } catch(\RenanBr\BibTexParser\ParseException $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+        $entries = $listener->export();
+        $newEntries = [];
+        foreach($entries as $entry) {
+            $insArray = $this->getFields($entry);
+            if(Literature::where($insArray)->first() === null) {
+                $literature = new Literature($insArray);
+                $literature->save();
+                $newEntries[] = $literature;
+            }
+        }
+        return response()->json([
+            'entries' => $newEntries
+        ]);
+    }
+
+    // DELETE
+
     public function delete($id) {
         DB::table('literature')
             ->where('id', '=', $id)
             ->delete();
     }
+
+    // OTHER FUNCTIONS
 
     private function getFields($request) {
         $ins = [];
@@ -126,102 +239,5 @@ class LiteratureController extends Controller
         }
 
         return $ins;
-    }
-
-    public function add(Request $request) {
-        $user = \Auth::user();
-        if(!$user->can('add_remove_literature')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        if(!$request->has('type') || !$request->has('title')) {
-            return response()->json([
-                'error' => 'Your literature should have at least a title and a type.'
-            ]);
-        }
-
-        $literature = new Literature();
-
-        foreach($request->toArray() as $key => $value){
-            $literature->{$key} = $value;
-        }
-
-        $literature->lasteditor = $user['name'];
-
-        $literature->save();
-
-
-        return response()->json([
-            'literature' => $literature
-        ]);
-    }
-
-    public function edit(Request $request, $id) {
-        $user = \Auth::user();
-        if(!$user->can('edit_literature')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $literature = Literature::find($id); //TODO findorfail
-
-        $upd = $this->getFields($request->all());
-        $upd['lasteditor'] = $user['name'];
-
-        foreach ($upd as $k => $v) {
-            $literature->{$k} = $v;
-        }
-
-        $literature->save();
-
-        return response()->json([
-            'literature' => $literature
-        ]);
-    }
-
-    public function importBibtex(Request $request) {
-        $user = \Auth::user();
-        if(!$user->can('add_remove_literature')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        if(!$request->hasFile('file') || !$request->file('file')->isValid()) return response()->json([
-            'error' => 'No or invalid file provided'
-        ]);
-        $file = $request->file('file');
-
-        $listener = new \RenanBr\BibTexParser\Listener;
-        $parser = new \RenanBr\BibTexParser\Parser;
-        $parser->addListener($listener);
-        try {
-            $parser->parseFile($file->getRealPath());
-        } catch(\RenanBr\BibTexParser\ParseException $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ]);
-        }
-        $entries = $listener->export();
-        $newEntries = [];
-        foreach($entries as $entry) {
-            $insArray = $this->getFields($entry);
-            if(Literature::where($insArray)->first() === null) {
-                $literature = new Literature($insArray);
-                $literature->save();
-                $newEntries[] = $literature;
-            }
-        }
-        return response()->json([
-            'entries' => $newEntries
-        ]);
-    }
-
-    public function getLiteratures() {
-        return response()->json(
-            DB::table('literature')
-            ->orderBy('author', 'asc')
-            ->get()
-        );
     }
 }

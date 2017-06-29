@@ -17,6 +17,8 @@ class SourceController extends Controller {
         //
     }
 
+    // GET
+
     public function getByContext($id) {
         $user = \Auth::user();
         if(!$user->can('view_concept_props')) {
@@ -38,18 +40,16 @@ class SourceController extends Controller {
         ]);
     }
 
-    private function getById($id) {
-        $src = DB::table('sources as s')
-                ->select('s.*', DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) AS attribute_name"))
-                ->where('s.id', '=', $id)
-                ->join('attributes as a', 's.attribute_id', '=', 'a.id')
-                ->orderBy('attribute_name', 'asc')
-                ->first();
-        $src->literature = Literature::find($src->literature_id);
-        return $src;
-    }
+    // POST
 
     public function add(Request $request) {
+        $this->validate($request, [
+            'aid' => 'required|integer',
+            'cid' => 'required|integer',
+            'lid' => 'required|integer',
+            'desc' => 'required|string',
+        ]);
+
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
@@ -76,6 +76,12 @@ class SourceController extends Controller {
         ]);
     }
 
+    // PATCH
+
+    // PUT
+
+    // DELETE
+
     public function delete($id) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
@@ -84,5 +90,18 @@ class SourceController extends Controller {
             ], 403);
         }
         Source::find($id)->delete();
+    }
+
+    // OTHER FUNCTIONS
+
+    private function getById($id) {
+        $src = DB::table('sources as s')
+                ->select('s.*', DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) AS attribute_name"))
+                ->where('s.id', '=', $id)
+                ->join('attributes as a', 's.attribute_id', '=', 'a.id')
+                ->orderBy('attribute_name', 'asc')
+                ->first();
+        $src->literature = Literature::find($src->literature_id);
+        return $src;
     }
 }

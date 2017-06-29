@@ -31,6 +31,87 @@ class ContextController extends Controller {
         //
     }
 
+    // GET
+
+    public function getContexts() {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type as typeid', 'thesaurus_url as typename', DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as typelabel"))->orderBy('rank')->get();
+
+        $roots = array();
+        $contexts = array();
+        $children = array();
+
+        foreach($contextEntries as $key => $context) {
+            $contexts[$context->id] = $context;
+            if(!$user->can('view_geodata')) {
+                if(isset($contexts[$context->id]->geodata_id)){
+                    unset($contexts[$context->id]->geodata_id);
+                }
+            }
+            if(!isset($context->root_context_id)) {
+                array_push($roots, $context->id);
+            }
+            else {
+                if(!array_key_exists($context->root_context_id, $children)) {
+                    $children[$context->root_context_id] = array();
+                }
+                array_push($children[$context->root_context_id], $context->id);
+            }
+        }
+
+        $response = [   'contexts' => $contexts,
+                        'roots' => $roots,
+                        'children' => $children];
+
+        return response()->json($response);
+    }
+
+    public function getArtifacts() {
+        return response()->json(
+            DB::table('context_types as c')
+                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
+                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
+                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
+                )
+                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+                ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
+                ->where('c.type', '=', '1')
+                ->orderBy('title', 'asc')
+                ->orderBy('ca.position', 'asc')
+                ->get()
+        );
+    }
+
+    public function getContextTypes() {
+        return response()->json(
+            DB::table('context_types as c')
+                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
+                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de' limit 1) as title"),
+                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) as val")
+                )
+                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+                ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
+                ->where('c.type', '=', '0')
+                ->orderBy('title', 'asc')
+                ->orderBy('ca.position', 'asc')
+                ->get()
+        );
+    }
+
+    public function getAttributes() {
+        return response()->json([
+            'attributes' => Attribute::select('*',
+            DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as label"),
+            DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_root_url and short_name = 'de' limit 1) as root_label"))->orderBy('label', 'asc')->get()
+        ]);
+    }
+
     public function getContextData($id) {
         $user = \Auth::user();
         if(!$user->can('view_concept_props')) {
@@ -42,6 +123,604 @@ class ContextController extends Controller {
             'data' => $this->getData($id)
         ]);
     }
+
+    public function getDropdownOptions() {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $rows = DB::table('context_types as c')
+        ->select('c.id as context_type_id', 'a.id as aid', 'a.datatype', 'a.thesaurus_root_url as root', 'ca.position',
+            DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
+            DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
+        )
+        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+        ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
+        ->where('a.datatype', '=', 'string-sc')
+        ->orWhere('a.datatype', '=', 'string-mc')
+        ->orWhere('a.datatype', '=', 'epoch')
+        ->orderBy('title', 'asc')
+        ->orderBy('ca.position', 'asc')
+        ->get();
+        foreach($rows as &$row) {
+            if(!isset($row->root)) continue;
+            $rootId = DB::table('th_concept')
+                ->select('id')
+                ->where('concept_url', '=', $row->root)
+                ->first();
+            if(!isset($rootId)) continue;
+            $rootId = $rootId->id;
+            $row->choices = DB::select("
+                WITH RECURSIVE
+                top AS (
+                    SELECT br.broader_id, br.narrower_id, (select label from getconceptlabelsfromid where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
+                            (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
+                    FROM th_broaders br
+                    WHERE broader_id = $rootId
+                    UNION
+                    SELECT br.broader_id, br.narrower_id, (select label from getconceptlabelsfromid where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
+                            (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
+                    FROM top t, th_broaders br
+                    WHERE t.narrower_id = br.broader_id
+                )
+                SELECT *
+                FROM top
+                ORDER BY narr
+            ");
+        }
+        return response()->json($rows);
+    }
+
+    public function getContextByGeodata($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_geodata') || !$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        return response()->json([
+            'context_id' => Context::where('geodata_id', '=', $id)->value('id')
+        ]);
+    }
+
+    public function getAvailableAttributeTypes() {
+        return response()->json([
+            'types' => [
+                [
+                    'datatype' => 'string',
+                    'description' => 'attribute.string.desc'
+                ],
+                [
+                    'datatype' => 'stringf',
+                    'description' => 'attribute.stringf.desc'
+                ],
+                [
+                    'datatype' => 'double',
+                    'description' => 'attribute.double.desc'
+                ],
+                [
+                    'datatype' => 'string-sc',
+                    'description' => 'attribute.string-sc.desc'
+                ],
+                [
+                    'datatype' => 'string-mc',
+                    'description' => 'attribute.string-mc.desc'
+                ],
+                [
+                    'datatype' => 'epoch',
+                    'description' => 'attribute.epoch.desc'
+                ],
+                [
+                    'datatype' => 'date',
+                    'description' => 'attribute.date.desc'
+                ],
+                [
+                    'datatype' => 'dimension',
+                    'description' => 'attribute.dimension.desc'
+                ],
+                [
+                    'datatype' => 'list',
+                    'description' => 'attribute.list.desc'
+                ],
+                [
+                    'datatype' => 'geography',
+                    'description' => 'attribute.geography.desc'
+                ],
+                [
+                    'datatype' => 'integer',
+                    'description' => 'attribute.integer.desc'
+                ],
+                [
+                    'datatype' => 'percentage',
+                    'description' => 'attribute.percentage.desc'
+                ]
+            ]
+        ]);
+    }
+
+    // POST
+
+    public function add(Request $request) {
+        // TODO variable keys
+        $this->validate($request, [
+            'root_cid' => 'nullable|integer'
+        ]);
+
+        $user = \Auth::user();
+        if(!$user->can('create_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $context = new Context();
+        $rank;
+        if($request->has('root_cid')) {
+            $rank = Context::where('root_context_id', '=', $request->get('root_cid'))->max('rank') + 1;
+        } else {
+            $rank = Context::whereNull('root_context_id')->max('rank') + 1;
+        }
+        $context->rank = $rank;
+
+        foreach($request->all() as $key) {
+            $context->{$key} = $request->{$key};
+        }
+        $context->lasteditor = $user['name'];
+        $context->save();
+
+        return response()->json(['context' => $context]);
+    }
+
+    public function duplicate(Request $request, $id) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $toDuplicate = Context::find($id);
+        $newDuplicate = $toDuplicate->replicate([
+            'geodata_id'
+        ]);
+        $dupCounter = 0;
+        do {
+            $dupCounter++;
+            $sameName = DB::table('contexts')
+                ->where('name', '=', $toDuplicate->name . " ($dupCounter)")
+                ->first();
+        } while($sameName != null);
+        $newDuplicate->name .= " ($dupCounter)";
+        $siblings;
+        if($toDuplicate->root_context_id === null) {
+            $siblings = Context::whereNull('root_context_id')
+                ->where('rank', '>', $toDuplicate->rank)
+                ->get();
+        } else {
+            $siblings = Context::where('root_context_id', '=', $toDuplicate->root_context_id)
+                ->where('rank', '>', $toDuplicate->rank)
+                ->get();
+        }
+        foreach($siblings as $s) {
+            $s->rank++;
+            $s->save();
+        }
+        $newDuplicate->rank = $toDuplicate->rank + 1;
+        $newDuplicate->save();
+        $toDuplicateValues = AttributeValue::where('context_id', $id)
+            ->get();
+        foreach($toDuplicateValues as $value) {
+            $newValue = $value->replicate();
+            $newValue->context_id = $newDuplicate->id;
+            $newValue->save();
+        }
+        return response()->json(['obj' => $newDuplicate]);
+    }
+
+    // PATCH
+
+    public function patchRank(Request $request, $id) {
+        $this->validate($request, [
+            'rank' => 'required|integer',
+            'parent_id' => 'nullable|integer',
+        ]);
+
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $rank = $request->get('rank');
+        $hasParent = $request->has('parent_id');
+        $context = Context::find($id);
+        $oldRank = $context->rank;
+        $context->rank = $rank;
+
+        $oldContexts;
+        if($context->root_context_id !== null) {
+            $oldContexts = Context::where('root_context_id', '=', $context->root_context_id)
+                ->where('rank', '>', $oldRank)
+                ->get();
+        } else {
+            $oldContexts = Context::whereNull('root_context_id')
+                ->where('rank', '>', $oldRank)
+                ->get();
+        }
+        foreach($oldContexts as $oc) {
+            $oc->rank--;
+            $oc->save();
+        }
+
+        $contexts;
+        if($hasParent) {
+            $parent = $request->get('parent_id');
+            $context->root_context_id = $parent;
+            $contexts = Context::where('root_context_id', '=', $parent)
+                ->where('rank', '>=', $rank)
+                ->get();
+        } else {
+            $context->root_context_id = null;
+            $contexts = Context::whereNull('root_context_id')
+                ->where('rank', '>=', $rank)
+                ->get();
+        }
+        foreach($contexts as $c) {
+            $c->rank++;
+            $c->save();
+        }
+        $context->save();
+    }
+
+    public function linkGeodata($cid, $gid = null) {
+        $user = \Auth::user();
+        if(!$user->can('link_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        try {
+            $context = Context::findOrFail($cid);
+        } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ]);
+        }
+        if ($gid === null) { // if only cid is given, unlink the geodata of that context
+            $context->geodata_id = null;
+        } else {
+            if(isset($context->geodata_id)) {
+                return response()->json([
+                    'error' => 'This context is already linked to a geodata'
+                ]);
+            }
+            try {
+                Geodata::findOrFail($gid);
+            } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => 'This geodata does not exist'
+                ]);
+            }
+            $context->geodata_id = $gid;
+        }
+        $context->save();
+        return response()->json([
+            'context' => $context
+        ]);
+    }
+
+    // PUT
+
+    public function put(Request $request, $id){
+        // TODO variable keys
+
+        $user = \Auth::user();
+
+        if(isset($id) && !$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $context = Context::find($id);
+
+        foreach($request->all() as $key) {
+            $context->{$key} = $request->{$key};
+        }
+        $context->lasteditor = $user['name'];
+        $context->save();
+
+        return response()->json(['context' => $context]);
+    }
+
+    public function putGeodata(Request $request, $id) {
+        $this->validate($request, [
+            'color' => 'nullable|',
+            'lat' => 'nullable|numeric',
+            'lng' => 'nullable|numeric'
+        ]);
+
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $geodata = Geodata::find($id);
+        if($request->has('color')) {
+            $geodata->color = $request->get('color');
+        }
+        if($request->has('lat') && $request->has('lng') && $geodata->geom instanceof Point) {
+            $geodata->geom = new Point($request->get('lat'), $request->get('lng'));
+        }
+        $geodata->save();
+        $ret = [
+            'color' => $geodata->color
+        ];
+        if($geodata->geom instanceof Point) {
+            $ret['lat'] = $geodata->geom->getLat();
+            $ret['lng'] = $geodata->geom->getLng();
+        }
+        return response()->json($ret);
+    }
+
+    public function putPossibility(Request $request, $cid, $aid) {
+        $this->validate($request, [
+            'possibility' => 'required|nullable|integer',
+            'possibility_description' => 'required|nullable|string'
+        ]);
+
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $possibility = $request->get('possibility');
+        $description = $request->get('possibility_description');
+
+        $av = AttributeValue::where([
+                ['context_id', '=', $cid],
+                ['attribute_id', '=', $aid]
+            ])->first();
+        if($av === null) { //insert
+            $av = new AttributeValue();
+
+            $av->context_id = $cid;
+            $av->attribute_id = $aid;
+            $av->possibility = $possibility;
+            $av->possibility_description = $description;
+            $av->lasteditor = $user['name'];
+
+            $av->save();
+        } else { //update
+            $av->possibility = $possibility;
+            $av->possibility_description = $description;
+            $av->lasteditor = $user['name'];
+
+            $av->save();
+        }
+        return response()->json($av);
+    }
+
+    // DELETE
+
+    public function delete($id) {
+        $user = \Auth::user();
+        if(!$user->can('delete_move_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $context = Context::find($id);
+        $siblings;
+        if($context->root_context_id === null) {
+            $siblings = Context::whereNull('root_context_id')
+                ->where('rank', '>', $context->rank)
+                ->get();
+        } else {
+            $siblings = Context::where('root_context_id', '=', $context->root_context_id)
+                ->where('rank', '>', $context->rank)
+                ->get();
+        }
+        foreach($siblings as $s) {
+            $s->rank--;
+            $s->save();
+        }
+        $context->delete();
+
+        return response()->json();
+    }
+
+    // EDITOR FUNCTIONS
+
+    // GET
+
+    public function getOccurrenceCount($id) {
+        $cnt = Context::where('context_type_id', '=', $id)->count();
+        return response()->json([
+            'count' => $cnt
+        ]);
+    }
+
+    public function searchForLabel($label, $lang = 'de') {
+        if($label == null) return response()->json();
+
+        $matchedConcepts = DB::table('th_concept_label as l')
+            ->select('c.concept_url', 'c.id', 'l.label')
+            ->join('th_concept as c', 'c.id', '=', 'l.concept_id')
+            ->join('th_language as lng', 'l.language_id', '=', 'lng.id')
+            ->where([
+                ['label', 'ilike', '%' . $label . '%'],
+                ['lng.short_name', '=', $lang]
+            ])
+            ->groupBy('c.id', 'l.label')
+            ->orderBy('l.label')
+            ->get();
+        return response()->json($matchedConcepts);
+    }
+
+    // POST
+
+    public function addContextType(Request $request) {
+        $this->validate($request, [
+            'concept_url' => 'required|url',
+            'type' => 'required|integer'
+        ]);
+
+        $curl = $request->get('concept_url');
+        $type = $request->get('type');
+        $cType = new ContextType();
+        $cType->thesaurus_url = $curl;
+        $cType->type = $type;
+        $cType->save();
+        $cType->label = $this->getLabel($curl);
+        return response()->json([
+            'contexttype' => $cType
+        ]);
+    }
+
+    public function addAttributeToContextType(Request $request, $ctid) {
+        $this->validate($request, [
+            'aid' => 'required|integer',
+            'type' => 'required|integer'
+        ]);
+
+        $aid = $request->get('aid');
+        $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
+        $ca = new ContextAttribute();
+        $ca->context_type_id = $ctid;
+        $ca->attribute_id = $aid;
+        $ca->position = $attrsCnt + 1; // add new attribute to the end
+        $ca->save();
+
+        $a = Attribute::find($aid);
+        $ca->val = $this->getLabel($a->thesaurus_url);
+        $ca->datatype = $a->datatype;
+
+        return response()->json([
+            'attribute' => $ca
+        ]);
+    }
+
+    public function addAttribute(Request $request) {
+        $this->validate($request, [
+            'label_id' => 'required|integer',
+            'datatype' => 'required|string',
+            'parent_id' => 'nullable|integer'
+        ]);
+
+        $lid = $request->get('label_id');
+        $datatype = $request->get('datatype');
+        $curl = ThConcept::find($lid)->concept_url;
+        $attr = new Attribute();
+        $attr->thesaurus_url = $curl;
+        $attr->datatype = $datatype;
+        if($request->has('parent_id')) {
+            $pid = $request->get('parent_id');
+            $purl = ThConcept::find($pid)->concept_url;
+            $attr->thesaurus_root_url = $purl;
+        }
+        $attr->save();
+        $attr->label = $this->getLabel($curl);
+        if(isset($purl)) $attr->root_label = $this->getLabel($purl);
+
+        return response()->json([
+            'attribute' => $attr
+        ]);
+    }
+
+    // PATCH
+
+    public function editContextType(Request $request, $ctid) {
+        $this->validate($request, [
+            'new_url' => 'required|url'
+        ]);
+
+        $newUrl = $request->get('new_url');
+        $ct = ContextType::find($ctid);
+        $ct->thesaurus_url = $newUrl;
+        $ct->save();
+    }
+
+    public function moveAttributeUp(Request $request, $ctid, $aid) {
+        $ca = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        if($ca->position == 1) {
+            return response()->json([
+                'error' => 'Element is already topmost element'
+            ]);
+        }
+        $ca2 = ContextAttribute::where([
+            ['position', '=', $ca->position-1],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        $ca->position--;
+        $ca2->position++;
+        $ca->save();
+        $ca2->save();
+        return response()->json();
+    }
+
+    public function moveAttributeDown(Request $request, $ctid, $aid) {
+        $ca = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        if($ca->position == ContextAttribute::where('context_type_id', '=', $ctid)->count()) {
+            return response()->json([
+                'error' => 'Element is already bottommost element'
+            ]);
+        }
+        $ca2 = ContextAttribute::where([
+            ['position', '=', $ca->position+1],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        $ca->position++;
+        $ca2->position--;
+        $ca->save();
+        $ca2->save();
+        return response()->json();
+    }
+
+    // DELETE
+
+    public function deleteAttribute($id) {
+        Attribute::find($id)->delete();
+    }
+
+    public function deleteContextType($id) {
+        ContextType::find($id)->delete();
+    }
+
+    public function removeAttributeFromContextType($ctid, $aid) {
+        $ca = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+        $pos = $ca->position;
+        $ca->delete();
+
+        $successors = ContextAttribute::where([
+                ['position', '>', $pos],
+                ['context_type_id', '=', $ctid]
+            ])->get();
+        foreach($successors as $s) {
+            $s->position--;
+            $s->save();
+        }
+    }
+
+    // OTHER FUNCTIONS
 
     private function getData($id) {
         $data = DB::table('attribute_values as av')->select('av.*', 'a.datatype', 'a.thesaurus_root_url')->join('attributes as a', 'av.attribute_id', '=', 'a.id')->where('context_id', $id)->get();
@@ -121,616 +800,6 @@ class ContextController extends Controller {
             ->orderByRaw("lang.short_name = '$lang' ASC")
             ->value('lbl.label');
         return $label;
-    }
-
-    public function searchForLabel($label, $lang = 'de') {
-        if($label == null) return response()->json();
-
-        $matchedConcepts = DB::table('th_concept_label as l')
-            ->select('c.concept_url', 'c.id', 'l.label')
-            ->join('th_concept as c', 'c.id', '=', 'l.concept_id')
-            ->join('th_language as lng', 'l.language_id', '=', 'lng.id')
-            ->where([
-                ['label', 'ilike', '%' . $label . '%'],
-                ['lng.short_name', '=', $lang]
-            ])
-            ->groupBy('c.id', 'l.label')
-            ->orderBy('l.label')
-            ->get();
-        return response()->json($matchedConcepts);
-    }
-
-    public function deleteContextType($id) {
-        ContextType::find($id)->delete();
-    }
-
-    public function addContextType(Request $request) {
-        if(!$request->has('concept_url') || !$request->has('type')) {
-            return response()->json([
-                'error' => 'Missing parameter'
-            ]);
-        }
-        $curl = $request->get('concept_url');
-        $type = $request->get('type');
-        $cType = new ContextType();
-        $cType->thesaurus_url = $curl;
-        $cType->type = $type;
-        $cType->save();
-        $cType->label = $this->getLabel($curl);
-        return response()->json([
-            'contexttype' => $cType
-        ]);
-    }
-
-    public function editContextType(Request $request, $ctid) {
-        $newUrl = $request->get('new_url');
-        $ct = ContextType::find($ctid);
-        $ct->thesaurus_url = $newUrl;
-        $ct->save();
-    }
-
-    public function addAttribute(Request $request) {
-        if(!$request->has('label_id') || !$request->has('datatype')) {
-            return response()->json([
-                'error' => 'Missing parameter.'
-            ]);
-        }
-        $lid = $request->get('label_id');
-        $datatype = $request->get('datatype');
-        $curl = ThConcept::find($lid)->concept_url;
-        $attr = new Attribute();
-        $attr->thesaurus_url = $curl;
-        $attr->datatype = $datatype;
-        if($request->has('parent_id')) {
-            $pid = $request->get('parent_id');
-            $purl = ThConcept::find($pid)->concept_url;
-            $attr->thesaurus_root_url = $purl;
-        }
-        $attr->save();
-        $attr->label = $this->getLabel($curl);
-        if(isset($purl)) $attr->root_label = $this->getLabel($purl);
-
-        return response()->json([
-            'attribute' => $attr
-        ]);
-    }
-
-    public function addAttributeToContextType(Request $request, $ctid) {
-        if(!$request->has('aid')) {
-            return response()->json([
-                'error' => 'Missing parameter. Either aid or ctid is missing.'
-            ]);
-        }
-        $aid = $request->get('aid');
-
-        $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
-        $ca = new ContextAttribute();
-        $ca->context_type_id = $ctid;
-        $ca->attribute_id = $aid;
-        $ca->position = $attrsCnt + 1; // add new attribute to the end
-        $ca->save();
-
-        $a = Attribute::find($aid);
-        $ca->val = $this->getLabel($a->thesaurus_url);
-        $ca->datatype = $a->datatype;
-
-        return response()->json([
-            'attribute' => $ca
-        ]);
-    }
-
-    public function removeAttributeFromContextType(Request $request, $ctid, $aid) {
-        $ca = ContextAttribute::where([
-            ['attribute_id', '=', $aid],
-            ['context_type_id', '=', $ctid]
-        ])->first();
-        $pos = $ca->position;
-        $ca->delete();
-
-        $successors = ContextAttribute::where([
-                ['position', '>', $pos],
-                ['context_type_id', '=', $ctid]
-            ])->get();
-        foreach($successors as $s) {
-            $s->position--;
-            $s->save();
-        }
-    }
-
-    public function deleteAttribute($id) {
-        Attribute::find($id)->delete();
-    }
-
-    public function moveAttributeUp(Request $request, $ctid, $aid) {
-        $ca = ContextAttribute::where([
-            ['attribute_id', '=', $aid],
-            ['context_type_id', '=', $ctid]
-        ])->first();
-
-        if($ca->position == 1) {
-            return response()->json([
-                'error' => 'Element is already topmost element'
-            ]);
-        }
-        $ca2 = ContextAttribute::where([
-            ['position', '=', $ca->position-1],
-            ['context_type_id', '=', $ctid]
-        ])->first();
-
-        $ca->position--;
-        $ca2->position++;
-        $ca->save();
-        $ca2->save();
-        return response()->json();
-    }
-
-    public function moveAttributeDown(Request $request, $ctid, $aid) {
-        $ca = ContextAttribute::where([
-            ['attribute_id', '=', $aid],
-            ['context_type_id', '=', $ctid]
-        ])->first();
-
-        if($ca->position == ContextAttribute::where('context_type_id', '=', $ctid)->count()) {
-            return response()->json([
-                'error' => 'Element is already bottommost element'
-            ]);
-        }
-        $ca2 = ContextAttribute::where([
-            ['position', '=', $ca->position+1],
-            ['context_type_id', '=', $ctid]
-        ])->first();
-
-        $ca->position++;
-        $ca2->position--;
-        $ca->save();
-        $ca2->save();
-        return response()->json();
-    }
-
-    public function getOccurrenceCount($id) {
-        $cnt = Context::where('context_type_id', '=', $id)->count();
-        return response()->json([
-            'count' => $cnt
-        ]);
-    }
-
-    public function getContextTypes() {
-        return response()->json(
-            DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de' limit 1) as title"),
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) as val")
-                )
-                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
-                ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
-                ->where('c.type', '=', '0')
-                ->orderBy('title', 'asc')
-                ->orderBy('ca.position', 'asc')
-                ->get()
-        );
-    }
-
-    public function getAvailableAttributeTypes() {
-        return response()->json([
-            'types' => [
-                [
-                    'datatype' => 'string',
-                    'description' => 'attribute.string.desc'
-                ],
-                [
-                    'datatype' => 'stringf',
-                    'description' => 'attribute.stringf.desc'
-                ],
-                [
-                    'datatype' => 'double',
-                    'description' => 'attribute.double.desc'
-                ],
-                [
-                    'datatype' => 'string-sc',
-                    'description' => 'attribute.string-sc.desc'
-                ],
-                [
-                    'datatype' => 'string-mc',
-                    'description' => 'attribute.string-mc.desc'
-                ],
-                [
-                    'datatype' => 'epoch',
-                    'description' => 'attribute.epoch.desc'
-                ],
-                [
-                    'datatype' => 'date',
-                    'description' => 'attribute.date.desc'
-                ],
-                [
-                    'datatype' => 'dimension',
-                    'description' => 'attribute.dimension.desc'
-                ],
-                [
-                    'datatype' => 'list',
-                    'description' => 'attribute.list.desc'
-                ],
-                [
-                    'datatype' => 'geography',
-                    'description' => 'attribute.geography.desc'
-                ],
-                [
-                    'datatype' => 'integer',
-                    'description' => 'attribute.integer.desc'
-                ],
-                [
-                    'datatype' => 'percentage',
-                    'description' => 'attribute.percentage.desc'
-                ]
-            ]
-        ]);
-    }
-
-    public function getAttributes() {
-        return response()->json([
-            'attributes' => Attribute::select('*',
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as label"),
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_root_url and short_name = 'de' limit 1) as root_label"))->orderBy('label', 'asc')->get()
-        ]);
-    }
-
-    public function getContexts() {
-        $user = \Auth::user();
-        if(!$user->can('view_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-
-
-        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type as typeid', 'thesaurus_url as typename', DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as typelabel"))->orderBy('rank')->get();
-
-        $roots = array();
-        $contexts = array();
-        $children = array();
-
-        foreach($contextEntries as $key => $context) {
-            $contexts[$context->id] = $context;
-            if(!$user->can('view_geodata')) {
-                if(isset($contexts[$context->id]->geodata_id)){
-                    unset($contexts[$context->id]->geodata_id);
-                }
-            }
-            if(!isset($context->root_context_id)) {
-                array_push($roots, $context->id);
-            }
-            else {
-                if(!array_key_exists($context->root_context_id, $children)) {
-                    $children[$context->root_context_id] = array();
-                }
-                array_push($children[$context->root_context_id], $context->id);
-            }
-        }
-
-        $response = [   'contexts' => $contexts,
-                        'roots' => $roots,
-                        'children' => $children];
-
-        return response()->json($response);
-    }
-
-    public function linkGeodata($cid, $gid=null) {
-        $user = \Auth::user();
-        if(!$user->can('link_geodata')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        try {
-            $context = Context::findOrFail($cid);
-        } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'error' => 'This context does not exist'
-            ]);
-        }
-        if ($gid === null) { // if only cid is given, unlink the geodata of that context
-            $context->geodata_id = null;
-        } else {
-            if(isset($context->geodata_id)) {
-                return response()->json([
-                    'error' => 'This context is already linked to a geodata'
-                ]);
-            }
-            try {
-                Geodata::findOrFail($gid);
-            } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-                return response()->json([
-                    'error' => 'This geodata does not exist'
-                ]);
-            }
-            $context->geodata_id = $gid;
-        }
-        $context->save();
-        return response()->json([
-            'context' => $context
-        ]);
-    }
-
-    public function getContextByGeodata($id) {
-        $user = \Auth::user();
-        if(!$user->can('view_geodata') || !$user->can('view_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        return response()->json([
-            'context_id' => Context::where('geodata_id', '=', $id)->value('id')
-        ]);
-    }
-
-
-    public function getDropdownOptions() {
-        $user = \Auth::user();
-        if(!$user->can('view_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $rows = DB::table('context_types as c')
-        ->select('c.id as context_type_id', 'a.id as aid', 'a.datatype', 'a.thesaurus_root_url as root', 'ca.position',
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
-        )
-        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
-        ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
-        ->where('a.datatype', '=', 'string-sc')
-        ->orWhere('a.datatype', '=', 'string-mc')
-        ->orWhere('a.datatype', '=', 'epoch')
-        ->orderBy('title', 'asc')
-        ->orderBy('ca.position', 'asc')
-        ->get();
-        foreach($rows as &$row) {
-            if(!isset($row->root)) continue;
-            $rootId = DB::table('th_concept')
-                ->select('id')
-                ->where('concept_url', '=', $row->root)
-                ->first();
-            if(!isset($rootId)) continue;
-            $rootId = $rootId->id;
-            $row->choices = DB::select("
-                WITH RECURSIVE
-                top AS (
-                    SELECT br.broader_id, br.narrower_id, (select label from getconceptlabelsfromid where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
-                            (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
-                    FROM th_broaders br
-                    WHERE broader_id = $rootId
-                    UNION
-                    SELECT br.broader_id, br.narrower_id, (select label from getconceptlabelsfromid where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
-                            (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
-                    FROM top t, th_broaders br
-                    WHERE t.narrower_id = br.broader_id
-                )
-                SELECT *
-                FROM top
-                ORDER BY narr
-            ");
-        }
-        return response()->json($rows);
-    }
-
-    public function duplicate(Request $request, $id) {
-        $user = \Auth::user();
-        if(!$user->can('duplicate_edit_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $toDuplicate = Context::find($id);
-        $newDuplicate = $toDuplicate->replicate([
-            'geodata_id'
-        ]);
-        $dupCounter = 0;
-        do {
-            $dupCounter++;
-            $sameName = DB::table('contexts')
-                ->where('name', '=', $toDuplicate->name . " ($dupCounter)")
-                ->first();
-        } while($sameName != null);
-        $newDuplicate->name .= " ($dupCounter)";
-        $siblings;
-        if($toDuplicate->root_context_id === null) {
-            $siblings = Context::whereNull('root_context_id')
-                ->where('rank', '>', $toDuplicate->rank)
-                ->get();
-        } else {
-            $siblings = Context::where('root_context_id', '=', $toDuplicate->root_context_id)
-                ->where('rank', '>', $toDuplicate->rank)
-                ->get();
-        }
-        foreach($siblings as $s) {
-            $s->rank++;
-            $s->save();
-        }
-        $newDuplicate->rank = $toDuplicate->rank + 1;
-        $newDuplicate->save();
-        $toDuplicateValues = AttributeValue::where('context_id', $id)
-            ->get();
-        foreach($toDuplicateValues as $value) {
-            $newValue = $value->replicate();
-            $newValue->context_id = $newDuplicate->id;
-            $newValue->save();
-        }
-        return response()->json(['obj' => $newDuplicate]);
-    }
-
-    public function getArtifacts() {
-        return response()->json(
-            DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
-                )
-                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
-                ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
-                ->where('c.type', '=', '1')
-                ->orderBy('title', 'asc')
-                ->orderBy('ca.position', 'asc')
-                ->get()
-        );
-    }
-
-    public function add(Request $request) {
-        $user = \Auth::user();
-
-        if(!$user->can('create_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-
-        $context = new Context();
-        $rank;
-        if($request->has('root_cid')) {
-            $rank = Context::where('root_context_id', '=', $request->get('root_cid'))->max('rank') + 1;
-        } else {
-            $rank = Context::whereNull('root_context_id')->max('rank') + 1;
-        }
-        $context->rank = $rank;
-
-        foreach($request->all() as $key) {
-            $context->{$key} = $request->{$key};
-        }
-        $context->lasteditor = $user['name'];
-        $context->save();
-
-        return response()->json(['context' => $context]);
-    }
-
-    public function put(Request $request, $id){
-        $user = \Auth::user();
-
-        if(isset($id) && !$user->can('duplicate_edit_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-
-        $context = Context::find($id);
-
-        foreach($request->all() as $key) {
-            $context->{$key} = $request->{$key};
-        }
-        $context->lasteditor = $user['name'];
-        $context->save();
-
-        return response()->json(['context' => $context]);
-    }
-
-
-    public function patchRank(Request $request, $id) {
-        $user = \Auth::user();
-        if(!$user->can('duplicate_edit_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $rank = $request->get('rank');
-        $hasParent = $request->has('parent_id');
-        $context = Context::find($id);
-        $oldRank = $context->rank;
-        $context->rank = $rank;
-
-        $oldContexts;
-        if($context->root_context_id !== null) {
-            $oldContexts = Context::where('root_context_id', '=', $context->root_context_id)
-                ->where('rank', '>', $oldRank)
-                ->get();
-        } else {
-            $oldContexts = Context::whereNull('root_context_id')
-                ->where('rank', '>', $oldRank)
-                ->get();
-        }
-        foreach($oldContexts as $oc) {
-            $oc->rank--;
-            $oc->save();
-        }
-
-        $contexts;
-        if($hasParent) {
-            $parent = $request->get('parent_id');
-            $context->root_context_id = $parent;
-            $contexts = Context::where('root_context_id', '=', $parent)
-                ->where('rank', '>=', $rank)
-                ->get();
-        } else {
-            $context->root_context_id = null;
-            $contexts = Context::whereNull('root_context_id')
-                ->where('rank', '>=', $rank)
-                ->get();
-        }
-        foreach($contexts as $c) {
-            $c->rank++;
-            $c->save();
-        }
-        $context->save();
-
-    }
-
-    public function putPossibility(Request $request, $cid, $aid) {
-        $user = \Auth::user();
-        if(!$user->can('duplicate_edit_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $possibility = $request->get('possibility');
-        $description = $request->get('possibility_description');
-
-        $av = AttributeValue::where([
-                ['context_id', '=', $cid],
-                ['attribute_id', '=', $aid]
-            ])->first();
-        if($av === null) { //insert
-            $av = new AttributeValue();
-
-            $av->context_id = $cid;
-            $av->attribute_id = $aid;
-            $av->possibility = $possibility;
-            $av->possibility_description = $description;
-            $av->lasteditor = $user['name'];
-
-            $av->save();
-        } else { //update
-            $av->possibility = $possibility;
-            $av->possibility_description = $description;
-            $av->lasteditor = $user['name'];
-
-            $av->save();
-        }
-        return response()->json($av);
-    }
-
-
-    public function delete($id) {
-        $user = \Auth::user();
-        if(!$user->can('delete_move_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-
-        $context = Context::find($id);
-        $siblings;
-        if($context->root_context_id === null) {
-            $siblings = Context::whereNull('root_context_id')
-                ->where('rank', '>', $context->rank)
-                ->get();
-        } else {
-            $siblings = Context::where('root_context_id', '=', $context->root_context_id)
-                ->where('rank', '>', $context->rank)
-                ->get();
-        }
-        foreach($siblings as $s) {
-            $s->rank--;
-            $s->save();
-        }
-        $context->delete();
-
-        return response()->json();
     }
 
     public function updateOrInsert($request, $cid, $isUpdate, $user) {
