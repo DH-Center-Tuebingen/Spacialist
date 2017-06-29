@@ -27,21 +27,21 @@ $app->group([
     $app->get('artifact', 'ContextController@getArtifacts');
     $app->get('context_type', 'ContextController@getContextTypes');
     $app->get('attribute', 'ContextController@getAttributes');
-    $app->get('{id}/data', 'ContextController@getContextData');
+    $app->get('{id:[0-9]+}/data', 'ContextController@getContextData');
     $app->get('dropdown_options', 'ContextController@getDropdownOptions');
-    $app->get('byGeodata/{id}', 'ContextController@getContextByGeodata');
+    $app->get('byGeodata/{id:[0-9]+}', 'ContextController@getContextByGeodata');
 
     $app->post('', 'ContextController@add');
-    $app->post('{id}/duplicate', 'ContextController@duplicate');
+    $app->post('{id:[0-9]+}/duplicate', 'ContextController@duplicate');
 
-    $app->patch('{id}/rank', 'ContextController@patchRank');
-    $app->patch('geodata/{cid}/{gid?}', 'ContextController@linkGeodata');
+    $app->patch('{id:[0-9]+}/rank', 'ContextController@patchRank');
+    $app->patch('geodata/{cid:[0-9]+}/{gid?}', 'ContextController@linkGeodata');
 
-    $app->put('{id}', 'ContextController@put');
-    $app->put('geodata/{id}', 'ContextController@putGeodata');
-    $app->put('attribute_value/{cid}/{aid}', 'ContextController@putPossibility');
+    $app->put('{id:[0-9]+}', 'ContextController@put');
+    $app->put('geodata/{id:[0-9]+}', 'ContextController@putGeodata');
+    $app->put('attribute_value/{cid:[0-9]+}/{aid:[0-9]+}', 'ContextController@putPossibility');
 
-    $app->delete('{id}', 'ContextController@delete');
+    $app->delete('{id:[0-9]+}', 'ContextController@delete');
 
     $app->get('attributetypes', 'ContextController@getAvailableAttributeTypes');
 });
@@ -51,13 +51,13 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('', 'LiteratureController@getLiteratures');
-        $app->get('{id}', 'LiteratureController@getLiterature');
+        $app->get('{id:[0-9]+}', 'LiteratureController@getLiterature');
 
         $app->post('', 'LiteratureController@add');
 
-        $app->patch('{id}', 'LiteratureController@edit');
+        $app->patch('{id:[0-9]+}', 'LiteratureController@edit');
 
-        $app->delete('{id}', 'LiteratureController@delete');
+        $app->delete('{id:[0-9]+}', 'LiteratureController@delete');
 
         $app->put('importBibtex', 'LiteratureController@importBibtex');
 });
@@ -70,29 +70,29 @@ $app->group([
         $app->get('{id:[0-9]+}', 'ImageController@getImage');
         $app->get('{id:[0-9]+}/object', 'ImageController@getImageObject');
         $app->get('tag', 'ImageController@getAvailableTags');
-        $app->get('by_context/{id}', 'ImageController@getByContext');
+        $app->get('by_context/{id:[0-9]+}', 'ImageController@getByContext');
 
         $app->post('upload', 'ImageController@uploadImage');
 
-        $app->patch('{id}/property', 'ImageController@patchPhotoProperty');
+        $app->patch('{id:[0-9]+}/property', 'ImageController@patchPhotoProperty');
 
         $app->put('link', 'ImageController@link');
         $app->put('tag', 'ImageController@addTag');
 
-        $app->delete('{id}', 'ImageController@delete');
-        $app->delete('link/{pid}/{cid}', 'ImageController@unlink');
-        $app->delete('{pid}/tag/{tid}', 'ImageController@removeTag');
+        $app->delete('{id:[0-9]+}', 'ImageController@delete');
+        $app->delete('link/{pid:[0-9]+}/{cid:[0-9]+}', 'ImageController@unlink');
+        $app->delete('{pid:[0-9]+}/tag/{tid:[0-9]+}', 'ImageController@removeTag');
 });
 
 $app->group([
         'prefix' => 'source',//TODO api v1
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
-        $app->get('by_context/{cid}', 'SourceController@getByContext');
+        $app->get('by_context/{cid:[0-9]+}', 'SourceController@getByContext');
 
         $app->post('', 'SourceController@add');
 
-        $app->delete('{id}', 'SourceController@delete');
+        $app->delete('{id:[0-9]+}', 'SourceController@delete');
 
 });
 
@@ -110,22 +110,22 @@ $app->group([
         $app->get('', 'UserController@getUsers');
         $app->get('active', 'UserController@getActiveUser');
         $app->get('role', 'UserController@getRoles');
-        $app->get('role/by_user/{id}', 'UserController@getRolesByUser');
-        $app->get('role/{id}/permission', 'UserController@getPermissionsByRole');
+        $app->get('role/by_user/{id:[0-9]+}', 'UserController@getRolesByUser');
+        $app->get('role/{id:[0-9]+}/permission', 'UserController@getPermissionsByRole');
 
         $app->post('', 'UserController@add');
 
-        $app->patch('{id}/', 'UserController@patch');
+        $app->patch('{id:[0-9]+}/', 'UserController@patch');
         $app->patch('role/{name}', 'UserController@patchRole');
-        $app->patch('{id}/attachRole', 'UserController@addRoleToUser');
-        $app->patch('{id}/detachRole', 'UserController@removeRoleFromUser');
+        $app->patch('{id:[0-9]+}/attachRole', 'UserController@addRoleToUser');
+        $app->patch('{id:[0-9]+}/detachRole', 'UserController@removeRoleFromUser');
 
         $app->put('role/{name}', 'UserController@putRole');
-        $app->put('permission_role/{rid}/{pid}', 'UserController@putRolePermission');
+        $app->put('permission_role/{rid:[0-9]+}/{pid:[0-9]+}', 'UserController@putRolePermission');
 
-        $app->delete('{id}', 'UserController@delete');
-        $app->delete('role/{id}', 'UserController@deleteRole');
-        $app->delete('permission_role/{rid}/{pid}', 'UserController@removeRolePermission');
+        $app->delete('{id:[0-9]+}', 'UserController@delete');
+        $app->delete('role/{id:[0-9]+}', 'UserController@deleteRole');
+        $app->delete('permission_role/{rid:[0-9]+}/{pid:[0-9]+}', 'UserController@removeRolePermission');
 });
 
 $app->group([
@@ -139,21 +139,21 @@ $app->group([
         'prefix' => 'editor',//TODO api v1
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
-        $app->get('occurrence_count/{id}', 'ContextController@getOccurrenceCount');
+        $app->get('occurrence_count/{id:[0-9]+}', 'ContextController@getOccurrenceCount');
         $app->get('search/label={label}/{lang?}', 'ContextController@searchForLabel');
 
 
         $app->post('context_type', 'ContextController@addContextType');
-        $app->post('context_type/{ctid}/attribute', 'ContextController@addAttributeToContextType');
+        $app->post('context_type/{ctid:[0-9]+}/attribute', 'ContextController@addAttributeToContextType');
         $app->post('attribute', 'ContextController@addAttribute');
 
-        $app->patch('context_type/{ctid}', 'ContextController@editContextType');
-        $app->patch('context_type/{ctid}/attribute/{aid}/move/up', 'ContextController@moveAttributeUp');
-        $app->patch('context_type/{ctid}/attribute/{aid}/move/down', 'ContextController@moveAttributeDown');
+        $app->patch('context_type/{ctid:[0-9]+}', 'ContextController@editContextType');
+        $app->patch('context_type/{ctid:[0-9]+}/attribute/{aid:[0-9]+}/move/up', 'ContextController@moveAttributeUp');
+        $app->patch('context_type/{ctid:[0-9]+}/attribute/{aid:[0-9]+}/move/down', 'ContextController@moveAttributeDown');
 
-        $app->delete('attribute/{id}', 'ContextController@deleteAttribute');
-        $app->delete('contexttype/{id}', 'ContextController@deleteContextType');
-        $app->delete('editor/context_type/{ctid}/attribute/{aid}', 'ContextController@removeAttributeFromContextType');
+        $app->delete('attribute/{id:[0-9]+}', 'ContextController@deleteAttribute');
+        $app->delete('contexttype/{id:[0-9]+}', 'ContextController@deleteContextType');
+        $app->delete('editor/context_type/{ctid:[0-9]+}/attribute/{aid:[0-9]+}', 'ContextController@removeAttributeFromContextType');
 });
 
 $app->group([
@@ -165,7 +165,7 @@ $app->group([
 
         $app->post('', 'GeodataController@add');
 
-        $app->put('{id}', 'GeodataController@put');
+        $app->put('{id:[0-9]+}', 'GeodataController@put');
 
-        $app->delete('{id}', 'GeodataController@delete');
+        $app->delete('{id:[0-9]+}', 'GeodataController@delete');
 });
