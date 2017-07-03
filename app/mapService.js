@@ -404,7 +404,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
                 map.geodata.linkedGeolayer[layer.context_type_id] = id;
                 setGeojsonLayerOptions(currentLayer.layerOptions);
             } else {
->>>>>>> master
                 currentLayer.name = layer.name;
                 currentLayer.type = layer.type;
                 switch(layer.type.toUpperCase()) {
