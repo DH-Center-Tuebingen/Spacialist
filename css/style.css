@@ -99,6 +99,11 @@ textarea {
     resize: vertical;
 }
 
+.form-group-unpadded {
+    margin: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 .inline-edit {
     border: none;
     border-bottom: 1px solid gray;
@@ -146,6 +151,13 @@ ol li.list-group-item {
 
 .animated-item.ng-leave {
     animation: fadeOutUp 0.5s;
+}
+
+div[resizeable] {
+    -webkit-transition: width 0.5s ease;
+    -moz-transition: width 0.5s ease;
+    -o-transition: width 0.5s ease;
+    transition: width 0.5s ease;
 }
 
 .spinner-container {
@@ -275,6 +287,10 @@ ol li.list-group-item {
 
 .padded-content {
     padding-top: 10px;
+}
+
+.progress {
+    height: 20px !important;
 }
 
 .external-container {
@@ -428,6 +444,39 @@ p, div {
   *border-left-color: #ffffff;
 }
 
+.removed {
+    display: none;
+}
+.resizeable-button-left, .resizeable-button-right {
+    cursor: pointer;
+    height: 100px;
+    width: 30px;
+    position: sticky;
+    top: 50%;
+    z-index: 99999;
+    box-shadow: 4px 4px 10px -5px rgba(0,0,0,0.75);
+    background-color: #eeeeee;
+    border-radius: 3px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    visibility: hidden;
+}
+
+.resizeable-button-left {
+    left: 0;
+}
+
+.resizeable-button-right {
+    right: 0;
+    margin-left: 100%;
+}
+
+div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
+    visibility: visible;
+}
+
 /* modal */
 .modal-header {
     text-align: center;
@@ -451,7 +500,7 @@ p, div {
     font-weight: normal;
 }
 
-#tree-container, #attribute-container, #addon-container, #literature-container, .attribute-editor-column {
+#tree-container, #attribute-container, #addon-container, #literature-container, .attribute-editor-column, .layer-editor-column {
     overflow: auto;
 }
 
@@ -643,8 +692,8 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     cursor: pointer;
     font-size: 12px !important;
     position: absolute;
-    right: 1px;
-    top: 2px;
+    right: -2px;
+    top: 8px;
 }
 
 .list-group-item {

@@ -303,7 +303,7 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-    this.newContextTypeModal = function(labelCallback, onCreate) {
+    this.newContextTypeModal = function(labelCallback, onCreate, availableGeometryTypes) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/new-context-type.html',
             controller: function($uibModalInstance) {
@@ -311,9 +311,10 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     { id: 0, label: 'context-type.type.context'},
                     { id: 1, label: 'context-type.type.find'}
                 ];
+                this.availableGeometryTypes = availableGeometryTypes;
                 this.onSearch = labelCallback;
-                this.onCreate = function(label, type) {
-                    onCreate(label, type);
+                this.onCreate = function(label, type, geomtype) {
+                    onCreate(label, type, geomtype);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {
@@ -416,6 +417,7 @@ spacialistApp.directive('resizeWatcher', function($window) {
                 $('#literature-container').css('height', '');
                 $('analysis-frame').css('height', '');
                 $('#attribute-editor').css('height', '');
+                $('#layer-editor').css('height', '');
             } else {
                 var height = newValue.height;
                 var width = newValue.width;
@@ -431,6 +433,12 @@ spacialistApp.directive('resizeWatcher', function($window) {
                     $(attributeEditor).css('height', containerHeight);
                     var heading = document.getElementById('editor-heading');
                     $('.attribute-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
+                }
+                var layerEditor = document.getElementById('layer-editor');
+                if(layerEditor) {
+                    $(layerEditor).css('height', containerHeight);
+                    var heading = document.getElementById('editor-heading');
+                    $('.layer-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
                 }
                 var literatureContainer = document.getElementById('literature-container');
                 if(literatureContainer) {
@@ -578,6 +586,94 @@ spacialistApp.directive('formField', function($log) {
                 return scope.$eval(attrs.sources);
             }, function(newVal, oldVal) {
                 updateInputFields(scope, element, attrs);
+            });
+        }
+    };
+});
+
+spacialistApp.directive('resizeable', function($compile) {
+    var extendContainer = function(extend, shrink) {
+        var cls = extend.className;
+        var gridClass = getCurrentDeviceClass();
+        var matchingClass = nextMatchingDeviceClass(cls, gridClass);
+        if(matchingClass === null) {
+            console.log("grid breakpoint not specified");
+            return;
+        }
+        var mClass = 'col-' + matchingClass + '-';
+        var regex = new RegExp(mClass+ '\\d+');
+        var selfClass = cls.match(regex);
+        if(selfClass === null) {
+            console.log(matchingClass + " not found in " + cls);
+            return;
+        }
+        var clsl = shrink.className;
+        var leftClass = clsl.match(regex);
+        if(leftClass === null) {
+            console.log("Shrink-container doesn't have a matching class.");
+            return;
+        }
+        var widthRegex = new RegExp(mClass + '(\\d+)');
+        var width = cls.match(widthRegex);
+        var widthLeft = clsl.match(widthRegex);
+        if(width === null || widthLeft === null) {
+            console.log("Shouldn't happen ;)");
+            return;
+        }
+        width = parseInt(width[1]);
+        widthLeft = parseInt(widthLeft[1]);
+        if(width == 12 || widthLeft === 0) {
+            console.log("Container can not be shrinked/extended");
+            return;
+        }
+        extend.classList.add(mClass+(width+1));
+        extend.classList.remove(mClass+width);
+        shrink.classList.add(mClass+(widthLeft-1));
+        shrink.classList.remove(mClass+widthLeft);
+        if(widthLeft === 1) { // hide container if it gets shrinked to 0
+            shrink.classList.add('removed');
+        }
+        if(extend.className.indexOf('removed') > -1) { // show container if it is removed, but gets extended again
+            extend.classList.remove('removed');
+        }
+    };
+
+    var resizeableContainers = document.querySelectorAll('[resizeable]');
+    var idxCtr = 0;
+
+    return {
+        restrict: 'A',
+        scope: false,
+        link: function(scope, element, attrs) {
+            // scope.idxCtr = idxCtr;
+            scope.clickLeft = function(i) {
+                if(!i) return;
+                var c = resizeableContainers[i-1];
+                var cl = resizeableContainers[i];
+                extendContainer(c, cl);
+            };
+            scope.clickRight = function(i) {
+                if(i >= resizeableContainers.length-1) return;
+                var c = resizeableContainers[i+1];
+                var cl = resizeableContainers[i];
+                extendContainer(c, cl);
+            };
+            scope.resizeToggle = scope.$eval(attrs.resizeable);
+            if(idxCtr < resizeableContainers.length - 1) {
+                var right = angular.element('<div class="resizeable-button-right" ng-if="resizeToggle" ng-click="clickRight('+idxCtr+')"><i class="material-icons">chevron_left</i></div>');
+                element.prepend(right);
+                $compile(right)(scope);
+            }
+            if(idxCtr !== 0) {
+                var left = angular.element('<div class="resizeable-button-left" ng-if="resizeToggle" ng-click="clickLeft('+idxCtr+')"><i class="material-icons">chevron_right</i></div>');
+                element.prepend(left);
+                $compile(left)(scope);
+            }
+            idxCtr++;
+            scope.$watch(function(scope) {
+                return scope.$eval(attrs.resizeable);
+            }, function(newVal, oldVal) {
+                scope.resizeToggle = newVal;
             });
         }
     };
@@ -930,6 +1026,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
         .state('attributes', {
             url: '/attribute-editor',
             templateUrl: 'attribute-editor.html'
+        })
+        .state('layers', {
+            url: '/layer-editor',
+            templateUrl: 'layer-editor.html'
         });
 });
 

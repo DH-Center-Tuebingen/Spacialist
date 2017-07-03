@@ -1,4 +1,4 @@
-spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService', '$state', 'modalFactory', function($scope, userService, analysisService, $state, modalFactory) {
+spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', 'analysisService', '$state', 'modalFactory', function($scope, userService, mainService, analysisService, $state, modalFactory) {
     $scope.currentUser = userService.currentUser;
     $scope.users = userService.users;
     $scope.roles = userService.roles;
@@ -7,6 +7,7 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService'
     $scope.analysisEntries = analysisService.entries;
     $scope.setAnalysisEntry = analysisService.setAnalysisEntry;
     $scope.deleteUser = userService.deleteUser;
+    $scope.toggleEditMode = mainService.toggleEditMode;
 
     $scope.openStartPage = function() {
         analysisService.unsetAnalysisEntry();
@@ -41,6 +42,10 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'analysisService'
 
     $scope.openAttributeEditor = function() {
         $state.go('attributes', {});
+    };
+
+    $scope.openLayerEditor = function() {
+        $state.go('layers', {});
     };
 
     $scope.openLiteratureView = function() {

@@ -1,4 +1,4 @@
-spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, mainService, $translate) {
+spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', 'mapService', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, mainService, mapService, $translate) {
     var editor = {};
 
     editor.ct = {
@@ -8,6 +8,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     editor.attributeTypes = [];
     editor.existingAttributes = [];
     editor.contextAttributes = {};
+    editor.availableGeometryTypes = [];
     editor.existingContextTypes = mainService.contextTypes;
     editor.existingArtifactTypes =  mainService.artifacts;
     editor.contextAttributes = mainService.contextReferences;
@@ -20,7 +21,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     };
 
     editor.addNewContextTypeWindow = function() {
-        modalFactory.newContextTypeModal(searchForLabel, addNewContextType);
+        modalFactory.newContextTypeModal(searchForLabel, addNewContextType, editor.availableGeometryTypes);
     };
 
     editor.addNewAttributeWindow = function() {
@@ -205,11 +206,12 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
         }
     }
 
-    function addNewContextType(label, type) {
+    function addNewContextType(label, type, geomtype) {
         if(!label || !type)  return;
         var formData = new FormData();
         formData.append('concept_url', label.concept_url);
         formData.append('type', type.id);
+        formData.append('geomtype', geomtype);
         httpPostFactory('api/editor/context_type', formData, function(response) {
             if(response.error) {
                 return;
@@ -227,6 +229,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
             } else if(response.contexttype.type == 1) {
                 editor.existingArtifactTypes.push(newType);
             }
+            mapService.setLayers([response.layer]);
         });
     }
 
@@ -281,6 +284,7 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
     init();
 
     function init() {
+        getGeometryTypes();
         httpGetFactory('api/context/attribute', function(response) {
             angular.forEach(response.attributes, function(a) {
                 var entry = {
@@ -298,6 +302,14 @@ spacialistApp.service('editorService', ['httpGetFactory', 'httpPostFactory', 'ht
                     datatype: t.datatype,
                     description: t.description
                 });
+            });
+        });
+    }
+
+    function getGeometryTypes() {
+        httpGetFactory('api/overlay/geometrytypes/get', function(response) {
+            angular.forEach(response, function(g) {
+                editor.availableGeometryTypes.push(g);
             });
         });
     }

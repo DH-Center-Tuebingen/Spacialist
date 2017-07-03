@@ -31,6 +31,7 @@ $app->group([
     $app->get('dropdown_options', 'ContextController@getDropdownOptions');
     $app->get('byGeodata/{id:[0-9]+}', 'ContextController@getContextByGeodata');
     $app->get('attributetypes', 'ContextController@getAvailableAttributeTypes');
+    $app->get('search/term={term}', 'ContextController@searchContextName');
 
     $app->post('', 'ContextController@add');
     $app->post('{id:[0-9]+}/duplicate', 'ContextController@duplicate');
@@ -132,6 +133,15 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('', 'OverlayController@getOverlays');
+        $app->get('geometry_types', 'OverlayController@getGeometryTypes');
+
+        $app->post('add', 'OverlayController@addLayer');
+
+        $app->patch('{id:[0-9]+}/move/up', 'OverlayController@moveUp');
+        $app->patch('{id:[0-9]+}/move/down', 'OverlayController@moveDown');
+        $app->patch('{id:[0-9]+}', 'OverlayController@patchLayer');
+
+        $app->delete('{id:[0-9]+}', 'OverlayController@deleteLayer');
 });
 
 $app->group([

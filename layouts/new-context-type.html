@@ -30,11 +30,24 @@
                     </ui-select>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="control-label col-md-3">
+                    {{ 'context-type.new.geomtype' | translate }}
+                </label>
+                <div class="col-md-4">
+                    <ui-select ng-model="mc.geomtype" close-on-select="true">
+                        <ui-select-match>{{ $select.selected }}</ui-select-match>
+                        <ui-select-choices repeat="t in mc.availableGeometryTypes">
+                            {{ t }}
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
         </form>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.label, mc.type)" ng-disabled="!mc.label || !mc.type">{{ 'create' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.label, mc.type, mc.geomtype)" ng-disabled="!mc.label || !mc.type || !mc.geomtype">{{ 'create' | translate }}</button>
     <button type="button" class="btn btn-danger"
       ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
 </div>

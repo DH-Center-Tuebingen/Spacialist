@@ -18,8 +18,11 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.activeAnalysis = analysisService.activeAnalysis;
     $scope.availableSearchTerms = searchService.availableSearchTerms;
     $scope.filterTree = mainService.filterTree;
+    $scope.contextSearch = mainService.contextSearch;
     $scope.treeCallbacks = mainService.treeCallbacks;
+    $scope.datepickerOptions = mainService.datepickerOptions;
     $scope.storedQueries = analysisService.storedQueries;
+    $scope.editMode = mainService.editMode;
     var createModalHelper = mainService.createModalHelper;
 
     $scope.newElementContextMenu = [
