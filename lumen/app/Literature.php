@@ -40,4 +40,32 @@ class Literature extends Model
         'school',
         'series'
     ];
+
+    const patchRules = [
+        'author'    => 'string',
+        'editor'    => 'string',
+        'title'     => 'string',
+        'journal'   => 'string',
+        'year'      => 'string',
+        'pages'     => 'string',
+        'volume'    => 'string',
+        'number'    => 'string',
+        'booktitle' => 'string',
+        'publisher' => 'string',
+        'address'   => 'string',
+        'misc'      => 'string',
+        'howpublished'=> 'string',
+        'type'      => 'string',
+        'annote'    => 'string',
+        'chapter'   => 'string',
+        'crossref'  => 'string',
+        'edition'   => 'string',
+        'institution'=> 'string',
+        'key'       => 'string',
+        'month'     => 'string',
+        'note'      => 'string',
+        'organization'=> 'string',
+        'school'    => 'string',
+        'series'    => 'string'
+    ];
 }

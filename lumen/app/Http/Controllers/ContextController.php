@@ -25,6 +25,7 @@ use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Zizaco\Entrust;
 use \DB;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ContextController extends Controller {
     /**
@@ -260,17 +261,13 @@ class ContextController extends Controller {
     // POST
 
     public function add(Request $request) {
-        // TODO variable keys
-        $this->validate($request, [
-            'root_cid' => 'nullable|integer'
-        ]);
-
         $user = \Auth::user();
         if(!$user->can('create_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
+        $this->validate($request, Context::rules);
 
         $context = new Context();
         $rank;
@@ -281,8 +278,8 @@ class ContextController extends Controller {
         }
         $context->rank = $rank;
 
-        foreach($request->all() as $key) {
-            $context->{$key} = $request->{$key};
+        foreach($request->intersect(array_keys(Context::rules)) as $key => $value) {
+            $context->{$key} = $value;
         }
         $context->lasteditor = $user['name'];
         $context->save();
@@ -297,7 +294,15 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $toDuplicate = Context::find($id);
+
+        try {
+            $toDuplicate = Context::find($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ]);
+        }
+
         $newDuplicate = $toDuplicate->replicate([
             'geodata_id'
         ]);
@@ -338,20 +343,28 @@ class ContextController extends Controller {
     // PATCH
 
     public function patchRank(Request $request, $id) {
-        $this->validate($request, [
-            'rank' => 'required|integer',
-            'parent_id' => 'nullable|integer',
-        ]);
-
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
+
+        $this->validate($request, [
+            'rank' => 'required|integer',
+            'parent_id' => 'nullable|integer',
+        ]);
+
+        try {
+            $context = Context::find($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ]);
+        }
+
         $rank = $request->get('rank');
         $hasParent = $request->has('parent_id');
-        $context = Context::find($id);
         $oldRank = $context->rank;
         $context->rank = $rank;
 
@@ -390,16 +403,17 @@ class ContextController extends Controller {
         $context->save();
     }
 
-    public function linkGeodata($cid, $gid = null) {
+    public function linkGeodata(Request $request, $cid, $gid = null) {
         $user = \Auth::user();
         if(!$user->can('link_geodata')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
+
         try {
             $context = Context::findOrFail($cid);
-        } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This context does not exist'
             ]);
@@ -442,20 +456,24 @@ class ContextController extends Controller {
     // PUT
 
     public function put(Request $request, $id){
-        // TODO variable keys
-
         $user = \Auth::user();
 
-        if(isset($id) && !$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
 
-        $context = Context::find($id);
+        try {
+            $context = Context::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ]);
+        }
 
-        foreach($request->all() as $key) {
-            $context->{$key} = $request->{$key};
+        foreach($request->intersect(array_keys(Context::patchRules)) as $key => $value) {
+            $context->{$key} = $value;
         }
         $context->lasteditor = $user['name'];
         $context->save();
@@ -477,7 +495,14 @@ class ContextController extends Controller {
             ], 403);
         }
 
-        $geodata = Geodata::find($id);
+        try {
+            $context = Geodata::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This geodata does not exist'
+            ]);
+        }
+
         if($request->has('color')) {
             $geodata->color = $request->get('color');
         }
@@ -544,7 +569,14 @@ class ContextController extends Controller {
             ], 403);
         }
 
-        $context = Context::find($id);
+        try {
+            $context = Context::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ]);
+        }
+
         $siblings;
         if($context->root_context_id === null) {
             $siblings = Context::whereNull('root_context_id')
@@ -569,6 +601,13 @@ class ContextController extends Controller {
     // GET
 
     public function getOccurrenceCount($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
         $cnt = Context::where('context_type_id', '=', $id)->count();
         return response()->json([
             'count' => $cnt
@@ -576,6 +615,13 @@ class ContextController extends Controller {
     }
 
     public function searchForLabel($label, $lang = 'de') {
+        $user = \Auth::user();
+        if(!$user->can('th_view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
         if($label == null) return response()->json();
 
         $matchedConcepts = DB::table('th_concept_label as l')
@@ -595,9 +641,17 @@ class ContextController extends Controller {
     // POST
 
     public function addContextType(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {//TODO wrong permission
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
         $this->validate($request, [
-            'concept_url' => 'required|url',
-            'type' => 'required|integer'
+            'concept_url' => 'required|url|exists:th_concept',
+            'type' => 'required|integer|between:0,1',
+            'geomtype' => 'required|geom_type'
         ]);
 
         $curl = $request->get('concept_url');
@@ -628,8 +682,15 @@ class ContextController extends Controller {
     }
 
     public function addAttributeToContextType(Request $request, $ctid) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {//TODO: wrong permission
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
         $this->validate($request, [
-            'aid' => 'required|integer'
+            'aid' => 'required|integer|exists:attributes,id'
         ]);
 
         $aid = $request->get('aid');
@@ -650,10 +711,17 @@ class ContextController extends Controller {
     }
 
     public function addAttribute(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {//TODO: wrong permission
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
         $this->validate($request, [
-            'label_id' => 'required|integer',
+            'label_id' => 'required|integer|exists:th_concept,id',
             'datatype' => 'required|string',
-            'parent_id' => 'nullable|integer'
+            'parent_id' => 'nullable|integer|exists:th_concept,id'
         ]);
 
         $lid = $request->get('label_id');
@@ -679,21 +747,48 @@ class ContextController extends Controller {
     // PATCH
 
     public function editContextType(Request $request, $ctid) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {//TODO wrong permission
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
         $this->validate($request, [
-            'new_url' => 'required|url'
+            'new_url' => 'required|url|exists:th_concept,concept_url'
         ]);
 
+        try {
+            $ct = ContextType::findOrFail($ctid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context type does not exist'
+            ]);
+        }
+
         $newUrl = $request->get('new_url');
-        $ct = ContextType::find($ctid);
         $ct->thesaurus_url = $newUrl;
         $ct->save();
     }
 
     public function moveAttributeUp(Request $request, $ctid, $aid) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {//TODO: wrong permission
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
         $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]
         ])->first();
+
+        if($ca === null){
+            return response()->json([
+                'error' => 'No ContextAttribute found'
+            ]);
+        }
 
         if($ca->position == 1) {
             return response()->json([
@@ -713,10 +808,23 @@ class ContextController extends Controller {
     }
 
     public function moveAttributeDown(Request $request, $ctid, $aid) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {//TODO: wrong permission
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
         $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]
         ])->first();
+
+        if($ca === null){
+            return response()->json([
+                'error' => 'No ContextAttribute found'
+            ]);
+        }
 
         if($ca->position == ContextAttribute::where('context_type_id', '=', $ctid)->count()) {
             return response()->json([
@@ -738,18 +846,43 @@ class ContextController extends Controller {
     // DELETE
 
     public function deleteAttribute($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {//TODO: wrong permission
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         Attribute::find($id)->delete();
     }
 
     public function deleteContextType($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {//TODO: wrong permission
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         ContextType::find($id)->delete();
     }
 
     public function removeAttributeFromContextType($ctid, $aid) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {//TODO: wrong permission
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]
         ])->first();
+
+        if($ca === null){
+            return response()->json([
+                'error' => 'No ContextAttribute found'
+            ]);
+        }
+
         $pos = $ca->position;
         $ca->delete();
 

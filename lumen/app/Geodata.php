@@ -22,4 +22,8 @@ class Geodata extends Model
     protected $postgisFields = [
         'geom',
     ];
+
+    const availableGeometryTypes = [
+        'Point', 'Linestring', 'Polygon'
+    ];
 }

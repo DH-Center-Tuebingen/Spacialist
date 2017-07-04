@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', function(httpPostFactory, httpGetFactory, modalFactory, snackbarService, $auth, $state, $http) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'httpPutFactory', 'httpPatchFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpGetFactory, httpPutFactory, httpPatchFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -72,7 +72,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         }
         httpPatchFactory('api/user/' + id, formData, function(response) {
             user.users[$index] = response.user;
-            var content = $translate.instant(snackbar.data-updated.success);
+            var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };
@@ -112,13 +112,13 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
             }
         }
         if (role) {
-            httpPatchFactory('api/role/'+role.name, formData, function(response) {
+            httpPatchFactory('api/user/role/'+role.name, formData, function(response) {
                 for(var k in response.role) {
                     if(response.role.hasOwnProperty(k)) {
                         role[k] = response.role[k];
                     }
                 }
-                var content = $translate.instant(snackbar.data-updated.success);
+                var content = $translate.instant('snackbar.data-updated.success');
                 snackbarService.addAutocloseSnack(content, 'success');
             });
         } else {
@@ -126,8 +126,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
                 snackbarService.addAutocloseSnack('Cannot create role without name', 'error')//TODO
                 return;
             }
-            var name = changes.name;
-            httpPutFactory('api/role/'+name, formData, function(response)  {
+            httpPostFactory('api/user/role', formData, function(response)  {
                 var role = {};
                 for(var k in response.role) {
                     if(response.role.hasOwnProperty(k)) {
@@ -135,7 +134,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
                     }
                 }
                 user.roles.push(role);
-                var content = $translate.instant(snackbar.data-stored.success);
+                var content = $translate.instant('snackbar.data-stored.success');
                 snackbarService.addAutocloseSnack(content, 'success');
             });
 
@@ -151,7 +150,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     };
 
     user.addRolePermission = function(item, role) {
-        httpPutFactory('api/permission_role/' + role.id + '/' + item.id, new FormData(), function(response) {
+        httpPutFactory('api/user/permission_role/' + role.id + '/' + item.id, new FormData(), function(response) {
             // if an error occurs, remove added permission
             if(response.error) {
                 var index = role.permissions.indexOf(item);
@@ -162,15 +161,15 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     };
 
     user.removeRolePermission = function(item, role) {
-        httpDeleteFactory('api/permission_role/'+role.id+'/'+item.id, function(response) {
+        httpDeleteFactory('api/user/permission_role/'+role.id+'/'+item.id, function(response) {
             // if an error occurs, readd removed permission
             if(response.error) {
                 role.permissions.push(item);
-                var content = $translate.instant(snackbar.data-updated.error);
+                var content = $translate.instant('snackbar.data-updated.error');
                 snackbarService.addAutocloseSnack(content, 'error');
                 return;
             }
-            var content = $translate.instant(snackbar.data-updated.success);
+            var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };
@@ -186,7 +185,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         formData.append('role_id', $item.id);
         httpPutFactory('api/user/' + user_id + '/attachRole', formData, function(response) {
             // TODO only remove/add role if function returns no error
-            var content = $translate.instant(snackbar.data-updated.success);
+            var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };
@@ -196,7 +195,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         formData.append('role_id', $item.id);
         httpPatchFactory('api/user/' + user_id + '/detachRole', formData, function(response) {
             // TODO only remove/add role if function returns no error
-            var content = $translate.instant(snackbar.data-updated.success);
+            var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };

@@ -6,9 +6,7 @@ use Illuminate\Http\Request;
 use \Log;
 
 class OverlayController extends Controller {
-    public $availableGeometryTypes = [
-        'Point', 'Linestring', 'Polygon'
-    ];
+    public $availableGeometryTypes = App\Geodata::availableGeometryTypes;
 
     /**
      * Create a new controller instance.

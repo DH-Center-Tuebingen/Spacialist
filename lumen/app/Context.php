@@ -18,4 +18,18 @@ class Context extends Model
         'lasteditor',
         'geodata_id',
     ];
+
+    const rules = [
+        'name'              => 'required|string',
+        'context_type_id'   => 'required|integer|exists:context_types,id',
+        'root_context_id'   => 'integer|exists:contexts,id',
+        'geodata_id'        => 'integer|exists:geodata,id'
+    ];
+
+    const patchRules = [
+        'name'              => 'string',
+        'context_type_id'   => 'integer|exists:context_types,id',
+        'root_context_id'   => 'integer|exists:contexts,id',
+        'geodata_id'        => 'integer|exists:geodata,id'
+    ]
 }

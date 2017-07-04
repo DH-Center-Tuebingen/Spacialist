@@ -68,22 +68,20 @@ class LiteratureController extends Controller
     // PATCH
 
     public function edit(Request $request, $id) {
-        // TODO variable keys
-        $this->validate($request, []);
-
         $user = \Auth::user();
         if(!$user->can('edit_literature')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
+        $this->validate($request, Literature::patchRules);
+
         $literature = Literature::find($id); //TODO findorfail
 
-        $upd = $this->getFields($request->all());
-        $upd['lasteditor'] = $user['name'];
+        $literature->lasteditor = $user['name'];
 
-        foreach ($upd as $k => $v) {
-            $literature->{$k} = $v;
+        foreach ($request->intersect(array_keys(Literature::patchRules)) as $key => $value) {
+            $literature->{$key} = $value;
         }
 
         $literature->save();
@@ -121,7 +119,7 @@ class LiteratureController extends Controller
         $entries = $listener->export();
         $newEntries = [];
         foreach($entries as $entry) {
-            $insArray = $this->getFields($entry);
+            $insArray = array_intersect_key($entry, Literature::patchRules);
             if(Literature::where($insArray)->first() === null) {
                 $literature = new Literature($insArray);
                 $literature->save();
@@ -139,105 +137,5 @@ class LiteratureController extends Controller
         DB::table('literature')
             ->where('id', '=', $id)
             ->delete();
-    }
-
-    // OTHER FUNCTIONS
-
-    private function getFields($request) {
-        $ins = [];
-
-        if(isset($request['type'])) {
-            $ins['type'] = $request['type'];
-        }
-
-        if(isset($request['title'])) {
-            $ins['title'] = $request['title'];
-        }
-
-        if(isset($request['author'])) {
-            $ins['author'] = $request['author'];
-        }
-
-        if(isset($request['editor'])) {
-            $ins['editor'] = $request['editor'];
-        }
-
-        if(isset($request['journal'])) {
-            $ins['journal'] = $request['journal'];
-        }
-
-        if(isset($request['year'])) {
-            $ins['year'] = $request['year'];
-        }
-
-        if(isset($request['pages'])) {
-            $ins['pages'] = $request['pages'];
-        }
-
-        if(isset($request['volume'])) {
-            $ins['volume'] = $request['volume'];
-        }
-
-        if(isset($request['number'])) {
-            $ins['number'] = $request['number'];
-        }
-
-        if(isset($request['booktitle'])) {
-            $ins['booktitle'] = $request['booktitle'];
-        }
-
-        if(isset($request['publisher'])) {
-            $ins['publisher'] = $request['publisher'];
-        }
-
-        if(isset($request['address'])) {
-            $ins['address'] = $request['address'];
-        }
-
-        if(isset($request['annote'])) {
-            $ins['annote'] = $request['annote'];
-        }
-
-        if(isset($request['chapter'])) {
-            $ins['chapter'] = $request['chapter'];
-        }
-
-        if(isset($request['crossref'])) {
-            $ins['crossref'] = $request['crossref'];
-        }
-
-        if(isset($request['edition'])) {
-            $ins['edition'] = $request['edition'];
-        }
-
-        if(isset($request['institution'])) {
-            $ins['institution'] = $request['institution'];
-        }
-
-        if(isset($request['key'])) {
-            $ins['key'] = $request['key'];
-        }
-
-        if(isset($request['month'])) {
-            $ins['month'] = $request['month'];
-        }
-
-        if(isset($request['note'])) {
-            $ins['note'] = $request['note'];
-        }
-
-        if(isset($request['organization'])) {
-            $ins['organization'] = $request['organization'];
-        }
-
-        if(isset($request['school'])) {
-            $ins['school'] = $request['school'];
-        }
-
-        if(isset($request['series'])) {
-            $ins['series'] = $request['series'];
-        }
-
-        return $ins;
     }
 }

@@ -102,7 +102,7 @@ class UserController extends Controller
 
         $request->email = Str::lower($request->email);
 
-        $valid = $this->validateRequest($request->only('email', 'password'));
+        $valid = $this->validateRequest($request->intersect('email', 'password'));
         if($valid['status'] == 200) {
             return response()->json($valid['token']);
         } else {
@@ -138,28 +138,42 @@ class UserController extends Controller
         ]);
     }
 
+    public function addRole(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('add_edit_role')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $validator = $this->validate($request, Role::rules);
+
+        $role = new Role();
+        foreach($request->intersect(array_keys(Role::rules)) as $key => $value) {
+            $role->{$key} = $value;
+        }
+        $role->save();
+        return response()->json([
+            'role' => $role
+        ]);
+    }
+
     // PATCH
 
     public function patch(Request $request, $id) {
-        // TODO variable keys
-
         $user = \Auth::user();
         if(!$user->can('change_password')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $editedUser = User::find($id);
-        //$keys = ['name', 'email', 'password'];
-        $keys = ['password']; //currently only password is supported
+        $this->validate($request, User::patchRules);
+
+        $editedUser = User::find($id); //TODO: findorfail
         $updated = false;
-        foreach($keys as $key) {
-            if($request->has($key)) {
-                $value = $request->get($key);
-                if($key == 'password') $value = Hash::make($value);
-                $editedUser->{$key} = $value;
-                $updated = true;
-            }
+        foreach($request->intersect(array_keys(User::patchRules)) as $key => $value) {
+            if($key == 'password') $value = Hash::make($value);
+            $editedUser->{$key} = $value;
+            $updated = true;
         }
         if($updated) $editedUser->save();
         return response()->json([
@@ -168,21 +182,17 @@ class UserController extends Controller
     }
 
     public function patchRole(Request $request, $name) {
-        // TODO variable keys
-
         $user = \Auth::user();
         if(!$user->can('add_edit_role')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $editedRole = Role::where('name', $name)->first();
-        $keys = ['name', 'display_name', 'description'];
-        foreach($keys as $key) {
-            if($request->has($key)) {
-                $value = $request->get($key);
-                $editedRole->{$key} = $value;
-            }
+        $this->validate($request, Role::patchRules);
+
+        $editedRole = Role::where('name', $name)->first(); //TODO: findorfail
+        foreach($request->intersect(array_keys(Role::patchRules)) as $key => $value) {
+            $editedRole->{$key} = $value;
         }
         $editedRole->save();
         return response()->json([
@@ -223,32 +233,6 @@ class UserController extends Controller
     }
 
     // PUT
-
-    public function putRole(Request $request, $name) {
-        // TODO variable keys
-
-        $user = \Auth::user();
-        if(!$user->can('add_edit_role')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $role = Role::where('name', $name)->first();
-        if ($role === null) {
-            $role = new Role();
-        }
-        $keys = ['name', 'display_name', 'description'];
-        foreach($keys as $key) {
-            if($request->has($key)) {
-                $value = $request->get($key);
-                $role->{$key} = $value;
-            }
-        }
-        $role->save();
-        return response()->json([
-            'role' => $role
-        ]);
-    }
 
     public function putRolePermission($rid, $pid) {
         $user = \Auth::user();

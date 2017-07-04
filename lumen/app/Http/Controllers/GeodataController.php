@@ -20,6 +20,7 @@ use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Zizaco\Entrust;
 use \DB;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class GeodataController extends Controller {
     /**
@@ -71,17 +72,18 @@ class GeodataController extends Controller {
     // POST
 
     public function add(Request $request) {
-        $this->validate($request, [
-            'coords' => 'required|array',
-            'type' => 'required|alpha'
-        ]);
-
         $user = \Auth::user();
         if(!$user->can('create_edit_geodata')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
+
+        $this->validate($request, [
+            'coords' => 'required|array',
+            'type' => 'required|geom_type'
+        ]);
+
         $coords = json_decode($request->get('coords'));
         $type = $request->get('type');
         $geodata = new Geodata();
@@ -103,20 +105,29 @@ class GeodataController extends Controller {
     // PUT
 
     public function put(Request $request, $id){
-        $this->validate($request, [
-            'coords' => 'required|array',
-            'type' => 'required|alpha'
-        ]);
-
         $user = \Auth::user();
         if(!$user->can('create_edit_geodata')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
+
+        $this->validate($request, [
+            'coords' => 'required|array',
+            'type' => 'required|geom_type'
+        ]);
+
         $coords = json_decode($request->get('coords'));
         $type = $request->get('type');
-        $geodata = Geodata::find($id);
+
+        try {
+            $geodata = Geodata::find($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This geodata does not exist'
+            ]);
+        }
+
 
         parseTypeCoords($type, $coords, $geodata);
 

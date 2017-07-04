@@ -115,13 +115,13 @@ $app->group([
         $app->get('role/{id:[0-9]+}/permission', 'UserController@getPermissionsByRole');
 
         $app->post('', 'UserController@add');
+        $app->post('role', 'UserController@addRole');
 
-        $app->patch('{id:[0-9]+}/', 'UserController@patch');
+        $app->patch('{id:[0-9]+}', 'UserController@patch');
         $app->patch('role/{name}', 'UserController@patchRole');
         $app->patch('{id:[0-9]+}/attachRole', 'UserController@addRoleToUser');
         $app->patch('{id:[0-9]+}/detachRole', 'UserController@removeRoleFromUser');
 
-        $app->put('role/{name}', 'UserController@putRole');
         $app->put('permission_role/{rid:[0-9]+}/{pid:[0-9]+}', 'UserController@putRolePermission');
 
         $app->delete('{id:[0-9]+}', 'UserController@delete');

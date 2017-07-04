@@ -846,6 +846,20 @@ spacialistApp.factory('httpPatchFactory', function($http) {
     };
 });
 
+spacialistApp.factory('httpPatchPromise', function($http) {
+    var getData = function(url, data) {
+        data.append('_method', 'PATCH');
+        return $http.post(url, data, {
+            headers: {
+                'Content-Type': undefined
+            }
+        }).then(function(result) {
+            return result.data;
+        });
+    };
+    return { getData: getData };
+});
+
 spacialistApp.factory('httpPutFactory', function($http) {
     return function(url, data, callback) {
         data.append('_method', 'PUT');
