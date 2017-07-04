@@ -31,5 +31,5 @@ class Context extends Model
         'context_type_id'   => 'integer|exists:context_types,id',
         'root_context_id'   => 'integer|exists:contexts,id',
         'geodata_id'        => 'integer|exists:geodata,id'
-    ]
+    ];
 }

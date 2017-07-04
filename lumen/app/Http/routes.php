@@ -18,7 +18,8 @@ $app->get('/', function () use ($app) {
     return $app->version();
 });
 
-$app->post('user/login', 'UserController@login');//TODO
+$app->post('user/login', 'UserController@login');
+
 $app->group([
         'prefix' => 'context',//TODO api v1
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
