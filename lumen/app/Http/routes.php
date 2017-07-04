@@ -37,7 +37,8 @@ $app->group([
     $app->post('{id:[0-9]+}/duplicate', 'ContextController@duplicate');
 
     $app->patch('{id:[0-9]+}/rank', 'ContextController@patchRank');
-    $app->patch('geodata/{cid:[0-9]+}/{gid?}', 'ContextController@linkGeodata'); // TODO validate gid
+    $app->patch('geodata/{cid:[0-9]+}', 'ContextController@linkGeodata');
+    $app->patch('geodata/{cid:[0-9]+}/{gid:[0-9]+}', 'ContextController@linkGeodata');
 
     $app->put('{id:[0-9]+}', 'ContextController@put');
     $app->put('geodata/{id:[0-9]+}', 'ContextController@putGeodata');
@@ -149,7 +150,8 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('occurrence_count/{id:[0-9]+}', 'ContextController@getOccurrenceCount');
-        $app->get('search/label={label}/{lang?}', 'ContextController@searchForLabel');
+        $app->get('search/label={label}', 'ContextController@searchForLabel');
+        $app->get('search/label={label}/{lang}', 'ContextController@searchForLabel');
 
         $app->post('context_type', 'ContextController@addContextType');
         $app->post('context_type/{ctid:[0-9]+}/attribute', 'ContextController@addAttributeToContextType');
