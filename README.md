@@ -7,6 +7,11 @@ Spacialist will be a customizable Web-based platform for collecting, managing, a
 ## Installation
 Installation procedures and system requirements are described [here](INSTALL.md).
 
+## Testing
+1. Create a testing database and reference it in your `.env` file
+2. Run migrations and seeds (`db:seed`)
+3. Run `vendor/bin/phpunit`
+
 ## Screenshots
 
 For all screenshots have a look at the [screenshot folder][scr_folder]
