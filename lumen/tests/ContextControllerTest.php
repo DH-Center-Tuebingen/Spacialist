@@ -1,6 +1,9 @@
 <?php
 
 use Laravel\Lumen\Testing\DatabaseTransactions;
+use App\Context;
+use App\Geodata;
+use App\AttributeValue;
 
 class ContextControllerTest extends TestCase
 {
@@ -20,7 +23,7 @@ class ContextControllerTest extends TestCase
         $this->withoutMiddleware(); // ignore JWT-Auth
 
         // Get random Context (called at this point to ensure it's not the mock Context)
-        $randomContext = App\Context::inRandomOrder()->first();
+        $randomContext = Context::inRandomOrder()->first();
 
         // Create Context to test insert
         // $app->post('', 'ContextController@add');
@@ -69,7 +72,7 @@ class ContextControllerTest extends TestCase
         ]);
 
         // Test Edit with invalid ID
-        $maxId = App\Context::max('id') + 100;
+        $maxId = Context::max('id') + 100;
         $response = $this->actingAs($this->user)->call('PUT', 'context/' . $maxId, []);
         $this->assertEquals(200, $response->status());
         $this->seeJsonEquals([
@@ -90,7 +93,7 @@ class ContextControllerTest extends TestCase
         $this->withoutMiddleware(); // ignore JWT-Auth
 
         // Testing $app->put('attribute_value/{cid:[0-9]+}/{aid:[0-9]+}', 'ContextController@putPossibility');
-        $av = App\AttributeValue::inRandomOrder()->first();
+        $av = AttributeValue::inRandomOrder()->first();
         $newPos = $this->faker->numberBetween(1, 100);
         $parameters = [
             'possibility' => $newPos,
@@ -148,6 +151,76 @@ class ContextControllerTest extends TestCase
             ]
         ]);
         $this->seeInDatabase('attribute_values', $toCheck);
+    }
+
+    public function testLinkGeodata() {
+        $this->withoutMiddleware(); // ignore JWT-Auth
+
+        // $app->patch('geodata/{cid:[0-9]+}', 'ContextController@linkGeodata');
+        // $app->patch('geodata/{cid:[0-9]+}/{gid:[0-9]+}', 'ContextController@linkGeodata');
+        $context = Context::whereNotNull('geodata_id')->inRandomOrder()->first();
+        $gid = $context->geodata_id;
+
+        $toCheck = [
+            'id' => $context->id,
+            'name' => $context->name,
+            'context_type_id' => $context->context_type_id,
+            'root_context_id' => $context->root_context_id,
+            'lasteditor' => $this->user->name,
+            'geodata_id' => null,
+            'rank' => $context->rank
+        ];
+        // Test Unlink
+        $response = $this->actingAs($this->user)->call('PATCH', 'context/geodata/' . $context->id, []);
+        $this->assertEquals(200, $response->status());
+        $this->seeJsonStructure([
+            'context' => [
+                'id', 'name', 'context_type_id', 'root_context_id', 'geodata_id', 'rank'
+            ]
+        ]);
+        $this->seeJson($toCheck);
+        $this->seeInDatabase('contexts', $toCheck);
+
+        // Test geodata does not exist
+        $undefGid = Geodata::max('id') + 100;
+        \Log::info("UNDEF: $undefGid");
+        $response = $this->actingAs($this->user)->call('PATCH', 'context/geodata/' . $context->id . '/' . $undefGid, []);
+        \Log::info($response->content());
+        $this->assertEquals(200, $response->status());
+        $this->seeJsonEquals([
+            'error' => 'This geodata does not exist'
+        ]);
+        $this->seeInDatabase('contexts', $toCheck);
+
+        // Test Link
+        $toCheck['geodata_id'] = strval($gid);
+        $response = $this->actingAs($this->user)->call('PATCH', 'context/geodata/' . $context->id . '/' . $gid, []);
+        $this->assertEquals(200, $response->status());
+        $this->seeJsonStructure([
+            'context' => [
+                'id', 'name', 'context_type_id', 'root_context_id', 'geodata_id', 'rank'
+            ]
+        ]);
+        $this->seeJson($toCheck);
+        $this->seeInDatabase('contexts', $toCheck);
+
+        // Test context does not exist
+        $undefCid = Context::max('id') + 100;
+        $toCheck['geodata_id'] = $context->geodata_id;
+        $response = $this->actingAs($this->user)->call('PATCH', 'context/geodata/' . $undefCid . '/' . $gid, []);
+        $this->assertEquals(200, $response->status());
+        $this->seeJsonEquals([
+            'error' => 'This context does not exist'
+        ]);
+
+        // Test already linked
+        $toCheck['geodata_id'] = $context->geodata_id;
+        $response = $this->actingAs($this->user)->call('PATCH', 'context/geodata/' . $context->id . '/' . $gid, []);
+        $this->assertEquals(200, $response->status());
+        $this->seeJsonEquals([
+            'error' => 'This context is already linked to a geodata'
+        ]);
+        $this->seeInDatabase('contexts', $toCheck);
     }
 
     // public function testEditorSearch()
