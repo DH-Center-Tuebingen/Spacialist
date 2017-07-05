@@ -86,6 +86,70 @@ class ContextControllerTest extends TestCase
         ]);
     }
 
+    public function testPutPossibility() {
+        $this->withoutMiddleware(); // ignore JWT-Auth
+
+        // Testing $app->put('attribute_value/{cid:[0-9]+}/{aid:[0-9]+}', 'ContextController@putPossibility');
+        $av = App\AttributeValue::inRandomOrder()->first();
+        $newPos = $this->faker->numberBetween(1, 100);
+        $parameters = [
+            'possibility' => $newPos,
+            'possibility_description' => $this->faker->text
+        ];
+        $toCheck = array_merge($parameters, [
+            'attribute_id' => $av->attribute_id,
+            'context_id' => $av->context_id,
+            'lasteditor' => $this->user->name
+        ]);
+        $response = $this->actingAs($this->user)->call('PUT', 'context/attribute_value/'.$av->context_id . '/' . $av->attribute_id, $parameters);
+
+        $this->assertEquals(200, $response->status());
+        $this->seeJson($toCheck);
+        $this->seeInDatabase('attribute_values', $toCheck);
+
+        $newPos = $this->faker->numberBetween(1, 100);
+        $parameters = [
+            'possibility' => $newPos
+        ];
+        $toCheck = array_merge($parameters, [
+            'possibility_description' => null,
+            'attribute_id' => $av->attribute_id,
+            'context_id' => $av->context_id,
+            'lasteditor' => $this->user->name
+        ]);
+        $response = $this->actingAs($this->user)->call('PUT', 'context/attribute_value/'.$av->context_id . '/' . $av->attribute_id, $parameters);
+
+        $this->assertEquals(200, $response->status());
+        $this->seeJson($toCheck);
+        $this->seeInDatabase('attribute_values', $toCheck);
+
+        $parameters = [
+            'possibility' => $this->faker->randomFloat(2, 1, 100)
+        ];
+        $toCheck = [
+            'possibility' => $newPos,
+            'possibility_description' => null,
+            'attribute_id' => $av->attribute_id,
+            'context_id' => $av->context_id,
+            'lasteditor' => $this->user->name
+        ];
+        $response = $this->actingAs($this->user)->call('PUT', 'context/attribute_value/'.$av->context_id . '/' . $av->attribute_id, $parameters);
+
+        $this->assertEquals(422, $response->status());
+        $this->seeJsonStructure([
+            'error' => [
+                'possibility'
+            ]
+        ]);
+        $this->seeJson([
+            'message' => 'validation.integer',
+            'source' => [
+                'pointer' => 'possibility'
+            ]
+        ]);
+        $this->seeInDatabase('attribute_values', $toCheck);
+    }
+
     // public function testEditorSearch()
     // {
     //     $this->user = factory('App\User')->create();
