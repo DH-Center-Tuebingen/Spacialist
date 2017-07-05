@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Validator::extend('color', function ($attribute, $value, $parameters, $validator) {
-            return preg_match('/[a-fA-F0-9]{6}$/', $value, $matches) === 1;
+            return preg_match('/^#[a-fA-F0-9]{6}$/', $value, $matches) === 1;
         });
 
 
