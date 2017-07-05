@@ -373,7 +373,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         initMapVariables();
 
         httpGetFactory('api/overlay', function(response) {
-            console.log(response);
             map.setLayers(response.layers);
             // wait a random amount of time, so mapObject.eachLayer has all layers
             $timeout(function() {

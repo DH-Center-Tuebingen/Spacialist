@@ -600,10 +600,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         var isCurrentlyLinked = mapService.geodata.linkedContexts[elem.geodata_id] && mapService.geodata.linkedContexts[elem.geodata_id] > 0;
         elem = target;
         var layerId = mapService.geodata.linkedGeolayer[elem.context_type_id];
-        console.log(mapService.geodata.linkedGeolayer);
         var layer = mapService.map.layers.overlays[layerId];
-        console.log(layerId);
-        console.log(mapService.map.layers.overlays);
         main.currentElement.geometryType = layer.layerOptions.type;
         console.log(elem);
         if(elem.typeid === 0) { //context
