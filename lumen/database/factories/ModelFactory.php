@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Hash;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
 use Phaza\LaravelPostgis\Geometries\Polygon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -99,6 +101,19 @@ $factory->define(App\ContextType::class, function(Faker\Generator $faker) {
     ];
 });
 
+$factory->define(App\AvailableLayer::class, function(Faker\Generator $faker) {
+    return [
+        'name' => '',
+        'url' => '',
+        'type' => $faker->randomElement(App\Geodata::availableGeometryTypes),
+        'opacity' => 1,
+        'visible' => true,
+        'is_overlay' => true,
+        'position' => App\AvailableLayer::where('is_overlay', '=', true)->max('position') + 1,
+        'color' => sprintf('#%06X', mt_rand(0, 0xFFFFFF)),
+    ];
+});
+
 $factory->define(App\Attribute::class, function(Faker\Generator $faker) {
     $concept = App\ThConcept::inRandomOrder()->first();
     if(!isset($concept)){
@@ -181,22 +196,47 @@ $factory->define(App\Geodata::class, function(Faker\Generator $faker) {
 });
 
 $factory->define(App\Context::class, function(Faker\Generator $faker) {
-    $contextType = App\ContextType::inRandomOrder()->first();
-    if(!isset($contextType)){
-        $contextType = factory(App\ContextType::class)->create();
-    }
     $geodata = factory(App\Geodata::class)->create();
+    if($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) {
+        $geomtype = 'Point';
+    } else if ($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString){
+        $geomtype = 'Linestring';
+    } else if ($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) {
+        $geomtype = 'Polygon';
+    } else {
+        $geomtype = '';
+    }
+    try {
+        // first we need to retrieve a layer which matches the created geodata's type
+        $validLayer = App\AvailableLayer::where('type', $geomtype)->inRandomOrder()->firstOrFail();
+        // now get the associated contexttype, this should usually not fail since each contexttype seeds its own layer
+        $contextType = App\ContextType::findOrFail($validLayer->context_type_id);
+        // if it was successfull, we may link the created geodata object to this context
+        $geodataId = $geodata->id;
+    } catch (ModelNotFoundException $e) {
+        // if we couldn't find a matching layer + contexttype, we may not link the geodata to this context
+        $geodataId = NULL;
+        // however the context needs to have a contexttype
+        try {
+            $contextType = App\ContextType::inRandomOrder()->first();
+        } catch (ModelNotFoundException $e) {
+            $contextType = factory(App\ContextType::class)->create();
+        }
 
+    }
     $rootContext = App\Context::inRandomOrder()->first();
     if(!isset($rootContext)){
         // if there is no entry in the Contexts table, do not recursively call this factory
         $rootContext = new App\Context();
     }
+    $root_context_id = $faker->optional()->randomElement([$rootContext->id]);
+    $rank = App\Context::where('root_context_id', $root_context_id)->max('rank') + 1;
     return [
         'context_type_id' => $contextType->id,
-        'root_context_id' => $faker->optional()->randomElement([$rootContext->id]),
+        'root_context_id' => $root_context_id,
         'name' => $faker->word,
-        'geodata_id' => $geodata->id,
+        'geodata_id' => $geodataId,
+        'rank' => $rank,
         'lasteditor' => $faker->name,
     ];
 });
