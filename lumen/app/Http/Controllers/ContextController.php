@@ -434,7 +434,7 @@ class ContextController extends Controller {
             }
             try {
                 $geodata = Geodata::findOrFail($gid);
-            } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            } catch(ModelNotFoundException $e) {
                 return response()->json([
                     'error' => 'This geodata does not exist'
                 ]);
@@ -453,6 +453,7 @@ class ContextController extends Controller {
             }
             $context->geodata_id = $gid;
         }
+        $context->lasteditor = $user['name'];
         $context->save();
         return response()->json([
             'context' => $context
