@@ -40,9 +40,9 @@ $app->group([
     $app->patch('{id:[0-9]+}/rank', 'ContextController@patchRank');
     $app->patch('geodata/{cid:[0-9]+}', 'ContextController@linkGeodata');
     $app->patch('geodata/{cid:[0-9]+}/{gid:[0-9]+}', 'ContextController@linkGeodata');
+    //TODO so far "gui-tested"
 
     $app->put('{id:[0-9]+}', 'ContextController@put');
-    $app->put('geodata/{id:[0-9]+}', 'ContextController@putGeodata');
     $app->put('attribute_value/{cid:[0-9]+}/{aid:[0-9]+}', 'ContextController@putPossibility');
 
     $app->delete('{id:[0-9]+}', 'ContextController@delete');

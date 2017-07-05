@@ -1,4 +1,4 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpGetPromise', 'httpPostPromise', 'httpPutPromise', 'httpPatchPromise', 'leafletData', 'userService', 'environmentService', 'langService', 'leafletBoundsHelpers', '$timeout', function(httpGetFactory, httpPostFactory, httpGetPromise, httpPostPromise, httpPutPromise, httpPatchPromise, leafletData, userService, environmentService, langService, leafletBoundsHelpers, $timeout) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpPutFactory', 'httpGetPromise', 'httpPostPromise', 'httpPutPromise', 'httpPatchPromise', 'leafletData', 'userService', 'environmentService', 'langService', 'leafletBoundsHelpers', '$timeout', function(httpGetFactory, httpPostFactory, httpPutFactory, httpGetPromise, httpPostPromise, httpPutPromise, httpPatchPromise, leafletData, userService, environmentService, langService, leafletBoundsHelpers, $timeout) {
     var localContexts;
     var defaultColor = '#00FF00';
     var invisibleLayers;
@@ -206,11 +206,11 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
     };
 
     map.linkGeodata = function(cid, gid) {
-        return httpPatchPromise.getData('api/context/geodata/' + cid + '/' + gid);
+        return httpPatchPromise.getData('api/context/geodata/' + cid + '/' + gid, new FormData());
     };
 
     map.unlinkGeodata = function(cid) {
-        return httpPatchPromise.getData('api/context/geodata/' + cid);
+        return httpPatchPromise.getData('api/context/geodata/' + cid, new FormData());
     };
 
     map.getMatchingContext = function(featureId) {
@@ -226,16 +226,21 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         var formData = new FormData();
         if(typeof color != 'undefined') formData.append('color', color);
         if(typeof lat != 'undefined' && typeof lng != 'undefined') {
-            formData.append('lat', lat);
-            formData.append('lng', lng);
+            var coords = [{
+                lat: geodata.lat,
+                lng: geodata.lng
+            }];
+            formData.append('coords', angular.toJson(coords));
+            formData.append('type', 'Point');
         }
-        httpPutPromise.getData('api/context/geodata/' + geodata.id, formData).then(
+        httpPutPromise.getData('api/geodata/' + geodata.id, formData).then(
             function(response) {
                 map.map.selectedLayer.feature.properties.color = response.color || '#000000';
-                map.map.selectedLayer.setStyle({fillColor: response.color});
                 if(map.map.selectedLayer.feature.geometry.type == 'Point') {
-                    if(typeof response.lat != 'undefined' && typeof response.lng != 'undefined') {
-                        var latlng = L.latLng(response.lat, response.lng);
+                    if(typeof response.geodata != 'undefined') {
+                        var lng = response.geodata.geodata.coordinates[0];
+                        var lat = response.geodata.geodata.coordinates[1];
+                        var latlng = L.latLng(lat, lng);
                         map.map.selectedLayer.setLatLng(latlng);
                     }
                 }
@@ -368,6 +373,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpG
         initMapVariables();
 
         httpGetFactory('api/overlay', function(response) {
+            console.log(response);
             map.setLayers(response.layers);
             // wait a random amount of time, so mapObject.eachLayer has all layers
             $timeout(function() {

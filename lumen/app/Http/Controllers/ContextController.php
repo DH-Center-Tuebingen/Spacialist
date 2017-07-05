@@ -251,6 +251,12 @@ class ContextController extends Controller {
     }
 
     public function searchContextName($term) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $matchingContexts = Context::where('name', 'ilike', '%'.$term.'%')
             ->select('name', 'id')
             ->orderBy('name')
@@ -481,45 +487,6 @@ class ContextController extends Controller {
         return response()->json(['context' => $context]);
     }
 
-    public function putGeodata(Request $request, $id) {
-        $this->validate($request, [
-            'color' => 'nullable|',
-            'lat' => 'nullable|numeric',
-            'lng' => 'nullable|numeric'
-        ]);
-
-        $user = \Auth::user();
-        if(!$user->can('duplicate_edit_concepts')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-
-        try {
-            $context = Geodata::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => 'This geodata does not exist'
-            ]);
-        }
-
-        if($request->has('color')) {
-            $geodata->color = $request->get('color');
-        }
-        if($request->has('lat') && $request->has('lng') && $geodata->geom instanceof Point) {
-            $geodata->geom = new Point($request->get('lat'), $request->get('lng'));
-        }
-        $geodata->save();
-        $ret = [
-            'color' => $geodata->color
-        ];
-        if($geodata->geom instanceof Point) {
-            $ret['lat'] = $geodata->geom->getLat();
-            $ret['lng'] = $geodata->geom->getLng();
-        }
-        return response()->json($ret);
-    }
-
     public function putPossibility(Request $request, $cid, $aid) {
         $this->validate($request, [
             'possibility' => 'required|nullable|integer',
@@ -616,7 +583,7 @@ class ContextController extends Controller {
 
     public function searchForLabel($label, $lang = 'de') {
         $user = \Auth::user();
-        if(!$user->can('th_view_concepts')) {
+        if(!$user->can('view_concepts_th')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);

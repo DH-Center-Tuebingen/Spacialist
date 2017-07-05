@@ -24,5 +24,11 @@ class AppServiceProvider extends ServiceProvider
         Validator::extend('geom_type', function ($attribute, $value, $parameters, $validator) {
             return in_array($value, \App\Geodata::availableGeometryTypes);
         });
+
+        Validator::extend('color', function ($attribute, $value, $parameters, $validator) {
+            return preg_match('/[a-fA-F0-9]{6}$/', $value, $matches) === 1;
+        });
+
+
     }
 }

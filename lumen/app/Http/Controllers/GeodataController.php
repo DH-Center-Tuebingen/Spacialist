@@ -88,7 +88,7 @@ class GeodataController extends Controller {
         $type = $request->get('type');
         $geodata = new Geodata();
 
-        parseTypeCoords($type, $coords, $geodata);
+        $this->parseTypeCoords($type, $coords, $geodata);
 
         $geodata->lasteditor = $user['name'];
         $geodata->save();
@@ -113,8 +113,9 @@ class GeodataController extends Controller {
         }
 
         $this->validate($request, [
-            'coords' => 'required|array',
-            'type' => 'required|geom_type'
+            'coords' => 'nullable|json',
+            'type' => 'nullable|geom_type',
+            'color' => 'color'
         ]);
 
         $coords = json_decode($request->get('coords'));
@@ -129,14 +130,15 @@ class GeodataController extends Controller {
         }
 
 
-        parseTypeCoords($type, $coords, $geodata);
+        $this->parseTypeCoords($type, $coords, $geodata);
 
         $geodata->lasteditor = $user['name'];
         $geodata->save();
         return response()->json([
             'geodata' => [
                 'geodata' => $geodata->geom->jsonSerialize(),
-                'id' => $geodata->id
+                'id' => $geodata->id,
+                'color' => $geodata->color
             ]
         ]);
     }

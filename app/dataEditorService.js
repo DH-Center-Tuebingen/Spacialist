@@ -1,4 +1,4 @@
-spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', 'mapService', '$translate', function(httpGetFactory, httpPostFactory, httpPostPromise, modalFactory, mainService, mapService, $translate) {
+spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', 'mapService', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, mainService, mapService, $translate) {
     var editor = {};
 
     editor.ct = {
@@ -275,7 +275,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpPostFactory',
     function searchForLabel(searchString) {
         //TODO might want to specify language of the label aswell, default is 'de'
         // api call for that case is 'api/editor/search/label=' + searchString + "/" + lang
-        return httpGetPromise.getData('api/editor/search/label=' + searchString, formData)
+        return httpGetPromise.getData('api/editor/search/label=' + searchString, new FormData())
         .then(function(response) {
             return response;
         });
@@ -307,7 +307,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpPostFactory',
     }
 
     function getGeometryTypes() {
-        httpGetFactory('api/overlay/geometrytypes/get', function(response) {
+        httpGetFactory('api/overlay/geometry_types', function(response) {
             angular.forEach(response, function(g) {
                 editor.availableGeometryTypes.push(g);
             });
