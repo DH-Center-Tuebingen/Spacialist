@@ -223,6 +223,45 @@ class ContextControllerTest extends TestCase
         $this->seeInDatabase('contexts', $toCheck);
     }
 
+    public function testDuplicate() {
+        $this->withoutMiddleware(); // ignore JWT-Auth
+
+        // $app->post('{id:[0-9]+}/duplicate', 'ContextController@duplicate');
+        $context = Context::inRandomOrder()->first();
+
+        $toCheck = [
+            'id' => $context->id,
+            'name' => $context->name,
+            'context_type_id' => $context->context_type_id,
+            'root_context_id' => $context->root_context_id,
+            'lasteditor' => $context->lasteditor,
+            'geodata_id' => $context->geodata_id,
+            'rank' => $context->rank
+        ];
+
+        $response = $this->actingAs($this->user)->call('POST', 'context/' . $context->id . '/duplicate', []);
+        $this->assertEquals(200, $response->status());
+        $this->seeJsonStructure([
+            'obj' => [
+                'id', 'name', 'context_type_id', 'root_context_id', 'geodata_id', 'rank'
+            ]
+        ]);
+        $this->seeInDatabase('contexts', $toCheck);
+        $toCheck['geodata_id'] = null;
+        $toCheck['id'] = Context::max('id'); // Duplicate should be last inserted
+        $toCheck['rank'] = $toCheck['rank'] + 1; //Duplicate should be inserted after original element in the tree
+        $toCheck['name'] = $toCheck['name'] . ' (1)';
+        $this->seeJson($toCheck);
+        $this->seeInDatabase('contexts', $toCheck);
+
+        $undefCid = Context::max('id') + 100;
+        $response = $this->actingAs($this->user)->call('POST', 'context/' . $undefCid . '/duplicate', []);
+        $this->assertEquals(200, $response->status());
+        $this->seeJsonEquals([
+            'error' => 'This context does not exist'
+        ]);
+    }
+
     // public function testEditorSearch()
     // {
     //     $this->user = factory('App\User')->create();
