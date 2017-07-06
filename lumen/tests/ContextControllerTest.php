@@ -32,12 +32,19 @@ class ContextControllerTest extends TestCase
             'name' => $mock->name,
             'context_type_id' => $mock->context_type_id
         ];
-        if($mock->root_context_id) $parameters['root_context_id'] = $mock->root_context_id;
+        if($mock->root_context_id) {
+            $parameters['root_context_id'] = $mock->root_context_id;
+            $rank = Context::where('root_context_id', $mock->root_context_id)->max('rank');
+        } else {
+            $rank = Context::whereNull('root_context_id')->max('rank');
+        }
+        $rank++;
 
         $response = $this->actingAs($this->user)->call('POST', 'context', $parameters);
 
         $toCheck = array_merge($parameters, [
-            'lasteditor' => $this->user->name
+            'lasteditor' => $this->user->name,
+            'rank' => $rank
         ]);
 
         // Assertions for insert
@@ -183,9 +190,7 @@ class ContextControllerTest extends TestCase
 
         // Test geodata does not exist
         $undefGid = Geodata::max('id') + 100;
-        \Log::info("UNDEF: $undefGid");
         $response = $this->actingAs($this->user)->call('PATCH', 'context/geodata/' . $context->id . '/' . $undefGid, []);
-        \Log::info($response->content());
         $this->assertEquals(200, $response->status());
         $this->seeJsonEquals([
             'error' => 'This geodata does not exist'
