@@ -90,7 +90,6 @@ class ContextControllerTest extends TestCase
         // $app->delete('{id:[0-9]+}', 'ContextController@delete');
         $response = $this->actingAs($this->user)->call('DELETE', 'context/' . $randomContext->id);
         $this->assertEquals(200, $response->status());
-        $this->seeInDatabase('contexts', $toCheck);
         $this->missingFromDatabase('contexts', [
             'id' => $randomContext->id
         ]);
@@ -201,6 +200,7 @@ class ContextControllerTest extends TestCase
         $toCheck['geodata_id'] = strval($gid);
         $response = $this->actingAs($this->user)->call('PATCH', 'context/geodata/' . $context->id . '/' . $gid, []);
         $this->assertEquals(200, $response->status());
+        // TODO layer type may not match geodata type
         $this->seeJsonStructure([
             'context' => [
                 'id', 'name', 'context_type_id', 'root_context_id', 'geodata_id', 'rank'
