@@ -267,6 +267,69 @@ class ContextControllerTest extends TestCase
         ]);
     }
 
+    public function testPatchRank() {
+        $this->withoutMiddleware(); // ignore JWT-Auth
+
+        $context = Context::inRandomOrder()->first();
+        $childrenCnt = Context::where('root_context_id', $context->id)->count();
+        // For testing our context should have at least 10 children
+        for($i=0; $i<10-$childrenCnt; $i++) {
+            $parameters = [
+                'name' => $this->faker->name(),
+                'context_type_id' => $context->context_type_id,
+                'root_context_id' => $context->id,
+            ];
+            $this->actingAs($this->user)->call('POST', 'context', $parameters);
+        }
+
+        // Testing patchRank moving down (2 -> 8)
+        $children = Context::where('root_context_id', $context->id)->orderBy('rank')->get();
+        $startRank = 2;
+        $endRank = 8;
+        $c = $children[$startRank-1];
+        $parameters = [
+            'rank' => $endRank,
+            'parent_id' => $context->id
+        ];
+        $response = $this->actingAs($this->user)->call('PATCH', 'context/'.$c->id.'/rank', $parameters);
+
+        $this->assertEquals(200, $response->status());
+        $this->seeInDatabase('contexts', [
+            'id' => $c->id,
+            'root_context_id' => $context->id,
+            'rank' => $endRank,
+            'lasteditor' => $this->user->name
+        ]);
+
+        $children = Context::where('root_context_id', $context->id)->orderBy('rank')->get();
+        for($i=0; $i<count($children); $i++) {
+            $this->assertEquals($i+1, $children[$i]->rank);
+        }
+
+        // Testing patchRank moving up (7 -> 1)
+        $startRank = 7;
+        $endRank = 1;
+        $c = $children[$startRank-1];
+        $parameters = [
+            'rank' => $endRank,
+            'parent_id' => $context->id
+        ];
+        $response = $this->actingAs($this->user)->call('PATCH', 'context/'.$c->id.'/rank', $parameters);
+
+        $this->assertEquals(200, $response->status());
+        $this->seeInDatabase('contexts', [
+            'id' => $c->id,
+            'root_context_id' => $context->id,
+            'rank' => $endRank,
+            'lasteditor' => $this->user->name
+        ]);
+
+        $children = Context::where('root_context_id', $context->id)->orderBy('rank')->get();
+        for($i=0; $i<count($children); $i++) {
+            $this->assertEquals($i+1, $children[$i]->rank);
+        }
+    }
+
     // public function testEditorSearch()
     // {
     //     $this->user = factory('App\User')->create();
