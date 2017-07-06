@@ -305,7 +305,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         formData.append('name', elem.name);
         formData.append('context_type_id', elem.context_type_id);
         if(root_cid != -1) {
-            formData.append('root_cid', root_cid);
+            formData.append('root_context_id', root_cid);
         }
         for(var i=0; i<elem.data.length; i++) {
             var d = elem.data[i];
@@ -800,7 +800,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             var formData = new FormData();
             formData.append('name', name);
             formData.append('context_type_id', type.context_type_id);
-            if(typeof parent.id != 'undefined') formData.append('root_cid', parent.id);
+            if(typeof parent.id != 'undefined') formData.append('root_context_id', parent.id);
             httpPostFactory('api/context', formData, function(response) {
                 var newContext = response.context;
                 var elem = {
