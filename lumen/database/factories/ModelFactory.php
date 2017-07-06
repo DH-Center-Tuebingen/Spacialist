@@ -158,7 +158,19 @@ $factory->define(App\Literature::class, function(Faker\Generator $faker) {
         'booktitle' => $faker->optional($weight=0.9)->sentence($faker->numberBetween(3, 10)),
         'publisher' => $faker->optional($weight=0.9)->name,
         'address' => $faker->optional($weight=0.9)->address,
-        'type' => $faker->randomElement(['book', 'article', 'web']),
+        'type' => $faker->randomElement(['book', 'article', 'web', 'misc']),
+        'howpublished' => $faker->optional($weight=0.9)->sentence($faker->numberBetween(3,10)),
+        'annote' => $faker->optional($weight=0.1)->sentence($faker->numberBetween(3,5)),
+        'chapter' => $faker->optional()->randomNumber($faker->numberBetween(1,4)),
+        'crossref' => $faker->optional($weight=0.9)->word,
+        'edition' => $faker->optional($weight=0.9)->word,
+        'institution' => $faker->optional($weight=0.9)->company,
+        'key' => $faker->optional($weight=0.9)->word,
+        'month' => $faker->optional($weight=0.9)->date('M'),
+        'note' => $faker->optional($weight=0.9)->sentence($faker->numberBetween(3, 10)),
+        'organization' => $faker->optional($weight=0.9)->company,
+        'school' => $faker->optional($weight=0.9)->company . ' ' . $faker->optional($weight=0.9)->companySuffix,
+        'series' => $faker->optional($weight=0.9)->word
     ];
 });
 
