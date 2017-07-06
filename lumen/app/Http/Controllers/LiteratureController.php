@@ -29,9 +29,14 @@ class LiteratureController extends Controller
     }
 
     public function getLiterature($id) {
-        return response()->json(
-            Literature::find($id)
-        );
+        try {
+            $entry = Literature::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            $entry = [
+                'error' => 'This literature entry does not exist'
+            ];
+        }
+        return response()->json($entry);
     }
 
     // POST
@@ -134,8 +139,6 @@ class LiteratureController extends Controller
     // DELETE
 
     public function delete($id) {
-        DB::table('literature')
-            ->where('id', '=', $id)
-            ->delete();
+        Literature::find($id)->delete();
     }
 }
