@@ -302,7 +302,7 @@ class ContextController extends Controller {
         }
 
         try {
-            $toDuplicate = Context::find($id);
+            $toDuplicate = Context::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This context does not exist'
@@ -312,6 +312,7 @@ class ContextController extends Controller {
         $newDuplicate = $toDuplicate->replicate([
             'geodata_id'
         ]);
+        $newDuplicate->geodata_id = null;
         $dupCounter = 0;
         do {
             $dupCounter++;
@@ -1004,7 +1005,7 @@ class ContextController extends Controller {
                                     $con = ThConcept::findOrFail($v->narrower_id);
                                     $set = $con->concept_url;
                                     $val = $row->thesaurus_val;
-                                } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                                } catch(ModelNotFoundException $e) {
                                     continue;
                                 }
                             }
