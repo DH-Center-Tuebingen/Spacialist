@@ -30,17 +30,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Validator::extend('boolean_string', function ($attribute, $value, $parameters, $validator) {
-            switch($value) {
-                case '0':
-                case '1':
-                case 'true':
-                case 'false':
-                    return true;
-                    break;
-                default:
-                    return false;
-                    break;
-            }
+            $acceptable = [true, false, 0, 1, '0', '1', 'true', 'false', 'TRUE', 'FALSE'];
+            return in_array($value, $acceptable, true);
         });
     }
 }
