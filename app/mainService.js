@@ -268,23 +268,23 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         if(noSearchTerm) {
             data[id].visible = true;
             data[id].collapsed = true;
-        }
-        else if(filters(data[id], term)) {
+        } else if(filters(data[id], term)) {
             data[id].visible = true;
-            data[id].collapsed = false;
+            data[id].collapsed = true;
         } else {
             data[id].visible = false;
             data[id].collapsed = true;
         }
         if(children[id]) {
             for(var i=0; i<children[id].length; i++) {
-                if(isVisible(elems, children[id][i], term)) {
+                if(data[id].visible) {
+                    var tmpId = children[id][i];
+                    data[tmpId].visible = true;
+                } else if(isVisible(elems, children[id][i], term)) {
                     data[id].visible = true;
-                    if(noSearchTerm) {
-                        data[id].collapsed = true;
-                    } else {
-                        data[id].collapsed = false;
-                    }
+                    data[id].collapsed = false;
+                } else {
+                    data[id].collapsed = false;
                 }
             }
         }
