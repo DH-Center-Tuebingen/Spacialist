@@ -29,6 +29,18 @@ class AppServiceProvider extends ServiceProvider
             return preg_match('/^#[a-fA-F0-9]{6}$/', $value, $matches) === 1;
         });
 
-
+        Validator::extend('boolean_string', function ($attribute, $value, $parameters, $validator) {
+            switch($value) {
+                case '0':
+                case '1':
+                case 'true':
+                case 'false':
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+            }
+        });
     }
 }

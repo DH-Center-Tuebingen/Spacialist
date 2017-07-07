@@ -57,7 +57,7 @@ class OverlayController extends Controller {
         }
         $this->validate($request, [
             'name' => 'required|string',
-            'is_overlay' => 'nullable|boolean'
+            'is_overlay' => 'nullable|boolean_string'
         ]);
         $name = $request->get('name');
         $isOverlay = $request->has('is_overlay') && $request->get('is_overlay') == 'true';
@@ -114,9 +114,7 @@ class OverlayController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $this->validate($request, [
-            'visible' => 'nullable|boolean'
-        ]);
+        $this->validate($request, AvailableLayer::patchRules);
         try {
             $layer = AvailableLayer::findOrFail($id);
         } catch (ModelNotFoundException $e) {
@@ -136,11 +134,11 @@ class OverlayController extends Controller {
                 }
             }
         }
-        foreach($request->except(['id']) as $k => $v) {
+        foreach($request->intersect(array_keys(AvailableLayer::patchRules)) as $key => $value) {
             // cast boolean strings
-            if($v == 'true') $v = true;
-            else if($v == 'false') $v = false;
-            $layer->{$k} = $v;
+            if($value == 'true') $value = true;
+            else if($value == 'false') $value = false;
+            $layer->{$key} = $value;
         }
         $layer->save();
         return response()->json([]);
