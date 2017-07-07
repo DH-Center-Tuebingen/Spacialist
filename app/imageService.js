@@ -8,6 +8,9 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     init();
 
     images.availableTags = [];
+    images.tags = {
+        visible: false
+    };
 
     var lastTimeImageChecked = 0;
 
