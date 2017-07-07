@@ -4,6 +4,7 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
     $scope.images.linked = imageService.linked;
     $scope.currentElement = mainService.currentElement;
     $scope.upload = imageService.upload;
+    $scope.tags = imageService.tags;
     $scope.hasMoreImages = imageService.hasMoreImages;
     $scope.search = {
         terms: {
