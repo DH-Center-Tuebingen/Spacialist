@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'httpPutFactory', 'httpPatchFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpGetFactory, httpPutFactory, httpPatchFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpGetFactory, httpPutFactory, httpPatchFactory, httpDeleteFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -183,7 +183,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
     user.addUserRole = function($item, user_id) {
         var formData = new FormData();
         formData.append('role_id', $item.id);
-        httpPutFactory('api/user/' + user_id + '/attachRole', formData, function(response) {
+        httpPatchFactory('api/user/' + user_id + '/attachRole', formData, function(response) {
             // TODO only remove/add role if function returns no error
             var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');

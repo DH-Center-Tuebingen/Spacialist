@@ -1,4 +1,4 @@
-spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'modalFactory', 'httpGetFactory', '$compile', function($scope, mapService, mainService, modalFactory, httpGetFactory, $compile) {
+spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'modalFactory', 'httpGetFactory', 'httpDeleteFactory', '$compile', function($scope, mapService, mainService, modalFactory, httpGetFactory, httpDeleteFactory, $compile) {
     $scope.map = mapService.map;
     $scope.mapObject = mapService.mapObject;
     $scope.currentElement = mainService.currentElement;
@@ -84,9 +84,7 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
                     modalFactory.errorModal(response.error);
                     return;
                 }
-                else {
-                    delete $scope.geodata.linkedContexts[id];
-                }
+                delete $scope.geodata.linkedContexts[id];
             });
         });
     });
