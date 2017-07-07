@@ -234,7 +234,7 @@ class ImageController extends Controller
         $mod = date('Y-m-d H:i:s', filemtime($fileUrl));
         $exifFound = false;
         if($isImage && ($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM)) {
-            $exif = exif_read_data($fileUrl, 'ANY_TAG', true);
+            $exif = @exif_read_data($fileUrl, 'ANY_TAG', true);
             if($exif !== false) {
                 if($this->exifDataExists($exif, 'IFD0', 'Make')) {
                     $make = $exif['IFD0']['Make'];
