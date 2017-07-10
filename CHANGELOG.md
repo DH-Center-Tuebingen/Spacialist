@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 - More Datatypes (Integer, Geography, Slider)
 - Dynamic UI (The three columns on the main view can be shrinked/extended, enable Edit Mode in the Settings Dropdown menu)
 ### Changed
-- Photo Viewer => File Viewer
+- Photo Viewer => File Viewer (Please read section _Protected Files_ in [INSTALL.md](INSTALL.md) for proper setup)
   - PDFs (pdf.js)
   - Text documents (+ text highlighting using highlightjs)
   - 3D files (`.dae` and `.obj`/`.mtl`, using three.js)
@@ -28,6 +28,11 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Display context-type in properties tab again
 - Store epochs (without exact date span)
+- Add/Remove items from a list
+- Display thumbnail after image upload
+- Show tags (enabling _Show tags_ in filter tab didn't change anything)
+- Search bar in tree column (Search results couldn't be expanded, thus children were not accessible)
+- Deleting Context-Types
 ### Removed/Deprecated
 
 ## 0.2 - Babylon
