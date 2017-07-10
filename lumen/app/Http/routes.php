@@ -40,7 +40,6 @@ $app->group([
     $app->patch('{id:[0-9]+}/rank', 'ContextController@patchRank');
     $app->patch('geodata/{cid:[0-9]+}', 'ContextController@linkGeodata');
     $app->patch('geodata/{cid:[0-9]+}/{gid:[0-9]+}', 'ContextController@linkGeodata');
-    //TODO so far "gui-tested"
 
     $app->put('{id:[0-9]+}', 'ContextController@put');
     $app->put('attribute_value/{cid:[0-9]+}/{aid:[0-9]+}', 'ContextController@putPossibility');
@@ -56,10 +55,9 @@ $app->group([
         $app->get('{id:[0-9]+}', 'LiteratureController@getLiterature');
 
         $app->post('', 'LiteratureController@add');
+        $app->post('importBibtex', 'LiteratureController@importBibtex');
 
         $app->patch('{id:[0-9]+}', 'LiteratureController@edit');
-
-        $app->put('importBibtex', 'LiteratureController@importBibtex');
 
         $app->delete('{id:[0-9]+}', 'LiteratureController@delete');
 });
@@ -95,7 +93,6 @@ $app->group([
         $app->post('', 'SourceController@add');
 
         $app->delete('{id:[0-9]+}', 'SourceController@delete');
-
 });
 
 $app->group([
@@ -164,7 +161,7 @@ $app->group([
 
         $app->delete('attribute/{id:[0-9]+}', 'ContextController@deleteAttribute');
         $app->delete('contexttype/{id:[0-9]+}', 'ContextController@deleteContextType');
-        $app->delete('editor/context_type/{ctid:[0-9]+}/attribute/{aid:[0-9]+}', 'ContextController@removeAttributeFromContextType');
+        $app->delete('context_type/{ctid:[0-9]+}/attribute/{aid:[0-9]+}', 'ContextController@removeAttributeFromContextType');
 });
 
 $app->group([

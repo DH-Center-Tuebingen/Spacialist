@@ -277,8 +277,8 @@ class ContextController extends Controller {
 
         $context = new Context();
         $rank;
-        if($request->has('root_cid')) {
-            $rank = Context::where('root_context_id', '=', $request->get('root_cid'))->max('rank') + 1;
+        if($request->has('root_context_id')) {
+            $rank = Context::where('root_context_id', '=', $request->get('root_context_id'))->max('rank') + 1;
         } else {
             $rank = Context::whereNull('root_context_id')->max('rank') + 1;
         }
@@ -302,7 +302,7 @@ class ContextController extends Controller {
         }
 
         try {
-            $toDuplicate = Context::find($id);
+            $toDuplicate = Context::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This context does not exist'
@@ -312,6 +312,7 @@ class ContextController extends Controller {
         $newDuplicate = $toDuplicate->replicate([
             'geodata_id'
         ]);
+        $newDuplicate->geodata_id = null;
         $dupCounter = 0;
         do {
             $dupCounter++;
@@ -362,7 +363,7 @@ class ContextController extends Controller {
         ]);
 
         try {
-            $context = Context::find($id);
+            $context = Context::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This context does not exist'
@@ -373,6 +374,7 @@ class ContextController extends Controller {
         $hasParent = $request->has('parent_id');
         $oldRank = $context->rank;
         $context->rank = $rank;
+        $context->lasteditor = $user['name'];
 
         $oldContexts;
         if($context->root_context_id !== null) {
@@ -434,7 +436,7 @@ class ContextController extends Controller {
             }
             try {
                 $geodata = Geodata::findOrFail($gid);
-            } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            } catch(ModelNotFoundException $e) {
                 return response()->json([
                     'error' => 'This geodata does not exist'
                 ]);
@@ -453,6 +455,7 @@ class ContextController extends Controller {
             }
             $context->geodata_id = $gid;
         }
+        $context->lasteditor = $user['name'];
         $context->save();
         return response()->json([
             'context' => $context
@@ -1003,7 +1006,7 @@ class ContextController extends Controller {
                                     $con = ThConcept::findOrFail($v->narrower_id);
                                     $set = $con->concept_url;
                                     $val = $row->thesaurus_val;
-                                } catch(Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                                } catch(ModelNotFoundException $e) {
                                     continue;
                                 }
                             }

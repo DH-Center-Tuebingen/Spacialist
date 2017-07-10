@@ -113,7 +113,7 @@ class UserController extends Controller
     public function add(Request $request) {
         $this->validate($request, [
             'email' => 'required|email|max:255',
-            'name' => 'required|alpha_dash|max:255',
+            'name' => 'required|string|max:255',
             'password' => 'required',
         ]);
 

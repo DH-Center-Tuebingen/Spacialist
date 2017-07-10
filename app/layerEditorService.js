@@ -1,4 +1,4 @@
-spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory', 'httpPatchFactory', 'mapService', 'snackbarService', '$translate', function(httpGetFactory, httpPostFactory, httpPatchFactory, mapService, snackbarService, $translate) {
+spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory', 'httpPatchFactory', 'httpDeleteFactory', 'mapService', 'snackbarService', '$translate', function(httpGetFactory, httpPostFactory, httpPatchFactory, httpDeleteFactory, mapService, snackbarService, $translate) {
     var editor = {};
     editor.selectedLayer = {
         layer: {},
@@ -97,7 +97,7 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
     };
 
     editor.onDelete = function(cl) {
-        httpGetFactory('api/overlay/delete/' + cl.layerOptions.layer_id, function(response) {
+        httpDeleteFactory('api/overlay/' + cl.layerOptions.layer_id, function(response) {
             if(response.error) {
                 console.log(response.error);
                 return;
@@ -114,7 +114,7 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
 
     editor.onOrder = {
         up: function(cl) {
-            httpGetFactory('api/overlay/move/' + cl.layerOptions.layer_id + '/up', function(response) {
+            httpPatchFactory('api/overlay/move/' + cl.layerOptions.layer_id + '/up', function(response) {
                 if(response.error) {
                     console.log(response.error);
                     return;
@@ -129,7 +129,7 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
             });
         },
         down: function(cl) {
-            httpGetFactory('api/overlay/move/' + cl.layerOptions.layer_id + '/down', function(response) {
+            httpPatchFactory('api/overlay/move/' + cl.layerOptions.layer_id + '/down', function(response) {
                 if(response.error) {
                     console.log(response.error);
                     return;

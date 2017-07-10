@@ -29,9 +29,14 @@ class LiteratureController extends Controller
     }
 
     public function getLiterature($id) {
-        return response()->json(
-            Literature::find($id)
-        );
+        try {
+            $entry = Literature::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            $entry = [
+                'error' => 'This literature entry does not exist'
+            ];
+        }
+        return response()->json($entry);
     }
 
     // POST
@@ -64,34 +69,6 @@ class LiteratureController extends Controller
             'literature' => $literature
         ]);
     }
-
-    // PATCH
-
-    public function edit(Request $request, $id) {
-        $user = \Auth::user();
-        if(!$user->can('edit_literature')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $this->validate($request, Literature::patchRules);
-
-        $literature = Literature::find($id); //TODO findorfail
-
-        $literature->lasteditor = $user['name'];
-
-        foreach ($request->intersect(array_keys(Literature::patchRules)) as $key => $value) {
-            $literature->{$key} = $value;
-        }
-
-        $literature->save();
-
-        return response()->json([
-            'literature' => $literature
-        ]);
-    }
-
-    // PUT
 
     public function importBibtex(Request $request) {
         $this->validate($request, [
@@ -131,11 +108,37 @@ class LiteratureController extends Controller
         ]);
     }
 
+    // PATCH
+
+    public function edit(Request $request, $id) {
+        $user = \Auth::user();
+        if(!$user->can('edit_literature')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $this->validate($request, Literature::patchRules);
+
+        $literature = Literature::find($id); //TODO findorfail
+
+        $literature->lasteditor = $user['name'];
+
+        foreach ($request->intersect(array_keys(Literature::patchRules)) as $key => $value) {
+            $literature->{$key} = $value;
+        }
+
+        $literature->save();
+
+        return response()->json([
+            'literature' => $literature
+        ]);
+    }
+
+    // PUT
+
     // DELETE
 
     public function delete($id) {
-        DB::table('literature')
-            ->where('id', '=', $id)
-            ->delete();
+        Literature::find($id)->delete();
     }
 }

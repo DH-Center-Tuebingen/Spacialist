@@ -80,7 +80,7 @@ class GeodataController extends Controller {
         }
 
         $this->validate($request, [
-            'coords' => 'required|array',
+            'coords' => 'required|json',
             'type' => 'required|geom_type'
         ]);
 
@@ -158,9 +158,6 @@ class GeodataController extends Controller {
             $context->save();
         }
         Geodata::find($id)->delete();
-        return response()->json([
-            'success' => ''
-        ]);
     }
 
     // OTHER FUNCTIONS

@@ -1,4 +1,4 @@
-spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'modalFactory', 'mainService', 'mapService', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, modalFactory, mainService, mapService, $translate) {
+spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', 'mainService', 'mapService', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPatchFactory, httpDeleteFactory, modalFactory, mainService, mapService, $translate) {
     var editor = {};
 
     editor.ct = {
@@ -139,7 +139,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
     }
 
     editor.deleteElementType = function(e) {
-        httpGetFactory('api/editor/occurence_count/' + e.context_type_id, function(response) {
+        httpGetFactory('api/editor/occurrence_count/' + e.context_type_id, function(response) {
             $translate('context-type.delete-warning', {
                 element: e.title,
                 cnt: response.count

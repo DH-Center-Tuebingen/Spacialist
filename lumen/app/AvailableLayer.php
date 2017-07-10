@@ -13,4 +13,22 @@ class AvailableLayer extends Model
      * @var array
      */
     protected $fillable = [];
+
+    const patchRules = [
+        'name' => 'string',
+        'url' => 'url',
+        'type' => 'string',
+        'subdomains' => 'string',
+        'attribution' => 'string',
+        'opacity' => 'alpha_num',
+        'layers' => 'string',
+        'styles' => 'string',
+        'format' => 'string',
+        'version' => 'alpha_num',
+        'visible' => 'boolean_string',
+        'is_overlay' => 'boolean_string',
+        'api_key' => 'string',
+        'layer_type' => 'string',
+        'color' => 'color',
+    ];
 }
