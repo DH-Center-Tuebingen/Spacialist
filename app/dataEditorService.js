@@ -174,7 +174,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         angular.forEach(editor.contexts.data, function(c, i) {
             if(c.typename == oldUrl) {
                 if(isDelete) {
-                    editor.contexts.data.splice(i, 1);
+                    delete editor.contexts.data[i];
                 } else {
                     c.typename = newType.concept_url;
                     c.typelabel = newType.label;
