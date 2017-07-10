@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - Drag & Drop Support for Element Tree
 - More Datatypes (Integer, Geography, Slider)
 - Dynamic UI (The three columns on the main view can be shrinked/extended, enable Edit Mode in the Settings Dropdown menu)
+- Basic Unit-Testing (Lumen API)
 ### Changed
 - Photo Viewer => File Viewer
   - PDFs (pdf.js)
@@ -25,6 +26,7 @@ All notable changes to this project will be documented in this file.
     - Enable/Disable layers (overlays, on startup)
     - Set opacity
     - Set default baselayer
+  - Real RESTful API
 ### Fixed
 - Display context-type in properties tab again
 - Store epochs (without exact date span)
