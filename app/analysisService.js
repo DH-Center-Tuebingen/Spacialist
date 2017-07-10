@@ -7,7 +7,7 @@ spacialistApp.service('analysisService', ['httpGetFactory', function(httpGetFact
     };
 
     analysis.getStoredQueries = function() {
-        httpGetFactory('api/analysis/queries/getAll', function(queries) {
+        httpGetFactory('api/analysis/', function(queries) {
             analysis.storedQueries = queries;
         });
     };

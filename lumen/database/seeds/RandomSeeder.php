@@ -24,7 +24,12 @@ class RandomSeeder extends Seeder
         });
 
         factory(App\ThBroader::class, $numberSeedEntries)->create();
-        factory(App\ContextType::class, $numberSeedEntries)->create();
+        factory(App\ContextType::class, $numberSeedEntries)->create()->each(function ($ctype) {
+            factory(App\AvailableLayer::class)->create([
+                'context_type_id' => $ctype->id,
+            ]);
+        });
+
         factory(App\Attribute::class, $numberSeedEntries)->create();
         factory(App\ContextAttribute::class, $numberSeedEntries)->create();
         factory(App\Literature::class, $numberSeedEntries)->create();

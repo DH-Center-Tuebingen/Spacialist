@@ -40,4 +40,10 @@ class User extends Model implements JWTSubject, AuthenticatableContract, Authori
     public function getJWTCustomClaims() {
 	return [];
     }
+
+    const patchRules = [
+        'name'  => 'string',
+        'email' => 'email|unique:users',
+        'password'=> 'string',
+    ];
 }

@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 use App\AvailableLayer;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use \Log;
 
 class OverlayController extends Controller {
-    public $availableGeometryTypes = [
-        'Point', 'Linestring', 'Polygon'
-    ];
+    public $availableGeometryTypes = \App\Geodata::availableGeometryTypes;
 
     /**
      * Create a new controller instance.
@@ -19,16 +18,47 @@ class OverlayController extends Controller {
         //
     }
 
+    // GET
+
+    public function getOverlays() {
+        $user = \Auth::user();
+        if(!$user->can('view_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $layers = \DB::table('available_layers as al')
+            ->select('al.*', 'ct.thesaurus_url')
+            ->orderBy('position', 'asc')
+            ->leftJoin('context_types as ct', 'context_type_id', '=', 'ct.id')
+            ->get();
+        foreach($layers as $l) {
+            $label = ContextController::getLabel($l->thesaurus_url);
+            $l->label = $label;
+            unset($l->thesaurus_url);
+        }
+        return response()->json([
+            'layers' => $layers
+        ]);
+    }
+
     public function getGeometryTypes() {
         return response()->json($this->availableGeometryTypes);
     }
 
-    public function deleteLayer($id) {
-        AvailableLayer::find($id)->delete();
-        return response()->json([]);
-    }
+    // POST
 
     public function addLayer(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('create_edit_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $this->validate($request, [
+            'name' => 'required|string',
+            'is_overlay' => 'nullable|boolean'
+        ]);
         $name = $request->get('name');
         $isOverlay = $request->has('is_overlay') && $request->get('is_overlay') == 'true';
         $layer = new AvailableLayer();
@@ -43,9 +73,58 @@ class OverlayController extends Controller {
         ]);
     }
 
-    public function updateLayer(Request $request) {
-        $id = $request->get('id');
+    // PATCH
+
+    public function moveUp($id) {
+        $user = \Auth::user();
+        if(!$user->can('create_edit_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
         $layer = AvailableLayer::find($id);
+        $layer2 = AvailableLayer::where('position', '=', $layer->position - 1)->first();
+        $layer->position--;
+        $layer2->position++;
+        $layer->save();
+        $layer2->save();
+        return response()->json([]);
+    }
+
+    public function moveDown($id) {
+        $user = \Auth::user();
+        if(!$user->can('create_edit_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $layer = AvailableLayer::find($id);
+        $layer2 = AvailableLayer::where('position', '=', $layer->position + 1)->first();
+        $layer->position++;
+        $layer2->position--;
+        $layer->save();
+        $layer2->save();
+        return response()->json([]);
+    }
+
+    public function patchLayer(Request $request, $id) {
+        $user = \Auth::user();
+        if(!$user->can('create_edit_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $this->validate($request, [
+            'visible' => 'nullable|boolean'
+        ]);
+        try {
+            $layer = AvailableLayer::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This layer does not exist'
+            ]);
+        }
+
         if($request->has('visible') && $request->get('visible') == 'true') {
             if(!$layer->visible) {
                 $layers = AvailableLayer::where('is_overlay', '=', false)
@@ -67,39 +146,18 @@ class OverlayController extends Controller {
         return response()->json([]);
     }
 
-    public function moveUp($id) {
-        $layer = AvailableLayer::find($id);
-        $layer2 = AvailableLayer::where('position', '=', $layer->position - 1)->first();
-        $layer->position--;
-        $layer2->position++;
-        $layer->save();
-        $layer2->save();
-        return response()->json([]);
-    }
+    // PUT
 
-    public function moveDown($id) {
-        $layer = AvailableLayer::find($id);
-        $layer2 = AvailableLayer::where('position', '=', $layer->position + 1)->first();
-        $layer->position++;
-        $layer2->position--;
-        $layer->save();
-        $layer2->save();
-        return response()->json([]);
-    }
+    // DELETE
 
-    public function getAll() {
-        $layers = \DB::table('available_layers as al')
-            ->select('al.*', 'ct.thesaurus_url')
-            ->orderBy('position', 'asc')
-            ->leftJoin('context_types as ct', 'context_type_id', '=', 'ct.id')
-            ->get();
-        foreach($layers as $l) {
-            $label = ContextController::getLabel($l->thesaurus_url);
-            $l->label = $label;
-            unset($l->thesaurus_url);
+    public function deleteLayer($id) {
+        $user = \Auth::user();
+        if(!$user->can('upload_remove_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
         }
-        return response()->json([
-            'layers' => $layers
-        ]);
+        AvailableLayer::find($id)->delete();
+        return response()->json([]);
     }
 }

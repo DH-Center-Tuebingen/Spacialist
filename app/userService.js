@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', function(httpPostFactory, httpGetFactory, modalFactory, snackbarService, $auth, $state, $http) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'httpPutFactory', 'httpPatchFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpGetFactory, httpPutFactory, httpPatchFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -38,7 +38,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
 
     user.getUserList = function() {
         user.users.length = 0;
-        httpPostFactory('api/user/get/all', new FormData(), function(response) {
+        httpGetFactory('api/user', function(response) {
             angular.forEach(response.users, function(u, key) {
                 user.users.push(u);
             });
@@ -47,7 +47,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
 
     user.deleteUser = function(u) {
         console.log(u);
-        httpGetFactory('api/user/delete/' + u.id, function(response) {
+        httpDeleteFactory('api/user/' + u.id, function(response) {
             var index = user.users.indexOf(u);
             if(index > -1) user.users.splice(index, 1);
         });
@@ -58,22 +58,21 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
         formData.append('name', name);
         formData.append('email', email);
         formData.append('password', password);
-        httpPostFactory('api/user/add', formData, function(response) {
+        httpPostFactory('api/user', formData, function(response) {
             user.users.push(response.user);
         });
     };
 
     user.editUser = function(changes, id, $index) {
         var formData = new FormData();
-        formData.append('user_id', id);
         for(var k in changes) {
             if(changes.hasOwnProperty(k)) {
                 formData.append(k, changes[k]);
             }
         }
-        httpPostFactory('api/user/edit', formData, function(response) {
+        httpPatchFactory('api/user/' + id, formData, function(response) {
             user.users[$index] = response.user;
-            var content = $translate.instant(snackbar.data-updated.success);
+            var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };
@@ -81,7 +80,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     user.getRoles = function() {
         user.roles.length = 0;
         user.permissions.length = 0;
-        httpGetFactory('api/user/get/roles/all', function(response) {
+        httpGetFactory('api/user/role', function(response) {
             angular.forEach(response.permissions, function(perm) {
                 user.permissions.push(perm);
             });
@@ -94,7 +93,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
 
     user.getRolePermissions = function(role) {
         if(role.permissions) role.permissions.length = 0;
-        httpGetFactory('api/user/get/role/permissions/' + role.id, function(response) {
+        httpGetFactory('api/user/role/' + role.id + '/permission', function(response) {
             angular.forEach(response.permissions, function(perm) {
                 role.permissions.push(perm);
             });
@@ -107,36 +106,43 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
 
     function editRole(role, changes) {
         var formData = new FormData();
-        if(role) formData.append('role_id', role.id);
         for(var k in changes) {
             if(changes.hasOwnProperty(k)) {
                 formData.append(k, changes[k]);
             }
         }
-        httpPostFactory('api/role/edit', formData, function(response) {
-            var isNew = false;
-            if(!role) {
-                role = {};
-                isNew = true;
-            }
-            for(var k in response.role) {
-                if(response.role.hasOwnProperty(k)) {
-                    role[k] = response.role[k];
+        if (role) {
+            httpPatchFactory('api/user/role/'+role.name, formData, function(response) {
+                for(var k in response.role) {
+                    if(response.role.hasOwnProperty(k)) {
+                        role[k] = response.role[k];
+                    }
                 }
+                var content = $translate.instant('snackbar.data-updated.success');
+                snackbarService.addAutocloseSnack(content, 'success');
+            });
+        } else {
+            if (!changes.name) {
+                snackbarService.addAutocloseSnack('Cannot create role without name', 'error')//TODO
+                return;
             }
-            if(isNew) {
+            httpPostFactory('api/user/role', formData, function(response)  {
+                var role = {};
+                for(var k in response.role) {
+                    if(response.role.hasOwnProperty(k)) {
+                        role[k] = response.role[k];
+                    }
+                }
                 user.roles.push(role);
-                var content = $translate.instant(snackbar.data-stored.success);
+                var content = $translate.instant('snackbar.data-stored.success');
                 snackbarService.addAutocloseSnack(content, 'success');
-            } else {
-                var content = $translate.instant(snackbar.data-updated.success);
-                snackbarService.addAutocloseSnack(content, 'success');
-            }
-        });
+            });
+
+        }
     }
 
     user.deleteRole = function(role) {
-        httpGetFactory('api/role/delete/' + role.id, function(response) {
+        httpDeleteFactory('api/user/role/' + role.id, function(response) {
             if(response.error) return;
             var index = user.roles.indexOf(role);
             if(index > -1) user.roles.splice(index, 1);
@@ -144,10 +150,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     };
 
     user.addRolePermission = function(item, role) {
-        var formData = new FormData();
-        formData.append('role_id', role.id);
-        formData.append('permission_id', item.id);
-        httpPostFactory('api/role/add/permission', formData, function(response) {
+        httpPutFactory('api/user/permission_role/' + role.id + '/' + item.id, new FormData(), function(response) {
             // if an error occurs, remove added permission
             if(response.error) {
                 var index = role.permissions.indexOf(item);
@@ -158,24 +161,21 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     };
 
     user.removeRolePermission = function(item, role) {
-        var formData = new FormData();
-        formData.append('role_id', role.id);
-        formData.append('permission_id', item.id);
-        httpPostFactory('api/role/remove/permission', formData, function(response) {
+        httpDeleteFactory('api/user/permission_role/'+role.id+'/'+item.id, function(response) {
             // if an error occurs, readd removed permission
             if(response.error) {
                 role.permissions.push(item);
-                var content = $translate.instant(snackbar.data-updated.error);
+                var content = $translate.instant('snackbar.data-updated.error');
                 snackbarService.addAutocloseSnack(content, 'error');
                 return;
             }
-            var content = $translate.instant(snackbar.data-updated.success);
+            var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 
     user.getUserRoles = function(id, $index) {
-        httpGetFactory('api/user/get/roles/' + id, function(response) {
+        httpGetFactory('api/user/role/by_user/' + id, function(response) {
             user.users[$index].roles = response.roles;
         });
     };
@@ -183,10 +183,9 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     user.addUserRole = function($item, user_id) {
         var formData = new FormData();
         formData.append('role_id', $item.id);
-        formData.append('user_id', user_id);
-        httpPostFactory('api/user/add/role', formData, function(response) {
+        httpPutFactory('api/user/' + user_id + '/attachRole', formData, function(response) {
             // TODO only remove/add role if function returns no error
-            var content = $translate.instant(snackbar.data-updated.success);
+            var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };
@@ -194,17 +193,16 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'moda
     user.removeUserRole = function($item, user_id) {
         var formData = new FormData();
         formData.append('role_id', $item.id);
-        formData.append('user_id', user_id);
-        httpPostFactory('api/user/remove/role', formData, function(response) {
+        httpPatchFactory('api/user/' + user_id + '/detachRole', formData, function(response) {
             // TODO only remove/add role if function returns no error
-            var content = $translate.instant(snackbar.data-updated.success);
+            var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 
     user.loginUser = function(credentials) {
         $auth.login(credentials).then(function() {
-            return $http.post('api/user/get');
+            return $http.get('api/user/active');
         }).then(function(response) {
             if(typeof response === 'undefined' || response.status !== 200) {
                 $state.go('auth', {});

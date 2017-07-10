@@ -16,10 +16,20 @@ class AnalysisController extends Controller {
         //
     }
 
-    public function getAll() {
+    // GET
+
+    public function getAnalyses() {
         return response()->json(
             DB::table('stored_queries')
                 ->get()
         );
     }
+
+    // POST
+
+    // PATCH
+
+    // PUT
+    
+    // DELETE
 }

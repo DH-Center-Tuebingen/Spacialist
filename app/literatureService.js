@@ -1,4 +1,4 @@
-spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'snackbarService', '$http', '$translate', 'Upload', function(modalFactory, httpGetFactory, httpGetPromise, httpPostFactory, snackbarService, $http, $translate, Upload) {
+spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPatchFactory', 'httpDeleteFactory', 'snackbarService', '$http', '$translate', 'Upload', function(modalFactory, httpGetFactory, httpGetPromise, httpPostFactory, httpPatchFactory, httpDeleteFactory, snackbarService, $http, $translate, Upload) {
     var literature = {};
     literature.literature = [];
     literature.literatureOptions = {};
@@ -145,7 +145,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
     ];
 
     literature.getLiterature = function() {
-        var promise = httpGetFactory('api/literature/getAll', function(response) {
+        var promise = httpGetFactory('api/literature', function(response) {
             literature.literature.length = 0;
             angular.forEach(response, function(entry, key) {
                 literature.literature.push(entry);
@@ -157,7 +157,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
 
     literature.deleteLiteratureEntry = function(entry) {
         var index = literature.literature.indexOf(entry);
-        httpGetFactory('api/literature/delete/' + entry.id, function(response) {
+        httpDeleteFactory('api/literature/' + entry.id, function(response) {
             literature.literature.splice(index, 1);
         });
     };
@@ -175,7 +175,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
                 break;
             }
         }
-        modalFactory.addLiteratureModal(literature.addLiterature, literature.literatureOptions.availableTypes, type, entryCopy, index);
+        modalFactory.addLiteratureModal(literature.editLiterature, literature.literatureOptions.availableTypes, type, entryCopy, index);
     };
 
     literature.openAddLiteratureDialog = function() {
@@ -185,7 +185,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
     literature.importBibTexFile = function(file, invalidFiles) {
         if(file) {
             file.upload = Upload.upload({
-                 url: 'api/literature/import/bib',
+                 url: 'api/literature/importBibtex',
                  data: { file: file }
             });
             file.upload.then(function(response) {
@@ -211,7 +211,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
         }
     };
 
-    literature.addLiterature = function(fields, type, index) {
+    literature.addLiterature = function(fields, type) {
         if(typeof type == 'undefined') return;
         if(typeof fields == 'undefined') return;
         var mandatorySet = true;
@@ -233,23 +233,61 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
         var formData = new FormData();
         for(var field in fields) {
             if(fields[field] !== null && fields[field] !== '') {
+                if (field == 'id') {
+                    continue;
+                }
                 formData.append(field, fields[field]);
             }
         }
         formData.append('type', type.name);
-        httpPostFactory('api/literature/add', formData, function(lit) {
-            if(lit.error) {
-                alert(lit.error);
-            } else {
-                if(fields.id) {
-                    literature.literature[index] = lit.literature[0];
-                } else {
-                    literature.literature.push(lit.literature[0]);
-                    /*var container = document.getElementById('literature-container');
-                    container.scrollTop = container.scrollTopMax;*/
-                }
+
+        httpPostFactory('api/literature', formData, function(response) {
+            if(response.error) {
+                alert(response.error);
+            }
+            else {
+                literature.literature.push(response.literature);
             }
         });
+    };
+
+    literature.editLiterature = function(fields, type, index) {
+        if(typeof type == 'undefined') return;
+        if(typeof fields == 'undefined') return;
+        var mandatorySet = true;
+        for(var i=0; i<type.mandatoryFields.length; i++) {
+            var m = type.mandatoryFields[i];
+            if(typeof fields[m] == 'undefined') {
+                mandatorySet = false;
+                break;
+            }
+            if(fields[m].length === 0) {
+                mandatorySet = false;
+                break;
+            }
+        }
+        if(!mandatorySet) {
+            alert('Not all mandatory fields are set!');
+            return;
+        }
+        var formData = new FormData();
+        for(var field in fields) {
+            if(fields[field] !== null && fields[field] !== '') {
+                if (field == 'id') {
+                    continue;
+                }
+                formData.append(field, fields[field]);
+            }
+        }
+        formData.append('type', type.name);
+        httpPatchFactory('api/literature/' + fields.id, formData, function(response) {
+            if(response.error) {
+                alert(response.error);
+                return;
+            }
+            literature.literature[index] = response.literature;
+        });
+
     };
     return literature;
 }]);

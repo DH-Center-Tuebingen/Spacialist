@@ -1,4 +1,4 @@
-spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory', 'mapService', 'snackbarService', '$translate', function(httpGetFactory, httpPostFactory, mapService, snackbarService, $translate) {
+spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory', 'httpPatchFactory', 'mapService', 'snackbarService', '$translate', function(httpGetFactory, httpPostFactory, httpPatchFactory, mapService, snackbarService, $translate) {
     var editor = {};
     editor.selectedLayer = {
         layer: {},
@@ -26,8 +26,8 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
         } else {
             tgt = editor.contextLayers.baselayers[key];
         }
+        var layerId = tmpLayer.layerOptions.layer_id;
         var formData = new FormData();
-        formData.append('id', tmpLayer.layerOptions.layer_id);
         delete tmpLayer.layerOptions.layer_id;
         var updated = false;
         var colorUpdated = tgt.layerOptions.color != layer.layerOptions.color;
@@ -54,7 +54,7 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
             var content = $translate.instant('snackbar.layer-update.success');
             snackbarService.addAutocloseSnack(content, 'success');
         }
-        httpPostFactory('api/overlay/update', formData, function(response) {
+        httpPatchFactory('api/overlay/' + layerId, formData, function(response) {
             if(response.error) {
                 // TODO errorModal
                 return;

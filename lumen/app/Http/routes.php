@@ -20,87 +20,163 @@ $app->get('/', function () use ($app) {
 
 $app->post('user/login', 'UserController@login');
 
-$app->group(['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']], function($app) {
-    $app->get('context/artifacts/get', 'ContextController@getArtifacts');
-    $app->get('context/get/children/{id}', 'ContextController@getChildren');
-    $app->get('context/get', 'ContextController@get');
-    $app->get('context/get/attributes', 'ContextController@getAttributes');
-    $app->get('context/get/attributes/types', 'ContextController@getAvailableAttributeTypes');
-    $app->get('context/get/data/{id}', 'ContextController@getContextData');
-    $app->get('context/get/geodata', 'ContextController@getGeodata');
-    $app->get('context/get/byGeodata/{id}', 'ContextController@getContextByGeodata');
-    $app->get('context/link/geodata/{cid}/{gid}', 'ContextController@linkGeodata');
-    $app->get('context/unlink/geodata/{cid}', 'ContextController@unlinkGeodata');
-    $app->get('context/get/parents/{id}', 'ContextController@getContextParents');
-    $app->get('context/getRecursive', 'ContextController@getRecursive');
-    $app->get('context/getChoices', 'ContextController@getChoices');
-    $app->get('context/duplicate/{id}', 'ContextController@duplicate');
-    $app->get('literature/getAll', 'LiteratureController@getAll');
-    $app->get('literature/get/{id}', 'LiteratureController@getById');
-    $app->get('literature/delete/{id}', 'LiteratureController@delete');
-    $app->get('image/tags/get', 'ImageController@getAvailableTags');
-    $app->get('image/getAll', 'ImageController@getAll');
-    $app->get('image/get/info/{id}', 'ImageController@getImage');
-    $app->get('image/get/{id}', 'ImageController@getImageObject');
-    $app->get('image/get/{id}/decoded', 'ImageController@getDecodedImageObject');
-    $app->get('image/get/preview/{id}', 'ImageController@getImagePreviewObject');
-    $app->get('image/getByContext/{id}', 'ImageController@getByContext');
-    $app->get('image/delete/{id}', 'ImageController@delete');
-    $app->get('context/delete/{id}', 'ContextController@delete');
-    $app->get('context/delete/geodata/{id}', 'ContextController@deleteGeodata');
-    $app->get('sources/get/{aid}/{fid}', 'SourceController@getByAttribute');
-    $app->get('sources/get/{id}', 'SourceController@getByContext');
-    $app->get('sources/delete/{id}', 'SourceController@delete');
-    $app->get('analysis/queries/getAll', 'AnalysisController@getAll');
-    $app->get('user/delete/{id}', 'UserController@delete');
-    $app->get('user/get/roles/all', 'UserController@getRoles');
-    $app->get('user/get/roles/{id}', 'UserController@getRolesByUser');
-    $app->get('user/get/role/permissions/{id}', 'UserController@getPermissionsByRole');
-    $app->get('role/delete/{id}', 'UserController@deleteRole');
-    $app->get('overlay/get/all', 'OverlayController@getAll');
-    $app->get('overlay/delete/{id}', 'OverlayController@deleteLayer');
-    $app->get('overlay/move/{id}/up', 'OverlayController@moveUp');
-    $app->get('overlay/move/{id}/down', 'OverlayController@moveDown');
-    $app->get('overlay/geometrytypes/get', 'OverlayController@getGeometryTypes');
-    $app->get('editor/attribute/delete/{id}', 'ContextController@deleteAttribute');
-    $app->get('editor/occurrences/{id}', 'ContextController@getOccurrenceCount');
-    $app->get('editor/contexttype/delete/{id}', 'ContextController@deleteContextType');
-    $app->post('image/upload', 'ImageController@uploadImage');
-    $app->post('image/link', 'ImageController@link');
-    $app->post('image/unlink', 'ImageController@unlink');
-    $app->post('image/property/set', 'ImageController@setProperty');
-    $app->post('image/tags/add', 'ImageController@addTag');
-    $app->post('image/tags/remove', 'ImageController@removeTag');
-    $app->post('context/add/geodata', 'ContextController@addGeodata');
-    $app->post('context/set', 'ContextController@set');
-    $app->post('context/set/props', 'ContextController@setProperties');
-    $app->post('context/move', 'ContextController@move');
-    $app->post('context/set/possibility', 'ContextController@setPossibility');
-    $app->post('context/wktToGeojson', 'ContextController@wktToGeojson');
-    $app->post('sources/add', 'SourceController@add');
-    $app->post('user/logout', 'UserController@logout');
-    $app->post('user/switch', 'UserController@switchRole');
-    $app->post('user/get', 'UserController@get');
-    $app->post('user/get/all', 'UserController@getAll');
-    $app->post('user/add', 'UserController@add');
-    $app->post('user/edit', 'UserController@edit');
-    $app->post('user/add/role', 'UserController@addRoleToUser');
-    $app->post('user/remove/role', 'UserController@removeRoleFromUser');
-    $app->post('role/edit', 'UserController@editRole');
-    $app->post('role/add/permission', 'UserController@addRolePermission');
-    $app->post('role/remove/permission', 'UserController@removeRolePermission');
-    $app->post('literature/add', 'LiteratureController@add');
-    $app->post('literature/edit', 'LiteratureController@edit');
-    $app->post('literature/import/bib', 'LiteratureController@importBibtex');
-    $app->post('overlay/update', 'OverlayController@updateLayer');
-    $app->post('overlay/add', 'OverlayController@addLayer');
-    $app->post('editor/search', 'ContextController@search');
-    $app->post('context/search', 'ContextController@searchContext');
-    $app->post('editor/contexttype/add', 'ContextController@addContextType');
-    $app->post('editor/contexttype/edit', 'ContextController@editContextType');
-    $app->post('editor/contexttype/attribute/add', 'ContextController@addAttributeToContextType');
-    $app->post('editor/contexttype/attribute/remove', 'ContextController@removeAttributeFromContextType');
-    $app->post('editor/contexttype/attribute/move/up', 'ContextController@moveAttributeUp');
-    $app->post('editor/contexttype/attribute/move/down', 'ContextController@moveAttributeDown');
-    $app->post('editor/attribute/add', 'ContextController@addAttribute');
+$app->group([
+        'prefix' => 'context',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+    $app->get('', 'ContextController@getContexts');
+    $app->get('artifact', 'ContextController@getArtifacts');
+    $app->get('context_type', 'ContextController@getContextTypes');
+    $app->get('attribute', 'ContextController@getAttributes');
+    $app->get('{id:[0-9]+}/data', 'ContextController@getContextData');
+    $app->get('dropdown_options', 'ContextController@getDropdownOptions');
+    $app->get('byGeodata/{id:[0-9]+}', 'ContextController@getContextByGeodata');
+    $app->get('attributetypes', 'ContextController@getAvailableAttributeTypes');
+    $app->get('search/term={term}', 'ContextController@searchContextName');
+
+    $app->post('', 'ContextController@add');
+    $app->post('{id:[0-9]+}/duplicate', 'ContextController@duplicate');
+
+    $app->patch('{id:[0-9]+}/rank', 'ContextController@patchRank');
+    $app->patch('geodata/{cid:[0-9]+}', 'ContextController@linkGeodata');
+    $app->patch('geodata/{cid:[0-9]+}/{gid:[0-9]+}', 'ContextController@linkGeodata');
+    //TODO so far "gui-tested"
+
+    $app->put('{id:[0-9]+}', 'ContextController@put');
+    $app->put('attribute_value/{cid:[0-9]+}/{aid:[0-9]+}', 'ContextController@putPossibility');
+
+    $app->delete('{id:[0-9]+}', 'ContextController@delete');
+});
+
+$app->group([
+        'prefix' => 'literature',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'LiteratureController@getLiteratures');
+        $app->get('{id:[0-9]+}', 'LiteratureController@getLiterature');
+
+        $app->post('', 'LiteratureController@add');
+
+        $app->patch('{id:[0-9]+}', 'LiteratureController@edit');
+
+        $app->put('importBibtex', 'LiteratureController@importBibtex');
+
+        $app->delete('{id:[0-9]+}', 'LiteratureController@delete');
+});
+
+$app->group([
+        'prefix' => 'image',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'ImageController@getImages');
+        $app->get('{id:[0-9]+}', 'ImageController@getImage');
+        $app->get('{id:[0-9]+}/object', 'ImageController@getImageObject');
+        $app->get('tag', 'ImageController@getAvailableTags');
+        $app->get('by_context/{id:[0-9]+}', 'ImageController@getByContext');
+
+        $app->post('upload', 'ImageController@uploadImage');
+
+        $app->patch('{id:[0-9]+}/property', 'ImageController@patchPhotoProperty');
+
+        $app->put('link', 'ImageController@link');
+        $app->put('tag', 'ImageController@addTag');
+
+        $app->delete('{id:[0-9]+}', 'ImageController@delete');
+        $app->delete('link/{pid:[0-9]+}/{cid:[0-9]+}', 'ImageController@unlink');
+        $app->delete('{pid:[0-9]+}/tag/{tid:[0-9]+}', 'ImageController@removeTag');
+});
+
+$app->group([
+        'prefix' => 'source',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('by_context/{cid:[0-9]+}', 'SourceController@getByContext');
+
+        $app->post('', 'SourceController@add');
+
+        $app->delete('{id:[0-9]+}', 'SourceController@delete');
+
+});
+
+$app->group([
+        'prefix' => 'analysis',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'AnalysisController@getAnalyses');
+});
+
+$app->group([
+        'prefix' => 'user',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'UserController@getUsers');
+        $app->get('active', 'UserController@getActiveUser');
+        $app->get('role', 'UserController@getRoles');
+        $app->get('role/by_user/{id:[0-9]+}', 'UserController@getRolesByUser');
+        $app->get('role/{id:[0-9]+}/permission', 'UserController@getPermissionsByRole');
+
+        $app->post('', 'UserController@add');
+        $app->post('role', 'UserController@addRole');
+
+        $app->patch('{id:[0-9]+}', 'UserController@patch');
+        $app->patch('role/{name}', 'UserController@patchRole');
+        $app->patch('{id:[0-9]+}/attachRole', 'UserController@addRoleToUser');
+        $app->patch('{id:[0-9]+}/detachRole', 'UserController@removeRoleFromUser');
+
+        $app->put('permission_role/{rid:[0-9]+}/{pid:[0-9]+}', 'UserController@putRolePermission');
+
+        $app->delete('{id:[0-9]+}', 'UserController@delete');
+        $app->delete('role/{id:[0-9]+}', 'UserController@deleteRole');
+        $app->delete('permission_role/{rid:[0-9]+}/{pid:[0-9]+}', 'UserController@removeRolePermission');
+});
+
+$app->group([
+        'prefix' => 'overlay',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'OverlayController@getOverlays');
+        $app->get('geometry_types', 'OverlayController@getGeometryTypes');
+
+        $app->post('add', 'OverlayController@addLayer');
+
+        $app->patch('{id:[0-9]+}/move/up', 'OverlayController@moveUp');
+        $app->patch('{id:[0-9]+}/move/down', 'OverlayController@moveDown');
+        $app->patch('{id:[0-9]+}', 'OverlayController@patchLayer');
+
+        $app->delete('{id:[0-9]+}', 'OverlayController@deleteLayer');
+});
+
+$app->group([
+        'prefix' => 'editor',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('occurrence_count/{id:[0-9]+}', 'ContextController@getOccurrenceCount');
+        $app->get('search/label={label}', 'ContextController@searchForLabel');
+        $app->get('search/label={label}/{lang}', 'ContextController@searchForLabel');
+
+        $app->post('context_type', 'ContextController@addContextType');
+        $app->post('context_type/{ctid:[0-9]+}/attribute', 'ContextController@addAttributeToContextType');
+        $app->post('attribute', 'ContextController@addAttribute');
+
+        $app->patch('context_type/{ctid:[0-9]+}', 'ContextController@editContextType');
+        $app->patch('context_type/{ctid:[0-9]+}/attribute/{aid:[0-9]+}/move/up', 'ContextController@moveAttributeUp');
+        $app->patch('context_type/{ctid:[0-9]+}/attribute/{aid:[0-9]+}/move/down', 'ContextController@moveAttributeDown');
+
+        $app->delete('attribute/{id:[0-9]+}', 'ContextController@deleteAttribute');
+        $app->delete('contexttype/{id:[0-9]+}', 'ContextController@deleteContextType');
+        $app->delete('editor/context_type/{ctid:[0-9]+}/attribute/{aid:[0-9]+}', 'ContextController@removeAttributeFromContextType');
+});
+
+$app->group([
+        'prefix' => 'geodata',//TODO api v1
+        'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+    ], function($app) {
+        $app->get('', 'GeodataController@get');
+        $app->get('wktToGeojson/{wkt}', 'GeodataController@wktToGeojson');
+
+        $app->post('', 'GeodataController@add');
+
+        $app->put('{id:[0-9]+}', 'GeodataController@put');
+
+        $app->delete('{id:[0-9]+}', 'GeodataController@delete');
 });

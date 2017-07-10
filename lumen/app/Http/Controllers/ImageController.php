@@ -23,18 +23,152 @@ class ImageController extends Controller
         //
     }
 
+    // OTHER FUNCTIONS
+
     private function exifDataExists($exif, $rootKey, $dataKey) {
         return array_key_exists($rootKey, $exif) && array_key_exists($dataKey, $exif[$rootKey]);
     }
 
+    private function getImageById($id) {
+        $user = \Auth::user();
+        $img = \DB::table('photos as ph')
+                ->select('id', 'modified', 'created', 'name as filename', 'thumb as thumbname', 'cameraname', 'orientation', 'description', 'copyright', 'photographer_id', 'mime_type')
+                ->where('id', $id)
+                ->first();
+        if($img == null) return null;
+        $img->url = 'images/' . $img->filename;
+        $img->thumb_url = 'images/' . $img->thumbname;
+        $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
+
+        if($user->can('edit_photo_props')) {
+            $img->tags = DB::table('photo_tags as p')
+            ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
+            ->select('c.id')
+            ->where('p.photo_id', '=', $img->id)
+            ->get();
+        }
+
+        // try to get file to check if it exists
+        try {
+            Storage::get($img->url);
+            $img->filesize = Storage::size($img->url);
+            $img->modified = Storage::lastModified($img->url);
+        } catch(FileNotFoundException $e) {
+        }
+        $img->created = strtotime($img->created);
+        return $img;
+    }
+
+    // GET
+
+    public function getImages() {
+        $user = \Auth::user();
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $images = DB::table('photos as ph')
+                    ->select("ph.id as id", "ph.modified", "ph.created", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id", "ph.mime_type")
+                    ->orderBy('id', 'asc')
+                    ->get();
+        foreach($images as &$img) {
+            $img->url = Storage::disk('public')->url(env('SP_IMAGE_PATH') .'/'. $img->filename);
+            if(substr($img->mime_type, 0, 6) === 'image/');
+            $img->thumb_url = Storage::disk('public')->url(env('SP_IMAGE_PATH') .'/'. $img->thumbname);
+            $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
+
+            if($user->can('edit_photo_props')) {
+                $img->tags = DB::table('photo_tags as p')
+                ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
+                ->select('c.id')
+                ->where('p.photo_id', '=', $img->id)
+                ->get();
+            }
+
+            // try to get file to check if it exists
+            try {
+                Storage::get($img->url);
+                $img->filesize = Storage::size($img->url);
+                $img->modified = Storage::lastModified($img->url);
+            } catch(FileNotFoundException $e) {
+            }
+            $img->created = strtotime($img->created);
+        }
+        return response()->json($images);
+    }
+
+    public function getImage($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        return response()->json($this->getImageById($id));
+    }
+
+    public function getImageObject($id) {
+        $img = $this->getImageById($id);
+        $content = Storage::get($img->url);
+        return 'data:' . $img->mime_type . ';base64,' . base64_encode($content);
+    }
+
+    public function getAvailableTags() {
+        $tags = DB::select("
+            WITH RECURSIVE
+            top AS (
+                SELECT br.narrower_id as id,
+                    (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as label
+                FROM th_broaders br
+                JOIN th_concept c ON c.id = br.broader_id
+                WHERE c.concept_url = 'http://thesaurus.archeoinf.de/SpTestthesaurus/false_126'
+                UNION
+                SELECT br.narrower_id as id,
+                    (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as label
+                FROM top t, th_broaders br
+                WHERE t.id = br.broader_id
+            )
+            SELECT *
+            FROM top
+            ORDER BY label
+        ");
+
+        return response()->json([
+            'tags' => $tags
+        ]);
+    }
+
+    public function getByContext($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $images = DB::table('context_photos as cp')
+            ->join('photos as p', 'p.id', '=', 'cp.photo_id')
+            ->where('cp.context_id', '=', $id)
+            ->get();
+        return response()->json([
+            'images' => $images
+        ]);
+    }
+
+    // POST
+
     public function uploadImage(Request $request) {
+        $this->validate($request, [
+            'file' => 'required|file'
+        ]);
+
         $user = \Auth::user();
         if(!$user->can('manage_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        if(!$request->hasFile('file') || !$request->file('file')->isValid()) return response()->json('null');
+
         $file = $request->file('file');
         $filename = $file->getClientOriginalName();
         Storage::put(
@@ -167,171 +301,72 @@ class ImageController extends Controller
         return response()->json($this->getImageById($photo->id));
     }
 
+    // PATCH
+
+    public function patchPhotoProperty(Request $request, $id) {
+        $this->validate($request, [
+            'property' => 'required',
+            'value' => 'required'
+        ]);
+
+        $prop = $request->get('property');
+        $val = $request->get('value');
+        $photo = Photo::find($id);
+        $photo->{$prop} = $val;
+        $photo->save();
+    }
+
+    // PUT
+
     public function link(Request $request) {
+        $this->validate($request, [
+            'imgId' => 'required|integer',
+            'ctxId' => 'required|integer'
+        ]);
+
         $user = \Auth::user();
         if(!$user->can('link_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        if(!$request->has('imgId') || !$request->has('ctxId')) {
-            return response()->json([
-                'error' => 'Either the ID for the image or the context is missing.'
-            ]);
-        }
+
         $imgId = $request->get('imgId');
         $ctxId = $request->get('ctxId');
 
-        DB::table('context_photos')
-            ->insert([
+        $link = ContextPhoto::firstOrNew([
                 'photo_id' => $imgId,
                 'context_id' => $ctxId,
-                'lasteditor' => $user['name']
-            ]);
+        ]);
+        $link->lasteditor = $user['name'];
+        $link->save();
         return response()->json();
     }
 
-    public function unlink(Request $request) {
+    public function addTag(Request $request) {
+        $this->validate($request, [
+            'photo_id' => 'required|integer',
+            'tag_id' => 'required|integer'
+        ]);
+
         $user = \Auth::user();
-        if(!$user->can('link_photos')) {
+        if(!$user->can('edit_photo_props')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        if(!$request->has('imgId') || !$request->has('ctxId')) {
-            return response()->json([
-                'error' => 'Either the ID for the image or the context is missing.'
-            ]);
-        }
-        $imgId = $request->get('imgId');
-        $ctxId = $request->get('ctxId');
+        $photoId = $request->get('photo_id');
+        $tagId = $request->get('tag_id');
 
-        DB::table('context_photos')
-            ->where([
-                ['photo_id', '=', $imgId],
-                ['context_id', '=', $ctxId]
-            ])
-            ->delete();
-        return response()->json();
-    }
+        $url = ThConcept::find($tagId)->concept_url;
 
-    public function getImage($id) {
-        $user = \Auth::user();
-        if(!$user->can('view_photos')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        return response()->json($this->getImageById($id));
-    }
-
-    private function getImageById($id) {
-        $user = \Auth::user();
-        $img = \DB::table('photos as ph')
-                ->select('id', 'modified', 'created', 'name as filename', 'thumb as thumbname', 'cameraname', 'orientation', 'description', 'copyright', 'photographer_id', 'mime_type')
-                ->where('id', $id)
-                ->first();
-        if($img == null) return null;
-        $img->url = 'images/' . $img->filename;
-        $img->thumb_url = 'images/' . $img->thumbname;
-        $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
-
-        if($user->can('edit_photo_props')) {
-            $img->tags = DB::table('photo_tags as p')
-            ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
-            ->select('c.id')
-            ->where('p.photo_id', '=', $img->id)
-            ->get();
-        }
-
-        // try to get file to check if it exists
-        try {
-            Storage::get($img->url);
-            $img->filesize = Storage::size($img->url);
-            $img->modified = Storage::lastModified($img->url);
-        } catch(FileNotFoundException $e) {
-        }
-        $img->created = strtotime($img->created);
-        return $img;
-    }
-
-    public function getByContext($id) {
-        $user = \Auth::user();
-        if(!$user->can('view_photos')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $images = DB::table('context_photos as cp')
-            ->join('photos as p', 'p.id', '=', 'cp.photo_id')
-            ->where('cp.context_id', '=', $id)
-            ->get();
-        return response()->json([
-            'images' => $images
+        PhotoTag::firstOrCreate([
+            'photo_id' => $photoId,
+            'concept_url' => $url
         ]);
     }
 
-    public function getImagePreviewObject($id) {
-        $img = $this->getImageById($id);
-        // try to get file to check if it exists
-        try {
-            $content = Storage::get($img->thumb_url);
-            return 'data:image/jpeg;base64,' . base64_encode($content);
-        } catch(FileNotFoundException $e) {
-            return response()->json([
-                'error' => 'image not found'
-            ]);
-        }
-    }
-
-    public function getImageObject($id) {
-        $img = $this->getImageById($id);
-        $content = Storage::get($img->url);
-        return 'data:' . $img->mime_type . ';base64,' . base64_encode($content);
-    }
-
-    public function getDecodedImageObject($id) {
-        $img = $this->getImageById($id);
-        $content = Storage::get($img->url);
-        return $content;
-    }
-
-    public function getAll() {
-        $user = \Auth::user();
-        if(!$user->can('view_photos')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-        $images = DB::table('photos as ph')
-                    ->select("ph.id as id", "ph.modified", "ph.created", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id", "ph.mime_type")
-                    ->orderBy('id', 'asc')
-                    ->get();
-        foreach($images as &$img) {
-            $img->url = Storage::disk('public')->url(env('SP_IMAGE_PATH') .'/'. $img->filename);
-            if(substr($img->mime_type, 0, 6) === 'image/');
-            $img->thumb_url = Storage::disk('public')->url(env('SP_IMAGE_PATH') .'/'. $img->thumbname);
-            $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
-
-            if($user->can('edit_photo_props')) {
-                $img->tags = DB::table('photo_tags as p')
-                ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
-                ->select('c.id')
-                ->where('p.photo_id', '=', $img->id)
-                ->get();
-            }
-
-            // try to get file to check if it exists
-            try {
-                Storage::get($img->url);
-                $img->filesize = Storage::size($img->url);
-                $img->modified = Storage::lastModified($img->url);
-            } catch(FileNotFoundException $e) {
-            }
-            $img->created = strtotime($img->created);
-        }
-        return response()->json($images);
-    }
+    // DELETE
 
     public function delete($id) {
         $user = \Auth::user();
@@ -347,59 +382,28 @@ class ImageController extends Controller
         $photo->delete();
     }
 
-    public function setProperty(Request $request) {
-        $id = $request->get('photo_id');
-        $prop = $request->get('property');
-        $val = $request->get('value');
-        $photo = Photo::find($id);
-        $photo->{$prop} = $val;
-        $photo->save();
-    }
-
-    public function getAvailableTags() {
-        $tags = DB::select("
-            WITH RECURSIVE
-            top AS (
-                SELECT br.narrower_id as id,
-                    (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as label
-                FROM th_broaders br
-                JOIN th_concept c ON c.id = br.broader_id
-                WHERE c.concept_url = 'http://thesaurus.archeoinf.de/SpTestthesaurus/false_126'
-                UNION
-                SELECT br.narrower_id as id,
-                    (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as label
-                FROM top t, th_broaders br
-                WHERE t.id = br.broader_id
-            )
-            SELECT *
-            FROM top
-            ORDER BY label
-        ");
-
-        return response()->json([
-            'tags' => $tags
-        ]);
-    }
-
-    public function addTag(Request $request) {
+    public function unlink($pid, $cid) {
         $user = \Auth::user();
-        if(!$user->can('edit_photo_props')) {
+        if(!$user->can('link_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $photoId = $request->get('photo_id');
-        $tagId = $request->get('tag_id');
-
-        $url = ThConcept::find($tagId)->concept_url;
-
-        $tag = new PhotoTag();
-        $tag->photo_id = $photoId;
-        $tag->concept_url = $url;
-        $tag->save();
+        DB::table('context_photos')
+            ->where([
+                ['photo_id', '=', $pid],
+                ['context_id', '=', $cid]
+            ])
+            ->delete();
+        return response()->json();
     }
 
     public function removeTag(Request $request) {
+        $this->validate($request, [
+            'photo_id' => 'required|integer',
+            'tag_id' => 'required|integer'
+        ]);
+
         $user = \Auth::user();
         if(!$user->can('edit_photo_props')) {
             return response([

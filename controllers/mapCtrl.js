@@ -79,7 +79,7 @@ spacialistApp.controller('mapCtrl', ['$scope', 'mapService', 'mainService', 'mod
         var layers = args.leafletEvent.layers.getLayers();
         angular.forEach(layers, function(layer, key) {
             var id = layer.feature.id;
-            httpGetFactory('api/context/delete/geodata/' + id, function(response) {
+            httpDeleteFactory('api/geodata/' + id, function(response) {
                 if(response.error) {
                     modalFactory.errorModal(response.error);
                     return;

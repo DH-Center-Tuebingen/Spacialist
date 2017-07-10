@@ -121,7 +121,7 @@ spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($
                     $uibModalInstance.dismiss('cancel');
                 };
                 $scope.modalOptions.openImageInTab = function(id) {
-                    httpGetFactory('api/image/get/' + id, function(data) {
+                    httpGetFactory('api/image/' + id + '/object', function(data) {
                         window.open(data);
                     });
                 };
@@ -772,11 +772,8 @@ spacialistApp.filter('truncate', function () {
 });
 
 spacialistApp.factory('httpPostPromise', function($http) {
-    var getData = function(file, data) {
-        return $http({
-            url: file,
-            method: "POST",
-            data: data,
+    var getData = function(url, data) {
+        return $http.post(url, data, {
             headers: {
                 'Content-Type': undefined
             }
@@ -788,11 +785,8 @@ spacialistApp.factory('httpPostPromise', function($http) {
 });
 
 spacialistApp.factory('httpPostFactory', function($http) {
-    return function(file, data, callback) {
-        $http({
-            url: file,
-            method: "POST",
-            data: data,
+    return function(url, data, callback) {
+        $http.post(url, data, {
             headers: {
                 'Content-Type': undefined
             }
@@ -803,10 +797,8 @@ spacialistApp.factory('httpPostFactory', function($http) {
 });
 
 spacialistApp.factory('httpGetPromise', function($http) {
-    var getData = function(file) {
-        return $http({
-            url: file,
-            method: "GET",
+    var getData = function(url) {
+        return $http.get(url, {
             headers: {
                 'Content-Type': undefined
             }
@@ -818,10 +810,8 @@ spacialistApp.factory('httpGetPromise', function($http) {
 });
 
 spacialistApp.factory('httpGetFactory', function($http) {
-    return function(file, callback) {
-        $http({
-            url: file,
-            method: "GET",
+    return function(url, callback) {
+        $http.get(url, {
             headers: {
                 'Content-Type': undefined
             }
@@ -829,6 +819,72 @@ spacialistApp.factory('httpGetFactory', function($http) {
             callback(response);
         });
     };
+});
+
+spacialistApp.factory('httpDeleteFactory', function($http) {
+    return function(url, callback) {
+        $http.delete(url, {
+            headers: {
+                'Content-Type': undefined
+            }
+        }).success(function(response) {
+            callback(response);
+        });
+    };
+});
+
+spacialistApp.factory('httpPatchFactory', function($http) {
+    return function(url, data, callback) {
+        data.append('_method', 'PATCH');
+        $http.post(url, data, {
+            headers: {
+                'Content-Type': undefined
+            }
+        }).success(function(response) {
+            callback(response);
+        });
+    };
+});
+
+spacialistApp.factory('httpPatchPromise', function($http) {
+    var getData = function(url, data) {
+        data.append('_method', 'PATCH');
+        return $http.post(url, data, {
+            headers: {
+                'Content-Type': undefined
+            }
+        }).then(function(result) {
+            return result.data;
+        });
+    };
+    return { getData: getData };
+});
+
+spacialistApp.factory('httpPutFactory', function($http) {
+    return function(url, data, callback) {
+        data.append('_method', 'PUT');
+        $http.post(url, data, {
+            headers: {
+                'Content-Type': undefined
+            }
+        }).success(function(response) {
+            callback(response);
+        });
+    };
+});
+
+spacialistApp.factory('httpPutPromise', function($http) {
+    var getData = function(url, data) {
+        data.append('_method', 'PUT');
+        return $http.post(url, data, {
+            headers: {
+                'Content-Type': undefined
+            }
+        }).then(function(result) {
+            return result.data;
+        });
+    };
+    return { getData: getData };
 });
 
 spacialistApp.config(['markedProvider', function (markedProvider) {
@@ -916,6 +972,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             },
             responseError: function(rejection) {
                 console.log("Something went wrong...");
+                var userService = $injector.get('userService');
                 var reasonIndex = rejectReasons.indexOf(rejection.data.error);
                 if(rejection.data && reasonIndex > -1) {
                     localStorage.removeItem('user');
@@ -923,10 +980,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     userService.loginError.message = rejectTranslationKeys[reasonIndex];
                 } else if(rejection.status == 400 || rejection.status == 401) {
                     var $state = $injector.get('$state');
-                    var userService = $injector.get('userService');
                     userService.loginError.message = 'login.error.400-or-401';
                     localStorage.removeItem('user');
                     $state.go('auth');
+                } else if(rejection.data.error) {
+                    updateToken(rejection, $injector);
+                    userService.loginError.errors = rejection.data.error;
                 } else {
                     updateToken(rejection, $injector);
                     var parser = new DOMParser();
