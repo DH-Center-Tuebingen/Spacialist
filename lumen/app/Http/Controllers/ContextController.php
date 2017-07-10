@@ -473,6 +473,8 @@ class ContextController extends Controller {
             ], 403);
         }
 
+        $this->validate($request, Context::patchRules);
+
         try {
             $context = Context::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -960,7 +962,13 @@ class ContextController extends Controller {
             $ids = explode("_", $key);
             $aid = $ids[0];
             if(isset($ids[1]) && $ids[1] == 'desc') continue;
-            $datatype = Attribute::find($aid)->datatype;
+
+            try {
+                $datatype = Attribute::findOrFail($aid)->datatype;
+            } catch(ModelNotFoundException $e) {
+                continue;
+            }
+
             $jsonArr = json_decode($value);
             if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
 
