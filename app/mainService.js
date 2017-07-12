@@ -525,11 +525,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     /**
     *   This function expands the tree up the selected element
     */
-    main.expandTree = function(id) {
-        main.contexts.data[id].collapsed = false;
+    main.expandTree = function(id, firstRun) {
+        // check for undefined, not false => firstRun = firstRun || true; would always be true
+        if(typeof firstRun == 'undefined') firstRun = true;
+        // only expand if element is not the first aka selected one
+        if(!firstRun) {
+            main.contexts.data[id].collapsed = false;
+        }
         rootId = main.contexts.data[id].root_context_id;
         if(rootId && rootId > 0) {
-            main.expandTree(rootId);
+            main.expandTree(rootId, false);
         }
     };
 
