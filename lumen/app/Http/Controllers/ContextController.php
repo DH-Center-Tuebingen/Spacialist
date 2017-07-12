@@ -359,7 +359,7 @@ class ContextController extends Controller {
 
         $this->validate($request, [
             'rank' => 'required|integer',
-            'parent_id' => 'nullable|integer',
+            'parent_id' => 'nullable|integer|exists:contexts,id',
         ]);
 
         try {
@@ -488,6 +488,8 @@ class ContextController extends Controller {
         }
         $context->lasteditor = $user['name'];
         $context->save();
+
+        $this->updateOrInsert($request->except(array_keys(Context::patchRules)), $id, $user);
 
         return response()->json(['context' => $context]);
     }
@@ -956,23 +958,33 @@ class ContextController extends Controller {
         return $label;
     }
 
-    public function updateOrInsert($request, $cid, $isUpdate, $user) {
-        foreach($request as $key => $value) {
-            if($value == 'null' || $value === null) continue;
+    private function updateOrInsert($values, $cid, $user) {
+        foreach($values as $key => $value) {
             $ids = explode("_", $key);
             $aid = $ids[0];
-            if(isset($ids[1]) && $ids[1] == 'desc') continue;
+            if(isset($ids[1]) && $ids[1] != "") continue;
 
             try {
                 $datatype = Attribute::findOrFail($aid)->datatype;
             } catch(ModelNotFoundException $e) {
                 continue;
             }
+            // instead of checking for changes we delete all entries
+            // to the given cid/aid pair and insert the one from the request again
+            AttributeValue::where([
+                ['context_id', $cid],
+                ['attribute_id', $aid]
+            ])->delete();
+
+            // if a key exists but the value is null the attribute value was deleted
+            if($value == 'null' || $value === null) {
+                continue;
+            }
 
             $jsonArr = json_decode($value);
             if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
 
-            if($datatype === 'epoch') {
+            if($datatype === 'epoch' && is_object($jsonArr)) {
                 $startExists = false;
                 if(isset($jsonArr->start)) {
                     $startExists = true;
@@ -996,45 +1008,8 @@ class ContextController extends Controller {
                 }
             }
 
-            if(is_array($jsonArr) && ($datatype == 'string-sc' || $datatype == 'string-mc')) { //only string-sc and string-mc should be arrays
-                if($isUpdate) {
-                    $dbEntries = array(
-                        ['context_id', $cid],
-                        ['attribute_id', $aid]
-                    );
-                    $rows = AttributeValue::where($dbEntries)->get();
-                    foreach($rows as $row) {
-                        $alreadySet = false;
-                        foreach($jsonArr as $k => $v) {
-                            if($datatype === 'list') {
-                                $set = $v->name;
-                                $val = $row->str_val;
-                            } else {
-                                try {
-                                    $con = ThConcept::findOrFail($v->narrower_id);
-                                    $set = $con->concept_url;
-                                    $val = $row->thesaurus_val;
-                                } catch(ModelNotFoundException $e) {
-                                    continue;
-                                }
-                            }
-                            if($val === $set) {
-                                unset($jsonArr[$k]);
-                                $alreadySet = true;
-                                break;
-                            }
-                        }
-                        if(!$alreadySet) {
-                            $del = array(
-                                ['context_id', $cid],
-                                ['attribute_id', $aid]
-                            );
-                            if($datatype === 'list') $del[] = ['str_val', $row->str_val];
-                            else $del[] = ['thesaurus_val', $row->thesaurus_val];
-                            AttributeValue::where($del)->delete();
-                        }
-                    }
-                }
+            //only string-sc, string-mc and list should be arrays
+            if(is_array($jsonArr) && ($datatype == 'string-sc' || $datatype == 'string-mc' || $datatype == 'list')) {
                 foreach($jsonArr as $v) {
                     $attr = new AttributeValue();
                     $attr->context_id = $cid;
@@ -1049,38 +1024,9 @@ class ContextController extends Controller {
                     $attr->save();
                 }
             } else {
-                if($isUpdate) {
-                    $alreadySet = false;
-                    $attr;
-                    $currAttrs = DB::table('attribute_values')->where('context_id', $cid)->get();
-                    foreach($currAttrs as $currKey => $currVal) {
-                        if($aid == $currVal->attribute_id) {
-                            $alreadySet = true;
-                            $attr = $currVal;
-                            unset($currAttrs[$currKey]);
-                            break;
-                        }
-                    }
-                    if($alreadySet) {
-                        $attrValue = AttributeValue::where([
-                            ['context_id', '=', $attr->context_id],
-                            ['attribute_id', '=', $attr->attribute_id],
-                            ['id', '=', $attr->id]
-                        ])->first();
-                        if($value == '' || $value === null) {
-                            AttributeValue::find($attrValue->id)->delete();
-                            continue;
-                        }
-                    } else {
-                        $attrValue = new AttributeValue();
-                        $attrValue->context_id = $cid;
-                        $attrValue->attribute_id = $aid;
-                    }
-                } else {
-                    $attrValue = new AttributeValue();
-                    $attrValue->context_id = $cid;
-                    $attrValue->attribute_id = $aid;
-                }
+                $attrValue = new AttributeValue();
+                $attrValue->context_id = $cid;
+                $attrValue->attribute_id = $aid;
                 $attrValue->lasteditor = $user['name'];
                 if(is_object($jsonArr)) {
                     if($datatype == 'context') {
@@ -1089,15 +1035,26 @@ class ContextController extends Controller {
                         $attrValue->json_val = json_encode($jsonArr);
                     }
                 } else {
-                    if($datatype == 'geography') {
-                        $parsed = $this->parseWkt($value);
-                        if($parsed !== -1) {
-                            $attrValue->geography_val = $parsed;
-                        }
-                    } else if($datatype == 'date') {
-                        $attrValue->dt_val = $value;
-                    } else {
-                        $attrValue->str_val = $value;
+                    switch ($datatype) {
+                        case 'geography':
+                            $parsed = $this->parseWkt($value);
+                            if($parsed !== -1) {
+                                $attrValue->geography_val = $parsed;
+                            }
+                            break;
+                        case 'date':
+                            \Log::info($value);
+                            $attrValue->dt_val = $value;
+                            break;
+                        case 'percentage':
+                        case 'integer':
+                            $attrValue->int_val = intval($value);
+                            break;
+                        case 'double':
+                            $attrValue->dbl_val = doubleval($value);
+                            break;
+                        default:
+                            $attrValue->str_val = $value;
                     }
                 }
                 $attrValue->save();

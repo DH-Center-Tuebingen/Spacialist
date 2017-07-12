@@ -28,8 +28,8 @@ class Context extends Model
 
     const patchRules = [
         'name'              => 'string',
-        'context_type_id'   => 'integer|exists:context_types,id',
-        'root_context_id'   => 'integer|exists:contexts,id',
-        'geodata_id'        => 'integer|exists:geodata,id'
+        // 'context_type_id'   => 'integer|exists:context_types,id',
+        // 'root_context_id'   => 'integer|exists:contexts,id',
+        // 'geodata_id'        => 'integer|exists:geodata,id'
     ];
 }

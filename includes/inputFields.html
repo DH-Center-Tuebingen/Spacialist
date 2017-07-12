@@ -31,7 +31,7 @@
             </div>
             <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"></textarea>
             <p class="input-group" ng-switch-when="date">
-                <input type="text" class="form-control" id="a{{ attr.aid }}_{{ attr.oid }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(attributeOutputs[attr.aid+'_'+attr.oid])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
+                <input type="text" class="form-control" id="a{{ attr.aid }}_{{ attr.oid }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(attributeOutputs[attr.aid+'_'+attr.oid])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-model-options="{timezone:'utc'}" ng-readonly="readonlyInput"/>
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-default" ng-init="date.opened=false" ng-click="date.opened=!date.opened" ng-disabled="readonlyInput"><i class="material-icons">event</i></button>
                 </span>

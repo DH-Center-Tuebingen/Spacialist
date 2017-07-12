@@ -300,13 +300,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
      */
     function storeElement(elem) {
         console.log("store context " + elem.name);
-        var root_cid = elem.root_cid;
         var formData = new FormData();
         formData.append('name', elem.name);
-        formData.append('context_type_id', elem.context_type_id);
-        if(root_cid != -1) {
-            formData.append('root_context_id', root_cid);
-        }
+
         for(var i=0; i<elem.data.length; i++) {
             var d = elem.data[i];
             var currValue = '';
@@ -319,7 +315,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
         var promise;
         if(typeof elem.id !== 'undefined' && elem.id != -1) {
-            formData.append('id', elem.id);
             promise = httpPutPromise.getData('api/context/' + elem.id, formData);
         }
         else {

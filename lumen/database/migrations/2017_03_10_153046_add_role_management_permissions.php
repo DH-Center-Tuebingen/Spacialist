@@ -15,29 +15,7 @@ class AddRoleManagementPermissions extends Migration
      */
     public function up()
     {
-        // Add and edit roles
-        $add_edit_role = new Permission();
-        $add_edit_role->name = 'add_edit_role';
-        $add_edit_role->display_name = 'Add and edit roles';
-        $add_edit_role->description = 'add and edit existing roles';
-        $add_edit_role->save();
-        // Delete roles
-        $delete_role = new Permission();
-        $delete_role->name = 'delete_role';
-        $delete_role->display_name = 'Delete roles';
-        $delete_role->description = 'delete existing roles';
-        $delete_role->save();
-        // Add and remove permissions
-        $add_remove_permission = new Permission();
-        $add_remove_permission->name = 'add_remove_permission';
-        $add_remove_permission->display_name = 'Add and remove permissions';
-        $add_remove_permission->description = 'add and remove permissions to/from roles';
-        $add_remove_permission->save();
-
-        $admin = Role::where('name', '=', 'admin')->firstOrFail();
-        $admin->attachPermission($add_edit_role);
-        $admin->attachPermission($delete_role);
-        $admin->attachPermission($add_remove_permission);
+        // empty for compatibility
     }
 
     /**
@@ -47,13 +25,6 @@ class AddRoleManagementPermissions extends Migration
      */
     public function down()
     {
-        $permissions = [
-            'add_edit_role',
-            'delete_role', 'add_remove_permission'
-        ];
-        foreach($permissions as $p) {
-            $entry = Permission::where('name', '=', $p)->firstOrFail();
-            $entry->delete();
-        }
+        // empty for compatibility
     }
 }
