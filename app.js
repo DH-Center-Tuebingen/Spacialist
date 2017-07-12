@@ -977,7 +977,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     var $state = $injector.get('$state');
                     userService.loginError.message = 'login.error.400-or-401';
                     localStorage.removeItem('user');
-                    $state.go('auth');
+                    var to = $state.router.stateService.$current.name;
+                    var params = $state.router.stateService.$current.params;
+                    $state.go('login', {toState: to, toParams: params});
                 } else if(rejection.data.error) {
                     updateToken(rejection, $injector);
                     userService.loginError.errors = rejection.data.error;
@@ -1008,16 +1010,20 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 
 	$authProvider.baseUrl = '.';
     $authProvider.loginUrl = 'api/user/login';
-    $urlRouterProvider.otherwise('/auth');
+    $urlRouterProvider.otherwise('/login');
 
     $stateProvider
-        .state('auth', {
-            url: '/auth',
+        .state('login', {
+            url: '/login',
             templateUrl: 'layouts/login.html',
-            controller: 'userCtrl'
+            controller: 'userCtrl',
+            params: {
+                toState: 'spacialist',
+                toParams: {}
+            }
         })
         .state('spacialist', {
-            url: '/spacialist',
+            url: '/',
             templateUrl: 'view.html'
         })
         .state('user', {
@@ -1029,8 +1035,24 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             templateUrl: 'roles.html'
         })
         .state('literature', {
-            url: '/literature',
-            templateUrl: 'literature.html'
+            url: '/bibliography',
+            component: 'bibliography',
+            resolve: {
+                bibliography: function(literatureService) {
+                    return literatureService.getAll();
+                }
+            }
+        })
+        .state('literature.edit', {
+            url: '/edit/{id}',
+            component: 'bibedit',
+            resolve: {
+                entry: function(bibliography, $transition$) {
+                    return bibliography.find(function (entry) {
+                        return entry.id == $transition$.params().id;
+                    });
+                }
+            }
         })
         .state('attributes', {
             url: '/attribute-editor',
@@ -1045,12 +1067,14 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 /**
  * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
  */
-spacialistApp.run(function($rootScope, $state, mapService, userService) {
-    $rootScope.$on('$stateChangeStart', function(event, toState) {
+spacialistApp.run(function($state, mapService, userService, $transitions) {
+    $transitions.onStart({}, function(trans) {
         var user = localStorage.getItem('user');
+        // var authenticated = false;
         if(user !== '') {
             parsedUser = JSON.parse(user);
             if(parsedUser) {
+                // authenticated = true;
                 userService.currentUser.user = parsedUser.user;
                 userService.currentUser.permissions = parsedUser.permissions;
                 if(!userService.can('duplicate_edit_concepts')) {
@@ -1064,11 +1088,13 @@ spacialistApp.run(function($rootScope, $state, mapService, userService) {
                         };
                     }
                 }
-                if(toState.name === 'auth') {
-                    event.preventDefault();
-                    $state.go('spacialist');
+                if (trans.to().name == 'login') {
+                    return trans.router.stateService.target('spacialist');
                 }
             }
         }
+        // if(!autheticated) {
+        //     return trans.router.stateService.target('login');
+        // }
     });
 });

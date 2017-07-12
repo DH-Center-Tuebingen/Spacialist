@@ -144,6 +144,20 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
         }
     ];
 
+    literature.getAll = function() {
+        return httpGetPromise.getData('api/literature').then(function (response) {
+            return response;
+        });
+    };
+
+    literature.getEntry = function(id) {
+        return literature.getAll().then(function (entries) {
+            return entries.find(function (entry) {
+                return entry.id == id;
+            });
+        });
+    };
+
     literature.getLiterature = function() {
         var promise = httpGetFactory('api/literature', function(response) {
             literature.literature.length = 0;

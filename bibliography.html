@@ -1,0 +1,235 @@
+<div>
+    <ui-view></ui-view>
+    <form id="literature-search-form">
+        <div class="form-group">
+            <div class="input-group">
+                <div class="input-group-addon">
+                    <i class="material-icons">search</i>
+                </div>
+                <input type="text" class="form-control" placeholder="{{'literature.search-placeholder'|translate}}" ng-model="searchTerm">
+            </div>
+        </div>
+    </form>
+    <div id="literature-container">
+        <table class="table table-striped table-hover" id="literature-table">
+            <thead>
+                <tr>
+                    <td>
+                        <a href="" ng-click="sortType = 'type'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.type'|translate}}
+                            <i ng-show="sortType == 'type' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'type' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="" ng-click="sortType = 'author'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.author'|translate}}
+                            <i ng-show="sortType == 'author' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'author' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="" ng-click="sortType = 'editor'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.editor'|translate}}
+                            <i ng-show="sortType == 'editor' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'editor' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="" ng-click="sortType = 'title'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.title'|translate}}
+                            <i ng-show="sortType == 'title' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'title' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="" ng-click="sortType = 'journal'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.journal'|translate}}
+                            <i ng-show="sortType == 'journal' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'journal' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="" ng-click="sortType = 'year'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.year'|translate}}
+                            <i ng-show="sortType == 'year' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'year' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.month'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.pages'|translate}}
+                    </td>
+                    <td>
+                        {{'literature.bibtex.volume'|translate}}
+                    </td>
+                    <td>
+                        {{'literature.bibtex.number'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.chapter'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.edition'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.series'|translate}}
+                    </td>
+                    <td>
+                        <a href="" ng-click="sortType = 'booktitle'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.booktitle'|translate}}
+                            <i ng-show="sortType == 'booktitle' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'booktitle' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="" ng-click="sortType = 'publisher'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.publisher'|translate}}
+                            <i ng-show="sortType == 'publisher' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'publisher' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="" ng-click="sortType = 'address'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.address'|translate}}
+                            <i ng-show="sortType == 'address' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'address' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.note'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.created-at'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.updated-at'|translate}}
+                    </td>
+                    <td>
+                        <a href="" ng-click="sortType = 'misc'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.misc'|translate}}
+                            <i ng-show="sortType == 'misc' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'misc' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="" ng-click="sortType = 'howpublished'; sortReverse = !sortReverse">
+                            {{'literature.bibtex.howpublished'|translate}}
+                            <i ng-show="sortType == 'howpublished' && !sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="sortType == 'howpublished' && sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.institution'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.organization'|translate}}
+                    </td>
+                    <td>
+                    	{{'literature.bibtex.school'|translate}}
+                    </td>
+                    <td ng-if="currentUser.permissions.add_remove_literature">
+                        {{'literature.delete'|translate}}
+                    </td>
+                    <td ng-if="currentUser.permissions.edit_literature">
+                        {{'literature.edit'|translate}}
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="entry in $ctrl.bibliography">
+                    <td>
+                        {{ entry.type }}
+                    </td>
+                    <td>
+                    	{{ entry.author }}
+                    </td>
+                    <td>
+                    	{{ entry.editor }}
+                    </td>
+                    <td>
+                    	{{ entry.title }}
+                    </td>
+                    <td>
+                    	{{ entry.journal }}
+                    </td>
+                    <td>
+                    	{{ entry.year }}
+                    </td>
+                    <td>
+                    	{{ entry.month }}
+                    </td>
+                    <td>
+                    	{{ entry.pages }}
+                    </td>
+                    <td>
+                    	{{ entry.volume }}
+                    </td>
+                    <td>
+                    	{{ entry.number }}
+                    </td>
+                    <td>
+                    	{{ entry.chapter }}
+                    </td>
+                    <td>
+                    	{{ entry.edition }}
+                    </td>
+                    <td>
+                    	{{ entry.series }}
+                    </td>
+                    <td>
+                    	{{ entry.booktitle }}
+                    </td>
+                    <td>
+                    	{{ entry.publisher }}
+                    </td>
+                    <td>
+                    	{{ entry.address }}
+                    </td>
+                    <td>
+                    	{{ entry.note }}
+                    </td>
+                    <td>
+                    	{{ entry.created_at }}
+                    </td>
+                    <td>
+                    	{{ entry.updated_at }}
+                    </td>
+                    <td>
+                    	{{ entry.misc }}
+                    </td>
+                    <td>
+                    	{{ entry.howpublished }}
+                    </td>
+                    <td>
+                    	{{ entry.institution }}
+                    </td>
+                    <td>
+                    	{{ entry.organization }}
+                    </td>
+                    <td>
+                    	{{ entry.school }}
+                    </td>
+                    <td ng-if="currentUser.permissions.add_remove_literature">
+                        <button type="button" class="btn btn-danger" ng-click="deleteLiteratureEntry(entry)">
+                            <i class="material-icons">delete</i>
+                        </button>
+                    </td>
+                    <td ng-if="currentUser.permissions.edit_literature">
+                        <button type="button" class="btn btn-info" ng-click="editLiteratureEntry(entry)">
+                            <i class="material-icons">mode_edit</i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <button type="button" class="btn btn-success" id="literature-add-button" ng-click="openAddLiteratureDialog()" ng-if="currentUser.permissions.add_remove_literature">
+        <i class="material-icons">add</i> {{'literature.add'|translate}}
+    </button>
+    <button type="file" id="literature-import-button" class="btn btn-primary" ngf-select="importBibTexFile($file, $invalidFiles)" accept="application/rdf+xml,text/plain,application/x-turtle" ngf-max-size="10MB" ng-if="currentUser.permissions.add_remove_literature">
+        Import BibTex File
+    </button>
+</div>

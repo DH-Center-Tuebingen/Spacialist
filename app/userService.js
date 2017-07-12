@@ -23,7 +23,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
                 user.currentUser.user = {};
                 user.currentUser.permissions = {};
                 localStorage.removeItem('user');
-                $state.go('auth', {});
+                $state.go('login', {});
             });
         }
     }
@@ -205,7 +205,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
             return $http.get('api/user/active');
         }).then(function(response) {
             if(typeof response === 'undefined' || response.status !== 200) {
-                $state.go('auth', {});
+                $state.go('login', $state.params);
                 return;
             }
             localStorage.setItem('user', JSON.stringify(response.data));
@@ -213,7 +213,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
             user.currentUser.permissions = response.data.permissions;
             console.log(JSON.stringify(response.data));
             delete user.loginError.message;
-            $state.go('spacialist', {});
+            $state.go($state.params.toState, $state.params.toParams);
         });
     };
 
@@ -222,7 +222,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
             user.currentUser.user = {};
             user.currentUser.permissions = {};
             localStorage.removeItem('user');
-            $state.go('auth', {});
+            $state.go('login', {});
         });
     };
 
