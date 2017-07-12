@@ -113,14 +113,9 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         mainService.deleteSourceEntry(index, key);
     };
 
-    $scope.addListEntry = function(aid, oid, text, arr) {
+    $scope.addListEntry = function(aid, oid, inp, arr) {
         var index = aid + '_' + (oid || '');
-        var tmpArr = $scope.$eval(arr);
-        var inp = $scope.$eval(text);
-        if(typeof tmpArr[index] == 'undefined') tmpArr[index] = [];
-        tmpArr[index].push({
-            'name': inp[index]
-        });
+        mainService.addListEntry(index, inp, arr);
         inp[index] = '';
     };
 
@@ -170,10 +165,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
 
     $scope.removeListItem = function(aid, oid, arr, $index) {
         var index = aid + '_' + (oid || '');
-        var tmpArr = $scope.$eval(arr);
-        tmpArr[index].splice($index, 1);
-        //var name = aid + "_" + oid;
-        //$scope.markerValues[name].splice($index, 1);
+        mainService.removeListItem(index, arr, $index);
     };
 
     $scope.toggleList = function(ctid, aid) {

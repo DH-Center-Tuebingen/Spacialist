@@ -3,6 +3,7 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use App\User;
+use App\Role;
 
 class GuestUserSeeder extends Seeder
 {
@@ -14,16 +15,16 @@ class GuestUserSeeder extends Seeder
     public function run()
     {
         $guestName = 'Guest User';
-        $cnt = User::where('name', '=', $guestName)->count();
-        if($cnt === 0) {
+        $guest = User::where('name', $guestName)->first();
+        if($guest === null) {
             $guest = new User();
             $guest->name = $guestName;
             $guest->email = 'udontneedtoseehisidentification@rebels.tld';
             $guest->password = Hash::make('thesearentthedroidsuarelookingfor');
             $guest->save();
-
-            $guestRole = App\Role::where('name', '=', 'guest')->firstOrFail();
-            $guest->attachRole($guestRole);
         }
+
+        $guestRole = Role::where('name', '=', 'guest')->first();
+        $guest->attachRole($guestRole);
     }
 }

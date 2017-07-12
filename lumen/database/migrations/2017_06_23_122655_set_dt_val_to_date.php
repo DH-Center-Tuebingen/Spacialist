@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\AttributeValue;
 use App\Attribute;
 
@@ -31,8 +32,18 @@ class SetDtValToDate extends Migration
         });
         foreach($storedValues as $sv) {
             $val = str_replace('"', '', $sv['value']);
-            $date = date_format(new DateTime($val), 'Y-m-d');
-            AttributeValue::where('id', '=', $sv['id'])->update(['dt_val' => $date]);
+            try {
+                $av = AttributeValue::findOrFail($sv['id']);
+            } catch(ModelNotFoundException $e) {
+                continue;
+            }
+            // if stored value can be parsed, store it as date, otherwise remove it
+            if(strtotime($val)) {
+                $date = date_format(new DateTime($val), 'Y-m-d');
+                $av->dt_val = $date;
+            }
+            $av->str_val = null;
+            $av->save();
         }
     }
 

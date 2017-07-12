@@ -14,14 +14,7 @@ class AddDefaultAdminAccount extends Migration
      */
     public function up()
     {
-        $admin = new User();
-        $admin->name = 'Admin';
-        $admin->email = 'admin@admin.com';
-        $admin->password = Hash::make('admin');
-        $admin->save();
-
-        $adminRole = Role::where('name', '=', 'admin')->first();
-        $admin->attachRole($adminRole);
+        // empty for compatibility with existing databases
     }
 
     /**
@@ -31,6 +24,6 @@ class AddDefaultAdminAccount extends Migration
      */
     public function down()
     {
-        User::where('name', '=', 'Admin')->delete();
+        // empty for compatibility with existing databases
     }
 }

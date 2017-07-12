@@ -120,11 +120,6 @@ spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($
                 $scope.modalOptions.close = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
-                $scope.modalOptions.openImageInTab = function(id) {
-                    httpGetFactory('api/image/' + id + '/object', function(data) {
-                        window.open(data);
-                    });
-                };
             };
         }
         var modalInstance = $uibModal.open(tempDefaults);

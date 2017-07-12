@@ -31,7 +31,7 @@
             </div>
             <textarea class="form-control" ng-switch-when="stringf" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"></textarea>
             <p class="input-group" ng-switch-when="date">
-                <input type="text" class="form-control" id="a{{ attr.aid }}_{{ attr.oid }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(attributeOutputs[attr.aid+'_'+attr.oid])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
+                <input type="text" class="form-control" id="a{{ attr.aid }}_{{ attr.oid }}" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" ng-change="getCurrentDate(attributeOutputs[attr.aid+'_'+attr.oid])" is-open="date.opened" datepicker-options="dateOptions" close-text="{{ 'close' | translate }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-model-options="{timezone:'utc'}" ng-readonly="readonlyInput"/>
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-default" ng-init="date.opened=false" ng-click="date.opened=!date.opened" ng-disabled="readonlyInput"><i class="material-icons">event</i></button>
                 </span>
@@ -64,7 +64,7 @@
                     </span>
                     <input class="form-control" type="text" id="{{ attr.aid }}_{{ attr.oid }}" ng-model="listInput[attr.aid+'_'+attr.oid]" placeholder="{{'field-types.list.new-placeholder'|translate}}" ng-readonly="readonlyInput"/>
                     <span class="input-group-btn">
-                        <button class="btn btn-success" type="button" ng-click="addListEntry(attr.aid, attr.oid, 'listInput', 'attributeOutputs')" ng-disabled="!listInput[attr.aid+'_'+attr.oid] || readonlyInput">
+                        <button class="btn btn-success" type="button" ng-click="addListEntry(attr.aid, attr.oid, listInput, attributeOutputs)" ng-disabled="!listInput[attr.aid+'_'+attr.oid] || readonlyInput">
                             <i class="material-icons">add</i>
                         </button>
                     </span>
@@ -72,7 +72,7 @@
                 <div ng-hide="hiddenLists[attr.aid+'_'+attr.oid] || !attributeOutputs[attr.aid+'_'+attr.oid] ||  attributeOutputs[attr.aid+'_'+attr.oid].length == 0" class="col-md-12 hideable-list">
                     <ol class="list-group inline-list">
                         <li ng-repeat="li in attributeOutputs[attr.aid+'_'+attr.oid] track by $index" class="list-group-item animated-item" ng-mouseenter="hovered = true;" ng-mouseleave="hovered = false;">
-                            <span class="delete-icon" ng-show="hovered && !editEntry[attr.aid+'_'+attr.oid][$index]" ng-click="removeListItem(attr.aid, attr.oid, 'attributeOutputs', $index)">
+                            <span class="delete-icon" ng-show="hovered && !editEntry[attr.aid+'_'+attr.oid][$index]" ng-click="removeListItem(attr.aid, attr.oid, attributeOutputs, $index)">
                                 <i class="material-icons">delete</i>
                             </span>
                             <span ng-hide="editEntry[attr.aid+'_'+attr.oid][$index]" ng-click="editListEntry(attr.aid, attr.oid, $index, li)">{{ li.name }}</span>

@@ -300,13 +300,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
      */
     function storeElement(elem) {
         console.log("store context " + elem.name);
-        var root_cid = elem.root_cid;
         var formData = new FormData();
         formData.append('name', elem.name);
-        formData.append('context_type_id', elem.context_type_id);
-        if(root_cid != -1) {
-            formData.append('root_context_id', root_cid);
-        }
+
         for(var i=0; i<elem.data.length; i++) {
             var d = elem.data[i];
             var currValue = '';
@@ -319,7 +315,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
         var promise;
         if(typeof elem.id !== 'undefined' && elem.id != -1) {
-            formData.append('id', elem.id);
             promise = httpPutPromise.getData('api/context/' + elem.id, formData);
         }
         else {
@@ -441,6 +436,17 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }, '');
     };
 
+    main.addListEntry = function(index, inp, arr) {
+        if(typeof arr[index] == 'undefined') arr[index] = [];
+        arr[index].push({
+            'name': inp[index]
+        });
+    }
+
+    main.removeListItem = function(index, arr, $index) {
+        arr[index].splice($index, 1);
+    }
+
     function parseData(data) {
         var parsedData = {};
         for(var i=0; i<data.length; i++) {
@@ -514,11 +520,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     /**
     *   This function expands the tree up the selected element
     */
-    main.expandTree = function(id) {
-        main.contexts.data[id].collapsed = false;
+    main.expandTree = function(id, firstRun) {
+        // check for undefined, not false => firstRun = firstRun || true; would always be true
+        if(typeof firstRun == 'undefined') firstRun = true;
+        // only expand if element is not the first aka selected one
+        if(!firstRun) {
+            main.contexts.data[id].collapsed = false;
+        }
         rootId = main.contexts.data[id].root_context_id;
         if(rootId && rootId > 0) {
-            main.expandTree(rootId);
+            main.expandTree(rootId, false);
         }
     };
 
