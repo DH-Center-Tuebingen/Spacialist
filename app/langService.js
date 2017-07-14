@@ -1,4 +1,4 @@
-spacialistApp.service('langService', ['$translate', function($translate) {
+spacialistApp.service('langService', ['$translate', 'httpGetPromise', function($translate, httpGetPromise) {
     var lang = {};
 
     lang.availableLanguages = {
@@ -82,6 +82,13 @@ spacialistApp.service('langService', ['$translate', function($translate) {
         if(typeof lang == 'undefined') return false;
         return lang.currentLanguage == lang.availableLanguages[lang];
     };
+
+    lang.getConcepts = function(lang) {
+        return httpGetPromise.getData('api/thesaurus/concept/'+lang).then(function(response) {
+            console.log(response.data);
+            return response.data;
+        });
+    }
 
     return lang;
 }]);

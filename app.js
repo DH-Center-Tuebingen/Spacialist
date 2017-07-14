@@ -1014,54 +1014,97 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 
     $stateProvider
         .state('login', {
-            url: '/login',
-            templateUrl: 'layouts/login.html',
-            controller: 'userCtrl',
-            params: {
-                toState: 'spacialist',
-                toParams: {}
-            }
-        })
-        .state('spacialist', {
-            url: '/',
-            templateUrl: 'view.html'
-        })
-        .state('user', {
-            url: '/user',
-            templateUrl: 'user.html'
-        })
-        .state('roles', {
-            url: '/roles',
-            templateUrl: 'roles.html'
-        })
-        .state('literature', {
-            url: '/bibliography',
-            component: 'bibliography',
-            resolve: {
-                bibliography: function(literatureService) {
-                    return literatureService.getAll();
+                url: '/login',
+                templateUrl: 'layouts/login.html',
+                controller: 'userCtrl',
+                params: {
+                    toState: 'spacialist',
+                    toParams: {}
                 }
-            }
-        })
-        .state('literature.edit', {
-            url: '/edit/{id}',
-            component: 'bibedit',
+            })
+        .state('root', {
+            abstract: true,
+            url: '',
+            component: 'root',
             resolve: {
-                entry: function(bibliography, $transition$) {
-                    return bibliography.find(function (entry) {
-                        return entry.id == $transition$.params().id;
-                    });
+                user: function(userService) {
+                    return userService.getUser();
+                },
+                config: function(userService, user) {
+                    return {}; //TODO: return general config
+                },
+                userConfig: function(userService, user, config) {
+                    return {
+                        language: 'de'
+                    }; //TODO: return active user's config
+                },
+                concepts: function(langService, userConfig) {
+                    return langService.getConcepts(userConfig.language);
                 }
-            }
+            },
         })
-        .state('attributes', {
-            url: '/attribute-editor',
-            templateUrl: 'attribute-editor.html'
-        })
-        .state('layers', {
-            url: '/layer-editor',
-            templateUrl: 'layer-editor.html'
-        });
+            .state('root.spacialist', {
+                url: '/',
+                component: 'spacialist',
+                resolve: {
+                    // contexts: {}, //TODO
+                    // geodata: {}, //TODO
+                    // layer: {}, //TODO
+                }
+            })
+            .state('root.user', {
+                url: '/user',
+                component: 'user',
+                resolve: {
+                    // users: {}, //TODO
+                    // roles: {}, //TODO
+                    // rolesPerUser: {}, //TODO
+                }
+            })
+            .state('root.role', {
+                url: '/role',
+                component: 'role',
+                resolve: {
+                    // roles: {}, //TODO
+                    // permissions: {}, //TODO
+                    // permissionsPerRole: {}, //TODO
+                }
+            })
+            .state('root.bibliography', {
+                url: '/bibliography',
+                component: 'bibliography',
+                resolve: {
+                    bibliography: function(literatureService) {
+                        return literatureService.getAll();
+                    }
+                }
+            })
+                .state('root.bibliography.edit', {
+                    url: '/edit/{id}',
+                    component: 'bibedit',
+                    resolve: {
+                        entry: function(bibliography, $transition$) {
+                            return bibliography.find(function (entry) {
+                                return entry.id == $transition$.params().id;
+                            });
+                        }
+                    }
+                })
+            .state('root.attribute', {//TODO NAME????
+                url: '/attribute-editor',
+                component: 'attribute',
+                resolve: {
+                    // attributes: {}, //TODO
+                    // contextTypes: {}, //TODO
+                }
+            })
+            .state('root.layer', {
+                url: '/layer-editor',
+                component: 'layer',
+                resolve: {
+                    // layers: {}, //TODO
+                }
+            });
 });
 
 /**
@@ -1089,7 +1132,7 @@ spacialistApp.run(function($state, mapService, userService, $transitions) {
                     }
                 }
                 if (trans.to().name == 'login') {
-                    return trans.router.stateService.target('spacialist');
+                    return trans.router.stateService.target('root.spacialist');
                 }
             }
         }

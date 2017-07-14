@@ -11,7 +11,7 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', 'a
 
     $scope.openStartPage = function() {
         analysisService.unsetAnalysisEntry();
-        $state.go('spacialist');
+        $state.go('root.spacialist');
     };
 
     $scope.loginUser = function(email, password) {
@@ -33,23 +33,23 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', 'a
     };
 
     $scope.openUserManagement = function() {
-        $state.go('user', {});
+        $state.go('root.user', {});
     };
 
     $scope.openRoleManagement = function() {
-        $state.go('roles', {});
+        $state.go('root.role', {});
     };
 
     $scope.openAttributeEditor = function() {
-        $state.go('attributes', {});
+        $state.go('root.attribute', {});
     };
 
     $scope.openLayerEditor = function() {
-        $state.go('layers', {});
+        $state.go('root.layer', {});
     };
 
     $scope.openLiteratureView = function() {
-        $state.go('literature', {});
+        $state.go('root.bibliography', {});
     };
 
     $scope.getUserList = function() {

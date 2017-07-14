@@ -177,3 +177,10 @@ $app->group([
 
         $app->delete('{id:[0-9]+}', 'GeodataController@delete');
 });
+
+$app->group([
+    'prefix' => 'thesaurus',//TODO api v1
+    'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+], function($app) {
+    $app->get('concept/{lang}', 'ThesaurusController@getConcepts');
+});

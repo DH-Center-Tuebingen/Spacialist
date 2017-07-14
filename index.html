@@ -32,7 +32,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="" ng-click="openStartPage()">
+                    <a class="navbar-brand" ui-sref="root.spacialist">
                         <img src="favicon.png" class="logo" alt="spacialist logo"/>
                         {{'spacialist'|translate}}
                     </a>
@@ -74,7 +74,7 @@
                             </ul>
                         </li>
                         <li ng-if="currentUser.permissions.edit_literature">
-                            <a href="" ng-click="openLiteratureView()">
+                            <a ui-sref="root.bibliography">
                                 <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
                             </a>
                         </li>
@@ -107,24 +107,24 @@
                             </a>
                             <ul class="dropdown-menu" uib-dropdown-menu>
                                 <li ng-if="currentUser.permissions.view_users">
-                                    <a href="" ng-click="openUserManagement()">
+                                    <a ui-sref="root.user">
                                         <i class="material-icons">group</i> {{'main.menu.user-management'|translate}}
                                     </a>
                                 </li>
                                 <li ng-if="currentUser.permissions.add_edit_role">
-                                    <a href="" ng-click="openRoleManagement()">
+                                    <a ui-sref="root.role">
                                         <i class="material-icons">verified_user</i> {{'main.menu.role-management'|translate}}
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="" ng-click="openAttributeEditor()">
+                                    <a ui-sref="root.attribute">
                                         <i class="material-icons">view_list</i> {{'main.menu.data-model-editor'|translate}}
                                     </a>
                                 </li>
                                 <li>
                                     <a href="" ng-click="toggleEditMode()">
                                         <i class="material-icons">mode_edit</i> {{'main.menu.toggle-edit-mode'|translate}}
-                                    <a href="" ng-click="openLayerEditor()">
+                                    <a ui-sref="root.layer">
                                         <i class="material-icons">layers</i> {{'main.menu.layer-editor'|translate}}
                                     </a>
                                 </li>
@@ -209,7 +209,13 @@
         <script src="controllers/layerEditorCtrl.js"></script>
         <script src="controllers/pdfCtrl.js"></script>
         <script src="controllers/threeCtrl.js"></script>
+        <script src="components/attribute.js"></script>
         <script src="components/bibliography.js"></script>
+        <script src="components/layer.js"></script>
+        <script src="components/role.js"></script>
+        <script src="components/root.js"></script>
+        <script src="components/spacialist.js"></script>
+        <script src="components/user.js"></script>
 
         <div id="current-device-class">
             <div id="xs" class="visible-xs"></div>

@@ -29,12 +29,22 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
     }
 
     function userSet() {
-        var user = localStorage.getItem('user');
-        if(user === '') return false;
-        var parsedUser = JSON.parse(user);
-        if(!parsedUser) return false;
-        return true;
+        var user = getUser();
+        if(user) return true;
+        return false;
     }
+
+    function getUser() {
+        var user = localStorage.getItem('user');
+        if(user !== '') {
+            parsedUser = JSON.parse(user);
+            if(parsedUser) {
+                return parsedUser;
+            }
+        }
+    }
+
+    user.getUser = getUser
 
     user.getUserList = function() {
         user.users.length = 0;
