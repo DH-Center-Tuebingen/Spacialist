@@ -41,11 +41,11 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', 'a
     };
 
     $scope.openAttributeEditor = function() {
-        $state.go('root.attribute', {});
+        $state.go('root.editor.data-model', {});
     };
 
     $scope.openLayerEditor = function() {
-        $state.go('root.layer', {});
+        $state.go('root.editor.layer', {});
     };
 
     $scope.openLiteratureView = function() {

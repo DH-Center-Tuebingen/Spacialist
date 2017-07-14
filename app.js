@@ -1090,16 +1090,20 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         }
                     }
                 })
-            .state('root.attribute', {//TODO NAME????
-                url: '/attribute-editor',
-                component: 'attribute',
+            .state('root.editor', {
+                abstract: true,
+                url: '/editor'
+            })
+            .state('root.editor.data-model', {//TODO NAME????
+                url: '/data-model',
+                component: 'data-model',
                 resolve: {
                     // attributes: {}, //TODO
                     // contextTypes: {}, //TODO
                 }
             })
-            .state('root.layer', {
-                url: '/layer-editor',
+            .state('root.editor.layer', {
+                url: '/layer',
                 component: 'layer',
                 resolve: {
                     // layers: {}, //TODO
