@@ -10,6 +10,7 @@
     "context-form.no-selection-info": "To show and edit the properties of an element, select the element in the tree view on the left-hand side.",
     "context-form.fields.placeholder-wkt": "Please Enter WKT (e.g. POINT(9.06262 48.52425))",
     "context-form.fields.open-map": "Open Map",
+    "context-form.fields.placeholder-context": "Search for Contexts",
     "map-placer-popup.title": "Draw location marker on map",
     "context-form.confirm-discard": "There are unsaved changes. Do you really want to discard these changes?",
     "context-form.tabs.map": "Map",

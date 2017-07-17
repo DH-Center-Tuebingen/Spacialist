@@ -10,6 +10,7 @@
     "context-form.no-selection-info": "Um die Eigenschaften eines Elements anzuzeigen, klicken Sie in der Baumansicht auf ein Element.",
     "context-form.fields.placeholder-wkt": "Bitte WKT eingeben (z.B. POINT(9.06262 48.52425))",
     "context-form.fields.open-map": "Karte öffnen",
+    "context-form.fields.placeholder-context": "Nach Kontexten suchen",
     "map-placer-popup.title": "Markierung auf die Karte zeichnen",
     "context-form.confirm-discard": "Es sind noch ungespeicherte Daten vorhanden. Möchten Sie die Änderungen verwerfen?",
     "context-form.tabs.map": "Karte",
