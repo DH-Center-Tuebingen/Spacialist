@@ -85,7 +85,6 @@ spacialistApp.service('langService', ['$translate', 'httpGetPromise', function($
 
     lang.getConcepts = function(lang) {
         return httpGetPromise.getData('api/thesaurus/concept/'+lang).then(function(response) {
-            console.log(response.data);
             return response.data;
         });
     }

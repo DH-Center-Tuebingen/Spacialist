@@ -1,16 +1,15 @@
-spacialistApp.service('environmentService', ['httpGetFactory', function(httpGetFactory) {
+spacialistApp.service('environmentService', ['httpGetFactory', 'httpGetPromise', function(httpGetFactory, httpGetPromise) {
     var env = {};
     env.contexts = {};
     env.contexts.data = {};
     env.contexts.children = {};
     env.contexts.roots = [];
 
-
-    init();
-
-    function init() {
-        getContextList();
-    }
+    // init();
+    //
+    // function init() {
+    //     getContextList();
+    // }
 
     env.getParentId = function(id) {
         if(!env.contexts.data[id]) return null;
@@ -27,6 +26,20 @@ spacialistApp.service('environmentService', ['httpGetFactory', function(httpGetF
                 context.collapsed = true;
                 context.visible = true;
             });
+        });
+    }
+
+    env.getContexts = function() {
+        return httpGetPromise.getData('api/context').then(function(response) {
+            angular.forEach(response.contexts, function(c) {
+                c.visible = true;
+                c.collapsed = true;
+            });
+            return {
+                data: response.contexts,
+                roots: response.roots,
+                children: response.children
+            };
         });
     }
 

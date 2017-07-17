@@ -485,13 +485,14 @@ spacialistApp.directive('myTree', function($parse) {
         scope: {
             onClickCallback: '&',
             contexts: '=',
+            concepts: '=',
             element: '=',
-            displayAttribute: '=',
-            typeAttribute: '=',
-            prefixAttribute: '=',
+            toState: '=',
+            callbacks: '=',
+            options: '=',
             setContextMenu: '='
         },
-        controller: 'mainCtrl'
+        // controller: 'mainCtrl'
     };
 });
 
@@ -547,7 +548,7 @@ spacialistApp.directive('formField', function($log) {
 
     return {
         restrict: 'E',
-        templateUrl: 'includes/inputFields.html',
+        templateUrl: 'includes/input-fields.html',
         scope: false,
         link: function(scope, element, attrs) {
             scope.listInput = {};
@@ -566,6 +567,7 @@ spacialistApp.directive('formField', function($log) {
                     throw new Error('onOrder must be an object with two fields: up and down, which are both functions.');
                 }
             }
+            scope.concepts = scope.$eval(attrs.concepts);
             scope.onDelete = scope.$eval(attrs.onDelete);
             scope.$watch(function(scope) {
                 return scope.$eval(attrs.fields);
@@ -1044,14 +1046,55 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             },
         })
             .state('root.spacialist', {
-                url: '/',
+                url: '/s',
                 component: 'spacialist',
                 resolve: {
-                    // contexts: {}, //TODO
+                    contexts: function(environmentService) {
+                        return environmentService.getContexts();
+                    },
+                    user: function(user) {
+                        // TODO other access to user object?
+                        return user;
+                    },
+                    concepts: function(concepts) {
+                        // TODO other access to concepts object?
+                        return concepts;
+                    }
                     // geodata: {}, //TODO
                     // layer: {}, //TODO
                 }
             })
+                .state('root.spacialist.data', {
+                    url: '/context/{id:[0-9]+}',
+                    component: 'spacialistdata',
+                    resolve: {
+                        context: function(contexts, $transition$) {
+                            var c = contexts.data[$transition$.params().id];
+                            var lastmodified = c.updated_at || c.created_at;
+                            var d = new Date(lastmodified);
+                            c.lastmodified = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+                            return c;
+                        },
+                        data: function(context, mainService) {
+                            return mainService.getContextData(context.id);
+                        },
+                        fields: function(context, mainService) {
+                            return mainService.getContextFields(context.context_type_id);
+                        },
+                        sources: function(context, mainService) {
+                            // TODO
+                            return [];
+                        },
+                        user: function(user) {
+                            // TODO other access to user object?
+                            return user;
+                        },
+                        concepts: function(concepts) {
+                            // TODO other access to concepts object?
+                            return concepts;
+                        }
+                    }
+                })
             .state('root.user', {
                 url: '/user',
                 component: 'user',
@@ -1080,10 +1123,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 }
             })
                 .state('root.bibliography.edit', {
-                    url: '/edit/{id}',
+                    url: '/edit/{id:[0-9]+}',
                     component: 'bibedit',
                     resolve: {
                         entry: function(bibliography, $transition$) {
+                            // TODO open modal
                             return bibliography.find(function (entry) {
                                 return entry.id == $transition$.params().id;
                             });

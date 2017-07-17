@@ -25,8 +25,7 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
     $app->get('', 'ContextController@getContexts');
-    $app->get('artifact', 'ContextController@getArtifacts');
-    $app->get('context_type', 'ContextController@getContextTypes');
+    $app->get('context_type/{id:[0-9]+}/attribute', 'ContextController@getContextTypeAttributes');
     $app->get('attribute', 'ContextController@getAttributes');
     $app->get('{id:[0-9]+}/data', 'ContextController@getContextData');
     $app->get('dropdown_options', 'ContextController@getDropdownOptions');

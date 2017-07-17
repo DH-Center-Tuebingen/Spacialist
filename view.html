@@ -1,6 +1,6 @@
-<div ng-controller="mainCtrl" resize-watcher>
+<div resize-watcher>
     <div class="col-md-2" id="tree-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled">
-        <div ng-if="currentUser.permissions.view_concepts">
+        <div ng-if="$ctrl.user.permissions.view_concepts">
             <h3>{{'context-tree.heading'|translate}}</h3>
             <div class="col-md-12">
                 <form class="form-horizontal">
@@ -9,71 +9,19 @@
                             <span class="input-group-addon">
                                 <i class="material-icons">search</i>
                             </span>
-                            <input class="form-control" type="text" ng-change="filterTree(contexts, treeSearchTerm)" ng-model="treeSearchTerm" placeholder="{{ 'search_val' | translate }}" />
+                            <input class="form-control" type="text" ng-change="filterTree($ctrl.contexts, treeSearchTerm)" ng-model="treeSearchTerm" placeholder="{{ 'search_val' | translate }}" />
                         </div>
                     </div>
                 </form>
             </div>
-            <my-tree class="col-md-12" on-click-callback="setCurrentElement(target, elem)" contexts="contexts" element="currentElement.element" display-attribute="'name'" type-attribute="'typename'" prefix-attribute="'typelabel'" set-context-menu="newElementContextMenu"></my-tree>
+            <my-tree class="col-md-12" to-state="'root.spacialist.data'" contexts="$ctrl.contexts" concepts="$ctrl.concepts" element="currentElement.element" callbacks="treeCallbacks" options="treeOptions" set-context-menu="newElementContextMenu"></my-tree>
         </div>
-        <div ng-if="!currentUser.permissions.view_concepts">
+        <div ng-if="!$ctrl.user.permissions.view_concepts">
             <div ng-include="'layouts/restricted-access.html'"></div>
         </div>
     </div>
-    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled">
-        <div ng-if="currentUser.permissions.view_concept_props">
-            <div ng-show="currentElement.element.id">
-                <h3>{{ currentElement.element.name }}<br>
-                    <small><span ng-if="currentElement.element.typelabel">{{ currentElement.element.typelabel }} &mdash; </span>{{'context-form.heading'|translate}}</small>
-                </h3>
-                <p class="btn-group-sm nav-inline">
-                    <a class="btn btn-success btn-fab btn-fab-mini" href="" ng-click="storeElement(currentElement.element, currentElement.data)">
-                        <i class="material-icons">save</i>
-                    </a>
-                    <a class="btn btn-danger btn-fab btn-fab-mini" href="" ng-click="deleteElement(currentElement.element)">
-                        <i class="material-icons">delete</i>
-                    </a>
-                </p>
-                <form class="form-horizontal" role="form" ng-if="currentElement.fields" name="currentElement.form">
-                    <div class="form-group form-group-unpadded">
-                        <label class="control-label col-md-3" for="name">
-                            {{'context-form.name'|translate}}:
-                        </label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" id="name" ng-model="currentElement.element.name" ng-readonly="!currentUser.permissions.duplicate_edit_concepts" />
-                        </div>
-                    </div>
-                    <form-field fields="currentElement.fields" output="currentElement.data" sources="currentElement.sources" label-width="3" input-width="9" offset="0" sp-readonly="{{ !currentUser.permissions.duplicate_edit_concepts }}">
-                    </form-field>
-                    <div class="form-group">
-                        <label class="control-label col-md-3" for="lasteditor">{{ 'context-form.last-modified' | translate }}:</label>
-                        <div class="col-md-9">
-                            <p class="form-control-static">
-                                {{ currentElement.element.lastmodified }} (<strong>{{ currentElement.element.lasteditor }}</strong>)
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-md-offset-3" ng-if="currentUser.permissions.duplicate_edit_concepts">
-                        <button type="button" class="btn btn-success" ng-click="storeElement(currentElement.element, currentElement.data)">
-                            <span class="material-icons">save</span> {{ 'context-form.save-button' | translate }}
-                        </button>
-                        <button type="button" class="btn btn-danger" ng-click="deleteElement(currentElement.element)">
-                            <span class="material-icons">delete</span> {{ 'context-form.delete-button' | translate }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <div ng-hide="currentElement.element.id">
-                <h3>{{'context-form.heading'|translate}}</h3>
-                <div class="alert alert-info">
-                    <p>{{ 'context-form.no-selection' | translate }}</p>
-                    <p>{{ 'context-form.no-selection-info' | translate }}</p>
-                </div>
-            </div>
-        </div>
-        <div ng-if="!currentUser.permissions.view_concept_props">
-            <div ng-include="'layouts/restricted-access.html'"></div>
-        </div>
+    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled" ui-view>
+        <!-- ui-view element for context detail template -->
     </div>
     <div class="col-md-5" id="addon-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled">
         <ul class="nav nav-tabs" id="addon-nav">
@@ -94,13 +42,13 @@
             </li>
         </ul>
         <div ng-show="layerTwo.activeTab == 'map'">
-            <div ng-if="currentUser.permissions.view_geodata" ng-controller="mapCtrl">
+            <div ng-if="$ctrl.user.permissions.view_geodata" ng-controller="mapCtrl">
                 <div id="map-container" ng-if="map">
                     <leaflet id="mainmap" layers="map.layers" lf-center="map.center" bounds="map.bounds" defaults="map.defaults" lf-draw="map.drawOptions" controls="map.controls" geojson="map.geojson" height="{{addonContainerHeight}}px" width="100%">
                     </leaflet><!-- legend="map.legend" -->
                 </div>
             </div>
-            <div ng-if="!currentUser.permissions.view_geodata">
+            <div ng-if="!$ctrl.user.permissions.view_geodata">
                 <div ng-include="'layouts/restricted-access.html'"></div>
             </div>
         </div>
@@ -111,7 +59,7 @@
             <h5>Harris active</h5>
         </div>
         <div ng-if="layerTwo.activeTab == 'images'" ng-controller="imageCtrl" ng-init="initImageTab()" class="padded-content" style="max-height: 100%;">
-            <div ng-if="currentUser.permissions.view_photos">
+            <div ng-if="$ctrl.user.permissions.view_photos">
                 <div class="container col-md-12" ng-init="filter_collapsed=true">
                     <div ng-click="filter_collapsed=!filter_collapsed" style="cursor: pointer;">
                         <h4 translate="photos.filter.heading" style="float:left;"></h4>
@@ -204,12 +152,12 @@
                     </div>
                 </uib-accordion>
             </div>
-            <div ng-if="!currentUser.permissions.view_photos">
+            <div ng-if="!$ctrl.user.permissions.view_photos">
                 <div ng-include="'layouts/restricted-access.html'"></div>
             </div>
         </div>
         <div ng-if="layerTwo.activeTab == 'bibliography'" class="padded-content">
-            <div ng-if="currentUser.permissions.duplicate_edit_concepts">
+            <div ng-if="$ctrl.user.permissions.duplicate_edit_concepts">
                 <p class="alert alert-warning" ng-if="!hasSources(currentElement)" ng-bind-html="'context-form.tabs.sources.empty'|translate"></p>
                 <div ng-repeat="(key, attr) in currentElement.sources">
                     <h4><a href="" ng-click="openSourceModal(attr[0].attribute_name, attr[0].attribute_id, currentElement.data[attr[0].attribute_id+'_pos'])">{{ attr[0].attribute_name }}</a></h4>
@@ -231,7 +179,7 @@
                     </table>
                 </div>
             </div>
-            <div ng-if="!currentUser.permissions.duplicate_edit_concepts">
+            <div ng-if="!$ctrl.user.permissions.duplicate_edit_concepts">
                 <div ng-include="'layouts/restricted-access.html'"></div>
             </div>
         </div>

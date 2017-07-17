@@ -47,7 +47,7 @@ class ContextController extends Controller {
             ], 403);
         }
 
-        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type as typeid', 'thesaurus_url as typename', DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as typelabel"))->orderBy('rank')->get();
+        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type', 'thesaurus_url as uri')->orderBy('rank')->get();
 
         $roots = array();
         $contexts = array();
@@ -78,35 +78,14 @@ class ContextController extends Controller {
         return response()->json($response);
     }
 
-    public function getArtifacts() {
+    public function getContextTypeAttributes($id) {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
-                )
-                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
-                ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
-                ->where('c.type', '=', '1')
-                ->orderBy('title', 'asc')
-                ->orderBy('ca.position', 'asc')
-                ->get()
-        );
-    }
-
-    public function getContextTypes() {
-        return response()->json(
-            DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de' limit 1) as title"),
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) as val")
-                )
-                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
-                ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
-                ->where('c.type', '=', '0')
-                ->orderBy('title', 'asc')
-                ->orderBy('ca.position', 'asc')
-                ->get()
+            ->where('c.id', $id)
+            ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+            ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
+            ->orderBy('ca.position', 'asc')
+            ->get()
         );
     }
 

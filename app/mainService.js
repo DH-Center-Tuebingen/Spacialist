@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, searchService, $timeout, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$state', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, searchService, $timeout, $state, $translate) {
     var main = {};
     var modalFields;
 
@@ -34,7 +34,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     //     opened: false
     // };
 
-    main.treeCallbacks.dropped = function(event) {
+    main.treeCallbacks.dropped = function(event, contexts) {
         var hasParent = event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue;
         var oldParent = environmentService.getParentId(id);
         var hadParent = oldParent !== null;
@@ -57,7 +57,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             if(((!hasParent && !hadParent) || parent == oldParent) && index == oldIndex) {
                 return;
             }
-            var oldIndex = main.contexts.data[id].rank - 1;
+            var oldIndex = contexts.data[id].rank - 1;
             var startIndex = oldIndex;
             if(((!hasParent && !hadParent) || parent == oldParent) && index < oldIndex) {
                 startIndex++;
@@ -65,112 +65,45 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             var children;
             var oldChildren;
             if(hasParent) {
-                children = main.contexts.children[parent];
+                children = contexts.children[parent];
             } else {
-                children = main.contexts.roots;
+                children = contexts.roots;
             }
             if(hadParent) {
-                oldChildren = main.contexts.children[oldParent];
+                oldChildren = contexts.children[oldParent];
             } else {
-                oldChildren = main.contexts.roots;
+                oldChildren = contexts.roots;
             }
             var i;
             for(i=startIndex; i<oldChildren.length; i++) {
-                main.contexts.data[oldChildren[i]].rank--;
+                contexts.data[oldChildren[i]].rank--;
             }
-            main.contexts.data[id].rank = rank;
+            contexts.data[id].rank = rank;
             for(i=index+1; i<children.length; i++) {
-                main.contexts.data[children[i]].rank++;
+                contexts.data[children[i]].rank++;
             }
         });
     };
-    main.treeCallbacks.toggle = function(collapsed, sourceNodeScope) {
-        main.contexts.data[sourceNodeScope.$modelValue].collapsed = collapsed;
+    main.treeCallbacks.toggle = function(collapsed, sourceNodeScope, contexts) {
+        contexts.data[sourceNodeScope.$modelValue].collapsed = collapsed;
     };
-
-    init();
-
-    function init() {
-        getContexts();
-        getArtifacts();
-        getDropdownOptions();
-        mapService.initMapService();
-    }
-
-    function getContexts() {
-        httpGetFactory('api/context/context_type', function(callback) {
-            angular.forEach(callback, function(value, key) {
-                var index = value.index;
-                var title = value.title;
-                if(typeof main.contextReferences[index] === 'undefined') {
-                    main.contextReferences[index] = [];
-                    main.contextTypes.push({
-                        title: title,
-                        index: index,
-                        type: value.type,
-                        context_type_id: value.context_type_id
-                    });
-                }
-                if(value.context_type_id && value.aid && value.val && value.datatype) {
-                    main.contextReferences[index].push({
-                        aid: value.aid,
-                        val: value.val,
-                        context_type_id: value.context_type_id,
-                        datatype: value.datatype,
-                        position: value.position
-                    });
-                }
-            });
-        });
-    }
-
-    function getArtifacts() {
-        httpGetFactory('api/context/artifact', function(callback) {
-            angular.forEach(callback, function(value, key) {
-                var index = value.index;
-                var title = value.title;
-                if (typeof main.artifactReferences[index] === 'undefined') {
-                    main.artifactReferences[index] = [];
-                    main.artifacts.push({
-                        title: title,
-                        index: index,
-                        type: value.type,
-                        context_type_id: value.context_type_id
-                    });
-                }
-                if (value.context_type_id && value.aid && value.val && value.datatype) {
-                    main.artifactReferences[index].push({
-                        aid: value.aid,
-                        val: value.val,
-                        context_type_id: value.context_type_id,
-                        datatype: value.datatype,
-                        position: value.position
-                    });
-                }
-            });
-        });
-    }
-
-    function getDropdownOptions() {
-        httpGetFactory('api/context/dropdown_options', function(callback) {
-            for(var i=0; i<callback.length; i++) {
-                var value = callback[i];
-                var index = value.aid + "_";
-                if(typeof value.oid != 'undefined') index += value.oid;
-                if (value.datatype == 'string-sc' || value.datatype == 'string-mc') {
-                    if(value.choices !== null) {
-                        main.dropdownOptions[index] = value.choices;
-                    }
-                } else if (value.datatype == 'epoch') {
-                    main.dropdownOptions[index] = value.choices;
-                }
-            }
-        });
-    }
 
     main.toggleEditMode = function() {
         main.editMode.enabled = !main.editMode.enabled;
     };
+
+    main.getContextData = function(id) {
+        return httpGetPromise.getData('api/context/' + id + '/data').then(function(response) {
+            return parseData(response.data);
+        });
+    }
+
+    main.getContextFields = function(ctid) {
+        return httpGetPromise.getData('api/context/context_type/' + ctid + '/attribute').then(function(response) {
+            console.log(response);
+            return response;
+        });
+    }
 
     main.duplicateElement = function(id) {
         httpPostFactory('api/context/' + id + '/duplicate', new FormData(), function(newElem) {
@@ -231,17 +164,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 }
             }
         }
-        elem.data = parsedData;
-        var promise = storeElement(elem);
+        var promise = storeElement(elem, parsedData);
         promise.then(function(response){
-            main.currentElement.form.$setPristine();
+            // TODO elem.form.$setPristine();
             var content = $translate.instant('snackbar.data-stored.success');
             snackbarService.addAutocloseSnack(content, 'success');
             if(response.error){
                 modalFactory.errorModal(response.error);
                 return;
             }
-            elem.data = response.data;
+            $state.go('root.spacialist.data', { id: elem.id }, { reload: true });
         });
     };
 
@@ -298,13 +230,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
      * Stores a single element of the context tree in the database
      * @return: returns a promise which returns the ID of the newly inserted context
      */
-    function storeElement(elem) {
+    function storeElement(elem, data) {
         console.log("store context " + elem.name);
         var formData = new FormData();
         formData.append('name', elem.name);
 
-        for(var i=0; i<elem.data.length; i++) {
-            var d = elem.data[i];
+        for(var i=0; i<data.length; i++) {
+            var d = data[i];
             var currValue = '';
             if (typeof d.value === 'object') {
                 currValue = angular.toJson(d.value);

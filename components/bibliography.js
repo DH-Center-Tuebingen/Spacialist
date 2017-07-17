@@ -10,4 +10,4 @@ spacialistApp.component('bibedit', {
         entry: '<'
     },
     template: '<input ng-model="$ctrl.entry.author"/>'
-})
+});
