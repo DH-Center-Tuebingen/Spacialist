@@ -13,6 +13,14 @@ class RandomSeeder extends Seeder
     {
         $numberSeedEntries = 20;
 
+        $al = new App\AvailableLayer();
+        $al->name = 'OpenStreetMap';
+        $al->url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        $al->type = 'xyz';
+        $al->attribution = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>';
+        $al->opacity = 1;
+        $al->position = 1;
+        $al->save();
 
         $concepts = factory(App\ThConcept::class, $numberSeedEntries)->create()->each(function ($concept) {
             foreach(App\ThLanguage::get() as $language){
