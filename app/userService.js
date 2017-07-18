@@ -221,9 +221,8 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
             localStorage.setItem('user', JSON.stringify(response.data));
             user.currentUser.user = response.data.user;
             user.currentUser.permissions = response.data.permissions;
-            console.log(JSON.stringify(response.data));
             delete user.loginError.message;
-            $state.go($state.params.toState, $state.params.toParams);
+            $state.go($state.params.toState, $state.params.toParams); // TODO should redirect to old state
         });
     };
 

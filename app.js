@@ -392,76 +392,89 @@ spacialistApp.directive('spinner', function() {
     };
 });
 
-spacialistApp.directive('resizeWatcher', function($window) {
-    return function(scope, element) {
-        var headerPadding = 20;
-        var bottomPadding = 20;
-
-        scope.getViewportDim = function() {
-            return {
-                'height': $window.innerHeight,
-                'width': $window.innerWidth,
-                'isSm': window.matchMedia("(max-width: 991px)").matches
-            };
+spacialistApp.directive('resizeWatcher', function($window, $timeout) {
+    function getViewportDim() {
+        return {
+            'height': $window.innerHeight,
+            'width': $window.innerWidth,
+            'isSm': window.matchMedia("(max-width: 991px)").matches
         };
-        scope.$watch(scope.getViewportDim, function(newValue, oldValue) {
-            if(newValue.isSm) {
-                $('#tree-container').css('height', '');
-                $('#attribute-container').css('height', '');
-                $('#addon-container').css('height', '');
-                $('#literature-container').css('height', '');
-                $('analysis-frame').css('height', '');
-                $('#attribute-editor').css('height', '');
-                $('#layer-editor').css('height', '');
-            } else {
-                var height = newValue.height;
-                var width = newValue.width;
+    };
 
-                var headerHeight = document.getElementById('header-nav').offsetHeight;
-                var addonNavHeight = 0;
-                var addonNav = document.getElementById('addon-nav');
-                if(addonNav) addonNavHeight = addonNav.offsetHeight;
-                var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
-                var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
-                var attributeEditor = document.getElementById('attribute-editor');
-                if(attributeEditor) {
-                    $(attributeEditor).css('height', containerHeight);
-                    var heading = document.getElementById('editor-heading');
-                    $('.attribute-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
-                }
-                var layerEditor = document.getElementById('layer-editor');
-                if(layerEditor) {
-                    $(layerEditor).css('height', containerHeight);
-                    var heading = document.getElementById('editor-heading');
-                    $('.layer-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
-                }
-                var literatureContainer = document.getElementById('literature-container');
-                if(literatureContainer) {
-                    var literatureHeight = containerHeight;
-                    var literatureAddButton = document.getElementById('literature-add-button');
-                    if(literatureAddButton) literatureHeight -= literatureAddButton.offsetHeight;
-                    var literatureSearch = document.getElementById('literature-search-form');
-                    if(literatureSearch) literatureHeight -= literatureSearch.offsetHeight;
-                    var literatureTable = document.getElementById('literature-table');
-                    if(literatureTable) {
-                        var head = literatureTable.tHead;
-                        angular.element(literatureContainer).bind('scroll', function(e) {
-                            var t = 'translate(0, ' + this.scrollTop + 'px)';
-                            head.style.transform = t;
-                        });
-                        var headHeight = head.offsetHeight;
-                        var body = literatureTable.tBodies[0];
-                        $(body).css('max-height', literatureHeight - headHeight);
-                        $(literatureContainer).css('height', literatureHeight);
-                    }
-                }
+    function onResize(scope) {
+        var newValue = getViewportDim();
+        if(newValue.isSm) {
+            $('#tree-container').css('height', '');
+            $('#attribute-container').css('height', '');
+            $('#addon-container').css('height', '');
+            $('#literature-container').css('height', '');
+            $('analysis-frame').css('height', '');
+            $('#attribute-editor').css('height', '');
+            $('#layer-editor').css('height', '');
+        } else {
+            var height = newValue.height;
+            var width = newValue.width;
 
-                $('#tree-container').css('height', containerHeight);
-                $('#attribute-container').css('height', containerHeight);
-                $('#addon-container').css('height', containerHeight);
-                $('#analysis-frame').css('height', containerHeight);
+            var headerHeight = document.getElementById('header-nav').offsetHeight;
+            var addonNavHeight = 0;
+            var addonNav = document.getElementById('addon-nav');
+            if(addonNav) addonNavHeight = addonNav.offsetHeight;
+            var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
+            var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
+            var attributeEditor = document.getElementById('attribute-editor');
+            if(attributeEditor) {
+                $(attributeEditor).css('height', containerHeight);
+                var heading = document.getElementById('editor-heading');
+                $('.attribute-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
             }
-        }, true);
+            var layerEditor = document.getElementById('layer-editor');
+            if(layerEditor) {
+                $(layerEditor).css('height', containerHeight);
+                var heading = document.getElementById('editor-heading');
+                $('.layer-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
+            }
+            var literatureContainer = document.getElementById('literature-container');
+            if(literatureContainer) {
+                var literatureHeight = containerHeight;
+                var literatureAddButton = document.getElementById('literature-add-button');
+                if(literatureAddButton) literatureHeight -= literatureAddButton.offsetHeight;
+                var literatureSearch = document.getElementById('literature-search-form');
+                if(literatureSearch) literatureHeight -= literatureSearch.offsetHeight;
+                var literatureTable = document.getElementById('literature-table');
+                if(literatureTable) {
+                    var head = literatureTable.tHead;
+                    angular.element(literatureContainer).bind('scroll', function(e) {
+                        var t = 'translate(0, ' + this.scrollTop + 'px)';
+                        head.style.transform = t;
+                    });
+                    var headHeight = head.offsetHeight;
+                    var body = literatureTable.tBodies[0];
+                    $(body).css('max-height', literatureHeight - headHeight);
+                    $(literatureContainer).css('height', literatureHeight);
+                }
+            }
+
+            $('#tree-container').css('height', containerHeight);
+            $('#attribute-container').css('height', containerHeight);
+            $('#addon-container').css('height', containerHeight);
+            $('#analysis-frame').css('height', containerHeight);
+            $timeout(function() {
+              scope.$digest();
+            }, 0);
+        }
+    }
+
+    var headerPadding = 20;
+    var bottomPadding = 20;
+
+    return {
+        scope: true,
+        link: function(scope, element, attrs) {
+            onResize(scope);
+            angular.element($window).bind('resize', function() {
+                onResize(scope);
+            });
+        }
     };
 });
 
@@ -1059,9 +1072,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     concepts: function(concepts) {
                         // TODO other access to concepts object?
                         return concepts;
+                    },
+                    map: function(mapService) {
+                        return mapService.initMapVariables();
+                    },
+                    layer: function(map, mapService) {
+                        return mapService.getLayers();
+                    },
+                    geodata: function(layer, mapService) {
+                        return mapService.getGeodata();
                     }
-                    // geodata: {}, //TODO
-                    // layer: {}, //TODO
                 }
             })
                 .state('root.spacialist.data', {

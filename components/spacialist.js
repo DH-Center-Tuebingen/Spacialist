@@ -1,10 +1,11 @@
 spacialistApp.component('spacialist', {
     bindings: {
         contexts: '<',
-        geodata: '<',
-        layer: '<',
         user: '<',
-        concepts:'<'
+        concepts:'<',
+        map: '<',
+        layer: '<',
+        geodata: '<'
     },
     templateUrl: 'view.html',
     controller: 'mainCtrl'

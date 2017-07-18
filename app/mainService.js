@@ -100,7 +100,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
 
     main.getContextFields = function(ctid) {
         return httpGetPromise.getData('api/context/context_type/' + ctid + '/attribute').then(function(response) {
-            console.log(response);
             return response;
         });
     }

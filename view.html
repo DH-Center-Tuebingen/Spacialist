@@ -42,9 +42,9 @@
             </li>
         </ul>
         <div ng-show="layerTwo.activeTab == 'map'">
-            <div ng-if="$ctrl.user.permissions.view_geodata" ng-controller="mapCtrl">
-                <div id="map-container" ng-if="map">
-                    <leaflet id="mainmap" layers="map.layers" lf-center="map.center" bounds="map.bounds" defaults="map.defaults" lf-draw="map.drawOptions" controls="map.controls" geojson="map.geojson" height="{{addonContainerHeight}}px" width="100%">
+            <div ng-if="$ctrl.user.permissions.view_geodata">
+                <div id="map-container" ng-if="$ctrl.map" ng-controller="mapCtrl">
+                    <leaflet id="mainmap" layers="$ctrl.map.layers" lf-center="$ctrl.map.center" bounds="$ctrl.map.bounds" defaults="$ctrl.map.defaults" lf-draw="$ctrl.map.drawOptions" controls="$ctrl.map.controls" height="{{addonContainerHeight}}px" width="100%">
                     </leaflet><!-- legend="map.legend" -->
                 </div>
             </div>

@@ -1,5 +1,35 @@
-spacialistApp.controller('mainCtrl', ['$scope', 'mainService', '$translate', function($scope, mainService, $translate) {
+spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$translate', '$timeout', function($scope, mainService, mapService, $translate, $timeout) {
+    $scope.moduleExists = mainService.moduleExists;
+
     var localContexts = this.contexts;
+    var localLayers = this.layer;
+    var localMap = this.map;
+    var mapObject;
+    var localGeodata = this.geodata;
+
+    mapService.setupLayers(localLayers, localMap, localContexts);
+    mapService.initMapObject().then(function(obj) {
+        mapObject = obj;
+        // wait a random amount of time, so mapObject.eachLayer has all layers
+        $timeout(function() {
+            mapObject.eachLayer(function(l) {
+                if(l.options.layer_id) {
+                    localMap.mapLayers[l.options.layer_id] = l;
+                }
+            });
+            mapService.initGeodata(localGeodata, localContexts, localMap);
+        }, 100);
+    });
+
+    $scope.layerTwo = {
+        activeTab: 'map',
+        imageTab: {}
+    };
+
+    $scope.setActiveTab = function(tabId) {
+        $scope.layerTwo.activeTab = tabId;
+    };
+
     $scope.treeCallbacks = {
         toggle: function(collapsed, sourceNodeScope) {
             mainService.treeCallbacks.toggle(collapsed, sourceNodeScope, localContexts);
