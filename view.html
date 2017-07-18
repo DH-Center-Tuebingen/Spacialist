@@ -22,6 +22,11 @@
     </div>
     <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled" ui-view>
         <!-- ui-view element for context detail template -->
+        <h3>{{'context-form.heading'|translate}}</h3>
+        <div class="alert alert-info">
+            <p>{{ 'context-form.no-selection' | translate }}</p>
+            <p>{{ 'context-form.no-selection-info' | translate }}</p>
+        </div>
     </div>
     <div class="col-md-5" id="addon-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled">
         <ul class="nav nav-tabs" id="addon-nav">

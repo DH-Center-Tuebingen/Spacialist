@@ -92,8 +92,8 @@
                     <div class="input-group-btn" uib-dropdown>
                         <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="readonlyInput">{{ attributeOutputs[attr.aid+'_'+attr.oid].startLabel | translate }} <span class="caret"></span></button>
                         <ul uib-dropdown-menu class="dropdown-menu">
-                            <li><a href="" ng-click="attributeOutputs[attr.aid+'_'+attr.oid].startLabel = 'bc'">{{'bc' | translate}}.</a></li>
-                            <li><a href="" ng-click="attributeOutputs[attr.aid+'_'+attr.oid].startLabel = 'ad'">{{'ad' | translate}}.</a></li>
+                            <li><a href="" ng-click="attributeOutputs[attr.aid+'_'+attr.oid].startLabel = 'bc'">{{'bc' | translate}}</a></li>
+                            <li><a href="" ng-click="attributeOutputs[attr.aid+'_'+attr.oid].startLabel = 'ad'">{{'ad' | translate}}</a></li>
                         </ul>
                     </div>
                     <input type="text" class="form-control centered" aria-label="" ng-model="attributeOutputs[attr.aid+'_'+attr.oid].start" ng-readonly="readonlyInput">

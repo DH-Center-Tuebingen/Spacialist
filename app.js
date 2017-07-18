@@ -561,7 +561,7 @@ spacialistApp.directive('formField', function($log) {
 
     return {
         restrict: 'E',
-        templateUrl: 'includes/input-fields.html',
+        templateUrl: 'includes/form-fields.html',
         scope: false,
         link: function(scope, element, attrs) {
             scope.listInput = {};
@@ -1158,21 +1158,50 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 abstract: true,
                 url: '/editor'
             })
-            .state('root.editor.data-model', {//TODO NAME????
-                url: '/data-model',
-                component: 'data-model',
-                resolve: {
-                    // attributes: {}, //TODO
-                    // contextTypes: {}, //TODO
-                }
-            })
-            .state('root.editor.layer', {
-                url: '/layer',
-                component: 'layer',
-                resolve: {
-                    // layers: {}, //TODO
-                }
-            });
+                .state('root.editor.data-model', {
+                    url: '/data-model',
+                    component: 'datamodel',
+                    resolve: {
+                        attributes: function(dataEditorService) {
+                            return dataEditorService.getAttributes();
+                        },
+                        attributetypes: function(dataEditorService) {
+                            return dataEditorService.getAttributeTypes();
+                        },
+                        concepts: function(concepts) {
+                            // TODO other access to concepts object?
+                            return concepts;
+                        },
+                        contextTypes: function(dataEditorService) {
+                            return dataEditorService.getContextTypes();
+                        }
+                    }
+                })
+                    .state('root.editor.data-model.edit', {
+                        url: '/contexttype/{id:[0-9]+}',
+                        component: 'contexttypeedit',
+                        resolve: {
+                            contextType: function(contextTypes, $transition$) {
+                                return contextTypes.find(function(ct) {
+                                    return ct.id == $transition$.params().id;
+                                });
+                            },
+                            concepts: function(concepts) {
+                                // TODO other access to concepts object?
+                                return concepts;
+                            },
+                            fields: function(contextType, mainService) {
+                                return mainService.getContextFields(contextType.id);
+                            }
+                        }
+                    })
+                .state('root.editor.layer', {
+                    url: '/layer',
+                    component: 'layer',
+                    resolve: {
+                        // layers: {}, //TODO
+                    }
+                });
 });
 
 /**

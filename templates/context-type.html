@@ -1,0 +1,12 @@
+<div ng-if="$ctrl.contextType">
+    <h4 translate="data-model-editor.attr-of.heading" translate-values="{ name: $ctrl.concepts[$ctrl.contextType.thesaurus_url].label }"></h4>
+    <form class="form-horizontal" role="form">
+        <form-field fields="$ctrl.fields" output="tempx" concepts="$ctrl.concepts" label-width="3" input-width="9" offset="0"><!--  deletable orderable on-delete="onRemoveAttrFromCt" on-order="onOrderAttrOfCt" -->
+        </form-field>
+        <div class="col-md-offset-3">
+            <button type="button" class="btn btn-success" ng-click="addAttributeToContextType(ct.selected)">
+                <i class="material-icons">add</i> <span translate="data-model-editor.add-attr-button" translate-values="{ name: ct.selected.title }"></span>
+            </button>
+        </div>
+    </form>
+</div>

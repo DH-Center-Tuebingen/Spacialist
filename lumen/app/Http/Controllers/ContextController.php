@@ -90,11 +90,11 @@ class ContextController extends Controller {
     }
 
     public function getAttributes() {
-        return response()->json([
-            'attributes' => Attribute::select('*',
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as label"),
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_root_url and short_name = 'de' limit 1) as root_label"))->orderBy('label', 'asc')->get()
-        ]);
+        return Attribute::all();
+    }
+
+    public function getContextTypes() {
+        return ContextType::all();
     }
 
     public function getContextData($id) {
@@ -172,59 +172,57 @@ class ContextController extends Controller {
 
     public function getAvailableAttributeTypes() {
         return response()->json([
-            'types' => [
-                [
-                    'datatype' => 'string',
-                    'description' => 'attribute.string.desc'
-                ],
-                [
-                    'datatype' => 'stringf',
-                    'description' => 'attribute.stringf.desc'
-                ],
-                [
-                    'datatype' => 'double',
-                    'description' => 'attribute.double.desc'
-                ],
-                [
-                    'datatype' => 'string-sc',
-                    'description' => 'attribute.string-sc.desc'
-                ],
-                [
-                    'datatype' => 'string-mc',
-                    'description' => 'attribute.string-mc.desc'
-                ],
-                [
-                    'datatype' => 'epoch',
-                    'description' => 'attribute.epoch.desc'
-                ],
-                [
-                    'datatype' => 'date',
-                    'description' => 'attribute.date.desc'
-                ],
-                [
-                    'datatype' => 'dimension',
-                    'description' => 'attribute.dimension.desc'
-                ],
-                [
-                    'datatype' => 'list',
-                    'description' => 'attribute.list.desc'
-                ],
-                [
-                    'datatype' => 'geography',
-                    'description' => 'attribute.geography.desc'
-                ],
-                [
-                    'datatype' => 'integer',
-                    'description' => 'attribute.integer.desc'
-                ],
-                [
-                    'datatype' => 'percentage',
-                    'description' => 'attribute.percentage.desc'
-                ],
-                [
-                    'datatype' => 'context',
-                    'description' => 'attribute.context.desc'
-                ]
+            [
+                'datatype' => 'string',
+                'description' => 'attribute.string.desc'
+            ],
+            [
+                'datatype' => 'stringf',
+                'description' => 'attribute.stringf.desc'
+            ],
+            [
+                'datatype' => 'double',
+                'description' => 'attribute.double.desc'
+            ],
+            [
+                'datatype' => 'string-sc',
+                'description' => 'attribute.string-sc.desc'
+            ],
+            [
+                'datatype' => 'string-mc',
+                'description' => 'attribute.string-mc.desc'
+            ],
+            [
+                'datatype' => 'epoch',
+                'description' => 'attribute.epoch.desc'
+            ],
+            [
+                'datatype' => 'date',
+                'description' => 'attribute.date.desc'
+            ],
+            [
+                'datatype' => 'dimension',
+                'description' => 'attribute.dimension.desc'
+            ],
+            [
+                'datatype' => 'list',
+                'description' => 'attribute.list.desc'
+            ],
+            [
+                'datatype' => 'geography',
+                'description' => 'attribute.geography.desc'
+            ],
+            [
+                'datatype' => 'integer',
+                'description' => 'attribute.integer.desc'
+            ],
+            [
+                'datatype' => 'percentage',
+                'description' => 'attribute.percentage.desc'
+            ],
+            [
+                'datatype' => 'context',
+                'description' => 'attribute.context.desc'
             ]
         ]);
     }

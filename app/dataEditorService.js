@@ -281,30 +281,23 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     }
 
-    init();
+    editor.getAttributes = function() {
+        return httpGetPromise.getData('api/context/attribute').then(function(response) {
+            return response;
+        });
+    };
 
-    function init() {
-        getGeometryTypes();
-        httpGetFactory('api/context/attribute', function(response) {
-            angular.forEach(response.attributes, function(a) {
-                var entry = {
-                    aid: a.id,
-                    datatype: a.datatype,
-                    val: a.label
-                };
-                if(a.root_label) entry.root_label = a.root_label;
-                editor.existingAttributes.push(entry);
-            });
+    editor.getContextTypes = function() {
+        return httpGetPromise.getData('api/context/context_type').then(function(response) {
+            return response;
         });
-        httpGetFactory('api/context/attributetypes', function(response) {
-            angular.forEach(response.types, function(t) {
-                editor.attributeTypes.push({
-                    datatype: t.datatype,
-                    description: t.description
-                });
-            });
+    };
+
+    editor.getAttributeTypes = function() {
+        httpGetPromise.getData('api/context/attributetypes').then(function(response) {
+            return response;
         });
-    }
+    };
 
     function getGeometryTypes() {
         httpGetFactory('api/overlay/geometry_types', function(response) {
