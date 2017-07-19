@@ -297,6 +297,9 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
 
     map.getLayers = function() {
         return httpGetPromise.getData('api/overlay').then(function(response) {
+            angular.forEach(response.layers, function(l) {
+                l.opacity = parseFloat(l.opacity);
+            });
             return response.layers;
         });
     };
