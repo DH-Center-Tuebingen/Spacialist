@@ -1,8 +1,10 @@
 spacialistApp.component('bibliography', {
     bindings: {
-        bibliography: '<'
+        bibliography: '<',
+        user: '<'
     },
-    templateUrl: 'bibliography.html'
+    templateUrl: 'bibliography.html',
+    controller: 'bibliographyCtrl'
 });
 
 spacialistApp.component('bibedit', {

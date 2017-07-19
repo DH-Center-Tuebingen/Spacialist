@@ -1139,6 +1139,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 resolve: {
                     bibliography: function(literatureService) {
                         return literatureService.getAll();
+                    },
+                    user: function(user) {
+                        // TODO other access to user object?
+                        return user;
                     }
                 }
             })

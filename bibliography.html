@@ -139,7 +139,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="entry in $ctrl.bibliography">
+                <tr ng-repeat="entry in $ctrl.bibliography | orderBy:['!' + sortType, sortType]:sortReverse | filter:searchTerm">
                     <td>
                         {{ entry.type }}
                     </td>
@@ -212,13 +212,13 @@
                     <td>
                     	{{ entry.school }}
                     </td>
-                    <td ng-if="currentUser.permissions.add_remove_literature">
+                    <td ng-if="$ctrl.user.permissions.add_remove_literature">
                         <button type="button" class="btn btn-danger" ng-click="deleteLiteratureEntry(entry)">
                             <i class="material-icons">delete</i>
                         </button>
                     </td>
-                    <td ng-if="currentUser.permissions.edit_literature">
-                        <button type="button" class="btn btn-info" ng-click="editLiteratureEntry(entry)">
+                    <td ng-if="$ctrl.user.permissions.edit_literature">
+                        <button type="button" class="btn btn-info" ui-sref="root.bibliography.edit({id: entry.id})">
                             <i class="material-icons">mode_edit</i>
                         </button>
                     </td>
@@ -226,10 +226,10 @@
             </tbody>
         </table>
     </div>
-    <button type="button" class="btn btn-success" id="literature-add-button" ng-click="openAddLiteratureDialog()" ng-if="currentUser.permissions.add_remove_literature">
+    <button type="button" class="btn btn-success" id="literature-add-button" ng-click="openAddLiteratureDialog()" ng-if="$ctrl.user.permissions.add_remove_literature">
         <i class="material-icons">add</i> {{'literature.add'|translate}}
     </button>
-    <button type="file" id="literature-import-button" class="btn btn-primary" ngf-select="importBibTexFile($file, $invalidFiles)" accept="application/rdf+xml,text/plain,application/x-turtle" ngf-max-size="10MB" ng-if="currentUser.permissions.add_remove_literature">
+    <button type="file" id="literature-import-button" class="btn btn-primary" ngf-select="importBibTexFile($file, $invalidFiles)" accept="application/rdf+xml,text/plain,application/x-turtle" ngf-max-size="10MB" ng-if="$ctrl.user.permissions.add_remove_literature">
         Import BibTex File
     </button>
 </div>
