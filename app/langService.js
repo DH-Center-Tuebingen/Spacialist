@@ -37,39 +37,18 @@ spacialistApp.service('langService', ['$translate', 'httpGetPromise', function($
         flagCode: ''
     };
 
-    setInitLanguage();
-
-    function setInitLanguage() {
-        var storedLang = localStorage.getItem('NG_TRANSLATE_LANG_KEY');
-        // check if there is a stored language
-        if(storedLang === null) {
-            updateLanguage($translate.resolveClientLocale());
-        } else {
-            updateLanguage(storedLang);
-        }
-    }
-
-    function updateLanguage(langKey) {
-        if(typeof langKey == 'undefined') {
-            lang.currentLanguage.label = '';
-            lang.currentLanguage.flagCode = '';
-        } else {
-            var newLang = lang.availableLanguages[langKey];
-            lang.currentLanguage.label = newLang.label;
-            lang.currentLanguage.flagCode = newLang.flagCode;
-        }
-    }
-
     lang.getCurrentLanguage = function() {
         return $translate.use();
     };
 
-    lang.switchLanguage = function(key) {
+    lang.switchLanguage = function(key, concepts) {
         var langPromise = $translate.use(key);
         if(typeof langPromise == 'object') {
-            langPromise.then(function() { updateLanguage(key); });
+            langPromise.then(function() {
+                updateLanguage(key, concepts);
+            });
         } else {
-            updateLanguage(langPromise);
+            updateLanguage(langPromise, concepts);
         }
     };
 
@@ -87,6 +66,38 @@ spacialistApp.service('langService', ['$translate', 'httpGetPromise', function($
         return httpGetPromise.getData('api/thesaurus/concept/'+lang).then(function(response) {
             return response.data;
         });
+    }
+
+    setInitLanguage();
+
+    function setInitLanguage() {
+        var storedLang = localStorage.getItem('NG_TRANSLATE_LANG_KEY');
+        // check if there is a stored language
+        if(storedLang === null) {
+            updateLanguage($translate.resolveClientLocale());
+        } else {
+            updateLanguage(storedLang);
+        }
+    }
+
+    function updateLanguage(langKey, concepts) {
+        if(typeof langKey == 'undefined') {
+            lang.currentLanguage.label = '';
+            lang.currentLanguage.flagCode = '';
+        } else {
+            var newLang = lang.availableLanguages[langKey];
+            lang.currentLanguage.label = newLang.label;
+            lang.currentLanguage.flagCode = newLang.flagCode;
+        }
+        if(concepts) {
+            lang.getConcepts(langKey).then(function(newConcepts) {
+                for(var k in newConcepts) {
+                    if(newConcepts.hasOwnProperty(k)) {
+                        concepts[k] = newConcepts[k];
+                    }
+                }
+            });
+        }
     }
 
     return lang;

@@ -247,7 +247,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             color: '#808080',
             fillOpacity: 0.5
         };
-        map.map.selectedLayer = {};
         map.map.controls = {
             scale: true
         };

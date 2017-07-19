@@ -1,6 +1,9 @@
-spacialistApp.controller('LangCtrl', ['$scope', 'langService', function($scope, langService) {
-    $scope.availableLanguages = langService.availableLanguages;
-    $scope.currentLanguage = langService.currentLanguage;
+spacialistApp.controller('langCtrl', ['$scope', 'langService', function($scope, langService) {
     $scope.isLangSet = langService.isLangSet;
-    $scope.switchLanguage = langService.switchLanguage;
+
+    var lConcepts = this.concepts;
+
+    $scope.switchLanguage = function(langKey) {
+        langService.switchLanguage(langKey, lConcepts);
+    };
 }]);

@@ -7,3 +7,14 @@ spacialistApp.component('root', {
     },
     template: '<ui-view/>'
 });
+
+spacialistApp.component('header', {
+    bindings: {
+        user: '<',
+        concepts: '<',
+        currentLanguage: '<',
+        availableLanguages: '<'
+    },
+    templateUrl: 'templates/header.html',
+    controller: 'langCtrl'
+});

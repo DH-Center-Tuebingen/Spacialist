@@ -1030,17 +1030,24 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
     $stateProvider
         .state('login', {
                 url: '/login',
-                templateUrl: 'layouts/login.html',
-                controller: 'userCtrl',
+                // templateUrl: 'layouts/login.html',
                 params: {
                     toState: 'spacialist',
                     toParams: {}
+                },
+                views: {
+                    header: {
+                        component: 'header'
+                    },
+                    content: {
+                        templateUrl: 'layouts/login.html',
+                        controller: 'userCtrl'
+                    }
                 }
             })
         .state('root', {
             abstract: true,
             url: '',
-            component: 'root',
             resolve: {
                 user: function(userService) {
                     return userService.getUser();
@@ -1055,8 +1062,25 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 concepts: function(langService, userConfig) {
                     return langService.getConcepts(userConfig.language);
+                },
+                currentLanguage: function(userConfig) {
+                    return {
+                        label: '',
+                        flagCode: userConfig.language
+                    };
+                },
+                availableLanguages: function(langService) {
+                    return langService.availableLanguages;
                 }
             },
+            views: {
+                header: {
+                    component: 'header'
+                },
+                content: {
+                    component: 'root'
+                }
+            }
         })
             .state('root.spacialist', {
                 url: '/s',
@@ -1086,7 +1110,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             })
                 .state('root.spacialist.data', {
                     url: '/context/{id:[0-9]+}',
-                    component: 'spacialistdata',
+                    // component: 'spacialistdata',
                     resolve: {
                         context: function(contexts, $transition$) {
                             var c = contexts.data[$transition$.params().id];
@@ -1105,6 +1129,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             // TODO
                             return [];
                         },
+                        geodate: function(context, map) {
+                            return map.geodata.linkedLayers[context.geodata_id];
+                        },
                         user: function(user) {
                             // TODO other access to user object?
                             return user;
@@ -1112,6 +1139,65 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         concepts: function(concepts) {
                             // TODO other access to concepts object?
                             return concepts;
+                        }
+                    },
+                    onEnter: function(geodate) {
+                        // TODO wait for init of geodata (mapService.initGeodata)
+                        if(geodate) geodate.openPopup();
+                    },
+                    views: {
+                        'context-detail': {
+                            component: 'spacialistdata',
+                        }
+                    }
+                })
+                .state('root.spacialist.geodata', {
+                    url: '/geodata/{id:[0-9]+}',
+                    resolve: {
+                        context: function(contexts, geodate, map) {
+                            var cid = map.geodata.linkedContexts[geodate.id];
+                            var c;
+                            if(cid) {
+                                c = contexts.data[cid];
+                                var lastmodified = c.updated_at || c.created_at;
+                                var d = new Date(lastmodified);
+                                c.lastmodified = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+                            }
+                            return c;
+                        },
+                        data: function(context, mainService) {
+                            return mainService.getContextData(context.id);
+                        },
+                        fields: function(context, mainService) {
+                            return mainService.getContextFields(context.context_type_id);
+                        },
+                        sources: function(context, mainService) {
+                            // TODO
+                            return [];
+                        },
+                        geodate: function(geodata, map, $transition$) {
+                            var gid = geodata.find(function(g) {
+                                return g.id == $transition$.params().id;
+                            });
+                            // TODO wait for init of geodata (mapService.initGeodata)
+                            return map.geodata.linkedLayers[gid];
+                        },
+                        user: function(user) {
+                            // TODO other access to user object?
+                            return user;
+                        },
+                        concepts: function(concepts) {
+                            // TODO other access to concepts object?
+                            return concepts;
+                        }
+                    },
+                    onEnter: function(geodate) {
+                        // TODO wait for init of geodata (mapService.initGeodata)
+                        if(geodate) geodate.openPopup();
+                    },
+                    views: {
+                        'context-detail': {
+                            component: 'spacialistdata'
                         }
                     }
                 })

@@ -17,6 +17,7 @@ spacialistApp.component('spacialistdata', {
         data: '<',
         fields: '<',
         sources: '<',
+        geodate: '<',
         user: '<',
         concepts: '<'
     },
