@@ -95,11 +95,8 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
     };
 
     user.getRolePermissions = function(role) {
-        if(role.permissions) role.permissions.length = 0;
         httpGetFactory('api/user/role/' + role.id + '/permission', function(response) {
-            angular.forEach(response.permissions, function(perm) {
-                role.permissions.push(perm);
-            });
+            role.permissions = response.permissions;
         });
     };
 

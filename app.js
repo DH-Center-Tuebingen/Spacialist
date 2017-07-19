@@ -1156,11 +1156,39 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 url: '/role',
                 component: 'role',
                 resolve: {
-                    // roles: {}, //TODO
-                    // permissions: {}, //TODO
-                    // permissionsPerRole: {}, //TODO
+                    roles: function(userService) {
+                        return userService.getRoles();
+                    },
+                    permissions: function(userService) {
+                        return userService.getPermissions();
+                    },
+                    permissionsPerRole: function(roles, userService) {
+                        for(var i=0; i<roles.length; i++) {
+                            userService.getRolePermissions(roles[i]);
+                        }
+                    },
+                    user: function(user) {
+                        // TODO other access to user object?
+                        return user;
+                    }
                 }
             })
+                .state('root.role.edit', {
+                    url: '/edit/{id:[0-9]+}',
+                    component: 'roleedit',
+                    resolve: {
+                        user: function(user) {
+                            // TODO other access to user object?
+                            return user;
+                        },
+                        role: function(roles, $transition$) {
+                            // TODO open modal
+                            return roles.find(function(r) {
+                                return r.id == $transition$.params().id;
+                            });
+                        }
+                    }
+                })
             .state('root.bibliography', {
                 url: '/bibliography',
                 component: 'bibliography',
