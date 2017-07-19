@@ -109,6 +109,7 @@ $app->group([
         $app->get('', 'UserController@getUsers');
         $app->get('active', 'UserController@getActiveUser');
         $app->get('role', 'UserController@getRoles');
+        $app->get('permission', 'UserController@getPermissions');
         $app->get('role/by_user/{id:[0-9]+}', 'UserController@getRolesByUser');
         $app->get('role/{id:[0-9]+}/permission', 'UserController@getPermissionsByRole');
 

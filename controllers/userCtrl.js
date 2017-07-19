@@ -40,30 +40,6 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', 'a
         $state.go('root.role', {});
     };
 
-    $scope.openAttributeEditor = function() {
-        $state.go('root.editor.data-model', {});
-    };
-
-    $scope.openLayerEditor = function() {
-        $state.go('root.editor.layer', {});
-    };
-
-    $scope.openLiteratureView = function() {
-        $state.go('root.bibliography', {});
-    };
-
-    $scope.getUserList = function() {
-        userService.getUserList();
-    };
-
-    $scope.getRoles = function() {
-        userService.getRoles();
-    };
-
-    $scope.getRolePermissions = function(role) {
-        userService.getRolePermissions(role);
-    };
-
     $scope.addRolePermission = function(item, role) {
         userService.addRolePermission(item, role);
     };
@@ -82,10 +58,6 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', 'a
 
     $scope.openEditRoleDialog = function(role) {
         userService.openEditRoleDialog(role);
-    };
-
-    $scope.getUserRoles = function(id, $index) {
-        userService.getUserRoles(id, $index);
     };
 
     $scope.addUserRole = function($item, user_id) {

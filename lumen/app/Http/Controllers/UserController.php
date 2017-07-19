@@ -55,7 +55,18 @@ class UserController extends Controller
             ], 403);
         }
         return response()->json([
-            'roles' => Role::all(),
+            'roles' => Role::all()
+        ]);
+    }
+
+    public function getPermissions() {
+        $user = \Auth::user();
+        if(!$user->can('add_remove_permission') && !$user->can('add_edit_role')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        return response()->json([
             'permissions' => Permission::all()
         ]);
     }

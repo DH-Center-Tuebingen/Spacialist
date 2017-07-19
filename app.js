@@ -1119,11 +1119,39 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 url: '/user',
                 component: 'user',
                 resolve: {
-                    // users: {}, //TODO
-                    // roles: {}, //TODO
-                    // rolesPerUser: {}, //TODO
+                    user: function(user) {
+                        // TODO other access to user object?
+                        return user;
+                    },
+                    users: function(userService) {
+                        return userService.getUsers();
+                    },
+                    roles: function(userService) {
+                        return userService.getRoles();
+                    },
+                    rolesPerUser: function(users, userService) {
+                        for(var i=0; i<users.length; i++) {
+                            userService.getUserRoles(users[i]);
+                        }
+                    }
                 }
             })
+                .state('root.user.edit', {
+                    url: '/edit/{id:[0-9]+}',
+                    component: 'useredit',
+                    resolve: {
+                        user: function(user) {
+                            // TODO other access to user object?
+                            return user;
+                        },
+                        selectedUser: function(users, $transition$) {
+                            // TODO open modal
+                            return users.find(function(u) {
+                                return u.id == $transition$.params().id;
+                            });
+                        }
+                    }
+                })
             .state('root.role', {
                 url: '/role',
                 component: 'role',

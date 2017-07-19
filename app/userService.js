@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpGetFactory, httpPutFactory, httpPatchFactory, httpDeleteFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpDeleteFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -6,7 +6,6 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         user: {}
     };
     user.loginError = {};
-    user.users = [];
     user.roles = [];
     user.permissions = [];
     user.can = function(to) {
@@ -46,17 +45,13 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
 
     user.getUser = getUser
 
-    user.getUserList = function() {
-        user.users.length = 0;
-        httpGetFactory('api/user', function(response) {
-            angular.forEach(response.users, function(u, key) {
-                user.users.push(u);
-            });
+    user.getUsers = function() {
+        return httpGetPromise.getData('api/user').then(function(response) {
+            return response.users;
         });
     };
 
     user.deleteUser = function(u) {
-        console.log(u);
         httpDeleteFactory('api/user/' + u.id, function(response) {
             var index = user.users.indexOf(u);
             if(index > -1) user.users.splice(index, 1);
@@ -88,16 +83,14 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
     };
 
     user.getRoles = function() {
-        user.roles.length = 0;
-        user.permissions.length = 0;
-        httpGetFactory('api/user/role', function(response) {
-            angular.forEach(response.permissions, function(perm) {
-                user.permissions.push(perm);
-            });
-            angular.forEach(response.roles, function(role, key) {
-                role.permissions = [];
-                user.roles.push(role);
-            });
+        return httpGetPromise.getData('api/user/role').then(function(response) {
+            return response.roles;
+        });
+    };
+
+    user.getPermissions = function() {
+        return httpGetPromise.getData('api/user/permission').then(function(response) {
+            return response.permissions;
         });
     };
 
@@ -184,9 +177,9 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         });
     };
 
-    user.getUserRoles = function(id, $index) {
-        httpGetFactory('api/user/role/by_user/' + id, function(response) {
-            user.users[$index].roles = response.roles;
+    user.getUserRoles = function(user) {
+        httpGetFactory('api/user/role/by_user/' + user.id, function(response) {
+            user.roles = response.roles;
         });
     };
 
