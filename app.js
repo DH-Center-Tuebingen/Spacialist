@@ -1203,9 +1203,22 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     url: '/layer',
                     component: 'layer',
                     resolve: {
-                        // layers: {}, //TODO
+                        avLayers: function(mapService) {
+                            return mapService.getLayers();
+                        }
                     }
-                });
+                })
+                    .state('root.editor.layer.edit', {
+                        url: '/layer/{id:[0-9]+}',
+                        component: 'layeredit',
+                        resolve: {
+                            layer: function(avLayers, $transition$) {
+                                return avLayers.find(function(l) {
+                                    return l.id == $transition$.params().id;
+                                });
+                            }
+                        }
+                    });
 });
 
 /**
