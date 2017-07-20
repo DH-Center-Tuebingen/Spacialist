@@ -1290,15 +1290,49 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             })
                 .state('root.bibliography.edit', {
                     url: '/edit/{id:[0-9]+}',
-                    component: 'bibedit',
                     resolve: {
                         entry: function(bibliography, $transition$) {
                             // TODO open modal
                             return bibliography.find(function (entry) {
                                 return entry.id == $transition$.params().id;
                             });
+                        },
+                        types: function(literatureService) {
+                            return literatureService.getTypes();
                         }
-                    }
+                    },
+                    onEnter: ['entry', 'types', '$state', '$uibModal', function(entry, types, $state, $uibModal) {
+                        $uibModal.open({
+                            templateUrl: "modals/edit-bibliography.html",
+                            controller: ['$scope', 'literatureService', function($scope, literatureService) {
+                                $scope.editEntry = angular.copy(entry);
+                                $scope.type = {
+                                    selected: types.find(function(t) {
+                                        return t.name == $scope.editEntry.type;
+                                    })
+                                };
+                                delete $scope.editEntry.type;
+                                $scope.types = types;
+
+                                $scope.cancel = function() {
+                                    $scope.$dismiss();
+                                };
+
+                                $scope.onEdit = function(editEntry, selectedType) {
+                                    literatureService.editLiterature(editEntry, selectedType).then(function(response) {
+                                        for(var k in response) {
+                                            if(response.hasOwnProperty(k)) {
+                                                entry[k] = response[k];
+                                            }
+                                        }
+                                        $scope.$close(true);
+                                    });
+                                };
+                            }]
+                        }).result.finally(function() {
+                            $state.go('^');
+                        });
+                    }]
                 })
             .state('root.editor', {
                 abstract: true,

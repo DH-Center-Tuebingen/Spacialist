@@ -72,6 +72,7 @@
     "literature.new.heading": "Neuer Literatureintrag",
     "literature.new.type": "Typ",
     "literature.new.bibtex-code": "BibTeX-Code",
+    "literature.edit.heading": "Literatureintrag editieren",
     "literature.search-placeholder": "Literatur durchsuchen",
     "user.name": "Name",
     "user.email": "Email-Adresse",

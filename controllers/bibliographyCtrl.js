@@ -3,13 +3,7 @@ spacialistApp.controller('bibliographyCtrl', function($scope, literatureService)
     $scope.sortReverse = false;
     $scope.searchTerm = '';
 
-    $scope.deleteLiteratureEntry = function(entry) {
-        literatureService.deleteLiteratureEntry(entry);
-    };
-
-    $scope.editLiteratureEntry = function(entry) {
-        literatureService.editLiteratureEntry(entry);
-    };
+    $scope.deleteLiteratureEntry = literatureService.deleteLiteratureEntry;
 
     $scope.openAddLiteratureDialog = function() {
         literatureService.openAddLiteratureDialog();

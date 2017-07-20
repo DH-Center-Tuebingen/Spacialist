@@ -72,6 +72,7 @@
     "literature.new.heading": "New Bibliography Item",
     "literature.new.type": "Type",
     "literature.new.bibtex-code": "BibTeX Code",
+    "literature.edit.heading": "Edit Bibliography Item",
     "literature.search-placeholder": "Search bibliography",
     "context-type.add.new": "Add New Context-Type",
     "context-type.new.heading": "Create New Context-Type",

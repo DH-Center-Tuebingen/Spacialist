@@ -1,4 +1,4 @@
-spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPatchFactory', 'httpDeleteFactory', 'snackbarService', '$http', '$translate', 'Upload', function(modalFactory, httpGetFactory, httpGetPromise, httpPostFactory, httpPatchFactory, httpDeleteFactory, snackbarService, $http, $translate, Upload) {
+spacialistApp.service('literatureService', ['modalFactory', 'httpGetPromise', 'httpPostFactory', 'httpPatchPromise', 'httpDeleteFactory', 'snackbarService', '$translate', 'Upload', function(modalFactory, httpGetPromise, httpPostFactory, httpPatchPromise, httpDeleteFactory, snackbarService, $translate, Upload) {
     var literature = {};
     literature.literature = [];
     literature.literatureOptions = {};
@@ -20,7 +20,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
                 'title', 'publisher', 'year'
             ],
             optionalFields: [
-                'author', 'editor', 'volume', 'number', 'address', 'series', 'address', 'edition', 'month', 'note'
+                'author', 'editor', 'volume', 'number', 'address', 'series', 'edition', 'month', 'note'
             ]
         },
         {
@@ -150,46 +150,15 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
         });
     };
 
-    literature.getEntry = function(id) {
-        return literature.getAll().then(function (entries) {
-            return entries.find(function (entry) {
-                return entry.id == id;
-            });
-        });
-    };
+    literature.getTypes = function() {
+        return literature.literatureOptions.availableTypes;
+    }
 
-    literature.getLiterature = function() {
-        var promise = httpGetFactory('api/literature', function(response) {
-            literature.literature.length = 0;
-            angular.forEach(response, function(entry, key) {
-                literature.literature.push(entry);
-            });
-        });
-    };
-
-    literature.getLiterature();
-
-    literature.deleteLiteratureEntry = function(entry) {
-        var index = literature.literature.indexOf(entry);
+    literature.deleteLiteratureEntry = function(entry, bibliography) {
+        var index = bibliography.indexOf(entry);
         httpDeleteFactory('api/literature/' + entry.id, function(response) {
-            literature.literature.splice(index, 1);
+            bibliography.splice(index, 1);
         });
-    };
-
-    literature.editLiteratureEntry = function(entry) {
-        var index = literature.literature.indexOf(entry);
-        var entryCopy = angular.copy(entry);
-        var typeName = entryCopy.type;
-        delete entryCopy.type;
-        var type;
-        for(var i=0; i<literature.literatureOptions.availableTypes.length; i++) {
-            var curr = literature.literatureOptions.availableTypes[i];
-            if(curr.name == typeName) {
-                type = curr;
-                break;
-            }
-        }
-        modalFactory.addLiteratureModal(literature.editLiterature, literature.literatureOptions.availableTypes, type, entryCopy, index);
     };
 
     literature.openAddLiteratureDialog = function() {
@@ -265,17 +234,12 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
         });
     };
 
-    literature.editLiterature = function(fields, type, index) {
-        if(typeof type == 'undefined') return;
-        if(typeof fields == 'undefined') return;
+    literature.editLiterature = function(entry, type) {
+        if(!type || !entry) return;
         var mandatorySet = true;
         for(var i=0; i<type.mandatoryFields.length; i++) {
             var m = type.mandatoryFields[i];
-            if(typeof fields[m] == 'undefined') {
-                mandatorySet = false;
-                break;
-            }
-            if(fields[m].length === 0) {
+            if(!fields[m] || fields[m].length === 0) {
                 mandatorySet = false;
                 break;
             }
@@ -285,21 +249,21 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetFactory', 'h
             return;
         }
         var formData = new FormData();
-        for(var field in fields) {
-            if(fields[field] !== null && fields[field] !== '') {
-                if (field == 'id') {
-                    continue;
+        for(var k in entry) {
+            if(entry.hasOwnProperty(k)) {
+                if(k == 'id') continue;
+                if(entry[k] !== null && entry[k] !== '') {
+                    formData.append(k, entry[k]);
                 }
-                formData.append(field, fields[field]);
             }
         }
         formData.append('type', type.name);
-        httpPatchFactory('api/literature/' + fields.id, formData, function(response) {
+        return httpPatchPromise.getData('api/literature/' + entry.id, formData).then(function(response) {
             if(response.error) {
                 alert(response.error);
                 return;
             }
-            literature.literature[index] = response.literature;
+            return response.literature;
         });
 
     };
