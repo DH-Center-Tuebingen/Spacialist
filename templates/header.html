@@ -58,7 +58,7 @@
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown" uib-dropdown>
                     <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        <flag country="{{ $ctrl.currentLanguage.flagCode }}" size="16"></flag> <i class="material-icons">arrow_drop_down</i>
+                        <flag country="{{ currentLanguage.flagCode }}" size="16"></flag> <i class="material-icons">arrow_drop_down</i>
                     </a>
                     <ul class="dropdown-menu" uib-dropdown-menu>
                         <li ng-repeat="(code,lang) in $ctrl.availableLanguages">

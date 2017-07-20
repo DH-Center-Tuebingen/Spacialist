@@ -15,7 +15,7 @@ spacialistApp.component('header', {
     bindings: {
         user: '<',
         concepts: '<',
-        currentLanguage: '<',
+        userConfig: '<',
         availableLanguages: '<'
     },
     templateUrl: 'templates/header.html',

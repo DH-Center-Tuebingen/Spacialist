@@ -1076,12 +1076,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 concepts: function(langService, userConfig) {
                     return langService.getConcepts(userConfig.language);
                 },
-                currentLanguage: function(userConfig) {
-                    return {
-                        label: '',
-                        flagCode: userConfig.language
-                    };
-                },
                 availableLanguages: function(langService) {
                     return langService.availableLanguages;
                 }
