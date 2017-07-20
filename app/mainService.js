@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$state', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, searchService, $timeout, $state, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'httpDeletePromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$state', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, httpDeletePromise, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, searchService, $timeout, $state, $translate) {
     var main = {};
     var modalFields;
 
@@ -128,25 +128,11 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
 
-    main.createNewContext = function(data) {
-        if(main.hasUnstagedChanges()) {
-            var onDiscard = function() {
-                main.currentElement.form.$setPristine();
-                return main.createNewContext(data);
-            };
-            var onConfirm = function() {
-                main.currentElement.form.$setPristine();
-                main.storeElement(main.currentElement.element, main.currentElement.data);
-                return main.createNewContext(data);
-            };
-            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
-            return;
-        }
-
+    main.createNewContext = function(data, contextTypes) {
         $translate('create-dialog.new-top-context').then(function(translation) {
             var parent = {name : translation};
             angular.extend(parent, data);
-            main.createModalHelper(parent, 'context', true);
+            main.createModalHelper(parent, 'context', contextTypes);
         });
     };
 
@@ -252,25 +238,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             promise = httpPostPromise.getData('api/context', formData);
         }
         return promise;
-    }
-
-    main.deleteElement = function(elem) {
-        modalFactory.deleteModal(elem.name, function() {
-            deleteElement(elem, function() {
-                deleteContext(elem.id);
-                var content = $translate.instant('snackbar.element-deleted.success', { name: elem.title  });
-                snackbarService.addAutocloseSnack(content, 'success');
-                if(main.currentElement.element.id == elem.id) {
-                    main.unsetCurrentElement();
-                }
-            });
-        }, 'delete-confirm.warning');
-    };
-
-    function deleteElement(elem, onSuccess) {
-        httpDeleteFactory('api/context/' + elem.id, function(callback) {
-            onSuccess();
-        });
     }
 
     main.openSourceModal = function(fieldname, fieldid, currentVal, currentDesc) {
@@ -427,26 +394,29 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         angular.merge(main.contexts.data[id], newValues);
     };
 
-    function deleteContext(id) {
-        rootId = main.contexts.data[id].root_context_id;
-        var index;
-        var children;
-        if(rootId && rootId > 0) {
-            index = main.contexts.children[rootId].indexOf(id);
-            children = main.contexts.children[rootId];
-        }
-        else {
-            index = main.contexts.roots.indexOf(id);
-            children = main.contexts.roots;
-        }
-        if(index > -1) {
-            children.splice(index, 1);
-        }
-        for(var i=index; i<children.length; i++) {
-            main.contexts.data[children[i]].rank--;
-        }
-        delete main.contexts.data[id];
-    }
+    main.deleteContext = function(context, contexts) {
+        var id = context.id;
+        return httpDeletePromise.getData('api/context/' + id).then(function(callback) {
+            var rootId = contexts.data[id].root_context_id;
+            var index;
+            var children;
+            if(rootId && rootId > 0) {
+                index = contexts.children[rootId].indexOf(id);
+                children = contexts.children[rootId];
+            }
+            else {
+                index = contexts.roots.indexOf(id);
+                children = contexts.roots;
+            }
+            if(index > -1) {
+                children.splice(index, 1);
+            }
+            for(var i=index; i<children.length; i++) {
+                contexts.data[children[i]].rank--;
+            }
+            delete contexts.data[id];
+        });
+    };
 
     /**
     *   This function expands the tree up the selected element
@@ -467,22 +437,22 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     /**
     *   This function adds a new context to the tree
     */
-    main.addContextToTree = function(elem, parent) {
+    main.addContextToTree = function(elem, parent, tree) {
         // insert the context into the context list
         elem.collapsed = true;
         elem.visible = true;
-        main.contexts.data[elem.id] = elem;
+        tree.data[elem.id] = elem;
 
         var children;
         // insert the context into the tree
-        if(parent && parent.id && parent.id > 0) { // elem is no root context
-            if(!main.contexts.children[parent.id]) { // parent was leaf before, create children list
-                main.contexts.children[parent.id] = [];
+        if(parent > 0) { // elem is no root context
+            if(!tree.children[parent]) { // parent was leaf before, create children list
+                tree.children[parent] = [];
             }
-            children = main.contexts.children[parent.id];
+            children = tree.children[parent];
         }
         else { // elem is root context
-            children = main.contexts.roots;
+            children = tree.roots;
         }
         var index = elem.rank - 1; // rank is 1-n, index 0-(n-1)
         // insert elem at index and update other indices
@@ -715,16 +685,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
 
-    main.createModalHelper = function(parent, elemType, copyPosition) {
+    main.createModalHelper = function(parent, elemType, contextTypes) {
         if(main.hasUnstagedChanges()) {
             var onDiscard = function() {
                 main.currentElement.form.$setPristine();
-                return main.createModalHelper(parent, elemType, copyPosition);
+                return main.createModalHelper(parent, elemType, contextTypes);
             };
             var onConfirm = function() {
                 main.currentElement.form.$setPristine();
                 main.storeElement(main.currentElement.element, main.currentElement.data);
-                return main.createModalHelper(parent, elemType, copyPosition);
+                return main.createModalHelper(parent, elemType, contextTypes);
             };
             modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
             return;
@@ -732,10 +702,14 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         var selection = [];
         var msg = '';
         if(elemType == 'context') {
-            selection = main.contextTypes.slice();
+            selection = contextTypes.filter(function(t) {
+                return t.type === 0;
+            });
             msg = 'create-dialog.new-context-description';
         } else if(elemType == 'find') {
-            selection = main.artifacts.slice();
+            selection = contextTypes.filter(function(t) {
+                return t.type === 1;
+            });
             msg = 'create-dialog.new-artifact-description';
         }
         modalFactory.createModal(parent.name, msg, selection, function(name, type) {
@@ -759,8 +733,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     updated_at: newContext.updated_at,
                     created_at: newContext.created_at
                 };
-                main.addContextToTree(elem, parent);
-                main.setCurrentElement(elem, main.currentElement);
+                // main.addContextToTree(elem, parent);
+                // main.setCurrentElement(elem, main.currentElement);
+                $state.go('root.spacialist.data', {id: elem.id});
             });
         });
     };

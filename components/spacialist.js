@@ -5,7 +5,8 @@ spacialistApp.component('spacialist', {
         concepts:'<',
         map: '<',
         layer: '<',
-        geodata: '<'
+        geodata: '<',
+        contextTypes: '<'
     },
     templateUrl: 'view.html',
     controller: 'mainCtrl'

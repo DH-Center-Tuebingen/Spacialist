@@ -5,7 +5,10 @@ spacialistApp.component('root', {
         userConfig: '<',
         concepts: '<'
     },
-    template: '<ui-view/>'
+    template: '<ui-view/>',
+    controller: function($scope) {
+        $scope.concepts = this.concepts;
+    }
 });
 
 spacialistApp.component('header', {

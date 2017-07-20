@@ -246,7 +246,7 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
     };
     this.addLiteratureModal = function(onCreate, types, selectedType, fields, index) {
         var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/new-literature.html',
+            templateUrl: 'modals/add-bibliography.html',
             controller: function($uibModalInstance) {
                 this.availableTypes = types;
                 this.selectedType = selectedType || types[0];
@@ -843,6 +843,19 @@ spacialistApp.factory('httpDeleteFactory', function($http) {
     };
 });
 
+spacialistApp.factory('httpDeletePromise', function($http) {
+    var getData = function(url) {
+        return $http.delete(url, {
+            headers: {
+                'Content-Type': undefined
+            }
+        }).then(function(result) {
+            return result.data;
+        });
+    };
+    return { getData: getData };
+});
+
 spacialistApp.factory('httpPatchFactory', function($http) {
     return function(url, data, callback) {
         data.append('_method', 'PATCH');
@@ -1150,6 +1163,102 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             component: 'spacialistdata',
                         }
                     }
+                })
+                .state('root.spacialist.add-top', {
+                    url: '/add',
+                    redirectTo: {
+                        state: 'root.spacialist.add',
+                        params: {
+                            type: 'context',
+                            id: 0
+                        }
+                    }
+                })
+                .state('root.spacialist.add', {
+                    url: '/add/{id:[0-9]+}/{type}',
+                    resolve: {
+                        contextTypes: function(dataEditorService) {
+                            return dataEditorService.getContextTypes();
+                        }
+                    },
+                    onEnter: ['contexts', 'concepts', 'contextTypes', 'mainService', 'httpPostFactory', '$transition$', '$state', '$uibModal', function(contexts, concepts, contextTypes, mainService, httpPostFactory, $transition$, $state, $uibModal) {
+                        $uibModal.open({
+                            templateUrl: "modals/add-context.html",
+                            controller: ['$scope', function($scope) {
+                                $scope.contexts = contexts;
+                                $scope.concepts = concepts;
+                                $scope.type = $transition$.params().type;
+                                $scope.parent = $transition$.params().id;
+
+                                if($scope.type == 'context') {
+                                    $scope.contextTypes = contextTypes.filter(function(t) {
+                                        return t.type === 0;
+                                    });
+                                } else if($scope.type == 'find') {
+                                    $scope.contextTypes = contextTypes.filter(function(t) {
+                                        return t.type == 1;
+                                    });
+                                }
+                                $scope.newContext = {
+                                    name: '',
+                                    type: ''
+                                };
+                                $scope.newContext.parent = $scope.parent > 0 ? $scope.parent : undefined;
+
+                                $scope.cancel = function() {
+                                    $scope.$dismiss();
+                                    $state.go('^');
+                                };
+
+                                $scope.onAdd = function(c) {
+                                    var formData = new FormData();
+                                    formData.append('name', c.name);
+                                    formData.append('context_type_id', c.type.id);
+                                    if(c.parent) {
+                                        formData.append('root_context_id', c.parent);
+                                    }
+                                    httpPostFactory('api/context', formData, function(response) {
+                                        var newContext = response.context;
+                                        mainService.addContextToTree(newContext, c.parent, contexts);
+                                        $scope.$close(true);
+                                        $state.go('root.spacialist.data', {id: newContext.id});
+                                    });
+                                };
+                            }]
+                        });
+                    }]
+                })
+                .state('root.spacialist.delete', {
+                    url: '/context/{id:[0-9]+}/delete',
+                    resolve: {
+                        context: function(contexts, $transition$) {
+                            return contexts.data[$transition$.params().id];
+                        }
+                    },
+                    onEnter: ['contexts', 'context', 'concepts', 'mainService', 'snackbarService', '$transition$', '$state', '$uibModal', '$translate', function(contexts, context, concepts, mainService, snackbarService, $transition$, $state, $uibModal, $translate) {
+                        $uibModal.open({
+                            templateUrl: "modals/delete-context.html",
+                            controller: ['$scope', function($scope) {
+                                $scope.contexts = contexts;
+                                $scope.concepts = concepts;
+                                $scope.context = context;
+
+                                $scope.cancel = function() {
+                                    $scope.$dismiss();
+                                };
+
+                                $scope.onDelete = function(context) {
+                                    mainService.deleteContext(context, contexts).then(function() {
+                                        var content = $translate.instant('snackbar.element-deleted.success', { name: context.name  });
+                                        snackbarService.addAutocloseSnack(content, 'success');
+                                        $scope.$close(true);
+                                    });
+                                };
+                            }]
+                        }).result.finally(function() {
+                            $state.go('^');
+                        });;
+                    }]
                 })
                 .state('root.spacialist.geodata', {
                     url: '/geodata/{id:[0-9]+}',

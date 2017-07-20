@@ -267,7 +267,15 @@ class ContextController extends Controller {
         $context->lasteditor = $user['name'];
         $context->save();
 
-        return response()->json(['context' => $context]);
+        return response()->json([
+            'context' => ContextType::join('contexts',
+                    'contexts.context_type_id', '=', 'context_types.id'
+                )
+                ->select('contexts.*', 'type', 'thesaurus_url as uri')
+                ->where('contexts.id', $context->id)
+                ->orderBy('rank')
+                ->first()
+        ]);
     }
 
     public function duplicate(Request $request, $id) {

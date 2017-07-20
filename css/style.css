@@ -617,6 +617,10 @@ body > .angular-bootstrap-contextmenu.dropdown {
     top: 7px;
 }
 
+.context-menu-icon {
+    padding-right: 16px;
+}
+
 g.leaf > rect {
   stroke: #ff0000;
   stroke-width: 0.25px;

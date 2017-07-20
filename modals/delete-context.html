@@ -1,0 +1,17 @@
+<div class="modal-header">
+    <h4>{{ 'delete' | translate }}</h4>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <p>{{ 'delete-confirm.question' | translate: {name: context.name} }}</p>
+        <div class="alert alert-danger">
+            <p translate="delete-confirm.warning">
+            </p>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" ng-click="onDelete(context)">{{ 'delete' | translate }}</button>
+    <button type="button" class="btn btn-default"
+      ng-click="cancel()">{{ 'dont delete' | translate }}</button>
+</div>
