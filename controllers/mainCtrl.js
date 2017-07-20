@@ -1,5 +1,6 @@
 spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$state', '$translate', '$timeout', function($scope, mainService, mapService, $state, $translate, $timeout) {
     $scope.moduleExists = mainService.moduleExists;
+    $scope.filterTree = mainService.filterTree;
 
     var localContexts = this.contexts;
     var localLayers = this.layer;
