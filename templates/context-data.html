@@ -6,7 +6,7 @@
         <a class="btn btn-success btn-fab btn-fab-mini" href="" ng-click="storeElement()">
             <i class="material-icons">save</i>
         </a>
-        <a class="btn btn-danger btn-fab btn-fab-mini" href="" ng-click="deleteElement(currentElement.element)">
+        <a class="btn btn-danger btn-fab btn-fab-mini" ui-sref="root.spacialist.delete({id: $ctrl.context.id})">
             <i class="material-icons">delete</i>
         </a>
     </p>
