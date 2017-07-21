@@ -1,5 +1,6 @@
 spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', '$state', 'modalFactory', function($scope, userService, mainService, $state, modalFactory) {
     var localUsers = this.users;
+    var localRoles = this.roles;
 
     $scope.loginError = userService.loginError;
     $scope.deleteUser = userService.deleteUser;
@@ -36,23 +37,19 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', '$
     };
 
     $scope.deleteRole = function(role) {
-        userService.deleteRole(role);
+        userService.deleteRole(role, localRoles);
     };
 
     $scope.openAddRoleDialog = function() {
-        userService.openEditRoleDialog();
+        userService.openAddRoleDialog(localRoles);
     };
 
-    $scope.openEditRoleDialog = function(role) {
-        userService.openEditRoleDialog(role);
+    $scope.addUserRole = function(item, user) {
+        userService.addUserRole(item, user);
     };
 
-    $scope.addUserRole = function(item, user_id) {
-        userService.addUserRole(item, user_id);
-    };
-
-    $scope.removeUserRole = function(item, user_id) {
-        userService.removeUserRole(item, user_id);
+    $scope.removeUserRole = function(item, user) {
+        userService.removeUserRole(item, user);
     };
 
     $scope.openAddUserDialog = function() {

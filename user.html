@@ -36,7 +36,7 @@
                 </button>
             </td>
             <td ng-if="$ctrl.user.permissions.add_remove_role">
-                <ui-select multiple ng-model="user.roles" close-on-select="false" name="user_roles_{{ user.id }}" id="user_roles_{{ user.id }}" on-select="addUserRole($item, user.id)" on-remove="removeUserRole($item, user.id)">
+                <ui-select multiple ng-model="user.roles" close-on-select="false" name="user_roles_{{ user.id }}" id="user_roles_{{ user.id }}" on-select="addUserRole($item, user)" on-remove="removeUserRole($item, user)">
                     <ui-select-match>{{ $item.display_name }}</ui-select-match>
                     <ui-select-choices repeat="role in $ctrl.roles | filter:$select.search">
                         {{ role.display_name }}

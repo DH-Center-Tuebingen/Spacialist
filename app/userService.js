@@ -60,7 +60,11 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
 
     user.openAddUserDialog = function(users) {
         modalFactory.addUserModal(user.addUser, users);
-    }
+    };
+
+    user.openAddRoleDialog = function(roles) {
+        modalFactory.addRoleModal(user.addRole, roles);
+    };
 
     user.addUser = function(name, email, password, users) {
         var formData = new FormData();
@@ -111,8 +115,50 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         });
     };
 
-    user.openEditRoleDialog = function(role) {
-        modalFactory.editRoleModal(editRole, role);
+    user.addRole = function(role, roles) {
+        if(!role.name) {
+            var content = $translate.instant('snackbar.role.missing-name.error');
+            snackbarService.addAutocloseSnack(content, 'error')
+            return;
+        }
+        var formData = new FormData();
+        for(var k in role) {
+            if(role.hasOwnProperty(k)) {
+                formData.append(k, role[k]);
+            }
+        }
+        httpPostFactory('api/user/role', formData, function(response)  {
+            var role = {};
+            for(var k in response.role) {
+                if(response.role.hasOwnProperty(k)) {
+                    role[k] = response.role[k];
+                }
+            }
+            roles.push(role);
+            var content = $translate.instant('snackbar.data-stored.success');
+            snackbarService.addAutocloseSnack(content, 'success');
+        });
+    };
+
+    user.editRole = function(orgRole, newRole) {
+        var oldValues = angular.copy(orgRole);
+        var formData = new FormData();
+        for(var k in newRole) {
+            if(newRole.hasOwnProperty(k)) {
+                if(newRole[k] != oldValues[k]) {
+                    formData.append(k, newRole[k]);
+                }
+            }
+        }
+        return httpPatchPromise.getData('api/user/role/' + orgRole.name, formData).then(function(response) {
+            for(var k in response.role) {
+                if(response.role.hasOwnProperty(k)) {
+                    orgRole[k] = response.role[k];
+                }
+            }
+            var content = $translate.instant('snackbar.data-updated.success');
+            snackbarService.addAutocloseSnack(content, 'success');
+        });
     };
 
     function editRole(role, changes) {
@@ -152,11 +198,11 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         }
     }
 
-    user.deleteRole = function(role) {
+    user.deleteRole = function(role, roles) {
         httpDeleteFactory('api/user/role/' + role.id, function(response) {
             if(response.error) return;
-            var index = user.roles.indexOf(role);
-            if(index > -1) user.roles.splice(index, 1);
+            var index = roles.indexOf(role);
+            if(index > -1) roles.splice(index, 1);
         });
     };
 
@@ -166,8 +212,12 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
             if(response.error) {
                 var index = role.permissions.indexOf(item);
                 if(index > -1) role.permissions.splice(index, 1);
+                var content = $translate.instant('snackbar.data-updated.error');
+                snackbarService.addAutocloseSnack(content, 'error');
                 return;
             }
+            var content = $translate.instant('snackbar.data-updated.success');
+            snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 
@@ -191,21 +241,34 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         });
     };
 
-    user.addUserRole = function(item, user_id) {
+    user.addUserRole = function(item, user) {
         var formData = new FormData();
         formData.append('role_id', item.id);
-        httpPatchFactory('api/user/' + user_id + '/attachRole', formData, function(response) {
-            // TODO only remove/add role if function returns no error
+        httpPatchFactory('api/user/' + user.id + '/attachRole', formData, function(response) {
+            // if an error occurs, remove added role
+            if(response.error) {
+                var index = user.roles.indexOf(item);
+                if(index > -1) user.roles.splice(index, 1);
+                var content = $translate.instant('snackbar.data-updated.error');
+                snackbarService.addAutocloseSnack(content, 'error');
+                return;
+            }
             var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 
-    user.removeUserRole = function(item, user_id) {
+    user.removeUserRole = function(item, user) {
         var formData = new FormData();
         formData.append('role_id', item.id);
         httpPatchFactory('api/user/' + user_id + '/detachRole', formData, function(response) {
-            // TODO only remove/add role if function returns no error
+            // if an error occurs, readd removed role
+            if(response.error) {
+                user.roles.push(item);
+                var content = $translate.instant('snackbar.data-updated.error');
+                snackbarService.addAutocloseSnack(content, 'error');
+                return;
+            }
             var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });

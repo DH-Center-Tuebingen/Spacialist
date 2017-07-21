@@ -164,6 +164,7 @@
     "user.edit.heading": "Benutzer Bearbeiten",
     "user.edit.new-password": "Neues Passwort",
     "role.edit.heading": "Rolle Bearbeiten",
+    "role.add.heading": "Neue Rolle anlegen",
     "map-marker.not-linked-info": "Diese Markierung ist mit keinem Kontext verknüpft.",
     "map-marker.how-to-link": "Um eine Verknüpfung herzustellen, wählen Sie einen Kontext aus dem Baum. Dann erscheint hier ein Knopf zum Verknüpfen der Markierung mit dem gewählten Kontext.",
     "map-marker.wrong-type.info": "Das ausgewählte Geodaten-Objekt kann nicht mit dem ausgewählten Kontext verknüpft werden, weil die erlaubten Geometrietypen ({{gtype}} und {{ctype}}) nicht übereinstimmen.",
@@ -241,6 +242,7 @@
     "snackbar.image-deleted.success": "Datei gelöscht.",
     "snackbar.bibtex-upload.success": "{{ cnt }} Einträge hinzugefügt.",
     "snackbar.layer-update.success": "Ebene erfolgreich aktualisiert.",
+    "snackbar.role.missing-name.error": "Rolle kann ohne Name nicht angelegt werden.",
 
     "dates_list": "Zeitangaben",
     "map": "Karte",

@@ -153,6 +153,7 @@
     "user.edit.heading": "Edit User",
     "user.edit.new-password": "New Password",
     "role.edit.heading": "Edit Role",
+    "role.add.heading": "Add New Role",
     "map-marker.not-linked-info": "This marker is not linked to any context.",
     "map-marker.how-to-link": "To link the marker with a context, select a context in the tree on the left-hand side.",
     "map-marker.wrong-type.info": "The selected geodata object cannot be linked to the selected context, because their allowed geometry types ({{gtype}} and {{ctype}}) does not match.",
@@ -230,6 +231,7 @@
     "snackbar.image-deleted.success": "File deleted.",
     "snackbar.bibtex-upload.success": "{{ cnt }} entries added.",
     "snackbar.layer-update.success": "Layer successfully updated.",
+    "snackbar.role.missing-name.error": "Cannot create role without name.",
 
     "dates_list": "Dates list",
     "map": "Map",

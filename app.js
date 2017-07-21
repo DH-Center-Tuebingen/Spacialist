@@ -215,28 +215,15 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function() {}, function() {});
     };
-    this.editRoleModal = function(onEdit, role) {
+    this.addRoleModal = function(onAdd, roles) {
         var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/edit-role.html',
+            templateUrl: 'modals/add-role.html',
             controller: function($uibModalInstance) {
-                this.roleinfo = angular.copy(role);
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
-                this.onEdit = function(roleinfo) {
-                    var changes = {};
-                    if(!role) {
-                        changes = roleinfo;
-                    } else {
-                        for(var key in role) {
-                            if(role.hasOwnProperty(key)) {
-                                if(role[key] != roleinfo[key]) {
-                                    changes[key] = roleinfo[key];
-                                }
-                            }
-                        }
-                    }
-                    onEdit(role, changes);
+                this.onAdd = function(newRole) {
+                    onAdd(newRole, roles);
                     $uibModalInstance.dismiss('ok');
                 };
             },
@@ -1331,7 +1318,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return user;
                         },
                         selectedUser: function(users, $transition$) {
-                            // TODO open modal
                             return users.find(function(u) {
                                 return u.id == $transition$.params().id;
                             });
@@ -1382,7 +1368,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             })
                 .state('root.role.edit', {
                     url: '/edit/{id:[0-9]+}',
-                    component: 'roleedit',
                     resolve: {
                         user: function(user) {
                             // TODO other access to user object?
@@ -1394,7 +1379,28 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return r.id == $transition$.params().id;
                             });
                         }
-                    }
+                    },
+                    onEnter: ['role', '$state', '$uibModal', function(role, $state, $uibModal) {
+                        $uibModal.open({
+                            templateUrl: "modals/edit-role.html",
+                            controller: ['$scope', 'userService', function($scope, userService) {
+                                var orgRole = role;
+                                $scope.editRole = angular.copy(orgRole);
+
+                                $scope.cancel = function() {
+                                    $scope.$dismiss();
+                                };
+
+                                $scope.onEdit = function(editRole) {
+                                    userService.editRole(orgRole, editRole).then(function() {
+                                        $scope.$close(true);
+                                    });
+                                };
+                            }]
+                        }).result.finally(function() {
+                            $state.go('^');
+                        });
+                    }]
                 })
             .state('root.bibliography', {
                 url: '/bibliography',
