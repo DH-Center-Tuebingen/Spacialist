@@ -161,11 +161,11 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetPromise', 'h
         });
     };
 
-    literature.openAddLiteratureDialog = function() {
-        modalFactory.addLiteratureModal(literature.addLiterature, literature.literatureOptions.availableTypes);
+    literature.openAddLiteratureDialog = function(bibliography) {
+        modalFactory.addLiteratureModal(literature.addLiterature, literature.literatureOptions.availableTypes, bibliography);
     };
 
-    literature.importBibTexFile = function(file, invalidFiles) {
+    literature.importBibTexFile = function(file, invalidFiles, bibliography) {
         if(file) {
             file.upload = Upload.upload({
                  url: 'api/literature/importBibtex',
@@ -178,7 +178,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetPromise', 'h
                 }
                 var entries = response.data.entries;
                 for(var i=0; i<entries.length; i++) {
-                    literature.literature.push(entries[i]);
+                    bibliography.push(entries[i]);
                 }
                 var content = $translate.instant('snackbar.bibtex-upload.success', {
                     cnt: entries.length
@@ -194,7 +194,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetPromise', 'h
         }
     };
 
-    literature.addLiterature = function(fields, type) {
+    literature.addLiterature = function(fields, type, bibliography) {
         if(typeof type == 'undefined') return;
         if(typeof fields == 'undefined') return;
         var mandatorySet = true;
@@ -229,7 +229,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetPromise', 'h
                 alert(response.error);
             }
             else {
-                literature.literature.push(response.literature);
+                bibliography.push(response.literature);
             }
         });
     };
