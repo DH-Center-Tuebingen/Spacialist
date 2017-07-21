@@ -324,9 +324,9 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function() {}, function() {});
     };
-    this.addNewAttributeModal = function(labelCallback, onCreate, datatypes) {
+    this.addNewAttributeModal = function(searchFn, onCreate, datatypes, attributes) {
         var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/add-attribute.html',
+            templateUrl: 'modals/add-attribute.html',
             controller: function($uibModalInstance) {
                 this.needsRoot = {
                     'string-sc': 1,
@@ -334,9 +334,9 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     epoch: 1
                 };
                 this.datatypes = datatypes;
-                this.onSearch = labelCallback;
+                this.onSearch = searchFn;
                 this.onCreate = function(label, datatype, parent) {
-                    onCreate(label, datatype, parent);
+                    onCreate(label, datatype, parent, attributes);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {

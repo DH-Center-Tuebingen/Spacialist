@@ -695,8 +695,6 @@ class ContextController extends Controller {
             $attr->thesaurus_root_url = $purl;
         }
         $attr->save();
-        $attr->label = $this->getLabel($curl);
-        if(isset($purl)) $attr->root_label = $this->getLabel($purl);
 
         return response()->json([
             'attribute' => $attr

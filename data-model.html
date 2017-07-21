@@ -1,4 +1,4 @@
-<div ng-controller="dataEditorCtrl" resize-watcher id="attribute-editor">
+<div resize-watcher id="attribute-editor">
     <h2 id="editor-heading" translate="data-model-editor.heading"></h2>
     <div class="col-md-12">
         <div class="col-md-5 attribute-editor-column">
@@ -17,6 +17,9 @@
         <div class="col-md-2 attribute-editor-column">
             <h4 translate="data-model-editor.available-ct.heading"></h4>
             <ul class="list-group">
+                <li class="btn btn-primary">
+                    <a href="" ng-click="addNewContextType()"><i class="material-icons">add</i> {{ 'context-type.add.new' | translate }}</a>
+                </li>
                 <li class="list-group-item" ng-repeat="ct in $ctrl.contextTypes" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
                     <a ui-sref="root.editor.data-model.edit({id: ct.id})">
                         <span ng-if="ct.type === 0">
@@ -35,7 +38,7 @@
                         </a>
                     </span>
                 </li>
-                <li class="list-group-item">
+                <li class="btn btn-primary">
                     <a href="" ng-click="addNewContextType()"><i class="material-icons">add</i> {{ 'context-type.add.new' | translate }}</a>
                 </li>
             </ul>

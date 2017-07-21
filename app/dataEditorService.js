@@ -24,8 +24,8 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         modalFactory.newContextTypeModal(searchForLabel, addNewContextType, editor.availableGeometryTypes);
     };
 
-    editor.addNewAttributeWindow = function() {
-        modalFactory.addNewAttributeModal(searchForLabel, addNewAttribute, editor.attributeTypes);
+    editor.addNewAttributeWindow = function(datatypes, attributes) {
+        modalFactory.addNewAttributeModal(searchForLabel, addNewAttribute, datatypes, attributes);
     };
 
     editor.addAttributeToContextTypeWindow = function(ct) {
@@ -88,24 +88,12 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     };
 
-    editor.deleteAttribute = function(attr) {
-        httpDeleteFactory('api/editor/attribute/' + attr.aid, function(response) {
+    editor.deleteAttribute = function(attr, attributes) {
+        httpDeleteFactory('api/editor/attribute/' + attr.id, function(response) {
             if(!response.error) {
-                var i = editor.existingAttributes.indexOf(attr);
+                var i = attributes.indexOf(attr);
                 if(i > -1) {
-                    editor.existingAttributes.splice(i, 1);
-                    angular.forEach(editor.existingContextTypes, function(t) {
-                        var attrs = getCtAttributes(t);
-                        var found = false;
-                        angular.forEach(attrs, function(a, k) {
-                            if(!found) {
-                                if(a.aid == attr.aid) {
-                                    attrs.splice(k, 1);
-                                    found = true;
-                                }
-                            }
-                        });
-                    });
+                    attributes.splice(i, 1);
                 }
             }
         });
@@ -183,29 +171,6 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     }
 
-    function getCtAttributes(ct) {
-        if(ct.type === 0) {
-            return mainService.contextReferences[ct.index];
-        }
-        else if(ct.type == 1) {
-            return mainService.artifactReferences[ct.index];
-        }
-        return [];
-    }
-
-    function initReferences(ct) {
-        if(ct.type === 0) {
-            if(!mainService.contextReferences[ct.index]) {
-                mainService.contextReferences[ct.index] = [];
-            }
-        }
-        else if(ct.type == 1) {
-            if(!mainService.artifactReferences[ct.index]) {
-                mainService.artifactReferences[ct.index] = [];
-            }
-        }
-    }
-
     function addNewContextType(label, type, geomtype) {
         if(!label || !type)  return;
         var formData = new FormData();
@@ -233,21 +198,14 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     }
 
-    function addNewAttribute(label, datatype, parent) {
+    function addNewAttribute(label, datatype, parent, attributes) {
         var formData = new FormData();
         formData.append('label_id', label.id);
         formData.append('datatype', datatype.datatype);
         if(parent) formData.append('parent_id', parent.id);
         httpPostFactory('api/editor/attribute', formData, function(response) {
             if(!response.error) {
-                var a = response.attribute;
-                var addedAttr = {
-                    aid: a.id,
-                    datatype: a.datatype,
-                    val: a.label
-                };
-                if(a.root_label) addedAttr.root_label = a.root_label;
-                editor.existingAttributes.push(addedAttr);
+                attributes.push(response.attribute);
             }
         });
     }
@@ -294,7 +252,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
     };
 
     editor.getAttributeTypes = function() {
-        httpGetPromise.getData('api/context/attributetypes').then(function(response) {
+        return httpGetPromise.getData('api/context/attributetypes').then(function(response) {
             return response;
         });
     };
