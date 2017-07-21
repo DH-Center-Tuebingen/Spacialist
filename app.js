@@ -174,15 +174,15 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-    this.addUserModal = function(onCreate) {
+    this.addUserModal = function(onCreate, users) {
         var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/new-user.html',
+            templateUrl: 'modals/add-user.html',
             controller: function($uibModalInstance) {
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
                 this.onCreate = function(name, email, password) {
-                    onCreate(name, email, password);
+                    onCreate(name, email, password, users);
                     $uibModalInstance.dismiss('ok');
                 };
             },
@@ -1325,7 +1325,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             })
                 .state('root.user.edit', {
                     url: '/edit/{id:[0-9]+}',
-                    component: 'useredit',
                     resolve: {
                         user: function(user) {
                             // TODO other access to user object?
@@ -1337,7 +1336,28 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return u.id == $transition$.params().id;
                             });
                         }
-                    }
+                    },
+                    onEnter: ['selectedUser', '$state', '$uibModal', function(selectedUser, $state, $uibModal) {
+                        $uibModal.open({
+                            templateUrl: "modals/edit-user.html",
+                            controller: ['$scope', 'userService', function($scope, userService) {
+                                var orgUser = selectedUser;
+                                $scope.editUser = angular.copy(orgUser);
+
+                                $scope.cancel = function() {
+                                    $scope.$dismiss();
+                                };
+
+                                $scope.onEdit = function(editUser) {
+                                    userService.editUser(orgUser, editUser).then(function() {
+                                        $scope.$close(true);
+                                    });
+                                };
+                            }]
+                        }).result.finally(function() {
+                            $state.go('^');
+                        });
+                    }]
                 })
             .state('root.role', {
                 url: '/role',

@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpDeleteFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpPatchPromise', 'httpDeleteFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpPatchPromise, httpDeleteFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -51,32 +51,43 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         });
     };
 
-    user.deleteUser = function(u) {
+    user.deleteUser = function(u, users) {
         httpDeleteFactory('api/user/' + u.id, function(response) {
-            var index = user.users.indexOf(u);
-            if(index > -1) user.users.splice(index, 1);
+            var index = users.indexOf(u);
+            if(index > -1) users.splice(index, 1);
         });
     };
 
-    user.addUser = function(name, email, password) {
+    user.openAddUserDialog = function(users) {
+        modalFactory.addUserModal(user.addUser, users);
+    }
+
+    user.addUser = function(name, email, password, users) {
         var formData = new FormData();
         formData.append('name', name);
         formData.append('email', email);
         formData.append('password', password);
         httpPostFactory('api/user', formData, function(response) {
-            user.users.push(response.user);
+            users.push(response.user);
         });
     };
 
-    user.editUser = function(changes, id, $index) {
+    user.editUser = function(orgUser, newUser) {
+        var oldValues = angular.copy(orgUser);
         var formData = new FormData();
-        for(var k in changes) {
-            if(changes.hasOwnProperty(k)) {
-                formData.append(k, changes[k]);
+        for(var k in newUser) {
+            if(newUser.hasOwnProperty(k)) {
+                if(newUser[k] != oldValues[k]) {
+                    formData.append(k, newUser[k]);
+                }
             }
         }
-        httpPatchFactory('api/user/' + id, formData, function(response) {
-            user.users[$index] = response.user;
+        return httpPatchPromise.getData('api/user/' + orgUser.id, formData).then(function(response) {
+            for(var k in response.user) {
+                if(response.user.hasOwnProperty(k)) {
+                    orgUser[k] = response.user[k];
+                }
+            }
             var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
@@ -180,9 +191,9 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         });
     };
 
-    user.addUserRole = function($item, user_id) {
+    user.addUserRole = function(item, user_id) {
         var formData = new FormData();
-        formData.append('role_id', $item.id);
+        formData.append('role_id', item.id);
         httpPatchFactory('api/user/' + user_id + '/attachRole', formData, function(response) {
             // TODO only remove/add role if function returns no error
             var content = $translate.instant('snackbar.data-updated.success');
@@ -190,9 +201,9 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         });
     };
 
-    user.removeUserRole = function($item, user_id) {
+    user.removeUserRole = function(item, user_id) {
         var formData = new FormData();
-        formData.append('role_id', $item.id);
+        formData.append('role_id', item.id);
         httpPatchFactory('api/user/' + user_id + '/detachRole', formData, function(response) {
             // TODO only remove/add role if function returns no error
             var content = $translate.instant('snackbar.data-updated.success');

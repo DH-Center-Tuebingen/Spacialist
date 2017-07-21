@@ -1,18 +1,9 @@
-spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', 'analysisService', '$state', 'modalFactory', function($scope, userService, mainService, analysisService, $state, modalFactory) {
-    $scope.currentUser = userService.currentUser;
-    $scope.users = userService.users;
-    $scope.roles = userService.roles;
-    $scope.permissions = userService.permissions;
+spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', '$state', 'modalFactory', function($scope, userService, mainService, $state, modalFactory) {
+    var localUsers = this.users;
+
     $scope.loginError = userService.loginError;
-    $scope.analysisEntries = analysisService.entries;
-    $scope.setAnalysisEntry = analysisService.setAnalysisEntry;
     $scope.deleteUser = userService.deleteUser;
     $scope.toggleEditMode = mainService.toggleEditMode;
-
-    $scope.openStartPage = function() {
-        analysisService.unsetAnalysisEntry();
-        $state.go('root.spacialist');
-    };
 
     $scope.loginUser = function(email, password) {
         var credentials = {
@@ -32,12 +23,8 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', 'a
         userService.logoutUser();
     };
 
-    $scope.openUserManagement = function() {
-        $state.go('root.user', {});
-    };
-
-    $scope.openRoleManagement = function() {
-        $state.go('root.role', {});
+    $scope.deleteUser = function(user) {
+        userService.deleteUser(user, localUsers);
     };
 
     $scope.addRolePermission = function(item, role) {
@@ -60,25 +47,15 @@ spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', 'a
         userService.openEditRoleDialog(role);
     };
 
-    $scope.addUserRole = function($item, user_id) {
-        userService.addUserRole($item, user_id);
+    $scope.addUserRole = function(item, user_id) {
+        userService.addUserRole(item, user_id);
     };
 
-    $scope.removeUserRole = function($item, user_id) {
-        userService.removeUserRole($item, user_id);
+    $scope.removeUserRole = function(item, user_id) {
+        userService.removeUserRole(item, user_id);
     };
 
     $scope.openAddUserDialog = function() {
-        modalFactory.addUserModal(userService.addUser);
-    };
-
-    $scope.openEditUserDialog = function(user, $index) {
-        var values = {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            password: ''
-        };
-        modalFactory.editUserModal(userService.editUser, values, $index);
+        userService.openAddUserDialog(localUsers);
     };
 }]);

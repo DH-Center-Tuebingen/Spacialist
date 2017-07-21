@@ -5,12 +5,6 @@ spacialistApp.component('user', {
         roles: '<',
         rolesPerUser: '<'
     },
-    templateUrl: 'user.html'
-});
-
-spacialistApp.component('useredit', {
-    bindings: {
-        user: '<',
-        selectedUser: '<'
-    }
+    templateUrl: 'user.html',
+    controller: 'userCtrl'
 });

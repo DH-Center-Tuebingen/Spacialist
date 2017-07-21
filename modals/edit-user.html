@@ -12,7 +12,7 @@
                     <input class="form-control" type="text" id="name" ng-model="mc.userinfo.name" />
                 </div>-->
                 <p class="form-control-static">
-                    {{ mc.userinfo.name }}
+                    {{ editUser.name }}
                 </p>
             </div>
             <div class="form-group">
@@ -23,7 +23,7 @@
                     <input class="form-control" type="email" id="email" ng-model="mc.userinfo.email" />
                 </div>-->
                 <p class="form-control-static">
-                    {{ mc.userinfo.email }}
+                    {{ editUser.email }}
                 </p>
             </div>
             <div class="form-group">
@@ -31,14 +31,14 @@
                     {{'user.edit.new-password'|translate}}:
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="password" id="password" ng-model="mc.userinfo.password" />
+                    <input class="form-control" type="password" id="password" ng-model="editUser.password" />
                 </div>
             </div>
         </form>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="mc.onEdit(mc.userinfo)">{{ 'Save' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="onEdit(editUser)">{{ 'Save' | translate }}</button>
     <button type="button" class="btn btn-danger"
-      ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
+      ng-click="cancel()">{{ 'cancel' | translate }}</button>
 </div>
