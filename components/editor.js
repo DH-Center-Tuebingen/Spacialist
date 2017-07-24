@@ -23,14 +23,18 @@ spacialistApp.component('contexttypeedit', {
 
 spacialistApp.component('layer', {
     bindings: {
-        avLayers: '<'
+        avLayers: '<',
+        concepts: '<'
     },
-    templateUrl: 'layer-editor.html'
+    templateUrl: 'layer-editor.html',
+    controller: 'layerEditorCtrl'
 });
 
 spacialistApp.component('layeredit', {
     bindings: {
-        layer: '<'
+        layer: '<',
+        concepts: '<'
     },
-    templateUrl: 'templates/layer-edit.html'
+    templateUrl: 'templates/layer-edit.html',
+    controller: 'layerEditCtrl'
 });

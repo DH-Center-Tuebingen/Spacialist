@@ -1516,6 +1516,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     resolve: {
                         avLayers: function(mapService) {
                             return mapService.getLayers();
+                        },
+                        concepts: function(concepts) {
+                            // TODO other access to concepts object?
+                            return concepts;
                         }
                     }
                 })
@@ -1527,6 +1531,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return avLayers.find(function(l) {
                                     return l.id == $transition$.params().id;
                                 });
+                            },
+                            concepts: function(concepts) {
+                                // TODO other access to concepts object?
+                                return concepts;
                             }
                         }
                     });
