@@ -620,7 +620,6 @@ class ContextController extends Controller {
         $cType->thesaurus_url = $curl;
         $cType->type = $type;
         $cType->save();
-        $cType->label = $this->getLabel($curl);
 
         $layer = new AvailableLayer();
         $layer->name = '';
@@ -635,8 +634,7 @@ class ContextController extends Controller {
         $layer->save();
 
         return response()->json([
-            'contexttype' => $cType,
-            'layer' => $layer
+            'contexttype' => $cType
         ]);
     }
 
@@ -649,10 +647,10 @@ class ContextController extends Controller {
         }
 
         $this->validate($request, [
-            'aid' => 'required|integer|exists:attributes,id'
+            'attribute_id' => 'required|integer|exists:attributes,id'
         ]);
 
-        $aid = $request->get('aid');
+        $aid = $request->get('attribute_id');
         $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
         $ca = new ContextAttribute();
         $ca->context_type_id = $ctid;
@@ -661,11 +659,14 @@ class ContextController extends Controller {
         $ca->save();
 
         $a = Attribute::find($aid);
-        $ca->val = $this->getLabel($a->thesaurus_url);
         $ca->datatype = $a->datatype;
 
         return response()->json([
-            'attribute' => $ca
+            'attribute' => DB::table('context_types as c')
+                ->where('ca.id', $ca->id)
+                ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+                ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
+                ->first()
         ]);
     }
 
@@ -928,17 +929,6 @@ class ContextController extends Controller {
             }
         }
         return $data;
-    }
-
-    public static function getLabel($thesaurus_url, $lang = 'de') {
-        $label = DB::table('th_concept_label as lbl')
-            ->join('th_language as lang', 'lang.id', '=', 'lbl.language_id')
-            ->join('th_concept as con', 'lbl.concept_id', '=', 'con.id')
-            ->where('con.concept_url', '=', $thesaurus_url)
-            ->orderBy('lbl.concept_label_type', 'asc')
-            ->orderByRaw("lang.short_name = '$lang' ASC")
-            ->value('lbl.label');
-        return $label;
     }
 
     private function updateOrInsert($values, $cid, $user) {

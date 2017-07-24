@@ -20,70 +20,62 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         editor.ct.attributes = getCtAttributes(c);
     };
 
-    editor.addNewContextTypeWindow = function() {
-        modalFactory.newContextTypeModal(searchForLabel, addNewContextType, editor.availableGeometryTypes);
+    editor.addNewContextTypeWindow = function(geometryTypes, contextTypes) {
+        modalFactory.newContextTypeModal(searchForLabel, addNewContextType, geometryTypes, contextTypes);
     };
 
     editor.addNewAttributeWindow = function(datatypes, attributes) {
         modalFactory.addNewAttributeModal(searchForLabel, addNewAttribute, datatypes, attributes);
     };
 
-    editor.addAttributeToContextTypeWindow = function(ct) {
-        var setAttrs = getCtAttributes(ct);
-        var attrs =  editor.existingAttributes.filter(function(i) {
-            for(var j=0; j<setAttrs.length; j++) {
-                if(setAttrs[j].aid == i.aid) return false;
+    editor.addAttributeToContextTypeWindow = function(contextType, ctAttributes, attributes, concepts) {
+        var attrs =  attributes.filter(function(a) {
+            for(var i=0; i<ctAttributes.length; i++) {
+                if(ctAttributes[i].id == a.id) return false;
             }
             return true;
         });
-        modalFactory.addAttributeToContextTypeModal(ct, attrs, addAttributeToContextType);
+        modalFactory.addAttributeToContextTypeModal(concepts, contextType, ctAttributes, attrs, addAttributeToContextType);
     };
 
-    editor.removeAttributeFromContextType = function(attr, context) {
-        var ctid = attr.context_type_id;
-        var aid = attr.aid;
-        httpDeleteFactory('api/editor/context_type/' + ctid + '/attribute/' + aid, function(response) {
+    editor.removeAttributeFromContextType = function(context, attr, attributes) {
+        if(attr.context_type_id != context.id) return; // context_type of attribute doesn't match context id
+        httpDeleteFactory('api/editor/context_type/' + context.id + '/attribute/' + attr.id, function(response) {
             if(!response.error) {
-                var i = editor.ct.attributes.indexOf(attr);
+                var i = attr.position - 1; // positions start at 1, indices at 0
                 if(i > -1) {
-                    editor.ct.attributes.splice(i, 1);
-                    for(var j=i; j<editor.ct.attributes.length; j++) {
-                        editor.ct.attributes[j].position--;
+                    attributes.splice(i, 1);
+                    for(var j=i; j<attributes.length; j++) {
+                        attributes[j].position--;
                     }
                 }
             }
         });
     };
 
-    editor.moveAttributeOfContextTypeUp = function(attr) {
+    editor.moveAttributeOfContextTypeUp = function(attr, attributes) {
         if(attr.position == 1) return; //topmost element can not be moved up
-        var i = editor.ct.attributes.indexOf(attr);
-        if(i == -1) return; //element is not part of attributes
-        if(i+1 != attr.position) return; // array position does not match stored position
-        var formData = new FormData();
         var ctid = attr.context_type_id;
-        var aid = attr.aid;
-        httpPatchFactory('api/editor/context_type/' + ctid + '/attribute/' + aid + '/move/up', formData, function(response) {
+        var aid = attr.id;
+        var i = attr.position - 1; // positions start at 1, indices at 0
+        httpPatchFactory('api/editor/context_type/' + ctid + '/attribute/' + aid + '/move/up', new FormData(), function(response) {
             if(!response.error) {
-                editor.ct.attributes[i].position--;
-                editor.ct.attributes[i-1].position++;
-                editor.ct.attributes.swap(i, i-1);
+                attributes[i].position--;
+                attributes[i-1].position++;
+                attributes.swap(i, i-1);
             }
         });
     };
-    editor.moveAttributeOfContextTypeDown = function(attr) {
+    editor.moveAttributeOfContextTypeDown = function(attr, attributes) {
         if(attr.position == editor.ct.attributes.length) return; //bottommost element can not be moved down
-        var i = editor.ct.attributes.indexOf(attr);
-        if(i == -1) return; //element is not part of attributes
-        if(i+1 != attr.position) return; // array position does not match stored position
-        var formData = new FormData();
         var ctid = attr.context_type_id;
-        var aid = attr.aid;
-        httpPatchFactory('api/editor/context_type/' + ctid + '/attribute/' + aid + '/move/down', formData, function(response) {
+        var aid = attr.id;
+        var i = attr.position - 1; // positions start at 1, indices at 0
+        httpPatchFactory('api/editor/context_type/' + ctid + '/attribute/' + aid + '/move/down', new FormData(), function(response) {
             if(!response.error) {
-                editor.ct.attributes[i].position++;
-                editor.ct.attributes[i+1].position--;
-                editor.ct.attributes.swap(i, i+1);
+                attributes[i].position++;
+                attributes[i+1].position--;
+                attributes.swap(i, i+1);
             }
         });
     };
@@ -109,69 +101,35 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         formData.append('new_url', newType.concept_url);
         httpPatchFactory('api/editor/context_type/' + ctid, formData, function(response) {
             if(!response.error) {
-                var refs;
-                if(e.type === 0) {
-                    refs = mainService.contextReferences;
-                }
-                else if(e.type == 1) {
-                    refs = mainService.artifactReferences;
-                }
-                refs[newType.concept_url] = refs[e.index];
-                delete refs[e.index];
-                var oldUrl = e.index;
-                e.title = newType.label;
-                e.index = newType.concept_url;
-                updateContextList(oldUrl, newType);
+                // TODO
             }
         });
     }
 
-    editor.deleteElementType = function(e) {
-        httpGetFactory('api/editor/occurrence_count/' + e.context_type_id, function(response) {
-            $translate('context-type.delete-warning', {
-                element: e.title,
+    editor.deleteContextType = function(e, contextTypes, contextName) {
+        httpGetFactory('api/editor/occurrence_count/' + e.id, function(response) {
+            return $translate('context-type.delete-warning', {
+                element: contextName,
                 cnt: response.count
             }).then(function(t) {
                 var onConfirm = function() {
-                    return deleteElementType(e);
+                    return deleteContextType(e, contextTypes);
                 };
-                modalFactory.deleteModal(e.title, onConfirm, t);
+                modalFactory.deleteModal(contextName, onConfirm, t);
             });
         });
     };
 
-    function deleteElementType(e) {
-        httpDeleteFactory('api/editor/contexttype/' + e.context_type_id, function(response) {
+    function deleteContextType(e, contextTypes) {
+        httpDeleteFactory('api/editor/contexttype/' + e.id, function(response) {
             if(!response.error) {
-                var id;
-                if(e.type === 0) {
-                    id = editor.existingContextTypes.indexOf(e);
-                    editor.existingContextTypes.splice(id, 1);
-                } else if(e.type == 1) {
-                    id = editor.existingArtifactTypes.indexOf(e);
-                    editor.existingArtifactTypes.splice(id, 1);
-                }
-                updateContextList(e.index, undefined);
+                var id = contextTypes.indexOf(e);
+                if(id > -1) contextTypes.splice(id, 1);
             }
         });
     }
 
-    function updateContextList(oldUrl, newType) {
-        if(!oldUrl || oldUrl.length === 0) return;
-        var isDelete = !newType;
-        angular.forEach(editor.contexts.data, function(c, i) {
-            if(c.typename == oldUrl) {
-                if(isDelete) {
-                    delete editor.contexts.data[i];
-                } else {
-                    c.typename = newType.concept_url;
-                    c.typelabel = newType.label;
-                }
-            }
-        });
-    }
-
-    function addNewContextType(label, type, geomtype) {
+    function addNewContextType(label, type, geomtype, contexttypes) {
         if(!label || !type)  return;
         var formData = new FormData();
         formData.append('concept_url', label.concept_url);
@@ -181,20 +139,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
             if(response.error) {
                 return;
             }
-            var c = response.contexttype;
-            var newType = {
-                title: c.label,
-                index: c.thesaurus_url,
-                type: parseInt(c.type),
-                context_type_id: c.id
-            };
-            initReferences(newType);
-            if(newType.type === 0) {
-                editor.existingContextTypes.push(newType);
-            } else if(response.contexttype.type == 1) {
-                editor.existingArtifactTypes.push(newType);
-            }
-            mapService.setLayers([response.layer]);
+            contexttypes.push(response.contexttype);
         });
     }
 
@@ -210,22 +155,13 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     }
 
-    function addAttributeToContextType(attr, ct) {
+    function addAttributeToContextType(attr, contextType, contextAttributes) {
         var formData = new FormData();
-        formData.append('aid', attr.aid);
+        formData.append('attribute_id', attr.id);
 
-        var ctid = ct.context_type_id;
-        httpPostFactory('api/editor/context_type/' + ctid + '/attribute', formData, function(response) {
+        httpPostFactory('api/editor/context_type/' + contextType.id + '/attribute', formData, function(response) {
             if(!response.error) {
-                var a = response.attribute;
-                var addedAttribute = {
-                    aid: parseInt(a.attribute_id),
-                    context_type_id: parseInt(a.context_type_id),
-                    val: a.val,
-                    datatype: a.datatype,
-                    position: a.position
-                };
-                getCtAttributes(ct).push(addedAttribute);
+                contextAttributes.push(response.attribute);
             }
         });
     }
@@ -257,13 +193,11 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     };
 
-    function getGeometryTypes() {
-        httpGetFactory('api/overlay/geometry_types', function(response) {
-            angular.forEach(response, function(g) {
-                editor.availableGeometryTypes.push(g);
-            });
+    editor.getGeometryTypes = function() {
+        return httpGetPromise.getData('api/overlay/geometry_types').then(function(response) {
+            return response;
         });
-    }
+    };
 
     return editor;
 }]);

@@ -3,13 +3,14 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
     $scope.filterTree = mainService.filterTree;
 
     var localContexts = this.contexts;
+    var localConcepts = this.concepts;
     var localLayers = this.layer;
     var localMap = this.map;
     var mapObject;
     var localGeodata = this.geodata;
     var localContextTypes = this.contextTypes;
 
-    mapService.setupLayers(localLayers, localMap, localContexts);
+    mapService.setupLayers(localLayers, localMap, localContexts, localConcepts);
     mapService.initMapObject().then(function(obj) {
         mapObject = obj;
         // wait a random amount of time, so mapObject.eachLayer has all layers

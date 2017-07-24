@@ -322,7 +322,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         initHiddenLayers(mapArr);
     };
 
-    map.setupLayers = function(layers, mapArr, contexts) {
+    map.setupLayers = function(layers, mapArr, contexts, concepts) {
         var gKeyLoaded = false;
         invisibleLayers = [];
         for(var i=0; i<layers.length; i++) {
@@ -335,7 +335,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             }
             currentLayer.layerOptions = setLayerOptions(layer);
             if(layer.context_type_id) {
-                currentLayer.name = layer.label;
+                currentLayer.name = concepts[layer.thesaurus_url].label;
                 angular.merge(currentLayer.layerOptions, setContextLayerOptions(layer));
                 currentLayer.type = 'geoJSONShape';
                 currentLayer.data = {

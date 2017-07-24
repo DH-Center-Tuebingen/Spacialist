@@ -32,11 +32,6 @@ class OverlayController extends Controller {
             ->orderBy('position', 'asc')
             ->leftJoin('context_types as ct', 'context_type_id', '=', 'ct.id')
             ->get();
-        foreach($layers as $l) {
-            $label = ContextController::getLabel($l->thesaurus_url);
-            $l->label = $label;
-            unset($l->thesaurus_url);
-        }
         return response()->json([
             'layers' => $layers
         ]);

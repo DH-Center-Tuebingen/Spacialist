@@ -283,7 +283,7 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-    this.newContextTypeModal = function(labelCallback, onCreate, availableGeometryTypes) {
+    this.newContextTypeModal = function(searchFn, onCreate, availableGeometryTypes, contexttypes) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/new-context-type.html',
             controller: function($uibModalInstance) {
@@ -292,9 +292,9 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     { id: 1, label: 'context-type.type.find'}
                 ];
                 this.availableGeometryTypes = availableGeometryTypes;
-                this.onSearch = labelCallback;
+                this.onSearch = searchFn;
                 this.onCreate = function(label, type, geomtype) {
-                    onCreate(label, type, geomtype);
+                    onCreate(label, type, geomtype, contexttypes);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {
@@ -347,14 +347,15 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-    this.addAttributeToContextTypeModal = function(ct, attrs, onCreate) {
+    this.addAttributeToContextTypeModal = function(concepts, contextType, ctAttributes, attrs, onCreate) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/add-attribute-contexttype.html',
             controller: function($uibModalInstance) {
-                this.ct = ct;
+                this.ct = contextType;
+                this.concepts = concepts;
                 this.attributes = attrs;
                 this.onCreate = function(attr) {
-                    onCreate(attr, ct);
+                    onCreate(attr, contextType, ctAttributes);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {
@@ -1481,6 +1482,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         },
                         contextTypes: function(dataEditorService) {
                             return dataEditorService.getContextTypes();
+                        },
+                        geometryTypes: function(dataEditorService) {
+                            return dataEditorService.getGeometryTypes();
                         }
                     }
                 })
@@ -1492,6 +1496,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return contextTypes.find(function(ct) {
                                     return ct.id == $transition$.params().id;
                                 });
+                            },
+                            attributes: function(attributes) {
+                                // TODO other access to attributes object?
+                                return attributes;
                             },
                             concepts: function(concepts) {
                                 // TODO other access to concepts object?

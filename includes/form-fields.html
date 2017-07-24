@@ -1,6 +1,6 @@
 <div>
     <div class="form-group form-group-unpadded" ng-repeat="attr in attributeFields" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;" ng-class="{'hovered-row': hovered && (isDeletable || isEditable)}">
-        <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}" uib-popover="{{attr.root_label}}" popover-trigger="'mouseenter'">
+        <label class="control-label col-md-{{labelWidth}}" for="a{{ attr.aid }}_{{ attr.oid }}" uib-popover="{{concepts[attr.thesaurus_root_url].label}}" popover-trigger="'mouseenter'">
             <div style="display: table; float: right;">
                 <span style="display: table-cell">
                     {{ concepts[attr.thesaurus_url].label }}:

@@ -3,7 +3,8 @@ spacialistApp.component('datamodel', {
         attributes: '<',
         attributetypes: '<',
         concepts: '<',
-        contextTypes: '<'
+        contextTypes: '<',
+        geometryTypes: '<'
     },
     templateUrl: 'data-model.html',
     controller: 'dataEditorCtrl'
@@ -12,10 +13,12 @@ spacialistApp.component('datamodel', {
 spacialistApp.component('contexttypeedit', {
     bindings: {
         contextType: '<',
+        attributes: '<',
         concepts: '<',
         fields: '<'
     },
-    templateUrl: 'templates/context-type.html'
+    templateUrl: 'templates/context-type.html',
+    controller: 'dataEditorCtrl'
 });
 
 spacialistApp.component('layer', {
