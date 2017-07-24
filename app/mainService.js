@@ -96,13 +96,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         return httpGetPromise.getData('api/context/' + id + '/data').then(function(response) {
             return parseData(response.data);
         });
-    }
+    };
 
     main.getContextFields = function(ctid) {
         return httpGetPromise.getData('api/context/context_type/' + ctid + '/attribute').then(function(response) {
             return response;
         });
-    }
+    };
 
     main.duplicateElement = function(id) {
         httpPostFactory('api/context/' + id + '/duplicate', new FormData(), function(newElem) {
@@ -339,11 +339,11 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         arr[index].push({
             'name': inp[index]
         });
-    }
+    };
 
     main.removeListItem = function(index, arr, $index) {
         arr[index].splice($index, 1);
-    }
+    };
 
     function parseData(data) {
         var parsedData = {};
