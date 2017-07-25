@@ -4,5 +4,5 @@ spacialistApp.controller('contextCtrl', ['$scope', 'mainService', '$translate', 
 
     $scope.storeElement = function() {
         mainService.storeElement(localContext, localData);
-    }
+    };
 }]);

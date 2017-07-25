@@ -26,12 +26,7 @@ class SourceController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $src = DB::table('sources')
-                ->select('sources.*', DB::raw("(select label from getconceptlabelsfromurl where concept_url = attributes.thesaurus_url and short_name = 'de' limit 1) AS attribute_name"))
-                ->where('context_id', '=', $id)
-                ->join('attributes', 'sources.attribute_id', '=', 'attributes.id')
-                ->orderBy('attribute_name', 'asc')
-                ->get();
+        $src = Source::where('context_id', '=', $id)->get();
         foreach($src as &$s) {
             $s->literature = Literature::find($s->literature_id);
         }

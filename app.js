@@ -1118,9 +1118,8 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         fields: function(context, mainService) {
                             return mainService.getContextFields(context.context_type_id);
                         },
-                        sources: function(context, mainService) {
-                            // TODO
-                            return [];
+                        sources: function(context, literatureService) {
+                            return literatureService.getByContext(context.id)
                         },
                         geodate: function(context, map) {
                             return map.geodata.linkedLayers[context.geodata_id];
@@ -1144,6 +1143,102 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         }
                     }
                 })
+                    .state('root.spacialist.data.sources', {
+                        url: '/sources/{aid:[0-9]+}',
+                        resolve: {
+                            attribute: function(fields, $transition$) {
+                                return fields.find(function(f) {
+                                    return f.id == $transition$.params().aid;
+                                });
+                            },
+                            certainty: function(data, $transition$) {
+                                var aid = $transition$.params().aid;
+                                return {
+                                    certainty: data[aid+'_pos'] || 100,
+                                    description: data[aid+'_desc'] || ''
+                                };
+                            },
+                            attribute_sources: function(sources, $transition$) {
+                                var aid = $transition$.params().aid;
+                                return sources.filter(function(s) {
+                                    return s.attribute_id == aid;
+                                });
+                            },
+                            context: function(context) {
+                                // TODO other access to context object?
+                                return context;
+                            },
+                            literature: function(literatureService) {
+                                return literatureService.getAll();
+                            }
+                        },
+                        onEnter: ['attribute', 'certainty', 'attribute_sources', 'context', 'literature', 'concepts', 'httpPostFactory', 'httpPutFactory', 'snackbarService', '$state', '$uibModal', '$translate', function(attribute, certainty, attribute_sources, context, literature, concepts, httpPostFactory, httpPutFactory, snackbarService, $state, $uibModal, $translate) {
+                            $uibModal.open({
+                                templateUrl: "modals/sources.html",
+                                windowClass: 'wide-modal shrinked-modal',
+                                controller: ['$scope', function($scope) {
+                                    $scope.attribute = attribute;
+                                    $scope.certainty = certainty;
+                                    $scope.concepts = concepts;
+                                    $scope.attribute_sources = attribute_sources;
+                                    $scope.literature = literature;
+                                    $scope.newEntry = {
+                                        source: '',
+                                        desc: ''
+                                    };
+
+                                    var updateCertainty = function(certainty) {
+                                        var formData = new FormData();
+                                        formData.append('possibility', certainty.certainty);
+                                        if(certainty.description) formData.append('possibility_description', certainty.description);
+                                        httpPutFactory('api/context/attribute_value/'+context.id+'/'+attribute.id, formData, function(callback) {
+                                            var content = $translate.instant('snackbar.data-stored.success');
+                                            snackbarService.addAutocloseSnack(content, 'success');
+                                        });
+                                    };
+
+                                    $scope.cancel = function() {
+                                        $scope.$dismiss();
+                                    };
+                                    $scope.addSource = function(entry) {
+                                        var formData = new FormData();
+                                        formData.append('cid', context.id);
+                                        formData.append('aid', attribute.id);
+                                        formData.append('lid', entry.source.id);
+                                        formData.append('desc', entry.desc);
+                                        httpPostFactory('api/source', formData, function(response) {
+                                            attribute_sources.push(response.source);
+                                            entry.source = undefined;
+                                            entry.desc = '';
+                                        });
+                                    };
+                                    $scope.setCertainty = function(event, certainty) {
+                                        var max = event.currentTarget.scrollWidth;
+                                        var click = event.originalEvent.layerX;
+                                        var curr = angular.copy(certainty.certainty);
+                                        var newVal = parseInt(click/max*100);
+                                        if(Math.abs(newVal-curr) < 10) {
+                                            if(newVal > curr) newVal = parseInt((newVal+10)/10)*10;
+                                            else newVal = parseInt(newVal/10)*10;
+                                        } else {
+                                            newVal = parseInt((newVal+5)/10)*10;
+                                        }
+                                        event.currentTarget.children[0].style.width = newVal+"%";
+                                        certainty.certainty = newVal;
+                                    };
+                                    $scope.saveCertainty = function(certainty) {
+                                        updateCertainty(certainty);
+                                    };
+                                    $scope.saveCertaintyAndClose = function(certainty) {
+                                        updateCertainty(certainty);
+                                        $scope.$close(true);
+                                    };
+                                }]
+                            }).result.finally(function() {
+                                $state.go('^');
+                            });
+                        }]
+                    })
                 .state('root.spacialist.add-top', {
                     url: '/add',
                     redirectTo: {
@@ -1237,7 +1332,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             }]
                         }).result.finally(function() {
                             $state.go('^');
-                        });;
+                        });
                     }]
                 })
                 .state('root.spacialist.geodata', {

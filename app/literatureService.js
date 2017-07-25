@@ -150,9 +150,15 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetPromise', 'h
         });
     };
 
+    literature.getByContext = function(cid) {
+        return httpGetPromise.getData('api/source/by_context/' + cid).then(function(response) {
+            return response.sources;
+        });
+    };
+
     literature.getTypes = function() {
         return literature.literatureOptions.availableTypes;
-    }
+    };
 
     literature.deleteLiteratureEntry = function(entry, bibliography) {
         var index = bibliography.indexOf(entry);

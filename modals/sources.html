@@ -1,0 +1,76 @@
+<div class="modal-header">
+    <h3>{{'evidence.heading'|translate}} <small>{{ concepts[attribute.thesaurus_url].label }}</small></h3>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <h4>{{'evidence.certainty.heading'|translate}}</h4>
+        <div class="row">
+            <div class="col-md-offset-2 col-md-8">
+                <div class="progress" ng-click="setCertainty($event, certainty)">
+                    <div class="progress-bar" ng-class="{ 'progress-bar-danger': certainty.certainty <= 25, 'progress-bar-warning': certainty.certainty <= 50, 'progress-bar-info': certainty.certainty <= 75, 'progress-bar-success': certainty.certainty > 75 }" role="progressbar" aria-valuenow="{{certainty.certainty}}" aria-valuemin="0" aria-valuemax="100" style="width: {{ certainty.certainty }}%">
+                        <span class="sr-only">{{ certainty.certainty }}% complete</span>
+                        {{ certainty.certainty }}%
+                    </div>
+                </div>
+                <form>
+                    <div class="form-group">
+                        <textarea class="form-control" ng-model="certainty.description" placeholder="{{'evidence.certainty.comment'|translate}}"></textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <button type="button" class="btn btn-success" ng-click="saveCertainty(certainty)">
+            <i class="material-icons">save</i> {{ 'evidence.certainty.save' | translate }}
+        </button>
+        <button type="button" class="btn btn-success" ng-click="saveCertaintyAndClose(certainty)">
+            <i class="material-icons">save</i> {{ 'evidence.certainty.save+close' | translate }}
+        </button>
+    </div>
+    <div class="col-md-12">
+        <hr />
+    </div>
+    <div class="col-md-12">
+        <h4>{{'evidence.sources.heading'|translate}}</h4>
+        <table class="table table-striped table-bordered table-hover">
+            <tr ng-repeat="entry in attribute_sources" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
+                <td class="td-50 word-break">
+                    {{ entry.literature.title }}<span ng-if="entry.literature.year"> - <i>{{ entry.literature.year}}</i></span>
+                    <br/>
+                    <strong>{{ entry.literature.author }}</strong>
+                </td>
+                <td class="td-50 word-break">
+                    <span class="delete-icon" ng-class="{'hidden-del': !hovered}" ng-click="mc.deleteSourceEntry($index, '#'+mc.modalFields.id)">
+                        &times;
+                    </span>
+                    <span class="deletable" ng-bind-html="entry.description | urlify">
+                    </span>
+                </td>
+            </tr>
+        </table>
+        <div class="col-md-5">
+            <ui-select id="lit{{ attr.context_type_id }}_{{ attr.attr }}_{{ attr.option }}" ng-model="newEntry.source" close-on-select="true">
+                <ui-select-match placeholder="{{'evidence.sources.literature'|translate}}">
+                    {{ $select.selected.title | truncate:80:true }}
+                </ui-select-match>
+                <ui-select-choices repeat="l in literature | filter:$select.search">
+                    <div>
+                        <div>
+                            {{ l.title | truncate:80:true }} <small><i style="color:gray; align: right;">{{ l.author | truncate:80:true }}</i></small>
+                        </div>
+                        <small>{{ l.year }}</small>
+                    </div>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+        <div class="col-md-5">
+            <textarea class="form-control" ng-model="newEntry.desc" placeholder="{{'evidence.sources.comment'|translate}}"></textarea>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-success" style="width: 100%;" ng-click="addSource(newEntry)" ng-disabled="!newEntry.source"><i class="material-icons" aria-hidden="true">add</i> {{ 'evidence.sources.add' | translate }}</button>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default"
+      ng-click="cancel()">{{ 'close' | translate }}</button>
+</div>
