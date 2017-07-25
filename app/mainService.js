@@ -239,7 +239,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
         return promise;
     }
-    
+
     /**
      * Remove a source entry at the given index `index` from the given array `arr`.
      */
@@ -269,9 +269,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         var parsedData = {};
         for(var i=0; i<data.length; i++) {
             var value = data[i];
-            var index = value.attribute_id + '_' + (value.o_id || '');
-            var posIndex = index + 'pos';
-            var descIndex = index + 'desc';
+            var index = value.attribute_id;
+            var posIndex = index + '_pos';
+            var descIndex = index + '_desc';
             var val = value.str_val;
             var dType = value.datatype;
             parsedData[posIndex] = value.possibility || 100;

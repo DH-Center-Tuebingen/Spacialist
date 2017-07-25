@@ -1103,7 +1103,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             })
                 .state('root.spacialist.data', {
                     url: '/context/{id:[0-9]+}',
-                    // component: 'spacialistdata',
                     resolve: {
                         context: function(contexts, $transition$) {
                             var c = contexts.data[$transition$.params().id];
@@ -1119,7 +1118,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return mainService.getContextFields(context.context_type_id);
                         },
                         sources: function(context, literatureService) {
-                            return literatureService.getByContext(context.id)
+                            return literatureService.getByContext(context.id);
                         },
                         geodate: function(context, map) {
                             return map.geodata.linkedLayers[context.geodata_id];

@@ -935,7 +935,7 @@ class ContextController extends Controller {
         foreach($values as $key => $value) {
             $ids = explode("_", $key);
             $aid = $ids[0];
-            if(isset($ids[1]) && $ids[1] != "") continue;
+            if($aid == "" || (isset($ids[1]) && $ids[1] != "")) continue;
 
             try {
                 $datatype = Attribute::findOrFail($aid)->datatype;
@@ -991,8 +991,12 @@ class ContextController extends Controller {
                     if($datatype === 'list') {
                         $attr->str_val = $v->name;
                     } else {
-                        $set = ThConcept::find($v->narrower_id)->concept_url;
-                        $attr->thesaurus_val = $set;
+                        try {
+                            $set = ThConcept::findOrFail($v->narrower_id);
+                            $attr->thesaurus_val = $set->concept_url;
+                        } catch(ModelNotFoundException $e) {
+                            continue;
+                        }
                     }
                     $attr->save();
                 }
