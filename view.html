@@ -20,7 +20,7 @@
             <div ng-include="'layouts/restricted-access.html'"></div>
         </div>
     </div>
-    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled" ui-view="context-detail">
+    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable="editMode.enabled" ui-view="context-detail" on-store="$ctrl.onStore(context, data)">
         <!-- ui-view element for context detail template -->
         <h3>{{'context-form.heading'|translate}}</h3>
         <div class="alert alert-info">

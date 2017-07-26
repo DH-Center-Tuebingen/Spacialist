@@ -20,7 +20,8 @@ spacialistApp.component('spacialistdata', {
         sources: '<',
         geodate: '<',
         user: '<',
-        concepts: '<'
+        concepts: '<',
+        onStore: '&'
     },
     templateUrl: 'templates/context-data.html',
     controller: 'contextCtrl'
@@ -35,10 +36,12 @@ spacialistApp.component('sourcemodal', {
             // attribute_sources: '<',
             sources: '<',
             // onEvent: '&'
+            resolve: '<'
         },
         templateUrl: "modals/sources.html",
         controller: ['$scope', function($scope) {
             console.log(this.sources);
+            console.log(this.resolve);
             $scope.attribute = this.attribute;
             $scope.certainty = this.certainty;
             $scope.concepts = this.concepts;

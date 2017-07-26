@@ -10,6 +10,11 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
     var localGeodata = this.geodata;
     var localContextTypes = this.contextTypes;
 
+    this.onStore = function(context, data) {
+        var c = this.contexts.data[context.id];
+        mainService.storeElement(c, data);
+    };
+
     mapService.setupLayers(localLayers, localMap, localContexts, localConcepts);
     mapService.initMapObject().then(function(obj) {
         mapObject = obj;

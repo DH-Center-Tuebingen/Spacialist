@@ -158,7 +158,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 modalFactory.errorModal(response.error);
                 return;
             }
-            $state.go('root.spacialist.data', { id: elem.id }, { reload: true });
         });
     };
 
