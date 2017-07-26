@@ -1169,74 +1169,19 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             },
                             literature: function(literatureService) {
                                 return literatureService.getAll();
+                            },
+                            sources: function(sources) {
+                                return sources;
                             }
                         },
-                        onEnter: ['attribute', 'certainty', 'attribute_sources', 'context', 'literature', 'concepts', 'httpPostFactory', 'httpPutFactory', 'snackbarService', '$state', '$uibModal', '$translate', function(attribute, certainty, attribute_sources, context, literature, concepts, httpPostFactory, httpPutFactory, snackbarService, $state, $uibModal, $translate) {
+                        onEnter: function($state, $uibModal, sources) {
                             $uibModal.open({
-                                templateUrl: "modals/sources.html",
+                                component: 'sourcemodal',
                                 windowClass: 'wide-modal shrinked-modal',
-                                controller: ['$scope', function($scope) {
-                                    $scope.attribute = attribute;
-                                    $scope.certainty = certainty;
-                                    $scope.concepts = concepts;
-                                    $scope.attribute_sources = attribute_sources;
-                                    $scope.literature = literature;
-                                    $scope.newEntry = {
-                                        source: '',
-                                        desc: ''
-                                    };
-
-                                    var updateCertainty = function(certainty) {
-                                        var formData = new FormData();
-                                        formData.append('possibility', certainty.certainty);
-                                        if(certainty.description) formData.append('possibility_description', certainty.description);
-                                        httpPutFactory('api/context/attribute_value/'+context.id+'/'+attribute.id, formData, function(callback) {
-                                            var content = $translate.instant('snackbar.data-stored.success');
-                                            snackbarService.addAutocloseSnack(content, 'success');
-                                        });
-                                    };
-
-                                    $scope.cancel = function() {
-                                        $scope.$dismiss();
-                                    };
-                                    $scope.addSource = function(entry) {
-                                        var formData = new FormData();
-                                        formData.append('cid', context.id);
-                                        formData.append('aid', attribute.id);
-                                        formData.append('lid', entry.source.id);
-                                        formData.append('desc', entry.desc);
-                                        httpPostFactory('api/source', formData, function(response) {
-                                            attribute_sources.push(response.source);
-                                            entry.source = undefined;
-                                            entry.desc = '';
-                                        });
-                                    };
-                                    $scope.setCertainty = function(event, certainty) {
-                                        var max = event.currentTarget.scrollWidth;
-                                        var click = event.originalEvent.layerX;
-                                        var curr = angular.copy(certainty.certainty);
-                                        var newVal = parseInt(click/max*100);
-                                        if(Math.abs(newVal-curr) < 10) {
-                                            if(newVal > curr) newVal = parseInt((newVal+10)/10)*10;
-                                            else newVal = parseInt(newVal/10)*10;
-                                        } else {
-                                            newVal = parseInt((newVal+5)/10)*10;
-                                        }
-                                        event.currentTarget.children[0].style.width = newVal+"%";
-                                        certainty.certainty = newVal;
-                                    };
-                                    $scope.saveCertainty = function(certainty) {
-                                        updateCertainty(certainty);
-                                    };
-                                    $scope.saveCertaintyAndClose = function(certainty) {
-                                        updateCertainty(certainty);
-                                        $scope.$close(true);
-                                    };
-                                }]
                             }).result.finally(function() {
                                 $state.go('^');
                             });
-                        }]
+                        }
                     })
                 .state('root.spacialist.add-top', {
                     url: '/add',
@@ -1302,11 +1247,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         });
                     }]
                 })
-                .state('root.spacialist.delete', {
-                    url: '/context/{id:[0-9]+}/delete',
+                .state('root.spacialist.data.delete', {
+                    url: '/delete',
                     resolve: {
-                        context: function(contexts, $transition$) {
-                            return contexts.data[$transition$.params().id];
+                        context: function(context) {
+                            return context;
                         }
                     },
                     onEnter: ['contexts', 'context', 'concepts', 'mainService', 'snackbarService', '$transition$', '$state', '$uibModal', '$translate', function(contexts, context, concepts, mainService, snackbarService, $transition$, $state, $uibModal, $translate) {
@@ -1319,18 +1264,22 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 
                                 $scope.cancel = function() {
                                     $scope.$dismiss();
+                                    $state.go('^');
                                 };
 
                                 $scope.onDelete = function(context) {
                                     mainService.deleteContext(context, contexts).then(function() {
                                         var content = $translate.instant('snackbar.element-deleted.success', { name: context.name  });
                                         snackbarService.addAutocloseSnack(content, 'success');
-                                        $scope.$close(true);
+                                        $scope.$close({state: 'success'});
+                                        if(context.root_context_id){
+                                            $state.go('root.spacialist.data', {id: context.root_context_id});
+                                        } else {
+                                            $state.go('root.spacialist');
+                                        }
                                     });
                                 };
                             }]
-                        }).result.finally(function() {
-                            $state.go('^');
                         });
                     }]
                 })
