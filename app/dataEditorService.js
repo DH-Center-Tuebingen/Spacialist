@@ -67,7 +67,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     };
     editor.moveAttributeOfContextTypeDown = function(attr, attributes) {
-        if(attr.position == editor.ct.attributes.length) return; //bottommost element can not be moved down
+        if(attr.position == attributes.length) return; //bottommost element can not be moved down
         var ctid = attr.context_type_id;
         var aid = attr.id;
         var i = attr.position - 1; // positions start at 1, indices at 0
