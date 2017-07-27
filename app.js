@@ -1132,7 +1132,8 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return concepts;
                         }
                     },
-                    onEnter: function(geodate) {
+                    onEnter: function(contexts, context, geodate, mainService) {
+                        mainService.expandTree(contexts, context.id, true);
                         // TODO wait for init of geodata (mapService.initGeodata)
                         if(geodate) geodate.openPopup();
                     },
