@@ -477,7 +477,7 @@ spacialistApp.directive('myDirective', function(httpPostFactory) {
     };
 });
 
-spacialistApp.directive('myTree', function($parse) {
+spacialistApp.directive('spTree', function($parse) {
     return {
         restrict: 'E',
         templateUrl: 'includes/tree.html',
@@ -486,7 +486,7 @@ spacialistApp.directive('myTree', function($parse) {
             contexts: '=',
             concepts: '=',
             element: '=',
-            toState: '=',
+            highlight: '=',
             callbacks: '=',
             options: '=',
             setContextMenu: '='
@@ -764,6 +764,15 @@ spacialistApp.filter('truncate', function () {
             }
         }
         return value + (suffix || '…');
+    };
+});
+
+spacialistApp.filter('highlight', function($sce) {
+    return function(text, search) {
+        if(search) {
+            text = text.replace(new RegExp('('+search+')', 'gi'), '<span class="search-highlighted">$1</span>');
+        }
+        return $sce.trustAsHtml(text);
     };
 });
 
