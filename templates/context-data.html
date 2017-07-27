@@ -1,6 +1,6 @@
 <div ng-if="$ctrl.user.permissions.view_concept_props">
-    <h3>{{ $ctrl.context.name }}<br>
-        <small><span ng-if="$ctrl.context.uri">{{ $ctrl.concepts[$ctrl.context.uri].label }} &mdash; </span>{{'context-form.heading'|translate}}</small>
+    <h3>{{ $ctrl.editContext.name }}<br>
+        <small><span ng-if="$ctrl.editContext.uri">{{ $ctrl.concepts[$ctrl.editContext.uri].label }} &mdash; </span>{{'context-form.heading'|translate}}</small>
     </h3>
     <p class="btn-group-sm nav-inline">
         <a class="btn btn-success btn-fab btn-fab-mini" href="" ng-click="storeElement()">
@@ -16,7 +16,7 @@
                 {{'context-form.name'|translate}}:
             </label>
             <div class="col-md-9">
-                <input type="text" class="form-control" id="name" ng-model="$ctrl.context.name" ng-readonly="!$ctrl.user.permissions.duplicate_edit_concepts" />
+                <input type="text" class="form-control" id="name" ng-model="$ctrl.editContext.name" ng-readonly="!$ctrl.user.permissions.duplicate_edit_concepts" />
             </div>
         </div>
         <form-field fields="$ctrl.fields" output="$ctrl.data" sources="$ctrl.sources" concepts="$ctrl.concepts" label-width="3" input-width="9" offset="0" sp-readonly="{{ !$ctrl.user.permissions.duplicate_edit_concepts }}">
@@ -25,7 +25,7 @@
             <label class="control-label col-md-3" for="lasteditor">{{ 'context-form.last-modified' | translate }}:</label>
             <div class="col-md-9">
                 <p class="form-control-static">
-                    {{ $ctrl.context.lastmodified }} (<strong>{{ $ctrl.context.lasteditor }}</strong>)
+                    {{ $ctrl.editContext.lastmodified }} (<strong>{{ $ctrl.editContext.lasteditor }}</strong>)
                 </p>
             </div>
         </div>

@@ -11,8 +11,17 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
     var localContextTypes = this.contextTypes;
 
     this.onStore = function(context, data) {
+        mainService.storeElement(context, data);
         var c = this.contexts.data[context.id];
-        mainService.storeElement(c, data);
+        for(var k in context) {
+            if(context.hasOwnProperty(k)) {
+                c[k] = context[k];
+            }
+        }
+    };
+
+    this.onSourceAdd = function(entry) {
+        console.log(entry);
     };
 
     mapService.setupLayers(localLayers, localMap, localContexts, localConcepts);
