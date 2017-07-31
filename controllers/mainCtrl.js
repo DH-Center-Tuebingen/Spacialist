@@ -23,6 +23,7 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
     $scope.datepickerOptions = mainService.datepickerOptions;
     $scope.storedQueries = analysisService.storedQueries;
     $scope.editMode = mainService.editMode;
+    $scope.dimensionUnits = mainService.dimensionUnits;
     var createModalHelper = mainService.createModalHelper;
 
     $scope.newElementContextMenu = [
