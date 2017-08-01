@@ -35,6 +35,8 @@ All notable changes to this project will be documented in this file.
 - Show tags (enabling _Show tags_ in filter tab didn't change anything)
 - Search bar in tree column (Search results couldn't be expanded, thus children were not accessible)
 - Deleting Context-Types
+- Missing translation (Context datatype label)
+- Missing dimension units in dropdown
 ### Removed/Deprecated
 
 ## 0.2 - Babylon
