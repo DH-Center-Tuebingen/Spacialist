@@ -79,57 +79,6 @@ spacialistApp.service('snackbarService', [function() {
     return snack;
 }]);
 
-spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($uibModal, httpGetFactory) {
-    var defaults = {
-        backdrop: true,
-        keyboard: true,
-        modalFade: true,
-        templateUrl: 'layouts/image-properties.html',
-        windowClass: 'wide-modal'
-    };
-    var options = {};
-
-    this.showModal = function(customDefaults, customOptions) {
-        if(!customDefaults) customDefaults = {};
-        //customDefaults.backdrop = 'static';
-        return this.show(customDefaults, customOptions);
-    };
-
-    this.show = function(customDefaults, customOptions) {
-        var tempDefaults = {};
-        var tempOptions = {};
-
-        angular.extend(tempDefaults, defaults, customDefaults);
-        angular.extend(tempOptions, options, customOptions);
-        tempOptions.modalNav = {
-            propTab: true,
-            linkTab: false,
-            setPropTab: function() {
-                tempOptions.modalNav.propTab = true;
-                tempOptions.modalNav.linkTab = false;
-            },
-            setLinkTab: function() {
-                tempOptions.modalNav.propTab = false;
-                tempOptions.modalNav.linkTab = true;
-            }
-        };
-
-        if(!tempDefaults.controller) {
-            tempDefaults.controller = function($scope, $uibModalInstance) {
-                $scope.modalOptions = tempOptions;
-                $scope.modalOptions.close = function(result) {
-                    $uibModalInstance.dismiss('cancel');
-                };
-            };
-        }
-        var modalInstance = $uibModal.open(tempDefaults);
-        modalInstance.result.then(function(selectedItem) {
-        }, function() {
-        });
-        return modalInstance;
-    };
-}]);
-
 spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
     this.deleteModal = function(elementName, onConfirm, additionalWarning) {
         if(typeof additionalWarning != 'undefined' && additionalWarning !== '') {
@@ -495,7 +444,23 @@ spacialistApp.directive('spTree', function($parse) {
     };
 });
 
-spacialistApp.directive('imageList', function(imageService) {
+spacialistApp.directive('fileList', function(imageService) {
+    return {
+        restrict: 'E',
+        templateUrl: 'templates/file-list.html',
+        scope: {
+            files: '=',
+            showTags: '=',
+            searchTerms: '='
+        },
+        controller: 'imageCtrl',
+        link: function(scope, elements, attrs) {
+            scope.availableTags = imageService.availableTags;
+        }
+    };
+});
+
+spacialistApp.directive('oldImageList', function(imageService) {
     return {
         restrict: 'E',
         templateUrl: 'includes/image-list.html',
@@ -720,6 +685,8 @@ spacialistApp.filter('imageFilter', function(searchService) {
 
     return function(items, searchTerms) {
         var filtered = [];
+        if(!items) return filtered;
+        if(!searchTerms) return items;
         for(var i=0; i<items.length; i++) {
             var item = items[i];
             if(matchesAllFilters(item, searchTerms)) {
@@ -1085,9 +1052,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             }
         })
             .state('root.spacialist', {
-                url: '/s',
+                url: '/s?tab',
                 component: 'spacialist',
                 resolve: {
+                    tab: function($state, $transition$) {
+                        var tabId = $transition$.params().tab;
+                        if(!tabId) {
+                            return 'map';
+                        }
+                        return tabId; // TODO unsupported id
+                    },
                     contexts: function(environmentService) {
                         return environmentService.getContexts();
                     },
@@ -1099,17 +1073,29 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         // TODO other access to concepts object?
                         return concepts;
                     },
-                    map: function(mapService) {
+                    map: function(mapService, tab) {
+                        if(tab != 'map') return undefined;
                         return mapService.initMapVariables();
                     },
-                    layer: function(map, mapService) {
+                    layer: function(map, mapService, tab) {
+                        if(tab != 'map') return undefined;
                         return mapService.getLayers();
                     },
-                    geodata: function(layer, mapService) {
+                    geodata: function(layer, mapService, tab) {
+                        if(tab != 'map') return undefined;
                         return mapService.getGeodata();
+                    },
+                    files: function(imageService, tab) {
+                        if(tab != 'files') return undefined;
+                        return imageService.getImages();
                     }
                 }
             })
+                .state('root.spacialist.tabs', {
+                    sticky: true,
+                    deepStateRedirect: true,
+                    url: '?tab'
+                })
                 .state('root.spacialist.data', {
                     url: '/context/{id:[0-9]+}',
                     resolve: {
@@ -1130,6 +1116,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return literatureService.getByContext(context.id);
                         },
                         geodate: function(context, map) {
+                            if(!map) return undefined;
                             return map.geodata.linkedLayers[context.geodata_id];
                         },
                         user: function(user) {
@@ -1173,26 +1160,111 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     return s.attribute_id == aid;
                                 });
                             },
-                            context: function(context) {
-                                // TODO other access to context object?
-                                return context;
-                            },
+                            // context: function(context) {
+                            //     // TODO other access to context object?
+                            //     return context;
+                            // },
                             literature: function(literatureService) {
                                 return literatureService.getAll();
                             },
-                            sources: function(sources) {
-                                return sources;
-                            }
+                            // sources: function(sources) {
+                            //     return sources;
+                            // }
                         },
-                        onEnter: function($state, $uibModal, sources) {
+                        onEnter: function($state, $uibModal, attribute, certainty, attribute_sources, context, literature, sources, $document) {
                             $uibModal.open({
-                                component: 'sourcemodal',
+                                // appendTo: $document.find('aside').eq(0),
+                                template: '<sourcemodal on-add="$ctrl.addSource(entry)"></sourcemodal>',
+                                controller: function() {
+                                    this.addSource = function(entry) {
+                                        this.onAdd(entry);
+                                    };
+                                },
+                                controllerAs: '$ctrl',
+                                // component: 'sourcemodal',
                                 windowClass: 'wide-modal shrinked-modal',
+                                resolve: {
+                                    attribute: function() {
+                                        return attribute;
+                                    },
+                                    certainty: function() {
+                                        return certainty;
+                                    },
+                                    attribute_sources: function() {
+                                        return attribute_sources;
+                                    },
+                                    context: function() {
+                                        return context;
+                                    },
+                                    literature: function() {
+                                        return literature;
+                                    },
+                                    sources: function() {
+                                        return sources;
+                                    }
+                                }
                             }).result.finally(function() {
                                 $state.go('^');
                             });
                         }
                     })
+                .state('root.spacialist.file', {
+                    url: '/file/{id:[0-9]+}',
+                    resolve: {
+                        file: function(files, $transition$) {
+                            var fileId = $transition$.params().id;
+                            return files.find(function(f) {
+                                return fileId == f.id;
+                            });
+                        },
+                        mimeType: function(file, imageService) {
+                            return imageService.getMimeType(file);
+                        }
+                    },
+                    onEnter: ['file', 'mimeType', 'httpPatchFactory', '$uibModal', '$state', function(file, mimeType, httpPatchFactory, $uibModal, $state) {
+                        $uibModal.open({
+                            templateUrl: "modals/file.html",
+                            windowClass: 'wide-modal',
+                            controller: ['$scope', function($scope) {
+                                var vm = this;
+                                vm.file = file;
+                                vm.mimeType = mimeType;
+                                vm.availableProperties = ['copyright', 'description'];
+                                vm.fileEdits = {};
+
+                                vm.cancelFilePropertyEdit = function(editArray, index) {
+                                    editArray[index].text = '';
+                                    editArray[index].editMode = false;
+                                };
+                                vm.setFilePropertyEdit = function(editArray, index, initValue) {
+                                    editArray[index] = {
+                                        text: initValue,
+                                        editMode: true
+                                    };
+                                };
+                                vm.storeFilePropertyEdit = function(editArray, index, f) {
+                                    var formData = new FormData();
+                                    formData.append('property', index);
+                                    formData.append('value', editArray[index].text);
+                                    httpPatchFactory('api/image/' + f.id + '/property', formData, function(response) {
+                                        if(response.error) {
+                                            vm.cancelFilePropertyEdit(editArray, index);
+                                            return;
+                                        }
+                                        f[index] = editArray[index].text;
+                                        vm.cancelFilePropertyEdit(editArray, index);
+                                    });
+                                };
+                                vm.close = function() {
+                                    $scope.$dismiss();
+                                };
+                            }],
+                            controllerAs: '$ctrl'
+                        }).result.finally(function() {
+                            $state.go('^');
+                        });
+                    }]
+                })
                 .state('root.spacialist.add-top', {
                     url: '/add',
                     redirectTo: {

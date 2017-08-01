@@ -9,6 +9,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
     var mapObject;
     var localGeodata = this.geodata;
     var localContextTypes = this.contextTypes;
+    var localTab = this.tab;
 
     this.onStore = function(context, data) {
         mainService.storeElement(context, data);
@@ -24,19 +25,21 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
         console.log(entry);
     };
 
-    mapService.setupLayers(localLayers, localMap, localContexts, localConcepts);
-    mapService.initMapObject().then(function(obj) {
-        mapObject = obj;
-        // wait a random amount of time, so mapObject.eachLayer has all layers
-        $timeout(function() {
-            mapObject.eachLayer(function(l) {
-                if(l.options.layer_id) {
-                    localMap.mapLayers[l.options.layer_id] = l;
-                }
-            });
-            mapService.initGeodata(localGeodata, localContexts, localMap);
-        }, 100);
-    });
+    if(localTab == 'map') {
+        mapService.setupLayers(localLayers, localMap, localContexts, localConcepts);
+        mapService.initMapObject().then(function(obj) {
+            mapObject = obj;
+            // wait a random amount of time, so mapObject.eachLayer has all layers
+            $timeout(function() {
+                mapObject.eachLayer(function(l) {
+                    if(l.options.layer_id) {
+                        localMap.mapLayers[l.options.layer_id] = l;
+                    }
+                });
+                mapService.initGeodata(localGeodata, localContexts, localMap);
+            }, 100);
+        });
+    }
 
     $scope.layerTwo = {
         activeTab: 'map',

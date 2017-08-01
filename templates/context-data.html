@@ -38,7 +38,7 @@
             </button>
         </div>
     </form>
-    <ui-view></ui-view>
+    <div ui-view on-add="$ctrl.addSource(entry)"></div>
 </div>
 <div ng-if="!$ctrl.user.permissions.view_concept_props">
     <div ng-include="'layouts/restricted-access.html'"></div>

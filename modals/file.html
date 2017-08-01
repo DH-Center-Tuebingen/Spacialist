@@ -1,14 +1,14 @@
 <div class="modal-header">
-    <h4>{{ modalOptions.img.filename }}</h4>
+    <h4>{{$ctrl.file.filename }}</h4>
 </div>
-<div class="modal-body col-md-12" ng-init="imageEdits = {}" style="display: flex;">
+<div class="modal-body col-md-12" style="display: flex;">
     <div class="col-md-7 external-container" style="align-items: stretch;">
-        <div class="hg-100" ng-switch="modalOptions.getMimeType(modalOptions.img.mime_type, modalOptions.img.filename)">
+        <div class="hg-100" ng-switch="$ctrl.mimeType">
             <div class="hg-100" ng-switch-when="image">
-                <img ng-src="{{modalOptions.img.url}}" id="modalImage" />
+                <img ng-src="{{$ctrl.file.url}}" id="file-modal" />
                 <div class="external-content">
-                    <a ng-href="{{modalOptions.img.url}}" target="_blank">
-                        <dfn title="Open {{ modalOptions.img.filename }} in a new tab">
+                    <a ng-href="{{$ctrl.file.url}}" target="_blank">
+                        <dfn title="Open {{ $ctrl.file.filename }} in a new tab">
                             <i class="material-icons" aria-hidden="true">open_in_new</i>
                         </dfn>
                     </a>
@@ -34,21 +34,21 @@
                     <span class="page-counter">{{getCurrentPage()}}/{{getPageCount()}}</span>
                 </div>
                 <div class="scrollable-modal">
-                    <pdf-viewer url="modalOptions.img.url" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
+                    <pdf-viewer url="$ctrl.file.url" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
                 </div>
             </div>
             <div ng-switch-when="audio">
                 <audio controls class="width-90">
-                    <source ng-src="{{modalOptions.img.url}}" />
+                    <source ng-src="{{$ctrl.file.url}}" />
                 </audio>
             </div>
             <div ng-switch-when="video">
                 <video controls class="width-90">
-                    <source ng-src="{{modalOptions.img.url}}" />
+                    <source ng-src="{{$ctrl.file.url}}" />
                 </video>
             </div>
             <div class="hg-100" ng-switch-when="3d" ng-controller="threeCtrl">
-                <div class="hg-100" id="threejs-container" ng-init="initThree(modalOptions.img.url)">
+                <div class="hg-100" id="threejs-container" ng-init="initThree($ctrl.file.url)">
                     <div style="position: absolute; top: 10px; left: 10px;">
                         <button class="btn btn-primary" style="display: block;" ng-click="zoomOut()"><i class="material-icons">zoom_out</i></button>
                         <button class="btn btn-primary" style="display: block;" ng-click="zoomIn()"><i class="material-icons">zoom_in</i></button>
@@ -60,49 +60,49 @@
                 </p>
             </div>
             <div ng-switch-default ng-controller="pdfCtrl">
-                <div ng-if="modalOptions.img.filename.endsWith('.md')">
+                <div ng-if="$ctrl.file.filename.endsWith('.md')">
                     <button type="button" class="btn btn-default" ng-click="togglePreview()">
                         <span translate="photos.properties.md-preview.toggle"></span>
                     </button>
                 </div>
-                <div ng-if="!isPreview" class="left scrollable-modal" hljs hljs-include="modalOptions.img.url">
+                <div ng-if="!isPreview" class="left scrollable-modal" hljs hljs-include="$ctrl.file.url">
                 </div>
-                <div ng-if="isPreview" class="left scrollable-modal" marked src="modalOptions.img.url">
+                <div ng-if="isPreview" class="left scrollable-modal" marked src="$ctrl.file.url">
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-5" style="align-items: stretch;">
+    <div class="col-md-5" style="align-items: stretch;" ng-init="activeTab = 'props'">
         <ul class="nav nav-tabs nav-justified">
-            <li role="presentation" ng-class="{active: modalOptions.modalNav.propTab}" ng-click="modalOptions.modalNav.setPropTab()"><a><i class="material-icons">tune</i> {{'photos.properties.heading'|translate}}</a></li>
-            <li role="presentation" ng-class="{active: modalOptions.modalNav.linkTab}" ng-click="modalOptions.modalNav.setLinkTab()"><a><i class="material-icons">link</i> {{'photos.linkages.heading'|translate}}</a></li>
+            <li role="presentation" ng-class="{active: activeTab == 'props'}" ng-click="activeTab = 'props'"><a><i class="material-icons">tune</i> {{'photos.properties.heading'|translate}}</a></li>
+            <li role="presentation" ng-class="{active: activeTab == 'links'}" ng-click="activeTab = 'links'"><a><i class="material-icons">link</i> {{'photos.linkages.heading'|translate}}</a></li>
         </ul>
-        <div ng-show="modalOptions.modalNav.propTab" class="col-md-10 col-md-offset-1">
+        <div ng-show="activeTab == 'props'" class="col-md-10 col-md-offset-1">
             <h3>{{'photos.properties.heading'|translate}}</h3>
             <table class="table" style="width: 100%;">
-                <tr ng-repeat="prop in ['copyright', 'description']" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
+                <tr ng-repeat="prop in $ctrl.availableProperties" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
                     <td style="text-align:left; font-weight: bold;">
                         {{'photos.properties.image.'+prop|translate}}
                     </td>
                     <td style="text-align:right;">
-                        <div ng-show="!imageEdits[prop].editMode">
-                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="modalOptions.setImagePropertyEdit(imageEdits, prop, modalOptions.img[prop])" ng-if="hovered">
+                        <div ng-show="!$ctrl.fileEdits[prop].editMode">
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.setFilePropertyEdit($ctrl.fileEdits, prop, $ctrl.file[prop])" ng-if="hovered">
                                 <i class="material-icons md-18 fa-green">edit</i>
                             </a>
                             <i>
                                 <i style="color: gray;">
-                                    {{ modalOptions.img[prop] }}
+                                    {{ $ctrl.file[prop] }}
                                 </i>
                             </i>
                         </div>
-                        <div ng-if="imageEdits[prop].editMode">
-                            <a class="btn btn-success btn-fab btn-fab-minime" href="" ng-click="modalOptions.storeImagePropertyEdit(imageEdits, prop, modalOptions.img)">
+                        <div ng-if="$ctrl.fileEdits[prop].editMode">
+                            <a class="btn btn-success btn-fab btn-fab-minime" href="" ng-click="$ctrl.storeFilePropertyEdit($ctrl.fileEdits, prop, $ctrl.file)">
                                 <i class="material-icons md-18">check</i>
                             </a>
-                            <a class="btn btn-danger btn-fab btn-fab-minime" href="" ng-click="modalOptions.cancelImagePropertyEdit(imageEdits, prop)">
+                            <a class="btn btn-danger btn-fab btn-fab-minime" href="" ng-click="$ctrl.cancelFilePropertyEdit($ctrl.fileEdits, prop)">
                                 <i class="material-icons md-18">clear</i>
                             </a>
-                            <input type="text" class="inline-edit" style="text-align: right;" ng-model="imageEdits[prop].text" />
+                            <input type="text" class="inline-edit" style="text-align: right;" ng-model="$ctrl.fileEdits[prop].text" />
                         </div>
                     </td>
                 </tr>
@@ -114,7 +114,7 @@
                         {{'photos.properties.image.created'|translate}}
                     </td>
                     <td style="text-align:right;">
-                        <i style="color: gray;">{{ modalOptions.img.created*1000 | date:'d.MM.yyyy H:mm:ss' }}</i>
+                        <i style="color: gray;">{{ $ctrl.file.created*1000 | date:'d.MM.yyyy H:mm:ss' }}</i>
                     </td>
                 </tr>
                 <tr>
@@ -122,7 +122,7 @@
                         {{'photos.properties.image.modified'|translate}}
                     </td>
                     <td style="text-align:right;">
-                        <i style="color: gray;">{{ modalOptions.img.modified*1000 | date:'d.MM.yyyy H:mm:ss' }}</i>
+                        <i style="color: gray;">{{ $ctrl.file.modified*1000 | date:'d.MM.yyyy H:mm:ss' }}</i>
                     </td>
                 </tr>
                 <tr>
@@ -130,7 +130,7 @@
                         {{'photos.properties.image.cameraname'|translate}}
                     </td>
                     <td style="text-align:right;">
-                        <i style="color: gray;">{{ modalOptions.img.cameraname }}</i>
+                        <i style="color: gray;">{{ $ctrl.file.cameraname }}</i>
                     </td>
                 </tr>
                 <tr>
@@ -138,12 +138,12 @@
                         {{'photos.properties.image.filesize'|translate}}
                     </td>
                     <td style="text-align:right;">
-                        <i style="color: gray;">{{ modalOptions.img.filesize | bytes:2 }}</i>
+                        <i style="color: gray;">{{ $ctrl.file.filesize | bytes:2 }}</i>
                     </td>
                 </tr>
                 <tr>
                     <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.orientation'|translate}}</td>
-                    <td style="text-align:right;"><i style="color: gray;">{{ modalOptions.img.orientation }}</i></td>
+                    <td style="text-align:right;"><i style="color: gray;">{{ $ctrl.file.orientation }}</i></td>
                 </tr>
             </table>
             <h3 translate="tags.name"></h3>
@@ -153,11 +153,11 @@
                         <span class="input-group-btn">
                             <i class="material-icons">local_offer</i>
                         </span>
-                       <ui-select multiple tagging tagging-label="false" ng-model="modalOptions.img.tags" on-select="addTag(modalOptions.img, $item)" on-remove="removeTag(modalOptions.img, $item)" theme="bootstrap" sortable="true" close-on-select="false">
+                       <ui-select multiple tagging tagging-label="false" ng-model="$ctrl.file.tags" on-select="addTag($ctrl.file, $item)" on-remove="removeTag($ctrl.file, $item)" theme="bootstrap" sortable="true" close-on-select="false">
                            <ui-select-match placeholder="{{ 'tags.add' | translate }}">
                                {{ $item.label }}
                            </ui-select-match>
-                           <ui-select-choices repeat="tag in modalOptions.availableTags | filter:$select.search">
+                           <ui-select-choices repeat="tag in $ctrl.availableTags | filter:$select.search">
                                {{ tag.label }}
                            </ui-select-choices>
                        </ui-select>
@@ -165,7 +165,7 @@
                 </div>
             </div>
         </div>
-        <div ng-show="modalOptions.modalNav.linkTab" style="padding-right: 10px;">
+        <div ng-show="activeTab == 'links'" style="padding-right: 10px;">
             <h3>{{'photos.linkages.heading'|translate}}</h3>
             <p>TODO</p>
         </div>
@@ -173,5 +173,5 @@
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-default"
-      ng-click="modalOptions.close()">{{ 'close' | translate }}</button>
+      ng-click="$ctrl.close()">{{ 'close' | translate }}</button>
 </div>

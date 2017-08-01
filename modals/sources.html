@@ -52,7 +52,7 @@
                 <ui-select-match placeholder="{{'evidence.sources.literature'|translate}}">
                     {{ $select.selected.title | truncate:80:true }}
                 </ui-select-match>
-                <ui-select-choices repeat="l in literature | filter:$select.search">
+                <ui-select-choices repeat="l in $ctrl.resolve.literature | filter:$select.search">
                     <div>
                         <div>
                             {{ l.title | truncate:80:true }} <small><i style="color:gray; align: right;">{{ l.author | truncate:80:true }}</i></small>
@@ -66,7 +66,7 @@
             <textarea class="form-control" ng-model="newEntry.desc" placeholder="{{'evidence.sources.comment'|translate}}"></textarea>
         </div>
         <div class="col-md-2">
-            <button type="button" class="btn btn-success" style="width: 100%;" ng-click="addSource(newEntry)" ng-disabled="!newEntry.source"><i class="material-icons" aria-hidden="true">add</i> {{ 'evidence.sources.add' | translate }}</button>
+            <button type="button" class="btn btn-success" style="width: 100%;" ng-click="$ctrl.addSource(newEntry)"><i class="material-icons" aria-hidden="true">add</i> {{ 'evidence.sources.add' | translate }}</button>
         </div>
     </div>
 </div>

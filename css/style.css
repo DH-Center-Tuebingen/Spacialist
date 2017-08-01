@@ -312,7 +312,7 @@ div[resizeable] {
     display: inline-block;
 }
 
-#modalImage {
+#file-modal {
     max-width: 100%;
     max-height: 100%;
 }
@@ -350,6 +350,10 @@ div[resizeable] {
 
 .thumbnail img {
     width: 100%;
+}
+
+.search-highlighted {
+    background-color: yellow;
 }
 
 .source-link {

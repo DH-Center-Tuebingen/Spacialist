@@ -1,12 +1,14 @@
 spacialistApp.component('spacialist', {
     bindings: {
+        tab: '@',
         contexts: '<',
         user: '<',
         concepts:'<',
         map: '<',
         layer: '<',
         geodata: '<',
-        contextTypes: '<'
+        contextTypes: '<',
+        files: '<'
     },
     templateUrl: 'view.html',
     controller: 'mainCtrl'
@@ -21,27 +23,20 @@ spacialistApp.component('spacialistdata', {
         geodate: '<',
         user: '<',
         concepts: '<',
-        onStore: '&'
+        onStore: '&',
+        onSourceAdd: '&'
     },
     templateUrl: 'templates/context-data.html',
     controller: 'contextCtrl'
 });
 
 spacialistApp.component('sourcemodal', {
-        bindings: {
-            // attribute: '<',
-            // certainty: '<',
-            // concepts: '<',
-            // literature: '<',
-            // attribute_sources: '<',
-            sources: '<',
-            // onEvent: '&'
-            resolve: '<'
-        },
         templateUrl: "modals/sources.html",
+        bindings: {
+            resolve: '<',
+            onAdd: '&'
+        },
         controller: ['$scope', function($scope) {
-            console.log(this.sources);
-            console.log(this.resolve);
             $scope.attribute = this.attribute;
             $scope.certainty = this.certainty;
             $scope.concepts = this.concepts;
@@ -52,7 +47,9 @@ spacialistApp.component('sourcemodal', {
                 desc: ''
             };
 
-            var updateCertainty = function(certainty) {
+            this.updateCertainty = function() {
+                var certainty = this.resolve.certainty;
+                var context = this.resolve.context;
                 var formData = new FormData();
                 formData.append('possibility', certainty.certainty);
                 if(certainty.description) formData.append('possibility_description', certainty.description);
@@ -65,7 +62,8 @@ spacialistApp.component('sourcemodal', {
             $scope.cancel = function() {
                 $scope.$dismiss();
             };
-            $scope.addSource = function(entry) {
+            this.addSource = function(entry) {
+                this.onAdd({entry: entry});
                 // var formData = new FormData();
                 // formData.append('cid', context.id);
                 // formData.append('aid', attribute.id);
@@ -77,7 +75,6 @@ spacialistApp.component('sourcemodal', {
                 //     entry.source = undefined;
                 //     entry.desc = '';
                 // });
-                this.onEvent();
             };
             $scope.setCertainty = function(event, certainty) {
                 var max = event.currentTarget.scrollWidth;

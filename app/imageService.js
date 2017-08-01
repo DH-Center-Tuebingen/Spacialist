@@ -1,4 +1,4 @@
-spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'modalService', 'snackbarService', 'searchService', 'Upload', '$translate', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, httpPutFactory, httpPatchFactory, httpDeleteFactory, modalService, snackbarService, searchService, Upload, $translate, $timeout) {
+spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'snackbarService', 'searchService', 'Upload', '$translate', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpDeleteFactory, snackbarService, searchService, Upload, $translate, $timeout) {
     var images = {
         all: [],
         linked: [],
@@ -14,10 +14,12 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
 
     var lastTimeImageChecked = 0;
 
-    images.getMimeType = function(mt, f) {
+    images.getMimeType = function(f) {
         // check for extension before mime-type check
-        if(f) {
-            var suffix = f.substr(f.lastIndexOf('.')+1);
+        var filename = f.filename;
+        var mt = f.mime_type;
+        if(filename) {
+            var suffix = filename.substr(filename.lastIndexOf('.')+1);
             switch(suffix) {
                 case 'dae':
                 case 'obj':
@@ -35,58 +37,6 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         // default is simple text
         return 'text';
     };
-
-    images.openImageModal = function(img) {
-        modalOptions = {};
-        // modalOptions.markers = angular.extend({}, scopeService.markers);
-        modalOptions.img = img;
-        modalOptions.linkImage = images.linkImage;
-        modalOptions.unlinkImage = images.unlinkImage;
-        modalOptions.setImagePropertyEdit = setImagePropertyEdit;
-        modalOptions.storeImagePropertyEdit = storeImagePropertyEdit;
-        modalOptions.cancelImagePropertyEdit = cancelImagePropertyEdit;
-        modalOptions.getMimeType = images.getMimeType;
-        // modalOptions.isEmpty = $scope.isEmpty;
-        // modalOptions.modalNav = angular.extend({}, $scope.modalNav);
-        modalService.showModal({}, modalOptions);
-    };
-
-    function resetEditFields(editArray) {
-        for(var k in editArray) {
-            if(editArray.hasOwnProperty(k)) {
-                if(editArray[k].editMode) {
-                    editArray[k].text = '';
-                    editArray[k].editMode = false;
-                }
-            }
-        }
-    }
-
-    function setImagePropertyEdit(editArray, index, initValue) {
-        editArray[index] = {
-            text: initValue,
-            editMode: true
-        };
-    }
-
-    function storeImagePropertyEdit(editArray, index, img) {
-        var formData = new FormData();
-        formData.append('property', index);
-        formData.append('value', editArray[index].text);
-        httpPatchFactory('api/image/' + img.id + '/property', formData, function(response) {
-            if(response.error) {
-                cancelImagePropertyEdit(editArray, index);
-                return;
-            }
-            img[index] = editArray[index].text;
-            cancelImagePropertyEdit(editArray, index);
-        });
-    }
-
-    function cancelImagePropertyEdit(editArray, index) {
-        editArray[index].text = '';
-        editArray[index].editMode = false;
-    }
 
     images.getImagesForContext = function(id) {
         if(!id) return;
@@ -182,6 +132,12 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
                 var i = images.all.indexOf(img);
                 if(i > -1) images.all.splice(i, 1);
             }
+        });
+    };
+
+    images.getImages = function() {
+        return httpGetPromise.getData('api/image').then(function(response) {
+            return response;
         });
     };
 

@@ -6,10 +6,22 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
     $scope.upload = imageService.upload;
     $scope.tags = imageService.tags;
     $scope.hasMoreImages = imageService.hasMoreImages;
-    $scope.getMimeType = imageService.getMimeType;
     $scope.search = {
         terms: {
             tags: []
+        }
+    };
+
+    $scope.initImageTab = function() {
+        $scope.layerTwo.imageTab.newOpen = false;
+        if($scope.currentElement.element.id) {
+            $scope.layerTwo.imageTab.linkedOpen = true;
+            $scope.layerTwo.imageTab.allOpen = false;
+            imageService.getLinkedImages($scope.currentElement.element.id);
+        } else {
+            $scope.layerTwo.imageTab.linkedOpen = false;
+            $scope.layerTwo.imageTab.allOpen = true;
+            imageService.getAllImages();
         }
     };
 
@@ -19,6 +31,10 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
 
     $scope.removeTag = function(img, item) {
         imageService.removeTag(img, item);
+    };
+
+    $scope.getMimeType = function(mt, f) {
+        return imageService.getMimeType(mt, f);
     };
 
     var linkImageContextMenu = [function($itemScope) {
@@ -84,5 +100,24 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
 
     $scope.uploadImages = function($files, $invalidFiles) {
         imageService.uploadImages($files, $invalidFiles);
+    };
+
+    $scope.loadImages = function(len, type) {
+        var imgs = imageService.loadImages(len, type);
+        return imgs;
+    };
+
+    $scope.updateLinkedImages = function(beforeClick) {
+        //if it was closed before toggle
+        if(!beforeClick) {
+            imageService.getLinkedImages($scope.currentElement.element.id);
+        }
+    };
+
+    $scope.updateAllImages = function(beforeClick) {
+        //if it was closed before toggle
+        if(!beforeClick) {
+            imageService.getAllImages();
+        }
     };
 }]);
