@@ -22,10 +22,10 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
     };
 
     var linkImageContextMenu = [function($itemScope) {
-        var img = $itemScope.img;
+        var f = $itemScope.f;
         var content;
-        for(var i=0; i<img.linked_images.length; i++) {
-            if(img.linked_images[i].context_id == mainService.currentElement.element.id) {
+        for(var i=0; i<f.linked_images.length; i++) {
+            if(f.linked_images[i].context_id == mainService.currentElement.element.id) {
                 content = $translate.instant('photo.unlink-from', { name: mainService.currentElement.element.name });
                 break;
             }
@@ -35,16 +35,16 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
         }
         return '<i class="material-icons md-18">add_circle_outline</i> ' + content;
     }, function ($itemScope) {
-        var img = $itemScope.img;
-        var imgId = img.id;
+        var f = $itemScope.f;
+        var fileId = f.id;
         var contextId = mainService.currentElement.element.id;
-        for(var i=0; i<img.linked_images.length; i++) {
-           if(img.linked_images[i].context_id == mainService.currentElement.element.id) {
-               imageService.unlinkImage(imgId, contextId);
+        for(var i=0; i<f.linked_images.length; i++) {
+           if(f.linked_images[i].context_id == mainService.currentElement.element.id) {
+               imageService.unlinkImage(fileId, contextId);
                return;
            }
         }
-        imageService.linkImage(imgId, contextId);
+        imageService.linkImage(fileId, contextId);
     }, function() {
         return mainService.currentElement.element.id > 0;
     }];
@@ -55,10 +55,10 @@ spacialistApp.controller('imageCtrl', ['$scope', 'imageService', 'mainService', 
        //TODO implement (open modal with search field or inline)
     }];
     var deleteImage = [function($itemScope) {
-        var content = $translate.instant('photo.delete', { name: $itemScope.img.filename });
+        var content = $translate.instant('photo.delete', { name: $itemScope.f.filename });
        return '<i class="material-icons md-18">delete</i> ' + content;
     }, function ($itemScope, $event, modelValue, text, $li) {
-       imageService.deleteImage($itemScope.img);
+       imageService.deleteImage($itemScope.f);
     }];
 
     $scope.imageContextMenu = [
