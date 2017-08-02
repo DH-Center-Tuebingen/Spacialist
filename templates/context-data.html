@@ -19,7 +19,7 @@
                 <input type="text" class="form-control" id="name" ng-model="$ctrl.editContext.name" ng-readonly="!$ctrl.user.permissions.duplicate_edit_concepts" />
             </div>
         </div>
-        <form-field fields="$ctrl.fields" output="$ctrl.data" sources="$ctrl.sources" concepts="$ctrl.concepts" label-width="3" input-width="9" offset="0" sp-readonly="{{ !$ctrl.user.permissions.duplicate_edit_concepts }}">
+        <form-field fields="$ctrl.fields" output="$ctrl.data" sources="$ctrl.sources" menus="$ctrl.menus" concepts="$ctrl.concepts" label-width="3" input-width="9" offset="0" sp-readonly="{{ !$ctrl.user.permissions.duplicate_edit_concepts }}">
         </form-field>
         <div class="form-group">
             <label class="control-label col-md-3" for="lasteditor">{{ 'context-form.last-modified' | translate }}:</label>

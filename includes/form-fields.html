@@ -41,9 +41,9 @@
             </p>
             <div ng-switch-when="string-mc">
                 <ui-select multiple ng-disabled="readonlyInput" ng-model="attributeOutputs[attr.id]" close-on-select="false" name="{{ attr.id }}" id="{{ attr.id }}">
-                    <ui-select-match>{{$item.narr}}</ui-select-match>
-                    <ui-select-choices repeat="choice in dropdownOptions[attr.id] | filter:$select.search">
-                        {{choice.narr}}
+                    <ui-select-match>{{concepts[$item.concept_url].label}}</ui-select-match>
+                    <ui-select-choices repeat="choice in menus[attr.id] | filter:$select.search">
+                        <span ng-bind-html="concepts[choice.concept_url].label | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>
             </div>
@@ -51,9 +51,9 @@
                 <ui-select ng-disabled="readonlyInput" ng-model="attributeOutputs[attr.id]"
                 name="{{ attr.id }}" id="{{ attr.id }}"
                >
-                  <ui-select-match placeholder="{{ attr.val }}">{{ $select.selected.narr }}</ui-select-match>
-                  <ui-select-choices repeat="choice in dropdownOptions[attr.id] | filter: $select.search">
-                    <span ng-bind-html="choice.narr | highlight: $select.search"></span>
+                  <ui-select-match placeholder="{{ attr.val }}">{{ concepts[$select.selected.concept_url].label }}</ui-select-match>
+                  <ui-select-choices repeat="choice in menus[attr.id] | filter: $select.search">
+                    <span ng-bind-html="concepts[choice.concept_url].label | highlight: $select.search"></span>
                   </ui-select-choices>
                 </ui-select>
             </div>
@@ -112,9 +112,9 @@
                     <ui-select ng-model="attributeOutputs[attr.id].epoch"
                     name="{{ attr.id }}" id="{{ attr.id }}"
                     ng-disabled="readonlyInput">
-                      <ui-select-match placeholder="{{ attr.val }}">{{ $select.selected.narr }}</ui-select-match>
-                      <ui-select-choices repeat="choice in dropdownOptions[attr.id] | filter: $select.search">
-                        <span ng-bind-html="choice.narr | highlight: $select.search"></span>
+                      <ui-select-match placeholder="{{ attr.val }}">{{ concepts[$select.selected.concept_url].label }}</ui-select-match>
+                      <ui-select-choices repeat="choice in menus[attr.id] | filter: $select.search">
+                        <span ng-bind-html="concepts[choice.concept_url].label | highlight: $select.search"></span>
                       </ui-select-choices>
                     </ui-select>
                 </div>

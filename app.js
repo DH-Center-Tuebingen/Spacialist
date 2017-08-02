@@ -482,11 +482,12 @@ spacialistApp.directive('oldImageList', function(imageService) {
     };
 });
 
-spacialistApp.directive('formField', function($log) {
+spacialistApp.directive('formField', function() {
     var updateInputFields = function(scope, element, attrs) {
         scope.attributeFields = scope.$eval(attrs.fields);
         scope.attributeOutputs = scope.$eval(attrs.output);
         scope.attributeSources = scope.$eval(attrs.sources);
+        scope.menus = scope.$eval(attrs.menus);
         scope.readonlyInput = scope.$eval(attrs.spReadonly);
         var pattern = /^\d+$/;
         if(typeof attrs.labelWidth != 'undefined' && pattern.test(attrs.labelWidth)) {
@@ -545,6 +546,11 @@ spacialistApp.directive('formField', function($log) {
             });
             scope.$watch(function(scope) {
                 return scope.$eval(attrs.sources);
+            }, function(newVal, oldVal) {
+                updateInputFields(scope, element, attrs);
+            });
+            scope.$watch(function(scope) {
+                return scope.$eval(attrs.menus);
             }, function(newVal, oldVal) {
                 updateInputFields(scope, element, attrs);
             });
@@ -1072,6 +1078,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     concepts: function(concepts) {
                         // TODO other access to concepts object?
                         return concepts;
+                    },
+                    menus: function(mainService) {
+                        return mainService.getDropdownOptions();
                     },
                     map: function(mapService, tab) {
                         if(tab != 'map') return undefined;

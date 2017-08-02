@@ -116,46 +116,29 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $rows = DB::table('context_types as c')
-        ->select('c.id as context_type_id', 'a.id as aid', 'a.datatype', 'a.thesaurus_root_url as root', 'ca.position',
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
-        )
-        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
-        ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
-        ->where('a.datatype', '=', 'string-sc')
-        ->orWhere('a.datatype', '=', 'string-mc')
-        ->orWhere('a.datatype', '=', 'epoch')
-        ->orderBy('title', 'asc')
-        ->orderBy('ca.position', 'asc')
-        ->get();
-        foreach($rows as &$row) {
-            if(!isset($row->root)) continue;
-            $rootId = DB::table('th_concept')
-                ->select('id')
-                ->where('concept_url', '=', $row->root)
-                ->first();
+        $attrs = Attribute::whereIn('datatype', ['string-sc', 'string-mc', 'epoch'])->get();
+        $choices = [];
+        foreach($attrs as &$attr) {
+            $rootId = ThConcept::where('concept_url', $attr->thesaurus_root_url)->value('id');
             if(!isset($rootId)) continue;
-            $rootId = $rootId->id;
-            $row->choices = DB::select("
+            $choices[$attr->id] = DB::select("
                 WITH RECURSIVE
                 top AS (
-                    SELECT br.broader_id, br.narrower_id, (select label from getconceptlabelsfromid where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
-                            (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
+                    SELECT br.broader_id, br.narrower_id, c.concept_url
                     FROM th_broaders br
+                    JOIN th_concept as c on c.id = br.narrower_id
                     WHERE broader_id = $rootId
                     UNION
-                    SELECT br.broader_id, br.narrower_id, (select label from getconceptlabelsfromid where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
-                            (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
+                    SELECT br.broader_id, br.narrower_id, c2.concept_url
                     FROM top t, th_broaders br
+                    JOIN th_concept as c2 on c2.id = br.narrower_id
                     WHERE t.narrower_id = br.broader_id
                 )
                 SELECT *
                 FROM top
-                ORDER BY narr
             ");
         }
-        return response()->json($rows);
+        return response()->json($choices);
     }
 
     public function getContextByGeodata($id) {
@@ -862,15 +845,7 @@ class ContextController extends Controller {
             if($attr->datatype == 'literature') {
                 $attr->literature_info = DB::table('literature')->where('id', $attr->str_val)->first();
             } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
-                $attr->val = DB::table('th_concept')
-                    ->select('id as narrower_id',
-                        DB::raw("'".DB::table('getconceptlabelsfromurl')
-                        ->where('concept_url', $attr->thesaurus_val)
-                        ->where('short_name', 'de')
-                        ->value('label')."' as narr")
-                    )
-                    ->where('concept_url', '=', $attr->thesaurus_val)
-                    ->first();
+                $attr->val = ThConcept::where('concept_url', $attr->thesaurus_val)->select('th_concept.id as narrower_id', 'concept_url')->first();
             } else if($attr->datatype == 'dimension') {
                 $jsonVal = json_decode($attr->json_val);
                 if(!isset($jsonVal)) continue;

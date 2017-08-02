@@ -19,7 +19,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.contextReferences = {};
     main.artifacts = [];
     main.artifactReferences = {};
-    main.dropdownOptions = {};
     main.treeCallbacks = {};
     main.dimensionUnits = [
         'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
@@ -100,6 +99,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
 
     main.getContextFields = function(ctid) {
         return httpGetPromise.getData('api/context/context_type/' + ctid + '/attribute').then(function(response) {
+            return response;
+        });
+    };
+
+    main.getDropdownOptions = function() {
+        return httpGetPromise.getData('api/context/dropdown_options').then(function(response) {
+            console.log(response);
             return response;
         });
     };
