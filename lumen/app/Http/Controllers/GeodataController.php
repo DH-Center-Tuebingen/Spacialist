@@ -174,12 +174,10 @@ class GeodataController extends Controller {
 
     private function parseTypeCoords($type, $coords, $geodata) {
         switch($type) {
-            case 'marker':
             case 'Point':
                 $coords = $coords[0];
                 $geodata->geom = new Point($coords->lat, $coords->lng);
                 break;
-            case 'polyline':
             case 'LineString':
                 $lines = [];
                 foreach($coords as $coord) {
@@ -187,7 +185,6 @@ class GeodataController extends Controller {
                 }
                 $geodata->geom = new LineString($lines);
                 break;
-            case 'polygon':
             case 'Polygon':
                 $lines = [];
                 foreach($coords[0] as $coord) {

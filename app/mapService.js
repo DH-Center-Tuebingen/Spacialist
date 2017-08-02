@@ -44,11 +44,15 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         return map.mapObject._popup.options.feature.id;
     };
 
-    map.addGeodata = function(type, coords, id) {
+    map.addGeodata = function(type, coords, id, contexts, mapArr) {
         var formData = new FormData();
+        type = convertToStandardGeomtype(type);
+        if(!type) {
+            snackbarService.addAutocloseSnack('TODO invalid geomtype', 'error');
+        }
         formData.append('type', type);
         formData.append('coords', angular.toJson(coords));
-        if(id) {
+        if(id > 0) {
             httpPutFactory('api/geodata/'+id, formData, function(response) {
                 if (response.error) {
                     snackbarService.addAutocloseSnack(response.error, 'error');
@@ -58,10 +62,27 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             httpPostFactory('api/geodata', formData, function(response) {
                 map.addListToMarkers([
                     response.geodata
-                ]);
+                ], contexts, mapArr);
             });
         }
     };
+
+    function convertToStandardGeomtype(type) {
+        switch(type) {
+            case 'marker':
+            case 'Marker':
+            case 'point':
+                return 'Point';
+            case 'linestring':
+            case 'polyline':
+            case 'linestring':
+            case 'Linestring':
+                return 'LineString';
+            case 'polygon':
+                return 'Polygon';
+        }
+        return undefined;
+    }
 
     function initHiddenLayers(mapArr) {
         for(var i=0; i<invisibleLayers.length; i++) {
@@ -224,7 +245,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
 
     map.initMapObject = function() {
         return leafletData.getMap('mainmap');
-    }
+    };
 
     map.initMapVariables = function() {
         map.map = {};
@@ -292,7 +313,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         map.map.geodata.linkedGeolayer = {};
 
         return map.map;
-    }
+    };
 
     map.getLayers = function() {
         return httpGetPromise.getData('api/overlay').then(function(response) {
@@ -383,7 +404,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                 mapArr.layers.baselayers[id] = currentLayer;
             }
         }
-    }
+    };
 
     function setLayerOptions(l) {
         var layerOptions = {};
