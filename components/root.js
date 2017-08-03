@@ -19,5 +19,5 @@ spacialistApp.component('header', {
         availableLanguages: '<'
     },
     templateUrl: 'templates/header.html',
-    controller: 'langCtrl'
+    controller: 'headerCtrl'
 });
