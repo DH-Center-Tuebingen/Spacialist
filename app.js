@@ -1340,11 +1340,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 })
                 .state('root.spacialist.data.delete', {
                     url: '/delete',
-                    resolve: {
-                        context: function(context) {
-                            return context;
-                        }
-                    },
                     onEnter: ['contexts', 'context', 'concepts', 'mainService', 'snackbarService', '$transition$', '$state', '$uibModal', '$translate', function(contexts, context, concepts, mainService, snackbarService, $transition$, $state, $uibModal, $translate) {
                         $uibModal.open({
                             templateUrl: "modals/delete-context.html",

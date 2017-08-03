@@ -112,8 +112,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
                 return '<i class="material-icons md-18 fa-light fa-red context-menu-icon">delete</i> ' + $translate.instant('context-menu.delete');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                $state.go('root.spacialist.delete', {id: $itemScope.$parent.id});
-                // mainService.deleteElement(localContexts, $itemScope.$parent.id);
+                $state.go('root.spacialist.data.delete', {id: $itemScope.$parent.id});
             }
         ]
     ];
