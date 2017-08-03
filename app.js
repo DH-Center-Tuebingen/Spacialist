@@ -444,23 +444,24 @@ spacialistApp.directive('spTree', function($parse) {
     };
 });
 
-spacialistApp.directive('fileList', function(imageService) {
+spacialistApp.directive('fileList', function(fileService) {
     return {
         restrict: 'E',
         templateUrl: 'templates/file-list.html',
         scope: {
             files: '=',
+            contextMenu: '=',
             showTags: '=',
             searchTerms: '='
         },
-        controller: 'imageCtrl',
+        controller: 'fileCtrl',
         link: function(scope, elements, attrs) {
-            scope.availableTags = imageService.availableTags;
+            scope.availableTags = fileService.availableTags;
         }
     };
 });
 
-spacialistApp.directive('oldImageList', function(imageService) {
+spacialistApp.directive('oldImageList', function(fileService) {
     return {
         restrict: 'E',
         templateUrl: 'includes/image-list.html',
@@ -472,9 +473,9 @@ spacialistApp.directive('oldImageList', function(imageService) {
             showTags: '=',
             searchTerms: '='
         },
-        controller: 'imageCtrl',
+        controller: 'fileCtrl',
         link: function(scope, elements, attrs) {
-            scope.availableTags = imageService.availableTags;
+            scope.availableTags = fileService.availableTags;
             scope.$root.$on('image:delete:linked', function(event, args) {
                 scope.tmpData.linked = [];
             });
@@ -1094,9 +1095,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         if(tab != 'map') return undefined;
                         return mapService.getGeodata();
                     },
-                    files: function(imageService, tab) {
+                    files: function(fileService, tab) {
                         if(tab != 'files') return undefined;
-                        return imageService.getImages();
+                        return fileService.getImages();
                     }
                 }
             })
@@ -1226,8 +1227,8 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return fileId == f.id;
                             });
                         },
-                        mimeType: function(file, imageService) {
-                            return imageService.getMimeType(file);
+                        mimeType: function(file, fileService) {
+                            return fileService.getMimeType(file);
                         }
                     },
                     onEnter: ['file', 'mimeType', 'httpPatchFactory', '$uibModal', '$state', function(file, mimeType, httpPatchFactory, $uibModal, $state) {

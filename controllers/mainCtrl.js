@@ -1,19 +1,12 @@
-spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$state', '$translate', '$timeout', '$compile', function($scope, mainService, mapService, $state, $translate, $timeout, $compile) {
+spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fileService', '$state', '$translate', '$timeout', '$compile', function($scope, mainService, mapService, fileService, $state, $translate, $timeout, $compile) {
+    var vm = this;
+
     $scope.moduleExists = mainService.moduleExists;
     $scope.filterTree = mainService.filterTree;
 
-    var localContexts = this.contexts;
-    var localConcepts = this.concepts;
-    var localLayers = this.layer;
-    var localMap = this.map;
-    var mapObject;
-    var localGeodata = this.geodata;
-    var localContextTypes = this.contextTypes;
-    var localTab = this.tab;
-
-    this.onStore = function(context, data) {
+    vm.onStore = function(context, data) {
         mainService.storeElement(context, data);
-        var c = this.contexts.data[context.id];
+        var c = vm.contexts.data[context.id];
         for(var k in context) {
             if(context.hasOwnProperty(k)) {
                 c[k] = context[k];
@@ -21,22 +14,22 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
         }
     };
 
-    this.onSourceAdd = function(entry) {
+    vm.onSourceAdd = function(entry) {
         console.log(entry);
     };
 
-    if(localTab == 'map') {
-        mapService.setupLayers(localLayers, localMap, localContexts, localConcepts);
+    if(vm.tab == 'map') {
+        mapService.setupLayers(vm.layer, vm.map, vm.contexts, vm.concepts);
         mapService.initMapObject().then(function(obj) {
-            mapObject = obj;
+            vm.mapObject = obj;
             // wait a random amount of time, so mapObject.eachLayer has all layers
             $timeout(function() {
-                mapObject.eachLayer(function(l) {
+                vm.mapObject.eachLayer(function(l) {
                     if(l.options.layer_id) {
-                        localMap.mapLayers[l.options.layer_id] = l;
+                        vm.map.mapLayers[l.options.layer_id] = l;
                     }
                 });
-                mapService.initGeodata(localGeodata, localContexts, localMap);
+                mapService.initGeodata(vm.geodata, vm.contexts, vm.map);
             }, 100);
         });
     }
@@ -52,10 +45,10 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
 
     $scope.treeCallbacks = {
         toggle: function(collapsed, sourceNodeScope) {
-            mainService.treeCallbacks.toggle(collapsed, sourceNodeScope, localContexts);
+            mainService.treeCallbacks.toggle(collapsed, sourceNodeScope, vm.contexts);
         },
         dropped: function(event) {
-            mainService.treeCallbacks.dropped(event, localContexts);
+            mainService.treeCallbacks.dropped(event, vm.contexts);
         }
     };
 
@@ -67,7 +60,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
     $scope.newElementContextMenu = [
         [
             function($itemScope, $event, modelValue, text, $li) {
-                return $translate.instant('context-menu.options-of', { object: localContexts.data[$itemScope.$parent.id].name });
+                return $translate.instant('context-menu.options-of', { object: vm.contexts.data[$itemScope.$parent.id].name });
             },
             function($itemScope, $event, modelValue, text, $li) {
             },
@@ -84,7 +77,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
                     id: $itemScope.$parent.id
                 });
         }, function($itemScope) {
-            return this.contexts.data[$itemScope.$parent.id].type === 0;
+            return vm.contexts.data[$itemScope.$parent.id].type === 0;
         }],
         [
             function() {
@@ -96,7 +89,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
                     id: $itemScope.$parent.id
                 });
         }, function($itemScope) {
-            return this.contexts.data[$itemScope.$parent.id].type === 0;
+            return vm.contexts.data[$itemScope.$parent.id].type === 0;
         }],
         null,
         [
@@ -154,7 +147,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
         var type = args.leafletEvent.layerType;
         var layer = args.leafletEvent.layer;
         var coords = mapService.getCoords(layer, type);
-        mapService.addGeodata(type, coords, -1, localContexts, localMap);
+        mapService.addGeodata(type, coords, -1, vm.contexts, vm.map);
     });
     $scope.$on('leafletDirectiveDraw.mainmap.draw:edited', function(event, args) {
         var layers = args.leafletEvent.layers.getLayers();
@@ -162,7 +155,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
             var type = layer.feature.geometry.type;
             var coords = mapService.getCoords(layer, type);
             var id = layer.feature.id;
-            mapService.addGeodata(type, coords, id, localContexts, localMap);
+            mapService.addGeodata(type, coords, id, vm.contexts, vm.map);
         });
     });
     $scope.$on('leafletDirectiveDraw.mainmap.draw:deleted', function(event, args) {
@@ -174,7 +167,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
                     modalFactory.errorModal(response.error);
                     return;
                 }
-                delete localMap.geodata.linkedContexts[id];
+                delete vm.map.geodata.linkedContexts[id];
             });
         });
     });
@@ -191,8 +184,8 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
                 geodata_id: updatedContext.geodata_id
             };
             mainService.updateContextById(cid, updatedValues);
-            localMap.geodata.linkedContexts[gid] = cid;
-            localMap.geodata.linkedLayers[gid].bindTooltip(localContexts.data[cid].name);
+            vm.map.geodata.linkedContexts[gid] = cid;
+            vm.map.geodata.linkedLayers[gid].bindTooltip(vm.contexts.data[cid].name);
         });
     };
 
@@ -207,9 +200,62 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', '$s
                 geodata_id: undefined
             };
             mainService.updateContextById(cid, updatedValues);
-            delete localMap.geodata.linkedContexts[$scope.currentGeodata.id]; // TODO currentGeodata
-            linkedLayer = localMap.geodata.linkedLayers[$scope.currentGeodata.id]; // TODO currentGeodata
+            delete vm.map.geodata.linkedContexts[$scope.currentGeodata.id]; // TODO currentGeodata
+            linkedLayer = vm.map.geodata.linkedLayers[$scope.currentGeodata.id]; // TODO currentGeodata
             linkedLayer.bindTooltip(linkedLayer.feature.properties.name);
         });
+    };
+
+    // FILE RELATED CODE
+
+    var linkFileContextMenu = [function($itemScope) {
+        var f = $itemScope.f;
+        var content;
+        for(var i=0; i<f.linked_images.length; i++) {
+            if(f.linked_images[i].context_id == mainService.currentElement.element.id) {
+                content = $translate.instant('photo.unlink-from', { name: mainService.currentElement.element.name });
+                break;
+            }
+        }
+        if(!content) {
+            content = $translate.instant('photo.link-to', { name: mainService.currentElement.element.name });
+        }
+        return '<i class="material-icons md-18">add_circle_outline</i> ' + content;
+    }, function ($itemScope) {
+        var f = $itemScope.f;
+        var fileId = f.id;
+        var contextId = mainService.currentElement.element.id;
+        for(var i=0; i<f.linked_images.length; i++) {
+           if(f.linked_images[i].context_id == mainService.currentElement.element.id) {
+               fileService.unlinkImage(fileId, contextId);
+               return;
+           }
+        }
+        fileService.linkImage(fileId, contextId);
+    }, function() {
+        return mainService.currentElement.element.id > 0;
+    }];
+    var deleteFile = [function($itemScope) {
+        var content = $translate.instant('photo.delete', { name: $itemScope.f.filename });
+       return '<i class="material-icons md-18">delete</i> ' + content;
+    }, function ($itemScope, $event, modelValue, text, $li) {
+        fileService.deleteFile($itemScope.f, vm.files);
+    }];
+
+    vm.fileContextMenu = [
+        linkFileContextMenu,
+        null,
+        deleteFile
+    ];
+
+    /**
+     * enables drag & drop support for image upload, calls `$scope.uploadImages` if files are dropped on the `dropFiles` model
+     */
+    $scope.$watch('dropFiles', function() {
+        vm.uploadImages($scope.dropFiles);
+    });
+
+    vm.uploadImages = function($files, $invalidFiles) {
+        vm.uploadStatus = fileService.uploadImages($files, $invalidFiles, vm.files);
     };
 }]);

@@ -5,7 +5,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-6 col-md-4 unlinked-item" context-menu="imageContextMenu" ng-repeat="f in files | imageFilter:searchTerms">
+        <div class="col-sm-6 col-md-4 unlinked-item" context-menu="contextMenu" ng-repeat="f in files | imageFilter:searchTerms">
             <div class="thumbnail">
                 <a ui-sref="root.spacialist.file({id: f.id})">
                     <div class="thumb-wrapper centered-full" ng-switch="getMimeType(f)">

@@ -33,7 +33,7 @@
             <li role="presentation" ui-sref="{tab: 'map'}" ui-sref-active="active" ng-if="moduleExists('mapCtrl')">
                 <a><i class="material-icons">place</i><span class="tab-desc"> {{'context-form.tabs.map'|translate}}</span></a>
             </li>
-            <li role="presentation" ui-sref="{tab: 'files'}" ui-sref-active="active" ng-if="moduleExists('imageCtrl')">
+            <li role="presentation" ui-sref="{tab: 'files'}" ui-sref-active="active" ng-if="moduleExists('fileCtrl')">
                 <a><i class="material-icons">folder</i><span class="tab-desc"> {{'context-form.tabs.photos'|translate}}</span></a>
             </li>
             <!-- TODO $ctrl.context in ng-if is not defined -->
@@ -116,9 +116,9 @@
                             <div class="alert alert-info drop-box" ngf-drop ngf-select ng-model="dropFiles" ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true" ngf-accept="'*'" ngf-pattern="'*'">
                                 {{'context-form.tabs.photos.drag+drop'|translate}}
                             </div>
-                            <button type="button" class="btn btn-default" ngf-select="uploadImages($files, $invalidFiles)" multiple ngf-allow-dir="true" ngf-accept="'*'">{{'context-form.tabs.photos.upload-button'|translate}}</button>
+                            <button type="button" class="btn btn-default" ngf-select="$ctrl.uploadImages($files, $invalidFiles)" multiple ngf-allow-dir="true" ngf-accept="'*'">{{'context-form.tabs.photos.upload-button'|translate}}</button>
                             <ul>
-                                <li ng-repeat="f in upload.files">
+                                <li ng-repeat="f in $ctrl.uploadStatus.files">
                                     {{ f.name }} {{ f.$errorParam }}
                                     <div class="progress">
                                         <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ f.progress }}%">
@@ -131,7 +131,7 @@
                                         </div>
                                     </div>
                                 </li>
-                                <li ng-repeat="f in upload.errFiles">{{f.name}} {{f.$error}} {{f.$errorParam}}
+                                <li ng-repeat="f in $ctrl.uploadStatus.errFiles">{{f.name}} {{f.$error}} {{f.$errorParam}}
                                 </li>
                             </ul>
                         </div>
@@ -140,7 +140,7 @@
                         <uib-accordion-heading>
                             {{'context-form.tabs.photos.all'|translate}}
                         </uib-accordion-heading>
-                        <file-list files="$ctrl.files"></file-list>
+                        <file-list files="$ctrl.files" context-menu="$ctrl.fileContextMenu"></file-list>
                         <!-- <old-image-list on-scroll-load="loadImages(len, type)" image-data="$ctrl.files" show-tags="tags.visible" search-terms="search.terms" image-type="'all'" scroll-container="'#addon-container'"></old-image-list> -->
                     </div>
                 </uib-accordion>

@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'httpDeletePromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$state', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, httpDeletePromise, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, searchService, $timeout, $state, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'httpDeletePromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'fileService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$state', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, httpDeletePromise, modalFactory, $uibModal, moduleHelper, environmentService, fileService, literatureService, mapService, snackbarService, searchService, $timeout, $state, $translate) {
     var main = {};
     var modalFields;
 
@@ -105,7 +105,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
 
     main.getDropdownOptions = function() {
         return httpGetPromise.getData('api/context/dropdown_options').then(function(response) {
-            console.log(response);
             return response;
         });
     };
@@ -666,8 +665,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     function loadLinkedImages(id) {
-        if(!moduleHelper.controllerExists('imageCtrl')) return;
-        imageService.getImagesForContext(id);
+        if(!moduleHelper.controllerExists('fileCtrl')) return;
+        fileService.getImagesForContext(id);
     }
 
     main.isEmpty = function(obj) {

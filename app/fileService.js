@@ -1,4 +1,4 @@
-spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'snackbarService', 'searchService', 'Upload', '$translate', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpDeleteFactory, snackbarService, searchService, Upload, $translate, $timeout) {
+spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'snackbarService', 'searchService', 'Upload', '$translate', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpDeleteFactory, snackbarService, searchService, Upload, $translate, $timeout) {
     var images = {
         all: [],
         linked: [],
@@ -65,11 +65,12 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
     /**
      * Upload the image files `files` to the server, one by one and store their paths in the database.
      */
-    images.uploadImages = function(files, invalidFiles) {
-        images.upload.files = files;
-        images.upload.errFiles = invalidFiles;
-        images.upload.finished = 0;
-        images.upload.toFinish = (typeof files === 'undefined') ? 0 : files.length;
+    images.uploadImages = function(files, invalidFiles, fileList) {
+        var upload = {};
+        upload.files = files;
+        upload.errFiles = invalidFiles;
+        upload.finished = 0;
+        upload.toFinish = (typeof files === 'undefined') ? 0 : files.length;
         angular.forEach(files, function(file) {
             file.upload = Upload.upload({
                 url: 'api/image/upload',
@@ -79,15 +80,14 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
                 $timeout(function() {
                     var data = response.data;
                     data.linked = [];
-                    if (typeof images.all === 'undefined') images.all = [];
-                    images.all.push(data);
-                    images.upload.finished++;
-                    if (images.upload.finished == images.upload.toFinish) {
+                    fileList.push(data);
+                    upload.finished++;
+                    if (upload.finished == upload.toFinish) {
                         $timeout(function() {
-                            images.upload.files.length = 0;
+                            upload.files.length = 0;
                         }, 1000);
                         var content = $translate.instant('snackbar.image-upload.success', {
-                            cnt: images.upload.finished
+                            cnt: upload.finished
                         });
                         snackbarService.addAutocloseSnack(content, 'success');
                     }
@@ -100,6 +100,7 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
                 file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
             });
         });
+        return upload;
     };
 
     /**
@@ -124,13 +125,13 @@ spacialistApp.service('imageService', ['$rootScope', 'httpPostFactory', 'httpGet
         });
     };
 
-    images.deleteImage = function(img) {
-        httpDeleteFactory('api/image/' + img.id, function(response) {
+    images.deleteFile = function(file, fileList) {
+        httpDeleteFactory('api/image/' + file.id, function(response) {
             if(!response.error) {
                 var content = $translate.instant('snackbar.image-deleted.success');
                 snackbarService.addAutocloseSnack(content, 'success');
-                var i = images.all.indexOf(img);
-                if(i > -1) images.all.splice(i, 1);
+                var i = fileList.indexOf(file);
+                if(i > -1) fileList.splice(i, 1);
             }
         });
     };
