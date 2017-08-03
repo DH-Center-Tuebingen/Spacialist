@@ -1,22 +1,16 @@
 spacialistApp.controller('dataEditorCtrl', ['$scope', 'dataEditorService', function($scope, dataEditorService) {
-    var localAttributes = this.attributes;
-    var localTypes = this.attributetypes;
-    var localGeomTypes = this.geometryTypes;
-    var localContextTypes = this.contextTypes;
-    var localContextType = this.contextType;
-    var localFields = this.fields;
-    var localConcepts = this.concepts;
+    var vm = this;
 
     $scope.addNewAttribute = function() {
-        dataEditorService.addNewAttributeWindow(localTypes, localAttributes);
+        dataEditorService.addNewAttributeWindow(vm.attributetypes, vm.attributes);
     };
 
     $scope.onDeleteAttribute = function(attr) {
-        dataEditorService.deleteAttribute(attr, localAttributes);
+        dataEditorService.deleteAttribute(attr, vm.attributes);
     };
 
     $scope.addNewContextType = function() {
-        dataEditorService.addNewContextTypeWindow(localGeomTypes, localContextTypes);
+        dataEditorService.addNewContextTypeWindow(vm.geometryTypes, vm.contextTypes);
     };
 
     $scope.editContextType = function(e) {
@@ -24,23 +18,23 @@ spacialistApp.controller('dataEditorCtrl', ['$scope', 'dataEditorService', funct
     };
 
     $scope.deleteContextType = function(e) {
-        dataEditorService.deleteContextType(e, localContextTypes, localConcepts[e.thesaurus_url].label);
+        dataEditorService.deleteContextType(e, vm.contextTypes, vm.concepts[e.thesaurus_url].label);
     };
 
     $scope.onRemoveAttrFromCt = function(attr) {
-        dataEditorService.removeAttributeFromContextType(localContextType, attr, localFields);
+        dataEditorService.removeAttributeFromContextType(vm.contextType, attr, vm.fields);
     };
 
     $scope.onOrderAttrOfCt = {
         up: function(attr) {
-            dataEditorService.moveAttributeOfContextTypeUp(attr, localFields);
+            dataEditorService.moveAttributeOfContextTypeUp(attr, vm.fields);
         },
         down: function(attr) {
-            dataEditorService.moveAttributeOfContextTypeDown(attr, localFields);
+            dataEditorService.moveAttributeOfContextTypeDown(attr, vm.fields);
         }
     };
 
     $scope.addAttributeToContextType = function() {
-        dataEditorService.addAttributeToContextTypeWindow(localContextType, localFields, localAttributes, localConcepts);
+        dataEditorService.addAttributeToContextTypeWindow(vm.contextType, vm.fields, vm.attributes, vm.concepts);
     };
 }]);

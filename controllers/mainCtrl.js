@@ -1,5 +1,6 @@
 spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fileService', '$state', '$translate', '$timeout', '$compile', function($scope, mainService, mapService, fileService, $state, $translate, $timeout, $compile) {
     var vm = this;
+    vm.currentElement = mainService.currentElement;
 
     $scope.moduleExists = mainService.moduleExists;
     $scope.filterTree = mainService.filterTree;
@@ -109,6 +110,10 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
             }
         ]
     ];
+
+    $scope.hasSources = function(element) {
+        return Object.keys(element.sources).length > 0;
+    };
 
     // MAP RELATED CODE
     /**

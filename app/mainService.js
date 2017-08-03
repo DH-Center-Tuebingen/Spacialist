@@ -6,14 +6,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         enabled: false
     };
 
-    main.currentElement = {
-        element: {},
-        form: {},
-        data: {},
-        geometryType: '',
-        fields: {},
-        sources: {}
-    };
+    main.currentElement = {};
     main.contextTypes = [];
     main.contexts = environmentService.contexts;
     main.contextReferences = {};
@@ -32,6 +25,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     // $scope.date = {
     //     opened: false
     // };
+
+    initCurrentElement();
 
     main.treeCallbacks.dropped = function(event, contexts) {
         var hasParent = event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue;
@@ -386,20 +381,17 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
     };
 
-
-    main.unsetCurrentElement = function(dontUnsetUnlinked) {
-        dontUnsetUnlinked = dontUnsetUnlinked || false;
-        if(typeof main.currentElement == 'undefined') return;
-        if(dontUnsetUnlinked) {
-            console.log(main.currentElement.element.geodata_id);
-            if(typeof main.currentElement.element.geodata_id == 'undefined' || main.currentElement.element.geodata_id === null) {
-                return;
-            }
-        }
+    function initCurrentElement() {
         main.currentElement.element = {};
+        main.currentElement.form = {};
         main.currentElement.data = {};
+        main.currentElement.geometryType = '';
         main.currentElement.fields = {};
         main.currentElement.sources = {};
+    }
+
+    main.unsetCurrentElement = function() {
+        initCurrentElement();
     };
 
     function addContextSource(source) {
@@ -414,75 +406,25 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         return main.currentElement.form && main.currentElement.form.$dirty;
     };
 
-    main.setCurrentElement = function(target, elem, openAgain) {
-        if(main.hasUnstagedChanges()) {
-            var onDiscard = function() {
-                main.currentElement.form.$setPristine();
-                return main.setCurrentElement(target, elem, openAgain);
-            };
-            var onConfirm = function() {
-                main.currentElement.form.$setPristine();
-                main.storeElement(main.currentElement.element, main.currentElement.data);
-                return main.setCurrentElement(target, elem, openAgain);
-            };
-            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
-            return;
-        }
-        if(typeof elem != 'undefined' && elem.id == target.id) {
-            if(mapService.getPopupGeoId() == elem.geodata_id) mapService.closePopup();
-            main.unsetCurrentElement();
-            return;
-        }
-        var isCurrentlyLinked = mapService.geodata.linkedContexts[elem.geodata_id] && mapService.geodata.linkedContexts[elem.geodata_id] > 0;
-        elem = target;
-        var layerId = mapService.geodata.linkedGeolayer[elem.context_type_id];
-        var layer = mapService.map.layers.overlays[layerId];
-        main.currentElement.geometryType = layer.layerOptions.type;
-        console.log(elem);
-        if(elem.typeid === 0) { //context
-            elem.fields = main.contextReferences[elem.typename].slice();
-        } else if(elem.typeid == 1) { //find
-            elem.fields = main.artifactReferences[elem.typename].slice();
-        }
-        var data = {};
-        httpGetFactory('api/context/' + elem.id + '/data', function(response) {
-            if(response.error) {
-                modalFactory.errorModal(response.error);
-                return;
+    main.setCurrentElement = function(element) {
+        // if(main.hasUnstagedChanges()) {
+        //     var onDiscard = function() {
+        //         main.currentElement.form.$setPristine();
+        //         return main.setCurrentElement(target, elem, openAgain);
+        //     };
+        //     var onConfirm = function() {
+        //         main.currentElement.form.$setPristine();
+        //         main.storeElement(main.currentElement.element, main.currentElement.data);
+        //         return main.setCurrentElement(target, elem, openAgain);
+        //     };
+        //     modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
+        //     return;
+        // }
+        for(var k in element) {
+            if(element.hasOwnProperty(k)) {
+                main.currentElement[k] = element[k];
             }
-            data = parseData(response.data);
-            main.currentElement.data = data;
-        });
-        main.currentElement.sources = {};
-        httpGetFactory('api/source/by_context/' + elem.id, function(response) {
-            if(response.error) {
-                modalFactory.errorModal(response.error);
-                return;
-            }
-            var sources = response.sources;
-            for(var k in main.currentElement.sources) {
-                if(main.currentElement.sources.hasOwnProperty(k)) {
-                    main.currentElement.sources[k].length = 0;
-                    delete main.currentElement.sources[k];
-                }
-            }
-            angular.forEach(sources, function(source, i) {
-                addContextSource(source);
-            });
-        });
-        var lastmodified = elem.updated_at || elem.created_at;
-        var d = new Date(lastmodified);
-        main.currentElement.fields = elem.fields;
-        elem.lastmodified = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
-        elem.root_cid = elem.root_cid || -1;
-        main.currentElement.element = elem;
-        if(typeof openAgain == 'undefined') openAgain = true;
-        if(elem.geodata_id !== null && openAgain) {
-            mapService.openPopup(elem.geodata_id);
-        } else if(elem.geodata_id === null && isCurrentlyLinked) {
-            mapService.closePopup();
         }
-        loadLinkedImages(main.currentElement.element.id);
     };
 
     main.openGeographyModal = function($scope, aid) {

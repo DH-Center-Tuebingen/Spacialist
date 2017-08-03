@@ -1,8 +1,8 @@
 spacialistApp.controller('layerEditCtrl', ['$scope', 'layerEditorService', function($scope, layerEditorService) {
-    $scope.editableLayer = angular.merge({}, this.layer);
-    var originalLayer = this.layer;
+    var vm = this;
+    $scope.editableLayer = angular.merge({}, vm.layer);
 
     $scope.updateLayer = function(layer) {
-        layerEditorService.updateLayer(layer, originalLayer);
+        layerEditorService.updateLayer(layer, vm.layer);
     };
 }]);

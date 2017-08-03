@@ -36,9 +36,8 @@
             <li role="presentation" ui-sref="{tab: 'files'}" ui-sref-active="active" ng-if="moduleExists('fileCtrl')">
                 <a><i class="material-icons">folder</i><span class="tab-desc"> {{'context-form.tabs.photos'|translate}}</span></a>
             </li>
-            <!-- TODO $ctrl.context in ng-if is not defined -->
-            <li role="presentation" ui-sref="{tab: 'bibliography'}" ui-sref-active="active" ng-if="moduleExists('literatureCtrl') && $ctrl.context">
-                <a href="" ng-click="setActiveTab('bibliography')"><i class="material-icons">book</i><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
+            <li role="presentation" ui-sref="{tab: 'bibliography'}" ui-sref-active="active" ng-if="moduleExists('bibliographyCtrl') && $ctrl.currentElement.element.id">
+                <a><i class="material-icons">book</i><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
             </li>
         </ul>
         <div ng-show="$ctrl.tab == 'map'" class="padded-content">
@@ -100,7 +99,7 @@
                     </div>
                 </div>
                 <uib-accordion close-others="true" class="col-md-12">
-                    <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!$ctrl.context"> <!-- TODO $ctrl.context is not defined in parent -->
+                    <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!$ctrl.currentElement.element.id">
                         <uib-accordion-heading>
                             <span ng-click="!currentElement.element || updateLinkedImages(layerTwo.imageTab.linkedOpen)">
                                 {{'context-form.tabs.photos.linked'|translate}}
@@ -151,9 +150,9 @@
         </div>
         <div ng-show="$ctrl.tab == 'bibliography'" class="padded-content">
             <div ng-if="$ctrl.user.permissions.duplicate_edit_concepts">
-                <p class="alert alert-warning" ng-if="!hasSources(currentElement)" ng-bind-html="'context-form.tabs.sources.empty'|translate"></p>
-                <div ng-repeat="(key, attr) in $ctrl.sources"> <!-- TODO $ctrl.sources is undefined in parent -->
-                    <h4><a ui-sref="root.spacialist.data.sources({aid: attr[0].id})">{{ attr[0].attribute_name }}</a></h4>
+                <p class="alert alert-warning" ng-if="!hasSources($ctrl.currentElement)" ng-bind-html="'context-form.tabs.sources.empty'|translate"></p>
+                <div ng-repeat="(key, attr) in $ctrl.currentElement.sources | groupBy:'attribute_id'">
+                    <h4><a ui-sref="root.spacialist.data.sources({aid: key})">{{ $ctrl.concepts[attr[0].attribute_url].label }}</a></h4>
                     <table class="table table-striped table-bordered table-hover">
                         <tr ng-repeat="entry in attr" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
                             <td class="td-50 word-break">

@@ -1,4 +1,4 @@
-var spacialistApp = angular.module('tutorialApp', ['satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ngCookies', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'hljs', 'hc.marked', 'pdf', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
+var spacialistApp = angular.module('tutorialApp', ['satellizer', 'ui.router', 'ngMessages', 'ngCookies', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'angular.filter', 'hljs', 'hc.marked', 'pdf', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
 
 $.material.init();
 
@@ -707,7 +707,7 @@ spacialistApp.filter('imageFilter', function(searchService) {
 spacialistApp.filter('urlify', function() {
     var urls = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
     return function(text) {
-        if(text.match(urls)) {
+        if(text && text.match(urls)) {
             text = text.replace(urls, '<a href="$1" target="_blank">$1</a>');
         }
         return text;
@@ -1138,10 +1138,18 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return concepts;
                         }
                     },
-                    onEnter: function(contexts, context, geodate, mainService) {
+                    onEnter: function(contexts, context, sources, geodate, mainService) {
                         mainService.expandTree(contexts, context.id, true);
+                        mainService.setCurrentElement({
+                            element: context,
+                            sources: sources
+                        });
                         // TODO wait for init of geodata (mapService.initGeodata)
                         if(geodate) geodate.openPopup();
+                    },
+                    onExit: function(mainService) {
+                        console.log("TODO: check for unstaged changes");
+                        mainService.unsetCurrentElement();
                     },
                     views: {
                         'context-detail': {
@@ -1400,14 +1408,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             });
                             // TODO wait for init of geodata (mapService.initGeodata)
                             return map.geodata.linkedLayers[gid];
-                        },
-                        user: function(user) {
-                            // TODO other access to user object?
-                            return user;
-                        },
-                        concepts: function(concepts) {
-                            // TODO other access to concepts object?
-                            return concepts;
                         }
                     },
                     onEnter: function(geodate) {
@@ -1424,10 +1424,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 url: '/user',
                 component: 'user',
                 resolve: {
-                    user: function(user) {
-                        // TODO other access to user object?
-                        return user;
-                    },
                     users: function(userService) {
                         return userService.getUsers();
                     },
@@ -1444,10 +1440,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 .state('root.user.edit', {
                     url: '/edit/{id:[0-9]+}',
                     resolve: {
-                        user: function(user) {
-                            // TODO other access to user object?
-                            return user;
-                        },
                         selectedUser: function(users, $transition$) {
                             return users.find(function(u) {
                                 return u.id == $transition$.params().id;
@@ -1490,22 +1482,13 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         for(var i=0; i<roles.length; i++) {
                             userService.getRolePermissions(roles[i]);
                         }
-                    },
-                    user: function(user) {
-                        // TODO other access to user object?
-                        return user;
                     }
                 }
             })
                 .state('root.role.edit', {
                     url: '/edit/{id:[0-9]+}',
                     resolve: {
-                        user: function(user) {
-                            // TODO other access to user object?
-                            return user;
-                        },
                         role: function(roles, $transition$) {
-                            // TODO open modal
                             return roles.find(function(r) {
                                 return r.id == $transition$.params().id;
                             });
@@ -1539,10 +1522,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 resolve: {
                     bibliography: function(literatureService) {
                         return literatureService.getAll();
-                    },
-                    user: function(user) {
-                        // TODO other access to user object?
-                        return user;
                     }
                 }
             })
@@ -1550,7 +1529,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     url: '/edit/{id:[0-9]+}',
                     resolve: {
                         entry: function(bibliography, $transition$) {
-                            // TODO open modal
                             return bibliography.find(function (entry) {
                                 return entry.id == $transition$.params().id;
                             });
@@ -1606,10 +1584,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         attributetypes: function(dataEditorService) {
                             return dataEditorService.getAttributeTypes();
                         },
-                        concepts: function(concepts) {
-                            // TODO other access to concepts object?
-                            return concepts;
-                        },
                         contextTypes: function(dataEditorService) {
                             return dataEditorService.getContextTypes();
                         },
@@ -1627,14 +1601,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     return ct.id == $transition$.params().id;
                                 });
                             },
-                            attributes: function(attributes) {
-                                // TODO other access to attributes object?
-                                return attributes;
-                            },
-                            concepts: function(concepts) {
-                                // TODO other access to concepts object?
-                                return concepts;
-                            },
                             fields: function(contextType, mainService) {
                                 return mainService.getContextFields(contextType.id);
                             }
@@ -1646,10 +1612,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     resolve: {
                         avLayers: function(mapService) {
                             return mapService.getLayers();
-                        },
-                        concepts: function(concepts) {
-                            // TODO other access to concepts object?
-                            return concepts;
                         }
                     }
                 })
@@ -1661,10 +1623,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return avLayers.find(function(l) {
                                     return l.id == $transition$.params().id;
                                 });
-                            },
-                            concepts: function(concepts) {
-                                // TODO other access to concepts object?
-                                return concepts;
                             }
                         }
                     });

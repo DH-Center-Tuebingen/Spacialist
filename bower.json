@@ -55,7 +55,8 @@
     "angular-pdf-viewer": "^0.2.13",
     "highlightjs": "^9.10.0",
     "angular-marked": "^1.2.2",
-    "three.js": "three#*"
+    "three.js": "three#*",
+    "angular-filter": "^0.5.16"
   },
   "resolutions": {
     "angular": "~1.5.8",
