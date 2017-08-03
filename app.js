@@ -1326,7 +1326,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 
                                 $scope.cancel = function() {
                                     $scope.$dismiss();
-                                    $state.go('^');
                                 };
 
                                 $scope.onAdd = function(c) {
@@ -1344,6 +1343,8 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     });
                                 };
                             }]
+                        }).result.catch(function() {
+                            $state.go('^');
                         });
                     }]
                 })

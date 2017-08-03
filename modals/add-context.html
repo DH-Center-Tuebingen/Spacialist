@@ -1,9 +1,9 @@
 <div class="modal-header">
-    <h4>{{ 'create' | translate }} <small>TODO {{ mc.heading }}</small></h4>
+    <h4 translate="modals.new-context.heading"></h4>
 </div>
 <div class="modal-body">
     <div class="col-md-12">
-        <p>TODO {{ mc.desc | translate }}</p>
+        <p translate="modals.new-context.desc" class="alert alert-info"></p>
         <form class="form-horizontal" role="form">
             <div class="form-group">
                 <label class="control-label col-md-3" for="name">
@@ -29,7 +29,7 @@
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="onAdd(newContext)">{{ 'create' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-disabled="!newContext.name || !newContext.type" ng-click="onAdd(newContext)">{{ 'create' | translate }}</button>
     <button type="button" class="btn btn-danger"
       ng-click="cancel()">{{ 'cancel' | translate }}</button>
 </div>
