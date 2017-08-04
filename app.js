@@ -1046,6 +1046,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 availableLanguages: function(langService) {
                     return langService.availableLanguages;
+                },
+                editMode: function() {
+                    return {
+                        enabled: false
+                    };
                 }
             },
             views: {

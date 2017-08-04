@@ -1,6 +1,10 @@
-spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', function($scope, langService, userService) {
+spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 'mainService', function($scope, langService, userService, mainService) {
     var vm = this;
     vm.isLangSet = langService.isLangSet;
+
+    vm.toggleEditMode = function() {
+        vm.editMode.enabled = !vm.editMode.enabled;
+    };
 
     vm.currentLanguage = {
         label: '',

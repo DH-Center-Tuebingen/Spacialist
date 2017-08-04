@@ -1,10 +1,9 @@
-spacialistApp.controller('userCtrl', ['$scope', 'userService', 'mainService', '$state', 'modalFactory', function($scope, userService, mainService, $state, modalFactory) {
+spacialistApp.controller('userCtrl', ['$scope', 'userService', '$state', 'modalFactory', function($scope, userService, $state, modalFactory) {
     var localUsers = this.users;
     var localRoles = this.roles;
 
     $scope.loginError = userService.loginError;
     $scope.deleteUser = userService.deleteUser;
-    $scope.toggleEditMode = mainService.toggleEditMode;
 
     $scope.loginUser = function(email, password) {
         var credentials = {

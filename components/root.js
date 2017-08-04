@@ -16,7 +16,8 @@ spacialistApp.component('header', {
         user: '<',
         concepts: '<',
         userConfig: '<',
-        availableLanguages: '<'
+        availableLanguages: '<',
+        editMode: '<'
     },
     templateUrl: 'templates/header.html',
     controller: 'headerCtrl'

@@ -82,10 +82,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         contexts.data[sourceNodeScope.$modelValue].collapsed = collapsed;
     };
 
-    main.toggleEditMode = function() {
-        main.editMode.enabled = !main.editMode.enabled;
-    };
-
     main.getContextData = function(id) {
         return httpGetPromise.getData('api/context/' + id + '/data').then(function(response) {
             return parseData(response.data);

@@ -98,10 +98,13 @@
                             </a>
                         </li>
                         <li>
-                            <a href="" ng-click="toggleEditMode()">
-                                <i class="material-icons">mode_edit</i> {{'main.menu.toggle-edit-mode'|translate}}
                             <a ui-sref="root.editor.layer">
                                 <i class="material-icons">layers</i> {{'main.menu.layer-editor'|translate}}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" ng-click="$ctrl.toggleEditMode()">
+                                <i class="material-icons">mode_edit</i> {{'main.menu.toggle-edit-mode'|translate}}
                             </a>
                         </li>
                     </ul>
