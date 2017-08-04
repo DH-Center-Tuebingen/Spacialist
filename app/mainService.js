@@ -127,12 +127,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     };
 
-
-    main.createNewContext = function(data, contextTypes) {
-        $translate('create-dialog.new-top-context').then(function(translation) {
-            var parent = {name : translation};
-            angular.extend(parent, data);
-            main.createModalHelper(parent, 'context', contextTypes);
+    main.addContext = function(context) {
+        var formData = new FormData();
+        formData.append('name', context.name);
+        formData.append('context_type_id', context.type.id);
+        if(context.parent) {
+            formData.append('root_context_id', context.parent);
+        }
+        return httpPostPromise.getData('api/context', formData).then(function(response) {
+            return response.context;
         });
     };
 
@@ -549,61 +552,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             controllerAs: 'mc'
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
-    };
-
-    main.createModalHelper = function(parent, elemType, contextTypes) {
-        if(main.hasUnstagedChanges()) {
-            var onDiscard = function() {
-                main.currentElement.form.$setPristine();
-                return main.createModalHelper(parent, elemType, contextTypes);
-            };
-            var onConfirm = function() {
-                main.currentElement.form.$setPristine();
-                main.storeElement(main.currentElement.element, main.currentElement.data);
-                return main.createModalHelper(parent, elemType, contextTypes);
-            };
-            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
-            return;
-        }
-        var selection = [];
-        var msg = '';
-        if(elemType == 'context') {
-            selection = contextTypes.filter(function(t) {
-                return t.type === 0;
-            });
-            msg = 'create-dialog.new-context-description';
-        } else if(elemType == 'find') {
-            selection = contextTypes.filter(function(t) {
-                return t.type === 1;
-            });
-            msg = 'create-dialog.new-artifact-description';
-        }
-        modalFactory.createModal(parent.name, msg, selection, function(name, type) {
-            var formData = new FormData();
-            formData.append('name', name);
-            formData.append('context_type_id', type.context_type_id);
-            if(typeof parent.id != 'undefined') formData.append('root_context_id', parent.id);
-            httpPostFactory('api/context', formData, function(response) {
-                var newContext = response.context;
-                var elem = {
-                    id: newContext.id,
-                    name: name,
-                    context_type_id: type.context_type_id,
-                    root_context_id: parent.id,
-                    rank: newContext.rank,
-                    typeid: type.type,
-                    typename: type.index,
-                    typelabel: type.title,
-                    data: [],
-                    lasteditor: newContext.lasteditor,
-                    updated_at: newContext.updated_at,
-                    created_at: newContext.created_at
-                };
-                // main.addContextToTree(elem, parent);
-                // main.setCurrentElement(elem, main.currentElement);
-                $state.go('root.spacialist.data', {id: elem.id});
-            });
-        });
     };
 
     function loadLinkedImages(id) {

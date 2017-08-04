@@ -1,4 +1,4 @@
-spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fileService', '$state', '$translate', '$timeout', '$compile', function($scope, mainService, mapService, fileService, $state, $translate, $timeout, $compile) {
+spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fileService', '$uibModal', '$state', '$translate', '$timeout', '$compile', function($scope, mainService, mapService, fileService, $uibModal, $state, $translate, $timeout, $compile) {
     var vm = this;
     vm.currentElement = mainService.currentElement;
 
@@ -35,13 +35,45 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
         });
     }
 
-    $scope.layerTwo = {
-        activeTab: 'map',
-        imageTab: {}
-    };
+    vm.openNewContextModal = function(type, parent) {
+        $uibModal.open({
+            templateUrl: "modals/add-context.html",
+            controller: ['$scope', function($scope) {
+                $scope.contexts = vm.contexts;
+                $scope.concepts = vm.concepts;
+                $scope.type = type;
+                $scope.parent = parent;
 
-    $scope.setActiveTab = function(tabId) {
-        $scope.layerTwo.activeTab = tabId;
+                if($scope.type == 'context') {
+                    $scope.contextTypes = vm.contextTypes.filter(function(t) {
+                        return t.type === 0;
+                    });
+                } else if($scope.type == 'find') {
+                    $scope.contextTypes = vm.contextTypes.filter(function(t) {
+                        return t.type == 1;
+                    });
+                }
+                $scope.newContext = {
+                    name: '',
+                    type: ''
+                };
+                $scope.newContext.parent = $scope.parent > 0 ? $scope.parent : undefined;
+
+                $scope.cancel = function() {
+                    $scope.$dismiss();
+                };
+
+                $scope.onAdd = function(c) {
+                    mainService.addContext(c).then(function(response) {
+                        var newContext = response;
+                        mainService.addContextToTree(newContext, c.parent, vm.contexts);
+                        $scope.$close(true);
+                        $state.go('root.spacialist.data', {id: newContext.id});
+                    });
+                };
+            }],
+            controllerAs: '$ctrl'
+        });
     };
 
     $scope.treeCallbacks = {
@@ -73,10 +105,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
                 return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">add_circle_outline</i> ' + $translate.instant('context-menu.new-artifact');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                $state.go('root.spacialist.add', {
-                    type: 'find',
-                    id: $itemScope.$parent.id
-                });
+                vm.openNewContextModal('find', $itemScope.$parent.id);
         }, function($itemScope) {
             return vm.contexts.data[$itemScope.$parent.id].type === 0;
         }],
@@ -85,10 +114,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
                 return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">add_circle_outline</i> ' + $translate.instant('context-menu.new-context');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                $state.go('root.spacialist.add', {
-                    type: 'context',
-                    id: $itemScope.$parent.id
-                });
+                vm.openNewContextModal('context', $itemScope.$parent.id);
         }, function($itemScope) {
             return vm.contexts.data[$itemScope.$parent.id].type === 0;
         }],

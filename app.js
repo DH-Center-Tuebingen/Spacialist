@@ -439,8 +439,7 @@ spacialistApp.directive('spTree', function($parse) {
             callbacks: '=',
             options: '=',
             setContextMenu: '='
-        },
-        // controller: 'mainCtrl'
+        }
     };
 });
 
@@ -1095,6 +1094,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         if(tab != 'map') return undefined;
                         return mapService.getGeodata();
                     },
+                    contextTypes: function(dataEditorService) {
+                        return dataEditorService.getContextTypes();
+                    },
                     files: function(fileService, tab) {
                         if(tab != 'files') return undefined;
                         return fileService.getImages();
@@ -1178,16 +1180,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     return s.attribute_id == aid;
                                 });
                             },
-                            // context: function(context) {
-                            //     // TODO other access to context object?
-                            //     return context;
-                            // },
                             literature: function(literatureService) {
                                 return literatureService.getAll();
-                            },
-                            // sources: function(sources) {
-                            //     return sources;
-                            // }
+                            }
                         },
                         onEnter: function($state, $uibModal, attribute, certainty, attribute_sources, context, literature, sources, $document) {
                             $uibModal.open({
@@ -1279,71 +1274,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             }],
                             controllerAs: '$ctrl'
                         }).result.finally(function() {
-                            $state.go('^');
-                        });
-                    }]
-                })
-                .state('root.spacialist.add-top', {
-                    url: '/add',
-                    redirectTo: {
-                        state: 'root.spacialist.add',
-                        params: {
-                            type: 'context',
-                            id: 0
-                        }
-                    }
-                })
-                .state('root.spacialist.add', {
-                    url: '/add/{id:[0-9]+}/{type}',
-                    resolve: {
-                        contextTypes: function(dataEditorService) {
-                            return dataEditorService.getContextTypes();
-                        }
-                    },
-                    onEnter: ['contexts', 'concepts', 'contextTypes', 'mainService', 'httpPostFactory', '$transition$', '$state', '$uibModal', function(contexts, concepts, contextTypes, mainService, httpPostFactory, $transition$, $state, $uibModal) {
-                        $uibModal.open({
-                            templateUrl: "modals/add-context.html",
-                            controller: ['$scope', function($scope) {
-                                $scope.contexts = contexts;
-                                $scope.concepts = concepts;
-                                $scope.type = $transition$.params().type;
-                                $scope.parent = $transition$.params().id;
-
-                                if($scope.type == 'context') {
-                                    $scope.contextTypes = contextTypes.filter(function(t) {
-                                        return t.type === 0;
-                                    });
-                                } else if($scope.type == 'find') {
-                                    $scope.contextTypes = contextTypes.filter(function(t) {
-                                        return t.type == 1;
-                                    });
-                                }
-                                $scope.newContext = {
-                                    name: '',
-                                    type: ''
-                                };
-                                $scope.newContext.parent = $scope.parent > 0 ? $scope.parent : undefined;
-
-                                $scope.cancel = function() {
-                                    $scope.$dismiss();
-                                };
-
-                                $scope.onAdd = function(c) {
-                                    var formData = new FormData();
-                                    formData.append('name', c.name);
-                                    formData.append('context_type_id', c.type.id);
-                                    if(c.parent) {
-                                        formData.append('root_context_id', c.parent);
-                                    }
-                                    httpPostFactory('api/context', formData, function(response) {
-                                        var newContext = response.context;
-                                        mainService.addContextToTree(newContext, c.parent, contexts);
-                                        $scope.$close(true);
-                                        $state.go('root.spacialist.data', {id: newContext.id});
-                                    });
-                                };
-                            }]
-                        }).result.catch(function() {
                             $state.go('^');
                         });
                     }]
