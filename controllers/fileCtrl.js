@@ -1,4 +1,6 @@
 spacialistApp.controller('fileCtrl', ['$scope', 'fileService', 'mainService', 'snackbarService', '$translate', function($scope, fileService, mainService, snackbarService, $translate) {
+    $scope.getMimeType = fileService.getMimeType;
+
     $scope.search = {
         terms: {
             tags: []
