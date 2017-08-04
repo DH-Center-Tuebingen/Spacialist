@@ -662,6 +662,10 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     width: 24px !important;
 }
 
+.material-icons.md-14 {
+    font-size: 14px;
+}
+
 .material-icons.md-18 {
     font-size: 18px;
 }

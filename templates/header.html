@@ -40,14 +40,9 @@
                         </li>
                     </ul>
                 </li>-->
-                <li class="dropdown" uib-dropdown>
-                    <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <i class="material-icons">arrow_drop_down</i>
+                <li>
+                    <a href="db" target="_blank"><i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <sup class="material-icons md-14">open_in_new</sup>
                     </a>
-                    <ul class="dropdown-menu" uib-dropdown-menu>
-                        <li ng-repeat="entry in analysisEntries">
-                            <a href="" ng-click="setAnalysisEntry($index)">{{ entry.name | translate }}</a>
-                        </li>
-                    </ul>
                 </li>
                 <li ng-if="$ctrl.user.permissions.edit_literature">
                     <a ui-sref="root.bibliography">
