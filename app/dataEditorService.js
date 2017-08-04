@@ -97,12 +97,13 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
 
     function editContextType(e, newType) {
         var formData = new FormData();
-        var ctid = e.context_type_id;
         formData.append('new_url', newType.concept_url);
-        httpPatchFactory('api/editor/context_type/' + ctid, formData, function(response) {
-            if(!response.error) {
+        httpPatchFactory('api/editor/context_type/' + e.id, formData, function(response) {
+            if(response.error) {
                 // TODO
+                return;
             }
+            e.thesaurus_url = newType.concept_url;
         });
     }
 
