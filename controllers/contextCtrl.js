@@ -1,4 +1,5 @@
-spacialistApp.controller('contextCtrl', ['$scope', 'mainService', '$translate', function($scope, mainService, $translate) {
+spacialistApp.controller('contextCtrl', ['$scope', 'mainService', function($scope, mainService) {
+    this.currentElement = mainService.currentElement;
     this.editContext = angular.copy(this.context);
 
     this.store = function(data) {

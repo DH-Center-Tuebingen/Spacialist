@@ -328,13 +328,16 @@ spacialistApp.directive('spinner', function() {
 });
 
 spacialistApp.directive('resizeWatcher', function($window, $timeout) {
+    var headerPadding = 20;
+    var bottomPadding = 20;
+
     function getViewportDim() {
         return {
             'height': $window.innerHeight,
             'width': $window.innerWidth,
             'isSm': window.matchMedia("(max-width: 991px)").matches
         };
-    };
+    }
 
     function onResize(scope) {
         var newValue = getViewportDim();
@@ -359,13 +362,13 @@ spacialistApp.directive('resizeWatcher', function($window, $timeout) {
             var attributeEditor = document.getElementById('attribute-editor');
             if(attributeEditor) {
                 $(attributeEditor).css('height', containerHeight);
-                var heading = document.getElementById('editor-heading');
-                $('.attribute-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
+                var editorHeading = document.getElementById('editor-heading');
+                $('.attribute-editor-column').css('height', containerHeight - (editorHeading.offsetHeight+headerPadding));
             }
             var layerEditor = document.getElementById('layer-editor');
             if(layerEditor) {
                 $(layerEditor).css('height', containerHeight);
-                var heading = document.getElementById('editor-heading');
+                var layerHeading = document.getElementById('editor-heading');
                 $('.layer-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
             }
             var literatureContainer = document.getElementById('literature-container');
@@ -398,9 +401,6 @@ spacialistApp.directive('resizeWatcher', function($window, $timeout) {
             }, 0);
         }
     }
-
-    var headerPadding = 20;
-    var bottomPadding = 20;
 
     return {
         scope: true,
@@ -1108,11 +1108,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     }
                 }
             })
-                .state('root.spacialist.tabs', {
-                    sticky: true,
-                    deepStateRedirect: true,
-                    url: '?tab'
-                })
                 .state('root.spacialist.data', {
                     url: '/context/{id:[0-9]+}',
                     resolve: {
@@ -1155,7 +1150,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         if(geodate) geodate.openPopup();
                     },
                     onExit: function(mainService) {
-                        console.log("TODO: check for unstaged changes");
                         mainService.unsetCurrentElement();
                     },
                     views: {
@@ -1567,7 +1561,26 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 /**
  * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
  */
-spacialistApp.run(function($state, mapService, userService, $transitions) {
+spacialistApp.run(function($state, mainService, mapService, userService, modalFactory, $transitions) {
+    $transitions.onBefore({ from: 'root.spacialist.data' }, function(trans) {
+        var form = mainService.currentElement.form;
+        if(form.$dirty) {
+            var onDiscard = function() {
+                form.$setPristine();
+                $state.go(trans.targetState().name(), trans.targetState().params());
+            };
+            var onConfirm = function() {
+                form.$setPristine();
+                // TODO store Element
+                mainService.storeElement(mainService.currentElement.element, mainService.currentElement.data);
+                $state.go(trans.targetState().name(), trans.targetState().params());
+                // return main.setCurrentElement(target, elem, openAgain);
+            };
+            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
+            return false;
+        }
+        return true;
+    });
     $transitions.onStart({}, function(trans) {
         var user = localStorage.getItem('user');
         // var authenticated = false;
