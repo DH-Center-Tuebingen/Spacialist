@@ -68,7 +68,7 @@
                             <form class="form-horizontal">
                                 <div class="form-group">
                                     <label>
-                                        <input type="checkbox" ng-model="tags.visible" ng-disabled="readonlyInput" /> {{ 'tags.show-tags' | translate }}
+                                        <input type="checkbox" ng-model="$ctrl.tags.visible" ng-disabled="readonlyInput" /> {{ 'tags.show-tags' | translate }}
                                     </label>
                                 </div>
                                 <div class="form-group label-floating">
@@ -108,7 +108,7 @@
                                     {{'context-form.tabs.photos.linked'|translate}}
                                 </span>
                             </uib-accordion-heading>
-                            <image-list on-scroll-load="loadImages(len, type)" image-data="images.linked" show-tags="tags.visible" search-terms="search.terms" image-type="'linked'" scroll-container="'#addon-container'"></image-list>
+                            <image-list on-scroll-load="loadImages(len, type)" image-data="images.linked" show-tags="$ctrl.tags.visible" search-terms="search.terms" image-type="'linked'" scroll-container="'#addon-container'"></image-list>
                         </div>
                         <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.newOpen">
                             <uib-accordion-heading>
@@ -142,8 +142,7 @@
                             <uib-accordion-heading>
                                 {{'context-form.tabs.photos.all'|translate}}
                             </uib-accordion-heading>
-                            <file-list files="$ctrl.files" context-menu="$ctrl.fileContextMenu"></file-list>
-                            <!-- <old-image-list on-scroll-load="loadImages(len, type)" image-data="$ctrl.files" show-tags="tags.visible" search-terms="search.terms" image-type="'all'" scroll-container="'#addon-container'"></old-image-list> -->
+                            <file-list files="$ctrl.files" context-menu="$ctrl.fileContextMenu" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags"></file-list>
                         </div>
                     </uib-accordion>
                 </div>

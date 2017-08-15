@@ -5,9 +5,6 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         upload: {}
     };
 
-    init();
-
-    images.availableTags = [];
     images.tags = {
         visible: false
     };
@@ -202,21 +199,11 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         });
     };
 
-    function init() {
-        getAvailableTags();
-    }
-
-    function getAvailableTags() {
-        httpGetFactory('api/image/tag', function(response) {
-            if(response.error) {
-                return;
-            }
-            angular.forEach(response.tags, function(tag) {
-                images.availableTags.push(tag);
-                searchService.availableSearchTerms.tags.push(tag);
-            });
+    images.getAvailableTags = function() {
+        return httpGetPromise.getData('api/image/tag').then(function(response) {
+            return response.tags;
         });
-    }
+    };
 
     function updateSearchOptions(img) {
         updateTags(img);

@@ -10,7 +10,8 @@ spacialistApp.component('spacialist', {
         layer: '<',
         geodata: '<',
         contextTypes: '<',
-        files: '<'
+        files: '<',
+        availableTags: '<'
     },
     templateUrl: 'view.html',
     controller: 'mainCtrl'

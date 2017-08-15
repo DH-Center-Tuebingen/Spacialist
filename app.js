@@ -451,12 +451,10 @@ spacialistApp.directive('fileList', function(fileService) {
             files: '=',
             contextMenu: '=',
             showTags: '=',
+            availableTags: '=',
             searchTerms: '='
         },
-        controller: 'fileCtrl',
-        link: function(scope, elements, attrs) {
-            scope.availableTags = fileService.availableTags;
-        }
+        controller: 'fileCtrl'
     };
 });
 
@@ -1105,6 +1103,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     files: function(fileService, tab) {
                         if(tab != 'files') return undefined;
                         return fileService.getImages();
+                    },
+                    availableTags: function(fileService, tab) {
+                        if(tab != 'files') return undefined;
+                        return fileService.getAvailableTags();
                     }
                 }
             })
