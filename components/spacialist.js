@@ -27,6 +27,7 @@ spacialistApp.component('spacialistdata', {
         geodate: '<',
         user: '<',
         concepts: '<',
+        linkedFiles: '<',
         onStore: '&',
         onSourceAdd: '&'
     },

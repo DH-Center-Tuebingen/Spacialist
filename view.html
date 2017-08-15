@@ -108,7 +108,8 @@
                                     {{'context-form.tabs.photos.linked'|translate}}
                                 </span>
                             </uib-accordion-heading>
-                            <image-list on-scroll-load="loadImages(len, type)" image-data="images.linked" show-tags="$ctrl.tags.visible" search-terms="search.terms" image-type="'linked'" scroll-container="'#addon-container'"></image-list>
+                            {{$ctrl.linkedFiles}}
+                            <file-list files="$ctrl.linkedFiles" context-menu="$ctrl.fileContextMenu" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags"></file-list>
                         </div>
                         <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.newOpen">
                             <uib-accordion-heading>

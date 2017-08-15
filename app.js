@@ -1136,13 +1136,17 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             if(!map) return undefined;
                             return map.geodata.linkedLayers[context.geodata_id];
                         },
-                        user: function(user) {
-                            // TODO other access to user object?
-                            return user;
-                        },
-                        concepts: function(concepts) {
-                            // TODO other access to concepts object?
-                            return concepts;
+                        linkedFiles: function(files, $transition$) {
+                            if(!files) return [];
+                            var cid = $transition$.params().id;
+                            var linkedFiles = files.filter(function(f) {
+                                var match = f.linked_images.find(function(li) {
+                                    return cid == li.context_id;
+                                });
+                                if(!match) return false;
+                                return true;
+                            });
+                            return linkedFiles;
                         }
                     },
                     onEnter: function(contexts, context, sources, geodate, mainService) {
