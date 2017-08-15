@@ -1111,8 +1111,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 .state('root.spacialist.data', {
                     url: '/context/{id:[0-9]+}',
                     resolve: {
-                        context: function(contexts, $transition$) {
+                        context: function(contexts, $transition$, $state) {
                             var c = contexts.data[$transition$.params().id];
+                            if(!c) {
+                                return $state.go('root.spacialist');
+                            }
                             var lastmodified = c.updated_at || c.created_at;
                             var d = new Date(lastmodified);
                             c.lastmodified = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
@@ -1182,15 +1185,23 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         },
                         onEnter: function($state, $uibModal, attribute, certainty, attribute_sources, context, literature, sources, $document) {
                             $uibModal.open({
-                                // appendTo: $document.find('aside').eq(0),
-                                template: '<sourcemodal on-add="$ctrl.addSource(entry)"></sourcemodal>',
-                                controller: function() {
-                                    this.addSource = function(entry) {
-                                        this.onAdd(entry);
+                                template: '<sourcemodal attribute="::$resolve.attribute" certainty="::$resolve.certainty" attribute_sources="::$resolve.attribute_sources" context="::$resolve.context" literature="::$resolve.literature" sources="::$resolve.sources" on-add="$ctrl.addSource(entry)" on-close="$ctrl.close(reason)" on-dismiss="$ctrl.dismiss(reason)"></sourcemodal>',
+                                controller: function($scope) {
+                                    var vm = this;
+
+                                    vm.addSource = function(entry) {
+                                        vm.onAdd(entry);
+                                    };
+
+                                    vm.dismiss = function(reason) {
+                                        $scope.$dismiss(reason);
+                                    };
+
+                                    vm.close = function(reason) {
+                                        $scope.$close(reason);
                                     };
                                 },
                                 controllerAs: '$ctrl',
-                                // component: 'sourcemodal',
                                 windowClass: 'wide-modal shrinked-modal',
                                 resolve: {
                                     attribute: function() {

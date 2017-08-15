@@ -36,37 +36,39 @@ spacialistApp.component('spacialistdata', {
 spacialistApp.component('sourcemodal', {
         templateUrl: "modals/sources.html",
         bindings: {
-            resolve: '<',
-            onAdd: '&'
+            attribute: '<',
+            certainty: '<',
+            attribute_sources: '<',
+            context: '<',
+            literature: '<',
+            sources: '<',
+            onAdd: '&',
+            onClose: '&',
+            onDismiss: '&'
         },
-        controller: ['$scope', function($scope) {
-            $scope.attribute = this.attribute;
-            $scope.certainty = this.certainty;
-            $scope.concepts = this.concepts;
-            $scope.attribute_sources = this.attribute_sources;
-            $scope.literature = this.literature;
-            $scope.newEntry = {
+        controller: ['$scope', 'snackbarService', 'httpPutFactory', '$translate', function($scope, snackbarService, httpPutFactory, $translate) {
+            var vm = this;
+
+            vm.newEntry = {
                 source: '',
                 desc: ''
             };
 
-            this.updateCertainty = function() {
-                var certainty = this.resolve.certainty;
-                var context = this.resolve.context;
+            vm.updateCertainty = function() {
                 var formData = new FormData();
-                formData.append('possibility', certainty.certainty);
-                if(certainty.description) formData.append('possibility_description', certainty.description);
-                httpPutFactory('api/context/attribute_value/'+context.id+'/'+attribute.id, formData, function(callback) {
+                formData.append('possibility', vm.certainty.certainty);
+                if(vm.certainty.description) formData.append('possibility_description', vm.certainty.description);
+                httpPutFactory('api/context/attribute_value/'+vm.context.id+'/'+vm.attribute.id, formData, function(callback) {
                     var content = $translate.instant('snackbar.data-stored.success');
                     snackbarService.addAutocloseSnack(content, 'success');
                 });
             };
 
-            $scope.cancel = function() {
-                $scope.$dismiss();
+            vm.cancel = function() {
+                vm.onDismiss();
             };
-            this.addSource = function(entry) {
-                this.onAdd({entry: entry});
+            vm.addSource = function(entry) {
+                vm.onAdd({entry: entry});
                 // var formData = new FormData();
                 // formData.append('cid', context.id);
                 // formData.append('aid', attribute.id);
@@ -79,7 +81,7 @@ spacialistApp.component('sourcemodal', {
                 //     entry.desc = '';
                 // });
             };
-            $scope.setCertainty = function(event, certainty) {
+            vm.setCertainty = function(event, certainty) {
                 var max = event.currentTarget.scrollWidth;
                 var click = event.originalEvent.layerX;
                 var curr = angular.copy(certainty.certainty);
@@ -93,12 +95,12 @@ spacialistApp.component('sourcemodal', {
                 event.currentTarget.children[0].style.width = newVal+"%";
                 certainty.certainty = newVal;
             };
-            $scope.saveCertainty = function(certainty) {
-                updateCertainty(certainty);
+            vm.saveCertainty = function(certainty) {
+                vm.updateCertainty(certainty);
             };
-            $scope.saveCertaintyAndClose = function(certainty) {
-                updateCertainty(certainty);
-                $scope.$close(true);
+            vm.saveCertaintyAndClose = function(certainty) {
+                vm.updateCertainty(certainty);
+                vm.onClose({reason: true});
             };
         }]
 });
