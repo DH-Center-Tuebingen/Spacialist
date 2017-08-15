@@ -105,6 +105,7 @@
     "attribute.stringf.desc": "Textbox (Multiline)",
     "attribute.double.desc": "Numeric Input (Floating Point)",
     "attribute.integer.desc": "Numeric Input (Integer)",
+    "attribute.boolean.desc": "Checkbox (True/False)",
     "attribute.percentage.desc": "Percentage Slider",
     "attribute.context.desc": "Context",
     "attribute.string-sc.desc": "Single Choice as Dropdown",

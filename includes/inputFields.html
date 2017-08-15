@@ -11,6 +11,7 @@
             <input class="form-control" ng-switch-when="string" type="text" id="a{{ attr.aid }}_{{ attr.oid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
             <input class="form-control" ng-switch-when="double" type="number" step="any" min="0" placeholder="0.0" id="a{{ attr.aid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
             <input class="form-control" ng-switch-when="integer" type="number" step="1" placeholder="0" id="a{{ attr.aid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
+            <input class="form-control" ng-switch-when="boolean" type="checkbox" id="a{{ attr.aid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput"/>
             <div ng-switch-when="percentage">
                 <input class="form-control" type="range" step="1" min="0" max="100" value="0" id="a{{ attr.aid }}" ng-model="attributeOutputs[attr.aid+'_'+attr.oid]" ng-readonly="readonlyInput" style="float: left !important; width: 90%;"/>
                 <span style="font-size: 1.5em; padding-left: 5px;">{{ attributeOutputs[attr.aid+'_'+attr.oid] }}%</span>

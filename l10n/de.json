@@ -115,6 +115,7 @@
     "attribute.stringf.desc": "Textfeld (Mehrzeilig)",
     "attribute.double.desc": "Eingabefeld für Zahlen (Gleitkomma)",
     "attribute.integer.desc": "Eingabefeld für Zahlen (Ganzzahl)",
+    "attribute.boolean.desc": "Kontrollkästchen (Ja/Nein)",
     "attribute.percentage.desc": "Prozentangabe",
     "attribute.context.desc": "Kontext",
     "attribute.string-sc.desc": "Einfachauswahl als Dropdown",

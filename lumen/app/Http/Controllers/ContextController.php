@@ -239,6 +239,10 @@ class ContextController extends Controller {
                     'description' => 'attribute.integer.desc'
                 ],
                 [
+                    'datatype' => 'boolean',
+                    'description' => 'attribute.boolean.desc'
+                ],
+                [
                     'datatype' => 'percentage',
                     'description' => 'attribute.percentage.desc'
                 ],
@@ -1049,6 +1053,9 @@ class ContextController extends Controller {
                         case 'percentage':
                         case 'integer':
                             $attrValue->int_val = intval($value);
+                            break;
+                        case 'boolean':
+                            $attrValue->int_val = ($value == 'true') ? 1 : 0;
                             break;
                         case 'double':
                             $attrValue->dbl_val = doubleval($value);
