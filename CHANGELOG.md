@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 - More Datatypes (Integer, Geography, Slider)
 - Dynamic UI (The three columns on the main view can be shrinked/extended, enable Edit Mode in the Settings Dropdown menu)
 - Basic Unit-Testing (Lumen API)
+- Boolean Datatype
+- Unset Selected Values (`string-sc` aka Single Dropdown)
 ### Changed
 - Photo Viewer => File Viewer (Please read section _Protected Files_ in [INSTALL.md](INSTALL.md) for proper setup)
   - PDFs (pdf.js)
