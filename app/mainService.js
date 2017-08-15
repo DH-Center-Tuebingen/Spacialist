@@ -406,19 +406,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     main.setCurrentElement = function(element) {
-        // if(main.hasUnstagedChanges()) {
-        //     var onDiscard = function() {
-        //         main.currentElement.form.$setPristine();
-        //         return main.setCurrentElement(target, elem, openAgain);
-        //     };
-        //     var onConfirm = function() {
-        //         main.currentElement.form.$setPristine();
-        //         main.storeElement(main.currentElement.element, main.currentElement.data);
-        //         return main.setCurrentElement(target, elem, openAgain);
-        //     };
-        //     modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
-        //     return;
-        // }
+        initCurrentElement();
         for(var k in element) {
             if(element.hasOwnProperty(k)) {
                 main.currentElement[k] = element[k];

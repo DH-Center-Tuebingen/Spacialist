@@ -1149,9 +1149,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         // TODO wait for init of geodata (mapService.initGeodata)
                         if(geodate) geodate.openPopup();
                     },
-                    onExit: function(mainService) {
-                        mainService.unsetCurrentElement();
-                    },
                     views: {
                         'context-detail': {
                             component: 'spacialistdata',
@@ -1562,6 +1559,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
  * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
  */
 spacialistApp.run(function($state, mainService, mapService, userService, modalFactory, $transitions) {
+    // Check for unstaged changes
     $transitions.onBefore({ from: 'root.spacialist.data' }, function(trans) {
         var form = mainService.currentElement.form;
         if(form.$dirty) {
@@ -1580,6 +1578,10 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
             return false;
         }
         return true;
+    });
+    $transitions.onStart({ exiting: 'root.spacialist.data' }, function(trans) {
+        // unset current element, if no element is selected (exiting data state)
+        mainService.unsetCurrentElement();
     });
     $transitions.onStart({}, function(trans) {
         var user = localStorage.getItem('user');
