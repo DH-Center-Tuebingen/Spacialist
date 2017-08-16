@@ -1149,14 +1149,17 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return linkedFiles;
                         }
                     },
-                    onEnter: function(contexts, context, sources, geodate, mainService) {
+                    onEnter: function(contexts, context, sources, map, geodate, mainService, mapService) {
                         mainService.expandTree(contexts, context.id, true);
                         mainService.setCurrentElement({
                             element: context,
                             sources: sources
                         });
                         // TODO wait for init of geodata (mapService.initGeodata)
-                        if(geodate) geodate.openPopup();
+                        if(geodate) {
+                            mapService.setCurrentGeodata(geodate.feature.id, map.geodata);
+                            geodate.openPopup();
+                        }
                     },
                     views: {
                         'context-detail': {
@@ -1326,7 +1329,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     url: '/geodata/{id:[0-9]+}',
                     resolve: {
                         context: function(contexts, geodate, map) {
-                            var cid = map.geodata.linkedContexts[geodate.id];
+                            var cid = map.geodata.linkedContexts[geodate.feature.id];
                             var c;
                             if(cid) {
                                 c = contexts.data[cid];
@@ -1337,26 +1340,44 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return c;
                         },
                         data: function(context, mainService) {
+                            if(!context) return {};
                             return mainService.getContextData(context.id);
                         },
                         fields: function(context, mainService) {
+                            if(!context) return {};
                             return mainService.getContextFields(context.context_type_id);
                         },
-                        sources: function(context, mainService) {
-                            // TODO
-                            return [];
+                        sources: function(context, literatureService) {
+                            if(!context) return {};
+                            return literatureService.getByContext(context.id);
                         },
-                        geodate: function(geodata, map, $transition$) {
-                            var gid = geodata.find(function(g) {
+                        geodate: function(geodata, map, $transition$, mapService) {
+                            var geoObject = geodata.find(function(g) {
                                 return g.id == $transition$.params().id;
                             });
+                            var gid = geoObject.id;
                             // TODO wait for init of geodata (mapService.initGeodata)
+                            mapService.setCurrentGeodata(gid, map.geodata);
+                            map.selectedLayer = map.geodata.linkedLayers[gid];
                             return map.geodata.linkedLayers[gid];
                         }
                     },
-                    onEnter: function(geodate) {
+                    onEnter: function(geodate, map, context, sources, contexts, mapService, mainService) {
+                        if(context) {
+                            mainService.expandTree(contexts, context.id, true);
+                            mainService.setCurrentElement({
+                                element: context,
+                                sources: sources
+                            });
+                        }
                         // TODO wait for init of geodata (mapService.initGeodata)
-                        if(geodate) geodate.openPopup();
+                        if(geodate) {
+                            mapService.setCurrentGeodata(geodate.feature.id, map.geodata);
+                            if(!geodate.isPopupOpen()) geodate.openPopup();
+                        }
+                    },
+                    onExit: function(geodate) {
+                        if(geodate) geodate.closePopup();
                     },
                     views: {
                         'context-detail': {

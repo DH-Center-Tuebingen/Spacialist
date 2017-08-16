@@ -1,6 +1,7 @@
 spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fileService', '$uibModal', '$state', '$translate', '$timeout', '$compile', function($scope, mainService, mapService, fileService, $uibModal, $state, $translate, $timeout, $compile) {
     var vm = this;
     vm.currentElement = mainService.currentElement;
+    vm.currentGeodata = mapService.currentGeodata;
 
     $scope.moduleExists = mainService.moduleExists;
     $scope.filterTree = mainService.filterTree;
@@ -147,13 +148,14 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
      */
     $scope.$on('leafletDirectiveMap.mainmap.popupclose', function(event, args) {
         // mapService.unsetCurrentGeodata();
+        $state.go('^');
     });
     $scope.$on('leafletDirectiveMap.mainmap.popupopen', function(event, args) {
         var popup = args.leafletEvent.popup;
         var newScope = $scope.$new();
         newScope.stream = popup.options.feature;
         $compile(popup._contentNode)(newScope);
-        var geodataId = args.leafletEvent.popup._source.feature.id;
+        // var geodataId = args.leafletEvent.popup._source.feature.id;
         // mapService.setCurrentGeodata(geodataId);
         // var promise = mapService.getMatchingContext(geodataId);
         // promise.then(function(response) {

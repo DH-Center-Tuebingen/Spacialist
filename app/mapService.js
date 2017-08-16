@@ -1,4 +1,4 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpPutFactory', 'httpGetPromise', 'httpPostPromise', 'httpPutPromise', 'httpPatchPromise', 'leafletData', 'userService', 'environmentService', 'langService', 'leafletBoundsHelpers', '$timeout', function(httpGetFactory, httpPostFactory, httpPutFactory, httpGetPromise, httpPostPromise, httpPutPromise, httpPatchPromise, leafletData, userService, environmentService, langService, leafletBoundsHelpers, $timeout) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpPutFactory', 'httpGetPromise', 'httpPostPromise', 'httpPutPromise', 'httpPatchPromise', 'leafletData', 'userService', 'environmentService', 'langService', 'leafletBoundsHelpers', '$state', '$timeout', function(httpGetFactory, httpPostFactory, httpPutFactory, httpGetPromise, httpPostPromise, httpPutPromise, httpPatchPromise, leafletData, userService, environmentService, langService, leafletBoundsHelpers, $state, $timeout) {
     var localContexts;
     var defaultColor = '#00FF00';
     var invisibleLayers;
@@ -177,8 +177,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         });
     };
 
-    map.setCurrentGeodata = function(gid) {
-        var layer = map.geodata.linkedLayers[gid];
+    map.setCurrentGeodata = function(gid, geodata) {
+        var layer = geodata.linkedLayers[gid];
         map.currentGeodata.id = gid;
         map.currentGeodata.type = layer.feature.geometry.type;
         map.currentGeodata.color = layer.feature.properties.color;
@@ -463,8 +463,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                 }
                 layer.bindTooltip(name);
                 layer.on('click', function(){
-                    mapArr.selectedLayer = layer;
-                    layer.openPopup();
+                    $state.go('root.spacialist.geodata', {id: layer.feature.id});
                 });
             }
             feature.properties.wkt = map.toWkt(layer);
