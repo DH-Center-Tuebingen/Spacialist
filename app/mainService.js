@@ -100,26 +100,12 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     };
 
-    main.duplicateElement = function(id) {
+    main.duplicateElement = function(id, contexts) {
         httpPostFactory('api/context/' + id + '/duplicate', new FormData(), function(newElem) {
-            var parent = main.contexts.data[main.contexts.data[id].root_context_id];
+            var parent = contexts.data[contexts.data[id].root_context_id];
             var copy = newElem.obj;
-            var elem = {
-                id: copy.id,
-                name: copy.name,
-                context_type_id: copy.context_type_id,
-                root_context_id: copy.root_context_id,
-                rank: copy.rank,
-                typeid: copy.typeid,
-                typename: copy.typename,
-                typelabel: copy.typelabel,
-                data: [],
-                lasteditor: copy.lasteditor,
-                updated_at: copy.updated_at,
-                created_at: copy.created_at
-            };
-            main.addContextToTree(elem, parent);
-            main.setCurrentElement(elem, main.currentElement);
+            main.addContextToTree(copy, copy.root_context_id, contexts);
+            $state.go('root.spacialist.data', {id: copy.id});
         });
     };
 

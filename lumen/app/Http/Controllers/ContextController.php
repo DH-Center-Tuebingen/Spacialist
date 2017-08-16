@@ -304,6 +304,7 @@ class ContextController extends Controller {
             $s->save();
         }
         $newDuplicate->rank = $toDuplicate->rank + 1;
+        $newDuplicate->lasteditor = $user['name'];
         $newDuplicate->save();
         $toDuplicateValues = AttributeValue::where('context_id', $id)
             ->get();
@@ -312,6 +313,9 @@ class ContextController extends Controller {
             $newValue->context_id = $newDuplicate->id;
             $newValue->save();
         }
+        $additionalProps = ContextType::where('id', $toDuplicate->context_type_id)->select('type', 'thesaurus_url as uri')->first();
+        $newDuplicate->type = $additionalProps->type;
+        $newDuplicate->uri = $additionalProps->uri;
         return response()->json(['obj' => $newDuplicate]);
     }
 

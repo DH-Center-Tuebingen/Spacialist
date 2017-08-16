@@ -125,7 +125,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
                 return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">content_copy</i> ' + $translate.instant('context-menu.duplicate-element');
             },
                 function($itemScope, $event, modelValue, text, $li) {
-            mainService.duplicateElement($itemScope.$parent.id);
+            mainService.duplicateElement($itemScope.$parent.id, vm.contexts);
         }],
         null,
         [
