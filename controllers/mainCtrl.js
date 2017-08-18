@@ -14,6 +14,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
                 c[k] = context[k];
             }
         }
+        vm.currentElement.form.$setPristine();
     };
 
     vm.onSourceAdd = function(entry) {
