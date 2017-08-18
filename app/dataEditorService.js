@@ -67,7 +67,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
             if(!response.error) {
                 editor.ct.attributes[i].position--;
                 editor.ct.attributes[i-1].position++;
-                editor.ct.attributes.swap(i, i-1);
+                swap(editor.ct.attributes, i, i-1);
             }
         });
     };
@@ -83,7 +83,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
             if(!response.error) {
                 editor.ct.attributes[i].position++;
                 editor.ct.attributes[i+1].position--;
-                editor.ct.attributes.swap(i, i+1);
+                swap(editor.ct.attributes, i, i+1);
             }
         });
     };
