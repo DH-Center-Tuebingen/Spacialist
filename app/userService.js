@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpPatchPromise', 'httpDeleteFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpPatchPromise, httpDeleteFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpPatchPromise', 'httpDeleteFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpPostPromise, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpPatchPromise, httpDeleteFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -71,8 +71,9 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         formData.append('name', name);
         formData.append('email', email);
         formData.append('password', password);
-        httpPostFactory('api/user', formData, function(response) {
+        return httpPostPromise.getData('api/user', formData).then(function(response) {
             users.push(response.user);
+            return response;
         });
     };
 

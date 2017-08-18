@@ -131,8 +131,18 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     $uibModalInstance.dismiss('cancel');
                 };
                 this.onCreate = function(name, email, password) {
-                    onCreate(name, email, password, users);
-                    $uibModalInstance.dismiss('ok');
+                    for(var k in ['name', 'email', 'password']) {
+                        $('#'+k+'-container').removeClass('has-error');
+                    }
+                    onCreate(name, email, password, users).then(function(response) {
+                        $uibModalInstance.dismiss('ok');
+                    }, function(reason) {
+                        for(var k in reason.data.error) {
+                            if(reason.data.error.hasOwnProperty(k)) {
+                                $('#'+k+'-container').addClass('has-error');
+                            }
+                        }
+                    });
                 };
             },
             controllerAs: 'mc'
