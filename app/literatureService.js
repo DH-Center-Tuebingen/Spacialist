@@ -245,7 +245,7 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetPromise', 'h
         var mandatorySet = true;
         for(var i=0; i<type.mandatoryFields.length; i++) {
             var m = type.mandatoryFields[i];
-            if(!fields[m] || fields[m].length === 0) {
+            if(!entry[m] || entry[m].length === 0) {
                 mandatorySet = false;
                 break;
             }
