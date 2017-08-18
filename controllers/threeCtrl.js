@@ -64,9 +64,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
             },
             function(event) { // onProgress
                 if(event.lengthComputable) {
-                    $scope.status.progress = event.loaded / event.total * 100;
+                    $scope.status.progress = Math.round(event.loaded / event.total * 100);
                     $scope.$apply();
-                    console.log('Downloaded ' + Math.round($scope.status.progress) + '% of model');
+                    console.log('Downloaded ' + $scope.status.progress + '% of model');
                 }
             },
             function(event) { // onError
@@ -91,7 +91,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 var parent = object;
                 do {
                     children = parent.children;
-                    if(!children) break;
+                    if(!children || !children[0]) break;
                     material = children[0].material;
                     parent = children[0];
                 } while(!material);
@@ -101,7 +101,16 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     			scene.add(object);
                 sceneObjects.push(object);
                 onWindowResize();
-    		} );
+    		},
+            function(event) { // onProgress
+                if(event.lengthComputable) {
+                    $scope.status.progress = Math.round(event.loaded / event.total * 100);
+                    $scope.$apply();
+                    console.log('Downloaded ' + $scope.status.progress + '% of model');
+                }
+            },
+            function(event) { // onError
+            });
         } else if(extension == 'obj') { // obj
             var sep = fileUrl.lastIndexOf('/')+1;
             var path = fileUrl.substr(0, sep);
