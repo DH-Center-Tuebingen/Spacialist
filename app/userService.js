@@ -43,7 +43,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         }
     }
 
-    user.getUser = getUser
+    user.getUser = getUser;
 
     user.getUsers = function() {
         return httpGetPromise.getData('api/user').then(function(response) {

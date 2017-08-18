@@ -1011,7 +1011,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 url: '/login',
                 // templateUrl: 'layouts/login.html',
                 params: {
-                    toState: 'spacialist',
+                    toState: 'root.spacialist',
                     toParams: {}
                 },
                 views: {

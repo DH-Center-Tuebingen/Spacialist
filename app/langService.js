@@ -32,23 +32,18 @@ spacialistApp.service('langService', ['$translate', 'httpGetPromise', function($
         }*/
     };
 
-    lang.currentLanguage = {
-        label: '',
-        flagCode: ''
-    };
-
     lang.getCurrentLanguage = function() {
         return $translate.use();
     };
 
-    lang.switchLanguage = function(key, concepts) {
-        var langPromise = $translate.use(key);
+    lang.switchLanguage = function(langObject, langKey, concepts) {
+        var langPromise = $translate.use(langKey);
         if(typeof langPromise == 'object') {
             langPromise.then(function() {
-                updateLanguage(key, concepts);
+                updateLanguage(langObject, langKey, concepts);
             });
         } else {
-            updateLanguage(langPromise, concepts);
+            updateLanguage(langObject, langPromise, concepts);
         }
     };
 
@@ -66,28 +61,26 @@ spacialistApp.service('langService', ['$translate', 'httpGetPromise', function($
         return httpGetPromise.getData('api/thesaurus/concept/'+lang).then(function(response) {
             return response.data;
         });
-    }
+    };
 
-    setInitLanguage();
-
-    function setInitLanguage() {
-        var storedLang = localStorage.getItem('NG_TRANSLATE_LANG_KEY');
+    lang.setInitLanguage = function(langObject, langKey) {
+        langKey = langKey || localStorage.getItem('NG_TRANSLATE_LANG_KEY');
         // check if there is a stored language
-        if(storedLang === null) {
+        if(!langKey) {
             updateLanguage($translate.resolveClientLocale());
         } else {
-            updateLanguage(storedLang);
+            updateLanguage(langObject, langKey);
         }
-    }
+    };
 
-    function updateLanguage(langKey, concepts) {
+    function updateLanguage(langObject, langKey, concepts) {
         if(typeof langKey == 'undefined') {
-            lang.currentLanguage.label = '';
-            lang.currentLanguage.flagCode = '';
+            langObject.label = '';
+            langObject.flagCode = '';
         } else {
             var newLang = lang.availableLanguages[langKey];
-            lang.currentLanguage.label = newLang.label;
-            lang.currentLanguage.flagCode = newLang.flagCode;
+            langObject.label = newLang.label;
+            langObject.flagCode = newLang.flagCode;
         }
         if(concepts) {
             lang.getConcepts(langKey).then(function(newConcepts) {
