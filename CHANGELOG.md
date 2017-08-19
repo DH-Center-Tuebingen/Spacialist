@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 - Dynamic UI (The three columns on the main view can be shrinked/extended, enable Edit Mode in the Settings Dropdown menu)
 - Basic Unit-Testing (Lumen API)
 - State-based Routing (Shareable Links) using ui-router
+- Boolean Datatype
+- Unset Selected Values (`string-sc` aka Single Dropdown)
 ### Changed
 - Photo Viewer => File Viewer (Please read section _Protected Files_ in [INSTALL.md](INSTALL.md) for proper setup)
   - PDFs (pdf.js)
@@ -38,6 +40,8 @@ All notable changes to this project will be documented in this file.
 - Deleting Context-Types
 - Store/Retrieve double (datatype) attribute values
 - Missing Attributes in Lumen Seeders
+- Missing translation (Context datatype label)
+- Missing dimension units in dropdown
 ### Removed/Deprecated
 
 ## 0.2 - Babylon

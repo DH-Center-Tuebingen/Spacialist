@@ -1,5 +1,6 @@
-spacialistApp.controller('dataEditorCtrl', ['$scope', 'dataEditorService', function($scope, dataEditorService) {
+spacialistApp.controller('dataEditorCtrl', ['$scope', 'dataEditorService', 'mainService', function($scope, dataEditorService, mainService) {
     var vm = this;
+    vm.dimensionUnits = mainService.dimensionUnits;
 
     $scope.addNewAttribute = function() {
         dataEditorService.addNewAttributeWindow(vm.attributetypes, vm.attributes);

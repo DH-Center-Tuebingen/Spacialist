@@ -1,5 +1,6 @@
 spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fileService', '$uibModal', '$state', '$translate', '$timeout', '$compile', function($scope, mainService, mapService, fileService, $uibModal, $state, $translate, $timeout, $compile) {
     var vm = this;
+    vm.dimensionUnits = mainService.dimensionUnits;
     vm.currentElement = mainService.currentElement;
     vm.currentGeodata = mapService.currentGeodata;
 
