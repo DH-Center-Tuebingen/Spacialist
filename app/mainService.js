@@ -477,7 +477,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             } else if(dType == 'context') {
                 parsedData[index] = value.val;
             } else if(dType == 'integer' || dType == 'percentage') {
-                parsedData[index] = parseInt(val);
+                parsedData[index] = parseInt(value.int_val);
             } else if(dType == 'boolean') {
                 parsedData[index] = (parseInt(value.int_val) != 0);
             } else if(dType == 'double') {
