@@ -1064,16 +1064,14 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 user: function(userService) {
                     return userService.getUser();
                 },
-                config: function(userService, user) {
-                    return {}; //TODO: return general config
-                },
-                userConfig: function(userService, user, config) {
-                    return {
-                        language: 'de'
-                    }; //TODO: return active user's config
+                userConfig: function(userService, user) {
+                    return userService.getUserPreferences(user.user.id);
                 },
                 concepts: function(langService, userConfig) {
-                    return langService.getConcepts(userConfig.language);
+                    var langPref = userConfig.find(function(pref) {
+                        return pref.label == 'prefs.gui-language';
+                    });
+                    return langService.getConcepts(langPref.value);
                 },
                 availableLanguages: function(langService) {
                     return langService.availableLanguages;
@@ -1658,19 +1656,14 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 url: '/preferences',
                 component: 'preferences',
                 resolve: {
-                    availablePreferences: function(mainService) {
-                        return mainService.getPreferences();
+                    availablePreferences: function(userService) {
+                        return userService.getPreferences();
                     }
                 }
             })
             .state('root.upreferences', {
                 url: '/preferences/{id:[0-9]+}',
-                component: 'upreferences',
-                resolve: {
-                    userPreferences: function(mainService, $transition$) {
-                        return mainService.getUserPreferences($transition$.params().id);
-                    }
-                }
+                component: 'upreferences'
             });
 });
 

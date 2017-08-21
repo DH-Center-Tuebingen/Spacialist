@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpPatchPromise', 'httpDeleteFactory', 'httpDeletePromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'fileService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$state', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpPatchPromise, httpDeleteFactory, httpDeletePromise, modalFactory, $uibModal, moduleHelper, environmentService, fileService, literatureService, mapService, snackbarService, searchService, $timeout, $state, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'httpDeletePromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'fileService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$state', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, httpDeletePromise, modalFactory, $uibModal, moduleHelper, environmentService, fileService, literatureService, mapService, snackbarService, searchService, $timeout, $state, $translate) {
     var main = {};
     var modalFields;
 
@@ -97,18 +97,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     };
 
-    main.getPreferences = function() {
-        return httpGetPromise.getData('api/preference').then(function(response) {
-            return response;
-        });
-    };
-
-    main.getUserPreferences = function(uid) {
-        return httpGetPromise.getData('api/preference/' + uid).then(function(response) {
-            return response;
-        });
-    };
-
     main.duplicateElement = function(id, contexts) {
         httpPostFactory('api/context/' + id + '/duplicate', new FormData(), function(newElem) {
             var parent = contexts.data[contexts.data[id].root_context_id];
@@ -116,14 +104,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             main.addContextToTree(copy, copy.root_context_id, contexts);
             $state.go('root.spacialist.data', {id: copy.id});
         });
-    };
-
-    main.storePreference = function(pref) {
-        return storePreference(pref);
-    };
-
-    main.storeUserPreference = function(pref, uid) {
-        return storePreference(pref, uid);
     };
 
     main.addContext = function(context) {
@@ -239,17 +219,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             promise = httpPostPromise.getData('api/context', formData);
         }
         return promise;
-    }
-
-    function storePreference(pref, uid) {
-        var formData = new FormData();
-        formData.append('label', pref.label);
-        formData.append('value', pref.value);
-        if(uid) formData.append('user_id', uid);
-        else formData.append('allow_override', pref.allow_override);
-        return httpPatchPromise.getData('api/preference/' + pref.id, formData).then(function(response) {
-            return response;
-        });
     }
 
     /**

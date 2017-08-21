@@ -43,6 +43,17 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
         }
     }
 
+    function storePreference(pref, uid) {
+        var formData = new FormData();
+        formData.append('label', pref.label);
+        formData.append('value', pref.value);
+        if(uid) formData.append('user_id', uid);
+        else formData.append('allow_override', pref.allow_override);
+        return httpPatchPromise.getData('api/preference/' + pref.id, formData).then(function(response) {
+            return response;
+        });
+    }
+
     user.getUser = getUser;
 
     user.getUsers = function() {
@@ -119,7 +130,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
     user.addRole = function(role, roles) {
         if(!role.name) {
             var content = $translate.instant('snackbar.role.missing-name.error');
-            snackbarService.addAutocloseSnack(content, 'error')
+            snackbarService.addAutocloseSnack(content, 'error');
             return;
         }
         var formData = new FormData();
@@ -181,7 +192,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
             });
         } else {
             if (!changes.name) {
-                snackbarService.addAutocloseSnack('Cannot create role without name', 'error')//TODO
+                snackbarService.addAutocloseSnack('Cannot create role without name', 'error'); //TODO
                 return;
             }
             httpPostFactory('api/user/role', formData, function(response)  {
@@ -305,6 +316,26 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
             localStorage.removeItem('user');
             $state.go('login', {});
         });
+    };
+
+    user.getPreferences = function() {
+        return httpGetPromise.getData('api/preference').then(function(response) {
+            return response;
+        });
+    };
+
+    user.getUserPreferences = function(uid) {
+        return httpGetPromise.getData('api/preference/' + uid).then(function(response) {
+            return response;
+        });
+    };
+
+    user.storePreference = function(pref) {
+        return storePreference(pref);
+    };
+
+    user.storeUserPreference = function(pref, uid) {
+        return storePreference(pref, uid);
     };
 
     return user;

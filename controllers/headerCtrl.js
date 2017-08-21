@@ -8,7 +8,13 @@ spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 
     };
 
     vm.initLanguage = function() {
-        var initKey = vm.userConfig ? vm.userConfig.language : undefined;
+        var initKey;
+        if(vm.userConfig) {
+            var langPref = vm.userConfig.find(function(pref) {
+                return pref.label == 'prefs.gui-language';
+            });
+            if(langPref) initKey = langPref.value;
+        }
         langService.setInitLanguage(vm.currentLanguage, initKey);
     };
 
