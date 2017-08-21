@@ -1107,14 +1107,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     contexts: function(environmentService) {
                         return environmentService.getContexts();
                     },
-                    user: function(user) {
-                        // TODO other access to user object?
-                        return user;
-                    },
-                    concepts: function(concepts) {
-                        // TODO other access to concepts object?
-                        return concepts;
-                    },
                     menus: function(mainService) {
                         return mainService.getDropdownOptions();
                     },
@@ -1661,7 +1653,25 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return $state.target('root.editor.layer', params);
                             }
                         }
-                    });
+                    })
+            .state('root.preferences', {
+                url: '/preferences',
+                component: 'preferences',
+                resolve: {
+                    availablePreferences: function(mainService) {
+                        return mainService.getPreferences();
+                    }
+                }
+            })
+            .state('root.upreferences', {
+                url: '/preferences/{id:[0-9]+}',
+                component: 'upreferences',
+                resolve: {
+                    userPreferences: function(mainService, $transition$) {
+                        return mainService.getUserPreferences($transition$.params().id);
+                    }
+                }
+            });
 });
 
 /**

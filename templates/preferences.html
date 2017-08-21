@@ -1,0 +1,25 @@
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th translate="preference.title"></th>
+            <th translate="preference.value"></th>
+            <th ng-if="!$ctrl.isUserPref" translate="preference.allow-override"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="pref in $ctrl.preferences">
+            <td>
+                <strong translate="{{ pref.label }}"></strong>
+            </td>
+            <td>
+                <input type="text" ng-model="pref.value" />
+                <button type="button" class="btn btn-xs btn-success btn-raised" ng-click="$ctrl.onUpdate(pref)">
+                    <i class="material-icons">check</i>
+                </button>
+            </td>
+            <td ng-if="!$ctrl.isUserPref">
+                <input type="checkbox" ng-model="pref.allow_override" />
+            </td>
+        </tr>
+    </tbody>
+</table>
