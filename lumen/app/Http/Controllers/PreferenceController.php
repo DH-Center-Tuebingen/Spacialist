@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Preference;
 use App\UserPreference;
+use App\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -51,22 +52,25 @@ class PreferenceController extends Controller {
 
     // PATCH
     public function patchPreference(Request $request, $id) {
-        $user = \Auth::user();
-        if(!$user->can('edit_preferences')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-
         $this->validate($request, [
             'label' => 'required|string|exists:preferences,label',
             'value' => 'string',
-            'user_id' => 'nullable|integer|exists:users,id'
+            'user_id' => 'nullable|integer|exists:users,id',
+            'allow_override' => 'nullable|boolean_string'
         ]);
 
         $label = $request->get('label');
         $value = $request->get('value');
         $uid = $request->get('user_id');
+        $allowOverride = $request->get('allow_override');
+
+        // Permission is required, if preference is not a user preference
+        $user = \Auth::user();
+        if((!isset($uid) && !$user->can('edit_preferences')) || (isset($uid) && !$user->can('edit_preferences') && $uid != $user['id'])) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
 
         try {
             $pref = Preference::findOrFail($id);
@@ -90,6 +94,15 @@ class PreferenceController extends Controller {
             $userPref->save();
         } else {
             $pref->default_value = $encodedValue;
+            if(isset($allowOverride)) {
+                $allowOverride = Helpers::parseBoolean($allowOverride);
+                $removeUserPrefs = $pref->allow_override && !$allowOverride;
+                $pref->allow_override = $allowOverride;
+                // remove stored user prefs, if pref is no longer overridable
+                if($removeUserPrefs) {
+                    UserPreference::where('pref_id', $id)->delete();
+                }
+            }
             $pref->save();
         }
     }

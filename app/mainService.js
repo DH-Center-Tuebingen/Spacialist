@@ -123,7 +123,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     main.storeUserPreference = function(pref, uid) {
-        console.log(uid);
         return storePreference(pref, uid);
     };
 
@@ -247,6 +246,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         formData.append('label', pref.label);
         formData.append('value', pref.value);
         if(uid) formData.append('user_id', uid);
+        else formData.append('allow_override', pref.allow_override);
         return httpPatchPromise.getData('api/preference/' + pref.id, formData).then(function(response) {
             return response;
         });
