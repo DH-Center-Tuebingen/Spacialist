@@ -23,6 +23,7 @@ class AddUserPrefs extends Migration
         });
 
         Schema::create('user_preferences', function (Blueprint $table) {
+            $table->increments('id');
             $table->integer('pref_id');
             $table->integer('user_id');
             $table->jsonb('value');

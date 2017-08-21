@@ -42,6 +42,7 @@ class PreferenceController extends Controller {
 
         $prefs = Preference::where('allow_override', true)
             ->leftJoin('user_preferences as up', 'preferences.id', '=', 'up.pref_id')
+            ->select('preferences.*', 'up.pref_id', 'up.user_id', 'up.value')
             ->orderBy('id')
             ->get();
         $this->decodePreferences($prefs, true);
