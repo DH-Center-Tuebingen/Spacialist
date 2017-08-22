@@ -6,6 +6,7 @@ use App\ContextFile;
 use App\File;
 use App\FileTag;
 use App\ThConcept;
+use App\Preference;
 use \DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -44,7 +45,7 @@ class FileController extends Controller
         if($user->can('edit_photo_props')) {
             $file->tags = DB::table('photo_tags as p')
             ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
-            ->select('c.id')
+            ->select('c.id', 'p.concept_url as uri')
             ->where('p.photo_id', '=', $file->id)
             ->get();
         }
@@ -82,7 +83,7 @@ class FileController extends Controller
             if($user->can('edit_photo_props')) {
                 $file->tags = DB::table('photo_tags as p')
                 ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
-                ->select('c.id')
+                ->select('c.id', 'p.concept_url as uri')
                 ->where('p.photo_id', '=', $file->id)
                 ->get();
             }
@@ -110,23 +111,24 @@ class FileController extends Controller
     }
 
     public function getAvailableTags() {
+        $tagObj = Preference::where('label', 'prefs.tag-root')->value('default_value');
+        $tagUri = json_decode($tagObj)->uri;
         $tags = DB::select("
             WITH RECURSIVE
             top AS (
-                SELECT br.narrower_id as id,
-                    (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as label
+                SELECT br.narrower_id as id, c2.concept_url as uri
                 FROM th_broaders br
                 JOIN th_concept c ON c.id = br.broader_id
-                WHERE c.concept_url = 'http://thesaurus.archeoinf.de/SpTestthesaurus/false_126'
+                JOIN th_concept c2 ON c2.id = br.narrower_id
+                WHERE c.concept_url = '$tagUri'
                 UNION
-                SELECT br.narrower_id as id,
-                    (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as label
+                SELECT br.narrower_id as id, concept_url as uri
                 FROM top t, th_broaders br
+                JOIN th_concept c ON c.id = br.narrower_id
                 WHERE t.id = br.broader_id
             )
             SELECT *
             FROM top
-            ORDER BY label
         ");
 
         return response()->json([
@@ -386,12 +388,10 @@ class FileController extends Controller
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        DB::table('context_photos')
-            ->where([
-                ['photo_id', '=', $fid],
-                ['context_id', '=', $cid]
-            ])
-            ->delete();
+        ContextPhoto::where([
+            ['photo_id', '=', $fid],
+            ['context_id', '=', $cid]
+        ])->delete();
         return response()->json();
     }
 

@@ -460,6 +460,7 @@ spacialistApp.directive('fileList', function(fileService) {
         scope: {
             files: '=',
             contextMenu: '=',
+            concepts: '=',
             showTags: '=',
             availableTags: '=',
             searchTerms: '='
@@ -1068,9 +1069,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     return userService.getUserPreferences(user.user.id);
                 },
                 concepts: function(langService, userConfig) {
-                    var langPref = userConfig.find(function(pref) {
-                        return pref.label == 'prefs.gui-language';
-                    });
+                    var langPref = userConfig['prefs.gui-language'];
                     return langService.getConcepts(langPref.value);
                 },
                 availableLanguages: function(langService) {

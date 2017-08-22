@@ -28,8 +28,8 @@ class PreferenceController extends Controller {
         }
 
         $prefs = Preference::orderBy('id')->get();
-        $this->decodePreferences($prefs, false);
-        return $prefs;
+        $prefObj = $this->decodePreferences($prefs, false);
+        return $prefObj;
     }
 
     public function getUserPreferences($id) {
@@ -45,8 +45,8 @@ class PreferenceController extends Controller {
             ->select('preferences.*', 'up.pref_id', 'up.user_id', 'up.value')
             ->orderBy('id')
             ->get();
-        $this->decodePreferences($prefs, true);
-        return $prefs;
+        $prefObj = $this->decodePreferences($prefs, true);
+        return $prefObj;
     }
 
     // POST
@@ -114,6 +114,7 @@ class PreferenceController extends Controller {
 
     // OTHER FUNCTIONS
     private function decodePreferences($prefs, $isUserPref) {
+        $prefObj = [];
         foreach($prefs as $p) {
             if(!isset($p->value)) {
                 $decoded = json_decode($p->default_value);
@@ -143,7 +144,9 @@ class PreferenceController extends Controller {
                     $p->value = $decoded->name;
                     break;
             }
+            $prefObj[$p->label] = $p;
         }
+        return $prefObj;
     }
 
     private function encodePreference($label, $decodedValue) {
