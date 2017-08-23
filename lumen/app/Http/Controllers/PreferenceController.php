@@ -40,8 +40,7 @@ class PreferenceController extends Controller {
             ], 403);
         }
 
-        $prefs = Preference::where('allow_override', true)
-            ->leftJoin('user_preferences as up', 'preferences.id', '=', 'up.pref_id')
+        $prefs = Preference::leftJoin('user_preferences as up', 'preferences.id', '=', 'up.pref_id')
             ->select('preferences.*', 'up.pref_id', 'up.user_id', 'up.value')
             ->orderBy('id')
             ->get();
@@ -122,7 +121,6 @@ class PreferenceController extends Controller {
                 $decoded = json_decode($p->value);
             }
             unset($p->default_value);
-            if($isUserPref) unset($p->allow_override);
             switch($p->label) {
                 case 'prefs.gui-language':
                     $p->value = $decoded->language_key;

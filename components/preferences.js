@@ -1,18 +1,16 @@
 spacialistApp.component('preferences', {
     bindings: {
         tab: '@',
+        onPrefUpdate: '&',
         availablePreferences: '<'
     },
     templateUrl: 'templates/preferences.html',
-    controller: ['userService', 'snackbarService', '$translate', function(userService, snackbarService, $translate) {
+    controller: [function() {
         var vm = this;
 
         vm.preferences = angular.copy(vm.availablePreferences);
         vm.onUpdate = function(pref) {
-            userService.storePreference(pref).then(function(response) {
-                var content = $translate.instant('snackbar.data-stored.success');
-                snackbarService.addAutocloseSnack(content, 'success');
-            });
+            vm.onPrefUpdate({pref: pref, uid: undefined});
         };
     }]
 });
@@ -21,18 +19,16 @@ spacialistApp.component('upreferences', {
     bindings: {
         tab: '@',
         user: '<',
-        userConfig: '<'
+        onPrefUpdate: '&',
+        overridablePrefs: '<'
     },
     templateUrl: 'templates/preferences.html',
-    controller: ['userService', 'snackbarService', '$translate', function(userService, snackbarService, $translate) {
+    controller: [function() {
         var vm = this;
 
-        vm.preferences = angular.copy(vm.userConfig);
+        vm.preferences = angular.copy(vm.overridablePrefs);
         vm.onUpdate = function(pref) {
-            userService.storeUserPreference(pref, vm.user.user.id).then(function(response) {
-                var content = $translate.instant('snackbar.data-stored.success');
-                snackbarService.addAutocloseSnack(content, 'success');
-            });
+            vm.onPrefUpdate({pref: pref, uid: vm.user.user.id});
         };
         vm.isUserPref = true;
     }]

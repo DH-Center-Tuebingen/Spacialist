@@ -1662,7 +1662,21 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             })
             .state('root.upreferences', {
                 url: '/preferences/{id:[0-9]+}',
-                component: 'upreferences'
+                component: 'upreferences',
+                resolve: {
+                    overridablePrefs: function(userConfig) {
+                        var prefs = {};
+                        for(var k in userConfig) {
+                            if(userConfig.hasOwnProperty(k)) {
+                                if(userConfig[k].allow_override) {
+                                    prefs[k] = userConfig[k];
+                                }
+                            }
+                        }
+                        return prefs;
+                    }
+                }
+
             });
 });
 

@@ -10,7 +10,7 @@
             </button>
             <a class="navbar-brand" ui-sref="root.spacialist">
                 <img src="favicon.png" class="logo" alt="spacialist logo"/>
-                {{'spacialist'|translate}}
+                {{ $ctrl.userConfig['prefs.project-name'].value }}
             </a>
         </div>
         <div class="navbar-collapse" id="navbar-collapse" uib-collapse="isCollapsed">
