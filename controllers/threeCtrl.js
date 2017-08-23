@@ -11,6 +11,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     var measureLine;
     var ts = Date.now();
 
+    $scope.status = {
+        progress: 0
+    };
     $scope.points = 0;
     $scope.measurementEnabled = false;
     $scope.props = {
@@ -48,16 +51,27 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     };
 
     function loadObj(path, objFile, materials) {
-        var objLoader = new THREE.OBJLoader();
-        objLoader.setPath(path);
+        var objLoader = new THREE.OBJLoader2();
         if(materials) {
-            objLoader.setMaterials(materials);
+            objLoader.setMaterials(materials.materials);
         }
-        objLoader.load(objFile, function(object) {
-            scene.add(object);
-            sceneObjects.push(object);
-            onWindowResize();
-        }, function() {}, function(xhr) {});
+        objLoader.setPath(path);
+        objLoader.load(objFile,
+            function(object) { // onSuccess
+                scene.add(object);
+                sceneObjects.push(object);
+                onWindowResize();
+            },
+            function(event) { // onProgress
+                if(event.lengthComputable) {
+                    $scope.status.progress = Math.round(event.loaded / event.total * 100);
+                    $scope.$apply();
+                    console.log('Downloaded ' + $scope.status.progress + '% of model');
+                }
+            },
+            function(event) { // onError
+            }
+        );
     }
 
     function init() {
@@ -77,7 +91,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 var parent = object;
                 do {
                     children = parent.children;
-                    if(!children) break;
+                    if(!children || !children[0]) break;
                     material = children[0].material;
                     parent = children[0];
                 } while(!material);
@@ -87,7 +101,16 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     			scene.add(object);
                 sceneObjects.push(object);
                 onWindowResize();
-    		} );
+    		},
+            function(event) { // onProgress
+                if(event.lengthComputable) {
+                    $scope.status.progress = Math.round(event.loaded / event.total * 100);
+                    $scope.$apply();
+                    console.log('Downloaded ' + $scope.status.progress + '% of model');
+                }
+            },
+            function(event) { // onError
+            });
         } else if(extension == 'obj') { // obj
             var sep = fileUrl.lastIndexOf('/')+1;
             var path = fileUrl.substr(0, sep);
