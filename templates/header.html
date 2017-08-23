@@ -41,12 +41,18 @@
                     </ul>
                 </li>-->
                 <li>
-                    <a href="db" target="_blank"><i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <sup class="material-icons md-14">open_in_new</sup>
+                    <a href="db" target="_blank">
+                        <i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <sup class="material-icons md-14">open_in_new</sup>
                     </a>
                 </li>
                 <li ng-if="$ctrl.user.permissions.edit_literature">
                     <a ui-sref="root.bibliography">
                         <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
+                    </a>
+                </li>
+                <li ng-if="$ctrl.userConfig['prefs.link-to-thesaurex'].value == 'true'">
+                    <a href="thesaurex" target="_blank">
+                        Go To ThesauRex <sup class="material-icons md-14">open_in_new</sup>
                     </a>
                 </li>
             </ul>

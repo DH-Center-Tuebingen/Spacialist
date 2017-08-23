@@ -17,7 +17,7 @@ spacialistApp.component('root', {
                 promise = userService.storePreference(pref);
             }
             promise.then(function(response) {
-                vm.userConfig[pref.label] = pref;
+                vm.userConfig[pref.label] = angular.copy(pref);
                 var content = $translate.instant('snackbar.data-stored.success');
                 snackbarService.addAutocloseSnack(content, 'success');
             });
