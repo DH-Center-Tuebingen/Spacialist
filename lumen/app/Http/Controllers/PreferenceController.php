@@ -126,6 +126,7 @@ class PreferenceController extends Controller {
                     $p->value = $decoded->language_key;
                     break;
                 case 'prefs.columns':
+                    $p->value = $decoded;
                     break;
                 case 'prefs.show-tooltips':
                     $p->value = $decoded->show;
@@ -154,6 +155,7 @@ class PreferenceController extends Controller {
                 $value = json_encode(['language_key' => $decodedValue]);
                 break;
             case 'prefs.columns':
+                $value = json_encode($decodedValue);
                 break;
             case 'prefs.show-tooltips':
                 $value = json_encode(['show' => $decodedValue]);

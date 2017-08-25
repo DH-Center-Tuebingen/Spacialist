@@ -1,5 +1,5 @@
 <div resize-watcher>
-    <div class="col-md-2" id="tree-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
+    <div class="col-md-{{$ctrl.userConfig['prefs.columns'].value.left}}" id="tree-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
         <div ng-if="$ctrl.user.permissions.view_concepts">
             <h3>{{'context-tree.heading'|translate}}</h3>
             <div class="col-md-12">
@@ -20,7 +20,7 @@
             <div ng-include="'layouts/restricted-access.html'"></div>
         </div>
     </div>
-    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
+    <div class="col-md-{{$ctrl.userConfig['prefs.columns'].value.center}}" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
         <div ui-view="context-detail" on-store="$ctrl.onStore(context, data)" on-source-add="$ctrl.onSourceAdd(entry)">
             <!-- ui-view element for context detail template -->
             <h3>{{'context-form.heading'|translate}}</h3>
@@ -31,7 +31,7 @@
         </div>
         <div ui-view="geodata-dummy"></div>
     </div>
-    <div class="col-md-5" id="addon-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
+    <div class="col-md-{{$ctrl.userConfig['prefs.columns'].value.right}}" id="addon-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
         <div ui-view="addons">
             <ul class="nav nav-tabs" id="addon-nav">
                 <li role="presentation" ui-sref="{tab: 'map'}" ui-sref-active="active" ng-if="moduleExists('mapCtrl')">

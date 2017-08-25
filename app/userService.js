@@ -46,7 +46,9 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
     function storePreference(pref, uid) {
         var formData = new FormData();
         formData.append('label', pref.label);
-        formData.append('value', pref.value);
+        var value = pref.value;
+        if(typeof value === 'object') value = angular.toJson(pref.value);
+        formData.append('value', value);
         if(uid) formData.append('user_id', uid);
         else formData.append('allow_override', pref.allow_override);
         return httpPatchPromise.getData('api/preference/' + pref.id, formData).then(function(response) {

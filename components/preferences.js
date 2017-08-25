@@ -9,6 +9,7 @@ spacialistApp.component('preferences', {
         var vm = this;
 
         vm.preferences = angular.copy(vm.availablePreferences);
+
         vm.onUpdate = function(pref) {
             vm.onPrefUpdate({pref: pref, uid: undefined});
         };
