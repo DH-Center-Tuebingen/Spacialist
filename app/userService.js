@@ -320,12 +320,14 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
 
     user.getPreferences = function() {
         return httpGetPromise.getData('api/preference').then(function(response) {
+            convertBooleanPrefs(response);
             return response;
         });
     };
 
     user.getUserPreferences = function(uid) {
         return httpGetPromise.getData('api/preference/' + uid).then(function(response) {
+            convertBooleanPrefs(response);
             return response;
         });
     };
@@ -337,6 +339,13 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
     user.storeUserPreference = function(pref, uid) {
         return storePreference(pref, uid);
     };
+
+    function convertBooleanPrefs(prefs) {
+        var stVal = prefs['prefs.show-tooltips'].value.toString();
+        var lttVal = prefs['prefs.link-to-thesaurex'].value.toString();
+        prefs['prefs.show-tooltips'].value = stVal == '1' || stVal == 'true';
+        prefs['prefs.link-to-thesaurex'].value = lttVal == '1' || lttVal == 'true';
+    }
 
     return user;
 }]);
