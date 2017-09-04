@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased - Delphi
+
+### Added
+- Preferences to allow customization for admins and users as well
+### Changed
+### Fixed
+### Removed/Deprecated
+
 ## 0.3 - Cannae
 
 ### Added
