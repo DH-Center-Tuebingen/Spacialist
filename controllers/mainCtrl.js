@@ -150,7 +150,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
      */
     $scope.$on('leafletDirectiveMap.mainmap.popupclose', function(event, args) {
         // mapService.unsetCurrentGeodata();
-        $state.go('^');
+        // $state.go('^');
     });
     $scope.$on('leafletDirectiveMap.mainmap.popupopen', function(event, args) {
         var popup = args.leafletEvent.popup;
