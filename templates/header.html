@@ -40,12 +40,12 @@
                         </li>
                     </ul>
                 </li>-->
-                <li>
+                <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
                     <a href="db" target="_blank">
                         <i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <sup class="material-icons md-14">open_in_new</sup>
                     </a>
                 </li>
-                <li ng-if="$ctrl.user.permissions.edit_literature">
+                <li ng-if="$ctrl.user.permissions.edit_literature && $ctrl.userConfig['prefs.load-extensions'].value.bibliography">
                     <a ui-sref="root.bibliography">
                         <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
                     </a>

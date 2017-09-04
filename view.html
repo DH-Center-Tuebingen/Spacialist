@@ -34,13 +34,13 @@
     <div class="col-md-{{$ctrl.userConfig['prefs.columns'].value.right}}" id="addon-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
         <div ui-view="addons">
             <ul class="nav nav-tabs" id="addon-nav">
-                <li role="presentation" ui-sref="{tab: 'map'}" ui-sref-active="active" ng-if="moduleExists('mapCtrl')">
+                <li role="presentation" ui-sref="{tab: 'map'}" ui-sref-active="active" ng-if="moduleExists('mapCtrl') && $ctrl.userConfig['prefs.load-extensions'].value.map">
                     <a><i class="material-icons">place</i><span class="tab-desc"> {{'context-form.tabs.map'|translate}}</span></a>
                 </li>
-                <li role="presentation" ui-sref="{tab: 'files'}" ui-sref-active="active" ng-if="moduleExists('fileCtrl')">
+                <li role="presentation" ui-sref="{tab: 'files'}" ui-sref-active="active" ng-if="moduleExists('fileCtrl') && $ctrl.userConfig['prefs.load-extensions'].value.files">
                     <a><i class="material-icons">folder</i><span class="tab-desc"> {{'context-form.tabs.files'|translate}}</span></a>
                 </li>
-                <li role="presentation" ui-sref="{tab: 'bibliography'}" ui-sref-active="active" ng-if="moduleExists('bibliographyCtrl') && $ctrl.currentElement.element.id">
+                <li role="presentation" ui-sref="{tab: 'bibliography'}" ui-sref-active="active" ng-if="moduleExists('bibliographyCtrl') && $ctrl.userConfig['prefs.load-extensions'].value.bibliography && $ctrl.currentElement.element.id">
                     <a><i class="material-icons">book</i><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
                 </li>
             </ul>
