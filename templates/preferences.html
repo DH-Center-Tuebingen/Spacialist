@@ -29,11 +29,11 @@
                 <strong translate="{{ $ctrl.preferences['prefs.columns'].label }}"></strong>
             </td>
             <td>
-                Left: <input type="number" ng-model="$ctrl.preferences['prefs.columns'].value.left" />
+                <span translate="prefs.columns-left"></span>: <input type="number" ng-model="$ctrl.preferences['prefs.columns'].value.left" />
                 <br />
-                Center: <input type="number" ng-model="$ctrl.preferences['prefs.columns'].value.center" />
+                <span translate="prefs.columns-center"></span>: <input type="number" ng-model="$ctrl.preferences['prefs.columns'].value.center" />
                 <br />
-                Rechts: <input type="number" ng-model="$ctrl.preferences['prefs.columns'].value.right" />
+                <span translate="prefs.columns-right"></span>: <input type="number" ng-model="$ctrl.preferences['prefs.columns'].value.right" />
             </td>
             <td ng-if="!$ctrl.isUserPref">
                 <input type="checkbox" ng-model="$ctrl.preferences['prefs.columns'].allow_override" />
