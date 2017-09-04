@@ -115,10 +115,10 @@ class PreferenceController extends Controller {
     private function decodePreferences($prefs, $isUserPref) {
         $prefObj = [];
         foreach($prefs as $p) {
-            if(!isset($p->value)) {
-                $decoded = json_decode($p->default_value);
-            } else {
+            if(isset($p->value)) {
                 $decoded = json_decode($p->value);
+            } else {
+                $decoded = json_decode($p->default_value);
             }
             unset($p->default_value);
             switch($p->label) {
@@ -155,7 +155,7 @@ class PreferenceController extends Controller {
                 $value = json_encode(['language_key' => $decodedValue]);
                 break;
             case 'prefs.columns':
-                $value = json_encode($decodedValue);
+                $value = $decodedValue;
                 break;
             case 'prefs.show-tooltips':
                 $value = json_encode(['show' => $decodedValue]);

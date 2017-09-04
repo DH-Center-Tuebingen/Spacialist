@@ -47,7 +47,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
         var formData = new FormData();
         formData.append('label', pref.label);
         var value = pref.value;
-        if(typeof value === 'object') value = angular.toJson(pref.value);
+        if(typeof value === 'object') value = angular.toJson(value);
         formData.append('value', value);
         if(uid) formData.append('user_id', uid);
         else formData.append('allow_override', pref.allow_override);
