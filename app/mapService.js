@@ -131,14 +131,18 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             }
         }
         if(isInit) {
-            var newBounds = map.featureGroup.getBounds();
-            var newNE = newBounds.getNorthEast();
-            var newSW = newBounds.getSouthWest();
-            mapArr.bounds.northEast.lat = newNE.lat;
-            mapArr.bounds.northEast.lng = newNE.lng;
-            mapArr.bounds.southWest.lat = newSW.lat;
-            mapArr.bounds.southWest.lng = newSW.lng;
+            map.fitBounds(mapArr);
         }
+    };
+
+    map.fitBounds = function(mapArr) {
+        var newBounds = map.featureGroup.getBounds();
+        var newNE = newBounds.getNorthEast();
+        var newSW = newBounds.getSouthWest();
+        mapArr.bounds.northEast.lat = newNE.lat;
+        mapArr.bounds.northEast.lng = newNE.lng;
+        mapArr.bounds.southWest.lat = newSW.lat;
+        mapArr.bounds.southWest.lng = newSW.lng;
     };
 
     map.isLinkPossible = function(geodataType, layerType) {
