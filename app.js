@@ -1631,6 +1631,14 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
     });
     $transitions.onStart({}, function(trans) {
         var user = localStorage.getItem('user');
+        var transitionService = trans.injector().get('transitionService');
+        if(!transitionService.isInitialized()) {
+            var ts = trans.targetState();
+            transitionService.setTransition({
+                to: ts.name(),
+                params: ts.params()
+            });
+        }
         // var authenticated = false;
         if(user !== '') {
             parsedUser = JSON.parse(user);
