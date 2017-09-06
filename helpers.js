@@ -38,8 +38,9 @@ L.Control.FitWorld = L.Control.extend({
         o.onClick = o.onClick || function() {};
         var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-fitworld');
         var elem = L.DomUtil.create('a', 'leaflet-control-fitworld-button', container);
-        elem.innerHTML = '+';
-        elem.href= '';
+        var icon = L.DomUtil.create('i', 'material-icons md-18', elem);
+        icon.innerHTML = 'zoom_out_map';
+        elem['ui-sref'] = '';
         elem.role = 'button';
 
         container.onclick = function(){
