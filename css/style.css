@@ -760,3 +760,8 @@ span.btn {
 .leaflet-popup .btn {
     white-space: normal !important;
 }
+
+.leaflet-control-fitworld-button {
+    font: bold 18px 'Lucida Console', Monaco, monospace;
+    text-indent: 1px;
+}

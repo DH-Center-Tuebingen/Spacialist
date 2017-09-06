@@ -31,3 +31,27 @@ function nextMatchingDeviceClass(col, currentClass) {
     }
     return null;
 }
+
+L.Control.FitWorld = L.Control.extend({
+	onAdd: function(map) {
+        var o = this.options;
+        o.onClick = o.onClick || function() {};
+        var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-fitworld');
+        var elem = L.DomUtil.create('a', 'leaflet-control-fitworld-button', container);
+        elem.innerHTML = '+';
+        elem.href= '';
+        elem.role = 'button';
+
+        container.onclick = function(){
+            o.onClick();
+        };
+        return container;
+	},
+
+	onRemove: function(map) {
+	}
+});
+
+L.control.fitworld = function(opts) {
+	return new L.Control.FitWorld(opts);
+};
