@@ -234,9 +234,9 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
             var updatedValues = {
                 geodata_id: undefined
             };
-            mainService.updateContextById(cid, updatedValues);
-            delete vm.map.geodata.linkedContexts[$scope.currentGeodata.id]; // TODO currentGeodata
-            linkedLayer = vm.map.geodata.linkedLayers[$scope.currentGeodata.id]; // TODO currentGeodata
+            mainService.updateContextById(vm.contexts, cid, updatedValues);
+            delete vm.map.geodata.linkedContexts[vm.currentGeodata.id];
+            linkedLayer = vm.map.geodata.linkedLayers[vm.currentGeodata.id];
             linkedLayer.bindTooltip(linkedLayer.feature.properties.name);
         });
     };

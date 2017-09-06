@@ -293,11 +293,11 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         return parsedData;
     }
 
-    main.updateContextById = function(id, newValues) {
-        main.expandTree(main.contexts, id);
+    main.updateContextById = function(tree, id, newValues) {
+        main.expandTree(tree, id);
 
         angular.merge(main.currentElement.element, newValues);
-        angular.merge(main.contexts.data[id], newValues);
+        angular.merge(tree.data[id], newValues);
     };
 
     main.deleteContext = function(context, contexts) {
