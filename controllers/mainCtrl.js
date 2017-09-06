@@ -26,6 +26,13 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
         mapService.setupLayers(vm.layer, vm.map, vm.contexts, vm.concepts);
         mapService.initMapObject().then(function(obj) {
             vm.mapObject = obj;
+            var fwOptions = {
+                position: 'topleft',
+                onClick: function() {
+                    mapService.fitBounds(vm.map);
+                }
+            };
+            L.control.fitworld(fwOptions).addTo(vm.mapObject);
             // wait a random amount of time, so mapObject.eachLayer has all layers
             $timeout(function() {
                 vm.mapObject.eachLayer(function(l) {
