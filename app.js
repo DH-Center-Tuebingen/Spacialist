@@ -1192,7 +1192,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     description: data[aid+'_desc'] || ''
                                 };
                             },
-                            attribute_sources: function(sources, $transition$) {
+                            attributesources: function(sources, $transition$) {
                                 var aid = $transition$.params().aid;
                                 return sources.filter(function(s) {
                                     return s.attribute_id == aid;
@@ -1202,14 +1202,14 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return literatureService.getAll();
                             }
                         },
-                        onEnter: function($state, $uibModal, attribute, certainty, attribute_sources, context, literature, sources, $document) {
+                        onEnter: function($state, $uibModal, attribute, certainty, attributesources, context, literature, sources, $document) {
                             $uibModal.open({
-                                template: '<sourcemodal attribute="::$resolve.attribute" certainty="::$resolve.certainty" attribute_sources="::$resolve.attribute_sources" context="::$resolve.context" literature="::$resolve.literature" sources="::$resolve.sources" on-add="$ctrl.addSource(entry)" on-close="$ctrl.close(reason)" on-dismiss="$ctrl.dismiss(reason)"></sourcemodal>',
+                                template: '<sourcemodal attribute="::$resolve.attribute" certainty="::$resolve.certainty" attributesources="::$resolve.attributesources" context="::$resolve.context" literature="::$resolve.literature" sources="::$resolve.sources" on-add="$ctrl.addSource(entry)" on-close="$ctrl.close(reason)" on-dismiss="$ctrl.dismiss(reason)"></sourcemodal>',
                                 controller: function($scope) {
                                     var vm = this;
 
                                     vm.addSource = function(entry) {
-                                        vm.onAdd(entry);
+                                        // vm.onAdd(entry);
                                     };
 
                                     vm.dismiss = function(reason) {
@@ -1229,8 +1229,8 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     certainty: function() {
                                         return certainty;
                                     },
-                                    attribute_sources: function() {
-                                        return attribute_sources;
+                                    attributesources: function() {
+                                        return attributesources;
                                     },
                                     context: function() {
                                         return context;
@@ -1243,7 +1243,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     }
                                 }
                             }).result.finally(function() {
-                                $state.go('^');
+                                $state.go('^', {}, {reload: true});
                             });
                         }
                     })

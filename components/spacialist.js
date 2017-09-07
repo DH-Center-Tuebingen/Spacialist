@@ -40,7 +40,7 @@ spacialistApp.component('sourcemodal', {
         bindings: {
             attribute: '<',
             certainty: '<',
-            attribute_sources: '<',
+            attributesources: '<',
             context: '<',
             literature: '<',
             sources: '<',
@@ -48,9 +48,9 @@ spacialistApp.component('sourcemodal', {
             onClose: '&',
             onDismiss: '&'
         },
-        controller: ['$scope', 'snackbarService', 'httpPutFactory', '$translate', function($scope, snackbarService, httpPutFactory, $translate) {
+        controller: ['$scope', 'snackbarService', 'httpPutFactory', 'httpPostFactory', '$translate', function($scope, snackbarService, httpPutFactory, httpPostFactory, $translate) {
             var vm = this;
-
+            console.log(vm.attributesources);
             vm.newEntry = {
                 source: '',
                 desc: ''
@@ -70,18 +70,17 @@ spacialistApp.component('sourcemodal', {
                 vm.onDismiss();
             };
             vm.addSource = function(entry) {
-                vm.onAdd({entry: entry});
-                // var formData = new FormData();
-                // formData.append('cid', context.id);
-                // formData.append('aid', attribute.id);
-                // formData.append('lid', entry.source.id);
-                // formData.append('desc', entry.desc);
-                // httpPostFactory('api/source', formData, function(response) {
-                //     console.log($state.$current.parent);
-                //     sources.push(response.source);
-                //     entry.source = undefined;
-                //     entry.desc = '';
-                // });
+                // vm.onAdd({entry: entry});
+                var formData = new FormData();
+                formData.append('cid', vm.context.id);
+                formData.append('aid', vm.attribute.id);
+                formData.append('lid', entry.source.id);
+                formData.append('desc', entry.desc);
+                httpPostFactory('api/source', formData, function(response) {
+                    vm.attributesources.push(response.source);
+                    entry.source = undefined;
+                    entry.desc = '';
+                });
             };
             vm.setCertainty = function(event, certainty) {
                 var max = event.currentTarget.scrollWidth;
