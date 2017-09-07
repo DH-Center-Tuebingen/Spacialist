@@ -905,6 +905,11 @@ spacialistApp.config(['markedProvider', function (markedProvider) {
   });
 }]);
 
+spacialistApp.config(function($uiRouterProvider) {
+    var StickyStatesPlugin = window['@uirouter/sticky-states'].StickyStatesPlugin;
+    $uiRouterProvider.plugin(StickyStatesPlugin);
+});
+
 spacialistApp.config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({
         files: [{
@@ -1122,6 +1127,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             })
                 .state('root.spacialist.data', {
                     url: '/context/{id:[0-9]+}',
+                    sticky: true,
                     resolve: {
                         context: function(contexts, $transition$, $state) {
                             var c = contexts.data[$transition$.params().id];
@@ -1302,7 +1308,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             }],
                             controllerAs: '$ctrl'
                         }).result.finally(function() {
-                            $state.go('^');
+                            $state.router.transitionService.back();
                         });
                     }]
                 })
@@ -1609,6 +1615,15 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
  * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
  */
 spacialistApp.run(function($state, mainService, mapService, userService, modalFactory, $transitions) {
+    var previousState;
+    var previousStateParameters;
+    $transitions.onSuccess({}, function (transition) {
+        previousState = transition.from().name;
+        previousStateParameters = transition.params('from');
+    });
+    $transitions.back = function () {
+        $state.go(previousState, previousStateParameters, { reload: true });
+    };
     // Check for unstaged changes
     $transitions.onBefore({ from: 'root.spacialist.data' }, function(trans) {
         var form = mainService.currentElement.form;

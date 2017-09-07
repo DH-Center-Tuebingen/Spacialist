@@ -1,0 +1,26 @@
+{
+  "name": "spacialist",
+  "version": "0.0.3",
+  "description": "A Virtual Research Environment for the Spatial Humanities",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eScienceCenter/Spacialist.git"
+  },
+  "author": "Vinzenz Rosenkranz <vinzenz.rosenkranz@uni-tuebingen.de>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eScienceCenter/Spacialist/issues"
+  },
+  "homepage": "https://github.com/eScienceCenter/Spacialist#readme",
+  "private": true,
+  "dependencies": {
+    "@uirouter/angularjs": "^1.0.6",
+    "@uirouter/core": "^5.0.6",
+    "@uirouter/sticky-states": "^1.4.1",
+    "@uirouter/visualizer": "^4.0.2"
+  }
+}
