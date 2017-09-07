@@ -1,4 +1,4 @@
-spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'snackbarService', 'searchService', 'Upload', '$translate', '$timeout', function($rootScope, httpPostFactory, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpDeleteFactory, snackbarService, searchService, Upload, $translate, $timeout) {
+spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'snackbarService', 'searchService', 'Upload', '$translate', '$timeout', '$state', function($rootScope, httpPostFactory, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpDeleteFactory, snackbarService, searchService, Upload, $translate, $timeout, $state) {
     var images = {
         all: [],
         linked: [],
@@ -110,7 +110,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         httpPutFactory('api/image/link', formData, function(response) {
             var content = $translate.instant('snackbar.image-linked.success');
             snackbarService.addAutocloseSnack(content, 'success');
-            images.getImagesForContext(contextId);
+            $state.reload('root.spacialist');
         });
     };
 
