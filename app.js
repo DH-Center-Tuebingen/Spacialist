@@ -1618,7 +1618,7 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
             var onConfirm = function() {
                 form.$setPristine();
                 mainService.storeElement(mainService.currentElement.element, mainService.currentElement.data);
-                $state.go(trans.targetState().name(), trans.targetState().params());
+                $state.go(trans.targetState().name(), trans.targetState().params(), {reload: true});
             };
             modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
             return false;

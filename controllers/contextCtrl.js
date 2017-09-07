@@ -1,12 +1,16 @@
 spacialistApp.controller('contextCtrl', ['$scope', 'mainService', function($scope, mainService) {
-    this.currentElement = mainService.currentElement;
-    this.editContext = angular.copy(this.context);
+    var vm = this;
+    vm.currentElement = mainService.currentElement;
+    vm.editContext = angular.copy(vm.context);
+    mainService.setCurrentElement({
+        element: vm.editContext
+    });
 
-    this.store = function(data) {
-        this.onStore({context: this.editContext, data: data});
+    vm.store = function(data) {
+        vm.onStore({context: vm.editContext, data: data});
     };
 
-    this.addSource = function(entry) {
-        this.onSourceAdd({entry: entry});
+    vm.addSource = function(entry) {
+        vm.onSourceAdd({entry: entry});
     };
 }]);
