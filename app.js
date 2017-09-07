@@ -1159,11 +1159,13 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return linkedFiles;
                         }
                     },
-                    onEnter: function(contexts, context, sources, map, geodate, mainService, mapService) {
+                    onEnter: function(contexts, context, sources, linkedFiles, map, geodate, mainService, mapService) {
                         mainService.expandTree(contexts, context.id, true);
+                        mainService.unsetCurrentElement();
                         mainService.setCurrentElement({
                             element: context,
-                            sources: sources
+                            sources: sources,
+                            linkedFiles: linkedFiles
                         });
                         // TODO wait for init of geodata (mapService.initGeodata)
                         if(geodate) {

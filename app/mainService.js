@@ -375,6 +375,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         main.currentElement.geometryType = '';
         main.currentElement.fields = {};
         main.currentElement.sources = {};
+        main.currentElement.linkedFiles = [];
     }
 
     main.unsetCurrentElement = function() {
@@ -394,7 +395,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     main.setCurrentElement = function(element) {
-        initCurrentElement();
         for(var k in element) {
             if(element.hasOwnProperty(k)) {
                 main.currentElement[k] = element[k];

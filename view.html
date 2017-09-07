@@ -108,8 +108,7 @@
                                     {{'context-form.tabs.photos.linked'|translate}}
                                 </span>
                             </uib-accordion-heading>
-                            {{$ctrl.linkedFiles}}
-                            <file-list files="$ctrl.linkedFiles" context-menu="$ctrl.fileContextMenu" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags"></file-list>
+                            <file-list files="$ctrl.currentElement.linkedFiles" context-menu="$ctrl.fileContextMenu" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags"></file-list>
                         </div>
                         <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.newOpen">
                             <uib-accordion-heading>
