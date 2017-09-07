@@ -1,6 +1,6 @@
 <div>
     <ui-view></ui-view>
-    <form id="literature-search-form">
+    <form class=form-inline id="literature-search-form">
         <div class="form-group">
             <div class="input-group">
                 <div class="input-group-addon">
@@ -9,6 +9,12 @@
                 <input type="text" class="form-control" placeholder="{{'literature.search-placeholder'|translate}}" ng-model="searchTerm">
             </div>
         </div>
+        <button type="button" class="btn btn-success" id="literature-add-button" ng-click="openAddLiteratureDialog()" ng-if="$ctrl.user.permissions.add_remove_literature">
+            <i class="material-icons">add</i> {{'literature.add'|translate}}
+        </button>
+        <button type="file" id="literature-import-button" class="btn btn-primary" ngf-select="importBibTexFile($file, $invalidFiles)" accept="application/rdf+xml,text/plain,application/x-turtle" ngf-max-size="10MB" ng-if="$ctrl.user.permissions.add_remove_literature">
+            Import BibTex File
+        </button>
     </form>
     <div id="literature-container">
         <table class="table table-striped table-hover" id="literature-table">
@@ -226,10 +232,4 @@
             </tbody>
         </table>
     </div>
-    <button type="button" class="btn btn-success" id="literature-add-button" ng-click="openAddLiteratureDialog()" ng-if="$ctrl.user.permissions.add_remove_literature">
-        <i class="material-icons">add</i> {{'literature.add'|translate}}
-    </button>
-    <button type="file" id="literature-import-button" class="btn btn-primary" ngf-select="importBibTexFile($file, $invalidFiles)" accept="application/rdf+xml,text/plain,application/x-turtle" ngf-max-size="10MB" ng-if="$ctrl.user.permissions.add_remove_literature">
-        Import BibTex File
-    </button>
 </div>
