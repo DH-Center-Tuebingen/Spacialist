@@ -39,8 +39,8 @@
                     <strong>{{ entry.literature.author }}</strong>
                 </td>
                 <td class="td-50 word-break">
-                    <span class="delete-icon" ng-class="{'hidden-del': !hovered}" ng-click="$ctrl.deleteSourceEntry($index, '#'+mc.modalFields.id)">
-                        &times;
+                    <span class="delete-icon" ng-class="{'hidden-del': !hovered}" ng-click="$ctrl.deleteSourceEntry(entry.id)">
+                        <i class="material-icons"> delete </i>
                     </span>
                     <span class="deletable" ng-bind-html="entry.description | urlify">
                     </span>

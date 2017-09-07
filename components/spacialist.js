@@ -48,7 +48,7 @@ spacialistApp.component('sourcemodal', {
             onClose: '&',
             onDismiss: '&'
         },
-        controller: ['$scope', 'snackbarService', 'httpPutFactory', 'httpPostFactory', '$translate', function($scope, snackbarService, httpPutFactory, httpPostFactory, $translate) {
+        controller: ['$scope', 'snackbarService', 'httpPutFactory', 'httpPostFactory', 'httpDeleteFactory', '$translate', function($scope, snackbarService, httpPutFactory, httpPostFactory, httpDeleteFactory, $translate) {
             var vm = this;
             console.log(vm.attributesources);
             vm.newEntry = {
@@ -80,6 +80,17 @@ spacialistApp.component('sourcemodal', {
                     vm.attributesources.push(response.source);
                     entry.source = undefined;
                     entry.desc = '';
+                });
+            };
+            vm.deleteSourceEntry = function(id) {
+                var entry = vm.attributesources.find(function(s) {
+                    return s.id == id;
+                });
+                httpDeleteFactory('api/source/' + entry.id, function() {
+                    var index = vm.attributesources.indexOf(entry);
+                    if(index > -1) {
+                        vm.attributesources.splice(index, 1);
+                    }
                 });
             };
             vm.setCertainty = function(event, certainty) {
