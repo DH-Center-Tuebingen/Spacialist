@@ -3,6 +3,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
     vm.dimensionUnits = mainService.dimensionUnits;
     vm.currentElement = mainService.currentElement;
     vm.currentGeodata = mapService.currentGeodata;
+    vm.isLinkPossible = mapService.isLinkPossible;
 
     $scope.moduleExists = mainService.moduleExists;
     $scope.filterTree = mainService.filterTree;
@@ -218,7 +219,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
             var updatedValues = {
                 geodata_id: updatedContext.geodata_id
             };
-            mainService.updateContextById(cid, updatedValues);
+            mainService.updateContextById(vm.contexts, cid, updatedValues);
             vm.map.geodata.linkedContexts[gid] = cid;
             vm.map.geodata.linkedLayers[gid].bindTooltip(vm.contexts.data[cid].name);
         });

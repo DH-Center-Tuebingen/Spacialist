@@ -10,6 +10,7 @@ spacialistApp.component('spacialist', {
         layer: '<',
         geodata: '<',
         contextTypes: '<',
+        geometryTypes: '<',
         files: '<',
         availableTags: '<'
     },

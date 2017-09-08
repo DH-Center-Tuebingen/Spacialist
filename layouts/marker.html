@@ -2,13 +2,13 @@
        && $ctrl.currentElement.element.id
        && !$ctrl.currentElement.element.geodata_id"
 >
-    <div ng-if="!isLinkPossible($ctrl.currentGeodata.type, $ctrl.currentElement.geometryType)" translate="map-marker.wrong-type.info" translate-values="{ gtype: $ctrl.currentGeodata.type, ctype: $ctrl.currentElement.geometryType }">
+    <div ng-if="!$ctrl.isLinkPossible($ctrl.currentGeodata.type, $ctrl.currentElement.geometryType, $ctrl.geometryTypes)" translate="map-marker.wrong-type.info" translate-values="{ gtype: $ctrl.currentGeodata.type, ctype: $ctrl.currentElement.geometryType }">
     </div>
     <button
         type="button"
         class="btn btn-sm btn-success"
         ng-click="linkGeodata($ctrl.currentElement.element.id, $ctrl.currentGeodata.id)"
-        ng-if="isLinkPossible($ctrl.currentGeodata.type, $ctrl.currentElement.geometryType)"
+        ng-if="$ctrl.isLinkPossible($ctrl.currentGeodata.type, $ctrl.currentElement.geometryType, $ctrl.geometryTypes)"
     >
         <i class="material-icons">link</i> <span translate="map-marker.actions.context-link" translate-values="{ context: $ctrl.currentElement.element.name }"></span>
     </button>

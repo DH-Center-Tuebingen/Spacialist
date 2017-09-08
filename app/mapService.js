@@ -132,20 +132,16 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         }
     };
 
-    map.isLinkPossible = function(geodataType, layerType) {
+    map.isLinkPossible = function(geodataType, layerType, allowedTypes) {
         var gt = geodataType.toUpperCase();
         var lt = layerType.toUpperCase();
 
-        return (
-            gt.endsWith(map.availableGeometryTypes.point) &&
-            lt.endsWith(map.availableGeometryTypes.point)
-        ) || (
-            gt.endsWith(map.availableGeometryTypes.linestring) &&
-            lt.endsWith(map.availableGeometryTypes.linestring)
-        ) || (
-            gt.endsWith(map.availableGeometryTypes.polygon) &&
-            lt.endsWith(map.availableGeometryTypes.polygon)
-        );
+        for(var i=0; i<allowedTypes.length; i++) {
+            var c = allowedTypes[i].toUpperCase();
+            // gt and lt can be Multi*, thus check if endsWith Point, LineString, Polygon, ...
+            if(gt.endsWith(c) && lt.endsWith(c)) return true;
+        }
+        return false;
     };
 
     map.getCoords = function(layer, type) {

@@ -1141,6 +1141,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     contextTypes: function(dataEditorService) {
                         return dataEditorService.getContextTypes();
                     },
+                    geometryTypes: function(dataEditorService) {
+                        return dataEditorService.getGeometryTypes();
+                    },
                     files: function(fileService, tab) {
                         if(tab != 'files') return undefined;
                         return fileService.getImages();
@@ -1191,12 +1194,18 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return linkedFiles;
                         }
                     },
-                    onEnter: function(contexts, context, sources, linkedFiles, map, geodate, mainService, mapService) {
+                    onEnter: function(contexts, context, sources, linkedFiles, map, layer, geodate, mainService, mapService) {
+                        var ctxLayer = layer.find(function(l) {
+                            return l.context_type_id == context.context_type_id;
+                        });
+                        var geometryType = '';
+                        if(ctxLayer) geometryType = ctxLayer.type;
                         mainService.expandTree(contexts, context.id, true);
                         mainService.unsetCurrentElement();
                         mainService.setCurrentElement({
                             element: context,
                             sources: sources,
+                            geometryType: geometryType,
                             linkedFiles: linkedFiles
                         });
                         // TODO wait for init of geodata (mapService.initGeodata)
@@ -1406,27 +1415,23 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return map.geodata.linkedLayers[gid];
                         }
                     },
-                    onEnter: function(geodate, map, context, sources, contexts, mapService, mainService) {
+                    onEnter: function(geodate, map, context, sources, contexts, mapService, mainService, $state) {
                         if(context) {
-                            mainService.expandTree(contexts, context.id, true);
-                            mainService.setCurrentElement({
-                                element: context,
-                                sources: sources
-                            });
+                            $state.go('root.spacialist.data', {id: context.id}, {inherit: true});
                         }
                         // TODO wait for init of geodata (mapService.initGeodata)
                         if(geodate) {
+                            // geodate is not linked to context, thus unset current element if it is linked
+                            if(mainService.currentElement.element.geodata_id > 0) {
+                                mainService.unsetCurrentElement();
+                                // TODO "clear" sticky root.spacialist.data state
+                            }
                             mapService.setCurrentGeodata(geodate.feature.id, map.geodata);
                             if(!geodate.isPopupOpen()) geodate.openPopup();
                         }
                     },
                     onExit: function(geodate) {
                         if(geodate) geodate.closePopup();
-                    },
-                    views: {
-                        'context-detail': {
-                            component: 'spacialistdata'
-                        }
                     }
                 })
             .state('root.user', {
