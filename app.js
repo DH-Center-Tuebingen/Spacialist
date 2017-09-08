@@ -721,6 +721,32 @@ spacialistApp.filter('urlify', function() {
     };
 });
 
+spacialistApp.filter('bibtexify', function() {
+    return function(props, selectedType) {
+        var type = selectedType.name;
+        var rendered = '<pre><code>';
+        if(type) {
+            rendered += '@' + type + ' {';
+            if(props) {
+                var mand = selectedType.mandatoryFields;
+                var opt = selectedType.optionalFields;
+                var fields = mand.concat(opt);
+                for(var i=0; i<fields.length; i++) {
+                    var k = fields[i];
+                    if(props[k] == null) continue;
+                    rendered += '    <br />';
+                    rendered += '    ' + k + ' = "' + props[k] + '"';
+                }
+
+            }
+            rendered += '<br />';
+            rendered += '}';
+        }
+        rendered += '</code></pre>';
+        return rendered;
+    };
+});
+
 spacialistApp.filter('bytes', function() {
 	return function(bytes, precision) {
         var units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
