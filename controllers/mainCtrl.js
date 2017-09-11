@@ -80,6 +80,10 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
         });
     };
 
+    vm.updateMarkerOptions = function(geodata) {
+        mapService.updateMarker(geodata);
+    };
+
     $scope.treeCallbacks = {
         toggle: function(collapsed, sourceNodeScope) {
             mainService.treeCallbacks.toggle(collapsed, sourceNodeScope, vm.contexts);

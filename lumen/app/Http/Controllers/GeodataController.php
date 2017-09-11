@@ -113,13 +113,11 @@ class GeodataController extends Controller {
         }
 
         $this->validate($request, [
-            'coords' => 'nullable|json',
-            'type' => 'nullable|geom_type',
+            'coords' => 'json',
+            'type' => 'geom_type',
             'color' => 'color'
         ]);
 
-        $coords = json_decode($request->get('coords'));
-        $type = $request->get('type');
 
         try {
             $geodata = Geodata::find($id);
@@ -129,8 +127,15 @@ class GeodataController extends Controller {
             ]);
         }
 
+        if($request->has(['coords', 'type'])){
+            $coords = json_decode($request->get('coords'));
+            $type = $request->get('type');
+            $this->parseTypeCoords($type, $coords, $geodata);
+        }
 
-        $this->parseTypeCoords($type, $coords, $geodata);
+        if($request->has('color')){
+            $geodata->color = $request->get('color');
+        }
 
         $geodata->lasteditor = $user['name'];
         $geodata->save();
