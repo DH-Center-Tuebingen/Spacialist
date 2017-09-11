@@ -1422,7 +1422,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     onEnter: function(geodate, map, context, sources, contexts, mapService, mainService, $state) {
                         if(context) {
-                            return $state.target('root.spacialist.data', {id: context.id}, {inherit: true});
+                            return $state.target('root.spacialist.data', {id: context.id}, {inherit: true, reload: 'root.spacialist.data'});
                         }
                         // TODO wait for init of geodata (mapService.initGeodata)
                         if(geodate) {
