@@ -1211,7 +1211,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         // TODO wait for init of geodata (mapService.initGeodata)
                         if(geodate) {
                             mapService.setCurrentGeodata(geodate.feature.id, map.geodata);
-                            geodate.openPopup();
+                            if(!geodate.isPopupOpen()) geodate.openPopup();
                         }
                     },
                     views: {
@@ -1418,6 +1418,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     onEnter: function(geodate, map, context, sources, contexts, mapService, mainService, $state) {
                         if(context) {
                             $state.go('root.spacialist.data', {id: context.id}, {inherit: true});
+                            return;
                         }
                         // TODO wait for init of geodata (mapService.initGeodata)
                         if(geodate) {
