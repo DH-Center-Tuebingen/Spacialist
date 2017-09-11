@@ -1201,7 +1201,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         var geometryType = '';
                         if(ctxLayer) geometryType = ctxLayer.type;
                         mainService.expandTree(contexts, context.id, true);
-                        mainService.unsetCurrentElement();
                         mainService.setCurrentElement({
                             element: context,
                             sources: sources,
@@ -1213,6 +1212,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             mapService.setCurrentGeodata(geodate.feature.id, map.geodata);
                             if(!geodate.isPopupOpen()) geodate.openPopup();
                         }
+                    },
+                    onExit: function(geodate, mainService) {
+                        if(geodate) {
+                            geodate.closePopup();
+                        }
+                        mainService.unsetCurrentElement();
                     },
                     views: {
                         'context-detail': {
@@ -1417,8 +1422,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     onEnter: function(geodate, map, context, sources, contexts, mapService, mainService, $state) {
                         if(context) {
-                            $state.go('root.spacialist.data', {id: context.id}, {inherit: true});
-                            return;
+                            return $state.target('root.spacialist.data', {id: context.id}, {inherit: true});
                         }
                         // TODO wait for init of geodata (mapService.initGeodata)
                         if(geodate) {
@@ -1431,9 +1435,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             if(!geodate.isPopupOpen()) geodate.openPopup();
                         }
                     },
-                    onExit: function(geodate) {
-                        if(geodate) geodate.closePopup();
-                    }
+                    // onExit: function(geodate) {
+                    //     if(geodate) geodate.closePopup();
+                    // }
                 })
             .state('root.user', {
                 url: '/user',
