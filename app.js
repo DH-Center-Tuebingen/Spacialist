@@ -1193,19 +1193,33 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return tab == 'map';
                         }
                     },
-                    onEnter: function(contexts, context, sources, linkedFiles, map, layer, mainService) {
-                        var ctxLayer = layer.find(function(l) {
-                            return l.context_type_id == context.context_type_id;
-                        });
-                        var geometryType = '';
-                        if(ctxLayer) geometryType = ctxLayer.type;
-                        mainService.expandTree(contexts, context.id, true);
-                        mainService.setCurrentElement({
+                    onEnter: function(contexts, context, sources, linkedFiles, map, layer, geodate, mainService, mapService) {
+                        var updates = {
                             element: context,
                             sources: sources,
-                            geometryType: geometryType,
                             linkedFiles: linkedFiles
-                        });
+                        };
+                        if(layer) {
+                            var ctxLayer = layer.find(function(l) {
+                                return l.context_type_id == context.context_type_id;
+                            });
+                            var geometryType = '';
+                            if(ctxLayer) geometryType = ctxLayer.type;
+                            updates.geometryType = geometryType;
+                        }
+                        mainService.expandTree(contexts, context.id, true);
+                        mainService.setCurrentElement(updates);
+                        // TODO wait for init of geodata (mapService.initGeodata)
+                        if(geodate) {
+                            mapService.setCurrentGeodata(geodate.feature.id, map.geodata);
+                            if(!geodate.isPopupOpen()) geodate.openPopup();
+                        }
+                    },
+                    onExit: function(geodate, mainService) {
+                        if(geodate) {
+                            geodate.closePopup();
+                        }
+                        mainService.unsetCurrentElement();
                     },
                     views: {
                         'context-detail': {
