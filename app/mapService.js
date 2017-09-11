@@ -235,6 +235,14 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         );
     };
 
+    map.openPopupForContext = function(context, geodata) {
+        var geodate = geodata.linkedLayers[context.geodata_id];
+        if(geodate) {
+            map.setCurrentGeodata(geodate.feature.id, geodata);
+            if(!geodate.isPopupOpen()) geodate.openPopup();
+        }
+    };
+
     map.createBoundsFromArray = function(arr) {
         return leafletBoundsHelpers.createBoundsFromArray(arr);
     };

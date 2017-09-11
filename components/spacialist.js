@@ -25,12 +25,13 @@ spacialistApp.component('spacialistdata', {
         fields: '<',
         sources: '<',
         menus: '<',
-        geodate: '<',
         user: '<',
         concepts: '<',
         linkedFiles: '<',
         onStore: '&',
-        onSourceAdd: '&'
+        onSourceAdd: '&',
+        map: '<',
+        mapContentLoaded: '<'
     },
     templateUrl: 'templates/context-data.html',
     controller: 'contextCtrl'
@@ -116,4 +117,19 @@ spacialistApp.component('sourcemodal', {
                 vm.onClose({reason: true});
             };
         }]
+});
+
+spacialistApp.component('geodata', {
+    bindings: {
+        map: '<',
+        context: '<',
+        geodataId: '<'
+    },
+    controller: function() {
+        var vm = this;
+        vm.test = vm.geodataId;
+        console.log(vm.test);
+        console.log(this.geodataId);
+    },
+    template: '<span>{{$ctrl.test}}</span>',
 });
