@@ -1398,19 +1398,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return geoObject.id;
                         }
                     },
-                    views: {
-                        'geodata-dummy': {
-                            component: 'geodata',
-                        }
-                    },
                     onEnter: function(context, $state) {
                         if(context) {
                             return $state.target('root.spacialist.data', {id: context.id}, {inherit: true, reload: 'root.spacialist.data'});
                         }
                     },
-                    // onExit: function(geodate) {
-                    //     if(geodate) geodate.closePopup();
-                    // }
+                    views: {
+                        'geodata-dummy': {
+                            component: 'geodata',
+                        }
+                    }
                 })
             .state('root.user', {
                 url: '/user',
@@ -1702,8 +1699,8 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
 
     $rootScope.$on('$viewContentLoaded', function(event) {
         if(event.targetScope) {
-            if(event.targetScope.$ctrl) {
-                var ctrl =  event.targetScope.$ctrl;
+            if(event.targetScope.$resolve) {
+                var ctrl =  event.targetScope.$resolve;
                 if(ctrl.mapContentLoaded) {
                     var geodata = ctrl.map.geodata;
                     var context = ctrl.context;
@@ -1716,12 +1713,17 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
                     }
                 }
                 if(ctrl.geodataId) {
-                    console.log(ctrl);
-                    $timeout(function() {
+                    if(ctrl.map.geodata.linkedLayers.length == 0) {
+                        $timeout(function() {
+                            mapService.setCurrentGeodata(ctrl.geodataId, ctrl.map.geodata);
+                            ctrl.map.selectedLayer = ctrl.map.geodata.linkedLayers[ctrl.geodataId];
+                            ctrl.map.selectedLayer.openPopup();
+                        }, 1000);
+                    } else {
                         mapService.setCurrentGeodata(ctrl.geodataId, ctrl.map.geodata);
                         ctrl.map.selectedLayer = ctrl.map.geodata.linkedLayers[ctrl.geodataId];
                         ctrl.map.selectedLayer.openPopup();
-                    }, 1000);
+                    }
                 }
             }
         }
