@@ -238,17 +238,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }, '');
     };
 
-    main.addListEntry = function(index, inp, arr) {
-        if(typeof arr[index] == 'undefined') arr[index] = [];
-        arr[index].push({
-            'name': inp[index]
-        });
-    };
-
-    main.removeListItem = function(index, arr, $index) {
-        arr[index].splice($index, 1);
-    };
-
     function parseData(data) {
         var parsedData = {};
         for(var i=0; i<data.length; i++) {

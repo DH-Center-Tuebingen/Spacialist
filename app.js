@@ -540,6 +540,16 @@ spacialistApp.directive('formField', function() {
                     throw new Error('onOrder must be an object with two fields: up and down, which are both functions.');
                 }
             }
+            scope.addListEntry = function(index, inp) {
+                if(typeof scope.attributeOutputs[index] == 'undefined') scope.attributeOutputs[index] = [];
+                scope.attributeOutputs[index].push({
+                    'name': inp[index]
+                });
+                inp[index] = '';
+            };
+            scope.removeListItem = function(index, $index) {
+                scope.attributeOutputs[index].splice($index, 1);
+            };
             scope.concepts = scope.$eval(attrs.concepts);
             scope.onDelete = scope.$eval(attrs.onDelete);
             scope.$watch(function(scope) {

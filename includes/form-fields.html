@@ -67,7 +67,7 @@
                 </span>
                 <input class="form-control" type="text" id="{{ attr.id }}" ng-model="listInput[attr.id]" placeholder="{{'field-types.list.new-placeholder'|translate}}" ng-readonly="readonlyInput"/>
                 <span class="input-group-btn">
-                    <button class="btn btn-success" type="button" ng-click="addListEntry(attr.id, attr.oid, listInput, attributeOutputs)" ng-disabled="!listInput[attr.id] || readonlyInput">
+                    <button class="btn btn-success" type="button" ng-click="addListEntry(attr.id, listInput)" ng-disabled="!listInput[attr.id] || readonlyInput">
                         <i class="material-icons">add</i>
                     </button>
                 </span>
@@ -75,7 +75,7 @@
             <div ng-hide="hiddenLists[attr.id] || !attributeOutputs[attr.id] ||  attributeOutputs[attr.id].length == 0" class="col-md-12 hideable-list">
                 <ol class="list-group inline-list">
                     <li ng-repeat="li in attributeOutputs[attr.id] track by $index" class="list-group-item animated-item" ng-mouseenter="hovered = true;" ng-mouseleave="hovered = false;">
-                        <span class="delete-icon" ng-show="hovered && !editEntry[attr.id][$index]" ng-click="removeListItem(attr.id, attr.oid, attributeOutputs, $index)">
+                        <span class="delete-icon" ng-show="hovered && !editEntry[attr.id][$index]" ng-click="removeListItem(attr.id, $index)">
                             <i class="material-icons">delete</i>
                         </span>
                         <span ng-hide="editEntry[attr.id][$index]" ng-click="editListEntry(attr.id, attr.oid, $index, li)">{{ li.name }}</span>
