@@ -1193,7 +1193,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return tab == 'map';
                         }
                     },
-                    onEnter: function(contexts, context, sources, linkedFiles, map, layer, geodate, mainService, mapService) {
+                    onEnter: function(contexts, context, sources, linkedFiles, map, layer, mainService) {
                         var updates = {
                             element: context,
                             sources: sources,
@@ -1209,17 +1209,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         }
                         mainService.expandTree(contexts, context.id, true);
                         mainService.setCurrentElement(updates);
-                        // TODO wait for init of geodata (mapService.initGeodata)
-                        if(geodate) {
-                            mapService.setCurrentGeodata(geodate.feature.id, map.geodata);
-                            if(!geodate.isPopupOpen()) geodate.openPopup();
-                        }
-                    },
-                    onExit: function(geodate, mainService) {
-                        if(geodate) {
-                            geodate.closePopup();
-                        }
-                        mainService.unsetCurrentElement();
                     },
                     views: {
                         'context-detail': {
