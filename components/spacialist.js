@@ -127,9 +127,6 @@ spacialistApp.component('geodata', {
     },
     controller: function() {
         var vm = this;
-        vm.test = vm.geodataId;
-        console.log(vm.test);
-        console.log(this.geodataId);
     },
-    template: '<span>{{$ctrl.test}}</span>',
+    template: '',
 });
