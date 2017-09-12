@@ -1141,7 +1141,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         return mapService.initMapVariables();
                     },
                     layer: function(map, mapService, tab) {
-                        if(tab != 'map') return {};
+                        if(tab != 'map') return [];
                         return mapService.getLayers();
                     },
                     geodata: function(layer, mapService, tab) {
@@ -1658,13 +1658,17 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
         }
         return true;
     });
-    $transitions.onStart({ exiting: 'root.spacialist.data' }, function(trans) {
+    $transitions.onExit({ exiting: 'root.spacialist.data' }, function(trans) {
         // unset current element, if no element is selected (exiting data state)
         var mapService = trans.injector().get('mapService');
-        var map = trans.injector().get('map');
-        var geodate = map.geodata.linkedLayers[mainService.currentElement.element.geodata_id];
-        if(geodate) {
-            geodate.closePopup();
+        // only close popup if injected map object exists
+        try {
+            var map = trans.injector().get('map');
+            var geodate = map.geodata.linkedLayers[mainService.currentElement.element.geodata_id];
+            if(geodate) {
+                geodate.closePopup();
+            }
+        } catch(err) {
         }
         mainService.unsetCurrentElement();
     });
