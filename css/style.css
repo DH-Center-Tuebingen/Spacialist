@@ -760,3 +760,7 @@ span.btn {
 .leaflet-popup .btn {
     white-space: normal !important;
 }
+
+.leaflet-top, .leaflet-bottom {
+    z-index: 999 !important;
+}
