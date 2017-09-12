@@ -172,10 +172,12 @@ class ImageController extends Controller
 
         $file = $request->file('file');
         $filename = $file->getClientOriginalName();
+        $filehandle = fopen($file->getRealPath(), 'r');
         Storage::put(
             'images/' . $filename,
-            file_get_contents($file->getRealPath())
+            $filehandle
         );
+        fclose($filehandle);
         $url = storage_path() . '/app/images';
         //$file->move($url, $filename);
         $fileUrl = $url . '/' . $filename;
