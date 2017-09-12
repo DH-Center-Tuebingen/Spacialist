@@ -1388,14 +1388,14 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             }
                             return c;
                         },
-                        geodataId: function(geodata, $transition$, $state, $timeout) {
+                        geodataId: function(geodata, $transition$, $state) {
                             var geoObject = geodata.find(function(g) {
                                 return g.id == $transition$.params().id;
                             });
                             if(!geoObject){
                                 return $state.target('root.spacialist');
                             }
-                            return $timeout(function() {return geoObject.id;}, 1000);
+                            return geoObject.id;
                         }
                     },
                     views: {
@@ -1707,9 +1707,13 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
                 if(ctrl.mapContentLoaded) {
                     var geodata = ctrl.map.geodata;
                     var context = ctrl.context;
-                    $timeout(function() {
+                    if(geodata.linkedLayers.length == 0) {
+                        $timeout(function() {
+                            mapService.openPopupForContext(context, geodata);
+                        }, 1000);
+                    } else {
                         mapService.openPopupForContext(context, geodata);
-                    }, 1000);
+                    }
                 }
                 if(ctrl.geodataId) {
                     console.log(ctrl);
@@ -1721,5 +1725,5 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
                 }
             }
         }
-    })
+    });
 });
