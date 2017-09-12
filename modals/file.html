@@ -58,6 +58,11 @@
                 <p>
                     Gemessene Länge: {{ props.length }}m
                 </p>
+                <div class="progress animated-item" ng-if="status.progress < 100">
+                    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ status.progress }}%">
+                        {{ status.progress }}%
+                    </div>
+                </div>
             </div>
             <div ng-switch-default ng-controller="pdfCtrl">
                 <div ng-if="$ctrl.file.filename.endsWith('.md')">
