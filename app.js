@@ -1127,15 +1127,15 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         return mainService.getDropdownOptions();
                     },
                     map: function(mapService, tab) {
-                        if(tab != 'map') return undefined;
+                        if(tab != 'map') return {};
                         return mapService.initMapVariables();
                     },
                     layer: function(map, mapService, tab) {
-                        if(tab != 'map') return undefined;
+                        if(tab != 'map') return {};
                         return mapService.getLayers();
                     },
                     geodata: function(layer, mapService, tab) {
-                        if(tab != 'map') return undefined;
+                        if(tab != 'map') return [];
                         return mapService.getGeodata();
                     },
                     contextTypes: function(dataEditorService) {
@@ -1145,11 +1145,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         return dataEditorService.getGeometryTypes();
                     },
                     files: function(fileService, tab) {
-                        if(tab != 'files') return undefined;
+                        if(tab != 'files') return [];
                         return fileService.getImages();
                     },
                     availableTags: function(fileService, tab) {
-                        if(tab != 'files') return undefined;
+                        if(tab != 'files') return [];
                         return fileService.getAvailableTags();
                     }
                 }
