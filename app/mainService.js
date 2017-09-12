@@ -13,9 +13,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.artifacts = [];
     main.artifactReferences = {};
     main.treeCallbacks = {};
-    main.dimensionUnits = [
-        'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
-    ];
     // main.legendList = {};
 
     main.datepickerOptions = {

@@ -550,6 +550,9 @@ spacialistApp.directive('formField', function() {
             scope.removeListItem = function(index, $index) {
                 scope.attributeOutputs[index].splice($index, 1);
             };
+            scope.dimensionUnits = [
+                'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
+            ];
             scope.concepts = scope.$eval(attrs.concepts);
             scope.onDelete = scope.$eval(attrs.onDelete);
             scope.$watch(function(scope) {
