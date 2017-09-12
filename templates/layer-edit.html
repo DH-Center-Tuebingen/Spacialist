@@ -1,22 +1,22 @@
-<h4 translate="layer-editor.properties-of.heading" translate-values="{ name: editableLayer.name || $ctrl.concepts[editableLayer.thesaurus_url].label }"></h4>
-<form class="form-horizontal" ng-submit="updateLayer(editableLayer)">
-    <div ng-if="editableLayer.context_type_id || editableLayer.type == 'unlinked'">
+<h4 translate="layer-editor.properties-of.heading" translate-values="{ name: $ctrl.editableLayer.name || $ctrl.concepts[$ctrl.editableLayer.thesaurus_url].label }"></h4>
+<form class="form-horizontal" ng-submit="$ctrl.updateLayer($ctrl.editableLayer)">
+    <div ng-if="$ctrl.editableLayer.context_type_id || $ctrl.editableLayer.type == 'unlinked'">
         <div class="form-group col-md-12">
             <label class="control-label col-md-2">
                 Color:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="color" ng-model="editableLayer.color" />
+                <input class="form-control" type="color" ng-model="$ctrl.editableLayer.color" />
             </div>
         </div>
     </div>
-    <div ng-if="!editableLayer.context_type_id && editableLayer.type != 'unlinked'">
+    <div ng-if="!$ctrl.editableLayer.context_type_id && $ctrl.editableLayer.type != 'unlinked'">
         <div class="form-group col-md-12">
             <label class="control-label col-md-2">
                 Name:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="text" ng-model="selectedLayer.layer.name" />
+                <input class="form-control" type="text" ng-model="$ctrl.editableLayer.name" />
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -24,7 +24,7 @@
                 URL:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="text" ng-model="selectedLayer.layer.url" />
+                <input class="form-control" type="text" ng-model="$ctrl.editableLayer.url" />
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -32,7 +32,7 @@
                 Type:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="text" ng-model="selectedLayer.layer.type" />
+                <input class="form-control" type="text" ng-model="$ctrl.editableLayer.type" />
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -40,7 +40,7 @@
                 Subdomains:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="text" ng-model="editableLayer.subdomains" />
+                <input class="form-control" type="text" ng-model="$ctrl.editableLayer.subdomains" />
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -48,7 +48,7 @@
                 Attribution:
             </label>
             <div class="col-md-4">
-                <textarea class="form-control" ng-model="editableLayer.attribution"></textarea>
+                <textarea class="form-control" ng-model="$ctrl.editableLayer.attribution"></textarea>
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -56,7 +56,7 @@
                 Layers:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="text" ng-model="editableLayer.layers" />
+                <input class="form-control" type="text" ng-model="$ctrl.editableLayer.layers" />
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -64,7 +64,7 @@
                 Styles:
             </label>
             <div class="col-md-4">
-                <textarea class="form-control" ng-model="editableLayer.styles"></textarea>
+                <textarea class="form-control" ng-model="$ctrl.editableLayer.styles"></textarea>
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -72,7 +72,7 @@
                 Format:
             </label>
             <div class="col-md-4">
-                <textarea class="form-control" ng-model="editableLayer.format"></textarea>
+                <textarea class="form-control" ng-model="$ctrl.editableLayer.format"></textarea>
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -80,7 +80,7 @@
                 Version:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="text" ng-model="editableLayer.version" />
+                <input class="form-control" type="text" ng-model="$ctrl.editableLayer.version" />
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -88,7 +88,7 @@
                 Overlay:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="checkbox" ng-model="editableLayer.is_overlay" />
+                <input class="form-control" type="checkbox" ng-model="$ctrl.editableLayer.is_overlay" />
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -96,7 +96,7 @@
                 API-Key:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="text" ng-model="editableLayer.api_key" />
+                <input class="form-control" type="text" ng-model="$ctrl.editableLayer.api_key" />
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -104,7 +104,7 @@
                 Layer Type:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="text" ng-model="editableLayer.layer_type" />
+                <input class="form-control" type="text" ng-model="$ctrl.editableLayer.layer_type" />
             </div>
         </div>
         <div class="form-group col-md-12">
@@ -112,7 +112,7 @@
                 Color:
             </label>
             <div class="col-md-4">
-                <input class="form-control" type="color" ng-model="editableLayer.color" />
+                <input class="form-control" type="color" ng-model="$ctrl.editableLayer.color" />
             </div>
         </div>
     </div>
@@ -121,7 +121,7 @@
             Visible:
         </label>
         <div class="col-md-4">
-            <input class="form-control" type="checkbox" ng-model="editableLayer.visible" />
+            <input class="form-control" type="checkbox" ng-model="$ctrl.editableLayer.visible" />
         </div>
     </div>
     <div class="form-group col-md-12">
@@ -129,7 +129,7 @@
             Opacity:
         </label>
         <div class="col-md-4">
-            <input class="form-control" type="number" step="0.01" min="0" max="1" ng-model="editableLayer.opacity" />
+            <input class="form-control" type="number" step="0.01" min="0" max="1" ng-model="$ctrl.editableLayer.opacity" />
         </div>
     </div>
     <button type="submit" class="btn btn-success">
