@@ -422,13 +422,15 @@ class ContextController extends Controller {
             $undefinedError = [
                 'error' => 'Layer Type doesn\'t match Geodata Type'
             ];
-            if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && !Helpers::endsWith($layer->type, 'Point')) {
-                return response()->json($undefinedError);
-            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && !Helpers::endsWith($layer->type, 'Linestring')) {
-                return response()->json($undefinedError);
-            } else if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && !Helpers::endsWith($layer->type, 'Polygon')) {
-                return response()->json($undefinedError);
+            $matching = false;
+            if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && Helpers::endsWith($layer->type, 'Polygon')) {
+                $matching = true;
+            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && Helpers::endsWith($layer->type, 'Linestring')) {
+                $matching = true;
+            } else if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && Helpers::endsWith($layer->type, 'Point')) {
+                $matching = true;
             }
+            if(!$matching) return response()->json($undefinedError);
             $context->geodata_id = $gid;
         }
         $context->lasteditor = $user['name'];
