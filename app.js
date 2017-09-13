@@ -626,14 +626,15 @@ spacialistApp.directive('resizeable', function($compile) {
         }
     };
 
-    var resizeableContainers = document.querySelectorAll('[resizeable]');
-    var idxCtr = 0;
-
     return {
         restrict: 'A',
         scope: false,
         link: function(scope, element, attrs) {
-            // scope.idxCtr = idxCtr;
+            var resizeableContainers = document.querySelectorAll('[resizeable]');
+            var idx;
+            resizeableContainers.forEach(function(e, i) {
+                if(e == element[0]) idx = i;
+            });
             scope.clickLeft = function(i) {
                 if(!i) return;
                 var c = resizeableContainers[i-1];
@@ -647,17 +648,16 @@ spacialistApp.directive('resizeable', function($compile) {
                 extendContainer(c, cl);
             };
             scope.resizeToggle = scope.$eval(attrs.resizeable);
-            if(idxCtr < resizeableContainers.length - 1) {
-                var right = angular.element('<div class="resizeable-button-right" ng-if="resizeToggle" ng-click="clickRight('+idxCtr+')"><i class="material-icons">chevron_left</i></div>');
+            if(idx < resizeableContainers.length - 1) {
+                var right = angular.element('<div class="resizeable-button-right" ng-if="resizeToggle" ng-click="clickRight('+idx+')"><i class="material-icons">chevron_left</i></div>');
                 element.prepend(right);
                 $compile(right)(scope);
             }
-            if(idxCtr !== 0) {
-                var left = angular.element('<div class="resizeable-button-left" ng-if="resizeToggle" ng-click="clickLeft('+idxCtr+')"><i class="material-icons">chevron_right</i></div>');
+            if(idx !== 0) {
+                var left = angular.element('<div class="resizeable-button-left" ng-if="resizeToggle" ng-click="clickLeft('+idx+')"><i class="material-icons">chevron_right</i></div>');
                 element.prepend(left);
                 $compile(left)(scope);
             }
-            idxCtr++;
             scope.$watch(function(scope) {
                 return scope.$eval(attrs.resizeable);
             }, function(newVal, oldVal) {
