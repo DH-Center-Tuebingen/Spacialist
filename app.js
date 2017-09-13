@@ -1391,6 +1391,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     url: '/geodata/{id:[0-9]+}',
                     resolve: {
                         context: function(contexts, geodataId, map) {
+                            if(geodataId == -1) return;
                             var cid = map.geodata.linkedContexts[geodataId];
                             var c;
                             if(cid) {
@@ -1406,7 +1407,8 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return g.id == $transition$.params().id;
                             });
                             if(!geoObject){
-                                return $state.target('root.spacialist');
+                                // $state.go('root.spacialist', {}, {reload: true});
+                                return -1;
                             }
                             return geoObject.id;
                         }
