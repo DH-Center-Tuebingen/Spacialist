@@ -118,7 +118,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         httpDeleteFactory('api/image/link/' + imgId + '/' + contextId, function(response) {
             var content = $translate.instant('snackbar.image-unlinked.success');
             snackbarService.addAutocloseSnack(content, 'success');
-            images.getImagesForContext(contextId);
+            $state.reload('root.spacialist');
         });
     };
 
