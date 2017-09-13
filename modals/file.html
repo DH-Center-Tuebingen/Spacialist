@@ -14,27 +14,12 @@
                     </a>
                 </div>
             </div>
-            <div class="hg-100" ng-switch-when="pdf" ng-controller="pdfCtrl">
-                <div class="pdf-header">
-                    <a class="btn btn-default" ng-click="prev()">
-                        <i class="material-icons" aria-hidden="true">navigate_before</i>
-                    </a>
-                    <a class="btn btn-default" ng-click="next()">
-                        <i class="material-icons" aria-hidden="true">navigate_next</i>
-                    </a>
-                    <a class="btn btn-default" ng-click="rotate()">
-                        <i class="material-icons" aria-hidden="true">rotate_right</i>
-                    </a>
-                    <a class="btn btn-default" ng-click="zoomOut()">
-                        <i class="material-icons" aria-hidden="true">zoom_out</i>
-                    </a>
-                    <a class="btn btn-default" ng-click="zoomIn()">
-                        <i class="material-icons" aria-hidden="true">zoom_in</i>
-                    </a>
-                    <span class="page-counter">{{getCurrentPage()}}/{{getPageCount()}}</span>
-                </div>
-                <div class="scrollable-modal">
-                    <pdf-viewer url="$ctrl.file.url" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
+            <div class="hg-100" ng-switch-when="pdf" ng-controller="pdfCtrl" ng-init="pdfUrl=$ctrl.file.url">
+                <ng-pdf template-url="layouts/pdf.html"></ng-pdf>
+                <div class="progress animated-item" ng-if="status.progress < 100">
+                    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ status.progress }}%">
+                        {{ status.progress }}%
+                    </div>
                 </div>
             </div>
             <div ng-switch-when="audio">

@@ -464,29 +464,8 @@ spacialistApp.directive('fileList', function(fileService) {
             availableTags: '=',
             searchTerms: '='
         },
-        controller: 'fileCtrl'
-    };
-});
-
-spacialistApp.directive('oldImageList', function(fileService) {
-    return {
-        restrict: 'E',
-        templateUrl: 'includes/image-list.html',
-        scope: {
-            onScrollLoad: '&',
-            scrollContainer: '=',
-            imageData: '=',
-            imageType: '=',
-            showTags: '=',
-            searchTerms: '='
-        },
         controller: 'fileCtrl',
-        link: function(scope, elements, attrs) {
-            scope.availableTags = fileService.availableTags;
-            scope.$root.$on('image:delete:linked', function(event, args) {
-                scope.tmpData.linked = [];
-            });
-        }
+        controllerAs: '$ctrl'
     };
 });
 

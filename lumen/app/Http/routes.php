@@ -68,7 +68,6 @@ $app->group([
     ], function($app) {
         $app->get('', 'ImageController@getImages');
         $app->get('{id:[0-9]+}', 'ImageController@getImage');
-        $app->get('{id:[0-9]+}/object', 'ImageController@getImageObject');
         $app->get('tag', 'ImageController@getAvailableTags');
         $app->get('by_context/{id:[0-9]+}', 'ImageController@getByContext');
 

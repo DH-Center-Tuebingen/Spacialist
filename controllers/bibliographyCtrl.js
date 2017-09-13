@@ -1,18 +1,19 @@
-spacialistApp.controller('bibliographyCtrl', function($scope, literatureService) {
-    $scope.sortType = 'author';
-    $scope.sortReverse = false;
-    $scope.searchTerm = '';
-    var localBibliography = this.bibliography;
+spacialistApp.controller('bibliographyCtrl', function(literatureService) {
+    var vm = this;
 
-    $scope.openAddLiteratureDialog = function() {
-        literatureService.openAddLiteratureDialog(localBibliography);
+    vm.sortType = 'author';
+    vm.sortReverse = false;
+    vm.searchTerm = '';
+
+    vm.openAddLiteratureDialog = function() {
+        literatureService.openAddLiteratureDialog(vm.bibliography);
     };
 
-    $scope.importBibTexFile = function(file, invalidFiles) {
-        literatureService.importBibTexFile(file, invalidFiles, localBibliography);
+    vm.importBibTexFile = function(file, invalidFiles) {
+        literatureService.importBibTexFile(file, invalidFiles, vm.bibliography);
     };
 
-    $scope.deleteLiteratureEntry = function(entry) {
-        literatureService.deleteLiteratureEntry(entry, localBibliography);
-    }
+    vm.deleteLiteratureEntry = function(entry) {
+        literatureService.deleteLiteratureEntry(entry, vm.bibliography);
+    };
 });

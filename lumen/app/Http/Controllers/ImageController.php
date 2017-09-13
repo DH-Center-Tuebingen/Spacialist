@@ -109,12 +109,6 @@ class ImageController extends Controller
         return response()->json($this->getImageById($id));
     }
 
-    public function getImageObject($id) {
-        $img = $this->getImageById($id);
-        $content = Storage::get($img->url);
-        return 'data:' . $img->mime_type . ';base64,' . base64_encode($content);
-    }
-
     public function getAvailableTags() {
         $tags = DB::select("
             WITH RECURSIVE

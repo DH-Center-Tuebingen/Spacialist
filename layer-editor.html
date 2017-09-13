@@ -9,7 +9,7 @@
                     <a ui-sref="root.editor.layer.edit({id: l.id})" style="float: left;"><i class="material-icons">map</i> {{ l.name }}</a>
                     <div ng-if="hovered">
                         <div style="float: left; padding-left: 5px;">
-                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="onDelete(l)">
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.onDelete(l)">
                                 <i class="material-icons md-18 fa-red">delete</i>
                             </a>
                         </div>
@@ -24,7 +24,7 @@
                     </div>
                 </li>
             </ul>
-            <button type="button" class="btn btn-success" ng-click="addNewBaselayer()">
+            <button type="button" class="btn btn-success" ng-click="$ctrl.addNewBaselayer()">
                 <i class="material-icons">add</i> {{ 'layer-editor.add-new.baselayer' | translate }}
             </button>
             <h5 translate="layer-editor.overlays.heading"></h5>
@@ -35,7 +35,7 @@
                     </a>
                     <div ng-if="hovered">
                         <div ng-if="!l.layerOptions.context_type_id && l.layerOptions.layer_id != 'unlinked'" style="float: left; padding-left: 5px;">
-                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="onDelete(l)">
+                            <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.onDelete(l)">
                                 <i class="material-icons md-18 fa-red">delete</i>
                             </a>
                         </div>
@@ -50,7 +50,7 @@
                     </div>
                 </li>
             </ul>
-            <button type="button" class="btn btn-success" ng-click="addNewOverlay()">
+            <button type="button" class="btn btn-success" ng-click="$ctrl.addNewOverlay()">
                 <i class="material-icons">add</i> {{ 'layer-editor.add-new.overlay' | translate }}
             </button>
         </div>

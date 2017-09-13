@@ -30,7 +30,7 @@
     "angular-highlightjs": "^0.7.1",
     "angular-marked": "^1.2.2",
     "angular-messages": "~1.5.8",
-    "angular-pdf-viewer": "git+https://github.com/winkerVSbecks/angular-pdf-viewer.git",
+    "angular-pdf": "^2.0.0",
     "angular-sanitize": "~1.5.8",
     "angular-simple-logger": "^0.1.7",
     "angular-translate": "^2.15.2",

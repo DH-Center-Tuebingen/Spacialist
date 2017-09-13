@@ -8,7 +8,7 @@
         <div class="col-sm-6 col-md-4 unlinked-item" context-menu="contextMenu" ng-repeat="f in files | imageFilter:searchTerms">
             <div class="thumbnail">
                 <a ui-sref="root.spacialist.file({id: f.id})">
-                    <div class="thumb-wrapper centered-full" ng-switch="getMimeType(f)">
+                    <div class="thumb-wrapper centered-full" ng-switch="$ctrl.getMimeType(f)">
                         <div ng-switch-when="image">
                             <img class="thumb" ng-src="{{f.thumb_url}}" />
                         </div>
@@ -53,7 +53,7 @@
                      </div>
                 </a>
                 <div ng-show="showTags">
-                   <ui-select multiple tagging tagging-label="false" ng-model="f.tags" on-select="addTag(f, $item)" on-remove="removeTag(f, $item)" theme="bootstrap" sortable="true" close-on-select="false">
+                   <ui-select multiple tagging tagging-label="false" ng-model="f.tags" on-select="$ctrl.addTag(f, $item)" on-remove="$ctrl.removeTag(f, $item)" theme="bootstrap" sortable="true" close-on-select="false">
                        <ui-select-match placeholder="{{ 'tags.add' | translate }}">
                            {{ $item.label }}
                        </ui-select-match>

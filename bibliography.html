@@ -6,13 +6,13 @@
                 <div class="input-group-addon">
                     <i class="material-icons">search</i>
                 </div>
-                <input type="text" class="form-control" placeholder="{{'literature.search-placeholder'|translate}}" ng-model="searchTerm">
+                <input type="text" class="form-control" placeholder="{{'literature.search-placeholder'|translate}}" ng-model="$ctrl.searchTerm">
             </div>
         </div>
-        <button type="button" class="btn btn-success" id="literature-add-button" ng-click="openAddLiteratureDialog()" ng-if="$ctrl.user.permissions.add_remove_literature">
+        <button type="button" class="btn btn-success" id="literature-add-button" ng-click="$ctrl.openAddLiteratureDialog()" ng-if="$ctrl.user.permissions.add_remove_literature">
             <i class="material-icons">add</i> {{'literature.add'|translate}}
         </button>
-        <button type="file" id="literature-import-button" class="btn btn-primary" ngf-select="importBibTexFile($file, $invalidFiles)" accept="application/rdf+xml,text/plain,application/x-turtle" ngf-max-size="10MB" ng-if="$ctrl.user.permissions.add_remove_literature">
+        <button type="file" id="literature-import-button" class="btn btn-primary" ngf-select="$ctrl.importBibTexFile($file, $invalidFiles)" accept="application/rdf+xml,text/plain,application/x-turtle" ngf-max-size="10MB" ng-if="$ctrl.user.permissions.add_remove_literature">
             Import BibTex File
         </button>
     </form>
@@ -21,45 +21,45 @@
             <thead>
                 <tr>
                     <td>
-                        <a href="" ng-click="sortType = 'type'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'type'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.type'|translate}}
-                            <i ng-show="sortType == 'type' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'type' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'type' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'type' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
-                        <a href="" ng-click="sortType = 'author'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'author'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.author'|translate}}
-                            <i ng-show="sortType == 'author' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'author' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'author' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'author' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
-                        <a href="" ng-click="sortType = 'editor'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'editor'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.editor'|translate}}
-                            <i ng-show="sortType == 'editor' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'editor' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'editor' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'editor' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
-                        <a href="" ng-click="sortType = 'title'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'title'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.title'|translate}}
-                            <i ng-show="sortType == 'title' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'title' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'title' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'title' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
-                        <a href="" ng-click="sortType = 'journal'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'journal'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.journal'|translate}}
-                            <i ng-show="sortType == 'journal' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'journal' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'journal' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'journal' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
-                        <a href="" ng-click="sortType = 'year'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'year'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.year'|translate}}
-                            <i ng-show="sortType == 'year' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'year' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'year' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'year' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
@@ -84,24 +84,24 @@
                     	{{'literature.bibtex.series'|translate}}
                     </td>
                     <td>
-                        <a href="" ng-click="sortType = 'booktitle'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'booktitle'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.booktitle'|translate}}
-                            <i ng-show="sortType == 'booktitle' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'booktitle' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'booktitle' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'booktitle' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
-                        <a href="" ng-click="sortType = 'publisher'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'publisher'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.publisher'|translate}}
-                            <i ng-show="sortType == 'publisher' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'publisher' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'publisher' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'publisher' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
-                        <a href="" ng-click="sortType = 'address'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'address'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.address'|translate}}
-                            <i ng-show="sortType == 'address' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'address' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'address' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'address' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
@@ -114,17 +114,17 @@
                     	{{'literature.updated-at'|translate}}
                     </td>
                     <td>
-                        <a href="" ng-click="sortType = 'misc'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'misc'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.misc'|translate}}
-                            <i ng-show="sortType == 'misc' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'misc' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'misc' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'misc' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
-                        <a href="" ng-click="sortType = 'howpublished'; sortReverse = !sortReverse">
+                        <a href="" ng-click="$ctrl.sortType = 'howpublished'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.howpublished'|translate}}
-                            <i ng-show="sortType == 'howpublished' && !sortReverse" class="material-icons">arrow_drop_down</i>
-                            <i ng-show="sortType == 'howpublished' && sortReverse" class="material-icons">arrow_drop_up</i>
+                            <i ng-show="$ctrl.sortType == 'howpublished' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'howpublished' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
                         </a>
                     </td>
                     <td>
@@ -145,7 +145,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="entry in $ctrl.bibliography | orderBy:['!' + sortType, sortType]:sortReverse | filter:searchTerm">
+                <tr ng-repeat="entry in $ctrl.bibliography | orderBy:['!' + $ctrl.sortType, $ctrl.sortType]:$ctrl.sortReverse | filter:$ctrl.searchTerm">
                     <td>
                         {{ entry.type }}
                     </td>
@@ -219,7 +219,7 @@
                     	{{ entry.school }}
                     </td>
                     <td ng-if="$ctrl.user.permissions.add_remove_literature">
-                        <button type="button" class="btn btn-danger" ng-click="deleteLiteratureEntry(entry)">
+                        <button type="button" class="btn btn-danger" ng-click="$ctrl.deleteLiteratureEntry(entry)">
                             <i class="material-icons">delete</i>
                         </button>
                     </td>

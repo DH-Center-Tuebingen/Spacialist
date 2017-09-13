@@ -1,15 +1,15 @@
-spacialistApp.controller('layerEditorCtrl', ['$scope', 'layerEditorService', function($scope, layerEditorService) {
-    var localLayers = this.avLayers;
+spacialistApp.controller('layerEditorCtrl', ['layerEditorService', function(layerEditorService) {
+    var vm = this;
 
-    $scope.addNewBaselayer = function() {
-        layerEditorService.addNewBaselayer(localLayers);
+    vm.addNewBaselayer = function() {
+        layerEditorService.addNewBaselayer(vm.avLayers);
     };
 
-    $scope.addNewOverlay = function() {
-        layerEditorService.addNewOverlay(localLayers);
+    vm.addNewOverlay = function() {
+        layerEditorService.addNewOverlay(vm.avLayers);
     };
 
-    $scope.onDelete = function(l) {
-        layerEditorService.onDelete(l, localLayers);
+    vm.onDelete = function(l) {
+        layerEditorService.onDelete(l, vm.avLayers);
     };
 }]);

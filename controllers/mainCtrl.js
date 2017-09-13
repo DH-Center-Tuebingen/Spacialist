@@ -18,10 +18,6 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
         vm.currentElement.form.$setPristine();
     };
 
-    vm.onSourceAdd = function(entry) {
-        console.log(entry);
-    };
-
     if(vm.tab == 'map') {
         mapService.setupLayers(vm.layer, vm.map, vm.contexts, vm.concepts);
         mapService.initMapObject().then(function(obj) {
@@ -144,7 +140,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
         ]
     ];
 
-    $scope.hasSources = function(element) {
+    vm.hasSources = function(element) {
         return Object.keys(element.sources).length > 0;
     };
 

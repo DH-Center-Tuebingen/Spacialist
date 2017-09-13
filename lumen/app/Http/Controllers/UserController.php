@@ -361,34 +361,4 @@ class UserController extends Controller
             'token' => compact('token')
         ];
     }
-
-    private function validateToken() {
-        try {
-            if(!$user = JWTAuth::parseToken()->authenticate()) {
-                return [
-                    'error' => 'user_not_found',
-                    'status' => 404
-                ];
-            }
-        } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-            return [
-                'error' => 'token_expired',
-                'status' => 500
-            ];
-        } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-            return [
-                'error' => 'token_invalid',
-                'status' => 500
-            ];
-        } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
-            return [
-                'error' => 'token_absent',
-                'status' => 500
-            ];
-        }
-        return [
-            'user' => $user,
-            'status' => 200
-        ];
-    }
 }
