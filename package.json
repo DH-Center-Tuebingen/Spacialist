@@ -53,6 +53,7 @@
     "ng-file-upload": "^12.2.13",
     "ng-infinite-scroll": "^1.3.0",
     "pdfjs-dist": "^1.9.528",
+    "popper.js": "^1.12.5",
     "satellizer": "^0.15.5",
     "snackbarjs": "^1.1.0",
     "three": "^0.87.1",
