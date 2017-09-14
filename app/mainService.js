@@ -512,9 +512,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
 
-    function loadLinkedImages(id) {
+    function loadLinkedFiles(id) {
         if(!moduleHelper.controllerExists('fileCtrl')) return;
-        fileService.getImagesForContext(id);
+        fileService.getFilesForContext(id);
     }
 
     main.isEmpty = function(obj) {

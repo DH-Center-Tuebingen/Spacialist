@@ -152,12 +152,12 @@ JWT_BLACKLIST_GRACE_PERIOD=* #a time span in seconds which allows you to use the
 ```
 
 #### Protected Files
-Your uploaded files are stored in a public folder. To increase security it is recommended to define a random path in your `.env` file. The matching key is `SP_IMAGE_PATH`. You also have to create the path on your system (Do not actually create the last part of the path, you have to create it as a softlink later).
+Your uploaded files are stored in a public folder. To increase security it is recommended to define a random path in your `.env` file. The matching key is `SP_FILE_PATH`. You also have to create the path on your system (Do not actually create the last part of the path, you have to create it as a softlink later).
 
 **Example:**
 ```bash
 # added to .env file
-SP_IMAGE_PATH=mysecret/anothersecret/privateFolderXYZ
+SP_FILE_PATH=mysecret/anothersecret/privateFolderXYZ
 ```
 ```bash
 cd /var/www/html/Spacialist/lumen/public

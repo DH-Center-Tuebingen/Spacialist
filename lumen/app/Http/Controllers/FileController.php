@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 use App\User;
-use App\ContextPhoto;
-use App\Photo;
-use App\PhotoTag;
+use App\ContextFile;
+use App\File;
+use App\FileTag;
 use App\ThConcept;
 use \DB;
 use Illuminate\Http\Request;
@@ -31,33 +31,33 @@ class FileController extends Controller
 
     private function getFileById($id) {
         $user = \Auth::user();
-        $img = \DB::table('photos as ph')
+        $file = \DB::table('photos as ph')
                 ->select('id', 'modified', 'created', 'name as filename', 'thumb as thumbname', 'cameraname', 'orientation', 'description', 'copyright', 'photographer_id', 'mime_type')
                 ->where('id', $id)
                 ->first();
-        if($img == null) return null;
-        $img->url = Storage::disk('public')->url(env('SP_IMAGE_PATH') .'/'. $img->filename);
-        if(substr($img->mime_type, 0, 6) === 'image/');
-        $img->thumb_url = Storage::disk('public')->url(env('SP_IMAGE_PATH') .'/'. $img->thumbname);
-        $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
+        if($file == null) return null;
+        $file->url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->filename);
+        if(substr($file->mime_type, 0, 6) === 'image/');
+        $file->thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->thumbname);
+        $file->linked_files = ContextFile::where('photo_id', '=', $file->id)->get();
 
         if($user->can('edit_photo_props')) {
-            $img->tags = DB::table('photo_tags as p')
+            $file->tags = DB::table('photo_tags as p')
             ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
             ->select('c.id')
-            ->where('p.photo_id', '=', $img->id)
+            ->where('p.photo_id', '=', $file->id)
             ->get();
         }
 
         // try to get file to check if it exists
         try {
-            Storage::get($img->url);
-            $img->filesize = Storage::size($img->url);
-            $img->modified = Storage::lastModified($img->url);
+            Storage::get($file->url);
+            $file->filesize = Storage::size($file->url);
+            $file->modified = Storage::lastModified($file->url);
         } catch(FileNotFoundException $e) {
         }
-        $img->created = strtotime($img->created);
-        return $img;
+        $file->created = strtotime($file->created);
+        return $file;
     }
 
     // GET
@@ -69,34 +69,34 @@ class FileController extends Controller
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $images = DB::table('photos as ph')
+        $files = DB::table('photos as ph')
                     ->select("ph.id as id", "ph.modified", "ph.created", "ph.name as filename", "ph.thumb as thumbname", "ph.cameraname", "ph.orientation", "ph.description", "ph.copyright", "ph.photographer_id", "ph.mime_type")
                     ->orderBy('id', 'asc')
                     ->get();
-        foreach($images as &$img) {
-            $img->url = Storage::disk('public')->url(env('SP_IMAGE_PATH') .'/'. $img->filename);
-            if(substr($img->mime_type, 0, 6) === 'image/');
-            $img->thumb_url = Storage::disk('public')->url(env('SP_IMAGE_PATH') .'/'. $img->thumbname);
-            $img->linked_images = ContextPhoto::where('photo_id', '=', $img->id)->get();
+        foreach($files as &$file) {
+            $file->url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->filename);
+            if(substr($file->mime_type, 0, 6) === 'image/');
+            $file->thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->thumbname);
+            $file->linked_files = ContextFile::where('photo_id', '=', $file->id)->get();
 
             if($user->can('edit_photo_props')) {
-                $img->tags = DB::table('photo_tags as p')
+                $file->tags = DB::table('photo_tags as p')
                 ->join('th_concept as c', 'c.concept_url', '=', 'p.concept_url')
                 ->select('c.id')
-                ->where('p.photo_id', '=', $img->id)
+                ->where('p.photo_id', '=', $file->id)
                 ->get();
             }
 
             // try to get file to check if it exists
             try {
-                Storage::get($img->url);
-                $img->filesize = Storage::size($img->url);
-                $img->modified = Storage::lastModified($img->url);
+                Storage::get($file->url);
+                $file->filesize = Storage::size($file->url);
+                $file->modified = Storage::lastModified($file->url);
             } catch(FileNotFoundException $e) {
             }
-            $img->created = strtotime($img->created);
+            $file->created = strtotime($file->created);
         }
-        return response()->json($images);
+        return response()->json($files);
     }
 
     public function getFile($id) {
@@ -141,12 +141,12 @@ class FileController extends Controller
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $images = DB::table('context_photos as cp')
+        $files = DB::table('context_photos as cp')
             ->join('photos as p', 'p.id', '=', 'cp.photo_id')
             ->where('cp.context_id', '=', $id)
             ->get();
         return response()->json([
-            'images' => $images
+            'files' => $files
         ]);
     }
 
@@ -175,9 +175,9 @@ class FileController extends Controller
         $url = storage_path() . '/app/images';
         //$file->move($url, $filename);
         $fileUrl = $url . '/' . $filename;
-        $imgMime = 'image/';
+        $fileMime = 'image/';
         $mimeType = $file->getMimeType();
-        $isImage = substr($mimeType, 0, strlen($imgMime)) === $imgMime;
+        $isImage = substr($mimeType, 0, strlen($fileMime)) === $fileMime;
         // check if current file is image
         if($isImage) {
             $THUMB_SUFFIX = "_thumb";
@@ -273,29 +273,29 @@ class FileController extends Controller
             }
         }
 
-        $photo = new Photo();
-        $photo->modified = $mod;
-        $photo->lasteditor = $user['name'];
-        $photo->mime_type = $mimeType;
-        $photo->name = $filename;
+        $file = new File();
+        $file->modified = $mod;
+        $file->lasteditor = $user['name'];
+        $file->mime_type = $mimeType;
+        $file->name = $filename;
 
         if($isImage) {
-            $photo->thumb = $thumbName;
-            $photo->photographer_id = 1;
+            $file->thumb = $thumbName;
+            $file->photographer_id = 1;
         }
         if($exifFound) {
-            $photo->created = $dateOrig;
-            $photo->cameraname = $model;
-            $photo->orientation = $orientation;
-            $photo->copyright = $copyright;
-            $photo->description = $description;
+            $file->created = $dateOrig;
+            $file->cameraname = $model;
+            $file->orientation = $orientation;
+            $file->copyright = $copyright;
+            $file->description = $description;
         } else {
-            $photo->created = $mod;
+            $file->created = $mod;
         }
 
-        $photo->save();
+        $file->save();
 
-        return response()->json($this->getFileById($photo->id));
+        return response()->json($this->getFileById($file->id));
     }
 
     // PATCH
@@ -308,16 +308,16 @@ class FileController extends Controller
 
         $prop = $request->get('property');
         $val = $request->get('value');
-        $photo = Photo::find($id);
-        $photo->{$prop} = $val;
-        $photo->save();
+        $file = File::find($id);
+        $file->{$prop} = $val;
+        $file->save();
     }
 
     // PUT
 
     public function link(Request $request) {
         $this->validate($request, [
-            'imgId' => 'required|integer',
+            'file_id' => 'required|integer',
             'ctxId' => 'required|integer'
         ]);
 
@@ -328,11 +328,11 @@ class FileController extends Controller
             ], 403);
         }
 
-        $imgId = $request->get('imgId');
+        $fileId = $request->get('file_id');
         $ctxId = $request->get('ctxId');
 
-        $link = ContextPhoto::firstOrNew([
-                'photo_id' => $imgId,
+        $link = ContextFile::firstOrNew([
+                'photo_id' => $fileId,
                 'context_id' => $ctxId,
         ]);
         $link->lasteditor = $user['name'];
@@ -342,7 +342,7 @@ class FileController extends Controller
 
     public function addTag(Request $request) {
         $this->validate($request, [
-            'photo_id' => 'required|integer',
+            'file_id' => 'required|integer',
             'tag_id' => 'required|integer'
         ]);
 
@@ -352,13 +352,13 @@ class FileController extends Controller
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $photoId = $request->get('photo_id');
+        $fileId = $request->get('file_id');
         $tagId = $request->get('tag_id');
 
         $url = ThConcept::find($tagId)->concept_url;
 
-        PhotoTag::firstOrCreate([
-            'photo_id' => $photoId,
+        FileTag::firstOrCreate([
+            'photo_id' => $fileId,
             'concept_url' => $url
         ]);
     }
@@ -372,14 +372,14 @@ class FileController extends Controller
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $photo = Photo::find($id);
+        $file = File::find($id);
         $pathPrefix = 'images/';
-        Storage::delete($pathPrefix . $photo->name);
-        if($photo->thumb != null) Storage::delete($pathPrefix . $photo->thumb);
-        $photo->delete();
+        Storage::delete($pathPrefix . $file->name);
+        if($file->thumb != null) Storage::delete($pathPrefix . $file->thumb);
+        $file->delete();
     }
 
-    public function unlink($pid, $cid) {
+    public function unlink($fid, $cid) {
         $user = \Auth::user();
         if(!$user->can('link_photos')) {
             return response([
@@ -388,32 +388,25 @@ class FileController extends Controller
         }
         DB::table('context_photos')
             ->where([
-                ['photo_id', '=', $pid],
+                ['photo_id', '=', $fid],
                 ['context_id', '=', $cid]
             ])
             ->delete();
         return response()->json();
     }
 
-    public function removeTag(Request $request) {
-        $this->validate($request, [
-            'photo_id' => 'required|integer',
-            'tag_id' => 'required|integer'
-        ]);
-
+    public function removeTag($fid, $tid) {
         $user = \Auth::user();
         if(!$user->can('edit_photo_props')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $photoId = $request->get('photo_id');
-        $tagId = $request->get('tag_id');
 
-        $url = ThConcept::find($tagId)->concept_url;
+        $url = ThConcept::find($tid)->concept_url;
 
-        $tag = PhotoTag::where([
-            [ 'photo_id', '=', $photoId ],
+        $tag = FileTag::where([
+            [ 'photo_id', '=', $fid ],
             [ 'concept_url', '=', $url ]
         ])->delete();
     }

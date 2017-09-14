@@ -252,8 +252,8 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
     var linkFileContextMenu = [function($itemScope) {
         var f = $itemScope.f;
         var content;
-        for(var i=0; i<f.linked_images.length; i++) {
-            if(f.linked_images[i].context_id == mainService.currentElement.element.id) {
+        for(var i=0; i<f.linked_files.length; i++) {
+            if(f.linked_files[i].context_id == mainService.currentElement.element.id) {
                 content = $translate.instant('file.unlink-from', { name: mainService.currentElement.element.name });
                 break;
             }
@@ -266,13 +266,13 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
         var f = $itemScope.f;
         var fileId = f.id;
         var contextId = mainService.currentElement.element.id;
-        for(var i=0; i<f.linked_images.length; i++) {
-           if(f.linked_images[i].context_id == mainService.currentElement.element.id) {
-               fileService.unlinkImage(fileId, contextId);
+        for(var i=0; i<f.linked_files.length; i++) {
+           if(f.linked_files[i].context_id == mainService.currentElement.element.id) {
+               fileService.unlinkFile(fileId, contextId);
                return;
            }
         }
-        fileService.linkImage(fileId, contextId);
+        fileService.linkFile(fileId, contextId);
     }, function() {
         return mainService.currentElement.element.id > 0;
     }];
@@ -290,13 +290,13 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
     ];
 
     /**
-     * enables drag & drop support for image upload, calls `$scope.uploadImages` if files are dropped on the `dropFiles` model
+     * enables drag & drop support for file upload, calls `$scope.uploadFiles` if files are dropped on the `dropFiles` model
      */
     $scope.$watch('dropFiles', function() {
-        vm.uploadImages($scope.dropFiles);
+        vm.uploadFiles($scope.dropFiles);
     });
 
-    vm.uploadImages = function($files, $invalidFiles) {
-        vm.uploadStatus = fileService.uploadImages($files, $invalidFiles, vm.files);
+    vm.uploadFiles = function($files, $invalidFiles) {
+        vm.uploadStatus = fileService.uploadFiles($files, $invalidFiles, vm.files);
     };
 }]);

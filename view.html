@@ -119,7 +119,7 @@
                                 <div class="alert alert-info drop-box" ngf-drop ngf-select ng-model="dropFiles" ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true" ngf-accept="'*'" ngf-pattern="'*'">
                                     {{'context-form.tabs.files.drag+drop'|translate}}
                                 </div>
-                                <button type="button" class="btn btn-default" ngf-select="$ctrl.uploadImages($files, $invalidFiles)" multiple ngf-allow-dir="true" ngf-accept="'*'">{{'context-form.tabs.files.upload-button'|translate}}</button>
+                                <button type="button" class="btn btn-default" ngf-select="$ctrl.uploadFiles($files, $invalidFiles)" multiple ngf-allow-dir="true" ngf-accept="'*'">{{'context-form.tabs.files.upload-button'|translate}}</button>
                                 <ul>
                                     <li ng-repeat="f in $ctrl.uploadStatus.files">
                                         {{ f.name }} {{ f.$errorParam }}

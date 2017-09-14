@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Storage;
-use App\Photo;
+use App\File;
 
 class ConvertPhotoToFile extends Migration
 {
@@ -25,7 +25,7 @@ class ConvertPhotoToFile extends Migration
             $table->text('description')->nullable()->change();
         });
 
-        $photos = Photo::all();
+        $photos = File::all();
         foreach($photos as $p) {
             $url = 'images/' . $p->name;
             $p->mime_type = Storage::mimeType($url);

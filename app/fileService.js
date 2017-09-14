@@ -9,7 +9,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         visible: false
     };
 
-    var lastTimeImageChecked = 0;
+    var lastTimeFileChecked = 0;
 
     files.getMimeType = function(f) {
         if(!f) return;
@@ -36,34 +36,33 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         return 'text';
     };
 
-    files.getImagesForContext = function(id) {
+    files.getFilesForContext = function(id) {
         if(!id) return;
-        $rootScope.$emit('image:delete:linked');
         files.linked = [];
-        files.getLinkedImages(id);
+        files.getLinkedFiles(id);
     };
 
-    files.getLinkedImages = function(id) {
+    files.getLinkedFiles = function(id) {
         if(!id) return;
-        files.linked = filterLinkedImages(id);
+        files.linked = filterLinkedFiles(id);
     };
 
-    files.loadImages = function(len, type) {
+    files.loadFiles = function(len, type) {
         var src = files[type];
         if(len == src.length) return src;
         var loaded = src.slice(0, len + 10);
         return loaded;
     };
 
-    files.hasMoreImages = function(len, type) {
+    files.hasMoreFiles = function(len, type) {
         var src = files[type];
         return src.length - len;
     };
 
     /**
-     * Upload the image files `files` to the server, one by one and store their paths in the database.
+     * Upload the files `files` to the server, one by one and store their paths in the database.
      */
-    files.uploadImages = function(files, invalidFiles, fileList) {
+    files.uploadFiles = function(files, invalidFiles, fileList) {
         var upload = {};
         upload.files = files;
         upload.errFiles = invalidFiles;
@@ -102,11 +101,11 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
     };
 
     /**
-     * Link the image with ID `imgId` to the context with the id `contextId`
+     * Link the file with ID `file_id` to the context with the id `contextId`
      */
-    files.linkImage = function(imgId, contextId) {
+    files.linkFile = function(fid, contextId) {
         var formData = new FormData();
-        formData.append('imgId', imgId);
+        formData.append('file_id', fid);
         formData.append('ctxId', contextId);
         httpPutFactory('api/file/link', formData, function(response) {
             var content = $translate.instant('snackbar.file-linked.success');
@@ -115,8 +114,8 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         });
     };
 
-    files.unlinkImage = function(imgId, contextId) {
-        httpDeleteFactory('api/file/link/' + imgId + '/' + contextId, function(response) {
+    files.unlinkFile = function(fid, contextId) {
+        httpDeleteFactory('api/file/link/' + fid + '/' + contextId, function(response) {
             var content = $translate.instant('snackbar.file-unlinked.success');
             snackbarService.addAutocloseSnack(content, 'success');
             $state.reload('root.spacialist');
@@ -134,22 +133,21 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         });
     };
 
-    files.getImages = function() {
+    files.getFiles = function() {
         return httpGetPromise.getData('api/file').then(function(response) {
             return response;
         });
     };
 
-    files.getAllImages = function(forceUpdate) {
+    files.getAllFiles = function(forceUpdate) {
         forceUpdate = forceUpdate || false;
         var currentTime = (new Date()).getTime();
-        //only fetch images again if it is a force update or last time checked is > 60s
-        if(!forceUpdate && currentTime - lastTimeImageChecked <= 60000) {
+        //only fetch files again if it is a force update or last time checked is > 60s
+        if(!forceUpdate && currentTime - lastTimeFileChecked <= 60000) {
             return;
         } else {
-            lastTimeImageChecked = currentTime;
+            lastTimeFileChecked = currentTime;
             httpGetFactory('api/file', function(response) {
-                var oneUpdated = false;
                 var allCopy = files.all.slice();
                 for(var i=0; i<response.length; i++) {
                     var newImg = response[i];
@@ -158,7 +156,6 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
                         var one = allCopy[j];
                         if(newImg.id == one.id) {
                             if(!angular.equals(newImg, one)) {
-                                oneUpdated = true;
                                 updateSearchOptions(newImg);
                                 files.all[j] = newImg;
                             }
@@ -167,13 +164,9 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
                         }
                     }
                     if(!alreadyLinked) {
-                        oneUpdated = true;
                         updateSearchOptions(newImg);
                         files.all.push(newImg);
                     }
-                }
-                if(oneUpdated) {
-                    $rootScope.$emit('image:updated:all');
                 }
             });
         }
@@ -181,7 +174,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
 
     files.addTag = function(img, tag) {
         var formData = new FormData();
-        formData.append('photo_id', img.id);
+        formData.append('file_id', img.id);
         formData.append('tag_id', tag.id);
         httpPutFactory('api/file/tag', formData, function(response) {
             if(response.error) {
@@ -246,10 +239,10 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         }
     }
 
-    function filterLinkedImages(id) {
+    function filterLinkedFiles(id) {
         return files.all.filter(function(img) {
-            for(var i=0; i<img.linked_images.length; i++) {
-                if(img.linked_images[i].context_id == id) {
+            for(var i=0; i<img.linked_files.length; i++) {
+                if(img.linked_files[i].context_id == id) {
                     return true;
                 }
             }

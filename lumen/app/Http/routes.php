@@ -79,8 +79,8 @@ $app->group([
         $app->put('tag', 'FileController@addTag');
 
         $app->delete('{id:[0-9]+}', 'FileController@delete');
-        $app->delete('link/{pid:[0-9]+}/{cid:[0-9]+}', 'FileController@unlink');
-        $app->delete('{pid:[0-9]+}/tag/{tid:[0-9]+}', 'FileController@removeTag');
+        $app->delete('link/{fid:[0-9]+}/{cid:[0-9]+}', 'FileController@unlink');
+        $app->delete('{fid:[0-9]+}/tag/{tid:[0-9]+}', 'FileController@removeTag');
 });
 
 $app->group([

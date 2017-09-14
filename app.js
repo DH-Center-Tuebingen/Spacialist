@@ -669,7 +669,7 @@ spacialistApp.directive("number", function() {
     };
 });
 
-spacialistApp.filter('imageFilter', function(searchService) {
+spacialistApp.filter('fileFilter', function(searchService) {
     var foundAll = function(haystack, needle) {
         if(!needle || needle.length === 0) return true;
         return needle.every(function(v) {
@@ -1138,7 +1138,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     files: function(fileService, tab) {
                         if(tab != 'files') return [];
-                        return fileService.getImages();
+                        return fileService.getFiles();
                     },
                     availableTags: function(fileService, tab) {
                         if(tab != 'files') return [];
@@ -1176,7 +1176,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             if(!files) return [];
                             var cid = $transition$.params().id;
                             var linkedFiles = files.filter(function(f) {
-                                var match = f.linked_images.find(function(li) {
+                                var match = f.linked_files.find(function(li) {
                                     return cid == li.context_id;
                                 });
                                 if(!match) return false;
