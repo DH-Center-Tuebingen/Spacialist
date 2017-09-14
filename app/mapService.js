@@ -6,6 +6,9 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
     map.currentGeodata = {};
     map.contexts = environmentService.contexts;
     map.featureGroup = new L.FeatureGroup();
+    map.modes = {
+        deleting: false
+    };
 
     map.availableGeometryTypes = {
         point: 'POINT',
@@ -466,7 +469,11 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                     name = feature.properties.name;
                 }
                 layer.bindTooltip(name);
-                layer.on('click', function(){
+                layer.on('click', function(e){
+                    // if we are in delete mode, don't switch state
+                    if(map.modes.deleting) {
+                        return;
+                    }
                     $state.go('root.spacialist.geodata', {id: layer.feature.id});
                 });
             }

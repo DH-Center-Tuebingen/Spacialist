@@ -1,4 +1,4 @@
-spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fileService', 'modalFactory', '$uibModal', '$state', '$translate', '$timeout', '$compile', function($scope, mainService, mapService, fileService, modalFactory, $uibModal, $state, $translate, $timeout, $compile) {
+spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainService', 'mapService', 'fileService', 'modalFactory', '$uibModal', '$state', '$translate', '$timeout', '$compile', function($scope, httpDeleteFactory, mainService, mapService, fileService, modalFactory, $uibModal, $state, $translate, $timeout, $compile) {
     var vm = this;
     vm.currentElement = mainService.currentElement;
     vm.currentGeodata = mapService.currentGeodata;
@@ -205,6 +205,12 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
                 delete vm.map.geodata.linkedContexts[id];
             });
         });
+    });
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:deletestart', function(event, args) {
+        mapService.modes.deleting = true;
+    });
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:deletestop', function(event, args) {
+        mapService.modes.deleting = false;
     });
 
     $scope.linkGeodata = function(cid, gid) {
