@@ -38,7 +38,7 @@
                     <a><i class="material-icons">place</i><span class="tab-desc"> {{'context-form.tabs.map'|translate}}</span></a>
                 </li>
                 <li role="presentation" ui-sref="{tab: 'files'}" ui-sref-active="active" ng-if="moduleExists('fileCtrl')">
-                    <a><i class="material-icons">folder</i><span class="tab-desc"> {{'context-form.tabs.photos'|translate}}</span></a>
+                    <a><i class="material-icons">folder</i><span class="tab-desc"> {{'context-form.tabs.files'|translate}}</span></a>
                 </li>
                 <li role="presentation" ui-sref="{tab: 'bibliography'}" ui-sref-active="active" ng-if="moduleExists('bibliographyCtrl') && $ctrl.currentElement.element.id">
                     <a><i class="material-icons">book</i><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
@@ -59,7 +59,7 @@
                 <div ng-if="$ctrl.user.permissions.view_photos">
                     <div class="container col-md-12" ng-init="filter_collapsed=true">
                         <div ng-click="filter_collapsed=!filter_collapsed" style="cursor: pointer;">
-                            <h4 translate="photos.filter.heading" style="float:left;"></h4>
+                            <h4 translate="files.filter.heading" style="float:left;"></h4>
                             <div style="padding-top: 8px;">
                                 <i class="material-icons" ng-if="filter_collapsed">expand_more</i>
                                 <i class="material-icons" ng-if="!filter_collapsed">expand_less</i>
@@ -82,7 +82,7 @@
                                     </ui-select>
                                 </div>
                                 <div class="form-group label-floating">
-                                    <label class="control-label" translate="photos.properties.image.created"></label>
+                                    <label class="control-label" translate="files.properties.file.created"></label>
                                     <ui-select multiple ng-disabled="readonlyInput" ng-model="search.terms.dates" close-on-select="false">
                                         <ui-select-match>{{$item}}</ui-select-match>
                                         <ui-select-choices repeat="choice in availableSearchTerms.dates | filter:$select.search">
@@ -91,7 +91,7 @@
                                     </ui-select>
                                 </div>
                                 <div class="form-group label-floating">
-                                    <label class="control-label" translate="photos.properties.image.cameraname"></label>
+                                    <label class="control-label" translate="files.properties.file.cameraname"></label>
                                     <ui-select multiple ng-disabled="readonlyInput" ng-model="search.terms.cameras" close-on-select="false">
                                         <ui-select-match>{{$item}}</ui-select-match>
                                         <ui-select-choices repeat="choice in availableSearchTerms.cameras | filter:$select.search">
@@ -106,27 +106,27 @@
                         <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.linkedOpen" is-disabled="!$ctrl.currentElement.element.id">
                             <uib-accordion-heading>
                                 <span ng-click="!currentElement.element || updateLinkedImages(layerTwo.imageTab.linkedOpen)">
-                                    {{'context-form.tabs.photos.linked'|translate}}
+                                    {{'context-form.tabs.files.linked'|translate}}
                                 </span>
                             </uib-accordion-heading>
                             <file-list files="$ctrl.currentElement.linkedFiles" context-menu="$ctrl.fileContextMenu" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags"></file-list>
                         </div>
                         <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.newOpen">
                             <uib-accordion-heading>
-                                {{ 'context-form.tabs.photos.upload' | translate }}
+                                {{ 'context-form.tabs.files.upload' | translate }}
                             </uib-accordion-heading>
                             <div class="col-md-12">
                                 <div class="alert alert-info drop-box" ngf-drop ngf-select ng-model="dropFiles" ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true" ngf-accept="'*'" ngf-pattern="'*'">
-                                    {{'context-form.tabs.photos.drag+drop'|translate}}
+                                    {{'context-form.tabs.files.drag+drop'|translate}}
                                 </div>
-                                <button type="button" class="btn btn-default" ngf-select="$ctrl.uploadImages($files, $invalidFiles)" multiple ngf-allow-dir="true" ngf-accept="'*'">{{'context-form.tabs.photos.upload-button'|translate}}</button>
+                                <button type="button" class="btn btn-default" ngf-select="$ctrl.uploadImages($files, $invalidFiles)" multiple ngf-allow-dir="true" ngf-accept="'*'">{{'context-form.tabs.files.upload-button'|translate}}</button>
                                 <ul>
                                     <li ng-repeat="f in $ctrl.uploadStatus.files">
                                         {{ f.name }} {{ f.$errorParam }}
                                         <div class="progress">
                                             <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ f.progress }}%">
                                                 <span ng-hide="f.progress < 100">
-                                                    {{'context-form.tabs.photos.upload-finished'|translate}}
+                                                    {{'context-form.tabs.files.upload-finished'|translate}}
                                                 </span>
                                                 <span ng-show="f.progress < 100">
                                                     {{ f.progress }}%
@@ -141,7 +141,7 @@
                         </div>
                         <div uib-accordion-group class="panel-default" is-open="true">
                             <uib-accordion-heading>
-                                {{'context-form.tabs.photos.all'|translate}}
+                                {{'context-form.tabs.files.all'|translate}}
                             </uib-accordion-heading>
                             <file-list files="$ctrl.files" context-menu="$ctrl.fileContextMenu" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags"></file-list>
                         </div>

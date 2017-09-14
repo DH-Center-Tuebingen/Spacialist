@@ -1334,7 +1334,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     var formData = new FormData();
                                     formData.append('property', index);
                                     formData.append('value', editArray[index].text);
-                                    httpPatchFactory('api/image/' + f.id + '/property', formData, function(response) {
+                                    httpPatchFactory('api/file/' + f.id + '/property', formData, function(response) {
                                         if(response.error) {
                                             vm.cancelFilePropertyEdit(editArray, index);
                                             return;

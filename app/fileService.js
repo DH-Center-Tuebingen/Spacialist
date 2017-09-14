@@ -1,17 +1,17 @@
 spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'snackbarService', 'searchService', 'Upload', '$translate', '$timeout', '$state', function($rootScope, httpPostFactory, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpDeleteFactory, snackbarService, searchService, Upload, $translate, $timeout, $state) {
-    var images = {
+    var files = {
         all: [],
         linked: [],
         upload: {}
     };
 
-    images.tags = {
+    files.tags = {
         visible: false
     };
 
     var lastTimeImageChecked = 0;
 
-    images.getMimeType = function(f) {
+    files.getMimeType = function(f) {
         if(!f) return;
         // check for extension before mime-type check
         var filename = f.filename;
@@ -36,34 +36,34 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         return 'text';
     };
 
-    images.getImagesForContext = function(id) {
+    files.getImagesForContext = function(id) {
         if(!id) return;
         $rootScope.$emit('image:delete:linked');
-        images.linked = [];
-        images.getLinkedImages(id);
+        files.linked = [];
+        files.getLinkedImages(id);
     };
 
-    images.getLinkedImages = function(id) {
+    files.getLinkedImages = function(id) {
         if(!id) return;
-        images.linked = filterLinkedImages(id);
+        files.linked = filterLinkedImages(id);
     };
 
-    images.loadImages = function(len, type) {
-        var src = images[type];
+    files.loadImages = function(len, type) {
+        var src = files[type];
         if(len == src.length) return src;
         var loaded = src.slice(0, len + 10);
         return loaded;
     };
 
-    images.hasMoreImages = function(len, type) {
-        var src = images[type];
+    files.hasMoreImages = function(len, type) {
+        var src = files[type];
         return src.length - len;
     };
 
     /**
      * Upload the image files `files` to the server, one by one and store their paths in the database.
      */
-    images.uploadImages = function(files, invalidFiles, fileList) {
+    files.uploadImages = function(files, invalidFiles, fileList) {
         var upload = {};
         upload.files = files;
         upload.errFiles = invalidFiles;
@@ -71,7 +71,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         upload.toFinish = (typeof files === 'undefined') ? 0 : files.length;
         angular.forEach(files, function(file) {
             file.upload = Upload.upload({
-                url: 'api/image/upload',
+                url: 'api/file/upload',
                 data: { file: file }
             });
             file.upload.then(function(response) {
@@ -84,7 +84,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
                         $timeout(function() {
                             upload.files.length = 0;
                         }, 1000);
-                        var content = $translate.instant('snackbar.image-upload.success', {
+                        var content = $translate.instant('snackbar.file-upload.success', {
                             cnt: upload.finished
                         });
                         snackbarService.addAutocloseSnack(content, 'success');
@@ -104,29 +104,29 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
     /**
      * Link the image with ID `imgId` to the context with the id `contextId`
      */
-    images.linkImage = function(imgId, contextId) {
+    files.linkImage = function(imgId, contextId) {
         var formData = new FormData();
         formData.append('imgId', imgId);
         formData.append('ctxId', contextId);
-        httpPutFactory('api/image/link', formData, function(response) {
-            var content = $translate.instant('snackbar.image-linked.success');
+        httpPutFactory('api/file/link', formData, function(response) {
+            var content = $translate.instant('snackbar.file-linked.success');
             snackbarService.addAutocloseSnack(content, 'success');
             $state.reload('root.spacialist');
         });
     };
 
-    images.unlinkImage = function(imgId, contextId) {
-        httpDeleteFactory('api/image/link/' + imgId + '/' + contextId, function(response) {
-            var content = $translate.instant('snackbar.image-unlinked.success');
+    files.unlinkImage = function(imgId, contextId) {
+        httpDeleteFactory('api/file/link/' + imgId + '/' + contextId, function(response) {
+            var content = $translate.instant('snackbar.file-unlinked.success');
             snackbarService.addAutocloseSnack(content, 'success');
             $state.reload('root.spacialist');
         });
     };
 
-    images.deleteFile = function(file, fileList) {
-        httpDeleteFactory('api/image/' + file.id, function(response) {
+    files.deleteFile = function(file, fileList) {
+        httpDeleteFactory('api/file/' + file.id, function(response) {
             if(!response.error) {
-                var content = $translate.instant('snackbar.image-deleted.success');
+                var content = $translate.instant('snackbar.file-deleted.success');
                 snackbarService.addAutocloseSnack(content, 'success');
                 var i = fileList.indexOf(file);
                 if(i > -1) fileList.splice(i, 1);
@@ -134,13 +134,13 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         });
     };
 
-    images.getImages = function() {
-        return httpGetPromise.getData('api/image').then(function(response) {
+    files.getImages = function() {
+        return httpGetPromise.getData('api/file').then(function(response) {
             return response;
         });
     };
 
-    images.getAllImages = function(forceUpdate) {
+    files.getAllImages = function(forceUpdate) {
         forceUpdate = forceUpdate || false;
         var currentTime = (new Date()).getTime();
         //only fetch images again if it is a force update or last time checked is > 60s
@@ -148,9 +148,9 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
             return;
         } else {
             lastTimeImageChecked = currentTime;
-            httpGetFactory('api/image', function(response) {
+            httpGetFactory('api/file', function(response) {
                 var oneUpdated = false;
-                var allCopy = images.all.slice();
+                var allCopy = files.all.slice();
                 for(var i=0; i<response.length; i++) {
                     var newImg = response[i];
                     var alreadyLinked = false;
@@ -160,7 +160,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
                             if(!angular.equals(newImg, one)) {
                                 oneUpdated = true;
                                 updateSearchOptions(newImg);
-                                images.all[j] = newImg;
+                                files.all[j] = newImg;
                             }
                             alreadyLinked = true;
                             break;
@@ -169,7 +169,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
                     if(!alreadyLinked) {
                         oneUpdated = true;
                         updateSearchOptions(newImg);
-                        images.all.push(newImg);
+                        files.all.push(newImg);
                     }
                 }
                 if(oneUpdated) {
@@ -179,11 +179,11 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         }
     };
 
-    images.addTag = function(img, tag) {
+    files.addTag = function(img, tag) {
         var formData = new FormData();
         formData.append('photo_id', img.id);
         formData.append('tag_id', tag.id);
-        httpPutFactory('api/image/tag', formData, function(response) {
+        httpPutFactory('api/file/tag', formData, function(response) {
             if(response.error) {
                 // TODO remove from img.tags
                 return;
@@ -191,8 +191,8 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         });
     };
 
-    images.removeTag = function(img, tag) {
-        httpDeleteFactory('api/image/' + img.id + '/tag/' + tag.id,  function(response) {
+    files.removeTag = function(img, tag) {
+        httpDeleteFactory('api/file/' + img.id + '/tag/' + tag.id,  function(response) {
             if(response.error) {
                 // TODO add back to img.tags
                 return;
@@ -200,8 +200,8 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         });
     };
 
-    images.getAvailableTags = function() {
-        return httpGetPromise.getData('api/image/tag').then(function(response) {
+    files.getAvailableTags = function() {
+        return httpGetPromise.getData('api/file/tag').then(function(response) {
             return response.tags;
         });
     };
@@ -216,11 +216,11 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         for(var i=0; i<img.tags.length; i++) {
             var tag = img.tags[i];
             var found = false;
-            for(var j=0; j<images.availableTags.length; j++) {
-                var aTag = images.availableTags[j];
+            for(var j=0; j<files.availableTags.length; j++) {
+                var aTag = files.availableTags[j];
                 if(tag.id == aTag.id) {
                     found = true;
-                    img.tags[i] = images.availableTags[j];
+                    img.tags[i] = files.availableTags[j];
                 }
             }
             if(!found) {
@@ -247,7 +247,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
     }
 
     function filterLinkedImages(id) {
-        return images.all.filter(function(img) {
+        return files.all.filter(function(img) {
             for(var i=0; i<img.linked_images.length; i++) {
                 if(img.linked_images[i].context_id == id) {
                     return true;
@@ -257,5 +257,5 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         });
     }
 
-    return images;
+    return files;
 }]);

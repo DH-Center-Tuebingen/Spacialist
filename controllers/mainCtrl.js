@@ -254,12 +254,12 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
         var content;
         for(var i=0; i<f.linked_images.length; i++) {
             if(f.linked_images[i].context_id == mainService.currentElement.element.id) {
-                content = $translate.instant('photo.unlink-from', { name: mainService.currentElement.element.name });
+                content = $translate.instant('file.unlink-from', { name: mainService.currentElement.element.name });
                 break;
             }
         }
         if(!content) {
-            content = $translate.instant('photo.link-to', { name: mainService.currentElement.element.name });
+            content = $translate.instant('file.link-to', { name: mainService.currentElement.element.name });
         }
         return '<i class="material-icons md-18">add_circle_outline</i> ' + content;
     }, function ($itemScope) {
@@ -277,7 +277,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
         return mainService.currentElement.element.id > 0;
     }];
     var deleteFile = [function($itemScope) {
-        var content = $translate.instant('photo.delete', { name: $itemScope.f.filename });
+        var content = $translate.instant('file.delete', { name: $itemScope.f.filename });
        return '<i class="material-icons md-18">delete</i> ' + content;
     }, function ($itemScope, $event, modelValue, text, $li) {
         fileService.deleteFile($itemScope.f, vm.files);

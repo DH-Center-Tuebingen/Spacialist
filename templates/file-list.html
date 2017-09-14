@@ -1,7 +1,7 @@
 <div class="col-md-12">
     <div class="row">
         <div class="alert alert-warning unpadded-alert" ng-if="files.length == 0">
-            <p>{{ 'photos.empty' | translate }}</p>
+            <p>{{ 'files.empty' | translate }}</p>
         </div>
     </div>
     <div class="row">
@@ -68,7 +68,7 @@
             <div class="thumbnail">
                 <div class="thumb-wrapper centered-full">
                     <i class="material-icons md-96 md-dark">file_download</i>
-                    <p translate="photos.load-more" translate-values="{ cnt: hasMoreImages(tmpData[imageType].length, imageType) }">
+                    <p translate="files.load-more" translate-values="{ cnt: hasMoreImages(tmpData[imageType].length, imageType) }">
                     </p>
                 </div>
             </div>

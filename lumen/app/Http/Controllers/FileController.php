@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
-class ImageController extends Controller
+class FileController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -29,7 +29,7 @@ class ImageController extends Controller
         return array_key_exists($rootKey, $exif) && array_key_exists($dataKey, $exif[$rootKey]);
     }
 
-    private function getImageById($id) {
+    private function getFileById($id) {
         $user = \Auth::user();
         $img = \DB::table('photos as ph')
                 ->select('id', 'modified', 'created', 'name as filename', 'thumb as thumbname', 'cameraname', 'orientation', 'description', 'copyright', 'photographer_id', 'mime_type')
@@ -62,7 +62,7 @@ class ImageController extends Controller
 
     // GET
 
-    public function getImages() {
+    public function getFiles() {
         $user = \Auth::user();
         if(!$user->can('view_photos')) {
             return response([
@@ -99,14 +99,14 @@ class ImageController extends Controller
         return response()->json($images);
     }
 
-    public function getImage($id) {
+    public function getFile($id) {
         $user = \Auth::user();
         if(!$user->can('view_photos')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        return response()->json($this->getImageById($id));
+        return response()->json($this->getFileById($id));
     }
 
     public function getAvailableTags() {
@@ -152,7 +152,7 @@ class ImageController extends Controller
 
     // POST
 
-    public function uploadImage(Request $request) {
+    public function uploadFile(Request $request) {
         $this->validate($request, [
             'file' => 'required|file'
         ]);
@@ -295,12 +295,12 @@ class ImageController extends Controller
 
         $photo->save();
 
-        return response()->json($this->getImageById($photo->id));
+        return response()->json($this->getFileById($photo->id));
     }
 
     // PATCH
 
-    public function patchPhotoProperty(Request $request, $id) {
+    public function patchFileProperty(Request $request, $id) {
         $this->validate($request, [
             'property' => 'required',
             'value' => 'required'
