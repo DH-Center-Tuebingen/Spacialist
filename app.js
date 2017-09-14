@@ -1153,7 +1153,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         context: function(contexts, $transition$, $state) {
                             var c = contexts.data[$transition$.params().id];
                             if(!c) {
-                                return $state.go('root.spacialist');
+                                return undefined;
                             }
                             var lastmodified = c.updated_at || c.created_at;
                             var d = new Date(lastmodified);
@@ -1161,12 +1161,15 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return c;
                         },
                         data: function(context, mainService) {
+                            if(!context) return {};
                             return mainService.getContextData(context.id);
                         },
                         fields: function(context, mainService) {
+                            if(!context) return [];
                             return mainService.getContextFields(context.context_type_id);
                         },
                         sources: function(context, literatureService) {
+                            if(!context) return [];
                             return literatureService.getByContext(context.id);
                         },
                         linkedFiles: function(files, $transition$) {
@@ -1185,7 +1188,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return tab == 'map';
                         }
                     },
-                    onEnter: function(contexts, context, sources, linkedFiles, map, layer, mainService) {
+                    onEnter: function(contexts, context, sources, linkedFiles, map, layer, mainService, $state, $transition$) {
+                        if(!context) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.spacialist', params);
+                        }
                         var updates = {
                             element: context,
                             sources: sources,
@@ -1233,7 +1241,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return literatureService.getAll();
                             }
                         },
-                        onEnter: function($state, $uibModal, attribute, certainty, attributesources, context, literature, sources, $document) {
+                        onEnter: function($state, $uibModal, attribute, certainty, attributesources, context, literature, sources, $transition$) {
+                            if(!attribute) {
+                                var params = $transition$.params();
+                                delete params.aid;
+                                return $state.target('root.spacialist.data', params);
+                            }
                             $uibModal.open({
                                 template: '<sourcemodal attribute="::$resolve.attribute" certainty="::$resolve.certainty" attributesources="::$resolve.attributesources" context="::$resolve.context" literature="::$resolve.literature" sources="::$resolve.sources" on-add="$ctrl.addSource(entry)" on-close="$ctrl.close(reason)" on-dismiss="$ctrl.dismiss(reason)"></sourcemodal>',
                                 controller: function($scope) {
@@ -1291,7 +1304,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return fileService.getMimeType(file);
                         }
                     },
-                    onEnter: ['file', 'mimeType', 'httpPatchFactory', '$uibModal', '$state', function(file, mimeType, httpPatchFactory, $uibModal, $state) {
+                    onEnter: ['file', 'mimeType', 'httpPatchFactory', '$uibModal', '$state', '$transition$', function(file, mimeType, httpPatchFactory, $uibModal, $state, $transition$) {
+                        if(!file) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.spacialist', params);
+                        }
                         $uibModal.open({
                             templateUrl: "modals/file.html",
                             windowClass: 'wide-modal',
@@ -1338,6 +1356,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 .state('root.spacialist.data.delete', {
                     url: '/delete',
                     onEnter: ['contexts', 'context', 'concepts', 'mainService', 'snackbarService', '$transition$', '$state', '$uibModal', '$translate', function(contexts, context, concepts, mainService, snackbarService, $transition$, $state, $uibModal, $translate) {
+                        if(!context) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.spacialist', params);
+                        }
                         $uibModal.open({
                             templateUrl: "modals/delete-context.html",
                             controller: ['$scope', function($scope) {
@@ -1370,7 +1393,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     url: '/geodata/{id:[0-9]+}',
                     resolve: {
                         context: function(contexts, geodataId, map) {
-                            if(geodataId == -1) return;
+                            if(!geodataId) return;
                             var cid = map.geodata.linkedContexts[geodataId];
                             var c;
                             if(cid) {
@@ -1387,12 +1410,17 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             });
                             if(!geoObject){
                                 // $state.go('root.spacialist', {}, {reload: true});
-                                return -1;
+                                return;
                             }
                             return geoObject.id;
                         }
                     },
-                    onEnter: function(context, $state) {
+                    onEnter: function(geodataId, context, $state, $transition$) {
+                        if(!geodataId) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.spacialist', params);
+                        }
                         if(context) {
                             return $state.target('root.spacialist.data', {id: context.id}, {inherit: true, reload: 'root.spacialist.data'});
                         }
@@ -1429,7 +1457,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             });
                         }
                     },
-                    onEnter: ['selectedUser', '$state', '$uibModal', function(selectedUser, $state, $uibModal) {
+                    onEnter: ['selectedUser', '$state', '$uibModal', '$transition$', function(selectedUser, $state, $uibModal, $transition$) {
+                        if(!selectedUser) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.user', params);
+                        }
                         $uibModal.open({
                             templateUrl: "modals/edit-user.html",
                             controller: ['$scope', 'userService', function($scope, userService) {
@@ -1477,7 +1510,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             });
                         }
                     },
-                    onEnter: ['role', '$state', '$uibModal', function(role, $state, $uibModal) {
+                    onEnter: ['role', '$state', '$uibModal', '$transition$', function(role, $state, $uibModal, $transition$) {
+                        if(!role) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.role', params);
+                        }
                         $uibModal.open({
                             templateUrl: "modals/edit-role.html",
                             controller: ['$scope', 'userService', function($scope, userService) {
@@ -1585,7 +1623,15 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 });
                             },
                             fields: function(contextType, mainService) {
+                                if(!contextType) return [];
                                 return mainService.getContextFields(contextType.id);
+                            }
+                        },
+                        onEnter: function(contextType, $state, $transition$) {
+                            if(!contextType) {
+                                var params = $transition$.params();
+                                delete params.id;
+                                return $state.target('root.editor.data-model', params);
                             }
                         }
                     })
@@ -1606,6 +1652,13 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return avLayers.find(function(l) {
                                     return l.id == $transition$.params().id;
                                 });
+                            }
+                        },
+                        onEnter: function(layer, $state, $transition$) {
+                            if(!layer) {
+                                var params = $transition$.params();
+                                delete params.id;
+                                return $state.target('root.editor.layer', params);
                             }
                         }
                     });

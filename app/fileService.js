@@ -12,6 +12,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
     var lastTimeImageChecked = 0;
 
     images.getMimeType = function(f) {
+        if(!f) return;
         // check for extension before mime-type check
         var filename = f.filename;
         var mt = f.mime_type;
