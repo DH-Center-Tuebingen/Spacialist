@@ -3,7 +3,8 @@ spacialistApp.controller('contextCtrl', ['$scope', 'mainService', function($scop
     vm.currentElement = mainService.currentElement;
     vm.editContext = angular.copy(vm.context);
     mainService.setCurrentElement({
-        element: vm.editContext
+        element: vm.editContext,
+        data: vm.data
     });
 
     vm.store = function(data) {
