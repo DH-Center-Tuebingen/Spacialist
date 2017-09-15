@@ -288,8 +288,13 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
             user.currentUser.permissions = response.data.permissions;
             delete user.loginError.message;
 
-            $state.go(transitionService.to, transitionService.params);
-            transitionService.unsetTransition();
+            // redirect to "start page" if last page was login page
+            if(transitionService.to == 'login') {
+                $state.go('root.spacialist');
+            } else {
+                $state.go(transitionService.to, transitionService.params);
+                transitionService.unsetTransition();
+            }
         });
     };
 
