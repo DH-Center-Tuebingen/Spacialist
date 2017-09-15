@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'httpPutFactory', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpGetFactory, httpPutFactory, httpPatchFactory, httpDeleteFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpPatchPromise', 'httpDeleteFactory', 'modalFactory', 'snackbarService', 'transitionService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpPostPromise, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpPatchPromise, httpDeleteFactory, modalFactory, snackbarService, transitionService, $auth, $state, $http, $translate) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -6,7 +6,6 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         user: {}
     };
     user.loginError = {};
-    user.users = [];
     user.roles = [];
     user.permissions = [];
     user.can = function(to) {
@@ -23,85 +22,144 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
                 user.currentUser.user = {};
                 user.currentUser.permissions = {};
                 localStorage.removeItem('user');
-                $state.go('auth', {});
+                $state.go('login', {});
             });
         }
     }
 
     function userSet() {
-        var user = localStorage.getItem('user');
-        if(user === '') return false;
-        var parsedUser = JSON.parse(user);
-        if(!parsedUser) return false;
-        return true;
+        var user = getUser();
+        if(user) return true;
+        return false;
     }
 
-    user.getUserList = function() {
-        user.users.length = 0;
-        httpGetFactory('api/user', function(response) {
-            angular.forEach(response.users, function(u, key) {
-                user.users.push(u);
-            });
+    function getUser() {
+        var user = localStorage.getItem('user');
+        if(user !== '') {
+            parsedUser = JSON.parse(user);
+            if(parsedUser) {
+                return parsedUser;
+            }
+        }
+    }
+
+    user.getUser = getUser;
+
+    user.getUsers = function() {
+        return httpGetPromise.getData('api/user').then(function(response) {
+            return response.users;
         });
     };
 
-    user.deleteUser = function(u) {
-        console.log(u);
+    user.deleteUser = function(u, users) {
         httpDeleteFactory('api/user/' + u.id, function(response) {
-            var index = user.users.indexOf(u);
-            if(index > -1) user.users.splice(index, 1);
+            var index = users.indexOf(u);
+            if(index > -1) users.splice(index, 1);
         });
     };
 
-    user.addUser = function(name, email, password) {
+    user.openAddUserDialog = function(users) {
+        modalFactory.addUserModal(user.addUser, users);
+    };
+
+    user.openAddRoleDialog = function(roles) {
+        modalFactory.addRoleModal(user.addRole, roles);
+    };
+
+    user.addUser = function(name, email, password, users) {
         var formData = new FormData();
         formData.append('name', name);
         formData.append('email', email);
         formData.append('password', password);
-        httpPostFactory('api/user', formData, function(response) {
-            user.users.push(response.user);
+        return httpPostPromise.getData('api/user', formData).then(function(response) {
+            users.push(response.user);
+            return response;
         });
     };
 
-    user.editUser = function(changes, id, $index) {
+    user.editUser = function(orgUser, newUser) {
+        var oldValues = angular.copy(orgUser);
         var formData = new FormData();
-        for(var k in changes) {
-            if(changes.hasOwnProperty(k)) {
-                formData.append(k, changes[k]);
+        for(var k in newUser) {
+            if(newUser.hasOwnProperty(k)) {
+                if(newUser[k] != oldValues[k]) {
+                    formData.append(k, newUser[k]);
+                }
             }
         }
-        httpPatchFactory('api/user/' + id, formData, function(response) {
-            user.users[$index] = response.user;
+        return httpPatchPromise.getData('api/user/' + orgUser.id, formData).then(function(response) {
+            for(var k in response.user) {
+                if(response.user.hasOwnProperty(k)) {
+                    orgUser[k] = response.user[k];
+                }
+            }
             var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 
     user.getRoles = function() {
-        user.roles.length = 0;
-        user.permissions.length = 0;
-        httpGetFactory('api/user/role', function(response) {
-            angular.forEach(response.permissions, function(perm) {
-                user.permissions.push(perm);
-            });
-            angular.forEach(response.roles, function(role, key) {
-                role.permissions = [];
-                user.roles.push(role);
-            });
+        return httpGetPromise.getData('api/user/role').then(function(response) {
+            return response.roles;
+        });
+    };
+
+    user.getPermissions = function() {
+        return httpGetPromise.getData('api/user/permission').then(function(response) {
+            return response.permissions;
         });
     };
 
     user.getRolePermissions = function(role) {
-        if(role.permissions) role.permissions.length = 0;
         httpGetFactory('api/user/role/' + role.id + '/permission', function(response) {
-            angular.forEach(response.permissions, function(perm) {
-                role.permissions.push(perm);
-            });
+            role.permissions = response.permissions;
         });
     };
 
-    user.openEditRoleDialog = function(role) {
-        modalFactory.editRoleModal(editRole, role);
+    user.addRole = function(role, roles) {
+        if(!role.name) {
+            var content = $translate.instant('snackbar.role.missing-name.error');
+            snackbarService.addAutocloseSnack(content, 'error')
+            return;
+        }
+        var formData = new FormData();
+        for(var k in role) {
+            if(role.hasOwnProperty(k)) {
+                formData.append(k, role[k]);
+            }
+        }
+        httpPostFactory('api/user/role', formData, function(response)  {
+            var role = {};
+            for(var k in response.role) {
+                if(response.role.hasOwnProperty(k)) {
+                    role[k] = response.role[k];
+                }
+            }
+            roles.push(role);
+            var content = $translate.instant('snackbar.data-stored.success');
+            snackbarService.addAutocloseSnack(content, 'success');
+        });
+    };
+
+    user.editRole = function(orgRole, newRole) {
+        var oldValues = angular.copy(orgRole);
+        var formData = new FormData();
+        for(var k in newRole) {
+            if(newRole.hasOwnProperty(k)) {
+                if(newRole[k] != oldValues[k]) {
+                    formData.append(k, newRole[k]);
+                }
+            }
+        }
+        return httpPatchPromise.getData('api/user/role/' + orgRole.name, formData).then(function(response) {
+            for(var k in response.role) {
+                if(response.role.hasOwnProperty(k)) {
+                    orgRole[k] = response.role[k];
+                }
+            }
+            var content = $translate.instant('snackbar.data-updated.success');
+            snackbarService.addAutocloseSnack(content, 'success');
+        });
     };
 
     function editRole(role, changes) {
@@ -141,11 +199,11 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         }
     }
 
-    user.deleteRole = function(role) {
+    user.deleteRole = function(role, roles) {
         httpDeleteFactory('api/user/role/' + role.id, function(response) {
             if(response.error) return;
-            var index = user.roles.indexOf(role);
-            if(index > -1) user.roles.splice(index, 1);
+            var index = roles.indexOf(role);
+            if(index > -1) roles.splice(index, 1);
         });
     };
 
@@ -155,8 +213,12 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
             if(response.error) {
                 var index = role.permissions.indexOf(item);
                 if(index > -1) role.permissions.splice(index, 1);
+                var content = $translate.instant('snackbar.data-updated.error');
+                snackbarService.addAutocloseSnack(content, 'error');
                 return;
             }
+            var content = $translate.instant('snackbar.data-updated.success');
+            snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 
@@ -174,27 +236,40 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
         });
     };
 
-    user.getUserRoles = function(id, $index) {
-        httpGetFactory('api/user/role/by_user/' + id, function(response) {
-            user.users[$index].roles = response.roles;
+    user.getUserRoles = function(user) {
+        httpGetFactory('api/user/role/by_user/' + user.id, function(response) {
+            user.roles = response.roles;
         });
     };
 
-    user.addUserRole = function($item, user_id) {
+    user.addUserRole = function(item, user) {
         var formData = new FormData();
-        formData.append('role_id', $item.id);
-        httpPatchFactory('api/user/' + user_id + '/attachRole', formData, function(response) {
-            // TODO only remove/add role if function returns no error
+        formData.append('role_id', item.id);
+        httpPatchFactory('api/user/' + user.id + '/attachRole', formData, function(response) {
+            // if an error occurs, remove added role
+            if(response.error) {
+                var index = user.roles.indexOf(item);
+                if(index > -1) user.roles.splice(index, 1);
+                var content = $translate.instant('snackbar.data-updated.error');
+                snackbarService.addAutocloseSnack(content, 'error');
+                return;
+            }
             var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
     };
 
-    user.removeUserRole = function($item, user_id) {
+    user.removeUserRole = function(item, user) {
         var formData = new FormData();
-        formData.append('role_id', $item.id);
+        formData.append('role_id', item.id);
         httpPatchFactory('api/user/' + user_id + '/detachRole', formData, function(response) {
-            // TODO only remove/add role if function returns no error
+            // if an error occurs, readd removed role
+            if(response.error) {
+                user.roles.push(item);
+                var content = $translate.instant('snackbar.data-updated.error');
+                snackbarService.addAutocloseSnack(content, 'error');
+                return;
+            }
             var content = $translate.instant('snackbar.data-updated.success');
             snackbarService.addAutocloseSnack(content, 'success');
         });
@@ -205,15 +280,21 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
             return $http.get('api/user/active');
         }).then(function(response) {
             if(typeof response === 'undefined' || response.status !== 200) {
-                $state.go('auth', {});
+                $state.go('login', $state.params);
                 return;
             }
             localStorage.setItem('user', JSON.stringify(response.data));
             user.currentUser.user = response.data.user;
             user.currentUser.permissions = response.data.permissions;
-            console.log(JSON.stringify(response.data));
             delete user.loginError.message;
-            $state.go('spacialist', {});
+
+            // redirect to "start page" if last page was login page
+            if(transitionService.to == 'login') {
+                $state.go('root.spacialist');
+            } else {
+                $state.go(transitionService.to, transitionService.params);
+                transitionService.unsetTransition();
+            }
         });
     };
 
@@ -222,7 +303,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpGetFactory', 'http
             user.currentUser.user = {};
             user.currentUser.permissions = {};
             localStorage.removeItem('user');
-            $state.go('auth', {});
+            $state.go('login', {});
         });
     };
 

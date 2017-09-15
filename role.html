@@ -1,5 +1,5 @@
-<div ng-controller="userCtrl" resize-watcher>
-    <table class="table table-striped table-hover" ng-if="currentUser.permissions.add_edit_role || currentUser.permissions.delete_role" ng-init="getRoles()">
+<div resize-watcher>
+    <table class="table table-striped table-hover" ng-if="$ctrl.user.permissions.add_edit_role || $ctrl.user.permissions.delete_role">
         <tr>
             <th>
                 {{ 'role.name' | translate }}
@@ -10,10 +10,10 @@
             <th>
                 {{ 'role.description' | translate }}
             </th>
-            <th ng-if="currentUser.permissions.add_remove_permission">
+            <th ng-if="$ctrl.user.permissions.add_remove_permission">
                 {{ 'role.permissions' | translate }}
             </th>
-            <th ng-if="currentUser.permissions.add_edit_role || currentUser.permissions.delete_role">
+            <th ng-if="$ctrl.user.permissions.add_edit_role || $ctrl.user.permissions.delete_role">
                 {{ 'role.options' | translate }}
             </th>
             <th>
@@ -23,7 +23,7 @@
                 {{'user.updated-at'|translate}}
             </th>
         </tr>
-        <tr ng-repeat="role in roles">
+        <tr ng-repeat="role in $ctrl.roles">
             <td>
                 {{ role.name }}
             </td>
@@ -33,18 +33,18 @@
             <td>
                 {{ role.description }}
             </td>
-            <td ng-if="currentUser.permissions.add_remove_permission" ng-init="getRolePermissions(role)">
+            <td ng-if="$ctrl.user.permissions.add_remove_permission">
                 <ui-select multiple ng-model="role.permissions" close-on-select="false" name="role_permissions_{{ role.id }}" id="role_permissions_{{ role.id }}" on-select="addRolePermission($item, role)" on-remove="removeRolePermission($item, role)">
                     <ui-select-match><span uib-tooltip="{{ $item.description }}">{{ $item.display_name }}</span></ui-select-match>
-                    <ui-select-choices repeat="permission in permissions | filter:$select.search">
+                    <ui-select-choices repeat="permission in $ctrl.permissions | filter:$select.search">
                         {{ permission.display_name }}
                     </ui-select-choices>
                 </ui-select>
             </td>
-            <th ng-if="currentUser.permissions.add_edit_role || currentUser.permissions.delete_role">
-                <button type="button" class="btn btn-info" ng-click="openEditRoleDialog(role)" ng-if="currentUser.permissions.add_edit_role">
+            <th ng-if="$ctrl.user.permissions.add_edit_role || $ctrl.user.permissions.delete_role">
+                <button type="button" class="btn btn-info" ui-sref="root.role.edit({id: role.id})" ng-if="$ctrl.user.permissions.add_edit_role">
                     <i class="material-icons">edit</i>
-                </button> <button type="button" class="btn btn-danger" ng-click="deleteRole(role)" ng-if="currentUser.permissions.delete_role">
+                </button> <button type="button" class="btn btn-danger" ng-click="deleteRole(role)" ng-if="$ctrl.user.permissions.delete_role">
                     <i class="material-icons">delete</i>
                 </button>
             </th>
@@ -56,7 +56,7 @@
             </td>
         </tr>
     </table>
-    <button type="button" class="btn btn-success" ng-click="openAddRoleDialog()" ng-if="currentUser.permissions.add_edit_role">
+    <button type="button" class="btn btn-success" ng-click="openAddRoleDialog()" ng-if="$ctrl.user.permissions.add_edit_role">
         <i class="material-icons">add</i> {{ 'role.add' | translate }}
     </button>
 </div>

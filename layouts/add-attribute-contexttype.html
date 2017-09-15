@@ -9,10 +9,10 @@
                 <div class="col-md-9">
                     <ui-select ng-model="mc.attribute">
                         <ui-select-match>
-                            <span>{{ $select.selected.val | translate }}</span>
+                            <span>{{ mc.concepts[$select.selected.thesaurus_url].label | translate }}</span>
                         </ui-select-match>
                         <ui-select-choices repeat="attribute in mc.attributes">
-                            <span>{{ attribute.val | translate }}</span>
+                            <span>{{ mc.concepts[attribute.thesaurus_url].label | translate }}</span>
                         </ui-select-choices>
                     </ui-select>
                     {{ mc.attribute.datatype }}

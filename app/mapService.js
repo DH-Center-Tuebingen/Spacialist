@@ -1,16 +1,14 @@
-spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpPutFactory', 'httpGetPromise', 'httpPostPromise', 'httpPutPromise', 'httpPatchPromise', 'leafletData', 'userService', 'environmentService', 'langService', 'leafletBoundsHelpers', '$timeout', function(httpGetFactory, httpPostFactory, httpPutFactory, httpGetPromise, httpPostPromise, httpPutPromise, httpPatchPromise, leafletData, userService, environmentService, langService, leafletBoundsHelpers, $timeout) {
+spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpPutFactory', 'httpGetPromise', 'httpPostPromise', 'httpPutPromise', 'httpPatchPromise', 'leafletData', 'userService', 'environmentService', 'langService', 'leafletBoundsHelpers', '$state', '$timeout', function(httpGetFactory, httpPostFactory, httpPutFactory, httpGetPromise, httpPostPromise, httpPutPromise, httpPatchPromise, leafletData, userService, environmentService, langService, leafletBoundsHelpers, $state, $timeout) {
     var localContexts;
     var defaultColor = '#00FF00';
     var invisibleLayers;
     var map = {};
-    map.mapLayers = {};
     map.currentGeodata = {};
     map.contexts = environmentService.contexts;
-    map.geodata = {};
-    map.geodata.linkedContexts = [];
-    map.geodata.linkedLayers = [];
-    map.geodata.linkedGeolayer = {};
     map.featureGroup = new L.FeatureGroup();
+    map.modes = {
+        deleting: false
+    };
 
     map.availableGeometryTypes = {
         point: 'POINT',
@@ -21,8 +19,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
     var availableLayerKeys = [
         'subdomains', 'attribution', 'opacity', 'layers', 'styles', 'format', 'version', 'visible'
     ];
-
-    initMap();
 
     function cleanName(name) {
         return getKeyForName(name.replace(/[^\x00-\x7F]/g, ''));
@@ -51,11 +47,15 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         return map.mapObject._popup.options.feature.id;
     };
 
-    map.addGeodata = function(type, coords, id) {
+    map.addGeodata = function(type, coords, id, contexts, mapArr) {
         var formData = new FormData();
+        type = convertToStandardGeomtype(type);
+        if(!type) {
+            snackbarService.addAutocloseSnack('TODO invalid geomtype', 'error');
+        }
         formData.append('type', type);
         formData.append('coords', angular.toJson(coords));
-        if(id) {
+        if(id > 0) {
             httpPutFactory('api/geodata/'+id, formData, function(response) {
                 if (response.error) {
                     snackbarService.addAutocloseSnack(response.error, 'error');
@@ -65,41 +65,37 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             httpPostFactory('api/geodata', formData, function(response) {
                 map.addListToMarkers([
                     response.geodata
-                ]);
+                ], contexts, mapArr);
             });
         }
     };
 
-    map.getGeodata = function() {
-        httpGetFactory('api/geodata', function(response) {
-            if(response.error) {
-                //TODO show modal
-                console.log("ERROR OCCURED");
-            } else {
-                var geodata = response.geodata;
-                for(var k in map.contexts.data) {
-                // angular.forEach(map.contexts.data, function(elem) {
-                    if(map.contexts.data.hasOwnProperty(k)) {
-                        var elem = map.contexts.data[k];
-                        if(elem.geodata_id && elem.geodata_id > 0){
-                            map.geodata.linkedContexts[elem.geodata_id] = elem.id;
-                        }
-                    }
-                }
-                // });
-                map.addListToMarkers(geodata, true);
-                initHiddenLayers();
-            }
-        });
-    };
+    function convertToStandardGeomtype(type) {
+        type = type.toUpperCase();
+        switch(type) {
+            case 'MARKER':
+            case 'POINT':
+                return 'Point';
+            case 'LINESTRING':
+            case 'POLYLINE':
+                return 'LineString';
+            case 'POLYGON':
+                return 'Polygon';
+        }
+        return undefined;
+    }
 
-    function initHiddenLayers() {
+    function initHiddenLayers(mapArr) {
         for(var i=0; i<invisibleLayers.length; i++) {
-            map.mapLayers[invisibleLayers[i]].remove();
+            mapArr.mapLayers[invisibleLayers[i]].remove();
         }
     }
 
-    map.addListToMarkers = function(geodataList, isInit) {
+    map.convertToStandardGeomtype = function(type) {
+        return convertToStandardGeomtype(type);
+    };
+
+    map.addListToMarkers = function(geodataList, contexts, mapArr, isInit) {
         isInit = isInit || false;
         if(!userService.can('view_geodata')) {
             return;
@@ -109,13 +105,13 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                 var geodata = geodataList[k];
                 var lid;
                 var color;
-                if(map.geodata.linkedContexts[geodata.id]) {
-                    var cid = map.geodata.linkedContexts[geodata.id];
-                    var c = map.contexts.data[cid];
+                if(mapArr.geodata.linkedContexts[geodata.id]) {
+                    var cid = mapArr.geodata.linkedContexts[geodata.id];
+                    var c = contexts.data[cid];
                     var ctid = c.context_type_id;
-                    lid = map.geodata.linkedGeolayer[ctid];
-                    if(map.mapLayers[lid]) {
-                        color = map.mapLayers[lid].options.color;
+                    lid = mapArr.geodata.linkedGeolayer[ctid];
+                    if(mapArr.mapLayers[lid]) {
+                        color = mapArr.mapLayers[lid].options.color;
                     }
                 }
                 if(!color) {
@@ -132,38 +128,35 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                     }
                 };
                 // Add geodata to contexttype layer if it is linked to it
-                if(lid && map.mapLayers[lid]) {
-                    map.mapLayers[lid].addData(feature);
+                if(lid && mapArr.mapLayers[lid]) {
+                    mapArr.mapLayers[lid].addData(feature);
                 } else {
-                    map.mapLayers.unlinked.addData(feature);
+                    mapArr.mapLayers.unlinked.addData(feature);
                 }
             }
         }
     };
 
-    map.isLinkPossible = function(geodataType, layerType) {
+    map.isLinkPossible = function(geodataType, layerType, allowedTypes) {
         var gt = geodataType.toUpperCase();
         var lt = layerType.toUpperCase();
 
-        return (
-            gt.endsWith(map.availableGeometryTypes.point) &&
-            lt.endsWith(map.availableGeometryTypes.point)
-        ) || (
-            gt.endsWith(map.availableGeometryTypes.linestring) &&
-            lt.endsWith(map.availableGeometryTypes.linestring)
-        ) || (
-            gt.endsWith(map.availableGeometryTypes.polygon) &&
-            lt.endsWith(map.availableGeometryTypes.polygon)
-        );
+        for(var i=0; i<allowedTypes.length; i++) {
+            var c = allowedTypes[i].toUpperCase();
+            // gt and lt can be Multi*, thus check if endsWith Point, LineString, Polygon, ...
+            if(gt.endsWith(c) && lt.endsWith(c)) return true;
+        }
+        return false;
     };
 
     map.getCoords = function(layer, type) {
+        type = convertToStandardGeomtype(type);
         var coords;
-        if(type == 'marker' || type == 'Point') {
+        if(type == 'Point') {
             coords = [ layer.getLatLng() ];
         } else {
             coords = layer.getLatLngs();
-            if(type.toLowerCase() == 'polygon') coords[0].push(angular.copy(coords[0][0]));
+            if(type == 'Polygon') coords[0].push(angular.copy(coords[0][0]));
         }
         return coords;
     };
@@ -186,8 +179,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         });
     };
 
-    map.setCurrentGeodata = function(gid) {
-        var layer = map.geodata.linkedLayers[gid];
+    map.setCurrentGeodata = function(gid, geodata) {
+        var layer = geodata.linkedLayers[gid];
         map.currentGeodata.id = gid;
         map.currentGeodata.type = layer.feature.geometry.type;
         map.currentGeodata.color = layer.feature.properties.color;
@@ -248,24 +241,23 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         );
     };
 
-    function initMap() {
-        leafletData.getMap('mainmap').then(function(mapObject) {
-            map.mapObject = mapObject;
-        });
-        leafletData.getGeoJSON('mainmap').then(function(geoJson) {
-            map.geoJson = geoJson;
-        });
-    }
-
-    map.reinitVariables = function() {
-        initMapVariables();
+    map.openPopupForContext = function(context, geodata) {
+        var geodate = geodata.linkedLayers[context.geodata_id];
+        if(geodate) {
+            map.setCurrentGeodata(geodate.feature.id, geodata);
+            if(!geodate.isPopupOpen()) geodate.openPopup();
+        }
     };
 
     map.createBoundsFromArray = function(arr) {
         return leafletBoundsHelpers.createBoundsFromArray(arr);
     };
 
-    function initMapVariables() {
+    map.initMapObject = function() {
+        return leafletData.getMap('mainmap');
+    };
+
+    map.initMapVariables = function() {
         map.map = {};
         map.map.center = {};
         map.map.defaults = {
@@ -279,59 +271,13 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             [-90, 180],
             [90, -180]
         ]);
-        map.style = {
+        map.map.style = {
             fillColor: "#000000",
             weight: 1,
             opacity: 1,
             color: '#808080',
             fillOpacity: 0.5
         };
-        map.map.geojson = {
-            data: {
-                type: 'FeatureCollection',
-                features: []
-            },
-            style: function(feature) {
-                var currentStyle = angular.copy(map.style);
-                currentStyle.fillColor = feature.properties.color;
-                return currentStyle;
-            },
-            pointToLayer: function(feature, latlng) {
-                var m = L.marker(latlng, map.style);
-                return m;
-            },
-            onEachFeature: function(feature, layer) {
-                if(feature.properties && feature.properties.popupContent) {
-                    layer.bindPopup(feature.properties.popupContent, {
-                        minWidth: 300,
-                        feature: feature
-                    });
-                    var name;
-                    if(map.geodata.linkedContexts[feature.id]){
-                        name = environmentService.contexts.data[map.geodata.linkedContexts[feature.id]].name;
-                    }
-                    else{
-                        name = feature.properties.name;
-                    }
-                    layer.bindTooltip(name);
-                    layer.on('click', function(){
-                        map.map.selectedLayer = layer;
-                        layer.openPopup();
-                    });
-                }
-                feature.properties.wkt = map.toWkt(layer);
-                map.featureGroup.addLayer(layer);
-                map.geodata.linkedLayers[feature.id] = layer;
-                var newBounds = map.featureGroup.getBounds();
-                var newNE = newBounds.getNorthEast();
-                var newSW = newBounds.getSouthWest();
-                map.map.bounds.northEast.lat = newNE.lat;
-                map.map.bounds.northEast.lng = newNE.lng;
-                map.map.bounds.southWest.lat = newSW.lat;
-                map.map.bounds.southWest.lng = newSW.lng;
-            }
-        };
-        map.map.selectedLayer = {};
         map.map.controls = {
             scale: true
         };
@@ -343,17 +289,17 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             position: "bottomright",
             draw: {
                 polyline: {
-                    shapeOptions: map.style,
+                    shapeOptions: map.map.style,
                     allowIntersection: false,
                     guideLayers: guideLayers
                 },
                 polygon: {
-                    shapeOptions: map.style,
+                    shapeOptions: map.map.style,
                     guideLayers: guideLayers,
                     snapDistance: 5
                 },
                 marker: {
-                    shapeOptions: map.style
+                    shapeOptions: map.map.style
                 },
                 circle: false,
                 rectangle: false
@@ -367,26 +313,47 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                 }
             }
         };
-    }
 
-    map.initMapService = function() {
-        initMapVariables();
+        // was map, not map.map
 
-        httpGetFactory('api/overlay', function(response) {
-            map.setLayers(response.layers);
-            // wait a random amount of time, so mapObject.eachLayer has all layers
-            $timeout(function() {
-                map.mapObject.eachLayer(function(l) {
-                    if(l.options.layer_id) {
-                        map.mapLayers[l.options.layer_id] = l;
-                    }
-                });
-                map.getGeodata();
-            }, 100);
+        map.map.mapLayers = {};
+        map.map.geodata = {};
+        map.map.geodata.linkedContexts = [];
+        map.map.geodata.linkedLayers = [];
+        map.map.geodata.linkedGeolayer = {};
+
+        return map.map;
+    };
+
+    map.getLayers = function() {
+        return httpGetPromise.getData('api/overlay').then(function(response) {
+            angular.forEach(response.layers, function(l) {
+                l.opacity = parseFloat(l.opacity);
+            });
+            return response.layers;
         });
     };
 
-    map.setLayers = function(layers) {
+    map.getGeodata = function() {
+        return httpGetPromise.getData('api/geodata').then(function(response) {
+            return response.geodata;
+        });
+    };
+
+    map.initGeodata = function(geodata, contexts, mapArr) {
+        for(var k in contexts.data) {
+            if(contexts.data.hasOwnProperty(k)) {
+                var elem = contexts.data[k];
+                if(elem.geodata_id && elem.geodata_id > 0){
+                    mapArr.geodata.linkedContexts[elem.geodata_id] = elem.id;
+                }
+            }
+        }
+        map.addListToMarkers(geodata, contexts, mapArr, true);
+        initHiddenLayers(mapArr);
+    };
+
+    map.setupLayers = function(layers, mapArr, contexts, concepts) {
         var gKeyLoaded = false;
         invisibleLayers = [];
         for(var i=0; i<layers.length; i++) {
@@ -399,15 +366,15 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             }
             currentLayer.layerOptions = setLayerOptions(layer);
             if(layer.context_type_id) {
-                currentLayer.name = layer.label;
+                currentLayer.name = concepts[layer.thesaurus_url].label;
                 angular.merge(currentLayer.layerOptions, setContextLayerOptions(layer));
                 currentLayer.type = 'geoJSONShape';
                 currentLayer.data = {
                     type: 'FeatureCollection',
                     features: []
                 };
-                map.geodata.linkedGeolayer[layer.context_type_id] = id;
-                setGeojsonLayerOptions(currentLayer.layerOptions);
+                mapArr.geodata.linkedGeolayer[layer.context_type_id] = id;
+                setGeojsonLayerOptions(currentLayer.layerOptions, mapArr, contexts);
             } else {
                 currentLayer.name = layer.name;
                 currentLayer.type = layer.type;
@@ -433,7 +400,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                         };
                         currentLayer.type = 'geoJSONShape';
                         currentLayer.layerOptions = setLayerOptions(layer);
-                        setGeojsonLayerOptions(currentLayer.layerOptions);
+                        setGeojsonLayerOptions(currentLayer.layerOptions, mapArr, contexts);
                         break;
                     default:
                         currentLayer.url = layer.url;
@@ -441,10 +408,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                 }
             }
             if(layer.is_overlay) {
-                map.map.layers.overlays[id] = currentLayer;
+                mapArr.layers.overlays[id] = currentLayer;
             } else {
                 currentLayer.top = layer.visible;
-                map.map.layers.baselayers[id] = currentLayer;
+                mapArr.layers.baselayers[id] = currentLayer;
             }
         }
     };
@@ -480,14 +447,15 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         return layerOptions;
     }
 
-    function setGeojsonLayerOptions(lo) {
+    function setGeojsonLayerOptions(lo, mapArr, contexts) {
         lo.style = function(feature) {
-            var currentStyle = angular.copy(map.style);
+            var currentStyle = angular.copy(mapArr.style);
             currentStyle.fillColor = feature.properties.color;
             return currentStyle;
         };
         lo.pointToLayer = function(feature, latlng) {
-            var m = L.marker(latlng, map.style);
+            var m = L.circleMarker(latlng, mapArr.style);
+            m.setRadius(m.getRadius()/2);
             return m;
         };
         lo.onEachFeature = function(feature, layer) {
@@ -497,28 +465,31 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                     feature: feature
                 });
                 var name;
-                if(map.geodata.linkedContexts[feature.id]){
-                    name = environmentService.contexts.data[map.geodata.linkedContexts[feature.id]].name;
+                if(mapArr.geodata.linkedContexts[feature.id]){
+                    name = contexts.data[mapArr.geodata.linkedContexts[feature.id]].name;
                 }
                 else{
                     name = feature.properties.name;
                 }
                 layer.bindTooltip(name);
-                layer.on('click', function(){
-                    map.map.selectedLayer = layer;
-                    layer.openPopup();
+                layer.on('click', function(e){
+                    // if we are in delete mode, don't switch state
+                    if(map.modes.deleting) {
+                        return;
+                    }
+                    $state.go('root.spacialist.geodata', {id: layer.feature.id});
                 });
             }
             feature.properties.wkt = map.toWkt(layer);
             map.featureGroup.addLayer(layer);
-            map.geodata.linkedLayers[feature.id] = layer;
+            mapArr.geodata.linkedLayers[feature.id] = layer;
             var newBounds = map.featureGroup.getBounds();
             var newNE = newBounds.getNorthEast();
             var newSW = newBounds.getSouthWest();
-            map.map.bounds.northEast.lat = newNE.lat;
-            map.map.bounds.northEast.lng = newNE.lng;
-            map.map.bounds.southWest.lat = newSW.lat;
-            map.map.bounds.southWest.lng = newSW.lng;
+            mapArr.bounds.northEast.lat = newNE.lat;
+            mapArr.bounds.northEast.lng = newNE.lng;
+            mapArr.bounds.southWest.lat = newSW.lat;
+            mapArr.bounds.southWest.lng = newSW.lng;
         };
     }
 
@@ -530,16 +501,18 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         var coords = [];
         if(layer instanceof L.Polygon || layer instanceof L.Polyline) {
             var latlngs = layer.getLatLngs();
+            if(layer instanceof L.Polygon) latlngs = latlngs[0];
             for(var i=0; i<latlngs.length; i++) {
-                coords.push(latlngs[i].lng + ' ' + latlngs[i].lat);
+                var latlng = latlngs[i];
+                coords.push(latlng.lng + ' ' + latlng.lat);
             }
-            if (layer instanceof L.Polygon) {
-                var latlng = layer.getLatLngs()[0];
-                return 'POLYGON((' + coords.join(',') + ',' + latlng.lng + ' ' + latlng.lat + '))';
-            } else if (layer instanceof L.Polyline) {
+            if(layer instanceof L.Polygon) {
+                var first = coords[0];
+                return 'POLYGON((' + coords.join(',') + ',' + first + '))';
+            } else if(layer instanceof L.Polyline) {
                 return 'LINESTRING(' + coords.join(',') + ')';
             }
-        } else if (layer instanceof L.Marker) {
+        } else if(layer instanceof L.CircleMarker) {
             return 'POINT(' + layer.getLatLng().lng + ' ' + layer.getLatLng().lat + ')';
         }
     };

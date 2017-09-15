@@ -1,0 +1,45 @@
+<div ng-if="$ctrl.user.permissions.view_concept_props">
+    <h3>{{ $ctrl.editContext.name }}<br>
+        <small><span ng-if="$ctrl.editContext.uri">{{ $ctrl.concepts[$ctrl.editContext.uri].label }} &mdash; </span>{{'context-form.heading'|translate}}</small>
+    </h3>
+    <p class="btn-group-sm nav-inline">
+        <a class="btn btn-success btn-fab btn-fab-mini" href="" ng-click="storeElement()">
+            <i class="material-icons">save</i>
+        </a>
+        <a class="btn btn-danger btn-fab btn-fab-mini" ui-sref="root.spacialist.data.delete">
+            <i class="material-icons">delete</i>
+        </a>
+    </p>
+    <form class="form-horizontal" role="form" ng-if="$ctrl.fields" name="$ctrl.currentElement.form">
+        <div class="form-group form-group-unpadded">
+            <label class="control-label col-md-3" for="name">
+                {{'context-form.name'|translate}}:
+            </label>
+            <div class="col-md-9">
+                <input type="text" class="form-control" id="name" ng-model="$ctrl.editContext.name" ng-readonly="!$ctrl.user.permissions.duplicate_edit_concepts" />
+            </div>
+        </div>
+        <form-field fields="$ctrl.fields" output="$ctrl.data" sources="$ctrl.sources" menus="$ctrl.menus" concepts="$ctrl.concepts" label-width="3" input-width="9" offset="0" sp-readonly="{{ !$ctrl.user.permissions.duplicate_edit_concepts }}">
+        </form-field>
+        <div class="form-group">
+            <label class="control-label col-md-3" for="lasteditor">{{ 'context-form.last-modified' | translate }}:</label>
+            <div class="col-md-9">
+                <p class="form-control-static">
+                    {{ $ctrl.editContext.lastmodified }} (<strong>{{ $ctrl.editContext.lasteditor }}</strong>)
+                </p>
+            </div>
+        </div>
+        <div class="col-md-offset-3" ng-if="$ctrl.user.permissions.duplicate_edit_concepts">
+            <button type="button" class="btn btn-success" ng-click="$ctrl.store($ctrl.data)">
+                <span class="material-icons">save</span> {{ 'context-form.save-button' | translate }}
+            </button>
+            <button type="button" class="btn btn-danger" ui-sref="root.spacialist.data.delete">
+                <span class="material-icons">delete</span> {{ 'context-form.delete-button' | translate }}
+            </button>
+        </div>
+    </form>
+    <div ui-view on-add="$ctrl.addSource(entry)"></div>
+</div>
+<div ng-if="!$ctrl.user.permissions.view_concept_props">
+    <div ng-include="'layouts/restricted-access.html'"></div>
+</div>

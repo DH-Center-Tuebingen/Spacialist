@@ -1,13 +1,14 @@
-<div ui-tree="treeCallbacks" data-nodrop-enabled="false" data-drag-enabled="true" data-drag-delay="250" id="context-tree">
+<div ui-tree="callbacks" data-nodrop-enabled="false" data-drag-enabled="true" data-drag-delay="250" id="context-tree">
+    {{ treeCallbacks}}
     <ul ui-tree-nodes ng-model="contexts.roots" style="margin-bottom: 8px;">
-        <li class="btn btn-primary clickable" ng-click="createNewContext()">
+        <li class="btn btn-primary clickable" ng-click="onClickCallback({type: 'context'})">
             <i class="material-icons md-18">add</i>
             <span class="contextPrefix">{{'context-tree.new-toplevel-context'|translate}}</span>
         </li>
         <li ng-repeat="id in contexts.roots" ng-show="contexts.data[id].visible" ui-tree-node data-collapsed="contexts.data[id].collapsed" data-expand-on-hover="500" ng-include="'includes/tree-child.html'" context-menu="setContextMenu">
         </li>
         <spinner ng-if="contexts.roots.length == 0"></spinner>
-        <li class="btn btn-primary clickable" ng-click="createNewContext()">
+        <li class="btn btn-primary clickable" ng-click="onClickCallback({type: 'context'})">
             <i class="material-icons md-18">add</i>
             <span class="contextPrefix">{{'context-tree.new-toplevel-context'|translate}}</span>
         </li>

@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <h4>{{'role.edit.heading'|translate}}</h4>
+    <h4>{{'role.add.heading'|translate}}</h4>
 </div>
 <div class="modal-body">
     <div class="col-md-12">
@@ -9,7 +9,7 @@
                     {{'role.name'|translate}}:
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" id="name" ng-model="mc.roleinfo.name" />
+                    <input class="form-control" type="text" id="name" ng-model="mc.newRole.name" />
                 </div>
             </div>
             <div class="form-group">
@@ -17,7 +17,7 @@
                     {{'role.display_name'|translate}}
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" id="display_name" ng-model="mc.roleinfo.display_name" />
+                    <input class="form-control" type="text" id="display_name" ng-model="mc.newRole.display_name" />
                 </div>
             </div>
             <div class="form-group">
@@ -25,14 +25,14 @@
                     {{'role.description'|translate}}:
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" id="description" ng-model="mc.roleinfo.description" />
+                    <input class="form-control" type="text" id="description" ng-model="mc.newRole.description" />
                 </div>
             </div>
         </form>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="mc.onEdit(mc.roleinfo)">{{ 'Save' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="mc.onAdd(mc.newRole)">{{ 'Save' | translate }}</button>
     <button type="button" class="btn btn-danger"
       ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
 </div>

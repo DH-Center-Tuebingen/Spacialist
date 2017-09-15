@@ -312,10 +312,18 @@ div[resizeable] {
     display: inline-block;
 }
 
-#modalImage {
+#file-modal {
     max-width: 100%;
     max-height: 100%;
 }
+
+/* PDF viewer styles */
+.rotate0 {transform: rotate(0deg); }
+.rotate90 {transform: rotate(90deg); }
+.rotate180 {transform: rotate(180deg); }
+.rotate270 {transform: rotate(270deg); }
+.pdf-controls { width: 100%; display: block; background: #eee; padding: 1em;}
+.fixed { position: fixed; top: 0; left: calc(50% - 480px); z-index: 100; width: 100%; padding: 1em; background: rgba(238, 238, 238,.9); width: 960px; }
 
 .delete-icon {
     color: gray;
@@ -350,6 +358,10 @@ div[resizeable] {
 
 .thumbnail img {
     width: 100%;
+}
+
+.search-highlighted {
+    background-color: yellow;
 }
 
 .source-link {
@@ -617,6 +629,10 @@ body > .angular-bootstrap-contextmenu.dropdown {
     top: 7px;
 }
 
+.context-menu-icon {
+    padding-right: 16px;
+}
+
 g.leaf > rect {
   stroke: #ff0000;
   stroke-width: 0.25px;
@@ -652,6 +668,10 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     height: 24px !important;
     min-width: 24px !important;
     width: 24px !important;
+}
+
+.material-icons.md-14 {
+    font-size: 14px;
 }
 
 .material-icons.md-18 {
@@ -747,4 +767,8 @@ span.btn {
 /* Leaflet popups have fixed width, and buttons have nowrap, so buttons with longer text cross the popup border. This should fix that */
 .leaflet-popup .btn {
     white-space: normal !important;
+}
+
+.leaflet-top, .leaflet-bottom {
+    z-index: 999 !important;
 }

@@ -139,9 +139,11 @@ $factory->define(App\ContextAttribute::class, function(Faker\Generator $faker) {
     if(!isset($attribute)){
         $attribute = factory(App\Attribute::class)->create();
     }
+    $position = App\ContextAttribute::where('context_type_id', $contextType->id)->max('position') + 1;
     return [
         'context_type_id' => $contextType->id,
         'attribute_id' => $attribute->id,
+        'position' => $position
     ];
 });
 
@@ -305,7 +307,7 @@ $factory->define(App\AttributeValue::class, function(Faker\Generator $faker) {
 });
 
 //TODO seed photos?
-$factory->define(App\Photo::class, function(Faker\Generator $faker) {
+$factory->define(App\File::class, function(Faker\Generator $faker) {
     return [
         'name' => '',
         'modified' => $faker->dateTime(),

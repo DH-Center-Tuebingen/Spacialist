@@ -1,4 +1,4 @@
-spacialistApp.service('langService', ['$translate', function($translate) {
+spacialistApp.service('langService', ['$translate', 'httpGetPromise', function($translate, httpGetPromise) {
     var lang = {};
 
     lang.availableLanguages = {
@@ -32,44 +32,18 @@ spacialistApp.service('langService', ['$translate', function($translate) {
         }*/
     };
 
-    lang.currentLanguage = {
-        label: '',
-        flagCode: ''
-    };
-
-    setInitLanguage();
-
-    function setInitLanguage() {
-        var storedLang = localStorage.getItem('NG_TRANSLATE_LANG_KEY');
-        // check if there is a stored language
-        if(storedLang === null) {
-            updateLanguage($translate.resolveClientLocale());
-        } else {
-            updateLanguage(storedLang);
-        }
-    }
-
-    function updateLanguage(langKey) {
-        if(typeof langKey == 'undefined') {
-            lang.currentLanguage.label = '';
-            lang.currentLanguage.flagCode = '';
-        } else {
-            var newLang = lang.availableLanguages[langKey];
-            lang.currentLanguage.label = newLang.label;
-            lang.currentLanguage.flagCode = newLang.flagCode;
-        }
-    }
-
     lang.getCurrentLanguage = function() {
         return $translate.use();
     };
 
-    lang.switchLanguage = function(key) {
-        var langPromise = $translate.use(key);
+    lang.switchLanguage = function(langObject, langKey, concepts) {
+        var langPromise = $translate.use(langKey);
         if(typeof langPromise == 'object') {
-            langPromise.then(function() { updateLanguage(key); });
+            langPromise.then(function() {
+                updateLanguage(langObject, langKey, concepts);
+            });
         } else {
-            updateLanguage(langPromise);
+            updateLanguage(langObject, langPromise, concepts);
         }
     };
 
@@ -82,6 +56,42 @@ spacialistApp.service('langService', ['$translate', function($translate) {
         if(typeof lang == 'undefined') return false;
         return lang.currentLanguage == lang.availableLanguages[lang];
     };
+
+    lang.getConcepts = function(lang) {
+        return httpGetPromise.getData('api/thesaurus/concept/'+lang).then(function(response) {
+            return response.data;
+        });
+    };
+
+    lang.setInitLanguage = function(langObject, langKey) {
+        langKey = langKey || localStorage.getItem('NG_TRANSLATE_LANG_KEY');
+        // check if there is a stored language
+        if(!langKey) {
+            updateLanguage($translate.resolveClientLocale());
+        } else {
+            updateLanguage(langObject, langKey);
+        }
+    };
+
+    function updateLanguage(langObject, langKey, concepts) {
+        if(typeof langKey == 'undefined') {
+            langObject.label = '';
+            langObject.flagCode = '';
+        } else {
+            var newLang = lang.availableLanguages[langKey];
+            langObject.label = newLang.label;
+            langObject.flagCode = newLang.flagCode;
+        }
+        if(concepts) {
+            lang.getConcepts(langKey).then(function(newConcepts) {
+                for(var k in newConcepts) {
+                    if(newConcepts.hasOwnProperty(k)) {
+                        concepts[k] = newConcepts[k];
+                    }
+                }
+            });
+        }
+    }
 
     return lang;
 }]);

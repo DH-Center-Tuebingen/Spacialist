@@ -55,7 +55,18 @@ class UserController extends Controller
             ], 403);
         }
         return response()->json([
-            'roles' => Role::all(),
+            'roles' => Role::all()
+        ]);
+    }
+
+    public function getPermissions() {
+        $user = \Auth::user();
+        if(!$user->can('add_remove_permission') && !$user->can('add_edit_role')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        return response()->json([
             'permissions' => Permission::all()
         ]);
     }
@@ -348,36 +359,6 @@ class UserController extends Controller
             'error' => '',
             'status' => 200,
             'token' => compact('token')
-        ];
-    }
-
-    private function validateToken() {
-        try {
-            if(!$user = JWTAuth::parseToken()->authenticate()) {
-                return [
-                    'error' => 'user_not_found',
-                    'status' => 404
-                ];
-            }
-        } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-            return [
-                'error' => 'token_expired',
-                'status' => 500
-            ];
-        } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-            return [
-                'error' => 'token_invalid',
-                'status' => 500
-            ];
-        } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
-            return [
-                'error' => 'token_absent',
-                'status' => 500
-            ];
-        }
-        return [
-            'user' => $user,
-            'status' => 200
         ];
     }
 }

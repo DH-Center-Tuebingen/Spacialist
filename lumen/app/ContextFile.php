@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ContextPhoto extends Model
+class ContextFile extends Model
 {
     protected $table = 'context_photos';
 

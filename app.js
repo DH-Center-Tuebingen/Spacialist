@@ -1,4 +1,4 @@
-var spacialistApp = angular.module('tutorialApp', ['ngAnimate', 'satellizer', 'ui.router', 'ngRoute', 'ngMessages', 'ngCookies', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'ngFlag', 'hljs', 'hc.marked', 'pdf', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
+var spacialistApp = angular.module('tutorialApp', ['satellizer', 'ui.router', 'ngMessages', 'ngCookies', 'ui-leaflet', 'ui.select', 'ngSanitize', 'pascalprecht.translate', 'uiFlag', 'angular.filter', 'hljs', 'hc.marked', 'pdf', 'ui.bootstrap', 'ngFileUpload', 'ui.tree', 'infinite-scroll', 'ui.bootstrap.contextMenu']);
 
 $.material.init();
 
@@ -79,57 +79,6 @@ spacialistApp.service('snackbarService', [function() {
     return snack;
 }]);
 
-spacialistApp.service('modalService', ['$uibModal', 'httpGetFactory', function($uibModal, httpGetFactory) {
-    var defaults = {
-        backdrop: true,
-        keyboard: true,
-        modalFade: true,
-        templateUrl: 'layouts/image-properties.html',
-        windowClass: 'wide-modal'
-    };
-    var options = {};
-
-    this.showModal = function(customDefaults, customOptions) {
-        if(!customDefaults) customDefaults = {};
-        //customDefaults.backdrop = 'static';
-        return this.show(customDefaults, customOptions);
-    };
-
-    this.show = function(customDefaults, customOptions) {
-        var tempDefaults = {};
-        var tempOptions = {};
-
-        angular.extend(tempDefaults, defaults, customDefaults);
-        angular.extend(tempOptions, options, customOptions);
-        tempOptions.modalNav = {
-            propTab: true,
-            linkTab: false,
-            setPropTab: function() {
-                tempOptions.modalNav.propTab = true;
-                tempOptions.modalNav.linkTab = false;
-            },
-            setLinkTab: function() {
-                tempOptions.modalNav.propTab = false;
-                tempOptions.modalNav.linkTab = true;
-            }
-        };
-
-        if(!tempDefaults.controller) {
-            tempDefaults.controller = function($scope, $uibModalInstance) {
-                $scope.modalOptions = tempOptions;
-                $scope.modalOptions.close = function(result) {
-                    $uibModalInstance.dismiss('cancel');
-                };
-            };
-        }
-        var modalInstance = $uibModal.open(tempDefaults);
-        modalInstance.result.then(function(selectedItem) {
-        }, function() {
-        });
-        return modalInstance;
-    };
-}]);
-
 spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
     this.deleteModal = function(elementName, onConfirm, additionalWarning) {
         if(typeof additionalWarning != 'undefined' && additionalWarning !== '') {
@@ -174,16 +123,26 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-    this.addUserModal = function(onCreate) {
+    this.addUserModal = function(onCreate, users) {
         var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/new-user.html',
+            templateUrl: 'modals/add-user.html',
             controller: function($uibModalInstance) {
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
                 this.onCreate = function(name, email, password) {
-                    onCreate(name, email, password);
-                    $uibModalInstance.dismiss('ok');
+                    for(var k in ['name', 'email', 'password']) {
+                        $('#'+k+'-container').removeClass('has-error');
+                    }
+                    onCreate(name, email, password, users).then(function(response) {
+                        $uibModalInstance.dismiss('ok');
+                    }, function(reason) {
+                        for(var k in reason.data.error) {
+                            if(reason.data.error.hasOwnProperty(k)) {
+                                $('#'+k+'-container').addClass('has-error');
+                            }
+                        }
+                    });
                 };
             },
             controllerAs: 'mc'
@@ -215,28 +174,15 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function() {}, function() {});
     };
-    this.editRoleModal = function(onEdit, role) {
+    this.addRoleModal = function(onAdd, roles) {
         var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/edit-role.html',
+            templateUrl: 'modals/add-role.html',
             controller: function($uibModalInstance) {
-                this.roleinfo = angular.copy(role);
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
-                this.onEdit = function(roleinfo) {
-                    var changes = {};
-                    if(!role) {
-                        changes = roleinfo;
-                    } else {
-                        for(var key in role) {
-                            if(role.hasOwnProperty(key)) {
-                                if(role[key] != roleinfo[key]) {
-                                    changes[key] = roleinfo[key];
-                                }
-                            }
-                        }
-                    }
-                    onEdit(role, changes);
+                this.onAdd = function(newRole) {
+                    onAdd(newRole, roles);
                     $uibModalInstance.dismiss('ok');
                 };
             },
@@ -244,19 +190,17 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function() {}, function() {});
     };
-    this.addLiteratureModal = function(onCreate, types, selectedType, fields, index) {
+    this.addLiteratureModal = function(onCreate, types, bibliography) {
         var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/new-literature.html',
+            templateUrl: 'modals/add-bibliography.html',
             controller: function($uibModalInstance) {
                 this.availableTypes = types;
-                this.selectedType = selectedType || types[0];
-                this.fields = fields;
-                this.index = index;
+                this.selectedType = types[0];
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
                 this.onCreate = function(fields, type) {
-                    onCreate(fields, type, index);
+                    onCreate(fields, type, bibliography);
                     $uibModalInstance.dismiss('ok');
                 };
             },
@@ -298,7 +242,7 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-    this.newContextTypeModal = function(labelCallback, onCreate, availableGeometryTypes) {
+    this.newContextTypeModal = function(searchFn, onCreate, availableGeometryTypes, contexttypes) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/new-context-type.html',
             controller: function($uibModalInstance) {
@@ -307,9 +251,9 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     { id: 1, label: 'context-type.type.find'}
                 ];
                 this.availableGeometryTypes = availableGeometryTypes;
-                this.onSearch = labelCallback;
+                this.onSearch = searchFn;
                 this.onCreate = function(label, type, geomtype) {
-                    onCreate(label, type, geomtype);
+                    onCreate(label, type, geomtype, contexttypes);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {
@@ -339,9 +283,9 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function() {}, function() {});
     };
-    this.addNewAttributeModal = function(labelCallback, onCreate, datatypes) {
+    this.addNewAttributeModal = function(searchFn, onCreate, datatypes, attributes) {
         var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/add-attribute.html',
+            templateUrl: 'modals/add-attribute.html',
             controller: function($uibModalInstance) {
                 this.needsRoot = {
                     'string-sc': 1,
@@ -349,9 +293,9 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                     epoch: 1
                 };
                 this.datatypes = datatypes;
-                this.onSearch = labelCallback;
+                this.onSearch = searchFn;
                 this.onCreate = function(label, datatype, parent) {
-                    onCreate(label, datatype, parent);
+                    onCreate(label, datatype, parent, attributes);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {
@@ -362,14 +306,15 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-    this.addAttributeToContextTypeModal = function(ct, attrs, onCreate) {
+    this.addAttributeToContextTypeModal = function(concepts, contextType, ctAttributes, attrs, onCreate) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/add-attribute-contexttype.html',
             controller: function($uibModalInstance) {
-                this.ct = ct;
+                this.ct = contextType;
+                this.concepts = concepts;
                 this.attributes = attrs;
                 this.onCreate = function(attr) {
-                    onCreate(attr, ct);
+                    onCreate(attr, contextType, ctAttributes);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {
@@ -392,76 +337,89 @@ spacialistApp.directive('spinner', function() {
     };
 });
 
-spacialistApp.directive('resizeWatcher', function($window) {
-    return function(scope, element) {
-        var headerPadding = 20;
-        var bottomPadding = 20;
+spacialistApp.directive('resizeWatcher', function($window, $timeout) {
+    var headerPadding = 20;
+    var bottomPadding = 20;
 
-        scope.getViewportDim = function() {
-            return {
-                'height': $window.innerHeight,
-                'width': $window.innerWidth,
-                'isSm': window.matchMedia("(max-width: 991px)").matches
-            };
+    function getViewportDim() {
+        return {
+            'height': $window.innerHeight,
+            'width': $window.innerWidth,
+            'isSm': window.matchMedia("(max-width: 991px)").matches
         };
-        scope.$watch(scope.getViewportDim, function(newValue, oldValue) {
-            if(newValue.isSm) {
-                $('#tree-container').css('height', '');
-                $('#attribute-container').css('height', '');
-                $('#addon-container').css('height', '');
-                $('#literature-container').css('height', '');
-                $('analysis-frame').css('height', '');
-                $('#attribute-editor').css('height', '');
-                $('#layer-editor').css('height', '');
-            } else {
-                var height = newValue.height;
-                var width = newValue.width;
+    }
 
-                var headerHeight = document.getElementById('header-nav').offsetHeight;
-                var addonNavHeight = 0;
-                var addonNav = document.getElementById('addon-nav');
-                if(addonNav) addonNavHeight = addonNav.offsetHeight;
-                var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
-                var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
-                var attributeEditor = document.getElementById('attribute-editor');
-                if(attributeEditor) {
-                    $(attributeEditor).css('height', containerHeight);
-                    var heading = document.getElementById('editor-heading');
-                    $('.attribute-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
-                }
-                var layerEditor = document.getElementById('layer-editor');
-                if(layerEditor) {
-                    $(layerEditor).css('height', containerHeight);
-                    var heading = document.getElementById('editor-heading');
-                    $('.layer-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
-                }
-                var literatureContainer = document.getElementById('literature-container');
-                if(literatureContainer) {
-                    var literatureHeight = containerHeight;
-                    var literatureAddButton = document.getElementById('literature-add-button');
-                    if(literatureAddButton) literatureHeight -= literatureAddButton.offsetHeight;
-                    var literatureSearch = document.getElementById('literature-search-form');
-                    if(literatureSearch) literatureHeight -= literatureSearch.offsetHeight;
-                    var literatureTable = document.getElementById('literature-table');
-                    if(literatureTable) {
-                        var head = literatureTable.tHead;
-                        angular.element(literatureContainer).bind('scroll', function(e) {
-                            var t = 'translate(0, ' + this.scrollTop + 'px)';
-                            head.style.transform = t;
-                        });
-                        var headHeight = head.offsetHeight;
-                        var body = literatureTable.tBodies[0];
-                        $(body).css('max-height', literatureHeight - headHeight);
-                        $(literatureContainer).css('height', literatureHeight);
-                    }
-                }
+    function onResize(scope) {
+        var newValue = getViewportDim();
+        if(newValue.isSm) {
+            $('#tree-container').css('height', '');
+            $('#attribute-container').css('height', '');
+            $('#addon-container').css('height', '');
+            $('#literature-container').css('height', '');
+            $('analysis-frame').css('height', '');
+            $('#attribute-editor').css('height', '');
+            $('#layer-editor').css('height', '');
+        } else {
+            var height = newValue.height;
+            var width = newValue.width;
 
-                $('#tree-container').css('height', containerHeight);
-                $('#attribute-container').css('height', containerHeight);
-                $('#addon-container').css('height', containerHeight);
-                $('#analysis-frame').css('height', containerHeight);
+            var headerHeight = document.getElementById('header-nav').offsetHeight;
+            var addonNavHeight = 0;
+            var addonNav = document.getElementById('addon-nav');
+            if(addonNav) addonNavHeight = addonNav.offsetHeight;
+            var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
+            var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
+            var attributeEditor = document.getElementById('attribute-editor');
+            if(attributeEditor) {
+                $(attributeEditor).css('height', containerHeight);
+                var editorHeading = document.getElementById('editor-heading');
+                $('.attribute-editor-column').css('height', containerHeight - (editorHeading.offsetHeight+headerPadding));
             }
-        }, true);
+            var layerEditor = document.getElementById('layer-editor');
+            if(layerEditor) {
+                $(layerEditor).css('height', containerHeight);
+                var layerHeading = document.getElementById('editor-heading');
+                $('.layer-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
+            }
+            var literatureContainer = document.getElementById('literature-container');
+            if(literatureContainer) {
+                var literatureHeight = containerHeight;
+                var literatureAddButton = document.getElementById('literature-add-button');
+                if(literatureAddButton) literatureHeight -= literatureAddButton.offsetHeight;
+                var literatureSearch = document.getElementById('literature-search-form');
+                if(literatureSearch) literatureHeight -= literatureSearch.offsetHeight;
+                var literatureTable = document.getElementById('literature-table');
+                if(literatureTable) {
+                    var head = literatureTable.tHead;
+                    angular.element(literatureContainer).bind('scroll', function(e) {
+                        var t = 'translate(0, ' + this.scrollTop + 'px)';
+                        head.style.transform = t;
+                    });
+                    var headHeight = head.offsetHeight;
+                    var body = literatureTable.tBodies[0];
+                    $(body).css('max-height', literatureHeight - headHeight);
+                    $(literatureContainer).css('height', literatureHeight);
+                }
+            }
+
+            $('#tree-container').css('height', containerHeight);
+            $('#attribute-container').css('height', containerHeight);
+            $('#addon-container').css('height', containerHeight);
+            $('#analysis-frame').css('height', containerHeight);
+            $timeout(function() {
+              scope.$digest();
+            }, 0);
+        }
+    }
+
+    return {
+        scope: true,
+        link: function(scope, element, attrs) {
+            onResize(scope);
+            angular.element($window).bind('resize', function() {
+                onResize(scope);
+            });
+        }
     };
 });
 
@@ -478,50 +436,45 @@ spacialistApp.directive('myDirective', function(httpPostFactory) {
     };
 });
 
-spacialistApp.directive('myTree', function($parse) {
+spacialistApp.directive('spTree', function($parse) {
     return {
         restrict: 'E',
         templateUrl: 'includes/tree.html',
         scope: {
             onClickCallback: '&',
             contexts: '=',
+            concepts: '=',
             element: '=',
-            displayAttribute: '=',
-            typeAttribute: '=',
-            prefixAttribute: '=',
+            highlight: '=',
+            callbacks: '=',
+            options: '=',
             setContextMenu: '='
-        },
-        controller: 'mainCtrl'
-    };
-});
-
-spacialistApp.directive('imageList', function(imageService) {
-    return {
-        restrict: 'E',
-        templateUrl: 'includes/image-list.html',
-        scope: {
-            onScrollLoad: '&',
-            scrollContainer: '=',
-            imageData: '=',
-            imageType: '=',
-            showTags: '=',
-            searchTerms: '='
-        },
-        controller: 'imageCtrl',
-        link: function(scope, elements, attrs) {
-            scope.availableTags = imageService.availableTags;
-            scope.$root.$on('image:delete:linked', function(event, args) {
-                scope.tmpData.linked = [];
-            });
         }
     };
 });
 
-spacialistApp.directive('formField', function($log) {
+spacialistApp.directive('fileList', function(fileService) {
+    return {
+        restrict: 'E',
+        templateUrl: 'templates/file-list.html',
+        scope: {
+            files: '=',
+            contextMenu: '=',
+            showTags: '=',
+            availableTags: '=',
+            searchTerms: '='
+        },
+        controller: 'fileCtrl',
+        controllerAs: '$ctrl'
+    };
+});
+
+spacialistApp.directive('formField', function() {
     var updateInputFields = function(scope, element, attrs) {
         scope.attributeFields = scope.$eval(attrs.fields);
         scope.attributeOutputs = scope.$eval(attrs.output);
         scope.attributeSources = scope.$eval(attrs.sources);
+        scope.menus = scope.$eval(attrs.menus);
         scope.readonlyInput = scope.$eval(attrs.spReadonly);
         var pattern = /^\d+$/;
         if(typeof attrs.labelWidth != 'undefined' && pattern.test(attrs.labelWidth)) {
@@ -547,7 +500,7 @@ spacialistApp.directive('formField', function($log) {
 
     return {
         restrict: 'E',
-        templateUrl: 'includes/inputFields.html',
+        templateUrl: 'includes/form-fields.html',
         scope: false,
         link: function(scope, element, attrs) {
             scope.listInput = {};
@@ -566,6 +519,20 @@ spacialistApp.directive('formField', function($log) {
                     throw new Error('onOrder must be an object with two fields: up and down, which are both functions.');
                 }
             }
+            scope.addListEntry = function(index, inp) {
+                if(typeof scope.attributeOutputs[index] == 'undefined') scope.attributeOutputs[index] = [];
+                scope.attributeOutputs[index].push({
+                    'name': inp[index]
+                });
+                inp[index] = '';
+            };
+            scope.removeListItem = function(index, $index) {
+                scope.attributeOutputs[index].splice($index, 1);
+            };
+            scope.dimensionUnits = [
+                'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
+            ];
+            scope.concepts = scope.$eval(attrs.concepts);
             scope.onDelete = scope.$eval(attrs.onDelete);
             scope.$watch(function(scope) {
                 return scope.$eval(attrs.fields);
@@ -579,6 +546,11 @@ spacialistApp.directive('formField', function($log) {
             });
             scope.$watch(function(scope) {
                 return scope.$eval(attrs.sources);
+            }, function(newVal, oldVal) {
+                updateInputFields(scope, element, attrs);
+            });
+            scope.$watch(function(scope) {
+                return scope.$eval(attrs.menus);
             }, function(newVal, oldVal) {
                 updateInputFields(scope, element, attrs);
             });
@@ -633,14 +605,15 @@ spacialistApp.directive('resizeable', function($compile) {
         }
     };
 
-    var resizeableContainers = document.querySelectorAll('[resizeable]');
-    var idxCtr = 0;
-
     return {
         restrict: 'A',
         scope: false,
         link: function(scope, element, attrs) {
-            // scope.idxCtr = idxCtr;
+            var resizeableContainers = document.querySelectorAll('[resizeable]');
+            var idx;
+            resizeableContainers.forEach(function(e, i) {
+                if(e == element[0]) idx = i;
+            });
             scope.clickLeft = function(i) {
                 if(!i) return;
                 var c = resizeableContainers[i-1];
@@ -654,17 +627,16 @@ spacialistApp.directive('resizeable', function($compile) {
                 extendContainer(c, cl);
             };
             scope.resizeToggle = scope.$eval(attrs.resizeable);
-            if(idxCtr < resizeableContainers.length - 1) {
-                var right = angular.element('<div class="resizeable-button-right" ng-if="resizeToggle" ng-click="clickRight('+idxCtr+')"><i class="material-icons">chevron_left</i></div>');
+            if(idx < resizeableContainers.length - 1) {
+                var right = angular.element('<div class="resizeable-button-right" ng-if="resizeToggle" ng-click="clickRight('+idx+')"><i class="material-icons">chevron_left</i></div>');
                 element.prepend(right);
                 $compile(right)(scope);
             }
-            if(idxCtr !== 0) {
-                var left = angular.element('<div class="resizeable-button-left" ng-if="resizeToggle" ng-click="clickLeft('+idxCtr+')"><i class="material-icons">chevron_right</i></div>');
+            if(idx !== 0) {
+                var left = angular.element('<div class="resizeable-button-left" ng-if="resizeToggle" ng-click="clickLeft('+idx+')"><i class="material-icons">chevron_right</i></div>');
                 element.prepend(left);
                 $compile(left)(scope);
             }
-            idxCtr++;
             scope.$watch(function(scope) {
                 return scope.$eval(attrs.resizeable);
             }, function(newVal, oldVal) {
@@ -697,7 +669,7 @@ spacialistApp.directive("number", function() {
     };
 });
 
-spacialistApp.filter('imageFilter', function(searchService) {
+spacialistApp.filter('fileFilter', function(searchService) {
     var foundAll = function(haystack, needle) {
         if(!needle || needle.length === 0) return true;
         return needle.every(function(v) {
@@ -719,6 +691,8 @@ spacialistApp.filter('imageFilter', function(searchService) {
 
     return function(items, searchTerms) {
         var filtered = [];
+        if(!items) return filtered;
+        if(!searchTerms) return items;
         for(var i=0; i<items.length; i++) {
             var item = items[i];
             if(matchesAllFilters(item, searchTerms)) {
@@ -732,10 +706,36 @@ spacialistApp.filter('imageFilter', function(searchService) {
 spacialistApp.filter('urlify', function() {
     var urls = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
     return function(text) {
-        if(text.match(urls)) {
+        if(text && text.match(urls)) {
             text = text.replace(urls, '<a href="$1" target="_blank">$1</a>');
         }
         return text;
+    };
+});
+
+spacialistApp.filter('bibtexify', function() {
+    return function(props, selectedType) {
+        var type = selectedType.name;
+        var rendered = '<pre><code>';
+        if(type) {
+            rendered += '@' + type + ' {';
+            if(props) {
+                var mand = selectedType.mandatoryFields;
+                var opt = selectedType.optionalFields;
+                var fields = mand.concat(opt);
+                for(var i=0; i<fields.length; i++) {
+                    var k = fields[i];
+                    if(props[k] == null) continue;
+                    rendered += '    <br />';
+                    rendered += '    ' + k + ' = "' + props[k] + '"';
+                }
+
+            }
+            rendered += '<br />';
+            rendered += '}';
+        }
+        rendered += '</code></pre>';
+        return rendered;
     };
 });
 
@@ -763,6 +763,15 @@ spacialistApp.filter('truncate', function () {
             }
         }
         return value + (suffix || '…');
+    };
+});
+
+spacialistApp.filter('highlight', function($sce) {
+    return function(text, search) {
+        if(search) {
+            text = text.replace(new RegExp('('+search+')', 'gi'), '<span class="search-highlighted">$1</span>');
+        }
+        return $sce.trustAsHtml(text);
     };
 });
 
@@ -826,6 +835,19 @@ spacialistApp.factory('httpDeleteFactory', function($http) {
             callback(response);
         });
     };
+});
+
+spacialistApp.factory('httpDeletePromise', function($http) {
+    var getData = function(url) {
+        return $http.delete(url, {
+            headers: {
+                'Content-Type': undefined
+            }
+        }).then(function(result) {
+            return result.data;
+        });
+    };
+    return { getData: getData };
 });
 
 spacialistApp.factory('httpPatchFactory', function($http) {
@@ -900,6 +922,11 @@ spacialistApp.config(['markedProvider', function (markedProvider) {
     }
   });
 }]);
+
+spacialistApp.config(function($uiRouterProvider) {
+    var StickyStatesPlugin = window['@uirouter/sticky-states'].StickyStatesPlugin;
+    $uiRouterProvider.plugin(StickyStatesPlugin);
+});
 
 spacialistApp.config(function($translateProvider) {
     $translateProvider.useStaticFilesLoader({
@@ -977,7 +1004,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     var $state = $injector.get('$state');
                     userService.loginError.message = 'login.error.400-or-401';
                     localStorage.removeItem('user');
-                    $state.go('auth');
+                    var to = $state.router.stateService.$current.name;
+                    var params = $state.router.stateService.$current.params;
+                    $state.go('login', {toState: to, toParams: params});
                 } else if(rejection.data.error) {
                     updateToken(rejection, $injector);
                     userService.loginError.errors = rejection.data.error;
@@ -1008,49 +1037,694 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 
 	$authProvider.baseUrl = '.';
     $authProvider.loginUrl = 'api/user/login';
-    $urlRouterProvider.otherwise('/auth');
+    $urlRouterProvider.otherwise('/login');
 
     $stateProvider
-        .state('auth', {
-            url: '/auth',
-            templateUrl: 'layouts/login.html',
-            controller: 'userCtrl'
+        .state('login', {
+                url: '/login',
+                // templateUrl: 'layouts/login.html',
+                params: {
+                    toState: 'root.spacialist',
+                    toParams: {}
+                },
+                views: {
+                    header: {
+                        component: 'header'
+                    },
+                    content: {
+                        templateUrl: 'layouts/login.html',
+                        controller: 'userCtrl'
+                    }
+                }
+            })
+        .state('root', {
+            abstract: true,
+            url: '',
+            resolve: {
+                user: function(userService) {
+                    return userService.getUser();
+                },
+                config: function(userService, user) {
+                    return {}; //TODO: return general config
+                },
+                userConfig: function(userService, user, config) {
+                    return {
+                        language: 'de'
+                    }; //TODO: return active user's config
+                },
+                concepts: function(langService, userConfig) {
+                    return langService.getConcepts(userConfig.language);
+                },
+                availableLanguages: function(langService) {
+                    return langService.availableLanguages;
+                },
+                editMode: function() {
+                    return {
+                        enabled: false
+                    };
+                }
+            },
+            views: {
+                header: {
+                    component: 'header'
+                },
+                content: {
+                    component: 'root'
+                }
+            }
         })
-        .state('spacialist', {
-            url: '/spacialist',
-            templateUrl: 'view.html'
-        })
-        .state('user', {
-            url: '/user',
-            templateUrl: 'user.html'
-        })
-        .state('roles', {
-            url: '/roles',
-            templateUrl: 'roles.html'
-        })
-        .state('literature', {
-            url: '/literature',
-            templateUrl: 'literature.html'
-        })
-        .state('attributes', {
-            url: '/attribute-editor',
-            templateUrl: 'attribute-editor.html'
-        })
-        .state('layers', {
-            url: '/layer-editor',
-            templateUrl: 'layer-editor.html'
-        });
+            .state('root.spacialist', {
+                url: '/s?tab',
+                component: 'spacialist',
+                resolve: {
+                    tab: function($state, $transition$) {
+                        var tabId = $transition$.params().tab;
+                        if(!tabId) {
+                            return 'map';
+                        }
+                        return tabId; // TODO unsupported id
+                    },
+                    contexts: function(environmentService) {
+                        return environmentService.getContexts();
+                    },
+                    user: function(user) {
+                        // TODO other access to user object?
+                        return user;
+                    },
+                    concepts: function(concepts) {
+                        // TODO other access to concepts object?
+                        return concepts;
+                    },
+                    menus: function(mainService) {
+                        return mainService.getDropdownOptions();
+                    },
+                    map: function(mapService, tab) {
+                        if(tab != 'map') return {};
+                        return mapService.initMapVariables();
+                    },
+                    layer: function(map, mapService, tab) {
+                        if(tab != 'map') return [];
+                        return mapService.getLayers();
+                    },
+                    geodata: function(layer, mapService, tab) {
+                        if(tab != 'map') return [];
+                        return mapService.getGeodata();
+                    },
+                    contextTypes: function(dataEditorService) {
+                        return dataEditorService.getContextTypes();
+                    },
+                    geometryTypes: function(dataEditorService) {
+                        return dataEditorService.getGeometryTypes();
+                    },
+                    files: function(fileService, tab) {
+                        if(tab != 'files') return [];
+                        return fileService.getFiles();
+                    },
+                    availableTags: function(fileService, tab) {
+                        if(tab != 'files') return [];
+                        return fileService.getAvailableTags();
+                    }
+                }
+            })
+                .state('root.spacialist.data', {
+                    url: '/context/{id:[0-9]+}',
+                    // sticky: true,
+                    resolve: {
+                        context: function(contexts, $transition$, $state) {
+                            var c = contexts.data[$transition$.params().id];
+                            if(!c) {
+                                return undefined;
+                            }
+                            var lastmodified = c.updated_at || c.created_at;
+                            var d = new Date(lastmodified);
+                            c.lastmodified = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+                            return c;
+                        },
+                        data: function(context, mainService) {
+                            if(!context) return {};
+                            return mainService.getContextData(context.id);
+                        },
+                        fields: function(context, mainService) {
+                            if(!context) return [];
+                            return mainService.getContextFields(context.context_type_id);
+                        },
+                        sources: function(context, literatureService) {
+                            if(!context) return [];
+                            return literatureService.getByContext(context.id);
+                        },
+                        linkedFiles: function(files, $transition$) {
+                            if(!files) return [];
+                            var cid = $transition$.params().id;
+                            var linkedFiles = files.filter(function(f) {
+                                var match = f.linked_files.find(function(li) {
+                                    return cid == li.context_id;
+                                });
+                                if(!match) return false;
+                                return true;
+                            });
+                            return linkedFiles;
+                        },
+                        mapContentLoaded: function(tab) {
+                            return tab == 'map';
+                        }
+                    },
+                    onEnter: function(contexts, context, sources, linkedFiles, map, layer, mainService, $state, $transition$) {
+                        if(!context) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.spacialist', params);
+                        }
+                        var updates = {
+                            element: context,
+                            sources: sources,
+                            linkedFiles: linkedFiles
+                        };
+                        if(layer) {
+                            var ctxLayer = layer.find(function(l) {
+                                return l.context_type_id == context.context_type_id;
+                            });
+                            var geometryType = '';
+                            if(ctxLayer) geometryType = ctxLayer.type;
+                            updates.geometryType = geometryType;
+                        }
+                        mainService.expandTree(contexts, context.id, true);
+                        mainService.setCurrentElement(updates);
+                    },
+                    views: {
+                        'context-detail': {
+                            component: 'spacialistdata',
+                        }
+                    }
+                })
+                    .state('root.spacialist.data.sources', {
+                        url: '/sources/{aid:[0-9]+}',
+                        resolve: {
+                            attribute: function(fields, $transition$) {
+                                return fields.find(function(f) {
+                                    return f.id == $transition$.params().aid;
+                                });
+                            },
+                            certainty: function(data, $transition$) {
+                                var aid = $transition$.params().aid;
+                                return {
+                                    certainty: data[aid+'_pos'] || 100,
+                                    description: data[aid+'_desc'] || ''
+                                };
+                            },
+                            attributesources: function(sources, $transition$) {
+                                var aid = $transition$.params().aid;
+                                return sources.filter(function(s) {
+                                    return s.attribute_id == aid;
+                                });
+                            },
+                            literature: function(literatureService) {
+                                return literatureService.getAll();
+                            }
+                        },
+                        onEnter: function($state, $uibModal, attribute, certainty, attributesources, context, literature, sources, $transition$) {
+                            if(!attribute) {
+                                var params = $transition$.params();
+                                delete params.aid;
+                                return $state.target('root.spacialist.data', params);
+                            }
+                            $uibModal.open({
+                                template: '<sourcemodal attribute="::$resolve.attribute" certainty="::$resolve.certainty" attributesources="::$resolve.attributesources" context="::$resolve.context" literature="::$resolve.literature" sources="::$resolve.sources" on-add="$ctrl.addSource(entry)" on-close="$ctrl.close(reason)" on-dismiss="$ctrl.dismiss(reason)"></sourcemodal>',
+                                controller: function($scope) {
+                                    var vm = this;
+
+                                    vm.addSource = function(entry) {
+                                        // vm.onAdd(entry);
+                                    };
+
+                                    vm.dismiss = function(reason) {
+                                        $scope.$dismiss(reason);
+                                    };
+
+                                    vm.close = function(reason) {
+                                        $scope.$close(reason);
+                                    };
+                                },
+                                controllerAs: '$ctrl',
+                                windowClass: 'wide-modal shrinked-modal',
+                                resolve: {
+                                    attribute: function() {
+                                        return attribute;
+                                    },
+                                    certainty: function() {
+                                        return certainty;
+                                    },
+                                    attributesources: function() {
+                                        return attributesources;
+                                    },
+                                    context: function() {
+                                        return context;
+                                    },
+                                    literature: function() {
+                                        return literature;
+                                    },
+                                    sources: function() {
+                                        return sources;
+                                    }
+                                }
+                            }).result.finally(function() {
+                                $state.go('^', {}, {reload: true});
+                            });
+                        }
+                    })
+                .state('root.spacialist.file', {
+                    url: '/file/{id:[0-9]+}',
+                    resolve: {
+                        file: function(files, $transition$) {
+                            var fileId = $transition$.params().id;
+                            return files.find(function(f) {
+                                return fileId == f.id;
+                            });
+                        },
+                        mimeType: function(file, fileService) {
+                            return fileService.getMimeType(file);
+                        }
+                    },
+                    onEnter: ['file', 'mimeType', 'httpPatchFactory', '$uibModal', '$state', '$transition$', function(file, mimeType, httpPatchFactory, $uibModal, $state, $transition$) {
+                        if(!file) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.spacialist', params);
+                        }
+                        $uibModal.open({
+                            templateUrl: "modals/file.html",
+                            windowClass: 'wide-modal',
+                            controller: ['$scope', function($scope) {
+                                var vm = this;
+                                vm.file = file;
+                                vm.mimeType = mimeType;
+                                vm.availableProperties = ['copyright', 'description'];
+                                vm.fileEdits = {};
+
+                                vm.cancelFilePropertyEdit = function(editArray, index) {
+                                    editArray[index].text = '';
+                                    editArray[index].editMode = false;
+                                };
+                                vm.setFilePropertyEdit = function(editArray, index, initValue) {
+                                    editArray[index] = {
+                                        text: initValue,
+                                        editMode: true
+                                    };
+                                };
+                                vm.storeFilePropertyEdit = function(editArray, index, f) {
+                                    var formData = new FormData();
+                                    formData.append('property', index);
+                                    formData.append('value', editArray[index].text);
+                                    httpPatchFactory('api/file/' + f.id + '/property', formData, function(response) {
+                                        if(response.error) {
+                                            vm.cancelFilePropertyEdit(editArray, index);
+                                            return;
+                                        }
+                                        f[index] = editArray[index].text;
+                                        vm.cancelFilePropertyEdit(editArray, index);
+                                    });
+                                };
+                                vm.close = function() {
+                                    $scope.$dismiss();
+                                };
+                            }],
+                            controllerAs: '$ctrl'
+                        }).result.finally(function() {
+                            $state.router.transitionService.back();
+                        });
+                    }]
+                })
+                .state('root.spacialist.data.delete', {
+                    url: '/delete',
+                    onEnter: ['contexts', 'context', 'concepts', 'mainService', 'snackbarService', '$transition$', '$state', '$uibModal', '$translate', function(contexts, context, concepts, mainService, snackbarService, $transition$, $state, $uibModal, $translate) {
+                        if(!context) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.spacialist', params);
+                        }
+                        $uibModal.open({
+                            templateUrl: "modals/delete-context.html",
+                            controller: ['$scope', function($scope) {
+                                $scope.contexts = contexts;
+                                $scope.concepts = concepts;
+                                $scope.context = context;
+
+                                $scope.cancel = function() {
+                                    $scope.$dismiss();
+                                    $state.go('^');
+                                };
+
+                                $scope.onDelete = function(context) {
+                                    mainService.deleteContext(context, contexts).then(function() {
+                                        var content = $translate.instant('snackbar.element-deleted.success', { name: context.name  });
+                                        snackbarService.addAutocloseSnack(content, 'success');
+                                        $scope.$close({state: 'success'});
+                                        if(context.root_context_id){
+                                            $state.go('root.spacialist.data', {id: context.root_context_id});
+                                        } else {
+                                            $state.go('root.spacialist');
+                                        }
+                                    });
+                                };
+                            }]
+                        });
+                    }]
+                })
+                .state('root.spacialist.geodata', {
+                    url: '/geodata/{id:[0-9]+}',
+                    resolve: {
+                        context: function(contexts, geodataId, map) {
+                            if(!geodataId) return;
+                            var cid = map.geodata.linkedContexts[geodataId];
+                            var c;
+                            if(cid) {
+                                c = contexts.data[cid];
+                                var lastmodified = c.updated_at || c.created_at;
+                                var d = new Date(lastmodified);
+                                c.lastmodified = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+                            }
+                            return c;
+                        },
+                        geodataId: function(geodata, $transition$, $state) {
+                            var geoObject = geodata.find(function(g) {
+                                return g.id == $transition$.params().id;
+                            });
+                            if(!geoObject){
+                                // $state.go('root.spacialist', {}, {reload: true});
+                                return;
+                            }
+                            return geoObject.id;
+                        }
+                    },
+                    onEnter: function(geodataId, context, $state, $transition$) {
+                        if(!geodataId) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.spacialist', params);
+                        }
+                        if(context) {
+                            return $state.target('root.spacialist.data', {id: context.id}, {inherit: true, reload: 'root.spacialist.data'});
+                        }
+                    },
+                    views: {
+                        'geodata-dummy': {
+                            component: 'geodata',
+                        }
+                    }
+                })
+            .state('root.user', {
+                url: '/user',
+                component: 'user',
+                resolve: {
+                    users: function(userService) {
+                        return userService.getUsers();
+                    },
+                    roles: function(userService) {
+                        return userService.getRoles();
+                    },
+                    rolesPerUser: function(users, userService) {
+                        for(var i=0; i<users.length; i++) {
+                            userService.getUserRoles(users[i]);
+                        }
+                    }
+                }
+            })
+                .state('root.user.edit', {
+                    url: '/edit/{id:[0-9]+}',
+                    resolve: {
+                        selectedUser: function(users, $transition$) {
+                            return users.find(function(u) {
+                                return u.id == $transition$.params().id;
+                            });
+                        }
+                    },
+                    onEnter: ['selectedUser', '$state', '$uibModal', '$transition$', function(selectedUser, $state, $uibModal, $transition$) {
+                        if(!selectedUser) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.user', params);
+                        }
+                        $uibModal.open({
+                            templateUrl: "modals/edit-user.html",
+                            controller: ['$scope', 'userService', function($scope, userService) {
+                                var orgUser = selectedUser;
+                                $scope.editUser = angular.copy(orgUser);
+
+                                $scope.cancel = function() {
+                                    $scope.$dismiss();
+                                };
+
+                                $scope.onEdit = function(editUser) {
+                                    userService.editUser(orgUser, editUser).then(function() {
+                                        $scope.$close(true);
+                                    });
+                                };
+                            }]
+                        }).result.finally(function() {
+                            $state.go('^');
+                        });
+                    }]
+                })
+            .state('root.role', {
+                url: '/role',
+                component: 'role',
+                resolve: {
+                    roles: function(userService) {
+                        return userService.getRoles();
+                    },
+                    permissions: function(userService) {
+                        return userService.getPermissions();
+                    },
+                    permissionsPerRole: function(roles, userService) {
+                        for(var i=0; i<roles.length; i++) {
+                            userService.getRolePermissions(roles[i]);
+                        }
+                    }
+                }
+            })
+                .state('root.role.edit', {
+                    url: '/edit/{id:[0-9]+}',
+                    resolve: {
+                        role: function(roles, $transition$) {
+                            return roles.find(function(r) {
+                                return r.id == $transition$.params().id;
+                            });
+                        }
+                    },
+                    onEnter: ['role', '$state', '$uibModal', '$transition$', function(role, $state, $uibModal, $transition$) {
+                        if(!role) {
+                            var params = $transition$.params();
+                            delete params.id;
+                            return $state.target('root.role', params);
+                        }
+                        $uibModal.open({
+                            templateUrl: "modals/edit-role.html",
+                            controller: ['$scope', 'userService', function($scope, userService) {
+                                var orgRole = role;
+                                $scope.editRole = angular.copy(orgRole);
+
+                                $scope.cancel = function() {
+                                    $scope.$dismiss();
+                                };
+
+                                $scope.onEdit = function(editRole) {
+                                    userService.editRole(orgRole, editRole).then(function() {
+                                        $scope.$close(true);
+                                    });
+                                };
+                            }]
+                        }).result.finally(function() {
+                            $state.go('^');
+                        });
+                    }]
+                })
+            .state('root.bibliography', {
+                url: '/bibliography',
+                component: 'bibliography',
+                resolve: {
+                    bibliography: function(literatureService) {
+                        return literatureService.getAll();
+                    }
+                }
+            })
+                .state('root.bibliography.edit', {
+                    url: '/edit/{id:[0-9]+}',
+                    resolve: {
+                        entry: function(bibliography, $transition$) {
+                            return bibliography.find(function (entry) {
+                                return entry.id == $transition$.params().id;
+                            });
+                        },
+                        types: function(literatureService) {
+                            return literatureService.getTypes();
+                        }
+                    },
+                    onEnter: ['entry', 'types', '$state', '$uibModal', function(entry, types, $state, $uibModal) {
+                        $uibModal.open({
+                            templateUrl: "modals/edit-bibliography.html",
+                            controller: ['$scope', 'literatureService', function($scope, literatureService) {
+                                $scope.editEntry = angular.copy(entry);
+                                $scope.type = {
+                                    selected: types.find(function(t) {
+                                        return t.name == $scope.editEntry.type;
+                                    })
+                                };
+                                delete $scope.editEntry.type;
+                                $scope.types = types;
+
+                                $scope.cancel = function() {
+                                    $scope.$dismiss();
+                                };
+
+                                $scope.onEdit = function(editEntry, selectedType) {
+                                    literatureService.editLiterature(editEntry, selectedType).then(function(response) {
+                                        for(var k in response) {
+                                            if(response.hasOwnProperty(k)) {
+                                                entry[k] = response[k];
+                                            }
+                                        }
+                                        $scope.$close(true);
+                                    });
+                                };
+                            }]
+                        }).result.finally(function() {
+                            $state.go('^');
+                        });
+                    }]
+                })
+            .state('root.editor', {
+                abstract: true,
+                url: '/editor'
+            })
+                .state('root.editor.data-model', {
+                    url: '/data-model',
+                    component: 'datamodel',
+                    resolve: {
+                        attributes: function(dataEditorService) {
+                            return dataEditorService.getAttributes();
+                        },
+                        attributetypes: function(dataEditorService) {
+                            return dataEditorService.getAttributeTypes();
+                        },
+                        contextTypes: function(dataEditorService) {
+                            return dataEditorService.getContextTypes();
+                        },
+                        geometryTypes: function(dataEditorService) {
+                            return dataEditorService.getGeometryTypes();
+                        }
+                    }
+                })
+                    .state('root.editor.data-model.edit', {
+                        url: '/contexttype/{id:[0-9]+}',
+                        component: 'contexttypeedit',
+                        resolve: {
+                            contextType: function(contextTypes, $transition$) {
+                                return contextTypes.find(function(ct) {
+                                    return ct.id == $transition$.params().id;
+                                });
+                            },
+                            fields: function(contextType, mainService) {
+                                if(!contextType) return [];
+                                return mainService.getContextFields(contextType.id);
+                            }
+                        },
+                        onEnter: function(contextType, $state, $transition$) {
+                            if(!contextType) {
+                                var params = $transition$.params();
+                                delete params.id;
+                                return $state.target('root.editor.data-model', params);
+                            }
+                        }
+                    })
+                .state('root.editor.layer', {
+                    url: '/layer',
+                    component: 'layer',
+                    resolve: {
+                        avLayers: function(mapService) {
+                            return mapService.getLayers();
+                        }
+                    }
+                })
+                    .state('root.editor.layer.edit', {
+                        url: '/layer/{id:[0-9]+}',
+                        component: 'layeredit',
+                        resolve: {
+                            layer: function(avLayers, $transition$) {
+                                return avLayers.find(function(l) {
+                                    return l.id == $transition$.params().id;
+                                });
+                            }
+                        },
+                        onEnter: function(layer, $state, $transition$) {
+                            if(!layer) {
+                                var params = $transition$.params();
+                                delete params.id;
+                                return $state.target('root.editor.layer', params);
+                            }
+                        }
+                    });
 });
 
 /**
  * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
  */
-spacialistApp.run(function($rootScope, $state, mapService, userService) {
-    $rootScope.$on('$stateChangeStart', function(event, toState) {
+spacialistApp.run(function($state, mainService, mapService, userService, modalFactory, $transitions, $rootScope, $timeout) {
+    var previousState;
+    var previousStateParameters;
+    $transitions.onSuccess({}, function (transition) {
+        previousState = transition.from().name;
+        previousStateParameters = transition.params('from');
+    });
+    $transitions.back = function () {
+        $state.go(previousState, previousStateParameters, { reload: true });
+    };
+    // Check for unstaged changes
+    $transitions.onBefore({ from: 'root.spacialist.data' }, function(trans) {
+        var form = mainService.currentElement.form;
+        if(form.$dirty) {
+            var onDiscard = function() {
+                form.$setPristine();
+                $state.go(trans.targetState().name(), trans.targetState().params());
+            };
+            var onConfirm = function() {
+                form.$setPristine();
+                mainService.storeElement(mainService.currentElement.element, mainService.currentElement.data);
+                $state.go(trans.targetState().name(), trans.targetState().params(), {reload: true});
+            };
+            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
+            return false;
+        }
+        return true;
+    });
+    $transitions.onExit({ exiting: 'root.spacialist.data' }, function(trans) {
+        // unset current element, if no element is selected (exiting data state)
+        var mapService = trans.injector().get('mapService');
+        // only close popup if injected map object exists
+        try {
+            var map = trans.injector().get('map');
+            var geodate = map.geodata.linkedLayers[mainService.currentElement.element.geodata_id];
+            if(geodate) {
+                geodate.closePopup();
+            }
+        } catch(err) {
+        }
+        mainService.unsetCurrentElement();
+    });
+
+    $transitions.onStart({}, function(trans) {
         var user = localStorage.getItem('user');
+        var transitionService = trans.injector().get('transitionService');
+        if(!transitionService.isInitialized()) {
+            var ts = trans.targetState();
+            transitionService.setTransition({
+                to: ts.name(),
+                params: ts.params()
+            });
+        }
+        // var authenticated = false;
         if(user !== '') {
             parsedUser = JSON.parse(user);
             if(parsedUser) {
+                // authenticated = true;
                 userService.currentUser.user = parsedUser.user;
                 userService.currentUser.permissions = parsedUser.permissions;
                 if(!userService.can('duplicate_edit_concepts')) {
@@ -1064,9 +1738,43 @@ spacialistApp.run(function($rootScope, $state, mapService, userService) {
                         };
                     }
                 }
-                if(toState.name === 'auth') {
-                    event.preventDefault();
-                    $state.go('spacialist');
+                if (trans.to().name == 'login') {
+                    return trans.router.stateService.target('root.spacialist');
+                }
+            }
+        }
+        // if(!autheticated) {
+        //     return trans.router.stateService.target('login');
+        // }
+    });
+
+    $rootScope.$on('$viewContentLoaded', function(event) {
+        if(event.targetScope) {
+            if(event.targetScope.$resolve) {
+                var ctrl =  event.targetScope.$resolve;
+                if(ctrl.mapContentLoaded) {
+                    var geodata = ctrl.map.geodata;
+                    var context = ctrl.context;
+                    if(geodata.linkedLayers.length == 0) {
+                        $timeout(function() {
+                            mapService.openPopupForContext(context, geodata);
+                        }, 1000);
+                    } else {
+                        mapService.openPopupForContext(context, geodata);
+                    }
+                }
+                if(ctrl.geodataId) {
+                    if(ctrl.map.geodata.linkedLayers.length == 0) {
+                        $timeout(function() {
+                            mapService.setCurrentGeodata(ctrl.geodataId, ctrl.map.geodata);
+                            ctrl.map.selectedLayer = ctrl.map.geodata.linkedLayers[ctrl.geodataId];
+                            ctrl.map.selectedLayer.openPopup();
+                        }, 1000);
+                    } else {
+                        mapService.setCurrentGeodata(ctrl.geodataId, ctrl.map.geodata);
+                        ctrl.map.selectedLayer = ctrl.map.geodata.linkedLayers[ctrl.geodataId];
+                        ctrl.map.selectedLayer.openPopup();
+                    }
                 }
             }
         }

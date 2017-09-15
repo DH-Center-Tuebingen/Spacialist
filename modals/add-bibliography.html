@@ -31,11 +31,7 @@
             </div>
         </form>
         <h4>{{'literature.new.bibtex-code'|translate}}</h4>
-        <pre>
-            <code>
-        {{ mc.fields }}
-            </code>
-        </pre>
+        <span style="text-align: left;" ng-bind-html="mc.fields | bibtexify:mc.selectedType"></span>
     </div>
 </div>
 <div class="modal-footer">

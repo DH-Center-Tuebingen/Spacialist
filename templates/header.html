@@ -1,0 +1,110 @@
+<nav id="header-nav" class="navbar navbar-inverse" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle"
+             ng-click="isCollapsed = !isCollapsed" aria-expanded="false">
+                <span class="sr-only">{{'main.navigation-toggle'|translate}}</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" ui-sref="root.spacialist">
+                <img src="favicon.png" class="logo" alt="spacialist logo"/>
+                {{'spacialist'|translate}}
+            </a>
+        </div>
+        <div class="navbar-collapse" id="navbar-collapse" uib-collapse="isCollapsed">
+            <ul class="nav navbar-nav">
+                <!--<li>
+                    <form class="navbar-form navbar-left">
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Search|translate">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button">
+                                        <i class="material-icons" aria-hidden="true">search</i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </form>
+                </li>-->
+                <!--<li class="dropdown" uib-dropdown>
+                    <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        {{ 'import_export' | translate }} <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" uib-dropdown-menu>
+                        <li ><a class="nav-link" href="#/file/import"><i class="material-icons">cloud_upload</i> {{ 'import' | translate }}</a>
+                        </li>
+                        <li ><a class="nav-link" href="#/file/export"><i class="material-icons">cloud_download</i> {{ 'export' | translate }}</a>
+                        </li>
+                    </ul>
+                </li>-->
+                <li>
+                    <a href="db" target="_blank"><i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <sup class="material-icons md-14">open_in_new</sup>
+                    </a>
+                </li>
+                <li ng-if="$ctrl.user.permissions.edit_literature">
+                    <a ui-sref="root.bibliography">
+                        <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
+                    </a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown" uib-dropdown>
+                    <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <flag ng-if="$ctrl.currentLanguage.flagCode != 'en'" country="{{ $ctrl.currentLanguage.flagCode }}" size="16"></flag><flag ng-if="$ctrl.currentLanguage.flagCode == 'en'" country="us" size="16"></flag> <i class="material-icons">arrow_drop_down</i>
+                    </a>
+                    <ul class="dropdown-menu" uib-dropdown-menu>
+                        <li ng-repeat="(code,lang) in $ctrl.availableLanguages">
+                            <a href="" ng-click="$ctrl.switchLanguage(code)" ng-class="{ activeLang: $ctrl.isLangSet(code) }">
+                                <flag country="{{lang.flagCode}}" size="16"></flag>
+                                {{ lang.label }}
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li ng-if="$ctrl.user.user.name">
+                    <a href="" ng-click="$ctrl.logoutUser()">
+                        <i class="material-icons">power_settings_new</i> {{ $ctrl.user.user.name }}
+                    </a>
+                </li>
+                <li ng-if="$ctrl.user.permissions.view_users || $ctrl.user.permissions.add_edit_role" class="dropdown" uib-dropdown>
+                    <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <i class="material-icons">settings</i>
+                        {{'main.menu.settings'|translate}} <i class="material-icons">arrow_drop_down</i>
+                    </a>
+                    <ul class="dropdown-menu" uib-dropdown-menu>
+                        <li ng-if="$ctrl.user.permissions.view_users">
+                            <a ui-sref="root.user">
+                                <i class="material-icons">group</i> {{'main.menu.user-management'|translate}}
+                            </a>
+                        </li>
+                        <li ng-if="$ctrl.user.permissions.add_edit_role">
+                            <a ui-sref="root.role">
+                                <i class="material-icons">verified_user</i> {{'main.menu.role-management'|translate}}
+                            </a>
+                        </li>
+                        <li>
+                            <a ui-sref="root.editor.data-model">
+                                <i class="material-icons">view_list</i> {{'main.menu.data-model-editor'|translate}}
+                            </a>
+                        </li>
+                        <li>
+                            <a ui-sref="root.editor.layer">
+                                <i class="material-icons">layers</i> {{'main.menu.layer-editor'|translate}}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="" ng-click="$ctrl.toggleEditMode()">
+                                <i class="material-icons">mode_edit</i> {{'main.menu.toggle-edit-mode'|translate}}
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

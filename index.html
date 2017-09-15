@@ -4,189 +4,79 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" type="image/png" href="favicon.png" sizes="32x32">
-        <link rel="stylesheet" type="text/css" href="bower_components/world-flags-sprite/stylesheets/flags16.css" />
-        <link rel="stylesheet" type="text/css" href="bower_components/angular-ui-tree/dist/angular-ui-tree.min.css" />
-        <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css" />
-        <link rel="stylesheet" href="bower_components/leaflet-draw/dist/leaflet.draw.css" />
+        <link rel="stylesheet" type="text/css" href="node_modules/world-flags-sprite/stylesheets/flags16.css" />
+        <link rel="stylesheet" type="text/css" href="node_modules/angular-ui-tree/dist/angular-ui-tree.min.css" />
+        <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
+        <link rel="stylesheet" href="node_modules/leaflet-draw/dist/leaflet.draw.css" />
         <link rel="stylesheet" href="css/animate.css" />
-        <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.min.css" />
-        <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
-        <link rel="stylesheet" href="bower_components/highlightjs/styles/github.css">
+        <link rel="stylesheet" href="node_modules/ui-select/dist/select.min.css" />
+        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="node_modules/highlightjs/styles/github.css">
         <link rel="stylesheet" href="css/material-icons.css">
-        <link rel="stylesheet" href="bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.min.css"/>
-        <link rel="stylesheet" href="bower_components/bootstrap-material-design/dist/css/ripples.min.css"/>
-        <link rel="stylesheet" href="bower_components/snackbarjs/dist/snackbar.min.css"/>
-        <link rel="stylesheet" href="bower_components/snackbarjs/themes-css/material.css"/>
+        <link rel="stylesheet" href="node_modules/bootstrap-material-design/dist/css/bootstrap-material-design.min.css"/>
+        <link rel="stylesheet" href="node_modules/bootstrap-material-design/dist/css/ripples.min.css"/>
+        <link rel="stylesheet" href="node_modules/snackbarjs/dist/snackbar.min.css"/>
+        <link rel="stylesheet" href="node_modules/snackbarjs/themes-css/material.css"/>
         <!--<link href='https://fonts.googleapis.com/css?family=Fira+Sans:400,300italic,300,400italic,500,500italic,700,700italic' rel='stylesheet' type='text/css'>-->
         <link rel="stylesheet" href="css/style.css" />
         <title>{{'spacialist'|translate}}</title>
     </head>
     <body>
-        <nav id="header-nav" class="navbar navbar-inverse" role="navigation" ng-controller="userCtrl">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle"
-                     ng-click="isCollapsed = !isCollapsed" aria-expanded="false">
-                        <span class="sr-only">{{'main.navigation-toggle'|translate}}</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="" ng-click="openStartPage()">
-                        <img src="favicon.png" class="logo" alt="spacialist logo"/>
-                        {{'spacialist'|translate}}
-                    </a>
-                </div>
-                <div class="navbar-collapse" id="navbar-collapse" uib-collapse="isCollapsed">
-                    <ul class="nav navbar-nav">
-                        <!--<li>
-                            <form class="navbar-form navbar-left">
-                                <div class="form-group">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Search|translate">
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button">
-                                                <i class="material-icons" aria-hidden="true">search</i>
-                                            </button>
-                                        </span>
-                                    </div>
-                                </div>
-                            </form>
-                        </li>-->
-                        <!--<li class="dropdown" uib-dropdown>
-                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                {{ 'import_export' | translate }} <span class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu" uib-dropdown-menu>
-                                <li ><a class="nav-link" href="#/file/import"><i class="material-icons">cloud_upload</i> {{ 'import' | translate }}</a>
-                                </li>
-                                <li ><a class="nav-link" href="#/file/export"><i class="material-icons">cloud_download</i> {{ 'export' | translate }}</a>
-                                </li>
-                            </ul>
-                        </li>-->
-                        <li class="dropdown" uib-dropdown>
-                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <i class="material-icons">arrow_drop_down</i>
-                            </a>
-                            <ul class="dropdown-menu" uib-dropdown-menu>
-                                <li ng-repeat="entry in analysisEntries">
-                                    <a href="" ng-click="setAnalysisEntry($index)">{{ entry.name | translate }}</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li ng-if="currentUser.permissions.edit_literature">
-                            <a href="" ng-click="openLiteratureView()">
-                                <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
-                            </a>
-                        </li>
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                        <li class="dropdown" uib-dropdown ng-controller="LangCtrl">
-                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                <flag country="{{ currentLanguage.flagCode }}" size="16"></flag> <i class="material-icons">arrow_drop_down</i>
-                            </a>
-                            <ul class="dropdown-menu" uib-dropdown-menu ng-init="setInitLanguage()">
-                                <li ng-repeat="(code,lang) in availableLanguages">
-                                    <a href="" ng-click="switchLanguage(code)" ng-class="{ activeLang: isLangSet(code) }">
-                                        <flag country="{{lang.flagCode}}" size="16"></flag>
-                                        {{ lang.label }}
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                        <li ng-if="currentUser.user.name">
-                            <a href="" ng-click="logoutUser()">
-                                <i class="material-icons">power_settings_new</i> {{ currentUser.user.name }}
-                            </a>
-                        </li>
-                        <li ng-if="currentUser.permissions.view_users || currentUser.permissions.add_edit_role" class="dropdown" uib-dropdown>
-                            <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                <i class="material-icons">settings</i>
-                                {{'main.menu.settings'|translate}} <i class="material-icons">arrow_drop_down</i>
-                            </a>
-                            <ul class="dropdown-menu" uib-dropdown-menu>
-                                <li ng-if="currentUser.permissions.view_users">
-                                    <a href="" ng-click="openUserManagement()">
-                                        <i class="material-icons">group</i> {{'main.menu.user-management'|translate}}
-                                    </a>
-                                </li>
-                                <li ng-if="currentUser.permissions.add_edit_role">
-                                    <a href="" ng-click="openRoleManagement()">
-                                        <i class="material-icons">verified_user</i> {{'main.menu.role-management'|translate}}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" ng-click="openAttributeEditor()">
-                                        <i class="material-icons">view_list</i> {{'main.menu.data-model-editor'|translate}}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="" ng-click="toggleEditMode()">
-                                        <i class="material-icons">mode_edit</i> {{'main.menu.toggle-edit-mode'|translate}}
-                                    <a href="" ng-click="openLayerEditor()">
-                                        <i class="material-icons">layers</i> {{'main.menu.layer-editor'|translate}}
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        <div>
-            <div ui-view class="col-md-12"></div>
-        </div>
-        <script src="bower_components/three.js/build/three.min.js"></script>
-        <script src="bower_components/three.js/examples/js/loaders/ColladaLoader2.js"></script>
-        <script src="bower_components/three.js/examples/js/loaders/OBJLoader2.js"></script>
-        <script src="bower_components/three.js/examples/js/loaders/MTLLoader.js"></script>
-        <script src="bower_components/three.js/examples/js/loaders/DDSLoader.js"></script>
-        <script src="bower_components/three.js/examples/js/controls/OrbitControls.js"></script>
-        <script src="bower_components/pdfjs-dist/build/pdf.min.js"></script>
-        <script src="bower_components/marked/marked.min.js"></script>
-        <script src="bower_components/highlightjs/highlight.pack.min.js"></script>
-        <script src="bower_components/jquery/dist/jquery.min.js"></script>
-        <script src="bower_components/lodash/dist/lodash.min.js"></script>
-        <script src="bower_components/angular/angular.min.js"></script>
-        <script src="bower_components/angular-animate/angular-animate.min.js"></script>
-        <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
-        <script src="bower_components/angular-cookies/angular-cookies.min.js"></script>
-        <script src="bower_components/angular-route/angular-route.min.js"></script>
-        <script src="bower_components/angular-messages/angular-messages.min.js"></script>
-        <script src="bower_components/angular-translate/angular-translate.min.js"></script>
-        <script src="bower_components/angular-translate-storage-cookie/angular-translate-storage-cookie.min.js"></script>
-        <script src="bower_components/angular-translate-storage-local/angular-translate-storage-local.min.js"></script>
-        <script src="bower_components/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
-        <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
-        <script src="bower_components/ng-file-upload/ng-file-upload-all.min.js"></script>
-        <script src="bower_components/angular-ui-tree/dist/angular-ui-tree.min.js"></script>
-        <script src="bower_components/angular-pdf-viewer/dist/angular-pdf-viewer.min.js"></script>
-        <script src="bower_components/angular-marked/dist/angular-marked.min.js"></script>
-        <script src="bower_components/angular-highlightjs/build/angular-highlightjs.min.js"></script>
-        <script src="bower_components/leaflet/dist/leaflet.js"></script>
-        <script src="bower_components/leaflet-draw/dist/leaflet.draw.js"></script>
-        <script src="bower_components/Leaflet.Snap/leaflet.snap.js"></script>
-        <script src="bower_components/Leaflet.GeometryUtil/dist/leaflet.geometryutil.js"></script>
-        <script src="bower_components/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js"></script>
-        <script src="bower_components/leaflet-plugins/layer/tile/Bing.js"></script>
-        <script src="bower_components/ui-leaflet/dist/ui-leaflet.min.js"></script>
-        <script src="bower_components/ui-leaflet-draw/dist/ui-leaflet-draw.js"></script>
-        <script src="bower_components/ui-leaflet-layers/dist/ui-leaflet-layers.min.js"></script>
-        <script src="bower_components/angular-simple-logger/dist/angular-simple-logger.min.js"></script>
-        <script src="bower_components/ng-infinite-scroll-npm-is-better-than-bower/build/ng-infinite-scroll.min.js"></script>
-        <script src="bower_components/angular-ui-select/dist/select.min.js"></script>
-        <script src="bower_components/ng-flags/src/directives/ng-flags.js"></script>
-        <script src="bower_components/angular-bootstrap-contextmenu/contextMenu.js"></script>
-        <script src="bower_components/satellizer/dist/satellizer.min.js"></script>
-        <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
-        <script src="bower_components/proj4/dist/proj4.js"></script>
-        <script src="bower_components/d3/d3.min.js"></script>
-        <script src="bower_components/klayjs-d3/dist/klayjs-d3.min.js"></script>
-        <script src="bower_components/klayjs/klay.js"></script>
-        <script src="bower_components/bootstrap-material-design/dist/js/material.min.js"></script>
-        <script src="bower_components/bootstrap-material-design/dist/js/ripples.min.js"></script>
-        <script src="bower_components/snackbarjs/dist/snackbar.min.js"></script>
+        <div ui-view="header"></div>
+        <div ui-view="content" class="col-md-12"></div>
+        <script src="node_modules/three/build/three.min.js"></script>
+        <script src="node_modules/three/examples/js/loaders/ColladaLoader2.js"></script>
+        <script src="node_modules/three/examples/js/loaders/OBJLoader2.js"></script>
+        <script src="node_modules/three/examples/js/loaders/MTLLoader.js"></script>
+        <script src="node_modules/three/examples/js/loaders/DDSLoader.js"></script>
+        <script src="node_modules/three/examples/js/controls/OrbitControls.js"></script>
+        <script src="node_modules/pdfjs-dist/build/pdf.min.js"></script>
+        <script src="node_modules/marked/marked.min.js"></script>
+        <script src="node_modules/highlightjs/highlight.pack.min.js"></script>
+        <script src="node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="node_modules/lodash/lodash.min.js"></script>
+        <script src="node_modules/angular/angular.min.js"></script>
+        <script src="node_modules/angular-animate/angular-animate.min.js"></script>
+        <script src="node_modules/angular-sanitize/angular-sanitize.min.js"></script>
+        <script src="node_modules/angular-cookies/angular-cookies.min.js"></script>
+        <script src="node_modules/angular-filter/dist/angular-filter.min.js"></script>
+        <script src="node_modules/angular-messages/angular-messages.min.js"></script>
+        <script src="node_modules/angular-translate/dist/angular-translate.min.js"></script>
+        <script src="node_modules/angular-translate-storage-cookie/angular-translate-storage-cookie.min.js"></script>
+        <script src="node_modules/angular-translate-storage-local/angular-translate-storage-local.min.js"></script>
+        <script src="node_modules/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
+        <script src="node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
+        <script src="node_modules/ng-file-upload/dist/ng-file-upload-all.min.js"></script>
+        <script src="node_modules/angular-ui-tree/dist/angular-ui-tree.min.js"></script>
+        <script src="node_modules/angular-pdf/dist/angular-pdf.min.js"></script>
+        <script src="node_modules/angular-marked/dist/angular-marked.min.js"></script>
+        <script src="node_modules/angular-highlightjs/build/angular-highlightjs.min.js"></script>
+        <script src="node_modules/leaflet/dist/leaflet.js"></script>
+        <script src="node_modules/leaflet-draw/dist/leaflet.draw.js"></script>
+        <script src="node_modules/leaflet-snap/leaflet.snap.js"></script>
+        <script src="node_modules/leaflet-geometryutil/src/leaflet.geometryutil.js"></script>
+        <script src="node_modules/leaflet.gridlayer.googlemutant/Leaflet.GoogleMutant.js"></script>
+        <script src="node_modules/leaflet-plugins/layer/tile/Bing.js"></script>
+        <script src="node_modules/ui-leaflet/dist/ui-leaflet.min.js"></script>
+        <script src="node_modules/ui-leaflet-draw/dist/ui-leaflet-draw.js"></script>
+        <script src="node_modules/ui-leaflet-layers/dist/ui-leaflet-layers.min.js"></script>
+        <script src="node_modules/angular-simple-logger/dist/angular-simple-logger.min.js"></script>
+        <script src="node_modules/ng-infinite-scroll/build/ng-infinite-scroll.min.js"></script>
+        <script src="node_modules/ui-select/dist/select.min.js"></script>
+        <script src="node_modules/ui.flags/dist/uiFlag.min.js"></script>
+        <script src="node_modules/angular-bootstrap-contextmenu/contextMenu.js"></script>
+        <script src="node_modules/satellizer/dist/satellizer.min.js"></script>
+        <script src="node_modules/@uirouter/core/_bundles/ui-router-core.min.js" charset="utf-8"></script>
+        <script src="node_modules/@uirouter/sticky-states/_bundles/ui-router-sticky-states.js"></script>
+        <script src="node_modules/@uirouter/angularjs/release/ui-router-angularjs.js" charset="utf-8"></script>
+        <script src="node_modules/@uirouter/visualizer/bundles/visualizer.min.js" charset="utf-8"></script>
+        <script src="node_modules/d3/d3.min.js"></script>
+        <script src="node_modules/klayjs-d3/dist/klayjs-d3.min.js"></script>
+        <script src="node_modules/klayjs/klay.js"></script>
+        <script src="node_modules/popper.js/dist/umd/popper.min.js"></script>
+        <script src="node_modules/bootstrap-material-design/dist/js/material.min.js"></script>
+        <script src="node_modules/bootstrap-material-design/dist/js/ripples.min.js"></script>
+        <script src="node_modules/snackbarjs/dist/snackbar.min.js"></script>
         <script src="helpers.js"></script>
         <script src="app.js"></script>
         <script src="app/langService.js"></script>
@@ -195,20 +85,29 @@
         <script src="app/mapService.js"></script>
         <script src="app/analysisService.js"></script>
         <script src="app/userService.js"></script>
-        <script src="app/imageService.js"></script>
+        <script src="app/fileService.js"></script>
         <script src="app/literatureService.js"></script>
         <script src="app/dataEditorService.js"></script>
         <script src="app/layerEditorService.js"></script>
+        <script src="app/transitionService.js"></script>
         <script src="controllers/mainCtrl.js"></script>
+        <script src="controllers/contextCtrl.js"></script>
         <script src="controllers/userCtrl.js"></script>
-        <script src="controllers/langCtrl.js"></script>
+        <script src="controllers/headerCtrl.js"></script>
         <script src="controllers/mapCtrl.js"></script>
-        <script src="controllers/imageCtrl.js"></script>
-        <script src="controllers/literatureCtrl.js"></script>
+        <script src="controllers/fileCtrl.js"></script>
+        <script src="controllers/bibliographyCtrl.js"></script>
         <script src="controllers/dataEditorCtrl.js"></script>
         <script src="controllers/layerEditorCtrl.js"></script>
+        <script src="controllers/layerEditCtrl.js"></script>
         <script src="controllers/pdfCtrl.js"></script>
         <script src="controllers/threeCtrl.js"></script>
+        <script src="components/bibliography.js"></script>
+        <script src="components/editor.js"></script>
+        <script src="components/role.js"></script>
+        <script src="components/root.js"></script>
+        <script src="components/spacialist.js"></script>
+        <script src="components/user.js"></script>
 
         <div id="current-device-class">
             <div id="xs" class="visible-xs"></div>

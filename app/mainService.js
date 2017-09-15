@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'imageService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, modalFactory, $uibModal, moduleHelper, environmentService, imageService, literatureService, mapService, snackbarService, searchService, $timeout, $translate) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'httpDeletePromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'fileService', 'literatureService', 'mapService', 'snackbarService', 'searchService', '$timeout', '$state', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, httpDeletePromise, modalFactory, $uibModal, moduleHelper, environmentService, fileService, literatureService, mapService, snackbarService, searchService, $timeout, $state, $translate) {
     var main = {};
     var modalFields;
 
@@ -6,24 +6,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         enabled: false
     };
 
-    main.currentElement = {
-        element: {},
-        form: {},
-        data: {},
-        geometryType: '',
-        fields: {},
-        sources: {}
-    };
+    main.currentElement = {};
     main.contextTypes = [];
     main.contexts = environmentService.contexts;
     main.contextReferences = {};
     main.artifacts = [];
     main.artifactReferences = {};
-    main.dropdownOptions = {};
     main.treeCallbacks = {};
-    main.dimensionUnits = [
-        'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
-    ];
     // main.legendList = {};
 
     main.datepickerOptions = {
@@ -34,7 +23,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     //     opened: false
     // };
 
-    main.treeCallbacks.dropped = function(event) {
+    initCurrentElement();
+
+    main.treeCallbacks.dropped = function(event, contexts) {
         var hasParent = event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue;
         var oldParent = environmentService.getParentId(id);
         var hadParent = oldParent !== null;
@@ -57,7 +48,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             if(((!hasParent && !hadParent) || parent == oldParent) && index == oldIndex) {
                 return;
             }
-            var oldIndex = main.contexts.data[id].rank - 1;
+            var oldIndex = contexts.data[id].rank - 1;
             var startIndex = oldIndex;
             if(((!hasParent && !hadParent) || parent == oldParent) && index < oldIndex) {
                 startIndex++;
@@ -65,156 +56,65 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             var children;
             var oldChildren;
             if(hasParent) {
-                children = main.contexts.children[parent];
+                children = contexts.children[parent];
             } else {
-                children = main.contexts.roots;
+                children = contexts.roots;
             }
             if(hadParent) {
-                oldChildren = main.contexts.children[oldParent];
+                oldChildren = contexts.children[oldParent];
             } else {
-                oldChildren = main.contexts.roots;
+                oldChildren = contexts.roots;
             }
             var i;
             for(i=startIndex; i<oldChildren.length; i++) {
-                main.contexts.data[oldChildren[i]].rank--;
+                contexts.data[oldChildren[i]].rank--;
             }
-            main.contexts.data[id].rank = rank;
+            contexts.data[id].rank = rank;
             for(i=index+1; i<children.length; i++) {
-                main.contexts.data[children[i]].rank++;
+                contexts.data[children[i]].rank++;
             }
         });
     };
-    main.treeCallbacks.toggle = function(collapsed, sourceNodeScope) {
-        main.contexts.data[sourceNodeScope.$modelValue].collapsed = collapsed;
+    main.treeCallbacks.toggle = function(collapsed, sourceNodeScope, contexts) {
+        contexts.data[sourceNodeScope.$modelValue].collapsed = collapsed;
     };
 
-    init();
-
-    function init() {
-        getContexts();
-        getArtifacts();
-        getDropdownOptions();
-        mapService.initMapService();
-    }
-
-    function getContexts() {
-        httpGetFactory('api/context/context_type', function(callback) {
-            angular.forEach(callback, function(value, key) {
-                var index = value.index;
-                var title = value.title;
-                if(typeof main.contextReferences[index] === 'undefined') {
-                    main.contextReferences[index] = [];
-                    main.contextTypes.push({
-                        title: title,
-                        index: index,
-                        type: value.type,
-                        context_type_id: value.context_type_id
-                    });
-                }
-                if(value.context_type_id && value.aid && value.val && value.datatype) {
-                    main.contextReferences[index].push({
-                        aid: value.aid,
-                        val: value.val,
-                        context_type_id: value.context_type_id,
-                        datatype: value.datatype,
-                        position: value.position
-                    });
-                }
-            });
+    main.getContextData = function(id) {
+        return httpGetPromise.getData('api/context/' + id + '/data').then(function(response) {
+            return parseData(response.data);
         });
-    }
-
-    function getArtifacts() {
-        httpGetFactory('api/context/artifact', function(callback) {
-            angular.forEach(callback, function(value, key) {
-                var index = value.index;
-                var title = value.title;
-                if (typeof main.artifactReferences[index] === 'undefined') {
-                    main.artifactReferences[index] = [];
-                    main.artifacts.push({
-                        title: title,
-                        index: index,
-                        type: value.type,
-                        context_type_id: value.context_type_id
-                    });
-                }
-                if (value.context_type_id && value.aid && value.val && value.datatype) {
-                    main.artifactReferences[index].push({
-                        aid: value.aid,
-                        val: value.val,
-                        context_type_id: value.context_type_id,
-                        datatype: value.datatype,
-                        position: value.position
-                    });
-                }
-            });
-        });
-    }
-
-    function getDropdownOptions() {
-        httpGetFactory('api/context/dropdown_options', function(callback) {
-            for(var i=0; i<callback.length; i++) {
-                var value = callback[i];
-                var index = value.aid + "_";
-                if(typeof value.oid != 'undefined') index += value.oid;
-                if (value.datatype == 'string-sc' || value.datatype == 'string-mc') {
-                    if(value.choices !== null) {
-                        main.dropdownOptions[index] = value.choices;
-                    }
-                } else if (value.datatype == 'epoch') {
-                    main.dropdownOptions[index] = value.choices;
-                }
-            }
-        });
-    }
-
-    main.toggleEditMode = function() {
-        main.editMode.enabled = !main.editMode.enabled;
     };
 
-    main.duplicateElement = function(id) {
+    main.getContextFields = function(ctid) {
+        return httpGetPromise.getData('api/context/context_type/' + ctid + '/attribute').then(function(response) {
+            return response;
+        });
+    };
+
+    main.getDropdownOptions = function() {
+        return httpGetPromise.getData('api/context/dropdown_options').then(function(response) {
+            return response;
+        });
+    };
+
+    main.duplicateElement = function(id, contexts) {
         httpPostFactory('api/context/' + id + '/duplicate', new FormData(), function(newElem) {
-            var parent = main.contexts.data[main.contexts.data[id].root_context_id];
+            var parent = contexts.data[contexts.data[id].root_context_id];
             var copy = newElem.obj;
-            var elem = {
-                id: copy.id,
-                name: copy.name,
-                context_type_id: copy.context_type_id,
-                root_context_id: copy.root_context_id,
-                rank: copy.rank,
-                typeid: copy.typeid,
-                typename: copy.typename,
-                typelabel: copy.typelabel,
-                data: [],
-                lasteditor: copy.lasteditor,
-                updated_at: copy.updated_at,
-                created_at: copy.created_at
-            };
-            main.addContextToTree(elem, parent);
-            main.setCurrentElement(elem, main.currentElement);
+            main.addContextToTree(copy, copy.root_context_id, contexts);
+            $state.go('root.spacialist.data', {id: copy.id});
         });
     };
 
-
-    main.createNewContext = function(data) {
-        if(main.hasUnstagedChanges()) {
-            var onDiscard = function() {
-                main.currentElement.form.$setPristine();
-                return main.createNewContext(data);
-            };
-            var onConfirm = function() {
-                main.currentElement.form.$setPristine();
-                main.storeElement(main.currentElement.element, main.currentElement.data);
-                return main.createNewContext(data);
-            };
-            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
-            return;
+    main.addContext = function(context) {
+        var formData = new FormData();
+        formData.append('name', context.name);
+        formData.append('context_type_id', context.type.id);
+        if(context.parent) {
+            formData.append('root_context_id', context.parent);
         }
-
-        $translate('create-dialog.new-top-context').then(function(translation) {
-            var parent = {name : translation};
-            angular.extend(parent, data);
-            main.createModalHelper(parent, 'context', true);
+        return httpPostPromise.getData('api/context', formData).then(function(response) {
+            return response.context;
         });
     };
 
@@ -231,17 +131,15 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 }
             }
         }
-        elem.data = parsedData;
-        var promise = storeElement(elem);
+        var promise = storeElement(elem, parsedData);
         promise.then(function(response){
-            main.currentElement.form.$setPristine();
+            // TODO elem.form.$setPristine();
             var content = $translate.instant('snackbar.data-stored.success');
             snackbarService.addAutocloseSnack(content, 'success');
             if(response.error){
                 modalFactory.errorModal(response.error);
                 return;
             }
-            elem.data = response.data;
         });
     };
 
@@ -298,13 +196,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
      * Stores a single element of the context tree in the database
      * @return: returns a promise which returns the ID of the newly inserted context
      */
-    function storeElement(elem) {
+    function storeElement(elem, data) {
         console.log("store context " + elem.name);
         var formData = new FormData();
         formData.append('name', elem.name);
 
-        for(var i=0; i<elem.data.length; i++) {
-            var d = elem.data[i];
+        for(var i=0; i<data.length; i++) {
+            var d = data[i];
             var currValue = '';
             if (typeof d.value === 'object') {
                 currValue = angular.toJson(d.value);
@@ -323,105 +221,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         return promise;
     }
 
-    main.deleteElement = function(elem) {
-        modalFactory.deleteModal(elem.name, function() {
-            deleteElement(elem, function() {
-                deleteContext(elem.id);
-                var content = $translate.instant('snackbar.element-deleted.success', { name: elem.title  });
-                snackbarService.addAutocloseSnack(content, 'success');
-                if(main.currentElement.element.id == elem.id) {
-                    main.unsetCurrentElement();
-                }
-            });
-        }, 'delete-confirm.warning');
-    };
-
-    function deleteElement(elem, onSuccess) {
-        httpDeleteFactory('api/context/' + elem.id, function(callback) {
-            onSuccess();
-        });
-    }
-
-    main.openSourceModal = function(fieldname, fieldid, currentVal, currentDesc) {
-        var aid = fieldid;
-        var cid = main.currentElement.element.id;
-        if(!main.currentElement.sources['#'+aid]) {
-            main.currentElement.sources['#'+aid] = [];
-        }
-        modalFields = {
-            name: fieldname,
-            id: aid,
-            literature: literatureService.literature.slice(),
-            addedSources: main.currentElement.sources['#'+aid],
-            value: currentVal || 100,
-            description: currentDesc,
-            setPossibility: function(event) {
-                var max = event.currentTarget.scrollWidth;
-                var click = event.originalEvent.layerX;
-                var curr = modalFields.value;
-                var newVal = parseInt(click/max*100);
-                if(Math.abs(newVal-curr) < 10) {
-                    if(newVal > curr) newVal = parseInt((newVal+10)/10)*10;
-                    else newVal = parseInt(newVal/10)*10;
-                } else {
-                    newVal = parseInt((newVal+5)/10)*10;
-                }
-                event.currentTarget.children[0].style.width = newVal+"%";
-                modalFields.value = newVal;
-            }
-        };
-        var modalInstance = $uibModal.open({
-            templateUrl: 'layouts/source-modal.html',
-            windowClass: 'wide-modal shrinked-modal',
-            controller: function($uibModalInstance) {
-                this.cancel = function(result) {
-                    $uibModalInstance.dismiss('cancel');
-                };
-                this.savePossibility = function() {
-                    var formData = new FormData();
-                    formData.append('possibility', modalFields.value);
-                    if(modalFields.description) formData.append('possibility_description', modalFields.description);
-                    httpPutFactory('api/context/attribute_value/'+cid+'/'+aid, formData, function(callback) {
-                        var content = $translate.instant('snackbar.data-stored.success');
-                        snackbarService.addAutocloseSnack(content, 'success');
-                        main.currentElement.data[aid+'_pos'] = modalFields.value;
-                        main.currentElement.data[aid+'_desc'] = modalFields.description;
-                    });
-                };
-                this.savePossibilityAndClose = function() {
-                    this.savePossibility();
-                    this.cancel();
-                };
-                this.modalFields = modalFields;
-                this.addSource = addSource;
-                this.deleteSourceEntry = main.deleteSourceEntry;
-            },
-            //scope: $scope
-            controllerAs: 'mc'
-        });
-        modalInstance.result.then(function(selectedItem) {}, function() {});
-    };
-
-    /**
-     * Adds the current selected source entry `currentSource` with the given description `currentDesc` for the given attribute `aid` to the database and the source modal window array
-     */
-    function addSource(currentSource, currentDesc, aid) {
-        if(typeof main.currentElement.element.id == 'undefined') return;
-        if(!currentDesc) currentDesc = '';
-        var cid = main.currentElement.element.id;
-        var formData = new FormData();
-        formData.append('cid', cid);
-        formData.append('aid', aid);
-        formData.append('lid', currentSource.id);
-        formData.append('desc', currentDesc);
-        httpPostFactory('api/source', formData, function(response) {
-            var source = response.source;
-            addContextSource(source);
-        });
-        modalFields.currentSource = undefined;
-        modalFields.currentDesc = undefined;
-    }
-
     /**
      * Remove a source entry at the given index `index` from the given array `arr`.
      */
@@ -436,24 +235,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }, '');
     };
 
-    main.addListEntry = function(index, inp, arr) {
-        if(typeof arr[index] == 'undefined') arr[index] = [];
-        arr[index].push({
-            'name': inp[index]
-        });
-    }
-
-    main.removeListItem = function(index, arr, $index) {
-        arr[index].splice($index, 1);
-    }
-
     function parseData(data) {
         var parsedData = {};
         for(var i=0; i<data.length; i++) {
             var value = data[i];
-            var index = value.attribute_id + '_' + (value.o_id || '');
-            var posIndex = index + 'pos';
-            var descIndex = index + 'desc';
+            var index = value.attribute_id;
+            var posIndex = index + '_pos';
+            var descIndex = index + '_desc';
             var val = value.str_val;
             var dType = value.datatype;
             parsedData[posIndex] = value.possibility || 100;
@@ -481,7 +269,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             } else if(dType == 'boolean') {
                 parsedData[index] = (parseInt(value.int_val) != 0);
             } else if(dType == 'double') {
-                parsedData[index] = parseFloat(val);
+                parsedData[index] = parseFloat(value.dbl_val);
             } else if(dType == 'date') {
                 parsedData[index] = new Date(value.dt_val);
             } else {
@@ -491,69 +279,72 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         return parsedData;
     }
 
-    main.updateContextById = function(id, newValues) {
-        main.expandTree(id);
+    main.updateContextById = function(tree, id, newValues) {
+        main.expandTree(tree, id);
 
         angular.merge(main.currentElement.element, newValues);
-        angular.merge(main.contexts.data[id], newValues);
+        angular.merge(tree.data[id], newValues);
     };
 
-    function deleteContext(id) {
-        rootId = main.contexts.data[id].root_context_id;
-        var index;
-        var children;
-        if(rootId && rootId > 0) {
-            index = main.contexts.children[rootId].indexOf(id);
-            children = main.contexts.children[rootId];
-        }
-        else {
-            index = main.contexts.roots.indexOf(id);
-            children = main.contexts.roots;
-        }
-        if(index > -1) {
-            children.splice(index, 1);
-        }
-        for(var i=index; i<children.length; i++) {
-            main.contexts.data[children[i]].rank--;
-        }
-        delete main.contexts.data[id];
-    }
+    main.deleteContext = function(context, contexts) {
+        var id = context.id;
+        return httpDeletePromise.getData('api/context/' + id).then(function(callback) {
+            var rootId = contexts.data[id].root_context_id;
+            var index;
+            var children;
+            if(rootId && rootId > 0) {
+                index = contexts.children[rootId].indexOf(id);
+                children = contexts.children[rootId];
+            }
+            else {
+                index = contexts.roots.indexOf(id);
+                children = contexts.roots;
+            }
+            if(index > -1) {
+                children.splice(index, 1);
+            }
+            for(var i=index; i<children.length; i++) {
+                contexts.data[children[i]].rank--;
+            }
+            delete contexts.data[id];
+        });
+    };
 
     /**
     *   This function expands the tree up the selected element
     */
-    main.expandTree = function(id, firstRun) {
+    main.expandTree = function(tree, id, firstRun) {
         // check for undefined, not false => firstRun = firstRun || true; would always be true
         if(typeof firstRun == 'undefined') firstRun = true;
         // only expand if element is not the first aka selected one
         if(!firstRun) {
-            main.contexts.data[id].collapsed = false;
+            tree.data[id].collapsed = false;
         }
-        rootId = main.contexts.data[id].root_context_id;
+        rootId = tree.data[id].root_context_id;
         if(rootId && rootId > 0) {
-            main.expandTree(rootId, false);
+            main.expandTree(tree, rootId, false);
         }
     };
 
     /**
     *   This function adds a new context to the tree
     */
-    main.addContextToTree = function(elem, parent) {
+    main.addContextToTree = function(elem, parent, tree) {
         // insert the context into the context list
         elem.collapsed = true;
         elem.visible = true;
-        main.contexts.data[elem.id] = elem;
+        tree.data[elem.id] = elem;
 
         var children;
         // insert the context into the tree
-        if(parent && parent.id && parent.id > 0) { // elem is no root context
-            if(!main.contexts.children[parent.id]) { // parent was leaf before, create children list
-                main.contexts.children[parent.id] = [];
+        if(parent > 0) { // elem is no root context
+            if(!tree.children[parent]) { // parent was leaf before, create children list
+                tree.children[parent] = [];
             }
-            children = main.contexts.children[parent.id];
+            children = tree.children[parent];
         }
         else { // elem is root context
-            children = main.contexts.roots;
+            children = tree.roots;
         }
         var index = elem.rank - 1; // rank is 1-n, index 0-(n-1)
         // insert elem at index and update other indices
@@ -563,20 +354,18 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
     };
 
-
-    main.unsetCurrentElement = function(dontUnsetUnlinked) {
-        dontUnsetUnlinked = dontUnsetUnlinked || false;
-        if(typeof main.currentElement == 'undefined') return;
-        if(dontUnsetUnlinked) {
-            console.log(main.currentElement.element.geodata_id);
-            if(typeof main.currentElement.element.geodata_id == 'undefined' || main.currentElement.element.geodata_id === null) {
-                return;
-            }
-        }
+    function initCurrentElement() {
         main.currentElement.element = {};
+        main.currentElement.form = {};
         main.currentElement.data = {};
+        main.currentElement.geometryType = '';
         main.currentElement.fields = {};
         main.currentElement.sources = {};
+        main.currentElement.linkedFiles = [];
+    }
+
+    main.unsetCurrentElement = function() {
+        initCurrentElement();
     };
 
     function addContextSource(source) {
@@ -591,78 +380,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         return main.currentElement.form && main.currentElement.form.$dirty;
     };
 
-    main.setCurrentElement = function(target, elem, openAgain) {
-        if(main.hasUnstagedChanges()) {
-            var onDiscard = function() {
-                main.currentElement.form.$setPristine();
-                return main.setCurrentElement(target, elem, openAgain);
-            };
-            var onConfirm = function() {
-                main.currentElement.form.$setPristine();
-                main.storeElement(main.currentElement.element, main.currentElement.data);
-                return main.setCurrentElement(target, elem, openAgain);
-            };
-            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
-            return;
-        }
-        if(typeof elem != 'undefined' && elem.id == target.id) {
-            if(mapService.getPopupGeoId() == elem.geodata_id) mapService.closePopup();
-            main.unsetCurrentElement();
-            return;
-        }
-        var isCurrentlyLinked = mapService.geodata.linkedContexts[elem.geodata_id] && mapService.geodata.linkedContexts[elem.geodata_id] > 0;
-        elem = target;
-        var layerId = mapService.geodata.linkedGeolayer[elem.context_type_id];
-        var layer = mapService.map.layers.overlays[layerId];
-        main.currentElement.geometryType = layer.layerOptions.type;
-        console.log(elem);
-        if(elem.typeid === 0) { //context
-            elem.fields = main.contextReferences[elem.typename].slice();
-        } else if(elem.typeid == 1) { //find
-            elem.fields = main.artifactReferences[elem.typename].slice();
-        }
-        var data = {};
-        httpGetFactory('api/context/' + elem.id + '/data', function(response) {
-            if(response.error) {
-                modalFactory.errorModal(response.error);
-                return;
+    main.setCurrentElement = function(element) {
+        for(var k in element) {
+            if(element.hasOwnProperty(k)) {
+                main.currentElement[k] = element[k];
             }
-            data = parseData(response.data);
-            main.currentElement.data = data;
-        });
-        main.currentElement.sources = {};
-        httpGetFactory('api/source/by_context/' + elem.id, function(response) {
-            if(response.error) {
-                modalFactory.errorModal(response.error);
-                return;
-            }
-            var sources = response.sources;
-            for(var k in main.currentElement.sources) {
-                if(main.currentElement.sources.hasOwnProperty(k)) {
-                    main.currentElement.sources[k].length = 0;
-                    delete main.currentElement.sources[k];
-                }
-            }
-            angular.forEach(sources, function(source, i) {
-                addContextSource(source);
-            });
-        });
-        var lastmodified = elem.updated_at || elem.created_at;
-        var d = new Date(lastmodified);
-        main.currentElement.fields = elem.fields;
-        elem.lastmodified = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
-        elem.root_cid = elem.root_cid || -1;
-        main.currentElement.element = elem;
-        if(typeof openAgain == 'undefined') openAgain = true;
-        if(elem.geodata_id !== null && openAgain) {
-            mapService.openPopup(elem.geodata_id);
-        } else if(elem.geodata_id === null && isCurrentlyLinked) {
-            mapService.closePopup();
         }
-        loadLinkedImages(main.currentElement.element.id);
     };
 
     main.openGeographyModal = function($scope, aid) {
+        var featureGroup = new L.FeatureGroup();
         var inp = document.getElementById('a' + aid);
         if(inp.value) {
             httpGetFactory('api/geodata/wktToGeojson/'+inp.value, function(response) {
@@ -678,20 +405,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 geojson.data.features.push(feature);
             });
         }
-        var featureGroup = new L.FeatureGroup();
         var createdListener = $scope.$on('leafletDirectiveMap.placermap.draw:created', function(event, args) {
             var type = args.leafletEvent.layerType;
-            switch(type) {
-                case 'marker':
-                    type = 'Point';
-                    break;
-                case 'polyline':
-                    type = 'LineString';
-                    break;
-                case 'polygon':
-                    type = 'Polygon';
-                    break;
-            }
+            type = mapService.convertToStandardGeomtype(type);
             var layer = args.leafletEvent.layer;
             var coords = [];
             if(type == 'Point') {
@@ -700,6 +416,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 coords.push(latlng.lat);
             } else {
                 var latlngs = layer.getLatLngs();
+                // "convert" MultiPolygon to Polygon
+                if(type == 'Polygon') latlngs = latlngs[0];
                 for(var i=0; i<latlngs.length; i++) {
                     var curr = latlngs[i];
                     var arr = [];
@@ -708,10 +426,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     coords.push(arr);
                 }
                 if(type == 'Polygon') {
-                    coords.push(coords[0]);
-                    var newCoords = [];
-                    newCoords.push(coords);
-                    coords = newCoords;
+                    coords.push(angular.copy(coords[0]));
+                    coords = [coords];
                 }
             }
             var feature = {
@@ -729,7 +445,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             geojson.data.features.length = 0;
         });
         var drawOptions = angular.copy(mapService.map.drawOptions);
-        var bounds = mapService.map.bounds;
+        var bounds = angular.copy(mapService.map.bounds);
         var geojson = {
             data: {
                 type: 'FeatureCollection',
@@ -786,59 +502,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
 
-    main.createModalHelper = function(parent, elemType, copyPosition) {
-        if(main.hasUnstagedChanges()) {
-            var onDiscard = function() {
-                main.currentElement.form.$setPristine();
-                return main.createModalHelper(parent, elemType, copyPosition);
-            };
-            var onConfirm = function() {
-                main.currentElement.form.$setPristine();
-                main.storeElement(main.currentElement.element, main.currentElement.data);
-                return main.createModalHelper(parent, elemType, copyPosition);
-            };
-            modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
-            return;
-        }
-        var selection = [];
-        var msg = '';
-        if(elemType == 'context') {
-            selection = main.contextTypes.slice();
-            msg = 'create-dialog.new-context-description';
-        } else if(elemType == 'find') {
-            selection = main.artifacts.slice();
-            msg = 'create-dialog.new-artifact-description';
-        }
-        modalFactory.createModal(parent.name, msg, selection, function(name, type) {
-            var formData = new FormData();
-            formData.append('name', name);
-            formData.append('context_type_id', type.context_type_id);
-            if(typeof parent.id != 'undefined') formData.append('root_context_id', parent.id);
-            httpPostFactory('api/context', formData, function(response) {
-                var newContext = response.context;
-                var elem = {
-                    id: newContext.id,
-                    name: name,
-                    context_type_id: type.context_type_id,
-                    root_context_id: parent.id,
-                    rank: newContext.rank,
-                    typeid: type.type,
-                    typename: type.index,
-                    typelabel: type.title,
-                    data: [],
-                    lasteditor: newContext.lasteditor,
-                    updated_at: newContext.updated_at,
-                    created_at: newContext.created_at
-                };
-                main.addContextToTree(elem, parent);
-                main.setCurrentElement(elem, main.currentElement);
-            });
-        });
-    };
-
-    function loadLinkedImages(id) {
-        if(!moduleHelper.controllerExists('imageCtrl')) return;
-        imageService.getImagesForContext(id);
+    function loadLinkedFiles(id) {
+        if(!moduleHelper.controllerExists('fileCtrl')) return;
+        fileService.getFilesForContext(id);
     }
 
     main.isEmpty = function(obj) {

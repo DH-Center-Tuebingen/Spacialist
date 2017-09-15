@@ -1,59 +1,59 @@
-<div class="col-md-12" ng-init="tmpData[imageType] = []">
+<div class="col-md-12">
     <div class="row">
-        <div class="alert alert-warning unpadded-alert" ng-hide="tmpData[imageType].length > 0">
-            <p>{{ 'photos.empty' | translate }}</p>
+        <div class="alert alert-warning unpadded-alert" ng-if="files.length == 0">
+            <p>{{ 'files.empty' | translate }}</p>
         </div>
     </div>
-    <div class="row" infinite-scroll="tmpData[imageType]=onScrollLoad({len: tmpData[imageType].length, type: imageType})" infinite-scroll-distance="0" infinite-scroll-container="scrollContainer" infinite-scroll-listen-for-event="image:updated:{{imageType}}">
-        <div class="col-sm-6 col-md-4 unlinked-item" context-menu="imageContextMenu" ng-repeat="img in tmpData[imageType] | imageFilter:searchTerms">
+    <div class="row">
+        <div class="col-sm-6 col-md-4 unlinked-item" context-menu="contextMenu" ng-repeat="f in files | fileFilter:searchTerms">
             <div class="thumbnail">
-                <a ng-click="openImageModal(img)">
-                    <div class="thumb-wrapper centered-full" ng-switch="getMimeType(img.mime_type, img.filename)">
+                <a ui-sref="root.spacialist.file({id: f.id})">
+                    <div class="thumb-wrapper centered-full" ng-switch="$ctrl.getMimeType(f)">
                         <div ng-switch-when="image">
-                            <img class="thumb" ng-src="{{img.thumb_url}}" />
+                            <img class="thumb" ng-src="{{f.thumb_url}}" />
                         </div>
                         <div ng-switch-when="pdf">
-                            <h3>{{ img.filename }}</h3>
+                            <h3>{{ f.filename }}</h3>
                             <i class="material-icons md-96 md-dark">attach_file</i>
                             <h4 translate="file-type.pdf"></h4>
                         </div>
                         <div ng-switch-when="xml">
-                            <h3>{{ img.filename }}</h3>
+                            <h3>{{ f.filename }}</h3>
                             <i class="material-icons md-96 md-dark">code</i>
                             <h4 translate="file-type.xml"></h4>
                         </div>
                         <div ng-switch-when="html">
-                            <h3>{{ img.filename }}</h3>
+                            <h3>{{ f.filename }}</h3>
                             <i class="material-icons md-96 md-dark">code</i>
                             <h4 translate="file-type.html"></h4>
                         </div>
                         <div ng-switch-when="audio">
-                            <h3>{{ img.filename }}</h3>
+                            <h3>{{ f.filename }}</h3>
                             <i class="material-icons md-96 md-dark">music_note</i> <!-- volume_up -->
                             <h4 translate="file-type.audio"></h4>
                         </div>
                         <div ng-switch-when="video">
-                            <h3>{{ img.filename }}</h3>
+                            <h3>{{ f.filename }}</h3>
                             <i class="material-icons md-96 md-dark">movie</i> <!-- videocam, theaters -->
                             <h4 translate="file-type.video"></h4>
                         </div>
                         <div ng-switch-when="3d">
-                            <h3>{{ img.filename }}</h3>
+                            <h3>{{ f.filename }}</h3>
                             <i class="material-icons md-96 md-dark">3d_rotation</i>
                             <h4 translate="file-type.3d"></h4>
                         </div>
                         <div ng-switch-default>
-                            <h3>{{ img.filename }}</h3>
+                            <h3>{{ f.filename }}</h3>
                             <i class="material-icons md-96 md-dark">format_align_left</i>
                             <h4 translate="file-type.plain-text"></h4>
                         </div>
-                         <div class="overlay">
-                             <i class="material-icons overlay-icon" aria-hidden="true">loupe</i>
-                         </div>
+                        <div class="overlay">
+                            <i class="material-icons overlay-icon" aria-hidden="true">loupe</i>
+                        </div>
                      </div>
                 </a>
                 <div ng-show="showTags">
-                   <ui-select multiple tagging tagging-label="false" ng-model="img.tags" on-select="addTag(img, $item)" on-remove="removeTag(img, $item)" theme="bootstrap" sortable="true" close-on-select="false">
+                   <ui-select multiple tagging tagging-label="false" ng-model="f.tags" on-select="$ctrl.addTag(f, $item)" on-remove="$ctrl.removeTag(f, $item)" theme="bootstrap" sortable="true" close-on-select="false">
                        <ui-select-match placeholder="{{ 'tags.add' | translate }}">
                            {{ $item.label }}
                        </ui-select-match>
@@ -64,14 +64,14 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-md-4 unlinked-item" ng-if="hasMoreImages(tmpData[imageType].length, imageType) > 0">
+        <!-- <div class="col-sm-6 col-md-4 unlinked-item" ng-if="hasMoreFiles(tmpData[imageType].length, imageType) > 0">
             <div class="thumbnail">
                 <div class="thumb-wrapper centered-full">
                     <i class="material-icons md-96 md-dark">file_download</i>
-                    <p translate="photos.load-more" translate-values="{ cnt: hasMoreImages(tmpData[imageType].length, imageType) }">
+                    <p translate="files.load-more" translate-values="{ cnt: hasMoreFiles(tmpData[imageType].length, imageType) }">
                     </p>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>

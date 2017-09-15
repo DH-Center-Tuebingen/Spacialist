@@ -1,0 +1,35 @@
+<div class="modal-header">
+    <h4 translate="modals.new-context.heading"></h4>
+</div>
+<div class="modal-body">
+    <div class="col-md-12">
+        <p translate="modals.new-context.desc" class="alert alert-info"></p>
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label class="control-label col-md-3" for="name">
+                    {{'context-new.name'|translate}}:
+                </label>
+                <div class="col-md-9">
+                    <input class="form-control" type="text" id="name" ng-model="newContext.name" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-3" for="type">
+                    {{'context-new.type'|translate}}:
+                </label>
+                <ui-select ng-model="newContext.type" id="type"
+                on-select="newContext.type=$select.ngModel.$modelValue" class="col-md-9">
+                  <ui-select-match placeholder="{{'context-new.type-placeholder'|translate}}">{{ concepts[$select.selected.thesaurus_url].label }}</ui-select-match>
+                  <ui-select-choices repeat="choice in contextTypes | filter: $select.search">
+                    <span ng-bind-html="concepts[choice.thesaurus_url].label | highlight: $select.search"></span>
+                  </ui-select-choices>
+                </ui-select>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" ng-disabled="!newContext.name || !newContext.type" ng-click="onAdd(newContext)">{{ 'create' | translate }}</button>
+    <button type="button" class="btn btn-danger"
+      ng-click="cancel()">{{ 'cancel' | translate }}</button>
+</div>

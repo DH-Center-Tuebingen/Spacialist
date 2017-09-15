@@ -24,6 +24,6 @@ class Geodata extends Model
     ];
 
     const availableGeometryTypes = [
-        'Point', 'Linestring', 'Polygon'
+        'Point', 'LineString', 'Polygon'
     ];
 }

@@ -1,0 +1,52 @@
+<div resize-watcher id="attribute-editor">
+    <h2 id="editor-heading" translate="data-model-editor.heading"></h2>
+    <div class="col-md-12">
+        <div class="col-md-5 attribute-editor-column">
+            <h4 translate="data-model-editor.available-attributes.heading"></h4>
+            <p class="alert alert-info">
+                Die Label der Eltern-Elemente (relevant für Dropdown-Elemente) können angezeigt werden, indem man mit der Maus über das Label des entsprechenden Attributs fährt.
+            </p>
+            <form class="form-horizontal" role="form">
+                <form-field fields="$ctrl.attributes" output="temp" concepts="$ctrl.concepts" label-width="3" input-width="9" offset="0" deletable on-delete="$ctrl.onDeleteAttribute">
+                </form-field>
+            </form>
+            <button type="button" class="btn btn-success" ng-click="$ctrl.addNewAttribute()">
+                <i class="material-icons">add</i> {{ 'attribute.add-button' | translate }}
+            </button>
+        </div>
+        <div class="col-md-2 attribute-editor-column">
+            <h4 translate="data-model-editor.available-ct.heading"></h4>
+            <ul class="list-group">
+                <li class="btn btn-primary">
+                    <a href="" ng-click="$ctrl.addNewContextType()"><i class="material-icons">add</i> {{ 'context-type.add.new' | translate }}</a>
+                </li>
+                <li class="list-group-item" ng-repeat="ct in $ctrl.contextTypes" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
+                    <a ui-sref="root.editor.data-model.edit({id: ct.id})">
+                        <span ng-if="ct.type === 0">
+                            <i class="material-icons">account_balance</i> {{ $ctrl.concepts[ct.thesaurus_url].label }} ({{'context-type.type.context'|translate}})
+                        </span>
+                        <span ng-if="ct.type == 1">
+                            <i class="material-icons">spa</i> {{ $ctrl.concepts[ct.thesaurus_url].label }} ({{'context-type.type.find'|translate}})
+                        </span>
+                    </a>
+                    <span ng-show="hovered" class="is-right">
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.editContextType(ct)">
+                            <i class="material-icons md-18 fa-green">edit</i>
+                        </a>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.deleteContextType(ct)">
+                            <i class="material-icons md-18 fa-red">delete</i>
+                        </a>
+                    </span>
+                </li>
+                <li class="btn btn-primary">
+                    <a href="" ng-click="$ctrl.addNewContextType()"><i class="material-icons">add</i> {{ 'context-type.add.new' | translate }}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-5 attribute-editor-column" ui-view>
+            <!-- ui-view element for context type edit template -->
+            <p class="alert alert-info" translate="data-model-editor.please-select-element">
+            </p>
+        </div>
+    </div>
+</div>

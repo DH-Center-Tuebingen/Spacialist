@@ -16,7 +16,7 @@ class AvailableLayer extends Model
 
     const patchRules = [
         'name' => 'string',
-        'url' => 'url',
+        'url' => 'string',
         'type' => 'string',
         'subdomains' => 'string',
         'attribution' => 'string',

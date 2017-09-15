@@ -13,6 +13,14 @@ class RandomSeeder extends Seeder
     {
         $numberSeedEntries = 20;
 
+        $al = new App\AvailableLayer();
+        $al->name = 'OpenStreetMap';
+        $al->url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        $al->type = 'xyz';
+        $al->attribution = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>';
+        $al->opacity = 1;
+        $al->position = 1;
+        $al->save();
 
         $concepts = factory(App\ThConcept::class, $numberSeedEntries)->create()->each(function ($concept) {
             foreach(App\ThLanguage::get() as $language){
@@ -31,11 +39,11 @@ class RandomSeeder extends Seeder
         });
 
         factory(App\Attribute::class, $numberSeedEntries)->create();
-        factory(App\ContextAttribute::class, $numberSeedEntries)->create();
         factory(App\Literature::class, $numberSeedEntries)->create();
         for($i = 0; $i < $numberSeedEntries; $i++){
             // creation needs to be done in a loop in order to have root-context relationships
             factory(App\Context::class)->create();
+            factory(App\ContextAttribute::class)->create();
         }
         factory(App\Source::class, $numberSeedEntries)->create();
         factory(App\AttributeValue::class, $numberSeedEntries)->create();

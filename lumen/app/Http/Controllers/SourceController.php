@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Literature;
 use App\Source;
+use App\Attribute;
 use \DB;
 use Illuminate\Http\Request;
 
@@ -26,14 +27,10 @@ class SourceController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $src = DB::table('sources')
-                ->select('sources.*', DB::raw("(select label from getconceptlabelsfromurl where concept_url = attributes.thesaurus_url and short_name = 'de' limit 1) AS attribute_name"))
-                ->where('context_id', '=', $id)
-                ->join('attributes', 'sources.attribute_id', '=', 'attributes.id')
-                ->orderBy('attribute_name', 'asc')
-                ->get();
+        $src = Source::where('context_id', '=', $id)->get();
         foreach($src as &$s) {
             $s->literature = Literature::find($s->literature_id);
+            $s->attribute_url = Attribute::where('id', $s->attribute_id)->value('thesaurus_url');
         }
         return response()->json([
             'sources' => $src
@@ -61,18 +58,15 @@ class SourceController extends Controller {
         $cid = $request->get('cid');
         $lid = $request->get('lid');
         $desc = $request->get('desc');
-        $id = DB::table('sources')
-            ->insertGetId(
-                [
-                    'context_id' => $cid,
-                    'attribute_id' => $aid,
-                    'literature_id' => $lid,
-                    'description' => $desc,
-                    'lasteditor' => $user['name']
-                ]
-            );
+        $src = new Source();
+        $src->context_id = $cid;
+        $src->attribute_id = $aid;
+        $src->literature_id = $lid;
+        $src->description = $desc;
+        $src->lasteditor = $user['name'];
+        $src->save();
         return response()->json([
-            'source' => $this->getById($id)
+            'source' => $this->getById($src->id)
         ]);
     }
 

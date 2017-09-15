@@ -1,35 +1,102 @@
-spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'analysisService', 'mainService', 'literatureService', 'searchService', 'modalFactory', '$translate', function($rootScope, $scope, userService, analysisService, mainService, literatureService, searchService, modalFactory, $translate) {
-    $scope.literature = literatureService.literature;
+spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainService', 'mapService', 'fileService', 'modalFactory', '$uibModal', '$state', '$translate', '$timeout', '$compile', function($scope, httpDeleteFactory, mainService, mapService, fileService, modalFactory, $uibModal, $state, $translate, $timeout, $compile) {
+    var vm = this;
+    vm.currentElement = mainService.currentElement;
+    vm.currentGeodata = mapService.currentGeodata;
+    vm.isLinkPossible = mapService.isLinkPossible;
 
-    $scope.currentUser = userService.currentUser;
-    $scope.can = userService.can;
-
-    $scope.currentElement = mainService.currentElement;
-    $scope.contextTypes = mainService.contextTypes;
-    $scope.contextReferences = mainService.contextReferences;
-    $scope.artifacts = mainService.artifacts;
-    $scope.artifactReferences = mainService.artifactReferences;
-    $scope.dropdownOptions = mainService.dropdownOptions;
-    $scope.getColorForId = mainService.getColorForId;
-    $scope.contexts = mainService.contexts;
     $scope.moduleExists = mainService.moduleExists;
-    $scope.unsetCurrentElement = mainService.unsetCurrentElement;
-    $scope.analysisEntries = analysisService.entries;
-    $scope.activeAnalysis = analysisService.activeAnalysis;
-    $scope.availableSearchTerms = searchService.availableSearchTerms;
     $scope.filterTree = mainService.filterTree;
-    $scope.contextSearch = mainService.contextSearch;
-    $scope.treeCallbacks = mainService.treeCallbacks;
-    $scope.datepickerOptions = mainService.datepickerOptions;
-    $scope.storedQueries = analysisService.storedQueries;
-    $scope.editMode = mainService.editMode;
-    $scope.dimensionUnits = mainService.dimensionUnits;
-    var createModalHelper = mainService.createModalHelper;
+
+    vm.onStore = function(context, data) {
+        mainService.storeElement(context, data);
+        var c = vm.contexts.data[context.id];
+        for(var k in context) {
+            if(context.hasOwnProperty(k)) {
+                c[k] = context[k];
+            }
+        }
+        vm.currentElement.form.$setPristine();
+    };
+
+    if(vm.tab == 'map') {
+        mapService.setupLayers(vm.layer, vm.map, vm.contexts, vm.concepts);
+        mapService.initMapObject().then(function(obj) {
+            vm.mapObject = obj;
+            // wait a random amount of time, so mapObject.eachLayer has all layers
+            $timeout(function() {
+                vm.mapObject.eachLayer(function(l) {
+                    if(l.options.layer_id) {
+                        vm.map.mapLayers[l.options.layer_id] = l;
+                    }
+                });
+                mapService.initGeodata(vm.geodata, vm.contexts, vm.map);
+            }, 100);
+        });
+    }
+
+    vm.openNewContextModal = function(type, parent) {
+        $uibModal.open({
+            templateUrl: "modals/add-context.html",
+            controller: ['$scope', function($scope) {
+                $scope.contexts = vm.contexts;
+                $scope.concepts = vm.concepts;
+                $scope.type = type;
+                $scope.parent = parent;
+
+                if($scope.type == 'context') {
+                    $scope.contextTypes = vm.contextTypes.filter(function(t) {
+                        return t.type === 0;
+                    });
+                } else if($scope.type == 'find') {
+                    $scope.contextTypes = vm.contextTypes.filter(function(t) {
+                        return t.type == 1;
+                    });
+                }
+                $scope.newContext = {
+                    name: '',
+                    type: ''
+                };
+                $scope.newContext.parent = $scope.parent > 0 ? $scope.parent : undefined;
+
+                $scope.cancel = function() {
+                    $scope.$dismiss();
+                };
+
+                $scope.onAdd = function(c) {
+                    mainService.addContext(c).then(function(response) {
+                        var newContext = response;
+                        mainService.addContextToTree(newContext, c.parent, vm.contexts);
+                        $scope.$close(true);
+                        $state.go('root.spacialist.data', {id: newContext.id});
+                    });
+                };
+            }],
+            controllerAs: '$ctrl'
+        });
+    };
+
+    vm.updateMarkerOptions = function(geodata) {
+        mapService.updateMarker(geodata);
+    };
+
+    $scope.treeCallbacks = {
+        toggle: function(collapsed, sourceNodeScope) {
+            mainService.treeCallbacks.toggle(collapsed, sourceNodeScope, vm.contexts);
+        },
+        dropped: function(event) {
+            mainService.treeCallbacks.dropped(event, vm.contexts);
+        }
+    };
+
+    $scope.treeOptions = {
+        getColorForId: mainService.getColorForId,
+        'new-context-link': 'root.spacialist.add({type: "context"})'
+    };
 
     $scope.newElementContextMenu = [
         [
             function($itemScope, $event, modelValue, text, $li) {
-                return $translate('context-menu.options-of', { object: $scope.contexts.data[$itemScope.$parent.id].name });
+                return $translate.instant('context-menu.options-of', { object: vm.contexts.data[$itemScope.$parent.id].name });
             },
             function($itemScope, $event, modelValue, text, $li) {
             },
@@ -38,151 +105,198 @@ spacialistApp.controller('mainCtrl', ['$rootScope', '$scope', 'userService', 'an
         null,
         [
             function() {
-                return '<i class="material-icons md-18 fa-light fa-green">add_circle_outline</i> ' + $translate.instant('context-menu.new-artifact');
+                return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">add_circle_outline</i> ' + $translate.instant('context-menu.new-artifact');
             },
             function($itemScope, $event, modelValue, text, $li) {
-            createModalHelper($scope.contexts.data[$itemScope.$parent.id], 'find', false);
+                vm.openNewContextModal('find', $itemScope.$parent.id);
         }, function($itemScope) {
-            return $scope.contexts.data[$itemScope.$parent.id].typeid === 0;
+            return vm.contexts.data[$itemScope.$parent.id].type === 0;
         }],
         [
             function() {
-                return '<i class="material-icons md-18 fa-light fa-green">add_circle_outline</i> ' + $translate.instant('context-menu.new-context');
+                return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">add_circle_outline</i> ' + $translate.instant('context-menu.new-context');
             },
             function($itemScope, $event, modelValue, text, $li) {
-            createModalHelper($scope.contexts.data[$itemScope.$parent.id], 'context', false);
+                vm.openNewContextModal('context', $itemScope.$parent.id);
         }, function($itemScope) {
-            return $scope.contexts.data[$itemScope.$parent.id].typeid === 0;
+            return vm.contexts.data[$itemScope.$parent.id].type === 0;
         }],
         null,
         [
             function() {
-                return '<i class="material-icons md-18 fa-light fa-green">content_copy</i> ' + $translate.instant('context-menu.duplicate-element');
+                return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">content_copy</i> ' + $translate.instant('context-menu.duplicate-element');
             },
                 function($itemScope, $event, modelValue, text, $li) {
-            mainService.duplicateElement($itemScope.$parent.id);
+            mainService.duplicateElement($itemScope.$parent.id, vm.contexts);
         }],
         null,
         [
             function() {
-                return '<i class="material-icons md-18 fa-light fa-red">delete</i> ' + $translate.instant('context-menu.delete');
+                return '<i class="material-icons md-18 fa-light fa-red context-menu-icon">delete</i> ' + $translate.instant('context-menu.delete');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                mainService.deleteElement($scope.contexts.data[$itemScope.$parent.id]);
+                $state.go('root.spacialist.data.delete', {id: $itemScope.$parent.id});
             }
         ]
     ];
 
-    $scope.layerTwo = {
-        activeTab: 'map',
-        imageTab: {}
+    vm.hasSources = function(element) {
+        return Object.keys(element.sources).length > 0;
     };
 
-    $scope.setActiveTab = function(tabId) {
-        $scope.layerTwo.activeTab = tabId;
-    };
-
-    $scope.setCurrentElement = function(target, elem, openAgain) {
-        mainService.setCurrentElement(target, elem, openAgain);
-    };
-
-    $scope.createNewContext = function(data) {
-        mainService.createNewContext(data);
-    };
-
-    $rootScope.$on('unsetCurrentElement', function(event, args) {
-        $scope.unsetCurrentElement();
+    // MAP RELATED CODE
+    /**
+     * listener for different leaflet actions
+     */
+    $scope.$on('leafletDirectiveMap.mainmap.popupclose', function(event, args) {
+        // mapService.unsetCurrentGeodata();
+        // $state.go('^');
+    });
+    $scope.$on('leafletDirectiveMap.mainmap.popupopen', function(event, args) {
+        var popup = args.leafletEvent.popup;
+        var newScope = $scope.$new();
+        newScope.stream = popup.options.feature;
+        $compile(popup._contentNode)(newScope);
+        // var geodataId = args.leafletEvent.popup._source.feature.id;
+        // mapService.setCurrentGeodata(geodataId);
+        // var promise = mapService.getMatchingContext(geodataId);
+        // promise.then(function(response) {
+        //     if(response.error) {
+        //         modalFactory.errorModal(response.error);
+        //     } else {
+        //         var matchingId = response.context_id;
+        //         if(matchingId !== null) {
+        //             mainService.expandTree(matchingId);
+        //             mainService.setCurrentElement(mainService.contexts.data[matchingId], mainService.currentElement, false);
+        //         } else {
+        //             var dontUnsetUnlinked = true;
+        //             mainService.unsetCurrentElement(dontUnsetUnlinked);
+        //         }
+        //     }
+        // });
+    });
+    /**
+     * If the marker has been created, add the marker to the marker-array and store it in the database
+     */
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:created', function(event, args) {
+        var type = args.leafletEvent.layerType;
+        var layer = args.leafletEvent.layer;
+        var coords = mapService.getCoords(layer, type);
+        mapService.addGeodata(type, coords, -1, vm.contexts, vm.map);
+    });
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:edited', function(event, args) {
+        var layers = args.leafletEvent.layers.getLayers();
+        angular.forEach(layers, function(layer, key) {
+            var type = layer.feature.geometry.type;
+            var coords = mapService.getCoords(layer, type);
+            var id = layer.feature.id;
+            mapService.addGeodata(type, coords, id, vm.contexts, vm.map);
+        });
+    });
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:deleted', function(event, args) {
+        var layers = args.leafletEvent.layers.getLayers();
+        angular.forEach(layers, function(layer, key) {
+            var id = layer.feature.id;
+            httpDeleteFactory('api/geodata/' + id, function(response) {
+                if(response.error) {
+                    modalFactory.errorModal(response.error);
+                    return;
+                }
+                delete vm.map.geodata.linkedContexts[id];
+            });
+        });
+    });
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:deletestart', function(event, args) {
+        mapService.modes.deleting = true;
+    });
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:deletestop', function(event, args) {
+        mapService.modes.deleting = false;
     });
 
-    $rootScope.$on('setCurrentElement', function(event, args) {
-        $scope.setCurrentElement(args.source, args.target);
-    });
-
-    $scope.storeElement = function(elem, data) {
-        mainService.storeElement(elem, data);
+    $scope.linkGeodata = function(cid, gid) {
+        var promise = mapService.linkGeodata(cid, gid);
+        promise.then(function(response) {
+            if(response.error) {
+                modalFactory.errorModal(response.error);
+                return;
+            }
+            var updatedContext = response.context;
+            var updatedValues = {
+                geodata_id: updatedContext.geodata_id
+            };
+            mainService.updateContextById(vm.contexts, cid, updatedValues);
+            vm.map.geodata.linkedContexts[gid] = cid;
+            vm.map.geodata.linkedLayers[gid].bindTooltip(vm.contexts.data[cid].name);
+        });
     };
 
-    $scope.deleteElement = function(elem) {
-        mainService.deleteElement(elem);
+    $scope.unlinkGeodata = function(cid) {
+        var promise = mapService.unlinkGeodata(cid);
+        promise.then(function(response) {
+            if(response.error) {
+                modalFactory.errorModal(response.error);
+                return;
+            }
+            var updatedValues = {
+                geodata_id: undefined
+            };
+            mainService.updateContextById(vm.contexts, cid, updatedValues);
+            delete vm.map.geodata.linkedContexts[vm.currentGeodata.id];
+            linkedLayer = vm.map.geodata.linkedLayers[vm.currentGeodata.id];
+            linkedLayer.bindTooltip(linkedLayer.feature.properties.name);
+        });
     };
 
-    $scope.hasSources = function(elem) {
-        return !mainService.isEmpty(elem.sources);
-    };
+    // FILE RELATED CODE
 
-    $scope.deleteSourceEntry = function(index, key) {
-        mainService.deleteSourceEntry(index, key);
-    };
-
-    $scope.addListEntry = function(aid, oid, inp, arr) {
-        var index = aid + '_' + (oid || '');
-        mainService.addListEntry(index, inp, arr);
-        inp[index] = '';
-    };
-
-    $scope.editListEntry = function(ctid, aid, $index, val, tableIndex) {
-        $scope.cancelEditListEntry();
-        var name = ctid + "_" + aid;
-        $scope.currentEditName = name;
-        $scope.currentEditIndex = $index;
-        if (typeof tableIndex !== 'undefined') {
-            $scope.currentEditCol = tableIndex;
-            $scope.editEntry[name][$index][tableIndex] = true;
-        } else {
-            $scope.editEntry[name][$index] = true;
-        }
-        $scope.initialListVal = val;
-    };
-
-    $scope.cancelEditListEntry = function() {
-        if (typeof $scope.currentEditName !== 'undefined' && typeof $scope.currentEditIndex !== 'undefined') {
-            if (typeof $scope.currentEditCol !== 'undefined') {
-                $scope.editEntry[$scope.currentEditName][$scope.currentEditIndex][$scope.currentEditCol] = false;
-                $scope.markerValues[$scope.currentEditName].selectedEpochs[$scope.currentEditIndex][$scope.currentEditCol] = $scope.initialListVal;
-            } else {
-                $scope.editEntry[$scope.currentEditName][$scope.currentEditIndex] = false;
-                $scope.markerValues[$scope.currentEditName][$scope.currentEditIndex] = $scope.initialListVal;
+    var linkFileContextMenu = [function($itemScope) {
+        var f = $itemScope.f;
+        var content;
+        for(var i=0; i<f.linked_files.length; i++) {
+            if(f.linked_files[i].context_id == mainService.currentElement.element.id) {
+                content = $translate.instant('file.unlink-from', { name: mainService.currentElement.element.name });
+                break;
             }
         }
-        $scope.currentEditName = undefined;
-        $scope.currentEditIndex = undefined;
-        $scope.currentEditCol = undefined;
-        $scope.initialListVal = undefined;
-    };
-
-    $scope.storeEditListEntry = function() {
-        if (typeof $scope.currentEditName !== 'undefined' && typeof $scope.currentEditIndex !== 'undefined') {
-            if (typeof $scope.currentEditCol !== 'undefined') {
-                $scope.editEntry[$scope.currentEditName][$scope.currentEditIndex][$scope.currentEditCol] = false;
-            } else {
-                $scope.editEntry[$scope.currentEditName][$scope.currentEditIndex] = false;
-            }
+        if(!content) {
+            content = $translate.instant('file.link-to', { name: mainService.currentElement.element.name });
         }
-        $scope.currentEditName = undefined;
-        $scope.currentEditIndex = undefined;
-        $scope.currentEditCol = undefined;
-        $scope.initialListVal = undefined;
-    };
+        return '<i class="material-icons md-18">add_circle_outline</i> ' + content;
+    }, function ($itemScope) {
+        var f = $itemScope.f;
+        var fileId = f.id;
+        var contextId = mainService.currentElement.element.id;
+        for(var i=0; i<f.linked_files.length; i++) {
+           if(f.linked_files[i].context_id == mainService.currentElement.element.id) {
+               fileService.unlinkFile(fileId, contextId);
+               return;
+           }
+        }
+        fileService.linkFile(fileId, contextId);
+    }, function() {
+        return mainService.currentElement.element.id > 0;
+    }];
+    var deleteFile = [function($itemScope) {
+        var content = $translate.instant('file.delete', { name: $itemScope.f.filename });
+       return '<i class="material-icons md-18">delete</i> ' + content;
+    }, function ($itemScope, $event, modelValue, text, $li) {
+        fileService.deleteFile($itemScope.f, vm.files);
+    }];
 
-    $scope.removeListItem = function(aid, oid, arr, $index) {
-        var index = aid + '_' + (oid || '');
-        mainService.removeListItem(index, arr, $index);
-    };
-
-    $scope.toggleList = function(ctid, aid) {
-        var index = ctid + "_" + aid;
-        $scope.hideLists[index] = !$scope.hideLists[index];
-    };
+    vm.fileContextMenu = [
+        linkFileContextMenu,
+        null,
+        deleteFile
+    ];
 
     /**
-     * Opens a modal window which allows the user to add/delete sources from a literature list for a particular attribute.
-     * One has to pass the field name `fieldname` and the attribute id `fieldid` as parameters.
+     * enables drag & drop support for file upload, calls `$scope.uploadFiles` if files are dropped on the `dropFiles` model
      */
-    $scope.openSourceModal = function(fieldname, fieldid, currentVal, currentDesc) {
-        mainService.openSourceModal(fieldname, fieldid, currentVal, currentDesc);
-    };
+    $scope.$watch('dropFiles', function() {
+        vm.uploadFiles($scope.dropFiles);
+    });
 
-    $scope.openGeographyPlacer = function(aid) {
-        mainService.openGeographyModal($scope, aid);
+    vm.uploadFiles = function($files, $invalidFiles) {
+        vm.uploadStatus = fileService.uploadFiles($files, $invalidFiles, vm.files);
     };
 }]);

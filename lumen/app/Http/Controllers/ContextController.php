@@ -47,7 +47,7 @@ class ContextController extends Controller {
             ], 403);
         }
 
-        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type as typeid', 'thesaurus_url as typename', DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as typelabel"))->orderBy('rank')->get();
+        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type', 'thesaurus_url as uri')->orderBy('rank')->get();
 
         $roots = array();
         $contexts = array();
@@ -78,44 +78,23 @@ class ContextController extends Controller {
         return response()->json($response);
     }
 
-    public function getArtifacts() {
+    public function getContextTypeAttributes($id) {
         return response()->json(
             DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
-                )
-                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
-                ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
-                ->where('c.type', '=', '1')
-                ->orderBy('title', 'asc')
-                ->orderBy('ca.position', 'asc')
-                ->get()
-        );
-    }
-
-    public function getContextTypes() {
-        return response()->json(
-            DB::table('context_types as c')
-                ->select('c.thesaurus_url as index', 'c.id as context_type_id', 'a.id as aid', 'a.datatype', 'c.type', 'ca.position',
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = c.thesaurus_url and short_name = 'de' limit 1) as title"),
-                    DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) as val")
-                )
-                ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
-                ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
-                ->where('c.type', '=', '0')
-                ->orderBy('title', 'asc')
-                ->orderBy('ca.position', 'asc')
-                ->get()
+            ->where('c.id', $id)
+            ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+            ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
+            ->orderBy('ca.position', 'asc')
+            ->get()
         );
     }
 
     public function getAttributes() {
-        return response()->json([
-            'attributes' => Attribute::select('*',
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_url and short_name = 'de' limit 1) as label"),
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = thesaurus_root_url and short_name = 'de' limit 1) as root_label"))->orderBy('label', 'asc')->get()
-        ]);
+        return Attribute::all();
+    }
+
+    public function getContextTypes() {
+        return ContextType::all();
     }
 
     public function getContextData($id) {
@@ -137,46 +116,29 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
-        $rows = DB::table('context_types as c')
-        ->select('c.id as context_type_id', 'a.id as aid', 'a.datatype', 'a.thesaurus_root_url as root', 'ca.position',
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = C.thesaurus_url and short_name = 'de' limit 1) AS title"),
-            DB::raw("(select label from getconceptlabelsfromurl where concept_url = A.thesaurus_url and short_name = 'de' limit 1) AS val")
-        )
-        ->leftJoin('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
-        ->leftJoin('attributes as a', 'ca.attribute_id', '=', 'a.id')
-        ->where('a.datatype', '=', 'string-sc')
-        ->orWhere('a.datatype', '=', 'string-mc')
-        ->orWhere('a.datatype', '=', 'epoch')
-        ->orderBy('title', 'asc')
-        ->orderBy('ca.position', 'asc')
-        ->get();
-        foreach($rows as &$row) {
-            if(!isset($row->root)) continue;
-            $rootId = DB::table('th_concept')
-                ->select('id')
-                ->where('concept_url', '=', $row->root)
-                ->first();
+        $attrs = Attribute::whereIn('datatype', ['string-sc', 'string-mc', 'epoch'])->get();
+        $choices = [];
+        foreach($attrs as &$attr) {
+            $rootId = ThConcept::where('concept_url', $attr->thesaurus_root_url)->value('id');
             if(!isset($rootId)) continue;
-            $rootId = $rootId->id;
-            $row->choices = DB::select("
+            $choices[$attr->id] = DB::select("
                 WITH RECURSIVE
                 top AS (
-                    SELECT br.broader_id, br.narrower_id, (select label from getconceptlabelsfromid where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
-                            (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
+                    SELECT br.broader_id, br.narrower_id, c.concept_url
                     FROM th_broaders br
+                    JOIN th_concept as c on c.id = br.narrower_id
                     WHERE broader_id = $rootId
                     UNION
-                    SELECT br.broader_id, br.narrower_id, (select label from getconceptlabelsfromid where concept_id = br.broader_id and short_name = 'de' limit 1) as broad,
-                            (select label from getconceptlabelsfromid where concept_id = br.narrower_id and short_name = 'de' limit 1) as narr
+                    SELECT br.broader_id, br.narrower_id, c2.concept_url
                     FROM top t, th_broaders br
+                    JOIN th_concept as c2 on c2.id = br.narrower_id
                     WHERE t.narrower_id = br.broader_id
                 )
                 SELECT *
                 FROM top
-                ORDER BY narr
             ");
         }
-        return response()->json($rows);
+        return response()->json($choices);
     }
 
     public function getContextByGeodata($id) {
@@ -193,63 +155,61 @@ class ContextController extends Controller {
 
     public function getAvailableAttributeTypes() {
         return response()->json([
-            'types' => [
-                [
-                    'datatype' => 'string',
-                    'description' => 'attribute.string.desc'
-                ],
-                [
-                    'datatype' => 'stringf',
-                    'description' => 'attribute.stringf.desc'
-                ],
-                [
-                    'datatype' => 'double',
-                    'description' => 'attribute.double.desc'
-                ],
-                [
-                    'datatype' => 'string-sc',
-                    'description' => 'attribute.string-sc.desc'
-                ],
-                [
-                    'datatype' => 'string-mc',
-                    'description' => 'attribute.string-mc.desc'
-                ],
-                [
-                    'datatype' => 'epoch',
-                    'description' => 'attribute.epoch.desc'
-                ],
-                [
-                    'datatype' => 'date',
-                    'description' => 'attribute.date.desc'
-                ],
-                [
-                    'datatype' => 'dimension',
-                    'description' => 'attribute.dimension.desc'
-                ],
-                [
-                    'datatype' => 'list',
-                    'description' => 'attribute.list.desc'
-                ],
-                [
-                    'datatype' => 'geography',
-                    'description' => 'attribute.geography.desc'
-                ],
-                [
-                    'datatype' => 'integer',
-                    'description' => 'attribute.integer.desc'
-                ],
-                [
-                    'datatype' => 'boolean',
-                    'description' => 'attribute.boolean.desc'
-                ],
-                [
-                    'datatype' => 'percentage',
-                    'description' => 'attribute.percentage.desc'
-                ],
-                [
-                    'datatype' => 'context',
-                    'description' => 'attribute.context.desc'
-                ]
+            [
+                'datatype' => 'string',
+                'description' => 'attribute.string.desc'
+            ],
+            [
+                'datatype' => 'stringf',
+                'description' => 'attribute.stringf.desc'
+            ],
+            [
+                'datatype' => 'double',
+                'description' => 'attribute.double.desc'
+            ],
+            [
+                'datatype' => 'string-sc',
+                'description' => 'attribute.string-sc.desc'
+            ],
+            [
+                'datatype' => 'string-mc',
+                'description' => 'attribute.string-mc.desc'
+            ],
+            [
+                'datatype' => 'epoch',
+                'description' => 'attribute.epoch.desc'
+            ],
+            [
+                'datatype' => 'date',
+                'description' => 'attribute.date.desc'
+            ],
+            [
+                'datatype' => 'dimension',
+                'description' => 'attribute.dimension.desc'
+            ],
+            [
+                'datatype' => 'list',
+                'description' => 'attribute.list.desc'
+            ],
+            [
+                'datatype' => 'geography',
+                'description' => 'attribute.geography.desc'
+            ],
+            [
+                'datatype' => 'integer',
+                'description' => 'attribute.integer.desc'
+            ],
+            [
+                'datatype' => 'boolean',
+                'description' => 'attribute.boolean.desc'
+            ],
+            [
+                'datatype' => 'percentage',
+                'description' => 'attribute.percentage.desc'
+            ],
+            [
+                'datatype' => 'context',
+                'description' => 'attribute.context.desc'
             ]
         ]);
     }
@@ -294,7 +254,15 @@ class ContextController extends Controller {
         $context->lasteditor = $user['name'];
         $context->save();
 
-        return response()->json(['context' => $context]);
+        return response()->json([
+            'context' => ContextType::join('contexts',
+                    'contexts.context_type_id', '=', 'context_types.id'
+                )
+                ->select('contexts.*', 'type', 'thesaurus_url as uri')
+                ->where('contexts.id', $context->id)
+                ->orderBy('rank')
+                ->first()
+        ]);
     }
 
     public function duplicate(Request $request, $id) {
@@ -340,6 +308,7 @@ class ContextController extends Controller {
             $s->save();
         }
         $newDuplicate->rank = $toDuplicate->rank + 1;
+        $newDuplicate->lasteditor = $user['name'];
         $newDuplicate->save();
         $toDuplicateValues = AttributeValue::where('context_id', $id)
             ->get();
@@ -348,6 +317,9 @@ class ContextController extends Controller {
             $newValue->context_id = $newDuplicate->id;
             $newValue->save();
         }
+        $additionalProps = ContextType::where('id', $toDuplicate->context_type_id)->select('type', 'thesaurus_url as uri')->first();
+        $newDuplicate->type = $additionalProps->type;
+        $newDuplicate->uri = $additionalProps->uri;
         return response()->json(['obj' => $newDuplicate]);
     }
 
@@ -450,13 +422,15 @@ class ContextController extends Controller {
             $undefinedError = [
                 'error' => 'Layer Type doesn\'t match Geodata Type'
             ];
-            if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && !Helpers::endsWith($layer->type, 'Point')) {
-                return response()->json($undefinedError);
-            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && !Helpers::endsWith($layer->type, 'Linestring')) {
-                return response()->json($undefinedError);
-            } else if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && !Helpers::endsWith($layer->type, 'Polygon')) {
-                return response()->json($undefinedError);
+            $matching = false;
+            if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && Helpers::endsWith($layer->type, 'Polygon')) {
+                $matching = true;
+            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && Helpers::endsWith($layer->type, 'Linestring')) {
+                $matching = true;
+            } else if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && Helpers::endsWith($layer->type, 'Point')) {
+                $matching = true;
             }
+            if(!$matching) return response()->json($undefinedError);
             $context->geodata_id = $gid;
         }
         $context->lasteditor = $user['name'];
@@ -639,7 +613,6 @@ class ContextController extends Controller {
         $cType->thesaurus_url = $curl;
         $cType->type = $type;
         $cType->save();
-        $cType->label = $this->getLabel($curl);
 
         $layer = new AvailableLayer();
         $layer->name = '';
@@ -654,8 +627,7 @@ class ContextController extends Controller {
         $layer->save();
 
         return response()->json([
-            'contexttype' => $cType,
-            'layer' => $layer
+            'contexttype' => $cType
         ]);
     }
 
@@ -668,10 +640,10 @@ class ContextController extends Controller {
         }
 
         $this->validate($request, [
-            'aid' => 'required|integer|exists:attributes,id'
+            'attribute_id' => 'required|integer|exists:attributes,id'
         ]);
 
-        $aid = $request->get('aid');
+        $aid = $request->get('attribute_id');
         $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
         $ca = new ContextAttribute();
         $ca->context_type_id = $ctid;
@@ -680,11 +652,14 @@ class ContextController extends Controller {
         $ca->save();
 
         $a = Attribute::find($aid);
-        $ca->val = $this->getLabel($a->thesaurus_url);
         $ca->datatype = $a->datatype;
 
         return response()->json([
-            'attribute' => $ca
+            'attribute' => DB::table('context_types as c')
+                ->where('ca.id', $ca->id)
+                ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+                ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
+                ->first()
         ]);
     }
 
@@ -714,8 +689,6 @@ class ContextController extends Controller {
             $attr->thesaurus_root_url = $purl;
         }
         $attr->save();
-        $attr->label = $this->getLabel($curl);
-        if(isset($purl)) $attr->root_label = $this->getLabel($purl);
 
         return response()->json([
             'attribute' => $attr
@@ -882,15 +855,7 @@ class ContextController extends Controller {
             if($attr->datatype == 'literature') {
                 $attr->literature_info = DB::table('literature')->where('id', $attr->str_val)->first();
             } else if($attr->datatype == 'string-sc' || $attr->datatype == 'string-mc') {
-                $attr->val = DB::table('th_concept')
-                    ->select('id as narrower_id',
-                        DB::raw("'".DB::table('getconceptlabelsfromurl')
-                        ->where('concept_url', $attr->thesaurus_val)
-                        ->where('short_name', 'de')
-                        ->value('label')."' as narr")
-                    )
-                    ->where('concept_url', '=', $attr->thesaurus_val)
-                    ->first();
+                $attr->val = ThConcept::where('concept_url', $attr->thesaurus_val)->select('th_concept.id as narrower_id', 'concept_url')->first();
             } else if($attr->datatype == 'dimension') {
                 $jsonVal = json_decode($attr->json_val);
                 if(!isset($jsonVal)) continue;
@@ -926,15 +891,7 @@ class ContextController extends Controller {
                     $attrVal['end'] = $jsonVal->end;
                 }
                 if(isset($jsonVal->epoch)){
-                    $attrVal['epoch'] = DB::table('th_concept')
-                                        ->select('id as narrower_id',
-                                            DB::raw("'".DB::table('getconceptlabelsfromid')
-                                            ->where('concept_id', $jsonVal->epoch->narrower_id)
-                                            ->where('short_name', 'de')
-                                            ->value('label')."' as narr")
-                                        )
-                                        ->where('id', '=', $jsonVal->epoch->narrower_id)
-                                        ->first();
+                    $attrVal['epoch'] = $jsonVal->epoch;
                 }
                 $attr->val = json_encode($attrVal);
             } else if($attr->datatype == 'geography') {
@@ -951,22 +908,11 @@ class ContextController extends Controller {
         return $data;
     }
 
-    public static function getLabel($thesaurus_url, $lang = 'de') {
-        $label = DB::table('th_concept_label as lbl')
-            ->join('th_language as lang', 'lang.id', '=', 'lbl.language_id')
-            ->join('th_concept as con', 'lbl.concept_id', '=', 'con.id')
-            ->where('con.concept_url', '=', $thesaurus_url)
-            ->orderBy('lbl.concept_label_type', 'asc')
-            ->orderByRaw("lang.short_name = '$lang' ASC")
-            ->value('lbl.label');
-        return $label;
-    }
-
     private function updateOrInsert($values, $cid, $user) {
         foreach($values as $key => $value) {
             $ids = explode("_", $key);
             $aid = $ids[0];
-            if(isset($ids[1]) && $ids[1] != "") continue;
+            if($aid == "" || (isset($ids[1]) && $ids[1] != "")) continue;
 
             try {
                 $datatype = Attribute::findOrFail($aid)->datatype;
@@ -1022,8 +968,12 @@ class ContextController extends Controller {
                     if($datatype === 'list') {
                         $attr->str_val = $v->name;
                     } else {
-                        $set = ThConcept::find($v->narrower_id)->concept_url;
-                        $attr->thesaurus_val = $set;
+                        try {
+                            $set = ThConcept::findOrFail($v->narrower_id);
+                            $attr->thesaurus_val = $set->concept_url;
+                        } catch(ModelNotFoundException $e) {
+                            continue;
+                        }
                     }
                     $attr->save();
                 }
@@ -1036,12 +986,17 @@ class ContextController extends Controller {
                     if($datatype == 'context') {
                         $attrValue->context_val = $jsonArr->id;
                     } else {
+                        if($datatype == 'epoch') {
+                            $jsonArr->epoch = [
+                                'concept_url' => $jsonArr->epoch->concept_url
+                            ];
+                        }
                         $attrValue->json_val = json_encode($jsonArr);
                     }
                 } else {
                     switch ($datatype) {
                         case 'geography':
-                            $parsed = $this->parseWkt($value);
+                            $parsed = Helpers::parseWkt($value);
                             if($parsed !== -1) {
                                 $attrValue->geography_val = $parsed;
                             }

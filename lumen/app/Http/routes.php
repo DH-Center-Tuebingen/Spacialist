@@ -25,9 +25,9 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
     $app->get('', 'ContextController@getContexts');
-    $app->get('artifact', 'ContextController@getArtifacts');
-    $app->get('context_type', 'ContextController@getContextTypes');
+    $app->get('context_type/{id:[0-9]+}/attribute', 'ContextController@getContextTypeAttributes');
     $app->get('attribute', 'ContextController@getAttributes');
+    $app->get('context_type', 'ContextController@getContextTypes');
     $app->get('{id:[0-9]+}/data', 'ContextController@getContextData');
     $app->get('dropdown_options', 'ContextController@getDropdownOptions');
     $app->get('byGeodata/{id:[0-9]+}', 'ContextController@getContextByGeodata');
@@ -63,25 +63,24 @@ $app->group([
 });
 
 $app->group([
-        'prefix' => 'image',//TODO api v1
+        'prefix' => 'file',//TODO api v1
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
-        $app->get('', 'ImageController@getImages');
-        $app->get('{id:[0-9]+}', 'ImageController@getImage');
-        $app->get('{id:[0-9]+}/object', 'ImageController@getImageObject');
-        $app->get('tag', 'ImageController@getAvailableTags');
-        $app->get('by_context/{id:[0-9]+}', 'ImageController@getByContext');
+        $app->get('', 'FileController@getFiles');
+        $app->get('{id:[0-9]+}', 'FileController@getFile');
+        $app->get('tag', 'FileController@getAvailableTags');
+        $app->get('by_context/{id:[0-9]+}', 'FileController@getByContext');
 
-        $app->post('upload', 'ImageController@uploadImage');
+        $app->post('upload', 'FileController@uploadFile');
 
-        $app->patch('{id:[0-9]+}/property', 'ImageController@patchPhotoProperty');
+        $app->patch('{id:[0-9]+}/property', 'FileController@patchFileProperty');
 
-        $app->put('link', 'ImageController@link');
-        $app->put('tag', 'ImageController@addTag');
+        $app->put('link', 'FileController@link');
+        $app->put('tag', 'FileController@addTag');
 
-        $app->delete('{id:[0-9]+}', 'ImageController@delete');
-        $app->delete('link/{pid:[0-9]+}/{cid:[0-9]+}', 'ImageController@unlink');
-        $app->delete('{pid:[0-9]+}/tag/{tid:[0-9]+}', 'ImageController@removeTag');
+        $app->delete('{id:[0-9]+}', 'FileController@delete');
+        $app->delete('link/{fid:[0-9]+}/{cid:[0-9]+}', 'FileController@unlink');
+        $app->delete('{fid:[0-9]+}/tag/{tid:[0-9]+}', 'FileController@removeTag');
 });
 
 $app->group([
@@ -109,6 +108,7 @@ $app->group([
         $app->get('', 'UserController@getUsers');
         $app->get('active', 'UserController@getActiveUser');
         $app->get('role', 'UserController@getRoles');
+        $app->get('permission', 'UserController@getPermissions');
         $app->get('role/by_user/{id:[0-9]+}', 'UserController@getRolesByUser');
         $app->get('role/{id:[0-9]+}/permission', 'UserController@getPermissionsByRole');
 
@@ -176,4 +176,11 @@ $app->group([
         $app->put('{id:[0-9]+}', 'GeodataController@put');
 
         $app->delete('{id:[0-9]+}', 'GeodataController@delete');
+});
+
+$app->group([
+    'prefix' => 'thesaurus',//TODO api v1
+    'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+], function($app) {
+    $app->get('concept/{lang}', 'ThesaurusController@getConcepts');
 });
