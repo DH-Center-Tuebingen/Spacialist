@@ -14,4 +14,8 @@ spacialistApp.controller('contextCtrl', ['$scope', 'mainService', function($scop
     vm.addSource = function(entry) {
         vm.onSourceAdd({entry: entry});
     };
+
+    vm.openGeographyPlacer = function(aid) {
+        mainService.openGeographyModal($scope, aid);
+    };
 }]);

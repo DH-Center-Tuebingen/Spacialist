@@ -389,6 +389,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     main.openGeographyModal = function($scope, aid) {
+        var featureGroup = new L.FeatureGroup();
         var inp = document.getElementById('a' + aid);
         if(inp.value) {
             httpGetFactory('api/geodata/wktToGeojson/'+inp.value, function(response) {
@@ -404,20 +405,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 geojson.data.features.push(feature);
             });
         }
-        var featureGroup = new L.FeatureGroup();
         var createdListener = $scope.$on('leafletDirectiveMap.placermap.draw:created', function(event, args) {
             var type = args.leafletEvent.layerType;
-            switch(type) {
-                case 'marker':
-                    type = 'Point';
-                    break;
-                case 'polyline':
-                    type = 'LineString';
-                    break;
-                case 'polygon':
-                    type = 'Polygon';
-                    break;
-            }
+            type = mapService.convertToStandardGeomtype(type);
             var layer = args.leafletEvent.layer;
             var coords = [];
             if(type == 'Point') {
@@ -426,6 +416,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 coords.push(latlng.lat);
             } else {
                 var latlngs = layer.getLatLngs();
+                // "convert" MultiPolygon to Polygon
+                if(type == 'Polygon') latlngs = latlngs[0];
                 for(var i=0; i<latlngs.length; i++) {
                     var curr = latlngs[i];
                     var arr = [];
@@ -434,10 +426,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     coords.push(arr);
                 }
                 if(type == 'Polygon') {
-                    coords.push(coords[0]);
-                    var newCoords = [];
-                    newCoords.push(coords);
-                    coords = newCoords;
+                    coords.push(angular.copy(coords[0]));
+                    coords = [coords];
                 }
             }
             var feature = {
@@ -455,7 +445,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             geojson.data.features.length = 0;
         });
         var drawOptions = angular.copy(mapService.map.drawOptions);
-        var bounds = mapService.map.bounds;
+        var bounds = angular.copy(mapService.map.bounds);
         var geojson = {
             data: {
                 type: 'FeatureCollection',

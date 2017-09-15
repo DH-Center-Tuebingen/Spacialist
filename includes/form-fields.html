@@ -20,7 +20,7 @@
         </div>
         <div ng-switch-when="geography">
             <input class="form-control" type="text" id="a{{ attr.id }}" placeholder="{{ 'context-form.fields.placeholder-wkt' | translate }}" ng-model="attributeOutputs[attr.id]" ng-readonly="readonlyInput" />
-            <button type="button" class="btn btn-default" style="margin-top: 10px;" ng-click="openGeographyPlacer(attr.id)">
+            <button type="button" class="btn btn-default" style="margin-top: 10px;" ng-click="$ctrl.openGeographyPlacer(attr.id)">
                 <i class="material-icons">place</i>
                 <span translate="context-form.fields.open-map"/>
             </button>

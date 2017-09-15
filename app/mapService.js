@@ -71,17 +71,15 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
     };
 
     function convertToStandardGeomtype(type) {
+        type = type.toUpperCase();
         switch(type) {
-            case 'marker':
-            case 'Marker':
-            case 'point':
+            case 'MARKER':
+            case 'POINT':
                 return 'Point';
-            case 'linestring':
-            case 'polyline':
-            case 'linestring':
-            case 'Linestring':
+            case 'LINESTRING':
+            case 'POLYLINE':
                 return 'LineString';
-            case 'polygon':
+            case 'POLYGON':
                 return 'Polygon';
         }
         return undefined;
@@ -92,6 +90,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             mapArr.mapLayers[invisibleLayers[i]].remove();
         }
     }
+
+    map.convertToStandardGeomtype = function(type) {
+        return convertToStandardGeomtype(type);
+    };
 
     map.addListToMarkers = function(geodataList, contexts, mapArr, isInit) {
         isInit = isInit || false;
@@ -148,12 +150,13 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
     };
 
     map.getCoords = function(layer, type) {
+        type = convertToStandardGeomtype(type);
         var coords;
-        if(type == 'marker' || type == 'Point') {
+        if(type == 'Point') {
             coords = [ layer.getLatLng() ];
         } else {
             coords = layer.getLatLngs();
-            if(type.toLowerCase() == 'polygon') coords[0].push(angular.copy(coords[0][0]));
+            if(type == 'Polygon') coords[0].push(angular.copy(coords[0][0]));
         }
         return coords;
     };
@@ -498,16 +501,18 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         var coords = [];
         if(layer instanceof L.Polygon || layer instanceof L.Polyline) {
             var latlngs = layer.getLatLngs();
+            if(layer instanceof L.Polygon) latlngs = latlngs[0];
             for(var i=0; i<latlngs.length; i++) {
-                coords.push(latlngs[i].lng + ' ' + latlngs[i].lat);
+                var latlng = latlngs[i];
+                coords.push(latlng.lng + ' ' + latlng.lat);
             }
-            if (layer instanceof L.Polygon) {
-                var latlng = layer.getLatLngs()[0];
-                return 'POLYGON((' + coords.join(',') + ',' + latlng.lng + ' ' + latlng.lat + '))';
-            } else if (layer instanceof L.Polyline) {
+            if(layer instanceof L.Polygon) {
+                var first = coords[0];
+                return 'POLYGON((' + coords.join(',') + ',' + first + '))';
+            } else if(layer instanceof L.Polyline) {
                 return 'LINESTRING(' + coords.join(',') + ')';
             }
-        } else if (layer instanceof L.Marker) {
+        } else if(layer instanceof L.CircleMarker) {
             return 'POINT(' + layer.getLatLng().lng + ' ' + layer.getLatLng().lat + ')';
         }
     };

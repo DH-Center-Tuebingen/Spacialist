@@ -12,6 +12,7 @@ use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
 use App\ContextAttribute;
+use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
@@ -56,8 +57,10 @@ class GeodataController extends Controller {
     }
 
     public function wktToGeojson($wkt) {
-        if($wkt == null) return; // null or empty
-        $parsed = $this->parseWkt($wkt);
+        if(!isset($wkt)) return; // null or empty
+        // the GET request adds % for spaces
+        $wkt = str_replace('%20', ' ', $wkt);
+        $parsed = Helpers::parseWkt($wkt);
         if($parsed !== -1) {
             return response()->json([
                 'geometry' => $parsed
@@ -166,16 +169,6 @@ class GeodataController extends Controller {
     }
 
     // OTHER FUNCTIONS
-
-    private function parseWkt($wkt) {
-        try {
-            $geom = Geometry::getWKTClass($wkt);
-            $parsed = $geom::fromWKT($wkt);
-            return $parsed;
-        } catch(UnknownWKTTypeException $e) {
-            return -1;
-        }
-    }
 
     private function parseTypeCoords($type, $coords, $geodata) {
         switch($type) {
