@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased - Cannae
+## 0.3 - Cannae
 
 ### Added
 - Drag & Drop Support for Element Tree
