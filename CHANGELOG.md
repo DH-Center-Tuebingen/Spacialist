@@ -5,13 +5,12 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Drag & Drop Support for Element Tree
-- More Datatypes (Integer, Geography, Slider)
+- More Datatypes (Integer, Geography, Slider, Boolean)
 - Dynamic UI (The three columns on the main view can be shrinked/extended, enable Edit Mode in the Settings Dropdown menu)
 - Basic Unit-Testing (Lumen API)
 - State-based Routing using [ui-router](https://github.com/angular-ui/ui-router)
   - Shareable Links
   - Redirect to last state after (re)login
-- Boolean Datatype
 - Unset Selected Values (`string-sc` aka Single Dropdown)
 ### Changed
 - Photo Viewer => File Viewer (Please read section _Protected Files_ in [INSTALL.md](INSTALL.md) for proper setup)
