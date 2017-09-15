@@ -30,3 +30,28 @@ function nextMatchingDeviceClass(col, currentClass) {
     }
     return null;
 }
+
+L.Control.FitWorld = L.Control.extend({
+	onAdd: function(map) {
+        var o = this.options;
+        o.onClick = o.onClick || function() {};
+        var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-fitworld');
+        var elem = L.DomUtil.create('a', 'leaflet-control-fitworld-button', container);
+        var icon = L.DomUtil.create('i', 'material-icons md-18', elem);
+        icon.innerHTML = 'zoom_out_map';
+        elem['ui-sref'] = '';
+        elem.role = 'button';
+
+        container.onclick = function(){
+            o.onClick();
+        };
+        return container;
+	},
+
+	onRemove: function(map) {
+	}
+});
+
+L.control.fitworld = function(opts) {
+	return new L.Control.FitWorld(opts);
+};

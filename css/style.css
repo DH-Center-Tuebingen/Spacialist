@@ -769,6 +769,10 @@ span.btn {
     white-space: normal !important;
 }
 
+.leaflet-control-fitworld-button {
+    cursor: pointer;
+}
+
 .leaflet-top, .leaflet-bottom {
     z-index: 999 !important;
 }
