@@ -1,4 +1,4 @@
-spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpPatchPromise', 'httpDeleteFactory', 'modalFactory', 'snackbarService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpPostPromise, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpPatchPromise, httpDeleteFactory, modalFactory, snackbarService, $auth, $state, $http, $translate) {
+spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'httpGetFactory', 'httpGetPromise', 'httpPutFactory', 'httpPatchFactory', 'httpPatchPromise', 'httpDeleteFactory', 'modalFactory', 'snackbarService', 'transitionService', '$auth', '$state', '$http', '$translate', function(httpPostFactory, httpPostPromise, httpGetFactory, httpGetPromise, httpPutFactory, httpPatchFactory, httpPatchPromise, httpDeleteFactory, modalFactory, snackbarService, transitionService, $auth, $state, $http, $translate) {
     var user = {};
     user.currentUser = {
         permissions: {},
@@ -287,7 +287,14 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
             user.currentUser.user = response.data.user;
             user.currentUser.permissions = response.data.permissions;
             delete user.loginError.message;
-            $state.go($state.params.toState, $state.params.toParams); // TODO should redirect to old state
+
+            // redirect to "start page" if last page was login page
+            if(transitionService.to == 'login') {
+                $state.go('root.spacialist');
+            } else {
+                $state.go(transitionService.to, transitionService.params);
+                transitionService.unsetTransition();
+            }
         });
     };
 

@@ -13,9 +13,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.artifacts = [];
     main.artifactReferences = {};
     main.treeCallbacks = {};
-    main.dimensionUnits = [
-        'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
-    ];
     // main.legendList = {};
 
     main.datepickerOptions = {
@@ -238,17 +235,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }, '');
     };
 
-    main.addListEntry = function(index, inp, arr) {
-        if(typeof arr[index] == 'undefined') arr[index] = [];
-        arr[index].push({
-            'name': inp[index]
-        });
-    };
-
-    main.removeListItem = function(index, arr, $index) {
-        arr[index].splice($index, 1);
-    };
-
     function parseData(data) {
         var parsedData = {};
         for(var i=0; i<data.length; i++) {
@@ -279,7 +265,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             } else if(dType == 'context') {
                 parsedData[index] = value.val;
             } else if(dType == 'integer' || dType == 'percentage') {
-                parsedData[index] = parseInt(val);
+                parsedData[index] = parseInt(value.int_val);
             } else if(dType == 'boolean') {
                 parsedData[index] = (parseInt(value.int_val) != 0);
             } else if(dType == 'double') {
@@ -293,11 +279,11 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         return parsedData;
     }
 
-    main.updateContextById = function(id, newValues) {
-        main.expandTree(main.contexts, id);
+    main.updateContextById = function(tree, id, newValues) {
+        main.expandTree(tree, id);
 
         angular.merge(main.currentElement.element, newValues);
-        angular.merge(main.contexts.data[id], newValues);
+        angular.merge(tree.data[id], newValues);
     };
 
     main.deleteContext = function(context, contexts) {
@@ -375,6 +361,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         main.currentElement.geometryType = '';
         main.currentElement.fields = {};
         main.currentElement.sources = {};
+        main.currentElement.linkedFiles = [];
     }
 
     main.unsetCurrentElement = function() {
@@ -394,7 +381,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     main.setCurrentElement = function(element) {
-        initCurrentElement();
         for(var k in element) {
             if(element.hasOwnProperty(k)) {
                 main.currentElement[k] = element[k];
@@ -403,6 +389,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     main.openGeographyModal = function($scope, aid) {
+        var featureGroup = new L.FeatureGroup();
         var inp = document.getElementById('a' + aid);
         if(inp.value) {
             httpGetFactory('api/geodata/wktToGeojson/'+inp.value, function(response) {
@@ -418,20 +405,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 geojson.data.features.push(feature);
             });
         }
-        var featureGroup = new L.FeatureGroup();
         var createdListener = $scope.$on('leafletDirectiveMap.placermap.draw:created', function(event, args) {
             var type = args.leafletEvent.layerType;
-            switch(type) {
-                case 'marker':
-                    type = 'Point';
-                    break;
-                case 'polyline':
-                    type = 'LineString';
-                    break;
-                case 'polygon':
-                    type = 'Polygon';
-                    break;
-            }
+            type = mapService.convertToStandardGeomtype(type);
             var layer = args.leafletEvent.layer;
             var coords = [];
             if(type == 'Point') {
@@ -440,6 +416,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 coords.push(latlng.lat);
             } else {
                 var latlngs = layer.getLatLngs();
+                // "convert" MultiPolygon to Polygon
+                if(type == 'Polygon') latlngs = latlngs[0];
                 for(var i=0; i<latlngs.length; i++) {
                     var curr = latlngs[i];
                     var arr = [];
@@ -448,10 +426,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                     coords.push(arr);
                 }
                 if(type == 'Polygon') {
-                    coords.push(coords[0]);
-                    var newCoords = [];
-                    newCoords.push(coords);
-                    coords = newCoords;
+                    coords.push(angular.copy(coords[0]));
+                    coords = [coords];
                 }
             }
             var feature = {
@@ -469,7 +445,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             geojson.data.features.length = 0;
         });
         var drawOptions = angular.copy(mapService.map.drawOptions);
-        var bounds = mapService.map.bounds;
+        var bounds = angular.copy(mapService.map.bounds);
         var geojson = {
             data: {
                 type: 'FeatureCollection',
@@ -526,9 +502,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
 
-    function loadLinkedImages(id) {
+    function loadLinkedFiles(id) {
         if(!moduleHelper.controllerExists('fileCtrl')) return;
-        fileService.getImagesForContext(id);
+        fileService.getFilesForContext(id);
     }
 
     main.isEmpty = function(obj) {

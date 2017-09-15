@@ -63,25 +63,24 @@ $app->group([
 });
 
 $app->group([
-        'prefix' => 'image',//TODO api v1
+        'prefix' => 'file',//TODO api v1
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
-        $app->get('', 'ImageController@getImages');
-        $app->get('{id:[0-9]+}', 'ImageController@getImage');
-        $app->get('{id:[0-9]+}/object', 'ImageController@getImageObject');
-        $app->get('tag', 'ImageController@getAvailableTags');
-        $app->get('by_context/{id:[0-9]+}', 'ImageController@getByContext');
+        $app->get('', 'FileController@getFiles');
+        $app->get('{id:[0-9]+}', 'FileController@getFile');
+        $app->get('tag', 'FileController@getAvailableTags');
+        $app->get('by_context/{id:[0-9]+}', 'FileController@getByContext');
 
-        $app->post('upload', 'ImageController@uploadImage');
+        $app->post('upload', 'FileController@uploadFile');
 
-        $app->patch('{id:[0-9]+}/property', 'ImageController@patchPhotoProperty');
+        $app->patch('{id:[0-9]+}/property', 'FileController@patchFileProperty');
 
-        $app->put('link', 'ImageController@link');
-        $app->put('tag', 'ImageController@addTag');
+        $app->put('link', 'FileController@link');
+        $app->put('tag', 'FileController@addTag');
 
-        $app->delete('{id:[0-9]+}', 'ImageController@delete');
-        $app->delete('link/{pid:[0-9]+}/{cid:[0-9]+}', 'ImageController@unlink');
-        $app->delete('{pid:[0-9]+}/tag/{tid:[0-9]+}', 'ImageController@removeTag');
+        $app->delete('{id:[0-9]+}', 'FileController@delete');
+        $app->delete('link/{fid:[0-9]+}/{cid:[0-9]+}', 'FileController@unlink');
+        $app->delete('{fid:[0-9]+}/tag/{tid:[0-9]+}', 'FileController@removeTag');
 });
 
 $app->group([

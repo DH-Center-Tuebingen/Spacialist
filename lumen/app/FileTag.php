@@ -4,8 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PhotoTag extends Model
+class FileTag extends Model
 {
+    protected $table = 'photo_tags';
     /**
      * The attributes that are assignable.
      *

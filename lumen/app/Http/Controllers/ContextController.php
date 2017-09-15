@@ -422,13 +422,15 @@ class ContextController extends Controller {
             $undefinedError = [
                 'error' => 'Layer Type doesn\'t match Geodata Type'
             ];
-            if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && !Helpers::endsWith($layer->type, 'Point')) {
-                return response()->json($undefinedError);
-            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && !Helpers::endsWith($layer->type, 'Linestring')) {
-                return response()->json($undefinedError);
-            } else if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && !Helpers::endsWith($layer->type, 'Polygon')) {
-                return response()->json($undefinedError);
+            $matching = false;
+            if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && Helpers::endsWith($layer->type, 'Polygon')) {
+                $matching = true;
+            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && Helpers::endsWith($layer->type, 'Linestring')) {
+                $matching = true;
+            } else if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && Helpers::endsWith($layer->type, 'Point')) {
+                $matching = true;
             }
+            if(!$matching) return response()->json($undefinedError);
             $context->geodata_id = $gid;
         }
         $context->lasteditor = $user['name'];
@@ -889,15 +891,7 @@ class ContextController extends Controller {
                     $attrVal['end'] = $jsonVal->end;
                 }
                 if(isset($jsonVal->epoch)){
-                    $attrVal['epoch'] = DB::table('th_concept')
-                                        ->select('id as narrower_id',
-                                            DB::raw("'".DB::table('getconceptlabelsfromid')
-                                            ->where('concept_id', $jsonVal->epoch->narrower_id)
-                                            ->where('short_name', 'de')
-                                            ->value('label')."' as narr")
-                                        )
-                                        ->where('id', '=', $jsonVal->epoch->narrower_id)
-                                        ->first();
+                    $attrVal['epoch'] = $jsonVal->epoch;
                 }
                 $attr->val = json_encode($attrVal);
             } else if($attr->datatype == 'geography') {
@@ -992,12 +986,17 @@ class ContextController extends Controller {
                     if($datatype == 'context') {
                         $attrValue->context_val = $jsonArr->id;
                     } else {
+                        if($datatype == 'epoch') {
+                            $jsonArr->epoch = [
+                                'concept_url' => $jsonArr->epoch->concept_url
+                            ];
+                        }
                         $attrValue->json_val = json_encode($jsonArr);
                     }
                 } else {
                     switch ($datatype) {
                         case 'geography':
-                            $parsed = $this->parseWkt($value);
+                            $parsed = Helpers::parseWkt($value);
                             if($parsed !== -1) {
                                 $attrValue->geography_val = $parsed;
                             }

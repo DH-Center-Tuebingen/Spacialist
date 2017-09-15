@@ -66,7 +66,7 @@ class SourceController extends Controller {
         $src->lasteditor = $user['name'];
         $src->save();
         return response()->json([
-            'source' => $this->getById($id)
+            'source' => $this->getById($src->id)
         ]);
     }
 

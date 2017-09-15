@@ -1,0 +1,22 @@
+<nav ng-class="{'pdf-controls fixed': scroll > 100, 'pdf-controls': scroll <= 100}">
+    <button type="button" class="btn btn-default" ng-click="goPrevious()">
+        <i class="material-icons" aria-hidden="true">navigate_before</i>
+    </button>
+    <button type="button" class="btn btn-default" ng-click="goNext()">
+        <i class="material-icons" aria-hidden="true">navigate_next</i>
+    </button>
+    <button type="button" class="btn btn-default" ng-click="zoomIn()">
+        <i class="material-icons" aria-hidden="true">zoom_in</i>
+    </button>
+    <button type="button" class="btn btn-default" ng-click="fit()">
+        <i class="material-icons" aria-hidden="true">zoom_out_map</i>
+    </button>
+    <button type="button" class="btn btn-default" ng-click="zoomOut()">
+        <i class="material-icons" aria-hidden="true">zoom_out</i>
+    </button>
+    <button type="button" class="btn btn-default" ng-click="rotate()">
+        <i class="material-icons" aria-hidden="true">rotate_right</i>
+    </button>
+    <input type="text" min="1" ng-model="pageNum"><span>/{{pageCount}}</span>
+</nav>
+<canvas id="pdf-canvas" class="rotate0"></canvas>

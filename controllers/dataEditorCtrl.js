@@ -1,32 +1,31 @@
-spacialistApp.controller('dataEditorCtrl', ['$scope', 'dataEditorService', 'mainService', function($scope, dataEditorService, mainService) {
+spacialistApp.controller('dataEditorCtrl', ['dataEditorService', 'mainService', function(dataEditorService, mainService) {
     var vm = this;
-    vm.dimensionUnits = mainService.dimensionUnits;
 
-    $scope.addNewAttribute = function() {
+    vm.addNewAttribute = function() {
         dataEditorService.addNewAttributeWindow(vm.attributetypes, vm.attributes);
     };
 
-    $scope.onDeleteAttribute = function(attr) {
+    vm.onDeleteAttribute = function(attr) {
         dataEditorService.deleteAttribute(attr, vm.attributes);
     };
 
-    $scope.addNewContextType = function() {
+    vm.addNewContextType = function() {
         dataEditorService.addNewContextTypeWindow(vm.geometryTypes, vm.contextTypes);
     };
 
-    $scope.editContextType = function(e) {
+    vm.editContextType = function(e) {
         dataEditorService.editContextType(e);
     };
 
-    $scope.deleteContextType = function(e) {
+    vm.deleteContextType = function(e) {
         dataEditorService.deleteContextType(e, vm.contextTypes, vm.concepts[e.thesaurus_url].label);
     };
 
-    $scope.onRemoveAttrFromCt = function(attr) {
+    vm.onRemoveAttrFromCt = function(attr) {
         dataEditorService.removeAttributeFromContextType(vm.contextType, attr, vm.fields);
     };
 
-    $scope.onOrderAttrOfCt = {
+    vm.onOrderAttrOfCt = {
         up: function(attr) {
             dataEditorService.moveAttributeOfContextTypeUp(attr, vm.fields);
         },
@@ -35,7 +34,7 @@ spacialistApp.controller('dataEditorCtrl', ['$scope', 'dataEditorService', 'main
         }
     };
 
-    $scope.addAttributeToContextType = function() {
+    vm.addAttributeToContextType = function() {
         dataEditorService.addAttributeToContextTypeWindow(vm.contextType, vm.fields, vm.attributes, vm.concepts);
     };
 }]);

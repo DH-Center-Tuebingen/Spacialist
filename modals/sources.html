@@ -32,15 +32,15 @@
     <div class="col-md-12">
         <h4>{{'evidence.sources.heading'|translate}}</h4>
         <table class="table table-striped table-bordered table-hover">
-            <tr ng-repeat="entry in $ctrl.attribute_sources" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
+            <tr ng-repeat="entry in $ctrl.attributesources" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
                 <td class="td-50 word-break">
                     {{ entry.literature.title }}<span ng-if="entry.literature.year"> - <i>{{ entry.literature.year}}</i></span>
                     <br/>
                     <strong>{{ entry.literature.author }}</strong>
                 </td>
                 <td class="td-50 word-break">
-                    <span class="delete-icon" ng-class="{'hidden-del': !hovered}" ng-click="$ctrl.deleteSourceEntry($index, '#'+mc.modalFields.id)">
-                        &times;
+                    <span class="delete-icon" ng-class="{'hidden-del': !hovered}" ng-click="$ctrl.deleteSourceEntry(entry.id)">
+                        <i class="material-icons">delete</i>
                     </span>
                     <span class="deletable" ng-bind-html="entry.description | urlify">
                     </span>
@@ -66,7 +66,7 @@
             <textarea class="form-control" ng-model="$ctrl.newEntry.desc" placeholder="{{'evidence.sources.comment'|translate}}"></textarea>
         </div>
         <div class="col-md-2">
-            <button type="button" class="btn btn-success" style="width: 100%;" ng-click="$ctrl.addSource($ctrl.newEntry)"><i class="material-icons" aria-hidden="true">add</i> {{ 'evidence.sources.add' | translate }}</button>
+            <button type="button" class="btn btn-success" style="width: 100%;" ng-click="$ctrl.addSource($ctrl.newEntry)" ng-disabled="!$ctrl.newEntry.source"><i class="material-icons" aria-hidden="true">add</i> {{ 'evidence.sources.add' | translate }}</button>
         </div>
     </div>
 </div>

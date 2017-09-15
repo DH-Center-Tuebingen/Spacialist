@@ -10,6 +10,7 @@ spacialistApp.component('spacialist', {
         layer: '<',
         geodata: '<',
         contextTypes: '<',
+        geometryTypes: '<',
         files: '<',
         availableTags: '<'
     },
@@ -24,12 +25,13 @@ spacialistApp.component('spacialistdata', {
         fields: '<',
         sources: '<',
         menus: '<',
-        geodate: '<',
         user: '<',
         concepts: '<',
         linkedFiles: '<',
         onStore: '&',
-        onSourceAdd: '&'
+        onSourceAdd: '&',
+        map: '<',
+        mapContentLoaded: '<'
     },
     templateUrl: 'templates/context-data.html',
     controller: 'contextCtrl'
@@ -40,7 +42,7 @@ spacialistApp.component('sourcemodal', {
         bindings: {
             attribute: '<',
             certainty: '<',
-            attribute_sources: '<',
+            attributesources: '<',
             context: '<',
             literature: '<',
             sources: '<',
@@ -48,9 +50,9 @@ spacialistApp.component('sourcemodal', {
             onClose: '&',
             onDismiss: '&'
         },
-        controller: ['$scope', 'snackbarService', 'httpPutFactory', '$translate', function($scope, snackbarService, httpPutFactory, $translate) {
+        controller: ['$scope', 'snackbarService', 'httpPutFactory', 'httpPostFactory', 'httpDeleteFactory', '$translate', function($scope, snackbarService, httpPutFactory, httpPostFactory, httpDeleteFactory, $translate) {
             var vm = this;
-
+            console.log(vm.attributesources);
             vm.newEntry = {
                 source: '',
                 desc: ''
@@ -70,18 +72,28 @@ spacialistApp.component('sourcemodal', {
                 vm.onDismiss();
             };
             vm.addSource = function(entry) {
-                vm.onAdd({entry: entry});
-                // var formData = new FormData();
-                // formData.append('cid', context.id);
-                // formData.append('aid', attribute.id);
-                // formData.append('lid', entry.source.id);
-                // formData.append('desc', entry.desc);
-                // httpPostFactory('api/source', formData, function(response) {
-                //     console.log($state.$current.parent);
-                //     sources.push(response.source);
-                //     entry.source = undefined;
-                //     entry.desc = '';
-                // });
+                // vm.onAdd({entry: entry});
+                var formData = new FormData();
+                formData.append('cid', vm.context.id);
+                formData.append('aid', vm.attribute.id);
+                formData.append('lid', entry.source.id);
+                formData.append('desc', entry.desc);
+                httpPostFactory('api/source', formData, function(response) {
+                    vm.attributesources.push(response.source);
+                    entry.source = undefined;
+                    entry.desc = '';
+                });
+            };
+            vm.deleteSourceEntry = function(id) {
+                var entry = vm.attributesources.find(function(s) {
+                    return s.id == id;
+                });
+                httpDeleteFactory('api/source/' + entry.id, function() {
+                    var index = vm.attributesources.indexOf(entry);
+                    if(index > -1) {
+                        vm.attributesources.splice(index, 1);
+                    }
+                });
             };
             vm.setCertainty = function(event, certainty) {
                 var max = event.currentTarget.scrollWidth;
@@ -105,4 +117,16 @@ spacialistApp.component('sourcemodal', {
                 vm.onClose({reason: true});
             };
         }]
+});
+
+spacialistApp.component('geodata', {
+    bindings: {
+        map: '<',
+        context: '<',
+        geodataId: '<'
+    },
+    controller: function() {
+        var vm = this;
+    },
+    template: '',
 });

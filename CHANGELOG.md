@@ -5,18 +5,19 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Drag & Drop Support for Element Tree
-- More Datatypes (Integer, Geography, Slider)
+- More Datatypes (Integer, Geography, Slider, Boolean)
 - Dynamic UI (The three columns on the main view can be shrinked/extended, enable Edit Mode in the Settings Dropdown menu)
 - Basic Unit-Testing (Lumen API)
-- State-based Routing (Shareable Links) using ui-router
-- Boolean Datatype
+- State-based Routing using [ui-router](https://github.com/angular-ui/ui-router)
+  - Shareable Links
+  - Redirect to last state after (re)login
 - Unset Selected Values (`string-sc` aka Single Dropdown)
 ### Changed
 - Photo Viewer => File Viewer (Please read section _Protected Files_ in [INSTALL.md](INSTALL.md) for proper setup)
-  - PDFs (pdf.js)
-  - Text documents (+ text highlighting using highlightjs)
-  - 3D files (`.dae` and `.obj`/`.mtl`, using three.js)
-  - Markdown files (marked.js)
+  - PDFs ([pdf.js](https://github.com/mozilla/pdf.js) & [angularjs-pdf](https://github.com/sayanee/angularjs-pdf))
+  - Text documents (including text highlighting using [highlight.js](https://highlightjs.org/))
+  - 3D files (`.dae` and `.obj`/`.mtl`, using [three.js](https://github.com/mrdoob/three.js/))
+  - Markdown files ([marked](https://github.com/chjj/marked) & [angular-marked](https://github.com/Hypercubed/angular-marked))
   - Audio/Video files
 - Remove input field placeholders
 - Layer Control
@@ -26,7 +27,7 @@ All notable changes to this project will be documented in this file.
   - Add Bing and Google Maps as Tile-Provider
   - Layer Editor
     - Change color
-    - Enable/Disable layers (overlays, on startup)
+    - Enable/Disable layers (**only** overlays, on startup)
     - Set opacity
     - Set default baselayer
   - Real RESTful API

@@ -1,17 +1,19 @@
-spacialistApp.controller('fileCtrl', ['$scope', 'fileService', 'mainService', 'snackbarService', '$translate', function($scope, fileService, mainService, snackbarService, $translate) {
-    $scope.getMimeType = fileService.getMimeType;
+spacialistApp.controller('fileCtrl', ['fileService', 'mainService', 'snackbarService', '$translate', function(fileService, mainService, snackbarService, $translate) {
+    var vm = this;
 
-    $scope.search = {
+    vm.getMimeType = fileService.getMimeType;
+
+    vm.search = {
         terms: {
             tags: []
         }
     };
 
-    $scope.addTag = function(file, item) {
+    vm.addTag = function(file, item) {
         fileService.addTag(file, item);
     };
 
-    $scope.removeTag = function(file, item) {
+    vm.removeTag = function(file, item) {
         fileService.removeTag(file, item);
     };
 }]);

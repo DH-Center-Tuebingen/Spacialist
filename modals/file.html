@@ -14,27 +14,12 @@
                     </a>
                 </div>
             </div>
-            <div class="hg-100" ng-switch-when="pdf" ng-controller="pdfCtrl">
-                <div class="pdf-header">
-                    <a class="btn btn-default" ng-click="prev()">
-                        <i class="material-icons" aria-hidden="true">navigate_before</i>
-                    </a>
-                    <a class="btn btn-default" ng-click="next()">
-                        <i class="material-icons" aria-hidden="true">navigate_next</i>
-                    </a>
-                    <a class="btn btn-default" ng-click="rotate()">
-                        <i class="material-icons" aria-hidden="true">rotate_right</i>
-                    </a>
-                    <a class="btn btn-default" ng-click="zoomOut()">
-                        <i class="material-icons" aria-hidden="true">zoom_out</i>
-                    </a>
-                    <a class="btn btn-default" ng-click="zoomIn()">
-                        <i class="material-icons" aria-hidden="true">zoom_in</i>
-                    </a>
-                    <span class="page-counter">{{getCurrentPage()}}/{{getPageCount()}}</span>
-                </div>
-                <div class="scrollable-modal">
-                    <pdf-viewer url="$ctrl.file.url" delegate-handle="pdf-handle" show-toolbar="false" scale="1"></pdf-viewer>
+            <div class="hg-100" ng-switch-when="pdf" ng-controller="pdfCtrl" ng-init="pdfUrl=$ctrl.file.url">
+                <ng-pdf template-url="layouts/pdf.html"></ng-pdf>
+                <div class="progress animated-item" ng-if="status.progress < 100">
+                    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ status.progress }}%">
+                        {{ status.progress }}%
+                    </div>
                 </div>
             </div>
             <div ng-switch-when="audio">
@@ -58,11 +43,16 @@
                 <p>
                     Gemessene Länge: {{ props.length }}m
                 </p>
+                <div class="progress animated-item" ng-if="status.progress < 100">
+                    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{ status.progress }}%">
+                        {{ status.progress }}%
+                    </div>
+                </div>
             </div>
             <div ng-switch-default ng-controller="pdfCtrl">
                 <div ng-if="$ctrl.file.filename.endsWith('.md')">
                     <button type="button" class="btn btn-default" ng-click="togglePreview()">
-                        <span translate="photos.properties.md-preview.toggle"></span>
+                        <span translate="files.properties.md-preview.toggle"></span>
                     </button>
                 </div>
                 <div ng-if="!isPreview" class="left scrollable-modal" hljs hljs-include="$ctrl.file.url">
@@ -74,15 +64,15 @@
     </div>
     <div class="col-md-5" style="align-items: stretch;" ng-init="activeTab = 'props'">
         <ul class="nav nav-tabs nav-justified">
-            <li role="presentation" ng-class="{active: activeTab == 'props'}" ng-click="activeTab = 'props'"><a><i class="material-icons">tune</i> {{'photos.properties.heading'|translate}}</a></li>
-            <li role="presentation" ng-class="{active: activeTab == 'links'}" ng-click="activeTab = 'links'"><a><i class="material-icons">link</i> {{'photos.linkages.heading'|translate}}</a></li>
+            <li role="presentation" ng-class="{active: activeTab == 'props'}" ng-click="activeTab = 'props'"><a><i class="material-icons">tune</i> {{'files.properties.heading'|translate}}</a></li>
+            <li role="presentation" ng-class="{active: activeTab == 'links'}" ng-click="activeTab = 'links'"><a><i class="material-icons">link</i> {{'files.linkages.heading'|translate}}</a></li>
         </ul>
         <div ng-show="activeTab == 'props'" class="col-md-10 col-md-offset-1">
-            <h3>{{'photos.properties.heading'|translate}}</h3>
+            <h3>{{'files.properties.heading'|translate}}</h3>
             <table class="table" style="width: 100%;">
                 <tr ng-repeat="prop in $ctrl.availableProperties" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
                     <td style="text-align:left; font-weight: bold;">
-                        {{'photos.properties.image.'+prop|translate}}
+                        {{'files.properties.file.'+prop|translate}}
                     </td>
                     <td style="text-align:right;">
                         <div ng-show="!$ctrl.fileEdits[prop].editMode">
@@ -107,11 +97,11 @@
                     </td>
                 </tr>
             </table>
-            <h3>{{'photos.properties.image.heading'|translate}}</h3>
+            <h3>{{'files.properties.file.heading'|translate}}</h3>
             <table class="table" style="width: 100%;">
                 <tr>
                     <td style="text-align:left; font-weight: bold;">
-                        {{'photos.properties.image.created'|translate}}
+                        {{'files.properties.file.created'|translate}}
                     </td>
                     <td style="text-align:right;">
                         <i style="color: gray;">{{ $ctrl.file.created*1000 | date:'d.MM.yyyy H:mm:ss' }}</i>
@@ -119,7 +109,7 @@
                 </tr>
                 <tr>
                     <td style="text-align:left; font-weight: bold;">
-                        {{'photos.properties.image.modified'|translate}}
+                        {{'files.properties.file.modified'|translate}}
                     </td>
                     <td style="text-align:right;">
                         <i style="color: gray;">{{ $ctrl.file.modified*1000 | date:'d.MM.yyyy H:mm:ss' }}</i>
@@ -127,7 +117,7 @@
                 </tr>
                 <tr>
                     <td style="text-align:left; font-weight: bold;">
-                        {{'photos.properties.image.cameraname'|translate}}
+                        {{'files.properties.file.cameraname'|translate}}
                     </td>
                     <td style="text-align:right;">
                         <i style="color: gray;">{{ $ctrl.file.cameraname }}</i>
@@ -135,14 +125,14 @@
                 </tr>
                 <tr>
                     <td style="text-align:left; font-weight: bold;">
-                        {{'photos.properties.image.filesize'|translate}}
+                        {{'files.properties.file.filesize'|translate}}
                     </td>
                     <td style="text-align:right;">
                         <i style="color: gray;">{{ $ctrl.file.filesize | bytes:2 }}</i>
                     </td>
                 </tr>
                 <tr>
-                    <td style="text-align:left; font-weight: bold;">{{'photos.properties.image.orientation'|translate}}</td>
+                    <td style="text-align:left; font-weight: bold;">{{'files.properties.file.orientation'|translate}}</td>
                     <td style="text-align:right;"><i style="color: gray;">{{ $ctrl.file.orientation }}</i></td>
                 </tr>
             </table>
@@ -166,7 +156,7 @@
             </div>
         </div>
         <div ng-show="activeTab == 'links'" style="padding-right: 10px;">
-            <h3>{{'photos.linkages.heading'|translate}}</h3>
+            <h3>{{'files.linkages.heading'|translate}}</h3>
             <p>TODO</p>
         </div>
     </div>

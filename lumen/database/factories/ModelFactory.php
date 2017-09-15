@@ -307,7 +307,7 @@ $factory->define(App\AttributeValue::class, function(Faker\Generator $faker) {
 });
 
 //TODO seed photos?
-$factory->define(App\Photo::class, function(Faker\Generator $faker) {
+$factory->define(App\File::class, function(Faker\Generator $faker) {
     return [
         'name' => '',
         'modified' => $faker->dateTime(),

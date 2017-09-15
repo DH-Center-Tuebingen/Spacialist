@@ -6,6 +6,9 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
     map.currentGeodata = {};
     map.contexts = environmentService.contexts;
     map.featureGroup = new L.FeatureGroup();
+    map.modes = {
+        deleting: false
+    };
 
     map.availableGeometryTypes = {
         point: 'POINT',
@@ -68,17 +71,15 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
     };
 
     function convertToStandardGeomtype(type) {
+        type = type.toUpperCase();
         switch(type) {
-            case 'marker':
-            case 'Marker':
-            case 'point':
+            case 'MARKER':
+            case 'POINT':
                 return 'Point';
-            case 'linestring':
-            case 'polyline':
-            case 'linestring':
-            case 'Linestring':
+            case 'LINESTRING':
+            case 'POLYLINE':
                 return 'LineString';
-            case 'polygon':
+            case 'POLYGON':
                 return 'Polygon';
         }
         return undefined;
@@ -89,6 +90,10 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             mapArr.mapLayers[invisibleLayers[i]].remove();
         }
     }
+
+    map.convertToStandardGeomtype = function(type) {
+        return convertToStandardGeomtype(type);
+    };
 
     map.addListToMarkers = function(geodataList, contexts, mapArr, isInit) {
         isInit = isInit || false;
@@ -145,29 +150,26 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         mapArr.bounds.southWest.lng = newSW.lng;
     };
 
-    map.isLinkPossible = function(geodataType, layerType) {
+    map.isLinkPossible = function(geodataType, layerType, allowedTypes) {
         var gt = geodataType.toUpperCase();
         var lt = layerType.toUpperCase();
 
-        return (
-            gt.endsWith(map.availableGeometryTypes.point) &&
-            lt.endsWith(map.availableGeometryTypes.point)
-        ) || (
-            gt.endsWith(map.availableGeometryTypes.linestring) &&
-            lt.endsWith(map.availableGeometryTypes.linestring)
-        ) || (
-            gt.endsWith(map.availableGeometryTypes.polygon) &&
-            lt.endsWith(map.availableGeometryTypes.polygon)
-        );
+        for(var i=0; i<allowedTypes.length; i++) {
+            var c = allowedTypes[i].toUpperCase();
+            // gt and lt can be Multi*, thus check if endsWith Point, LineString, Polygon, ...
+            if(gt.endsWith(c) && lt.endsWith(c)) return true;
+        }
+        return false;
     };
 
     map.getCoords = function(layer, type) {
+        type = convertToStandardGeomtype(type);
         var coords;
-        if(type == 'marker' || type == 'Point') {
+        if(type == 'Point') {
             coords = [ layer.getLatLng() ];
         } else {
             coords = layer.getLatLngs();
-            if(type.toLowerCase() == 'polygon') coords[0].push(angular.copy(coords[0][0]));
+            if(type == 'Polygon') coords[0].push(angular.copy(coords[0][0]));
         }
         return coords;
     };
@@ -250,6 +252,14 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                 }
             }
         );
+    };
+
+    map.openPopupForContext = function(context, geodata) {
+        var geodate = geodata.linkedLayers[context.geodata_id];
+        if(geodate) {
+            map.setCurrentGeodata(geodate.feature.id, geodata);
+            if(!geodate.isPopupOpen()) geodate.openPopup();
+        }
     };
 
     map.createBoundsFromArray = function(arr) {
@@ -475,7 +485,11 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                     name = feature.properties.name;
                 }
                 layer.bindTooltip(name);
-                layer.on('click', function(){
+                layer.on('click', function(e){
+                    // if we are in delete mode, don't switch state
+                    if(map.modes.deleting) {
+                        return;
+                    }
                     $state.go('root.spacialist.geodata', {id: layer.feature.id});
                 });
             }
@@ -493,16 +507,18 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         var coords = [];
         if(layer instanceof L.Polygon || layer instanceof L.Polyline) {
             var latlngs = layer.getLatLngs();
+            if(layer instanceof L.Polygon) latlngs = latlngs[0];
             for(var i=0; i<latlngs.length; i++) {
-                coords.push(latlngs[i].lng + ' ' + latlngs[i].lat);
+                var latlng = latlngs[i];
+                coords.push(latlng.lng + ' ' + latlng.lat);
             }
-            if (layer instanceof L.Polygon) {
-                var latlng = layer.getLatLngs()[0];
-                return 'POLYGON((' + coords.join(',') + ',' + latlng.lng + ' ' + latlng.lat + '))';
-            } else if (layer instanceof L.Polyline) {
+            if(layer instanceof L.Polygon) {
+                var first = coords[0];
+                return 'POLYGON((' + coords.join(',') + ',' + first + '))';
+            } else if(layer instanceof L.Polyline) {
                 return 'LINESTRING(' + coords.join(',') + ')';
             }
-        } else if (layer instanceof L.Marker) {
+        } else if(layer instanceof L.CircleMarker) {
             return 'POINT(' + layer.getLatLng().lng + ' ' + layer.getLatLng().lat + ')';
         }
     };

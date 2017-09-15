@@ -5,4 +5,12 @@ bower_components
 .bower-cache
 .bower-registry
 .bower-tmp
+
+### NPM ###
+node_modules
+
+### Lumen ###
 lumen/composer.lock
+
+### Plugins ###
+thesaurex

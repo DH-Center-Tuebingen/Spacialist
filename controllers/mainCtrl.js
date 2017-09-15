@@ -1,8 +1,8 @@
-spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fileService', '$uibModal', '$state', '$translate', '$timeout', '$compile', function($scope, mainService, mapService, fileService, $uibModal, $state, $translate, $timeout, $compile) {
+spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainService', 'mapService', 'fileService', 'modalFactory', '$uibModal', '$state', '$translate', '$timeout', '$compile', function($scope, httpDeleteFactory, mainService, mapService, fileService, modalFactory, $uibModal, $state, $translate, $timeout, $compile) {
     var vm = this;
-    vm.dimensionUnits = mainService.dimensionUnits;
     vm.currentElement = mainService.currentElement;
     vm.currentGeodata = mapService.currentGeodata;
+    vm.isLinkPossible = mapService.isLinkPossible;
 
     $scope.moduleExists = mainService.moduleExists;
     $scope.filterTree = mainService.filterTree;
@@ -16,10 +16,6 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
             }
         }
         vm.currentElement.form.$setPristine();
-    };
-
-    vm.onSourceAdd = function(entry) {
-        console.log(entry);
     };
 
     if(vm.tab == 'map') {
@@ -86,6 +82,10 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
         });
     };
 
+    vm.updateMarkerOptions = function(geodata) {
+        mapService.updateMarker(geodata);
+    };
+
     $scope.treeCallbacks = {
         toggle: function(collapsed, sourceNodeScope) {
             mainService.treeCallbacks.toggle(collapsed, sourceNodeScope, vm.contexts);
@@ -147,7 +147,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
         ]
     ];
 
-    $scope.hasSources = function(element) {
+    vm.hasSources = function(element) {
         return Object.keys(element.sources).length > 0;
     };
 
@@ -213,6 +213,12 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
             });
         });
     });
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:deletestart', function(event, args) {
+        mapService.modes.deleting = true;
+    });
+    $scope.$on('leafletDirectiveDraw.mainmap.draw:deletestop', function(event, args) {
+        mapService.modes.deleting = false;
+    });
 
     $scope.linkGeodata = function(cid, gid) {
         var promise = mapService.linkGeodata(cid, gid);
@@ -225,7 +231,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
             var updatedValues = {
                 geodata_id: updatedContext.geodata_id
             };
-            mainService.updateContextById(cid, updatedValues);
+            mainService.updateContextById(vm.contexts, cid, updatedValues);
             vm.map.geodata.linkedContexts[gid] = cid;
             vm.map.geodata.linkedLayers[gid].bindTooltip(vm.contexts.data[cid].name);
         });
@@ -241,9 +247,9 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
             var updatedValues = {
                 geodata_id: undefined
             };
-            mainService.updateContextById(cid, updatedValues);
-            delete vm.map.geodata.linkedContexts[$scope.currentGeodata.id]; // TODO currentGeodata
-            linkedLayer = vm.map.geodata.linkedLayers[$scope.currentGeodata.id]; // TODO currentGeodata
+            mainService.updateContextById(vm.contexts, cid, updatedValues);
+            delete vm.map.geodata.linkedContexts[vm.currentGeodata.id];
+            linkedLayer = vm.map.geodata.linkedLayers[vm.currentGeodata.id];
             linkedLayer.bindTooltip(linkedLayer.feature.properties.name);
         });
     };
@@ -253,32 +259,32 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
     var linkFileContextMenu = [function($itemScope) {
         var f = $itemScope.f;
         var content;
-        for(var i=0; i<f.linked_images.length; i++) {
-            if(f.linked_images[i].context_id == mainService.currentElement.element.id) {
-                content = $translate.instant('photo.unlink-from', { name: mainService.currentElement.element.name });
+        for(var i=0; i<f.linked_files.length; i++) {
+            if(f.linked_files[i].context_id == mainService.currentElement.element.id) {
+                content = $translate.instant('file.unlink-from', { name: mainService.currentElement.element.name });
                 break;
             }
         }
         if(!content) {
-            content = $translate.instant('photo.link-to', { name: mainService.currentElement.element.name });
+            content = $translate.instant('file.link-to', { name: mainService.currentElement.element.name });
         }
         return '<i class="material-icons md-18">add_circle_outline</i> ' + content;
     }, function ($itemScope) {
         var f = $itemScope.f;
         var fileId = f.id;
         var contextId = mainService.currentElement.element.id;
-        for(var i=0; i<f.linked_images.length; i++) {
-           if(f.linked_images[i].context_id == mainService.currentElement.element.id) {
-               fileService.unlinkImage(fileId, contextId);
+        for(var i=0; i<f.linked_files.length; i++) {
+           if(f.linked_files[i].context_id == mainService.currentElement.element.id) {
+               fileService.unlinkFile(fileId, contextId);
                return;
            }
         }
-        fileService.linkImage(fileId, contextId);
+        fileService.linkFile(fileId, contextId);
     }, function() {
         return mainService.currentElement.element.id > 0;
     }];
     var deleteFile = [function($itemScope) {
-        var content = $translate.instant('photo.delete', { name: $itemScope.f.filename });
+        var content = $translate.instant('file.delete', { name: $itemScope.f.filename });
        return '<i class="material-icons md-18">delete</i> ' + content;
     }, function ($itemScope, $event, modelValue, text, $li) {
         fileService.deleteFile($itemScope.f, vm.files);
@@ -291,13 +297,13 @@ spacialistApp.controller('mainCtrl', ['$scope', 'mainService', 'mapService', 'fi
     ];
 
     /**
-     * enables drag & drop support for image upload, calls `$scope.uploadImages` if files are dropped on the `dropFiles` model
+     * enables drag & drop support for file upload, calls `$scope.uploadFiles` if files are dropped on the `dropFiles` model
      */
     $scope.$watch('dropFiles', function() {
-        vm.uploadImages($scope.dropFiles);
+        vm.uploadFiles($scope.dropFiles);
     });
 
-    vm.uploadImages = function($files, $invalidFiles) {
-        vm.uploadStatus = fileService.uploadImages($files, $invalidFiles, vm.files);
+    vm.uploadFiles = function($files, $invalidFiles) {
+        vm.uploadStatus = fileService.uploadFiles($files, $invalidFiles, vm.files);
     };
 }]);

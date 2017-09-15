@@ -20,7 +20,7 @@
         </div>
         <div ng-switch-when="geography">
             <input class="form-control" type="text" id="a{{ attr.id }}" placeholder="{{ 'context-form.fields.placeholder-wkt' | translate }}" ng-model="attributeOutputs[attr.id]" ng-readonly="readonlyInput" />
-            <button type="button" class="btn btn-default" style="margin-top: 10px;" ng-click="openGeographyPlacer(attr.id)">
+            <button type="button" class="btn btn-default" style="margin-top: 10px;" ng-click="$ctrl.openGeographyPlacer(attr.id)">
                 <i class="material-icons">place</i>
                 <span translate="context-form.fields.open-map"/>
             </button>
@@ -67,7 +67,7 @@
                 </span>
                 <input class="form-control" type="text" id="{{ attr.id }}" ng-model="listInput[attr.id]" placeholder="{{'field-types.list.new-placeholder'|translate}}" ng-readonly="readonlyInput"/>
                 <span class="input-group-btn">
-                    <button class="btn btn-success" type="button" ng-click="addListEntry(attr.id, attr.oid, listInput, attributeOutputs)" ng-disabled="!listInput[attr.id] || readonlyInput">
+                    <button class="btn btn-success" type="button" ng-click="addListEntry(attr.id, listInput)" ng-disabled="!listInput[attr.id] || readonlyInput">
                         <i class="material-icons">add</i>
                     </button>
                 </span>
@@ -75,7 +75,7 @@
             <div ng-hide="hiddenLists[attr.id] || !attributeOutputs[attr.id] ||  attributeOutputs[attr.id].length == 0" class="col-md-12 hideable-list">
                 <ol class="list-group inline-list">
                     <li ng-repeat="li in attributeOutputs[attr.id] track by $index" class="list-group-item animated-item" ng-mouseenter="hovered = true;" ng-mouseleave="hovered = false;">
-                        <span class="delete-icon" ng-show="hovered && !editEntry[attr.id][$index]" ng-click="removeListItem(attr.id, attr.oid, attributeOutputs, $index)">
+                        <span class="delete-icon" ng-show="hovered && !editEntry[attr.id][$index]" ng-click="removeListItem(attr.id, $index)">
                             <i class="material-icons">delete</i>
                         </span>
                         <span ng-hide="editEntry[attr.id][$index]" ng-click="editListEntry(attr.id, attr.oid, $index, li)">{{ li.name }}</span>
@@ -103,8 +103,8 @@
                 <div class="input-group-btn" uib-dropdown>
                     <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="readonlyInput">{{ attributeOutputs[attr.id].endLabel | translate }} <span class="caret"></span></button>
                     <ul uib-dropdown-menu class="dropdown-menu">
-                        <li><a href="" ng-click="attributeOutputs[attr.id].endLabel = 'bc'">{{'bc' | translate}}.</a></li>
-                        <li><a href="" ng-click="attributeOutputs[attr.id].endLabel = 'ad'">{{'ad' | translate}}.</a></li>
+                        <li><a href="" ng-click="attributeOutputs[attr.id].endLabel = 'bc'">{{'bc' | translate}}</a></li>
+                        <li><a href="" ng-click="attributeOutputs[attr.id].endLabel = 'ad'">{{'ad' | translate}}</a></li>
                     </ul>
                 </div>
             </div>
@@ -119,19 +119,19 @@
                 </ui-select>
             </div>
         </div>
-        <div ng-switch-when="dimension" ng-init="attributeOutputs[attr.id] = {}">
+        <div ng-switch-when="dimension">
             <div class="input-group">
-                <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.width-placeholder'|translate}}" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.id].B" ng-readonly="readonlyInput">
+                <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.width-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="attributeOutputs[attr.id].B" ng-readonly="readonlyInput">
                 <span class="input-group-addon">&times;</span>
-                <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.height-placeholder'|translate}}" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.id].H" ng-readonly="readonlyInput">
+                <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.height-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="attributeOutputs[attr.id].H" ng-readonly="readonlyInput">
                 <span class="input-group-addon">&times;</span>
-                <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.depth-placeholder'|translate}}" min="0" max="9999" step="0.1" ng-model="attributeOutputs[attr.id].T" ng-readonly="readonlyInput">
+                <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.depth-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="attributeOutputs[attr.id].T" ng-readonly="readonlyInput">
                 <div class="input-group-btn" uib-dropdown>
                     <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="readonlyInput">
                         {{ attributeOutputs[attr.id].unit }} <span class="caret"></span>
                     </button>
                     <ul uib-dropdown-menu class="dropdown-menu">
-                        <li ng-repeat="unit in $ctrl.dimensionUnits"><a href="" ng-click="attributeOutputs[attr.id].unit = unit">{{ unit }}</a></li>
+                        <li ng-repeat="unit in dimensionUnits"><a href="" ng-click="attributeOutputs[attr.id].unit = unit">{{ unit }}</a></li>
                     </ul>
                 </div>
             </div>

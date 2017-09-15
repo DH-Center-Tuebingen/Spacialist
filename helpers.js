@@ -1,9 +1,8 @@
-Array.prototype.swap = function(a, b) {
-    var t = this[a];
-    this[a] = this[b];
-    this[b] = t;
-    return this;
-};
+function swap(a, i, j) {
+    var t = a[i];
+    a[i] = a[j];
+    a[j] = t;
+}
 
 function getCurrentDeviceClass() {
     return $('#current-device-class').find('div:visible').first().attr('id');

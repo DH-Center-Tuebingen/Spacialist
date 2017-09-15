@@ -12,6 +12,7 @@ use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
 use App\ContextAttribute;
+use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
@@ -56,8 +57,10 @@ class GeodataController extends Controller {
     }
 
     public function wktToGeojson($wkt) {
-        if($wkt == null) return; // null or empty
-        $parsed = $this->parseWkt($wkt);
+        if(!isset($wkt)) return; // null or empty
+        // the GET request adds % for spaces
+        $wkt = str_replace('%20', ' ', $wkt);
+        $parsed = Helpers::parseWkt($wkt);
         if($parsed !== -1) {
             return response()->json([
                 'geometry' => $parsed
@@ -113,13 +116,11 @@ class GeodataController extends Controller {
         }
 
         $this->validate($request, [
-            'coords' => 'nullable|json',
-            'type' => 'nullable|geom_type',
+            'coords' => 'json',
+            'type' => 'geom_type',
             'color' => 'color'
         ]);
 
-        $coords = json_decode($request->get('coords'));
-        $type = $request->get('type');
 
         try {
             $geodata = Geodata::find($id);
@@ -129,8 +130,15 @@ class GeodataController extends Controller {
             ]);
         }
 
+        if($request->has(['coords', 'type'])){
+            $coords = json_decode($request->get('coords'));
+            $type = $request->get('type');
+            $this->parseTypeCoords($type, $coords, $geodata);
+        }
 
-        $this->parseTypeCoords($type, $coords, $geodata);
+        if($request->has('color')){
+            $geodata->color = $request->get('color');
+        }
 
         $geodata->lasteditor = $user['name'];
         $geodata->save();
@@ -161,16 +169,6 @@ class GeodataController extends Controller {
     }
 
     // OTHER FUNCTIONS
-
-    private function parseWkt($wkt) {
-        try {
-            $geom = Geometry::getWKTClass($wkt);
-            $parsed = $geom::fromWKT($wkt);
-            return $parsed;
-        } catch(UnknownWKTTypeException $e) {
-            return -1;
-        }
-    }
 
     private function parseTypeCoords($type, $coords, $geodata) {
         switch($type) {
