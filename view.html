@@ -26,7 +26,7 @@
             <h3>{{'context-form.heading'|translate}}</h3>
             <div class="alert alert-info">
                 <p>{{ 'context-form.no-selection' | translate }}</p>
-                <p>{{ 'context-form.no-selection-info' | translate }}</p>
+                <p ng-if="$ctrl.userConfig['prefs.show-tooltips'].value">{{ 'context-form.no-selection-info' | translate }}</p>
             </div>
         </div>
         <div ui-view="geodata-dummy"></div>
