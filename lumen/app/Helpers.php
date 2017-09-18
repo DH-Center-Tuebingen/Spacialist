@@ -23,7 +23,8 @@ class Helpers {
         } catch(UnknownWKTTypeException $e) {
             return -1;
         }
-
+    }
+    
     public static function parseBoolean($str) {
         $acceptable = [true, 1, '1', 'true', 'TRUE'];
         return in_array($str, $acceptable, true);
