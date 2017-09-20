@@ -1,7 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased - Delphi
+
+### Added
+- Preferences to allow customization for admins and users as well
+### Changed
+### Fixed
+### Removed/Deprecated
+
 ## 0.3.1
+
 ### Fixed
 - Context Search (didn't work at all)
 - Possible Error retrieving files without a thumbnail (every file except images)

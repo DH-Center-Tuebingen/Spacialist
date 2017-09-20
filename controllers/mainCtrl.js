@@ -47,6 +47,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
             controller: ['$scope', function($scope) {
                 $scope.contexts = vm.contexts;
                 $scope.concepts = vm.concepts;
+                $scope.userConfig = vm.userConfig;
                 $scope.type = type;
                 $scope.parent = parent;
 
