@@ -14,6 +14,7 @@ use App\ThConcept;
 use App\ContextAttribute;
 use App\AvailableLayer;
 use App\File;
+use App\Source;
 use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
@@ -329,9 +330,10 @@ class ContextController extends Controller {
             ->orWhere(DB::raw('CAST (json_val AS text)'), 'ilike', '%'.$term.'%')
             ->orWhere(DB::raw('ST_AsText(geography_val)'), 'ilike', '%'.$term.'%')
             ->orWhere(DB::raw('to_char(dt_val, \'MM.DD.YYYY day month\')'), 'ilike', '%'.$term.'%')
+            ->orWhere('possibility_description', 'ilike', '%'.$term.'%')
             ->join('contexts', 'context_id', '=', 'contexts.id')
             ->join('attributes', 'attribute_id', '=', 'attributes.id')
-            ->select('contexts.id', 'name', 'str_val', 'int_val', 'dbl_val', 'thesaurus_val', 'possibility_description', 'json_val', 'geography_val', 'dt_val', 'attributes.thesaurus_url')
+            ->select('contexts.id', 'name', 'str_val', 'int_val', 'dbl_val', 'thesaurus_val', 'possibility_description', 'json_val', 'geography_val', 'dt_val', 'possibility_description', 'attributes.thesaurus_url')
             ->orderBy('name')
             ->get();
         foreach($matchingValues as $v) {
@@ -369,6 +371,39 @@ class ContextController extends Controller {
                 }
                 $matches[$key]['values'][$v->thesaurus_url] = $value;
             }
+            if(isset($v->possibility_description) && stripos($v->possibility_description, $term) !== false) {
+                $matches[$key]['values']['possibility_description'] = $v->possibility_description;
+            }
+        }
+
+        $matchingSources = Source::where('description', 'ilike', '%'.$term.'%')
+            ->join('contexts', 'context_id', '=', 'contexts.id')
+            ->join('attributes', 'attribute_id', '=', 'attributes.id')
+            ->join('literature', 'literature_id', '=', 'literature.id')
+            ->select('contexts.id', 'attributes.id as attribute_id', 'literature.id as literature_id', 'name', 'description', 'attributes.thesaurus_url', 'literature.title')
+            ->orderBy('name')
+            ->get();
+        foreach($matchingSources as $s) {
+            $type = 'context';
+            $key = $type . "_" . $s->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $s->id,
+                    'aid' => $s->attribute_id,
+                    'name' => $s->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => [],
+                    'sources' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+            $matches[$key]['sources'][] = [
+                'title' => $s->title,
+                'desc' => $s->description
+            ];
         }
 
         usort($matches, ['App\Helpers', 'sortMatchesReverse']);

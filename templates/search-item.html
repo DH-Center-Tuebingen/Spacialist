@@ -12,6 +12,17 @@
                    <span ng-bind-html="v | highlight:query:true"></span>
                </dd>
            </dl>
+           <dl class="dl-horizontal search-result-attr">
+               <dt class="search-item-content" ng-repeat-start="s in match.model.sources">
+                   {{ s.title }}
+               </dt>
+               <dd class="search-item-content search-item-text" ng-repeat-end>
+                   <span ng-bind-html="s.desc | highlight:query:true"></span>
+                   <button type="button" class="btn btn-default btn-xs" ui-sref="root.spacialist.data.sources({id: match.model.id, aid: match.model.aid})">
+                       <i class="material-icons md-18" aria-hidden="true">stars</i>
+                   </button>
+               </dd>
+           </dl>
        </div>
        <div class="media-right">
            <img class="media-object search-item-img" ng-src="{{match.model.thumb_url}}" ng-if="match.model.thumb_url" />
