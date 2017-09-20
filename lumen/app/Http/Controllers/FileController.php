@@ -38,8 +38,9 @@ class FileController extends Controller
                 ->first();
         if($file == null) return null;
         $file->url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->filename);
-        if(substr($file->mime_type, 0, 6) === 'image/');
-        $file->thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->thumbname);
+        if(substr($file->mime_type, 0, 6) === 'image/') {
+            $file->thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->thumbname);
+        }
         $file->linked_files = ContextFile::where('photo_id', '=', $file->id)->get();
 
         if($user->can('edit_photo_props')) {
