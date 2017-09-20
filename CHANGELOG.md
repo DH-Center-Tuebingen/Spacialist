@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.3.1
+### Fixed
+- Context Search (didn't work at all)
+- Possible Error retrieving files without a thumbnail (every file except images)
+
 ## 0.3 - Cannae
 
 ### Added
