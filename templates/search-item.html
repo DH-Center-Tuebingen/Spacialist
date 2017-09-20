@@ -1,8 +1,9 @@
 <a ui-sref="root.spacialist.data({id: match.model.id})" tabindex="-1" style="text-decoration: none;">
    <div class="media">
        <div class="media-body">
-           <div class="meadia-heading search-item-title">
+           <div class="media-heading search-item-title">
                <span ng-bind-html="match.label | highlight:query"></span> <span class="badge">{{ match.model.count }}</span>
+               <span class="search-item-title-sub" ng-bind-html="match.model.email | highlight:query" ng-if="match.model.email"></span>
            </div>
            <dl class="dl-horizontal search-result-attr">
                <dt class="search-item-content" ng-repeat-start="(label, v) in match.model.values">

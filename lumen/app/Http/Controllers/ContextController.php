@@ -406,6 +406,28 @@ class ContextController extends Controller {
             ];
         }
 
+        $matchingUsers = User::where('name', 'ilike', '%'.$term.'%')
+            ->select('name', 'email', 'id')
+            ->orderBy('name')
+            ->get();
+        foreach($matchingUsers as $u) {
+            $type = 'user';
+            $key = $type . "_" . $u->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+        }
+
         usort($matches, ['App\Helpers', 'sortMatchesReverse']);
 
         return response()->json($matches);

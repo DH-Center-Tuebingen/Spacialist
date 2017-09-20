@@ -645,12 +645,18 @@ body > .angular-bootstrap-contextmenu.dropdown {
     font-weight: 500;
 }
 
-.search-item-content, .uib-typeahead-match.active:hover .search-item-content {
+.search-item-title-sub {
+    display: block;
+    font-style: italic;
+    font-weight: 300;
+}
+
+.search-item-content, .search-item-title-sub, .uib-typeahead-match.active:hover .search-item-content, .uib-typeahead-match.active:hover .search-item-title-sub {
     color: gray;
     font-size: 10px;
 }
 
-.uib-typeahead-match.active .search-item-content {
+.uib-typeahead-match.active .search-item-content, .uib-typeahead-match.active .search-item-title-sub {
     color: white;
 }
 

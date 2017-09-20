@@ -15,6 +15,9 @@ spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 
             case 'file':
                 $state.go('root.spacialist.file', {id: $model.id});
                 break;
+            case 'user':
+                $state.go('root.user.edit', {id: $model.id});
+                break;
         }
     };
 
