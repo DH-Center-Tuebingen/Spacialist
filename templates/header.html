@@ -50,8 +50,8 @@
                         <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
                     </a>
                 </li>
-                <li ng-if="$ctrl.userConfig['prefs.link-to-thesaurex'].value">
-                    <a href="thesaurex" target="_blank">
+                <li ng-if="$ctrl.userConfig['prefs.link-to-thesaurex'].value.length > 0">
+                    <a ng-href="{{ $ctrl.userConfig['prefs.link-to-thesaurex'].value }}" target="_blank">
                         <i class="material-icons">pets</i> ThesauRex <sup class="material-icons md-14">open_in_new</sup>
                     </a>
                 </li>

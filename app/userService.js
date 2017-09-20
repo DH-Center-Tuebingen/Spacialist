@@ -344,9 +344,7 @@ spacialistApp.service('userService', ['httpPostFactory', 'httpPostPromise', 'htt
 
     function convertBooleanPrefs(prefs) {
         var stVal = prefs['prefs.show-tooltips'].value.toString();
-        var lttVal = prefs['prefs.link-to-thesaurex'].value.toString();
         prefs['prefs.show-tooltips'].value = stVal == '1' || stVal == 'true';
-        prefs['prefs.link-to-thesaurex'].value = lttVal == '1' || lttVal == 'true';
     }
 
     return user;

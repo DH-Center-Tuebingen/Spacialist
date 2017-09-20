@@ -99,7 +99,7 @@
                 <strong translate="{{ $ctrl.preferences['prefs.link-to-thesaurex'].label }}"></strong>
             </td>
             <td>
-                <input type="checkbox" ng-model="$ctrl.preferences['prefs.link-to-thesaurex'].value" />
+                <input type="text" ng-model="$ctrl.preferences['prefs.link-to-thesaurex'].value" />
             </td>
             <td ng-if="!$ctrl.isUserPref">
                 <input type="checkbox" ng-model="$ctrl.preferences['prefs.link-to-thesaurex'].allow_override" />

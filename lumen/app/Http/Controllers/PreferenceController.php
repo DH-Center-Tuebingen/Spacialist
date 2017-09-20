@@ -138,7 +138,7 @@ class PreferenceController extends Controller {
                     $p->value = $decoded;
                     break;
                 case 'prefs.link-to-thesaurex':
-                    $p->value = $decoded->show;
+                    $p->value = $decoded->url;
                     break;
                 case 'prefs.project-name':
                     $p->value = $decoded->name;
@@ -168,7 +168,7 @@ class PreferenceController extends Controller {
                 $value = $decodedValue;
                 break;
             case 'prefs.link-to-thesaurex':
-                $value = json_encode(['show' => $decodedValue]);
+                $value = json_encode(['url' => $decodedValue]);
                 break;
             case 'prefs.project-name':
                 $value = json_encode(['name' => $decodedValue]);

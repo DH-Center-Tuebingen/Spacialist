@@ -61,7 +61,7 @@ class AddUserPrefs extends Migration
             ],
             [
                 'label' => 'prefs.link-to-thesaurex',
-                'default_value' => json_encode(['show' => true]),
+                'default_value' => json_encode(['url' => '']),
                 'allow_override' => false
             ],
             [
