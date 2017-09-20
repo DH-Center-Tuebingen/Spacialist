@@ -18,4 +18,8 @@ spacialistApp.controller('contextCtrl', ['$scope', 'mainService', function($scop
     vm.openGeographyPlacer = function(aid) {
         mainService.openGeographyModal($scope, aid);
     };
+
+    vm.contextSearch = function(searchTerm) {
+        return mainService.contextSearch(searchTerm);
+    };
 }]);

@@ -26,7 +26,7 @@
             </button>
         </div>
         <div ng-switch-when="context">
-            <input class="form-control" type="text" id="a{{ attr.id }}" placeholder="{{ 'context-form.fields.placeholder-context' | translate }}" ng-model="attributeOutputs[attr.id]" ng-model-options="{ debounce: 250 }" ng-readonly="readonlyInput" uib-typeahead="result as result.name for result in contextSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel" />
+            <input class="form-control" type="text" id="a{{ attr.id }}" placeholder="{{ 'context-form.fields.placeholder-context' | translate }}" ng-model="attributeOutputs[attr.id]" ng-model-options="{ debounce: 250 }" ng-readonly="readonlyInput" uib-typeahead="result as result.name for result in $ctrl.contextSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel" />
             <i ng-show="loadingResultsLabel" class="material-icons">refresh</i>
             <div ng-show="noResultsLabel && result.name.length >= 3">
                 <i class="material-icons md-18">clear</i> No Results Found
