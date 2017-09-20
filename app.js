@@ -767,9 +767,11 @@ spacialistApp.filter('truncate', function () {
 });
 
 spacialistApp.filter('highlight', function($sce) {
-    return function(text, search) {
+    return function(text, search, convert) {
+        convert = convert || false;
+        if(convert && typeof text == 'object') text = angular.toJson(text);
         if(search) {
-            text = text.replace(new RegExp('('+search+')', 'gi'), '<span class="search-highlighted">$1</span>');
+            text = text.replace(new RegExp('('+search+')', 'i'), '<span class="search-highlighted">$1</span>');
         }
         return $sce.trustAsHtml(text);
     };

@@ -364,6 +364,10 @@ div[resizeable] {
     background-color: yellow;
 }
 
+.active .search-highlighted {
+    background-color: purple;
+}
+
 .source-link {
     cursor: pointer;
     /*color: #337ab7;*/
