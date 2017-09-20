@@ -33,6 +33,7 @@ $app->group([
     $app->get('byGeodata/{id:[0-9]+}', 'ContextController@getContextByGeodata');
     $app->get('attributetypes', 'ContextController@getAvailableAttributeTypes');
     $app->get('search/term={term}', 'ContextController@searchContextName');
+    $app->get('search/all/term={term}', 'ContextController@searchGlobal');
 
     $app->post('', 'ContextController@add');
     $app->post('{id:[0-9]+}/duplicate', 'ContextController@duplicate');

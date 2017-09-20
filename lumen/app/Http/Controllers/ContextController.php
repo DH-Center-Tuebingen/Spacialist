@@ -13,6 +13,7 @@ use App\AttributeValue;
 use App\ThConcept;
 use App\ContextAttribute;
 use App\AvailableLayer;
+use App\File;
 use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
@@ -24,6 +25,7 @@ use Phaza\LaravelPostgis\Geometries\MultiPolygon;
 use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Zizaco\Entrust;
 use \DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -226,6 +228,152 @@ class ContextController extends Controller {
             ->orderBy('name')
             ->get();
         return response()->json($matchingContexts);
+    }
+
+    public function searchGlobal($term) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $matches = [];
+
+        $matchingContexts = Context::where('name', 'ilike', '%'.$term.'%')
+            ->select('name', 'id')
+            ->orderBy('name')
+            ->get();
+        foreach($matchingContexts as $c) {
+            $type = 'context';
+            $key = $type . "_" . $c->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matching_values = [];
+                $matches[$key] = [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => $matching_values
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+        }
+
+        $matchingFiles = File::where('name', 'ilike', '%'.$term.'%')
+            ->orWhere('copyright', 'ilike', '%'.$term.'%')
+            ->orWhere('description', 'ilike', '%'.$term.'%')
+            ->select('name', 'id', 'thumb', 'mime_type', 'copyright', 'description')
+            ->orderBy('name')
+            ->get();
+        foreach($matchingFiles as $f) {
+            $type = 'file';
+            $key = $type . "_" . $f->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matching_values = [];
+                if(isset($f->copyright) && stripos($f->copyright, $term) !== false) {
+                    $matching_values['copyright'] = $f->copyright;
+                }
+                if(isset($f->description) && stripos($f->description, $term) !== false) {
+                    $matching_values['description'] = $f->description;
+                }
+                $matches[$key] = [
+                    'id' => $f->id,
+                    'name' => $f->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => $matching_values
+                ];
+                if(isset($f->thumb) && substr($f->mime_type, 0, 6) === 'image/') {
+                    $thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $f->thumb);
+                    $matches[$key]['thumb_url'] = $thumb_url;
+                }
+            } else {
+                $matches[$key]['count']++;
+            }
+        }
+
+        $matchingLayers = AvailableLayer::where('name', 'ilike', '%'.$term.'%')
+            ->orWhere('url', 'ilike', '%'.$term.'%')
+            ->select('name', 'id', 'url')
+            ->orderBy('name')
+            ->get();
+        foreach($matchingLayers as $l) {
+            $type = 'layer';
+            $key = $type . "_" . $l->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matching_values = [];
+                if(isset($l->url) && stripos($l->url, $term) !== false) {
+                    $matching_values['url'] = $l->url;
+                }
+                $matches[$key] = [
+                    'id' => $lid,
+                    'name' => $l->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => $matching_values
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+        }
+
+        $matchingValues = AttributeValue::where('str_val', 'ilike', '%'.$term.'%')
+            ->orWhere(DB::raw('CAST (int_val AS text)'), 'ilike', '%'.$term.'%')
+            ->orWhere(DB::raw('CAST (dbl_val AS text)'), 'ilike', '%'.$term.'%')
+            ->orWhere('thesaurus_val', 'ilike', '%'.$term.'%')
+            ->orWhere('possibility_description', 'ilike', '%'.$term.'%')
+            ->orWhere(DB::raw('CAST (json_val AS text)'), 'ilike', '%'.$term.'%')
+            ->orWhere(DB::raw('ST_AsText(geography_val)'), 'ilike', '%'.$term.'%')
+            ->orWhere(DB::raw('to_char(dt_val, \'MM.DD.YYYY day month\')'), 'ilike', '%'.$term.'%')
+            ->join('contexts', 'context_id', '=', 'contexts.id')
+            ->join('attributes', 'attribute_id', '=', 'attributes.id')
+            ->select('contexts.id', 'name', 'str_val', 'int_val', 'dbl_val', 'thesaurus_val', 'possibility_description', 'json_val', 'geography_val', 'dt_val', 'attributes.thesaurus_url')
+            ->orderBy('name')
+            ->get();
+        foreach($matchingValues as $v) {
+            $type = 'context';
+            $key = $type . "_" . $v->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matching_values = [];
+                $matches[$key] = [
+                    'id' => $v->id,
+                    'name' => $v->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => $matching_values
+                ];
+            } else {
+                $matches[$key]['count']++;
+                $value;
+                if(isset($v->str_val)) {
+                    $value = $v->str_val;
+                } else if(isset($v->int_val)) {
+                    $value = $v->int_val;
+                } else if(isset($v->dbl_val)) {
+                    $value = $v->dbl_val;
+                } else if(isset($v->thesaurus_val)) {
+                    $value = $v->thesaurus_val;
+                } else if(isset($v->possibility_description)) {
+                    $value = $v->possibility_description;
+                } else if(isset($v->json_val)) {
+                    $value = json_decode($v->json_val);
+                } else if(isset($v->geography_val)) {
+                    $value = $v->geography_val;
+                } else if(isset($v->dt_val)) {
+                    $value = $v->dt_val;
+                }
+                $matches[$key]['values'][$v->thesaurus_url] = $value;
+            }
+        }
+
+        usort($matches, ['App\Helpers', 'sortMatchesReverse']);
+
+        return response()->json($matches);
     }
 
     // POST

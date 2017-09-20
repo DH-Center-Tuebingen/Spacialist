@@ -149,6 +149,13 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     };
 
+    main.globalSearch = function(term) {
+        return httpGetPromise.getData('api/context/search/all/term=' + term)
+        .then(function(response) {
+            return response;
+        });
+    };
+
     main.contextSearch = function(searchString) {
         var formData = new FormData();
         formData.append('val', searchString);

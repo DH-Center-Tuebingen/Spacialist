@@ -1,0 +1,21 @@
+<a ui-sref="root.spacialist.data({id: match.model.id})" tabindex="-1" style="text-decoration: none;">
+   <div class="media">
+       <div class="media-body">
+           <div class="meadia-heading search-item-title">
+               <span ng-bind-html="match.label | highlight:query"></span> <span class="badge">{{ match.model.count }}</span>
+           </div>
+           <dl class="dl-horizontal">
+               <dt class="search-item-content" ng-repeat-start="(label, v) in match.model.values">
+                   {{ $parent.$parent.$parent.$parent.$parent.concepts[label].label || 'files.properties.file.' + label | translate }}
+               </dt>
+               <dd class="search-item-content search-item-text" ng-repeat-end>
+                   <span ng-bind-html="v | highlight:query:true"></span>
+               </dd>
+           </dl>
+       </div>
+       <div class="media-right">
+           <img class="media-object search-item-img" ng-src="{{match.model.thumb_url}}" ng-if="match.model.thumb_url" />
+           <span class="media-object search-item-img-dummy" ng-if="!match.model.thumb_url"></span>
+       </div>
+   </div>
+</a>

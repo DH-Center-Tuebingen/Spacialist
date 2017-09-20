@@ -637,6 +637,44 @@ body > .angular-bootstrap-contextmenu.dropdown {
     padding-right: 16px;
 }
 
+.search-item-switch {
+    color: black;
+}
+
+ .search-item-wrapper {
+     padding: 0 7px;
+ }
+
+ .search-item-wrapper dl {
+     margin-bottom: 0;
+ }
+
+.search-item-title {
+    font-weight: 500;
+}
+
+.search-item-content {
+    color: gray;
+    font-size: 10px;
+}
+
+.uib-typeahead-match.active .search-item-content {
+    color: white !important;
+}
+
+.search-item-text {
+    font-weight: 300;
+}
+
+.search-item-img, .search-item-img-dummy {
+    padding-left: 5px;
+    width: 64px;
+}
+
+.search-item-img-dummy {
+    height: 64px;
+}
+
 g.leaf > rect {
   stroke: #ff0000;
   stroke-width: 0.25px;

@@ -15,20 +15,24 @@
         </div>
         <div class="navbar-collapse" id="navbar-collapse" uib-collapse="isCollapsed">
             <ul class="nav navbar-nav">
-                <!--<li>
+                <li>
                     <form class="navbar-form navbar-left">
                         <div class="form-group">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Search|translate">
+                                <input class="form-control" type="text" id="a{{ attr.id }}" ng-model="globaleSearchValue" ng-model-options="{ debounce: 250 }" uib-typeahead="result as result.name for result in $ctrl.globalSearch($viewValue)" typeahead-min-length="2" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel" typeahead-template-url="templates/search-item.html" typeahead-on-select="$ctrl.onSearchSelect($item, $model, $label)" />
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" type="button">
                                         <i class="material-icons" aria-hidden="true">search</i>
                                     </button>
                                 </span>
+                                <i ng-show="loadingResultsLabel" class="material-icons">refresh</i>
+                                <div ng-show="noResultsLabel && result.name.length >= 3">
+                                    <i class="material-icons md-18">clear</i> No Results Found
+                                </div>
                             </div>
                         </div>
                     </form>
-                </li>-->
+                </li>
                 <!--<li class="dropdown" uib-dropdown>
                     <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         {{ 'import_export' | translate }} <span class="caret"></span>
