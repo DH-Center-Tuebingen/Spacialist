@@ -360,7 +360,7 @@ div[resizeable] {
     width: 100%;
 }
 
-.search-highlighted {
+.search-highlighted, .active:hover .search-highlighted {
     background-color: yellow;
 }
 
@@ -637,15 +637,7 @@ body > .angular-bootstrap-contextmenu.dropdown {
     padding-right: 16px;
 }
 
-.search-item-switch {
-    color: black;
-}
-
- .search-item-wrapper {
-     padding: 0 7px;
- }
-
- .search-item-wrapper dl {
+ .search-result-attr {
      margin-bottom: 0;
  }
 
@@ -653,13 +645,13 @@ body > .angular-bootstrap-contextmenu.dropdown {
     font-weight: 500;
 }
 
-.search-item-content {
+.search-item-content, .uib-typeahead-match.active:hover .search-item-content {
     color: gray;
     font-size: 10px;
 }
 
 .uib-typeahead-match.active .search-item-content {
-    color: white !important;
+    color: white;
 }
 
 .search-item-text {

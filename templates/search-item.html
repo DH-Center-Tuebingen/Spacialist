@@ -4,7 +4,7 @@
            <div class="meadia-heading search-item-title">
                <span ng-bind-html="match.label | highlight:query"></span> <span class="badge">{{ match.model.count }}</span>
            </div>
-           <dl class="dl-horizontal">
+           <dl class="dl-horizontal search-result-attr">
                <dt class="search-item-content" ng-repeat-start="(label, v) in match.model.values">
                    {{ $parent.$parent.$parent.$parent.$parent.concepts[label].label || 'files.properties.file.' + label | translate }}
                </dt>
