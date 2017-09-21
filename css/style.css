@@ -664,6 +664,12 @@ body > .angular-bootstrap-contextmenu.dropdown {
     font-weight: 300;
 }
 
+.search-item-sources-btn {
+    font-size: 10px !important;
+    margin: 0 !important;
+    padding: 0 7px !important;
+}
+
 .search-item-img, .search-item-img-dummy {
     padding-left: 5px;
     width: 64px;

@@ -231,7 +231,7 @@ class ContextController extends Controller {
         return response()->json($matchingContexts);
     }
 
-    public function searchGlobal($term) {
+    public function searchGlobal($term, $lang) {
         $user = \Auth::user();
         if(!$user->can('view_concepts')) {
             return response([
@@ -239,8 +239,10 @@ class ContextController extends Controller {
             ], 403);
         }
         $matches = [];
+        $term = '%'.$term.'%';
 
-        $matchingContexts = Context::where('name', 'ilike', '%'.$term.'%')
+        $matchingContexts = Context::where('name', 'ilike', $term)
+            ->orWhere('lasteditor', 'ilike', $term)
             ->select('name', 'id')
             ->orderBy('name')
             ->get();
@@ -262,9 +264,10 @@ class ContextController extends Controller {
             }
         }
 
-        $matchingFiles = File::where('name', 'ilike', '%'.$term.'%')
-            ->orWhere('copyright', 'ilike', '%'.$term.'%')
-            ->orWhere('description', 'ilike', '%'.$term.'%')
+        $matchingFiles = File::where('name', 'ilike', $term)
+            ->orWhere('copyright', 'ilike', $term)
+            ->orWhere('description', 'ilike', $term)
+            ->orWhere('lasteditor', 'ilike', $term)
             ->select('name', 'id', 'thumb', 'mime_type', 'copyright', 'description')
             ->orderBy('name')
             ->get();
@@ -296,8 +299,8 @@ class ContextController extends Controller {
             }
         }
 
-        $matchingLayers = AvailableLayer::where('name', 'ilike', '%'.$term.'%')
-            ->orWhere('url', 'ilike', '%'.$term.'%')
+        $matchingLayers = AvailableLayer::where('name', 'ilike', $term)
+            ->orWhere('url', 'ilike', $term)
             ->select('name', 'id', 'url')
             ->orderBy('name')
             ->get();
@@ -322,20 +325,28 @@ class ContextController extends Controller {
             }
         }
 
-        $matchingValues = AttributeValue::where('str_val', 'ilike', '%'.$term.'%')
-            ->orWhere(DB::raw('CAST (int_val AS text)'), 'ilike', '%'.$term.'%')
-            ->orWhere(DB::raw('CAST (dbl_val AS text)'), 'ilike', '%'.$term.'%')
-            ->orWhere('thesaurus_val', 'ilike', '%'.$term.'%')
-            ->orWhere('possibility_description', 'ilike', '%'.$term.'%')
-            ->orWhere(DB::raw('CAST (json_val AS text)'), 'ilike', '%'.$term.'%')
-            ->orWhere(DB::raw('ST_AsText(geography_val)'), 'ilike', '%'.$term.'%')
-            ->orWhere(DB::raw('to_char(dt_val, \'MM.DD.YYYY day month\')'), 'ilike', '%'.$term.'%')
-            ->orWhere('possibility_description', 'ilike', '%'.$term.'%')
+        $matchingValues = AttributeValue::where('str_val', 'ilike', $term)
+            ->orWhere(DB::raw('CAST (int_val AS text)'), 'ilike', $term)
+            ->orWhere(DB::raw('CAST (dbl_val AS text)'), 'ilike', $term)
+            ->orWhere('possibility_description', 'ilike', $term)
+            ->orWhere(DB::raw('CAST (json_val AS text)'), 'ilike', $term)
+            ->orWhere(DB::raw('ST_AsText(geography_val)'), 'ilike', $term)
+            ->orWhere(DB::raw('to_char(dt_val, \'MM.DD.YYYY day month\')'), 'ilike', $term)
+            ->orWhere('attribute_values.lasteditor', 'ilike', $term)
+            ->orWhere('contexts.lasteditor', 'ilike', $term)
+            ->orWhere(function($query) use ($term, $lang) {
+                $query->where('thl.short_name', $lang)
+                    ->where('thcl.label', 'ilike', $term);
+            })
             ->join('contexts', 'context_id', '=', 'contexts.id')
             ->join('attributes', 'attribute_id', '=', 'attributes.id')
-            ->select('contexts.id', 'name', 'str_val', 'int_val', 'dbl_val', 'thesaurus_val', 'possibility_description', 'json_val', 'geography_val', 'dt_val', 'possibility_description', 'attributes.thesaurus_url')
+            ->join('th_concept as thc', 'thesaurus_val', '=', 'thc.concept_url')
+            ->join('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
+            ->join('th_language as thl', 'thcl.language_id', '=', 'thl.id')
+            ->select('contexts.id', 'name', 'str_val', 'int_val', 'dbl_val', 'thesaurus_val', 'possibility_description', 'json_val', 'geography_val', 'dt_val', 'attributes.thesaurus_url')
             ->orderBy('name')
             ->get();
+
         foreach($matchingValues as $v) {
             $type = 'context';
             $key = $type . "_" . $v->id;
@@ -351,32 +362,32 @@ class ContextController extends Controller {
                 ];
             } else {
                 $matches[$key]['count']++;
-                $value;
-                if(isset($v->str_val)) {
-                    $value = $v->str_val;
-                } else if(isset($v->int_val)) {
-                    $value = $v->int_val;
-                } else if(isset($v->dbl_val)) {
-                    $value = $v->dbl_val;
-                } else if(isset($v->thesaurus_val)) {
-                    $value = $v->thesaurus_val;
-                } else if(isset($v->possibility_description)) {
-                    $value = $v->possibility_description;
-                } else if(isset($v->json_val)) {
-                    $value = json_decode($v->json_val);
-                } else if(isset($v->geography_val)) {
-                    $value = $v->geography_val;
-                } else if(isset($v->dt_val)) {
-                    $value = $v->dt_val;
-                }
-                $matches[$key]['values'][$v->thesaurus_url] = $value;
             }
-            if(isset($v->possibility_description) && stripos($v->possibility_description, $term) !== false) {
-                $matches[$key]['values']['possibility_description'] = $v->possibility_description;
+            $value;
+            if(isset($v->str_val)) {
+                $value = $v->str_val;
+            } else if(isset($v->int_val)) {
+                $value = $v->int_val;
+            } else if(isset($v->dbl_val)) {
+                $value = $v->dbl_val;
+            } else if(isset($v->thesaurus_val)) {
+                $value = $v->thesaurus_val;
+            } else if(isset($v->possibility_description) && stripos($v->possibility_description, $term) !== false) {
+                $value = $v->possibility_description;
+            } else if(isset($v->json_val)) {
+                $value = json_decode($v->json_val);
+            } else if(isset($v->geography_val)) {
+                $value = $v->geography_val;
+            } else if(isset($v->dt_val)) {
+                $value = $v->dt_val;
             }
+            $matches[$key]['values'][$v->thesaurus_url] = $value;
         }
 
-        $matchingSources = Source::where('description', 'ilike', '%'.$term.'%')
+        $matchingSources = Source::where('description', 'ilike', $term)
+            ->orWhere('sources.lasteditor', 'ilike', $term)
+            ->orWhere('contexts.lasteditor', 'ilike', $term)
+            ->orWhere('literature.lasteditor', 'ilike', $term)
             ->join('contexts', 'context_id', '=', 'contexts.id')
             ->join('attributes', 'attribute_id', '=', 'attributes.id')
             ->join('literature', 'literature_id', '=', 'literature.id')
@@ -406,7 +417,7 @@ class ContextController extends Controller {
             ];
         }
 
-        $matchingUsers = User::where('name', 'ilike', '%'.$term.'%')
+        $matchingUsers = User::where('name', 'ilike', $term)
             ->select('name', 'email', 'id')
             ->orderBy('name')
             ->get();
@@ -428,7 +439,7 @@ class ContextController extends Controller {
             }
         }
 
-        usort($matches, ['App\Helpers', 'sortMatchesReverse']);
+        usort($matches, ['App\Helpers', 'sortMatchesDesc']);
 
         return response()->json($matches);
     }

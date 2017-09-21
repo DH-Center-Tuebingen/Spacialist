@@ -1,33 +1,33 @@
 <a ui-sref="root.spacialist.data({id: match.model.id})" tabindex="-1" style="text-decoration: none;">
-   <div class="media">
-       <div class="media-body">
-           <div class="media-heading search-item-title">
-               <span ng-bind-html="match.label | highlight:query"></span> <span class="badge">{{ match.model.count }}</span>
-               <span class="search-item-title-sub" ng-bind-html="match.model.email | highlight:query" ng-if="match.model.email"></span>
-           </div>
-           <dl class="dl-horizontal search-result-attr">
-               <dt class="search-item-content" ng-repeat-start="(label, v) in match.model.values">
+    <div class="media">
+        <div class="media-body">
+            <div class="media-heading search-item-title">
+                <span ng-bind-html="match.label | highlight:query"></span> <span class="badge">{{ match.model.count }}</span>
+                <span class="search-item-title-sub" ng-bind-html="match.model.email | highlight:query" ng-if="match.model.email"></span>
+            </div>
+            <dl class="dl-horizontal search-result-attr">
+                <dt class="search-item-content" ng-repeat-start="(label, v) in match.model.values">
                    {{ $parent.$parent.$parent.$parent.$parent.concepts[label].label || 'files.properties.file.' + label | translate }}
-               </dt>
-               <dd class="search-item-content search-item-text" ng-repeat-end>
-                   <span ng-bind-html="v | highlight:query:true"></span>
-               </dd>
-           </dl>
-           <dl class="dl-horizontal search-result-attr">
-               <dt class="search-item-content" ng-repeat-start="s in match.model.sources">
+                </dt>
+                <dd class="search-item-content search-item-text" ng-repeat-end>
+                    <span ng-bind-html="$parent.$parent.$parent.$parent.$parent.concepts[v].label || v | highlight:query:true"></span>
+                </dd>
+            </dl>
+            <dl class="dl-horizontal search-result-attr">
+                <dt class="search-item-content" ng-repeat-start="s in match.model.sources">
                    {{ s.title }}
-               </dt>
-               <dd class="search-item-content search-item-text" ng-repeat-end>
-                   <span ng-bind-html="s.desc | highlight:query:true"></span>
-                   <button type="button" class="btn btn-default btn-xs" ui-sref="root.spacialist.data.sources({id: match.model.id, aid: match.model.aid})">
-                       <i class="material-icons md-18" aria-hidden="true">stars</i>
+                </dt>
+                <dd class="search-item-content search-item-text" ng-repeat-end>
+                    <span ng-bind-html="s.desc | highlight:query:true"></span>
+                    <button type="button" class="btn btn-default search-item-sources-btn" ui-sref="root.spacialist.data.sources({id: match.model.id, aid: match.model.aid})">
+                       <i class="material-icons md-14" aria-hidden="true">stars</i>
                    </button>
-               </dd>
-           </dl>
-       </div>
-       <div class="media-right">
-           <img class="media-object search-item-img" ng-src="{{match.model.thumb_url}}" ng-if="match.model.thumb_url" />
-           <span class="media-object search-item-img-dummy" ng-if="!match.model.thumb_url"></span>
-       </div>
-   </div>
+                </dd>
+            </dl>
+        </div>
+        <div class="media-right">
+            <img class="media-object search-item-img" ng-src="{{match.model.thumb_url}}" ng-if="match.model.thumb_url" />
+            <span class="media-object search-item-img-dummy" ng-if="!match.model.thumb_url"></span>
+        </div>
+    </div>
 </a>
