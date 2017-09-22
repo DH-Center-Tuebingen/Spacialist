@@ -97,7 +97,7 @@
                                 <i class="material-icons">layers</i> {{'main.menu.layer-editor'|translate}}
                             </a>
                         </li>
-                        <li>
+                        <li ng-if="$ctrl.state.includes('root.spacialist')">
                             <a href="" ng-click="$ctrl.toggleEditMode()">
                                 <i class="material-icons">mode_edit</i> {{'main.menu.toggle-edit-mode'|translate}}
                             </a>
