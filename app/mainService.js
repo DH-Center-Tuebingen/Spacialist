@@ -151,6 +151,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
 
     main.globalSearch = function(term) {
         var langKey = langService.getCurrentLanguage();
+        // encode search term to allow special chars such as '/', ' '
+        term = window.encodeURIComponent(term);
         return httpGetPromise.getData('api/context/search/all/term=' + term + '/' + langKey)
         .then(function(response) {
             return response;

@@ -239,10 +239,12 @@ class ContextController extends Controller {
             ], 403);
         }
         $matches = [];
-        $term = '%'.$term.'%';
+        // decode encoded search term
+        $term = '%'.urldecode($term).'%';
 
         $matchingContexts = Context::where('name', 'ilike', $term)
             ->orWhere('lasteditor', 'ilike', $term)
+            ->orWhere(DB::raw('to_char(updated_at, \'MM.DD.YYYY TMday TMmonth\')'), 'ilike', $term)
             ->select('name', 'id')
             ->orderBy('name')
             ->get();
@@ -331,20 +333,21 @@ class ContextController extends Controller {
             ->orWhere('possibility_description', 'ilike', $term)
             ->orWhere(DB::raw('CAST (json_val AS text)'), 'ilike', $term)
             ->orWhere(DB::raw('ST_AsText(geography_val)'), 'ilike', $term)
-            ->orWhere(DB::raw('to_char(dt_val, \'MM.DD.YYYY day month\')'), 'ilike', $term)
+            // use server's locale for day and month (TM). To use a different locale `SET lc_time = <supported locale>` has to be executed before the actual query
+            ->orWhere(DB::raw('to_char(dt_val, \'MM.DD.YYYY TMday TMmonth\')'), 'ilike', $term)
             ->orWhere('attribute_values.lasteditor', 'ilike', $term)
-            ->orWhere('contexts.lasteditor', 'ilike', $term)
             ->orWhere(function($query) use ($term, $lang) {
                 $query->where('thl.short_name', $lang)
                     ->where('thcl.label', 'ilike', $term);
             })
             ->join('contexts', 'context_id', '=', 'contexts.id')
             ->join('attributes', 'attribute_id', '=', 'attributes.id')
-            ->join('th_concept as thc', 'thesaurus_val', '=', 'thc.concept_url')
-            ->join('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
-            ->join('th_language as thl', 'thcl.language_id', '=', 'thl.id')
+            ->leftJoin('th_concept as thc', 'thesaurus_val', '=', 'thc.concept_url')
+            ->leftJoin('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
+            ->leftJoin('th_language as thl', 'thcl.language_id', '=', 'thl.id')
             ->select('contexts.id', 'name', 'str_val', 'int_val', 'dbl_val', 'thesaurus_val', 'possibility_description', 'json_val', 'geography_val', 'dt_val', 'attributes.thesaurus_url')
             ->orderBy('name')
+            ->distinct()
             ->get();
 
         foreach($matchingValues as $v) {
@@ -352,13 +355,12 @@ class ContextController extends Controller {
             $key = $type . "_" . $v->id;
             if(!isset($matches[$key])) {
                 $count = 1;
-                $matching_values = [];
                 $matches[$key] = [
                     'id' => $v->id,
                     'name' => $v->name,
                     'type' => $type,
                     'count' => $count,
-                    'values' => $matching_values
+                    'values' => []
                 ];
             } else {
                 $matches[$key]['count']++;
