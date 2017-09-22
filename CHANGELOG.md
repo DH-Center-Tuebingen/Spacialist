@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased - Delphi
+
+### Added
+- Preferences to allow customization for admins and users as well
+### Changed
+### Fixed
+### Removed/Deprecated
+
 ## 0.3.2
 ### Fixed
 - The fab-styled save button (context detail view upper right corner) didn't work
@@ -8,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - The _Toggle Edit Mode_ button is now disabled on not-supported states (should only be visible in the main state with the tree, detail view and map/files)
 
 ## 0.3.1
+
 ### Fixed
 - Context Search (didn't work at all)
 - Possible Error retrieving files without a thumbnail (every file except images)

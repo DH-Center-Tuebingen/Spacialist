@@ -4,7 +4,8 @@ spacialistApp.component('datamodel', {
         attributetypes: '<',
         concepts: '<',
         contextTypes: '<',
-        geometryTypes: '<'
+        geometryTypes: '<',
+        userConfig: '<'
     },
     templateUrl: 'data-model.html',
     controller: 'dataEditorCtrl'

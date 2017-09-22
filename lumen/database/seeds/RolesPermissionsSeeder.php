@@ -159,6 +159,12 @@ class RolesPermissionsSeeder extends Seeder
         $add_remove_permission->display_name = 'Add and remove permissions';
         $add_remove_permission->description = 'add and remove permissions to/from roles';
         $add_remove_permission->save();
+        // Edit system preferences
+        $edit_preferences = new Permission();
+        $edit_preferences->name = 'edit_preferences';
+        $edit_preferences->display_name = 'Edit system preferences';
+        $edit_preferences->description = 'edit system preferences';
+        $edit_preferences->save();
         // Add & Move thesaurus concepts
         $add_move_concepts_th = new Permission();
         $add_move_concepts_th->name = 'add_move_concepts_th';
@@ -230,6 +236,7 @@ class RolesPermissionsSeeder extends Seeder
         $admin->attachPermission($edit_concepts_th);
         $admin->attachPermission($export_th);
         $admin->attachPermission($view_concepts_th);
+        $admin->attachPermission($edit_preferences);
         // Guest
         $guest = Role::where('name', 'guest')->first();
         if($guest === null) {

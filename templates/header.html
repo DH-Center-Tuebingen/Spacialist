@@ -10,7 +10,7 @@
             </button>
             <a class="navbar-brand" ui-sref="root.spacialist">
                 <img src="favicon.png" class="logo" alt="spacialist logo"/>
-                {{'spacialist'|translate}}
+                {{ $ctrl.userConfig['prefs.project-name'].value }}
             </a>
         </div>
         <div class="navbar-collapse" id="navbar-collapse" uib-collapse="isCollapsed">
@@ -40,13 +40,19 @@
                         </li>
                     </ul>
                 </li>-->
-                <li>
-                    <a href="db" target="_blank"><i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <sup class="material-icons md-14">open_in_new</sup>
+                <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
+                    <a href="db" target="_blank">
+                        <i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <sup class="material-icons md-14">open_in_new</sup>
                     </a>
                 </li>
-                <li ng-if="$ctrl.user.permissions.edit_literature">
+                <li ng-if="$ctrl.user.permissions.edit_literature && $ctrl.userConfig['prefs.load-extensions'].value.bibliography">
                     <a ui-sref="root.bibliography">
                         <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
+                    </a>
+                </li>
+                <li ng-if="$ctrl.userConfig['prefs.link-to-thesaurex'].value.length > 0">
+                    <a ng-href="{{ $ctrl.userConfig['prefs.link-to-thesaurex'].value }}" target="_blank">
+                        <i class="material-icons">pets</i> ThesauRex <sup class="material-icons md-14">open_in_new</sup>
                     </a>
                 </li>
             </ul>
@@ -95,6 +101,16 @@
                         <li>
                             <a ui-sref="root.editor.layer">
                                 <i class="material-icons">layers</i> {{'main.menu.layer-editor'|translate}}
+                            </a>
+                        </li>
+                        <li>
+                            <a ui-sref="root.upreferences({id: $ctrl.user.user.id})">
+                                <i class="material-icons">star</i> {{'main.menu.user-preferences'|translate}}
+                            </a>
+                        </li>
+                        <li ng-if="$ctrl.user.permissions.edit_preferences">
+                            <a ui-sref="root.preferences">
+                                <i class="material-icons">star_border</i> {{'main.menu.preferences'|translate}}
                             </a>
                         </li>
                         <li ng-if="$ctrl.state.includes('root.spacialist')">
