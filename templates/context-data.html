@@ -3,7 +3,7 @@
         <small><span ng-if="$ctrl.editContext.uri">{{ $ctrl.concepts[$ctrl.editContext.uri].label }} &mdash; </span>{{'context-form.heading'|translate}}</small>
     </h3>
     <p class="btn-group-sm nav-inline">
-        <a class="btn btn-success btn-fab btn-fab-mini" href="" ng-click="storeElement()">
+        <a class="btn btn-success btn-fab btn-fab-mini" href="" ng-click="$ctrl.store($ctrl.data)">
             <i class="material-icons">save</i>
         </a>
         <a class="btn btn-danger btn-fab btn-fab-mini" ui-sref="root.spacialist.data.delete">
