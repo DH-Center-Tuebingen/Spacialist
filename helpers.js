@@ -31,6 +31,13 @@ function nextMatchingDeviceClass(col, currentClass) {
     return null;
 }
 
+// Convert context' last modification (created or updated) to a locale representation
+function updateLastModified(context) {
+    var lastmodified = context.updated_at || context.created_at;
+    var d = new Date(lastmodified);
+    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+}
+
 L.Control.FitWorld = L.Control.extend({
 	onAdd: function(map) {
         var o = this.options;

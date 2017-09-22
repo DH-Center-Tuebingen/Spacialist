@@ -1144,9 +1144,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             if(!c) {
                                 return undefined;
                             }
-                            var lastmodified = c.updated_at || c.created_at;
-                            var d = new Date(lastmodified);
-                            c.lastmodified = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+                            c.lastmodified = updateLastModified(c);
                             return c;
                         },
                         data: function(context, mainService) {

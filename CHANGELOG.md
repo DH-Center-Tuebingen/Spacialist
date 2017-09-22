@@ -9,6 +9,12 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 ### Removed/Deprecated
 
+## 0.3.2
+### Fixed
+- The fab-styled save button (context detail view upper right corner) didn't work
+- The _Last modified_ info was not updated after saving the context
+- The _Toggle Edit Mode_ button is now disabled on not-supported states (should only be visible in the main state with the tree, detail view and map/files)
+
 ## 0.3.1
 
 ### Fixed

@@ -1,5 +1,6 @@
-spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 'mainService', function($scope, langService, userService, mainService) {
+spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 'mainService', '$state', function($scope, langService, userService, mainService, $state) {
     var vm = this;
+    vm.state = $state;
     vm.currentLanguage = {};
     vm.isLangSet = langService.isLangSet;
 
