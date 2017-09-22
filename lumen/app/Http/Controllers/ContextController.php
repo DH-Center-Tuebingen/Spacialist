@@ -15,6 +15,7 @@ use App\ContextAttribute;
 use App\AvailableLayer;
 use App\File;
 use App\Source;
+use App\Literature;
 use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
@@ -240,11 +241,12 @@ class ContextController extends Controller {
         }
         $matches = [];
         // decode encoded search term
-        $term = '%'.urldecode($term).'%';
+        $term = urldecode($term);
+        $likeTerm = '%' . $term . '%';
 
-        $matchingContexts = Context::where('name', 'ilike', $term)
-            ->orWhere('lasteditor', 'ilike', $term)
-            ->orWhere(DB::raw('to_char(updated_at, \'MM.DD.YYYY TMday TMmonth\')'), 'ilike', $term)
+        $matchingContexts = Context::where('name', 'ilike', $likeTerm)
+            ->orWhere('lasteditor', 'ilike', $likeTerm)
+            ->orWhere(DB::raw('to_char(updated_at, \'MM.DD.YYYY TMday TMmonth\')'), 'ilike', $likeTerm)
             ->select('name', 'id')
             ->orderBy('name')
             ->get();
@@ -266,10 +268,10 @@ class ContextController extends Controller {
             }
         }
 
-        $matchingFiles = File::where('name', 'ilike', $term)
-            ->orWhere('copyright', 'ilike', $term)
-            ->orWhere('description', 'ilike', $term)
-            ->orWhere('lasteditor', 'ilike', $term)
+        $matchingFiles = File::where('name', 'ilike', $likeTerm)
+            ->orWhere('copyright', 'ilike', $likeTerm)
+            ->orWhere('description', 'ilike', $likeTerm)
+            ->orWhere('lasteditor', 'ilike', $likeTerm)
             ->select('name', 'id', 'thumb', 'mime_type', 'copyright', 'description')
             ->orderBy('name')
             ->get();
@@ -301,8 +303,8 @@ class ContextController extends Controller {
             }
         }
 
-        $matchingLayers = AvailableLayer::where('name', 'ilike', $term)
-            ->orWhere('url', 'ilike', $term)
+        $matchingLayers = AvailableLayer::where('name', 'ilike', $likeTerm)
+            ->orWhere('url', 'ilike', $likeTerm)
             ->select('name', 'id', 'url')
             ->orderBy('name')
             ->get();
@@ -327,18 +329,18 @@ class ContextController extends Controller {
             }
         }
 
-        $matchingValues = AttributeValue::where('str_val', 'ilike', $term)
-            ->orWhere(DB::raw('CAST (int_val AS text)'), 'ilike', $term)
-            ->orWhere(DB::raw('CAST (dbl_val AS text)'), 'ilike', $term)
-            ->orWhere('possibility_description', 'ilike', $term)
-            ->orWhere(DB::raw('CAST (json_val AS text)'), 'ilike', $term)
-            ->orWhere(DB::raw('ST_AsText(geography_val)'), 'ilike', $term)
+        $matchingValues = AttributeValue::where('str_val', 'ilike', $likeTerm)
+            ->orWhere(DB::raw('CAST (int_val AS text)'), 'ilike', $likeTerm)
+            ->orWhere(DB::raw('CAST (dbl_val AS text)'), 'ilike', $likeTerm)
+            ->orWhere('possibility_description', 'ilike', $likeTerm)
+            ->orWhere(DB::raw('CAST (json_val AS text)'), 'ilike', $likeTerm)
+            ->orWhere(DB::raw('ST_AsText(geography_val)'), 'ilike', $likeTerm)
             // use server's locale for day and month (TM). To use a different locale `SET lc_time = <supported locale>` has to be executed before the actual query
-            ->orWhere(DB::raw('to_char(dt_val, \'MM.DD.YYYY TMday TMmonth\')'), 'ilike', $term)
-            ->orWhere('attribute_values.lasteditor', 'ilike', $term)
-            ->orWhere(function($query) use ($term, $lang) {
+            ->orWhere(DB::raw('to_char(dt_val, \'MM.DD.YYYY TMday TMmonth\')'), 'ilike', $likeTerm)
+            ->orWhere('attribute_values.lasteditor', 'ilike', $likeTerm)
+            ->orWhere(function($query) use ($likeTerm, $lang) {
                 $query->where('thl.short_name', $lang)
-                    ->where('thcl.label', 'ilike', $term);
+                    ->where('thcl.label', 'ilike', $likeTerm);
             })
             ->join('contexts', 'context_id', '=', 'contexts.id')
             ->join('attributes', 'attribute_id', '=', 'attributes.id')
@@ -386,10 +388,10 @@ class ContextController extends Controller {
             $matches[$key]['values'][$v->thesaurus_url] = $value;
         }
 
-        $matchingSources = Source::where('description', 'ilike', $term)
-            ->orWhere('sources.lasteditor', 'ilike', $term)
-            ->orWhere('contexts.lasteditor', 'ilike', $term)
-            ->orWhere('literature.lasteditor', 'ilike', $term)
+        $matchingSources = Source::where('description', 'ilike', $likeTerm)
+            ->orWhere('sources.lasteditor', 'ilike', $likeTerm)
+            ->orWhere('contexts.lasteditor', 'ilike', $likeTerm)
+            ->orWhere('literature.lasteditor', 'ilike', $likeTerm)
             ->join('contexts', 'context_id', '=', 'contexts.id')
             ->join('attributes', 'attribute_id', '=', 'attributes.id')
             ->join('literature', 'literature_id', '=', 'literature.id')
@@ -419,7 +421,128 @@ class ContextController extends Controller {
             ];
         }
 
-        $matchingUsers = User::where('name', 'ilike', $term)
+        $matchingBibliography = Literature::where('author', 'ilike', $likeTerm)
+            ->orWhere('editor', 'ilike', $likeTerm)
+            ->orWhere('title', 'ilike', $likeTerm)
+            ->orWhere('journal', 'ilike', $likeTerm)
+            ->orWhere('year', 'ilike', $likeTerm)
+            ->orWhere('pages', 'ilike', $likeTerm)
+            ->orWhere('volume', 'ilike', $likeTerm)
+            ->orWhere('number', 'ilike', $likeTerm)
+            ->orWhere('booktitle', 'ilike', $likeTerm)
+            ->orWhere('publisher', 'ilike', $likeTerm)
+            ->orWhere('address', 'ilike', $likeTerm)
+            ->orWhere('misc', 'ilike', $likeTerm)
+            ->orWhere('howpublished', 'ilike', $likeTerm)
+            ->orWhere('type', 'ilike', $likeTerm)
+            ->orWhere('annote', 'ilike', $likeTerm)
+            ->orWhere('chapter', 'ilike', $likeTerm)
+            ->orWhere('crossref', 'ilike', $likeTerm)
+            ->orWhere('edition', 'ilike', $likeTerm)
+            ->orWhere('institution', 'ilike', $likeTerm)
+            ->orWhere('key', 'ilike', $likeTerm)
+            ->orWhere('month', 'ilike', $likeTerm)
+            ->orWhere('note', 'ilike', $likeTerm)
+            ->orWhere('organization', 'ilike', $likeTerm)
+            ->orWhere('school', 'ilike', $likeTerm)
+            ->orWhere('series', 'ilike', $likeTerm)
+            ->select('id', 'author', 'editor', 'title', 'journal', 'year', 'pages', 'volume', 'number', 'booktitle', 'publisher', 'address', 'misc', 'howpublished', 'type', 'annote', 'chapter', 'crossref', 'edition', 'institution', 'key', 'month', 'note', 'organization', 'school', 'series', 'lasteditor')
+            ->orderBy('title')
+            ->get();
+
+        foreach($matchingBibliography as $b) {
+            $type = 'bibliography';
+            $key = $type . "_" . $b->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $b->id,
+                    'name' => $b->title,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+            if(isset($b->author) && stripos($b->author, $term) !== false) {
+            	$matches[$key]['values']['author'] = $b->author;
+            }
+            if(isset($b->editor) && stripos($b->editor, $term) !== false) {
+            	$matches[$key]['values']['editor'] = $b->editor;
+            }
+            if(isset($b->title) && stripos($b->title, $term) !== false) {
+            	$matches[$key]['values']['title'] = $b->title;
+            }
+            if(isset($b->journal) && stripos($b->journal, $term) !== false) {
+            	$matches[$key]['values']['journal'] = $b->journal;
+            }
+            if(isset($b->year) && stripos($b->year, $term) !== false) {
+            	$matches[$key]['values']['year'] = $b->year;
+            }
+            if(isset($b->pages) && stripos($b->pages, $term) !== false) {
+            	$matches[$key]['values']['pages'] = $b->pages;
+            }
+            if(isset($b->volume) && stripos($b->volume, $term) !== false) {
+            	$matches[$key]['values']['volume'] = $b->volume;
+            }
+            if(isset($b->number) && stripos($b->number, $term) !== false) {
+            	$matches[$key]['values']['number'] = $b->number;
+            }
+            if(isset($b->booktitle) && stripos($b->booktitle, $term) !== false) {
+            	$matches[$key]['values']['booktitle'] = $b->booktitle;
+            }
+            if(isset($b->publisher) && stripos($b->publisher, $term) !== false) {
+            	$matches[$key]['values']['publisher'] = $b->publisher;
+            }
+            if(isset($b->address) && stripos($b->address, $term) !== false) {
+            	$matches[$key]['values']['address'] = $b->address;
+            }
+            if(isset($b->misc) && stripos($b->misc, $term) !== false) {
+            	$matches[$key]['values']['misc'] = $b->misc;
+            }
+            if(isset($b->howpublished) && stripos($b->howpublished, $term) !== false) {
+            	$matches[$key]['values']['howpublished'] = $b->howpublished;
+            }
+            if(isset($b->type) && stripos($b->type, $term) !== false) {
+            	$matches[$key]['values']['type'] = $b->type;
+            }
+            if(isset($b->annote) && stripos($b->annote, $term) !== false) {
+            	$matches[$key]['values']['annote'] = $b->annote;
+            }
+            if(isset($b->chapter) && stripos($b->chapter, $term) !== false) {
+            	$matches[$key]['values']['chapter'] = $b->chapter;
+            }
+            if(isset($b->crossref) && stripos($b->crossref, $term) !== false) {
+            	$matches[$key]['values']['crossref'] = $b->crossref;
+            }
+            if(isset($b->edition) && stripos($b->edition, $term) !== false) {
+            	$matches[$key]['values']['edition'] = $b->edition;
+            }
+            if(isset($b->institution) && stripos($b->institution, $term) !== false) {
+            	$matches[$key]['values']['institution'] = $b->institution;
+            }
+            if(isset($b->key) && stripos($b->key, $term) !== false) {
+            	$matches[$key]['values']['key'] = $b->key;
+            }
+            if(isset($b->month) && stripos($b->month, $term) !== false) {
+            	$matches[$key]['values']['month'] = $b->month;
+            }
+            if(isset($b->note) && stripos($b->note, $term) !== false) {
+            	$matches[$key]['values']['note'] = $b->note;
+            }
+            if(isset($b->organization) && stripos($b->organization, $term) !== false) {
+            	$matches[$key]['values']['organization'] = $b->organization;
+            }
+            if(isset($b->school) && stripos($b->school, $term) !== false) {
+            	$matches[$key]['values']['school'] = $b->school;
+            }
+            if(isset($b->series) && stripos($b->series, $term) !== false) {
+            	$matches[$key]['values']['series'] = $b->series;
+            }
+        }
+
+        $matchingUsers = User::where('name', 'ilike', $likeTerm)
             ->select('name', 'email', 'id')
             ->orderBy('name')
             ->get();

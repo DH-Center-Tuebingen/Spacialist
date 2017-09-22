@@ -7,7 +7,7 @@
             </div>
             <dl class="dl-horizontal search-result-attr">
                 <dt class="search-item-content" ng-repeat-start="(label, v) in match.model.values">
-                   {{ $parent.$parent.$parent.$parent.$parent.concepts[label].label || 'files.properties.file.' + label | translate }}
+                   {{ $parent.$parent.$parent.$parent.$parent.concepts[label].label || $parent.$parent.$parent.$parent.$parent.getLabePrefix(match.model.type) + label | translate }}
                 </dt>
                 <dd class="search-item-content search-item-text" ng-repeat-end>
                     <span ng-bind-html="$parent.$parent.$parent.$parent.$parent.concepts[v].label || v | highlight:query:true"></span>

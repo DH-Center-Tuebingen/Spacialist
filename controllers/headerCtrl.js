@@ -1,8 +1,12 @@
 spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 'mainService', '$state', function($scope, langService, userService, mainService, $state) {
     var vm = this;
-    $scope.concepts = vm.concepts;
     vm.currentLanguage = {};
     vm.isLangSet = langService.isLangSet;
+    $scope.concepts = vm.concepts;
+    $scope.getLabePrefix = function(type) {
+        if(type == 'file') return  'files.properties.file.';
+        if(type == 'bibliography') return 'literature.bibtex.';
+    };
 
     vm.onSearchSelect = function($item, $model, $label) {
         switch($model.type) {
