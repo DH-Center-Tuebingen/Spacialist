@@ -1,4 +1,4 @@
-spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', 'mainService', 'mapService', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPatchFactory, httpDeleteFactory, modalFactory, mainService, mapService, $translate) {
+spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPatchFactory', 'httpDeleteFactory', 'modalFactory', 'mainService', 'mapService', 'langService', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPatchFactory, httpDeleteFactory, modalFactory, mainService, mapService, langService, $translate) {
     var editor = {};
 
     editor.ct = {
@@ -170,7 +170,8 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
     function searchForLabel(searchString) {
         //TODO might want to specify language of the label aswell, default is 'de'
         // api call for that case is 'api/editor/search/label=' + searchString + "/" + lang
-        return httpGetPromise.getData('api/editor/search/label=' + searchString, new FormData())
+        var lang = langService.getCurrentLanguage();
+        return httpGetPromise.getData('api/editor/search/label=' + searchString + '/' + lang)
         .then(function(response) {
             return response;
         });
