@@ -33,6 +33,8 @@ spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 
             case 'user':
                 $state.go('root.user.edit', {id: $model.id});
                 break;
+            case 'bibliography':
+                $state.go('root.bibliography.edit', {id: $model.id});
         }
     };
 
