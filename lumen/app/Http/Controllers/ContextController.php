@@ -271,8 +271,16 @@ class ContextController extends Controller {
         $matchingFiles = File::where('name', 'ilike', $likeTerm)
             ->orWhere('copyright', 'ilike', $likeTerm)
             ->orWhere('description', 'ilike', $likeTerm)
-            ->orWhere('lasteditor', 'ilike', $likeTerm)
-            ->select('name', 'id', 'thumb', 'mime_type', 'copyright', 'description')
+            ->orWhere('photos.lasteditor', 'ilike', $likeTerm)
+            ->orWhere(function($query) use ($likeTerm, $lang) {
+                $query->where('thl.short_name', $lang)
+                    ->where('thcl.label', 'ilike', $likeTerm);
+            })
+            ->leftJoin('photo_tags as tags', 'photos.id', '=', 'tags.photo_id')
+            ->leftJoin('th_concept as thc', 'tags.concept_url', '=', 'thc.concept_url')
+            ->leftJoin('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
+            ->leftJoin('th_language as thl', 'thcl.language_id', '=', 'thl.id')
+            ->select('name', 'photos.id', 'thumb', 'mime_type', 'copyright', 'description', 'thcl.label')
             ->orderBy('name')
             ->get();
         foreach($matchingFiles as $f) {
@@ -292,7 +300,8 @@ class ContextController extends Controller {
                     'name' => $f->name,
                     'type' => $type,
                     'count' => $count,
-                    'values' => $matching_values
+                    'values' => $matching_values,
+                    'tags' => []
                 ];
                 if(isset($f->thumb) && substr($f->mime_type, 0, 6) === 'image/') {
                     $thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $f->thumb);
@@ -300,6 +309,9 @@ class ContextController extends Controller {
                 }
             } else {
                 $matches[$key]['count']++;
+            }
+            if(isset($f->label) && stripos($f->label, $term) !== false) {
+                $matches[$key]['tags'][] = $f->label;
             }
         }
 
