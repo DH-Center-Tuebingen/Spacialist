@@ -635,6 +635,7 @@ class ContextController extends Controller {
         }
 
         $matchingUsers = User::where('name', 'ilike', $likeTerm)
+            ->orWhere('email', 'ilike', $likeTerm)
             ->select('name', 'email', 'id')
             ->orderBy('name')
             ->get();
