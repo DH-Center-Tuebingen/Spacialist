@@ -1,4 +1,4 @@
-<a ui-sref="root.spacialist.data({id: match.model.id})" tabindex="-1" style="text-decoration: none;">
+<a tabindex="-1" style="text-decoration: none;">
     <div class="media">
         <div class="media-body">
             <div class="media-heading search-item-title">
@@ -20,8 +20,8 @@
                 <dd class="search-item-content search-item-text" ng-repeat-end>
                     <span ng-bind-html="s.desc | highlight:query:true"></span>
                     <button type="button" class="btn btn-default search-item-sources-btn" ui-sref="root.spacialist.data.sources({id: match.model.id, aid: match.model.aid})">
-                       <i class="material-icons md-14" aria-hidden="true">stars</i>
-                   </button>
+                        <i class="material-icons md-14" aria-hidden="true">stars</i>
+                    </button>
                 </dd>
             </dl>
             <dl class="dl-horizontal search-result-attr" ng-if="match.model.tags.length >
