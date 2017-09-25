@@ -144,8 +144,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     };
 
     main.contextSearch = function(searchString) {
-        var formData = new FormData();
-        formData.append('val', searchString);
+        searchString = window.encodeURIComponent(searchString);
         return httpGetPromise.getData('api/context/search/term=' + searchString)
         .then(function(response) {
             return response;

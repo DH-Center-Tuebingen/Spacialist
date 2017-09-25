@@ -221,6 +221,7 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to call this method'
             ], 403);
         }
+        $term = urldecode($term);
         $matchingContexts = Context::where('name', 'ilike', '%'.$term.'%')
             ->select('name', 'id')
             ->orderBy('name')
