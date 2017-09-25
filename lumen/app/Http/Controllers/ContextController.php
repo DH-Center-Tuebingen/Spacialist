@@ -244,28 +244,108 @@ class ContextController extends Controller {
         $term = urldecode($term);
         $likeTerm = '%' . $term . '%';
 
+        // get contexts where the name, last editor or date matches the search term
         $matchingContexts = Context::where('name', 'ilike', $likeTerm)
             ->orWhere('lasteditor', 'ilike', $likeTerm)
             ->orWhere(DB::raw('to_char(updated_at, \'MM.DD.YYYY TMday TMmonth\')'), 'ilike', $likeTerm)
             ->select('name', 'id')
-            ->orderBy('name')
             ->get();
         foreach($matchingContexts as $c) {
             $type = 'context';
             $key = $type . "_" . $c->id;
             if(!isset($matches[$key])) {
                 $count = 1;
-                $matching_values = [];
                 $matches[$key] = [
                     'id' => $c->id,
                     'name' => $c->name,
                     'type' => $type,
                     'count' => $count,
-                    'values' => $matching_values
+                    'values' => []
                 ];
             } else {
                 $matches[$key]['count']++;
             }
+        }
+
+        // get contexts where the attribute label matches the search term
+        $matchingContexts = Context::where(function($query) use ($likeTerm, $lang) {
+            $query->where('thl.short_name', $lang)
+                ->where('thcl.label', 'ilike', $likeTerm);
+        })
+            ->join('context_attributes as ca', 'ca.context_type_id', '=', 'contexts.context_type_id')
+            ->join('attributes as a', 'a.id', '=', 'ca.attribute_id')
+            ->leftJoin('attribute_values as av', function($query) {
+                $query->on('a.id', '=', 'av.attribute_id')
+                    ->on('contexts.id', '=', 'av.context_id');
+            })
+            ->leftJoin('th_concept as thc', 'a.thesaurus_url', '=', 'thc.concept_url')
+            ->leftJoin('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
+            ->leftJoin('th_language as thl', 'thcl.language_id', '=', 'thl.id')
+            ->select('name', 'contexts.id as cid', 'a.thesaurus_url', 'av.*')
+            ->distinct()
+            ->get();
+        foreach($matchingContexts as $c) {
+            $type = 'context';
+            $key = $type . "_" . $c->cid;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $c->cid,
+                    'name' => $c->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+            $value = null;
+            if(isset($c->str_val)) {
+                $value = $c->str_val;
+            } else if(isset($c->int_val)) {
+                $value = $c->int_val;
+            } else if(isset($c->dbl_val)) {
+                $value = $c->dbl_val;
+            } else if(isset($c->thesaurus_val)) {
+                $value = $c->thesaurus_val;
+            } else if(isset($c->json_val)) {
+                $value = json_decode($c->json_val);
+            } else if(isset($c->geography_val)) {
+                $value = $c->geography_val;
+            } else if(isset($c->dt_val)) {
+                $value = $c->dt_val;
+            }
+            if(isset($value)) $matches[$key]['values'][$c->thesaurus_url] = $value;
+        }
+
+        // get contexts where the context type label matches the search term
+        $matchingContexts = Context::where(function($query) use ($likeTerm, $lang) {
+            $query->where('thl.short_name', $lang)
+                ->where('thcl.label', 'ilike', $likeTerm);
+        })
+            ->join('context_types as ct', 'ct.id', '=', 'contexts.context_type_id')
+            ->leftJoin('th_concept as thc', 'ct.thesaurus_url', '=', 'thc.concept_url')
+            ->leftJoin('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
+            ->leftJoin('th_language as thl', 'thcl.language_id', '=', 'thl.id')
+            ->select('name', 'contexts.id', 'ct.thesaurus_url')
+            ->distinct()
+            ->get();
+        foreach($matchingContexts as $c) {
+            $type = 'context';
+            $key = $type . "_" . $c->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+            $matches[$key]['context_type'] = $c->thesaurus_url;
         }
 
         $matchingFiles = File::where('name', 'ilike', $likeTerm)
@@ -379,7 +459,7 @@ class ContextController extends Controller {
             } else {
                 $matches[$key]['count']++;
             }
-            $value;
+            $value = null;
             if(isset($v->str_val)) {
                 $value = $v->str_val;
             } else if(isset($v->int_val)) {
@@ -397,7 +477,7 @@ class ContextController extends Controller {
             } else if(isset($v->dt_val)) {
                 $value = $v->dt_val;
             }
-            $matches[$key]['values'][$v->thesaurus_url] = $value;
+            if(isset($value)) $matches[$key]['values'][$v->thesaurus_url] = $value;
         }
 
         $matchingSources = Source::where('description', 'ilike', $likeTerm)

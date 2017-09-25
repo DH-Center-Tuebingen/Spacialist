@@ -772,8 +772,9 @@ spacialistApp.filter('highlight', function($sce) {
         if(convert && typeof text == 'object') text = angular.toJson(text);
         if(search) {
             text = text.replace(new RegExp('('+search+')', 'i'), '<span class="search-highlighted">$1</span>');
+            return $sce.trustAsHtml(text);
         }
-        return $sce.trustAsHtml(text);
+        return text;
     };
 });
 
