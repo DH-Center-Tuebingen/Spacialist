@@ -3,7 +3,7 @@
     <div class="col-md-12">
         <div class="col-md-5 attribute-editor-column">
             <h4 translate="data-model-editor.available-attributes.heading"></h4>
-            <p class="alert alert-info">
+            <p class="alert alert-info" ng-if="$ctrl.userConfig['prefs.show-tooltips'].value">
                 Die Label der Eltern-Elemente (relevant für Dropdown-Elemente) können angezeigt werden, indem man mit der Maus über das Label des entsprechenden Attributs fährt.
             </p>
             <form class="form-horizontal" role="form">

@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'httpDeletePromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'fileService', 'literatureService', 'mapService', 'searchService', '$timeout', '$state', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, httpDeletePromise, modalFactory, $uibModal, moduleHelper, environmentService, fileService, literatureService, mapService, searchService, $timeout, $state) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'httpDeletePromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'fileService', 'literatureService', 'mapService', 'snackbarService', 'searchService', 'langService', '$timeout', '$state', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, httpDeletePromise, modalFactory, $uibModal, moduleHelper, environmentService, fileService, literatureService, mapService, snackbarService, searchService, langService, $timeout, $state, $translate) {
     var main = {};
     var modalFields;
 
@@ -140,6 +140,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.filterTree = function(elements, term) {
         angular.forEach(elements.roots, function(r) {
             isVisible(elements, r, term.toUpperCase());
+        });
+    };
+
+    main.globalSearch = function(term) {
+        var langKey = langService.getCurrentLanguage();
+        // encode search term to allow special chars such as '/', ' '
+        term = window.encodeURIComponent(term);
+        return httpGetPromise.getData('api/context/search/all/term=' + term + '/' + langKey)
+        .then(function(response) {
+            return response;
         });
     };
 

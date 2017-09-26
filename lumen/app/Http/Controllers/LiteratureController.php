@@ -5,6 +5,7 @@ use App\User;
 use App\Literature;
 use \DB;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class LiteratureController extends Controller
 {

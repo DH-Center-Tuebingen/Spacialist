@@ -55,10 +55,10 @@
                 <div ng-show="showTags">
                    <ui-select multiple tagging tagging-label="false" ng-model="f.tags" on-select="$ctrl.addTag(f, $item)" on-remove="$ctrl.removeTag(f, $item)" theme="bootstrap" sortable="true" close-on-select="false">
                        <ui-select-match placeholder="{{ 'tags.add' | translate }}">
-                           {{ $item.label }}
+                           {{ concepts[$item.uri].label }}
                        </ui-select-match>
                        <ui-select-choices repeat="tag in availableTags | filter:$select.search">
-                           {{ tag.label }}
+                           {{ concepts[tag.uri].label }}
                        </ui-select-choices>
                    </ui-select>
                 </div>

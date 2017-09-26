@@ -33,6 +33,8 @@ $app->group([
     $app->get('byGeodata/{id:[0-9]+}', 'ContextController@getContextByGeodata');
     $app->get('attributetypes', 'ContextController@getAvailableAttributeTypes');
     $app->get('search/term={term}', 'ContextController@searchContextName');
+    $app->get('search/all/term={term}', 'ContextController@searchGlobal');
+    $app->get('search/all/term={term}/{lang}', 'ContextController@searchGlobal');
 
     $app->post('', 'ContextController@add');
     $app->post('{id:[0-9]+}/duplicate', 'ContextController@duplicate');
@@ -176,6 +178,16 @@ $app->group([
         $app->put('{id:[0-9]+}', 'GeodataController@put');
 
         $app->delete('{id:[0-9]+}', 'GeodataController@delete');
+});
+
+$app->group([
+    'prefix' => 'preference',//TODO api v1
+    'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+], function($app) {
+    $app->get('', 'PreferenceController@getPreferences');
+    $app->get('{id:[0-9]+}', 'PreferenceController@getUserPreferences');
+
+    $app->patch('{id:[0-9]+}', 'PreferenceController@patchPreference');
 });
 
 $app->group([

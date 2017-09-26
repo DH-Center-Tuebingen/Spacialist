@@ -10,25 +10,29 @@
             </button>
             <a class="navbar-brand" ui-sref="root.spacialist">
                 <img src="favicon.png" class="logo" alt="spacialist logo"/>
-                {{'spacialist'|translate}}
+                {{ $ctrl.userConfig['prefs.project-name'].value }}
             </a>
         </div>
         <div class="navbar-collapse" id="navbar-collapse" uib-collapse="isCollapsed">
             <ul class="nav navbar-nav">
-                <!--<li>
+                <li>
                     <form class="navbar-form navbar-left">
                         <div class="form-group">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Search|translate">
+                                <input class="form-control global-search" type="text" id="a{{ attr.id }}" ng-model="globaleSearchValue" ng-model-options="{ debounce: 250 }" uib-typeahead="result as result.name for result in $ctrl.globalSearch($viewValue)" typeahead-min-length="2" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel" typeahead-template-url="templates/search-item.html" typeahead-on-select="$ctrl.onSearchSelect($item, $model, $label)" />
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" type="button">
-                                        <i class="material-icons" aria-hidden="true">search</i>
+                                        <i class="material-icons md-light" aria-hidden="true">search</i>
                                     </button>
                                 </span>
+                                <i ng-show="loadingResultsLabel" class="material-icons">refresh</i>
+                                <div ng-show="noResultsLabel && result.name.length >= 3">
+                                    <i class="material-icons md-18">clear</i> No Results Found
+                                </div>
                             </div>
                         </div>
                     </form>
-                </li>-->
+                </li>
                 <!--<li class="dropdown" uib-dropdown>
                     <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         {{ 'import_export' | translate }} <span class="caret"></span>
@@ -40,13 +44,19 @@
                         </li>
                     </ul>
                 </li>-->
-                <li>
-                    <a href="db" target="_blank"><i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <sup class="material-icons md-14">open_in_new</sup>
+                <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
+                    <a href="db" target="_blank">
+                        <i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <sup class="material-icons md-14">open_in_new</sup>
                     </a>
                 </li>
-                <li ng-if="$ctrl.user.permissions.edit_literature">
+                <li ng-if="$ctrl.user.permissions.edit_literature && $ctrl.userConfig['prefs.load-extensions'].value.bibliography">
                     <a ui-sref="root.bibliography">
                         <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
+                    </a>
+                </li>
+                <li ng-if="$ctrl.userConfig['prefs.link-to-thesaurex'].value.length > 0">
+                    <a ng-href="{{ $ctrl.userConfig['prefs.link-to-thesaurex'].value }}" target="_blank">
+                        <i class="material-icons">pets</i> ThesauRex <sup class="material-icons md-14">open_in_new</sup>
                     </a>
                 </li>
             </ul>
@@ -95,6 +105,16 @@
                         <li>
                             <a ui-sref="root.editor.layer">
                                 <i class="material-icons">layers</i> {{'main.menu.layer-editor'|translate}}
+                            </a>
+                        </li>
+                        <li>
+                            <a ui-sref="root.upreferences({id: $ctrl.user.user.id})">
+                                <i class="material-icons">star</i> {{'main.menu.user-preferences'|translate}}
+                            </a>
+                        </li>
+                        <li ng-if="$ctrl.user.permissions.edit_preferences">
+                            <a ui-sref="root.preferences">
+                                <i class="material-icons">star_border</i> {{'main.menu.preferences'|translate}}
                             </a>
                         </li>
                         <li ng-if="$ctrl.state.includes('root.spacialist')">

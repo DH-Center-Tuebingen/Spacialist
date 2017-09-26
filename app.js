@@ -460,6 +460,7 @@ spacialistApp.directive('fileList', function(fileService) {
         scope: {
             files: '=',
             contextMenu: '=',
+            concepts: '=',
             showTags: '=',
             availableTags: '=',
             searchTerms: '='
@@ -767,11 +768,14 @@ spacialistApp.filter('truncate', function () {
 });
 
 spacialistApp.filter('highlight', function($sce) {
-    return function(text, search) {
+    return function(text, search, convert) {
+        convert = convert || false;
+        if(convert && typeof text == 'object') text = angular.toJson(text);
         if(search) {
-            text = text.replace(new RegExp('('+search+')', 'gi'), '<span class="search-highlighted">$1</span>');
+            text = text.replace(new RegExp('('+search+')', 'i'), '<span class="search-highlighted">$1</span>');
+            return $sce.trustAsHtml(text);
         }
-        return $sce.trustAsHtml(text);
+        return text;
     };
 });
 
@@ -1064,16 +1068,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 user: function(userService) {
                     return userService.getUser();
                 },
-                config: function(userService, user) {
-                    return {}; //TODO: return general config
-                },
-                userConfig: function(userService, user, config) {
-                    return {
-                        language: 'de'
-                    }; //TODO: return active user's config
+                userConfig: function(userService, user) {
+                    return userService.getUserPreferences(user.user.id);
                 },
                 concepts: function(langService, userConfig) {
-                    return langService.getConcepts(userConfig.language);
+                    var langPref = userConfig['prefs.gui-language'];
+                    return langService.getConcepts(langPref.value);
                 },
                 availableLanguages: function(langService) {
                     return langService.availableLanguages;
@@ -1106,14 +1106,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     contexts: function(environmentService) {
                         return environmentService.getContexts();
-                    },
-                    user: function(user) {
-                        // TODO other access to user object?
-                        return user;
-                    },
-                    concepts: function(concepts) {
-                        // TODO other access to concepts object?
-                        return concepts;
                     },
                     menus: function(mainService) {
                         return mainService.getDropdownOptions();
@@ -1659,7 +1651,34 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return $state.target('root.editor.layer', params);
                             }
                         }
-                    });
+                    })
+            .state('root.preferences', {
+                url: '/preferences',
+                component: 'preferences',
+                resolve: {
+                    availablePreferences: function(userService) {
+                        return userService.getPreferences();
+                    }
+                }
+            })
+            .state('root.upreferences', {
+                url: '/preferences/{id:[0-9]+}',
+                component: 'upreferences',
+                resolve: {
+                    overridablePrefs: function(userConfig) {
+                        var prefs = {};
+                        for(var k in userConfig) {
+                            if(userConfig.hasOwnProperty(k)) {
+                                if(userConfig[k].allow_override) {
+                                    prefs[k] = userConfig[k];
+                                }
+                            }
+                        }
+                        return prefs;
+                    }
+                }
+
+            });
 });
 
 /**
