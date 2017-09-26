@@ -284,7 +284,7 @@ class ContextController extends Controller {
             ->leftJoin('th_concept as thc', 'a.thesaurus_url', '=', 'thc.concept_url')
             ->leftJoin('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
             ->leftJoin('th_language as thl', 'thcl.language_id', '=', 'thl.id')
-            ->select('name', 'contexts.id as cid', 'a.thesaurus_url', 'av.*')
+            ->select('name', 'contexts.id as cid', 'a.thesaurus_url', 'av.*', DB::raw('ST_AsText(geography_val) as geography_val_wkt'))
             ->distinct()
             ->get();
         foreach($matchingContexts as $c) {
@@ -314,7 +314,7 @@ class ContextController extends Controller {
             } else if(isset($c->json_val)) {
                 $value = json_decode($c->json_val);
             } else if(isset($c->geography_val)) {
-                $value = $c->geography_val;
+                $value = $c->geography_val_wkt;
             } else if(isset($c->dt_val)) {
                 $value = $c->dt_val;
             }
@@ -437,13 +437,15 @@ class ContextController extends Controller {
                 $query->where('thl.short_name', $lang)
                     ->where('thcl.label', 'ilike', $likeTerm);
             })
-            ->join('contexts', 'context_id', '=', 'contexts.id')
+            ->orWhere('c2.name', 'ilike', $likeTerm)
+            ->join('contexts as c', 'context_id', '=', 'c.id')
             ->join('attributes', 'attribute_id', '=', 'attributes.id')
+            ->leftJoin('contexts as c2', 'c2.id', '=', 'context_val')
             ->leftJoin('th_concept as thc', 'thesaurus_val', '=', 'thc.concept_url')
             ->leftJoin('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
             ->leftJoin('th_language as thl', 'thcl.language_id', '=', 'thl.id')
-            ->select('contexts.id', 'name', 'str_val', 'int_val', 'dbl_val', 'thesaurus_val', 'possibility_description', 'json_val', 'geography_val', 'dt_val', 'attributes.thesaurus_url')
-            ->orderBy('name')
+            ->select('c.id', 'c.name', 'str_val', 'int_val', 'dbl_val', 'thesaurus_val', 'possibility_description', 'json_val', DB::raw('ST_AsText(geography_val) as geography_val'), 'dt_val', 'attributes.thesaurus_url', 'context_val', 'c2.name as context_val_name', 'label', DB::raw('to_char(dt_val, \'MM.DD.YYYY TMday TMmonth\') as dt_val_str'))
+            ->orderBy('c.name')
             ->distinct()
             ->get();
 
@@ -463,22 +465,24 @@ class ContextController extends Controller {
                 $matches[$key]['count']++;
             }
             $value = null;
-            if(isset($v->str_val)) {
+            if(isset($v->str_val) && stripos($v->str_val, $term) !== false) {
                 $value = $v->str_val;
-            } else if(isset($v->int_val)) {
+            } else if(isset($v->int_val) && stripos($v->int_val, $term) !== false) {
                 $value = $v->int_val;
-            } else if(isset($v->dbl_val)) {
+            } else if(isset($v->dbl_val) && stripos($v->dbl_val, $term) !== false) {
                 $value = $v->dbl_val;
-            } else if(isset($v->thesaurus_val)) {
+            } else if(isset($v->thesaurus_val) && stripos($v->label, $term) !== false) {
                 $value = $v->thesaurus_val;
             } else if(isset($v->possibility_description) && stripos($v->possibility_description, $term) !== false) {
                 $value = $v->possibility_description;
-            } else if(isset($v->json_val)) {
+            } else if(isset($v->json_val) && stripos($v->json_val, $term) !== false) {
                 $value = json_decode($v->json_val);
-            } else if(isset($v->geography_val)) {
+            } else if(isset($v->geography_val) && stripos($v->geography_val, $term) !== false) {
                 $value = $v->geography_val;
-            } else if(isset($v->dt_val)) {
+            } else if(isset($v->dt_val) && stripos($v->dt_val_str, $term) !== false) {
                 $value = $v->dt_val;
+            } else if(isset($v->context_val) && stripos($v->context_val_name, $term) !== false) {
+                $value = $v->context_val_name;
             }
             if(isset($value)) $matches[$key]['values'][$v->thesaurus_url] = $value;
         }
