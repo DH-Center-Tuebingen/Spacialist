@@ -1,6 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+=======
 ## Unreleased - Delphi
 
 ### Added
@@ -31,6 +32,12 @@ All notable changes to this project will be documented in this file.
 ### Changed
 ### Fixed
 ### Removed/Deprecated
+
+## 0.3.3
+### Fixed
+- use current selected language for search requests
+- encode search term in context search (fix missing results for terms with special chars, e.g. umlauts)
+
 
 ## 0.3.2
 ### Fixed
