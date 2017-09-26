@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Preferences to allow customization for admins and users as well
+- Global search, Supports
+  - **Contexts** by...
+    - name
+    - lasteditor
+    - updated_at (supported format is `MM.DD.YYYY <DayName> <MonthName>`)
+    - Context-Type
+    - Attributes (Values and Labels)
+  - **Files** by...
+    - Tags
+    - Copyright
+    - Description
+    - lasteditor
+  - **Layers** by...
+    - Name
+    - URL
+  - **Sources** _(click on the star icon in the results to jump to the source entry)_ by...
+    - description
+    - lasteditor (literature, source and context)
+  - **Literature** by...
+    - all fields
+  - **Users** by...
+    - Name
+    - E-Mail
 ### Changed
 ### Fixed
 ### Removed/Deprecated
