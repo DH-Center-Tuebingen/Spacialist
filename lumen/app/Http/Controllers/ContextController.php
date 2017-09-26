@@ -248,7 +248,7 @@ class ContextController extends Controller {
         $matchingContexts = Context::where('name', 'ilike', $likeTerm)
             ->orWhere('lasteditor', 'ilike', $likeTerm)
             ->orWhere(DB::raw('to_char(updated_at, \'MM.DD.YYYY TMday TMmonth\')'), 'ilike', $likeTerm)
-            ->select('name', 'id')
+            ->select('name', 'id', 'updated_at', DB::raw('to_char(updated_at, \'MM.DD.YYYY TMday TMmonth\') as updated_str'))
             ->get();
         foreach($matchingContexts as $c) {
             $type = 'context';
@@ -264,6 +264,9 @@ class ContextController extends Controller {
                 ];
             } else {
                 $matches[$key]['count']++;
+            }
+            if(isset($c->updated_str) && stripos($c->updated_str, $term) !== false) {
+                $matches[$key]['updated_at'] = $c->updated_at;
             }
         }
 
@@ -554,83 +557,106 @@ class ContextController extends Controller {
                     'count' => $count,
                     'values' => []
                 ];
-            } else {
-                $matches[$key]['count']++;
             }
             if(isset($b->author) && stripos($b->author, $term) !== false) {
             	$matches[$key]['values']['author'] = $b->author;
+                $matches[$key]['count']++;
             }
             if(isset($b->editor) && stripos($b->editor, $term) !== false) {
             	$matches[$key]['values']['editor'] = $b->editor;
+                $matches[$key]['count']++;
             }
             if(isset($b->title) && stripos($b->title, $term) !== false) {
             	$matches[$key]['values']['title'] = $b->title;
+                $matches[$key]['count']++;
             }
             if(isset($b->journal) && stripos($b->journal, $term) !== false) {
             	$matches[$key]['values']['journal'] = $b->journal;
+                $matches[$key]['count']++;
             }
             if(isset($b->year) && stripos($b->year, $term) !== false) {
             	$matches[$key]['values']['year'] = $b->year;
+                $matches[$key]['count']++;
             }
             if(isset($b->pages) && stripos($b->pages, $term) !== false) {
             	$matches[$key]['values']['pages'] = $b->pages;
+                $matches[$key]['count']++;
             }
             if(isset($b->volume) && stripos($b->volume, $term) !== false) {
             	$matches[$key]['values']['volume'] = $b->volume;
+                $matches[$key]['count']++;
             }
             if(isset($b->number) && stripos($b->number, $term) !== false) {
             	$matches[$key]['values']['number'] = $b->number;
+                $matches[$key]['count']++;
             }
             if(isset($b->booktitle) && stripos($b->booktitle, $term) !== false) {
             	$matches[$key]['values']['booktitle'] = $b->booktitle;
+                $matches[$key]['count']++;
             }
             if(isset($b->publisher) && stripos($b->publisher, $term) !== false) {
             	$matches[$key]['values']['publisher'] = $b->publisher;
+                $matches[$key]['count']++;
             }
             if(isset($b->address) && stripos($b->address, $term) !== false) {
             	$matches[$key]['values']['address'] = $b->address;
+                $matches[$key]['count']++;
             }
             if(isset($b->misc) && stripos($b->misc, $term) !== false) {
             	$matches[$key]['values']['misc'] = $b->misc;
+                $matches[$key]['count']++;
             }
             if(isset($b->howpublished) && stripos($b->howpublished, $term) !== false) {
             	$matches[$key]['values']['howpublished'] = $b->howpublished;
+                $matches[$key]['count']++;
             }
             if(isset($b->type) && stripos($b->type, $term) !== false) {
             	$matches[$key]['values']['type'] = $b->type;
+                $matches[$key]['count']++;
             }
             if(isset($b->annote) && stripos($b->annote, $term) !== false) {
             	$matches[$key]['values']['annote'] = $b->annote;
+                $matches[$key]['count']++;
             }
             if(isset($b->chapter) && stripos($b->chapter, $term) !== false) {
             	$matches[$key]['values']['chapter'] = $b->chapter;
+                $matches[$key]['count']++;
             }
             if(isset($b->crossref) && stripos($b->crossref, $term) !== false) {
             	$matches[$key]['values']['crossref'] = $b->crossref;
+                $matches[$key]['count']++;
             }
             if(isset($b->edition) && stripos($b->edition, $term) !== false) {
             	$matches[$key]['values']['edition'] = $b->edition;
+                $matches[$key]['count']++;
             }
             if(isset($b->institution) && stripos($b->institution, $term) !== false) {
             	$matches[$key]['values']['institution'] = $b->institution;
+                $matches[$key]['count']++;
             }
             if(isset($b->key) && stripos($b->key, $term) !== false) {
             	$matches[$key]['values']['key'] = $b->key;
+                $matches[$key]['count']++;
             }
             if(isset($b->month) && stripos($b->month, $term) !== false) {
             	$matches[$key]['values']['month'] = $b->month;
+                $matches[$key]['count']++;
             }
             if(isset($b->note) && stripos($b->note, $term) !== false) {
             	$matches[$key]['values']['note'] = $b->note;
+                $matches[$key]['count']++;
             }
             if(isset($b->organization) && stripos($b->organization, $term) !== false) {
             	$matches[$key]['values']['organization'] = $b->organization;
+                $matches[$key]['count']++;
             }
             if(isset($b->school) && stripos($b->school, $term) !== false) {
             	$matches[$key]['values']['school'] = $b->school;
+                $matches[$key]['count']++;
             }
             if(isset($b->series) && stripos($b->series, $term) !== false) {
             	$matches[$key]['values']['series'] = $b->series;
+                $matches[$key]['count']++;
             }
         }
 

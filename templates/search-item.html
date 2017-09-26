@@ -39,6 +39,13 @@
                      <span ng-bind-html="$parent.$parent.$parent.$parent.$parent.concepts[match.model.context_type].label | highlight:query"></span>
                  </dd>
             </dl>
+            <dl class="dl-horizontal search-result-attr" ng-if="match.model.updated_at">
+                <dt class="search-item-content" translate="context-form.last-modified">
+                </dt>
+                <dd class="search-item-content search-item-text">
+                    <span ng-bind-html="match.model.updated_at.date | highlight:query"></span>
+                </dd>
+            </dl>
         </div>
         <div class="media-right">
             <img class="media-object search-item-img" ng-src="{{match.model.thumb_url}}" ng-if="match.model.thumb_url" />
