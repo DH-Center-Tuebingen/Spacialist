@@ -656,6 +656,15 @@ body > .angular-bootstrap-contextmenu.dropdown {
     font-size: 10px;
 }
 
+.uib-typeahead-match.active:hover .search-item-title {
+    color: black;
+}
+
+.global-search + .dropdown-menu {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
 .uib-typeahead-match.active .search-item-content, .uib-typeahead-match.active .search-item-title-sub {
     color: white;
 }

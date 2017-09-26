@@ -19,7 +19,7 @@
                     <form class="navbar-form navbar-left">
                         <div class="form-group">
                             <div class="input-group">
-                                <input class="form-control" type="text" id="a{{ attr.id }}" ng-model="globaleSearchValue" ng-model-options="{ debounce: 250 }" uib-typeahead="result as result.name for result in $ctrl.globalSearch($viewValue)" typeahead-min-length="2" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel" typeahead-template-url="templates/search-item.html" typeahead-on-select="$ctrl.onSearchSelect($item, $model, $label)" />
+                                <input class="form-control global-search" type="text" id="a{{ attr.id }}" ng-model="globaleSearchValue" ng-model-options="{ debounce: 250 }" uib-typeahead="result as result.name for result in $ctrl.globalSearch($viewValue)" typeahead-min-length="2" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel" typeahead-template-url="templates/search-item.html" typeahead-on-select="$ctrl.onSearchSelect($item, $model, $label)" />
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" type="button">
                                         <i class="material-icons md-light" aria-hidden="true">search</i>
