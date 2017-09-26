@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.3.3
+### Fixed
+- use current selected language for search requests
+- encode search term in context search (fix missing results for terms with special chars, e.g. umlauts)
+
 ## 0.3.2
 ### Fixed
 - The fab-styled save button (context detail view upper right corner) didn't work
