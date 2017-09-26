@@ -181,6 +181,16 @@ $app->group([
 });
 
 $app->group([
+    'prefix' => 'preference',//TODO api v1
+    'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
+], function($app) {
+    $app->get('', 'PreferenceController@getPreferences');
+    $app->get('{id:[0-9]+}', 'PreferenceController@getUserPreferences');
+
+    $app->patch('{id:[0-9]+}', 'PreferenceController@patchPreference');
+});
+
+$app->group([
     'prefix' => 'thesaurus',//TODO api v1
     'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
 ], function($app) {

@@ -1,5 +1,5 @@
 <div resize-watcher>
-    <div class="col-md-2" id="tree-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
+    <div class="col-md-{{$ctrl.userConfig['prefs.columns'].value.left}}" id="tree-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
         <div ng-if="$ctrl.user.permissions.view_concepts">
             <h3>{{'context-tree.heading'|translate}}</h3>
             <div class="col-md-12">
@@ -20,27 +20,27 @@
             <div ng-include="'layouts/restricted-access.html'"></div>
         </div>
     </div>
-    <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
+    <div class="col-md-{{$ctrl.userConfig['prefs.columns'].value.center}}" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
         <div ui-view="context-detail" on-store="$ctrl.onStore(context, data)" on-source-add="$ctrl.onSourceAdd(entry)">
             <!-- ui-view element for context detail template -->
             <h3>{{'context-form.heading'|translate}}</h3>
             <div class="alert alert-info">
                 <p>{{ 'context-form.no-selection' | translate }}</p>
-                <p>{{ 'context-form.no-selection-info' | translate }}</p>
+                <p ng-if="$ctrl.userConfig['prefs.show-tooltips'].value">{{ 'context-form.no-selection-info' | translate }}</p>
             </div>
         </div>
         <div ui-view="geodata-dummy"></div>
     </div>
-    <div class="col-md-5" id="addon-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
+    <div class="col-md-{{$ctrl.userConfig['prefs.columns'].value.right}}" id="addon-container" ng-hide="activeAnalysis.isActive" resizeable="$ctrl.editMode.enabled">
         <div ui-view="addons">
             <ul class="nav nav-tabs" id="addon-nav">
-                <li role="presentation" ui-sref="{tab: 'map'}" ui-sref-active="active" ng-if="moduleExists('mapCtrl')">
+                <li role="presentation" ui-sref="{tab: 'map'}" ui-sref-active="active" ng-if="moduleExists('mapCtrl') && $ctrl.userConfig['prefs.load-extensions'].value.map">
                     <a><i class="material-icons">place</i><span class="tab-desc"> {{'context-form.tabs.map'|translate}}</span></a>
                 </li>
-                <li role="presentation" ui-sref="{tab: 'files'}" ui-sref-active="active" ng-if="moduleExists('fileCtrl')">
+                <li role="presentation" ui-sref="{tab: 'files'}" ui-sref-active="active" ng-if="moduleExists('fileCtrl') && $ctrl.userConfig['prefs.load-extensions'].value.files">
                     <a><i class="material-icons">folder</i><span class="tab-desc"> {{'context-form.tabs.files'|translate}}</span></a>
                 </li>
-                <li role="presentation" ui-sref="{tab: 'bibliography'}" ui-sref-active="active" ng-if="moduleExists('bibliographyCtrl') && $ctrl.currentElement.element.id">
+                <li role="presentation" ui-sref="{tab: 'bibliography'}" ui-sref-active="active" ng-if="moduleExists('bibliographyCtrl') && $ctrl.userConfig['prefs.load-extensions'].value.bibliography && $ctrl.currentElement.element.id">
                     <a><i class="material-icons">book</i><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
                 </li>
             </ul>
@@ -143,7 +143,7 @@
                             <uib-accordion-heading>
                                 {{'context-form.tabs.files.all'|translate}}
                             </uib-accordion-heading>
-                            <file-list files="$ctrl.files" context-menu="$ctrl.fileContextMenu" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags"></file-list>
+                            <file-list files="$ctrl.files" context-menu="$ctrl.fileContextMenu" concepts="$ctrl.concepts" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags"></file-list>
                         </div>
                     </uib-accordion>
                 </div>

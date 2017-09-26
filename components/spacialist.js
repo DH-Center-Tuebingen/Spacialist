@@ -1,6 +1,7 @@
 spacialistApp.component('spacialist', {
     bindings: {
         tab: '@',
+        userConfig: '<',
         editMode: '<',
         contexts: '<',
         user: '<',

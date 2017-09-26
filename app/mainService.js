@@ -132,14 +132,8 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             }
         }
         var promise = storeElement(elem, parsedData);
-        promise.then(function(response){
-            // TODO elem.form.$setPristine();
-            var content = $translate.instant('snackbar.data-stored.success');
-            snackbarService.addAutocloseSnack(content, 'success');
-            if(response.error){
-                modalFactory.errorModal(response.error);
-                return;
-            }
+        return promise.then(function(response){
+            return response;
         });
     };
 
@@ -162,7 +156,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.contextSearch = function(searchString) {
         var formData = new FormData();
         formData.append('val', searchString);
-        return httpPostPromise.getData('api/context/search', formData)
+        return httpGetPromise.getData('api/context/search/term=' + searchString)
         .then(function(response) {
             return response;
         });
