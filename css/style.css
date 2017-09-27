@@ -293,6 +293,16 @@ div[resizeable] {
     height: 20px !important;
 }
 
+.slider {
+    float: left !important;
+    width: 90% !important;
+}
+
+.slider-text {
+    font-size: 1.5em;
+    padding-left: 5px;
+}
+
 .external-container {
     position: relative;
 }
