@@ -205,6 +205,8 @@
     "file.unlink-from": "Unlink from {{ name }}",
     "file.delete": "Delete {{ name }}",
     "file.context-search": "Search for contexts",
+    "files.exif.heading": "Exif",
+    "files.exif.no-data": "No Exif data found.",
     "files.linkages.heading": "Linkages",
     "field-types.list.new-placeholder": "Additional List Entry",
     "field-types.dimension.width-placeholder": "W",

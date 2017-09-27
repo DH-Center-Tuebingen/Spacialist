@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 use App\User;
+use App\Context;
 use App\ContextFile;
 use App\File;
 use App\FileTag;
 use App\ThConcept;
+use App\Helpers;
 use \DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -23,10 +25,33 @@ class FileController extends Controller
         //
     }
 
+    private $imageMime = 'image/';
+
     // OTHER FUNCTIONS
 
     private function exifDataExists($exif, $rootKey, $dataKey) {
         return array_key_exists($rootKey, $exif) && array_key_exists($dataKey, $exif[$rootKey]);
+    }
+
+    private function getExifData($file) {
+        $mimeType = $file->mime_type;
+        $isImage = substr($mimeType, 0, strlen($this->imageMime)) === $this->imageMime;
+        if(!$isImage) return null;
+        $url = Storage::url(env('SP_FILE_PATH') .'/'. $file->filename);
+        if(Helpers::startsWith($url, '/')) {
+            $url = substr($url, 1);
+        }
+        $exif = @exif_read_data($url, 0, true);
+        if($exif === false) return null;
+        return $exif;
+    }
+
+    private function getLinkedContexts($file) {
+        $links = Context::where('photo_id', $file->id)
+            ->join('context_photos', 'context_id', '=', 'contexts.id')
+            ->select('name', 'contexts.id')
+            ->get();
+        return $links;
     }
 
     private function getFileById($id) {
@@ -51,13 +76,16 @@ class FileController extends Controller
         }
 
         // try to get file to check if it exists
+        $storageUrl = 'images/' . $file->filename;
         try {
-            Storage::get($file->url);
-            $file->filesize = Storage::size($file->url);
-            $file->modified = Storage::lastModified($file->url);
+            Storage::get($storageUrl);
+            $file->filesize = Storage::size($storageUrl);
+            $file->modified = Storage::lastModified($storageUrl);
         } catch(FileNotFoundException $e) {
         }
         $file->created = strtotime($file->created);
+        $file->exif = $this->getExifData($file);
+        $file->linked_contexts = $this->getLinkedContexts($file);
         return $file;
     }
 
@@ -89,13 +117,16 @@ class FileController extends Controller
             }
 
             // try to get file to check if it exists
+            $storageUrl = 'images/' . $file->filename;
             try {
-                Storage::get($file->url);
-                $file->filesize = Storage::size($file->url);
-                $file->modified = Storage::lastModified($file->url);
+                Storage::get($storageUrl);
+                $file->filesize = Storage::size($storageUrl);
+                $file->modified = Storage::lastModified($storageUrl);
             } catch(FileNotFoundException $e) {
             }
             $file->created = strtotime($file->created);
+            $file->exif = $this->getExifData($file);
+            $file->linked_contexts = $this->getLinkedContexts($file);
         }
         return response()->json($files);
     }

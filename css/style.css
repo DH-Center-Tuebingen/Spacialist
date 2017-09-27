@@ -724,6 +724,25 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     height: 100%;
 }
 
+.exif-table {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.exif-table tr td {
+    width: 50%;
+}
+
+.exif-table tr td:nth-child(1) {
+    padding-right: 7px;
+    text-align: right;
+}
+
+.exif-table tr td:nth-child(2) {
+    padding-left: 7px;
+    text-align: left;
+}
+
 /* three.js */
 #threejs-container > canvas {
     width: 100% !important;

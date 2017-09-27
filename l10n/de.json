@@ -212,6 +212,8 @@
     "files.properties.file.description": "Beschreibung",
     "files.properties.file.copyright": "Copyright",
     "files.properties.md-preview.toggle": "Markdown-Vorschau umschalten",
+    "files.exif.heading": "Exif",
+    "files.exif.no-data": "Keine Exif-Daten gefunden.",
     "files.linkages.heading": "Verknüpfungen",
     "file.link-to": "Mit {{ name }} verknüpfen",
     "file.unlink-from": "Von {{ name }} lösen",

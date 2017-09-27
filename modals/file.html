@@ -64,8 +64,21 @@
     </div>
     <div class="col-md-5" style="align-items: stretch;" ng-init="activeTab = 'props'">
         <ul class="nav nav-tabs nav-justified">
-            <li role="presentation" ng-class="{active: activeTab == 'props'}" ng-click="activeTab = 'props'"><a><i class="material-icons">tune</i> {{'files.properties.heading'|translate}}</a></li>
-            <li role="presentation" ng-class="{active: activeTab == 'links'}" ng-click="activeTab = 'links'"><a><i class="material-icons">link</i> {{'files.linkages.heading'|translate}}</a></li>
+            <li role="presentation" ng-class="{active: activeTab == 'props'}" ng-click="activeTab = 'props'">
+                <a>
+                    <i class="material-icons">tune</i> {{'files.properties.heading'|translate}}
+                </a>
+            </li>
+            <li role="presentation" ng-class="{active: activeTab == 'links'}" ng-click="activeTab = 'links'">
+                <a>
+                    <i class="material-icons">link</i> {{'files.linkages.heading'|translate}}
+                </a>
+            </li>
+            <li role="presentation" ng-class="{active: activeTab == 'exif'}" ng-click="activeTab = 'exif'">
+                <a>
+                    <i class="material-icons">camera</i> {{ 'files.exif.heading'|translate}}
+                </a>
+            </li>
         </ul>
         <div ng-show="activeTab == 'props'" class="col-md-10 col-md-offset-1">
             <h3>{{'files.properties.heading'|translate}}</h3>
@@ -155,10 +168,96 @@
                 </div>
             </div>
         </div>
-        <div ng-show="activeTab == 'links'" style="padding-right: 10px;">
+        <div ng-show="activeTab == 'links'">
             <h3>{{'files.linkages.heading'|translate}}</h3>
-            <p>TODO</p>
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat="lc in $ctrl.file.linked_contexts">
+                    <a ui-sref="root.spacialist.data({id: lc.id })" ui-sref-opts="{reload: true}">
+                        {{ lc.name }}
+                    </a>
+                </li>
+            </ul>
         </div>
+        <div ng-show="activeTab == 'exif'">
+            <p class="alert alert-info" ng-if="!$ctrl.file.exif" translate="files.exif.no-data">
+            </p>
+            <table class="exif-table" ng-if="$ctrl.file.exif">
+                <tr>
+                    <td>
+                        <i class="material-icons">photo_camera</i>
+                    </td>
+                    <td>
+                        {{ $ctrl.file.exif.IFD0.Model }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <i class="material-icons">camera</i>
+                    </td>
+                    <td>
+                        {{ $ctrl.file.exif.COMPUTED.ApertureFNumber }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <i class="material-icons">lens</i>
+                    </td>
+                    <td>
+                        {{ $ctrl.file.exif.EXIF.FocalLength | floatify }}mm
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <i class="material-icons">timer</i>
+                    </td>
+                    <td>
+                        {{ $ctrl.file.exif.EXIF.ExposureTime }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <i class="material-icons">iso</i>
+                    </td>
+                    <td>
+                        {{ $ctrl.file.exif.EXIF.ISOSpeedRatings }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <!-- EXIF.Flash is hex, trailing 0 means no flash -->
+                        <i class="material-icons" ng-if="$ctrl.file.exif.EXIF.Flash % 2 == 0">flash_off</i>
+                        <i class="material-icons" ng-if="$ctrl.file.exif.EXIF.Flash % 2 == 1">flash_on</i>
+                    </td>
+                    <td>
+                        {{ $ctrl.file.exif.EXIF.Flash }} (TODO: parse status code)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <i class="material-icons">access_time</i>
+                    </td>
+                    <td>
+                        {{ $ctrl.file.exif.EXIF.DateTimeOriginal }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <i class="material-icons">brightness_6</i>
+                    </td>
+                    <td>
+                        Whitebalance
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <i class="material-icons">copyright</i>
+                    </td>
+                    <td>
+                        {{ $ctrl.file.exif.EXIF.Copyright }}
+                    </td>
+                </tr>
+            </table>
+         </div>
     </div>
 </div>
 <div class="modal-footer">

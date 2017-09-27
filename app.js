@@ -703,6 +703,20 @@ spacialistApp.filter('fileFilter', function(searchService) {
     };
 });
 
+// Exif Data stores FocalLength as <Length>/x
+spacialistApp.filter('floatify', function() {
+    return function(str) {
+        var frags = str.split('/');
+        var res = parseFloat(frags[0]);
+        for(var i=1; i<frags.length; i++) {
+            var c = parseFloat(frags[i]);
+            res /= c;
+        }
+        if(Number.isInteger(res)) return Math.round(res);
+        return res.toFixed(1);
+    }
+});
+
 spacialistApp.filter('urlify', function() {
     var urls = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
     return function(text) {
