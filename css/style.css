@@ -100,7 +100,7 @@ textarea {
 }
 
 .form-group-unpadded {
-    margin: 0 !important;
+    margin-top: 0 !important;
     padding-bottom: 0 !important;
 }
 
@@ -395,6 +395,11 @@ div[resizeable] {
     float: left;
     margin-right: 8px;
     opacity: 0.7;
+}
+
+.formatted-geodata {
+    color: gray;
+    padding-left: 15px;
 }
 
 /* use the 'Open Sans' font */
