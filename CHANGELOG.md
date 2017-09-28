@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.3.4
+### Fixed
+- Fix missing values of metadata in file popup
+- Marker popup form styles
+- Opacity of layers (Storing was not possible, stored value was ignored)
+### Added
+- List linked contexts in file popup
+- Exif Data viewer for image files (JPEG and TIFF)
+- Display coordinates in DMS (Degree Minute Second) in marker popup
+
 ## 0.3.3
 ### Fixed
 - use current selected language for search requests
