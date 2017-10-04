@@ -1111,15 +1111,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         return mainService.getDropdownOptions();
                     },
                     map: function(mapService, tab) {
-                        if(tab != 'map') return {};
                         return mapService.initMapVariables();
                     },
                     layer: function(map, mapService, tab) {
-                        if(tab != 'map') return [];
                         return mapService.getLayers();
                     },
                     geodata: function(layer, mapService, tab) {
-                        if(tab != 'map') return [];
                         return mapService.getGeodata();
                     },
                     contextTypes: function(dataEditorService) {
@@ -1129,11 +1126,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         return dataEditorService.getGeometryTypes();
                     },
                     files: function(fileService, tab) {
-                        if(tab != 'files') return [];
                         return fileService.getFiles();
                     },
                     availableTags: function(fileService, tab) {
-                        if(tab != 'files') return [];
                         return fileService.getAvailableTags();
                     }
                 }
@@ -1704,8 +1699,11 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
             };
             var onConfirm = function() {
                 form.$setPristine();
-                mainService.storeElement(mainService.currentElement.element, mainService.currentElement.data);
-                $state.go(trans.targetState().name(), trans.targetState().params(), {reload: true});
+                var contexts = trans.injector(null, 'from').get('contexts');
+                mainService.storeElement(mainService.currentElement.element, mainService.currentElement.data).then(function(response) {
+                    mainService.updateContextList(contexts, response.context, mainService.currentElement, response);
+                });
+                $state.go(trans.targetState().name(), trans.targetState().params());
             };
             modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
             return false;

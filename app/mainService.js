@@ -289,6 +289,27 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         angular.merge(tree.data[id], newValues);
     };
 
+    main.updateContextList = function(contexts, context, currentElement, response) {
+        context.lasteditor = response.context.lasteditor;
+        context.updated_at = response.context.updated_at;
+        context.updated_at = response.context.updated_at;
+        context.lastmodified = updateLastModified(response.context);
+        var c = contexts.data[context.id];
+        for(var k in context) {
+            if(context.hasOwnProperty(k)) {
+                c[k] = context[k];
+            }
+        }
+        //TODO: replace currentElement
+        // currentElement.form.$setPristine();
+        var content = $translate.instant('snackbar.data-stored.success');
+        snackbarService.addAutocloseSnack(content, 'success');
+        if(response.error){
+            modalFactory.errorModal(response.error);
+            return;
+        }
+    };
+
     main.deleteContext = function(context, contexts) {
         var id = context.id;
         return httpDeletePromise.getData('api/context/' + id).then(function(callback) {

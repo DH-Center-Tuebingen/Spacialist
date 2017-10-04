@@ -9,24 +9,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
 
     vm.onStore = function(context, data) {
         mainService.storeElement(context, data).then(function(response) {
-            context.lasteditor = response.context.lasteditor;
-            context.updated_at = response.context.updated_at;
-            context.updated_at = response.context.updated_at;
-            context.lastmodified = updateLastModified(response.context);
-            var c = vm.contexts.data[context.id];
-            for(var k in context) {
-                if(context.hasOwnProperty(k)) {
-                    c[k] = context[k];
-                }
-            }
-            vm.currentElement.form.$setPristine();
-            // TODO elem.form.$setPristine();
-            var content = $translate.instant('snackbar.data-stored.success');
-            snackbarService.addAutocloseSnack(content, 'success');
-            if(response.error){
-                modalFactory.errorModal(response.error);
-                return;
-            }
+            mainService.updateContextList(vm.contexts, context, vm.currentElement, response);
         });
     };
 
