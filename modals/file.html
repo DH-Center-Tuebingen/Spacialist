@@ -178,7 +178,7 @@
                 </li>
             </ul>
         </div>
-        <div ng-show="activeTab == 'exif'">
+        <div ng-show="activeTab == 'exif'" ng-init="showAllExif = false">
             <p class="alert alert-info" ng-if="!$ctrl.file.exif" translate="files.exif.no-data">
             </p>
             <table class="exif-table" ng-if="$ctrl.file.exif">
@@ -187,7 +187,7 @@
                         <i class="material-icons">photo_camera</i>
                     </td>
                     <td>
-                        {{ $ctrl.file.exif.IFD0.Model }}
+                        {{ $ctrl.file.exif.Model }}
                     </td>
                 </tr>
                 <tr>
@@ -195,7 +195,7 @@
                         <i class="material-icons">camera</i>
                     </td>
                     <td>
-                        {{ $ctrl.file.exif.COMPUTED.ApertureFNumber }}
+                        {{ $ctrl.file.exif.Exif.FNumber }}
                     </td>
                 </tr>
                 <tr>
@@ -203,7 +203,8 @@
                         <i class="material-icons">lens</i>
                     </td>
                     <td>
-                        {{ $ctrl.file.exif.EXIF.FocalLength | floatify }}mm
+                        <span>{{ $ctrl.file.exif.Exif.FocalLength }} ({{ $ctrl.file.exif.MakerNotes.LensModel }})</span>
+                        <span style="display: block;font-size: 90%;color: gray;">{{ $ctrl.file.exif.MakerNotes.LensType }}</span>
                     </td>
                 </tr>
                 <tr>
@@ -211,7 +212,7 @@
                         <i class="material-icons">timer</i>
                     </td>
                     <td>
-                        {{ $ctrl.file.exif.EXIF.ExposureTime }}
+                        {{ $ctrl.file.exif.Exif.ExposureTime }}
                     </td>
                 </tr>
                 <tr>
@@ -219,17 +220,16 @@
                         <i class="material-icons">iso</i>
                     </td>
                     <td>
-                        {{ $ctrl.file.exif.EXIF.ISOSpeedRatings }}
+                        {{ $ctrl.file.exif.Exif.ISOSpeedRatings }}
                     </td>
                 </tr>
                 <tr>
                     <td>
                         <!-- EXIF.Flash is hex, trailing 0 means no flash -->
-                        <i class="material-icons" ng-if="$ctrl.file.exif.EXIF.Flash % 2 == 0">flash_off</i>
-                        <i class="material-icons" ng-if="$ctrl.file.exif.EXIF.Flash % 2 == 1">flash_on</i>
+                        <i class="material-icons">flash_on</i>
                     </td>
                     <td>
-                        {{ $ctrl.file.exif.EXIF.Flash }} (TODO: parse status code)
+                        {{ $ctrl.file.exif.Exif.Flash }}
                     </td>
                 </tr>
                 <tr>
@@ -237,7 +237,7 @@
                         <i class="material-icons">access_time</i>
                     </td>
                     <td>
-                        {{ $ctrl.file.exif.EXIF.DateTimeOriginal }}
+                        {{ $ctrl.file.exif.Exif.DateTimeOriginal }}
                     </td>
                 </tr>
                 <tr>
@@ -245,7 +245,7 @@
                         <i class="material-icons">brightness_6</i>
                     </td>
                     <td>
-                        Whitebalance
+                        {{ $ctrl.file.exif.MakerNotes.WhiteBalanceSetting }}
                     </td>
                 </tr>
                 <tr>
@@ -253,11 +253,44 @@
                         <i class="material-icons">copyright</i>
                     </td>
                     <td>
-                        {{ $ctrl.file.exif.EXIF.Copyright }}
+                        {{ $ctrl.file.exif.Copyright }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <i class="material-icons">memory</i>
+                    </td>
+                    <td>
+                        {{ $ctrl.file.exif.MakerNotes.FirmwareVersion }}
                     </td>
                 </tr>
             </table>
-         </div>
+            <button type="button" class="btn btn-default" ng-click="showAllExif=!showAllExif">
+                <span ng-show="!showAllExif">
+                    <span translate="files.exif.show-all"></span> <i class="material-icons">arrow_drop_down</i>
+                </span>
+                <span ng-show="showAllExif">
+                    <span translate="files.exif.hide-all"></span> <i class="material-icons">arrow_drop_up</i>
+                </span>
+            </button>
+            <table class="table-striped" ng-if="showAllExif">
+                <tr ng-repeat="(key, e) in $ctrl.file.exif">
+                    <td>
+                        {{ key }}
+                    </td>
+                    <td>
+                        <ul class="left" ng-if="key == 'Exif' || key == 'Interoperability' || key == 'MakerNotes' || key == 'GPS'">
+                            <li ng-repeat="(subkey, ee) in e">
+                                {{ subkey }}: {{ ee }}
+                            </li>
+                        </ul>
+                        <span ng-if="key != 'Exif' && key != 'Interoperability' && key != 'MakerNotes' && key != 'GPS'">
+                            {{ e }}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
 <div class="modal-footer">

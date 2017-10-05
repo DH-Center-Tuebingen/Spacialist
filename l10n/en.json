@@ -207,6 +207,8 @@
     "file.context-search": "Search for contexts",
     "files.exif.heading": "Exif",
     "files.exif.no-data": "No Exif data found.",
+    "files.exif.hide-all": "Hide all Exif data",
+    "files.exif.show-all": "Show all Exif data",
     "files.linkages.heading": "Linkages",
     "field-types.list.new-placeholder": "Additional List Entry",
     "field-types.dimension.width-placeholder": "W",

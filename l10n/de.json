@@ -214,6 +214,8 @@
     "files.properties.md-preview.toggle": "Markdown-Vorschau umschalten",
     "files.exif.heading": "Exif",
     "files.exif.no-data": "Keine Exif-Daten gefunden.",
+    "files.exif.hide-all": "Komplette Exif-Daten ausblenden",
+    "files.exif.show-all": "Komplette Exif-Daten anzeigen",
     "files.linkages.heading": "Verknüpfungen",
     "file.link-to": "Mit {{ name }} verknüpfen",
     "file.unlink-from": "Von {{ name }} lösen",

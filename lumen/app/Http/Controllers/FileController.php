@@ -12,6 +12,12 @@ use \DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use lsolesen\pel\Pel;
+use lsolesen\pel\PelJpeg;
+use lsolesen\pel\PelTiff;
+use lsolesen\pel\PelTag;
+use lsolesen\pel\PelIfd;
+use lsolesen\pel\PelDataWindow;
 
 class FileController extends Controller
 {
@@ -33,6 +39,27 @@ class FileController extends Controller
         return array_key_exists($rootKey, $exif) && array_key_exists($dataKey, $exif[$rootKey]);
     }
 
+    private function extractFromIfd($ifd, &$values) {
+        foreach($ifd->getEntries() as $entry) {
+            $name = PelTag::getName($entry->getIfdType(), $entry->getTag());
+            if($entry->getIfdType() !== PelIfd::IFD0 && $entry->getIfdType() !== PelIfd::IFD1) {
+                $key = PelIfd::getTypeName($entry->getIfdType());
+                if(!isset($values[$key])) {
+                    $values[$key] = [];
+                }
+                $values[$key][$name] = $entry->getText();
+            } else {
+                $values[$name] = $entry->getText();
+            }
+        }
+        foreach($ifd->getSubIfds() as $sifd) {
+            $this->extractFromIfd($sifd, $values);
+        }
+        if(!$ifd->isLastIfd()) {
+            $this->extractFromIfd($ifd->getNextIfd(), $values);
+        }
+    }
+
     private function getExifData($file) {
         $mimeType = $file->mime_type;
         $isImage = substr($mimeType, 0, strlen($this->imageMime)) === $this->imageMime;
@@ -41,9 +68,23 @@ class FileController extends Controller
         if(Helpers::startsWith($url, '/')) {
             $url = substr($url, 1);
         }
-        $exif = @exif_read_data($url, 0, true);
-        if($exif === false) return null;
-        return $exif;
+        $data = new PelDataWindow(file_get_contents($url));
+        if(PelJpeg::isValid($data)) {
+            $jpg = new PelJpeg();
+            $jpg->load($data);
+            $app1 = $jpg->getExif();
+            if($app1 == null) {
+                return null;
+            }
+            $ifd = $app1->getTiff()->getIfd();
+            $values = [];
+            $this->extractFromIfd($ifd, $values);
+            return $values;
+        } else if(PelTiff::isValid($data)) {
+        } else {
+            return null;
+        }
+        return null;
     }
 
     private function getLinkedContexts($file) {
