@@ -15,8 +15,8 @@
         <input class="form-control" ng-switch-when="integer" type="number" step="1" placeholder="0" id="a{{ attr.id }}" ng-model="attributeOutputs[attr.id]" ng-readonly="readonlyInput"/>
         <input class="form-control" ng-switch-when="boolean" type="checkbox" id="a{{ attr.id }}" ng-model="attributeOutputs[attr.id]" ng-readonly="readonlyInput"/>
         <div ng-switch-when="percentage">
-            <input class="form-control" type="range" step="1" min="0" max="100" value="0" id="a{{ attr.id }}" ng-model="attributeOutputs[attr.id]" ng-readonly="readonlyInput" style="float: left !important; width: 90%;"/>
-            <span style="font-size: 1.5em; padding-left: 5px;">{{ attributeOutputs[attr.id] }}%</span>
+            <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" id="a{{ attr.id }}" ng-model="attributeOutputs[attr.id]" ng-readonly="readonlyInput"/>
+            <span class="slider-text">{{ attributeOutputs[attr.id] }}%</span>
         </div>
         <div ng-switch-when="geography">
             <input class="form-control" type="text" id="a{{ attr.id }}" placeholder="{{ 'context-form.fields.placeholder-wkt' | translate }}" ng-model="attributeOutputs[attr.id]" ng-readonly="readonlyInput" />
