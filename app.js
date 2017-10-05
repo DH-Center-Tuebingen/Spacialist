@@ -1342,6 +1342,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 vm.availableProperties = ['copyright', 'description'];
                                 vm.fileEdits = {};
 
+                                vm.openContext = function(cid) {
+                                    $scope.$close('context');
+                                    $state.go('root.spacialist.data', {id: cid});
+                                };
+
                                 vm.cancelFilePropertyEdit = function(editArray, index) {
                                     editArray[index].text = '';
                                     editArray[index].editMode = false;
@@ -1366,11 +1371,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     });
                                 };
                                 vm.close = function() {
-                                    $scope.$dismiss();
+                                    $scope.$dismiss('close');
                                 };
                             }],
                             controllerAs: '$ctrl'
-                        }).result.finally(function() {
+                        }).result.then(function(reason) {
+                        }, function(reason) {
                             $state.router.transitionService.back();
                         });
                     }]

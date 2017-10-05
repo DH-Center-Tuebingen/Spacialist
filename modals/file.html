@@ -172,7 +172,7 @@
             <h3>{{'files.linkages.heading'|translate}}</h3>
             <ul class="list-group">
                 <li class="list-group-item" ng-repeat="lc in $ctrl.file.linked_contexts">
-                    <a ui-sref="root.spacialist.data({id: lc.id })" ui-sref-opts="{reload: true}">
+                    <a ng-click="$ctrl.openContext(lc.id)" href="">
                         {{ lc.name }}
                     </a>
                 </li>
