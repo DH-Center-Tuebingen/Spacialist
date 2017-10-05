@@ -13,6 +13,9 @@ use App\AttributeValue;
 use App\ThConcept;
 use App\ContextAttribute;
 use App\AvailableLayer;
+use App\File;
+use App\Source;
+use App\Literature;
 use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
@@ -24,6 +27,7 @@ use Phaza\LaravelPostgis\Geometries\MultiPolygon;
 use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Zizaco\Entrust;
 use \DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -227,6 +231,466 @@ class ContextController extends Controller {
             ->orderBy('name')
             ->get();
         return response()->json($matchingContexts);
+    }
+
+    public function searchGlobal($term, $lang) {
+        $user = \Auth::user();
+        if(!$user->can('view_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $matches = [];
+        // decode encoded search term
+        $term = urldecode($term);
+        $likeTerm = '%' . $term . '%';
+
+        // get contexts where the name, last editor or date matches the search term
+        $matchingContexts = Context::where('name', 'ilike', $likeTerm)
+            ->orWhere('lasteditor', 'ilike', $likeTerm)
+            ->orWhere(DB::raw('to_char(updated_at, \'MM.DD.YYYY TMday TMmonth\')'), 'ilike', $likeTerm)
+            ->select('name', 'id', 'updated_at', DB::raw('to_char(updated_at, \'MM.DD.YYYY TMday TMmonth\') as updated_str'))
+            ->get();
+        foreach($matchingContexts as $c) {
+            $type = 'context';
+            $key = $type . "_" . $c->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+            if(isset($c->updated_str) && stripos($c->updated_str, $term) !== false) {
+                $matches[$key]['updated_at'] = $c->updated_at;
+            }
+        }
+
+        // get contexts where the attribute label matches the search term
+        $matchingContexts = Context::where(function($query) use ($likeTerm, $lang) {
+            $query->where('thl.short_name', $lang)
+                ->where('thcl.label', 'ilike', $likeTerm);
+        })
+            ->join('context_attributes as ca', 'ca.context_type_id', '=', 'contexts.context_type_id')
+            ->join('attributes as a', 'a.id', '=', 'ca.attribute_id')
+            ->leftJoin('attribute_values as av', function($query) {
+                $query->on('a.id', '=', 'av.attribute_id')
+                    ->on('contexts.id', '=', 'av.context_id');
+            })
+            ->leftJoin('th_concept as thc', 'a.thesaurus_url', '=', 'thc.concept_url')
+            ->leftJoin('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
+            ->leftJoin('th_language as thl', 'thcl.language_id', '=', 'thl.id')
+            ->select('name', 'contexts.id as cid', 'a.thesaurus_url', 'av.*', DB::raw('ST_AsText(geography_val) as geography_val_wkt'))
+            ->distinct()
+            ->get();
+        foreach($matchingContexts as $c) {
+            $type = 'context';
+            $key = $type . "_" . $c->cid;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $c->cid,
+                    'name' => $c->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+            $value = null;
+            if(isset($c->str_val)) {
+                $value = $c->str_val;
+            } else if(isset($c->int_val)) {
+                $value = $c->int_val;
+            } else if(isset($c->dbl_val)) {
+                $value = $c->dbl_val;
+            } else if(isset($c->thesaurus_val)) {
+                $value = $c->thesaurus_val;
+            } else if(isset($c->json_val)) {
+                $value = json_decode($c->json_val);
+            } else if(isset($c->geography_val)) {
+                $value = $c->geography_val_wkt;
+            } else if(isset($c->dt_val)) {
+                $value = $c->dt_val;
+            }
+            if(isset($value)) $matches[$key]['values'][$c->thesaurus_url] = $value;
+        }
+
+        // get contexts where the context type label matches the search term
+        $matchingContexts = Context::where(function($query) use ($likeTerm, $lang) {
+            $query->where('thl.short_name', $lang)
+                ->where('thcl.label', 'ilike', $likeTerm);
+        })
+            ->join('context_types as ct', 'ct.id', '=', 'contexts.context_type_id')
+            ->leftJoin('th_concept as thc', 'ct.thesaurus_url', '=', 'thc.concept_url')
+            ->leftJoin('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
+            ->leftJoin('th_language as thl', 'thcl.language_id', '=', 'thl.id')
+            ->select('name', 'contexts.id', 'ct.thesaurus_url')
+            ->distinct()
+            ->get();
+        foreach($matchingContexts as $c) {
+            $type = 'context';
+            $key = $type . "_" . $c->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+            $matches[$key]['context_type'] = $c->thesaurus_url;
+        }
+
+        $matchingFiles = File::where('name', 'ilike', $likeTerm)
+            ->orWhere('copyright', 'ilike', $likeTerm)
+            ->orWhere('description', 'ilike', $likeTerm)
+            ->orWhere('photos.lasteditor', 'ilike', $likeTerm)
+            ->orWhere(function($query) use ($likeTerm, $lang) {
+                $query->where('thl.short_name', $lang)
+                    ->where('thcl.label', 'ilike', $likeTerm);
+            })
+            ->leftJoin('photo_tags as tags', 'photos.id', '=', 'tags.photo_id')
+            ->leftJoin('th_concept as thc', 'tags.concept_url', '=', 'thc.concept_url')
+            ->leftJoin('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
+            ->leftJoin('th_language as thl', 'thcl.language_id', '=', 'thl.id')
+            ->select('name', 'photos.id', 'thumb', 'mime_type', 'copyright', 'description', 'thcl.label')
+            ->orderBy('name')
+            ->get();
+        foreach($matchingFiles as $f) {
+            $type = 'file';
+            $key = $type . "_" . $f->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matching_values = [];
+                if(isset($f->copyright) && stripos($f->copyright, $term) !== false) {
+                    $matching_values['copyright'] = $f->copyright;
+                }
+                if(isset($f->description) && stripos($f->description, $term) !== false) {
+                    $matching_values['description'] = $f->description;
+                }
+                $matches[$key] = [
+                    'id' => $f->id,
+                    'name' => $f->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => $matching_values,
+                    'tags' => []
+                ];
+                if(isset($f->thumb) && substr($f->mime_type, 0, 6) === 'image/') {
+                    $thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $f->thumb);
+                    $matches[$key]['thumb_url'] = $thumb_url;
+                }
+            } else {
+                $matches[$key]['count']++;
+            }
+            if(isset($f->label) && stripos($f->label, $term) !== false) {
+                $matches[$key]['tags'][] = $f->label;
+            }
+        }
+
+        $matchingLayers = AvailableLayer::where('name', 'ilike', $likeTerm)
+            ->orWhere('url', 'ilike', $likeTerm)
+            ->select('name', 'id', 'url')
+            ->orderBy('name')
+            ->get();
+        foreach($matchingLayers as $l) {
+            $type = 'layer';
+            $key = $type . "_" . $l->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matching_values = [];
+                if(isset($l->url) && stripos($l->url, $term) !== false) {
+                    $matching_values['url'] = $l->url;
+                }
+                $matches[$key] = [
+                    'id' => $lid,
+                    'name' => $l->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => $matching_values
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+        }
+
+        $matchingValues = AttributeValue::where('str_val', 'ilike', $likeTerm)
+            ->orWhere(DB::raw('CAST (int_val AS text)'), 'ilike', $likeTerm)
+            ->orWhere(DB::raw('CAST (dbl_val AS text)'), 'ilike', $likeTerm)
+            ->orWhere('possibility_description', 'ilike', $likeTerm)
+            ->orWhere(DB::raw('CAST (json_val AS text)'), 'ilike', $likeTerm)
+            ->orWhere(DB::raw('ST_AsText(geography_val)'), 'ilike', $likeTerm)
+            // use server's locale for day and month (TM). To use a different locale `SET lc_time = <supported locale>` has to be executed before the actual query
+            ->orWhere(DB::raw('to_char(dt_val, \'MM.DD.YYYY TMday TMmonth\')'), 'ilike', $likeTerm)
+            ->orWhere('attribute_values.lasteditor', 'ilike', $likeTerm)
+            ->orWhere(function($query) use ($likeTerm, $lang) {
+                $query->where('thl.short_name', $lang)
+                    ->where('thcl.label', 'ilike', $likeTerm);
+            })
+            ->orWhere('c2.name', 'ilike', $likeTerm)
+            ->join('contexts as c', 'context_id', '=', 'c.id')
+            ->join('attributes', 'attribute_id', '=', 'attributes.id')
+            ->leftJoin('contexts as c2', 'c2.id', '=', 'context_val')
+            ->leftJoin('th_concept as thc', 'thesaurus_val', '=', 'thc.concept_url')
+            ->leftJoin('th_concept_label as thcl', 'thc.id', '=', 'thcl.concept_id')
+            ->leftJoin('th_language as thl', 'thcl.language_id', '=', 'thl.id')
+            ->select('c.id', 'c.name', 'str_val', 'int_val', 'dbl_val', 'thesaurus_val', 'possibility_description', 'json_val', DB::raw('ST_AsText(geography_val) as geography_val'), 'dt_val', 'attributes.thesaurus_url', 'context_val', 'c2.name as context_val_name', 'label', DB::raw('to_char(dt_val, \'MM.DD.YYYY TMday TMmonth\') as dt_val_str'))
+            ->orderBy('c.name')
+            ->distinct()
+            ->get();
+
+        foreach($matchingValues as $v) {
+            $type = 'context';
+            $key = $type . "_" . $v->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $v->id,
+                    'name' => $v->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+            $value = null;
+            if(isset($v->str_val) && stripos($v->str_val, $term) !== false) {
+                $value = $v->str_val;
+            } else if(isset($v->int_val) && stripos($v->int_val, $term) !== false) {
+                $value = $v->int_val;
+            } else if(isset($v->dbl_val) && stripos($v->dbl_val, $term) !== false) {
+                $value = $v->dbl_val;
+            } else if(isset($v->thesaurus_val) && stripos($v->label, $term) !== false) {
+                $value = $v->thesaurus_val;
+            } else if(isset($v->possibility_description) && stripos($v->possibility_description, $term) !== false) {
+                $value = $v->possibility_description;
+            } else if(isset($v->json_val) && stripos($v->json_val, $term) !== false) {
+                $value = json_decode($v->json_val);
+            } else if(isset($v->geography_val) && stripos($v->geography_val, $term) !== false) {
+                $value = $v->geography_val;
+            } else if(isset($v->dt_val) && stripos($v->dt_val_str, $term) !== false) {
+                $value = $v->dt_val;
+            } else if(isset($v->context_val) && stripos($v->context_val_name, $term) !== false) {
+                $value = $v->context_val_name;
+            }
+            if(isset($value)) $matches[$key]['values'][$v->thesaurus_url] = $value;
+        }
+
+        $matchingSources = Source::where('description', 'ilike', $likeTerm)
+            ->orWhere('sources.lasteditor', 'ilike', $likeTerm)
+            ->orWhere('contexts.lasteditor', 'ilike', $likeTerm)
+            ->orWhere('literature.lasteditor', 'ilike', $likeTerm)
+            ->join('contexts', 'context_id', '=', 'contexts.id')
+            ->join('attributes', 'attribute_id', '=', 'attributes.id')
+            ->join('literature', 'literature_id', '=', 'literature.id')
+            ->select('contexts.id', 'attributes.id as attribute_id', 'literature.id as literature_id', 'name', 'description', 'attributes.thesaurus_url', 'literature.title')
+            ->orderBy('name')
+            ->get();
+        foreach($matchingSources as $s) {
+            $type = 'context';
+            $key = $type . "_" . $s->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $s->id,
+                    'aid' => $s->attribute_id,
+                    'name' => $s->name,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => [],
+                    'sources' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+            $matches[$key]['sources'][] = [
+                'title' => $s->title,
+                'desc' => $s->description
+            ];
+        }
+
+        $matchingBibliography = Literature::where('author', 'ilike', $likeTerm)
+            ->orWhere('editor', 'ilike', $likeTerm)
+            ->orWhere('title', 'ilike', $likeTerm)
+            ->orWhere('journal', 'ilike', $likeTerm)
+            ->orWhere('year', 'ilike', $likeTerm)
+            ->orWhere('pages', 'ilike', $likeTerm)
+            ->orWhere('volume', 'ilike', $likeTerm)
+            ->orWhere('number', 'ilike', $likeTerm)
+            ->orWhere('booktitle', 'ilike', $likeTerm)
+            ->orWhere('publisher', 'ilike', $likeTerm)
+            ->orWhere('address', 'ilike', $likeTerm)
+            ->orWhere('misc', 'ilike', $likeTerm)
+            ->orWhere('howpublished', 'ilike', $likeTerm)
+            ->orWhere('type', 'ilike', $likeTerm)
+            ->orWhere('annote', 'ilike', $likeTerm)
+            ->orWhere('chapter', 'ilike', $likeTerm)
+            ->orWhere('crossref', 'ilike', $likeTerm)
+            ->orWhere('edition', 'ilike', $likeTerm)
+            ->orWhere('institution', 'ilike', $likeTerm)
+            ->orWhere('key', 'ilike', $likeTerm)
+            ->orWhere('month', 'ilike', $likeTerm)
+            ->orWhere('note', 'ilike', $likeTerm)
+            ->orWhere('organization', 'ilike', $likeTerm)
+            ->orWhere('school', 'ilike', $likeTerm)
+            ->orWhere('series', 'ilike', $likeTerm)
+            ->select('id', 'author', 'editor', 'title', 'journal', 'year', 'pages', 'volume', 'number', 'booktitle', 'publisher', 'address', 'misc', 'howpublished', 'type', 'annote', 'chapter', 'crossref', 'edition', 'institution', 'key', 'month', 'note', 'organization', 'school', 'series', 'lasteditor')
+            ->orderBy('title')
+            ->get();
+
+        foreach($matchingBibliography as $b) {
+            $type = 'bibliography';
+            $key = $type . "_" . $b->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $b->id,
+                    'name' => $b->title,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => []
+                ];
+            }
+            if(isset($b->author) && stripos($b->author, $term) !== false) {
+            	$matches[$key]['values']['author'] = $b->author;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->editor) && stripos($b->editor, $term) !== false) {
+            	$matches[$key]['values']['editor'] = $b->editor;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->title) && stripos($b->title, $term) !== false) {
+            	$matches[$key]['values']['title'] = $b->title;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->journal) && stripos($b->journal, $term) !== false) {
+            	$matches[$key]['values']['journal'] = $b->journal;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->year) && stripos($b->year, $term) !== false) {
+            	$matches[$key]['values']['year'] = $b->year;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->pages) && stripos($b->pages, $term) !== false) {
+            	$matches[$key]['values']['pages'] = $b->pages;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->volume) && stripos($b->volume, $term) !== false) {
+            	$matches[$key]['values']['volume'] = $b->volume;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->number) && stripos($b->number, $term) !== false) {
+            	$matches[$key]['values']['number'] = $b->number;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->booktitle) && stripos($b->booktitle, $term) !== false) {
+            	$matches[$key]['values']['booktitle'] = $b->booktitle;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->publisher) && stripos($b->publisher, $term) !== false) {
+            	$matches[$key]['values']['publisher'] = $b->publisher;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->address) && stripos($b->address, $term) !== false) {
+            	$matches[$key]['values']['address'] = $b->address;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->misc) && stripos($b->misc, $term) !== false) {
+            	$matches[$key]['values']['misc'] = $b->misc;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->howpublished) && stripos($b->howpublished, $term) !== false) {
+            	$matches[$key]['values']['howpublished'] = $b->howpublished;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->type) && stripos($b->type, $term) !== false) {
+            	$matches[$key]['values']['type'] = $b->type;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->annote) && stripos($b->annote, $term) !== false) {
+            	$matches[$key]['values']['annote'] = $b->annote;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->chapter) && stripos($b->chapter, $term) !== false) {
+            	$matches[$key]['values']['chapter'] = $b->chapter;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->crossref) && stripos($b->crossref, $term) !== false) {
+            	$matches[$key]['values']['crossref'] = $b->crossref;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->edition) && stripos($b->edition, $term) !== false) {
+            	$matches[$key]['values']['edition'] = $b->edition;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->institution) && stripos($b->institution, $term) !== false) {
+            	$matches[$key]['values']['institution'] = $b->institution;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->key) && stripos($b->key, $term) !== false) {
+            	$matches[$key]['values']['key'] = $b->key;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->month) && stripos($b->month, $term) !== false) {
+            	$matches[$key]['values']['month'] = $b->month;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->note) && stripos($b->note, $term) !== false) {
+            	$matches[$key]['values']['note'] = $b->note;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->organization) && stripos($b->organization, $term) !== false) {
+            	$matches[$key]['values']['organization'] = $b->organization;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->school) && stripos($b->school, $term) !== false) {
+            	$matches[$key]['values']['school'] = $b->school;
+                $matches[$key]['count']++;
+            }
+            if(isset($b->series) && stripos($b->series, $term) !== false) {
+            	$matches[$key]['values']['series'] = $b->series;
+                $matches[$key]['count']++;
+            }
+        }
+
+        $matchingUsers = User::where('name', 'ilike', $likeTerm)
+            ->orWhere('email', 'ilike', $likeTerm)
+            ->select('name', 'email', 'id')
+            ->orderBy('name')
+            ->get();
+        foreach($matchingUsers as $u) {
+            $type = 'user';
+            $key = $type . "_" . $u->id;
+            if(!isset($matches[$key])) {
+                $count = 1;
+                $matches[$key] = [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'type' => $type,
+                    'count' => $count,
+                    'values' => []
+                ];
+            } else {
+                $matches[$key]['count']++;
+            }
+        }
+
+        usort($matches, ['App\Helpers', 'sortMatchesDesc']);
+
+        return response()->json($matches);
     }
 
     // POST

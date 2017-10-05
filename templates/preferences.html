@@ -1,0 +1,130 @@
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th translate="preference.title"></th>
+            <th translate="preference.value"></th>
+            <th ng-if="!$ctrl.isUserPref" translate="preference.allow-override"></th>
+            <th translate="Save"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-if="$ctrl.preferences['prefs.gui-language']">
+            <td>
+                <strong translate="{{ $ctrl.preferences['prefs.gui-language'].label }}"></strong>
+            </td>
+            <td>
+                <input type="text" ng-model="$ctrl.preferences['prefs.gui-language'].value" />
+            </td>
+            <td ng-if="!$ctrl.isUserPref">
+                <input type="checkbox" ng-model="$ctrl.preferences['prefs.gui-language'].allow_override" />
+            </td>
+            <td>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.onUpdate($ctrl.preferences['prefs.gui-language'])">
+                    <i class="material-icons">check</i>
+                </button>
+            </td>
+        </tr>
+        <tr ng-if="$ctrl.preferences['prefs.columns']">
+            <td>
+                <strong translate="{{ $ctrl.preferences['prefs.columns'].label }}"></strong>
+            </td>
+            <td>
+                <span translate="prefs.columns-left"></span>: <input type="number" ng-model="$ctrl.preferences['prefs.columns'].value.left" />
+                <br />
+                <span translate="prefs.columns-center"></span>: <input type="number" ng-model="$ctrl.preferences['prefs.columns'].value.center" />
+                <br />
+                <span translate="prefs.columns-right"></span>: <input type="number" ng-model="$ctrl.preferences['prefs.columns'].value.right" />
+            </td>
+            <td ng-if="!$ctrl.isUserPref">
+                <input type="checkbox" ng-model="$ctrl.preferences['prefs.columns'].allow_override" />
+            </td>
+            <td>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.onUpdate($ctrl.preferences['prefs.columns'])">
+                    <i class="material-icons">check</i>
+                </button>
+            </td>
+        </tr>
+        <tr ng-if="$ctrl.preferences['prefs.show-tooltips']">
+            <td>
+                <strong translate="{{ $ctrl.preferences['prefs.show-tooltips'].label }}"></strong>
+            </td>
+            <td>
+                <input type="checkbox" ng-model="$ctrl.preferences['prefs.show-tooltips'].value" />
+            </td>
+            <td ng-if="!$ctrl.isUserPref">
+                <input type="checkbox" ng-model="$ctrl.preferences['prefs.show-tooltips'].allow_override" />
+            </td>
+            <td>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.onUpdate($ctrl.preferences['prefs.show-tooltips'])">
+                    <i class="material-icons">check</i>
+                </button>
+            </td>
+        </tr>
+        <tr ng-if="$ctrl.preferences['prefs.tag-root']">
+            <td>
+                <strong translate="{{ $ctrl.preferences['prefs.tag-root'].label }}"></strong>
+            </td>
+            <td>
+                <input type="text" ng-model="$ctrl.preferences['prefs.tag-root'].value" />
+            </td>
+            <td ng-if="!$ctrl.isUserPref">
+                <input type="checkbox" ng-model="$ctrl.preferences['prefs.tag-root'].allow_override" />
+            </td>
+            <td>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.onUpdate($ctrl.preferences['prefs.tag-root'])">
+                    <i class="material-icons">check</i>
+                </button>
+            </td>
+        </tr>
+        <tr ng-if="$ctrl.preferences['prefs.load-extensions']">
+            <td>
+                <strong translate="{{ $ctrl.preferences['prefs.load-extensions'].label }}"></strong>
+            </td>
+            <td>
+                <div ng-repeat="(key, ext) in $ctrl.preferences['prefs.load-extensions'].value">
+                    <span translate="prefs.plugin.{{key}}"></span>: <input type="checkbox" ng-model="$ctrl.preferences['prefs.load-extensions'].value[key]" />
+                </div>
+            </td>
+            <td ng-if="!$ctrl.isUserPref">
+                <input type="checkbox" ng-model="$ctrl.preferences['prefs.load-extensions'].allow_override" />
+            </td>
+            <td>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.onUpdate($ctrl.preferences['prefs.load-extensions'])">
+                    <i class="material-icons">check</i>
+                </button>
+            </td>
+        </tr>
+        <tr ng-if="$ctrl.preferences['prefs.link-to-thesaurex']">
+            <td>
+                <strong translate="{{ $ctrl.preferences['prefs.link-to-thesaurex'].label }}"></strong>
+            </td>
+            <td>
+                <input type="text" ng-model="$ctrl.preferences['prefs.link-to-thesaurex'].value" />
+            </td>
+            <td ng-if="!$ctrl.isUserPref">
+                <input type="checkbox" ng-model="$ctrl.preferences['prefs.link-to-thesaurex'].allow_override" />
+            </td>
+            <td>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.onUpdate($ctrl.preferences['prefs.link-to-thesaurex'])">
+                    <i class="material-icons">check</i>
+                </button>
+            </td>
+        </tr>
+        <tr ng-if="$ctrl.preferences['prefs.project-name']">
+            <td>
+                <strong translate="{{ $ctrl.preferences['prefs.project-name'].label }}"></strong>
+            </td>
+            <td>
+                <input type="text" ng-model="$ctrl.preferences['prefs.project-name'].value" />
+            </td>
+            <td ng-if="!$ctrl.isUserPref">
+                <input type="checkbox" ng-model="$ctrl.preferences['prefs.project-name'].allow_override" />
+            </td>
+            <td>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.onUpdate($ctrl.preferences['prefs.project-name'])">
+                    <i class="material-icons">check</i>
+                </button>
+            </td>
+        </tr>
+    </tbody>
+</table>

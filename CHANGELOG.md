@@ -1,6 +1,37 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased - Delphi
+
+### Added
+- Preferences to allow customization for admins and users as well
+- Global search, Supports
+  - **Contexts** by...
+    - name
+    - lasteditor
+    - updated_at (supported format is `MM.DD.YYYY <DayName> <MonthName>`)
+    - Context-Type
+    - Attributes (Values and Labels)
+  - **Files** by...
+    - Tags
+    - Copyright
+    - Description
+    - lasteditor
+  - **Layers** by...
+    - Name
+    - URL
+  - **Sources** _(click on the star icon in the results to jump to the source entry)_ by...
+    - description
+    - lasteditor (literature, source and context)
+  - **Literature** by...
+    - all fields
+  - **Users** by...
+    - Name
+    - E-Mail
+### Changed
+### Fixed
+### Removed/Deprecated
+
 ## 0.3.4
 ### Fixed
 - Fix missing values of metadata in file popup
@@ -23,6 +54,7 @@ All notable changes to this project will be documented in this file.
 - The _Toggle Edit Mode_ button is now disabled on not-supported states (should only be visible in the main state with the tree, detail view and map/files)
 
 ## 0.3.1
+
 ### Fixed
 - Context Search (didn't work at all)
 - Possible Error retrieving files without a thumbnail (every file except images)

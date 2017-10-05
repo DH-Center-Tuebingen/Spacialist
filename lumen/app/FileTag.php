@@ -12,6 +12,5 @@ class FileTag extends Model
      *
      * @var array
      */
-    protected $primaryKay = '';
-    public $incrementing = false;
+     protected $fillable = ['photo_id', 'concept_url'];
 }
