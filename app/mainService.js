@@ -301,7 +301,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             }
         }
         //TODO: replace currentElement
-        // currentElement.form.$setPristine();
+        currentElement.form.$setPristine();
         var content = $translate.instant('snackbar.data-stored.success');
         snackbarService.addAutocloseSnack(content, 'success');
         if(response.error){
