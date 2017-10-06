@@ -22,5 +22,5 @@ For all screenshots have a look at the [screenshot folder][scr_folder]
 
 Development of Spacialist is co-funded by the Ministry of Science, Research and the Arts Baden-Württemberg in the "E-Science" funding programme.
 
-[scr_start]: screenshots/start.png "Spacialist Start View"
+[scr_start]: screenshots/selected_element.png "Spacialist Main Screen"
 [scr_folder]: screenshots/
