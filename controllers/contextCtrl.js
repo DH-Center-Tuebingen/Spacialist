@@ -33,6 +33,17 @@ spacialistApp.controller('contextCtrl', ['$scope', 'mainService', function($scop
                 linkedFiles: vm.linkedFiles
             }
         });
+
+        if(vm.editContext.geodata_id) {
+            vm.onSetGeodata({gid: vm.editContext.geodata_id, geodata: vm.map.geodata});
+            var geodate = vm.map.geodata.linkedLayers[vm.editContext.geodata_id];
+            if(geodate) {
+                if(!geodate.isPopupOpen()) geodate.openPopup();
+            }
+        } else if(vm.map.geodata.linkedContexts[vm.globalGeodata.geodata.id]){
+            // unset geodata if current context is not linked
+            vm.onSetGeodata({gid: undefined});
+        }
     };
 
     vm.setContext();

@@ -282,7 +282,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 c[k] = context[k];
             }
         }
-        context.form.$setPristine();
         var content = $translate.instant('snackbar.data-stored.success');
         snackbarService.addAutocloseSnack(content, 'success');
         if(response.error){

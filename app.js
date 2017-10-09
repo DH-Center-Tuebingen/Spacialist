@@ -1110,6 +1110,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     globalContext: function() {
                         return {context: {}};
                     },
+                    globalGeodata: function() {
+                        return {geodata: {}};
+                    },
                     menus: function(mainService) {
                         return mainService.getDropdownOptions();
                     },
@@ -1133,6 +1136,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     availableTags: function(fileService, tab) {
                         return fileService.getAvailableTags();
+                    },
+                    mapContentLoaded: function(tab) {
+                        return tab == 'map';
                     }
                 }
             })
@@ -1174,12 +1180,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return true;
                             });
                             return linkedFiles;
-                        },
-                        mapContentLoaded: function(tab) {
-                            return tab == 'map';
                         }
                     },
-                    onEnter: function(contexts, context, sources, linkedFiles, map, mainService, $state, $transition$) {
+                    onEnter: function(contexts, context, mainService, $state, $transition$) {
                         if(!context) {
                             var params = $transition$.params();
                             delete params.id;
@@ -1369,18 +1372,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 .state('root.spacialist.geodata', {
                     url: '/geodata/{id:[0-9]+}',
                     resolve: {
-                        context: function(contexts, geodataId, map) {
-                            if(!geodataId) return;
-                            var cid = map.geodata.linkedContexts[geodataId];
-                            var c;
-                            if(cid) {
-                                c = contexts.data[cid];
-                                var lastmodified = c.updated_at || c.created_at;
-                                var d = new Date(lastmodified);
-                                c.lastmodified = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
-                            }
-                            return c;
-                        },
                         geodataId: function(geodata, $transition$, $state) {
                             var geoObject = geodata.find(function(g) {
                                 return g.id == $transition$.params().id;
@@ -1392,14 +1383,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return geoObject.id;
                         }
                     },
-                    onEnter: function(geodataId, context, $state, $transition$) {
+                    onEnter: function(geodataId, map, $state, $transition$) {
                         if(!geodataId) {
                             var params = $transition$.params();
                             delete params.id;
                             return $state.target('root.spacialist', params);
-                        }
-                        if(context) {
-                            return $state.target('root.spacialist.data', {id: context.id}, {inherit: true, reload: 'root.spacialist.data'});
                         }
                     },
                     views: {
@@ -1693,6 +1681,21 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
             }
         }
     );
+    $transitions.onSuccess({
+        from: function(state) {
+            return state.includes['root.spacialist'];
+        },
+        to: function(state) {
+            return state.name == 'root.spacialist';
+        }}, function(trans) {
+            var geodata = trans.injector().get('globalGeodata');
+            for(var k in geodata) {
+                if(geodata.hasOwnProperty(k)) {
+                    geodata[k] = {};
+                }
+            }
+        }
+    );
     $transitions.back = function () {
         $state.go(previousState, previousStateParameters, { reload: true });
     };
@@ -1774,30 +1777,25 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
 
     $rootScope.$on('$viewContentLoaded', function(event) {
         if(event.targetScope) {
-            if(event.targetScope.$resolve) {
-                var ctrl =  event.targetScope.$resolve;
-                if(ctrl.mapContentLoaded) {
-                    var geodata = ctrl.map.geodata;
-                    var context = ctrl.context;
+            if(event.targetScope.$resolve && event.targetScope.$ctrl) {
+                var resolves =  event.targetScope.$resolve;
+                var ctrl = event.targetScope.$ctrl;
+                var geodata, gid;
+                if(resolves.mapContentLoaded && resolves.geodataId) {
+                    geodata = resolves.map.geodata;
+                    gid = resolves.geodataId;
                     if(geodata.linkedLayers.length == 0) {
                         $timeout(function() {
-                            mapService.openPopupForContext(context, geodata);
+                            var geodate = geodata.linkedLayers[gid];
+                            if(geodate) {
+                                if(!geodate.isPopupOpen()) geodate.openPopup();
+                            }
                         }, 1000);
                     } else {
-                        mapService.openPopupForContext(context, geodata);
-                    }
-                }
-                if(ctrl.geodataId) {
-                    if(ctrl.map.geodata.linkedLayers.length == 0) {
-                        $timeout(function() {
-                            mapService.setCurrentGeodata(ctrl.geodataId, ctrl.map.geodata);
-                            ctrl.map.selectedLayer = ctrl.map.geodata.linkedLayers[ctrl.geodataId];
-                            ctrl.map.selectedLayer.openPopup();
-                        }, 1000);
-                    } else {
-                        mapService.setCurrentGeodata(ctrl.geodataId, ctrl.map.geodata);
-                        ctrl.map.selectedLayer = ctrl.map.geodata.linkedLayers[ctrl.geodataId];
-                        ctrl.map.selectedLayer.openPopup();
+                        var geodate = geodata.linkedLayers[gid];
+                        if(geodate) {
+                            if(!geodate.isPopupOpen()) geodate.openPopup();
+                        }
                     }
                 }
             }

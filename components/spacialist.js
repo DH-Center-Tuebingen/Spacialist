@@ -5,6 +5,7 @@ spacialistApp.component('spacialist', {
         editMode: '<',
         contexts: '<',
         globalContext: '<',
+        globalGeodata: '<',
         user: '<',
         concepts:'<',
         menus: '<',
@@ -35,8 +36,10 @@ spacialistApp.component('spacialistdata', {
         onStore: '&',
         onSourceAdd: '&',
         map: '<',
+        globalGeodata: '<',
         mapContentLoaded: '<',
-        onSetContext: '&'
+        onSetContext: '&',
+        onSetGeodata: '&'
     },
     templateUrl: 'templates/context-data.html',
     controller: 'contextCtrl'
@@ -127,11 +130,9 @@ spacialistApp.component('sourcemodal', {
 spacialistApp.component('geodata', {
     bindings: {
         map: '<',
-        context: '<',
-        geodataId: '<'
+        geodataId: '<',
+        onSetGeodata: '&'
     },
-    controller: function() {
-        var vm = this;
-    },
+    controller: 'geodataCtrl',
     template: '',
 });

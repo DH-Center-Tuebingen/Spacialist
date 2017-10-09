@@ -3,7 +3,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
     var defaultColor = '#00FF00';
     var invisibleLayers;
     var map = {};
-    map.currentGeodata = {};
     map.contexts = environmentService.contexts;
     map.featureGroup = new L.FeatureGroup();
     map.modes = {
@@ -193,25 +192,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         });
     };
 
-    map.setCurrentGeodata = function(gid, geodata) {
-        var layer = geodata.linkedLayers[gid];
-        map.currentGeodata.id = gid;
-        map.currentGeodata.type = layer.feature.geometry.type;
-        map.currentGeodata.color = layer.feature.properties.color;
-        if(map.currentGeodata.type == 'Point') {
-            var latlng = layer.getLatLng();
-            map.currentGeodata.lat = latlng.lat;
-            map.currentGeodata.lng = latlng.lng;
-        } else {
-            map.currentGeodata.lat = undefined;
-            map.currentGeodata.lng = undefined;
-        }
-    };
-
-    map.unsetCurrentGeodata = function() {
-        delete map.currentGeodata.id;
-    };
-
     map.linkGeodata = function(cid, gid) {
         return httpPatchPromise.getData('api/context/geodata/' + cid + '/' + gid, new FormData());
     };
@@ -253,14 +233,6 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                 }
             }
         );
-    };
-
-    map.openPopupForContext = function(context, geodata) {
-        var geodate = geodata.linkedLayers[context.geodata_id];
-        if(geodate) {
-            map.setCurrentGeodata(geodate.feature.id, geodata);
-            if(!geodate.isPopupOpen()) geodate.openPopup();
-        }
     };
 
     map.createBoundsFromArray = function(arr) {

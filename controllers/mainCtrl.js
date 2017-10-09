@@ -1,6 +1,5 @@
 spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainService', 'mapService', 'fileService', 'snackbarService', 'modalFactory', '$uibModal', '$state', '$translate', '$timeout', '$compile', function($scope, httpDeleteFactory, mainService, mapService, fileService, snackbarService, modalFactory, $uibModal, $state, $translate, $timeout, $compile) {
     var vm = this;
-    vm.currentGeodata = mapService.currentGeodata;
     vm.isLinkPossible = mapService.isLinkPossible;
 
     $scope.moduleExists = mainService.moduleExists;
@@ -8,6 +7,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
 
     vm.onStore = function(context, data) {
         mainService.storeElement(context, data).then(function(response) {
+            context.form.$setPristine();
             mainService.updateContextList(vm.contexts, context, response);
         });
     };
@@ -18,6 +18,30 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
             if(data.hasOwnProperty(k)) {
                 vm.globalContext[k] = data[k];
             }
+        }
+    };
+
+    vm.onSetGeodata = function(gid, geodata) {
+        if(!gid) {
+            for(var k in vm.globalGeodata) {
+                if(vm.globalGeodata.hasOwnProperty(k)) {
+                    vm.globalGeodata[k] = {};
+                }
+            }
+            return;
+        }
+        var layer = geodata.linkedLayers[gid];
+        vm.globalGeodata.geodata.id = gid;
+        vm.globalGeodata.geodata.type = layer.feature.geometry.type;
+        vm.globalGeodata.geodata.color = layer.feature.properties.color;
+
+        if(vm.globalGeodata.geodata.type == 'Point') {
+            var latlng = layer.getLatLng();
+            vm.globalGeodata.geodata.lat = latlng.lat;
+            vm.globalGeodata.geodata.lng = latlng.lng;
+        } else {
+            vm.globalGeodata.geodata.lat = undefined;
+            vm.globalGeodata.geodata.lng = undefined;
         }
     };
 
@@ -161,8 +185,6 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
      * listener for different leaflet actions
      */
     $scope.$on('leafletDirectiveMap.mainmap.popupclose', function(event, args) {
-        // mapService.unsetCurrentGeodata();
-        // $state.go('^');
     });
     $scope.$on('leafletDirectiveMap.mainmap.popupopen', function(event, args) {
         var popup = args.leafletEvent.popup;
@@ -236,8 +258,8 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                 geodata_id: undefined
             };
             mainService.updateContextById(vm.contexts, cid, updatedValues);
-            delete vm.map.geodata.linkedContexts[vm.currentGeodata.id];
-            linkedLayer = vm.map.geodata.linkedLayers[vm.currentGeodata.id];
+            delete vm.map.geodata.linkedContexts[vm.globalGeodata.geodata.id];
+            linkedLayer = vm.map.geodata.linkedLayers[vm.globalGeodata.geodata.id];
             linkedLayer.bindTooltip(linkedLayer.feature.properties.name);
         });
     };
