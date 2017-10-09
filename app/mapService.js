@@ -151,6 +151,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
     };
 
     map.isLinkPossible = function(geodataType, layerType, allowedTypes) {
+        if(!geodataType || !layerType) return false;
         var gt = geodataType.toUpperCase();
         var lt = layerType.toUpperCase();
 

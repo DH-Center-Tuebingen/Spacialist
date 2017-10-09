@@ -4,6 +4,7 @@ spacialistApp.component('spacialist', {
         userConfig: '<',
         editMode: '<',
         contexts: '<',
+        globalContext: '<',
         user: '<',
         concepts:'<',
         menus: '<',
@@ -22,6 +23,7 @@ spacialistApp.component('spacialist', {
 spacialistApp.component('spacialistdata', {
     bindings: {
         context: '<',
+        editContext: '<',
         data: '<',
         fields: '<',
         sources: '<',
@@ -29,10 +31,12 @@ spacialistApp.component('spacialistdata', {
         user: '<',
         concepts: '<',
         linkedFiles: '<',
+        layer: '<',
         onStore: '&',
         onSourceAdd: '&',
         map: '<',
-        mapContentLoaded: '<'
+        mapContentLoaded: '<',
+        onSetContext: '&'
     },
     templateUrl: 'templates/context-data.html',
     controller: 'contextCtrl'

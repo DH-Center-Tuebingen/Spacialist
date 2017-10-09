@@ -1107,6 +1107,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     contexts: function(environmentService) {
                         return environmentService.getContexts();
                     },
+                    globalContext: function() {
+                        return {context: {}};
+                    },
                     menus: function(mainService) {
                         return mainService.getDropdownOptions();
                     },
@@ -1145,6 +1148,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             c.lastmodified = updateLastModified(c);
                             return c;
                         },
+                        editContext: function(context) {
+                            return angular.copy(context);
+                        },
                         data: function(context, mainService) {
                             if(!context) return {};
                             return mainService.getContextData(context.id);
@@ -1173,27 +1179,13 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return tab == 'map';
                         }
                     },
-                    onEnter: function(contexts, context, sources, linkedFiles, map, layer, mainService, $state, $transition$) {
+                    onEnter: function(contexts, context, sources, linkedFiles, map, mainService, $state, $transition$) {
                         if(!context) {
                             var params = $transition$.params();
                             delete params.id;
                             return $state.target('root.spacialist', params);
                         }
-                        var updates = {
-                            element: context,
-                            sources: sources,
-                            linkedFiles: linkedFiles
-                        };
-                        if(layer) {
-                            var ctxLayer = layer.find(function(l) {
-                                return l.context_type_id == context.context_type_id;
-                            });
-                            var geometryType = '';
-                            if(ctxLayer) geometryType = ctxLayer.type;
-                            updates.geometryType = geometryType;
-                        }
                         mainService.expandTree(contexts, context.id, true);
-                        mainService.setCurrentElement(updates);
                     },
                     views: {
                         'context-detail': {
@@ -1686,12 +1678,28 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
         previousState = transition.from().name;
         previousStateParameters = transition.params('from');
     });
+    $transitions.onSuccess({
+        from: function(state) {
+            return state.includes['root.spacialist.data'];
+        },
+        to: function(state) {
+            return !state.includes['root.spacialist.data'];
+        }}, function(trans) {
+            var context = trans.injector().get('globalContext');
+            for(var k in context) {
+                if(context.hasOwnProperty(k)) {
+                    context[k] = {};
+                }
+            }
+        }
+    );
     $transitions.back = function () {
         $state.go(previousState, previousStateParameters, { reload: true });
     };
     // Check for unstaged changes
     $transitions.onBefore({ from: 'root.spacialist.data' }, function(trans) {
-        var form = mainService.currentElement.form;
+        var editContext = trans.injector(null, 'from').get('editContext');
+        var form = editContext.form;
         if(form.$dirty) {
             var onDiscard = function() {
                 form.$setPristine();
@@ -1700,8 +1708,9 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
             var onConfirm = function() {
                 form.$setPristine();
                 var contexts = trans.injector(null, 'from').get('contexts');
-                mainService.storeElement(mainService.currentElement.element, mainService.currentElement.data).then(function(response) {
-                    mainService.updateContextList(contexts, response.context, mainService.currentElement, response);
+                var data = trans.injector(null, 'from').get('data');
+                mainService.storeElement(editContext, data).then(function(response) {
+                    mainService.updateContextList(contexts, editContext, response);
                 });
                 $state.go(trans.targetState().name(), trans.targetState().params());
             };
@@ -1716,13 +1725,13 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
         // only close popup if injected map object exists
         try {
             var map = trans.injector().get('map');
-            var geodate = map.geodata.linkedLayers[mainService.currentElement.element.geodata_id];
+            var context = trans.injector(null, 'from').get('context');
+            var geodate = map.geodata.linkedLayers[context.geodata_id];
             if(geodate) {
                 geodate.closePopup();
             }
         } catch(err) {
         }
-        mainService.unsetCurrentElement();
     });
 
     $transitions.onStart({}, function(trans) {

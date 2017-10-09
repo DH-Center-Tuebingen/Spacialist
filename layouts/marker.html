@@ -1,36 +1,36 @@
 <div ng-if="$ctrl.user.permissions.link_geodata
-       && $ctrl.currentElement.element.id
-       && !$ctrl.currentElement.element.geodata_id"
+       && $ctrl.globalContext.context.id
+       && !$ctrl.globalContext.context.geodata_id"
 >
-    <div ng-if="!$ctrl.isLinkPossible($ctrl.currentGeodata.type, $ctrl.currentElement.geometryType, $ctrl.geometryTypes)" translate="map-marker.wrong-type.info" translate-values="{ gtype: $ctrl.currentGeodata.type, ctype: $ctrl.currentElement.geometryType }">
+    <div ng-if="!$ctrl.isLinkPossible($ctrl.currentGeodata.type, $ctrl.globalContext.geometryType, $ctrl.geometryTypes)" translate="map-marker.wrong-type.info" translate-values="{ gtype: $ctrl.currentGeodata.type, ctype: $ctrl.globalContext.geometryType }">
     </div>
     <button
         type="button"
         class="btn btn-sm btn-success"
-        ng-click="linkGeodata($ctrl.currentElement.element.id, $ctrl.currentGeodata.id)"
-        ng-if="$ctrl.isLinkPossible($ctrl.currentGeodata.type, $ctrl.currentElement.geometryType, $ctrl.geometryTypes)"
+        ng-click="linkGeodata($ctrl.globalContext.context.id, $ctrl.currentGeodata.id)"
+        ng-if="$ctrl.isLinkPossible($ctrl.currentGeodata.type, $ctrl.globalContext.geometryType, $ctrl.geometryTypes)"
     >
-        <i class="material-icons">link</i> <span translate="map-marker.actions.context-link" translate-values="{ context: $ctrl.currentElement.element.name }"></span>
+        <i class="material-icons">link</i> <span translate="map-marker.actions.context-link" translate-values="{ context: $ctrl.globalContext.context.name }"></span>
     </button>
 </div>
 <h4 ng-if="$ctrl.user.permissions.link_geodata
-       && $ctrl.currentElement.element.geodata_id
-       && $ctrl.currentElement.element.geodata_id == $ctrl.currentGeodata.id">
-    {{ $ctrl.currentElement.element.name }}
+       && $ctrl.globalContext.context.geodata_id
+       && $ctrl.globalContext.context.geodata_id == $ctrl.currentGeodata.id">
+    {{ $ctrl.globalContext.context.name }}
 </h4>
 
-<div ng-if="!$ctrl.currentElement.element.id">
+<div ng-if="!$ctrl.globalContext.context.id">
     <p translate="map-marker.not-linked-info"></p>
     <p ng-if="$ctrl.user.permissions.link_geodata" translate="map-marker.how-to-link"></p>
 </div>
 <p ng-if="$ctrl.user.permissions.link_geodata
-       && $ctrl.currentElement.element.geodata_id
-       && $ctrl.currentElement.element.geodata_id == $ctrl.currentGeodata.id">
+       && $ctrl.globalContext.context.geodata_id
+       && $ctrl.globalContext.context.geodata_id == $ctrl.currentGeodata.id">
     <button
         type="button"
         class="btn btn-xs btn-success"
-        ng-click="unlinkGeodata($ctrl.currentElement.element.id)">
-        <i class="material-icons">link</i> <span translate="map-marker.actions.context-unlink" translate-values="{ context: $ctrl.currentElement.element.name }"></span>
+        ng-click="unlinkGeodata($ctrl.globalContext.context.id)">
+        <i class="material-icons">link</i> <span translate="map-marker.actions.context-unlink" translate-values="{ context: $ctrl.globalContext.context.name }"></span>
     </button>
 </p>
 

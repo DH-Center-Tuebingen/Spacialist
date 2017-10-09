@@ -6,7 +6,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         enabled: false
     };
 
-    main.currentElement = {};
     main.contextTypes = [];
     main.contexts = environmentService.contexts;
     main.contextReferences = {};
@@ -22,8 +21,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     // $scope.date = {
     //     opened: false
     // };
-
-    initCurrentElement();
 
     main.treeCallbacks.dropped = function(event, contexts) {
         var hasParent = event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue;
@@ -224,20 +221,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         return promise;
     }
 
-    /**
-     * Remove a source entry at the given index `index` from the given array `arr`.
-     */
-    main.deleteSourceEntry = function(index, key) {
-        var src = main.currentElement.sources[key][index];
-        var id = src.id;
-        var title = src.literature.title + ' (' + src.description + ')';
-        modalFactory.deleteModal(title, function() {
-            httpDeleteFactory('api/source/'+id, function(callback) {
-                main.currentElement.sources[key].splice(index, 1);
-            });
-        }, '');
-    };
-
     function parseData(data) {
         var parsedData = {};
         for(var i=0; i<data.length; i++) {
@@ -285,11 +268,10 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.updateContextById = function(tree, id, newValues) {
         main.expandTree(tree, id);
 
-        angular.merge(main.currentElement.element, newValues);
         angular.merge(tree.data[id], newValues);
     };
 
-    main.updateContextList = function(contexts, context, currentElement, response) {
+    main.updateContextList = function(contexts, context, response) {
         context.lasteditor = response.context.lasteditor;
         context.updated_at = response.context.updated_at;
         context.updated_at = response.context.updated_at;
@@ -300,8 +282,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 c[k] = context[k];
             }
         }
-        //TODO: replace currentElement
-        currentElement.form.$setPristine();
+        context.form.$setPristine();
         var content = $translate.instant('snackbar.data-stored.success');
         snackbarService.addAutocloseSnack(content, 'success');
         if(response.error){
@@ -375,40 +356,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         children.splice(index, 0, elem.id);
         for(var i=index+1; i<children.length; i++) {
             children[i].rank++;
-        }
-    };
-
-    function initCurrentElement() {
-        main.currentElement.element = {};
-        main.currentElement.form = {};
-        main.currentElement.data = {};
-        main.currentElement.geometryType = '';
-        main.currentElement.fields = {};
-        main.currentElement.sources = {};
-        main.currentElement.linkedFiles = [];
-    }
-
-    main.unsetCurrentElement = function() {
-        initCurrentElement();
-    };
-
-    function addContextSource(source) {
-        var index = '#' + source.attribute_id;
-        if(typeof main.currentElement.sources[index] == 'undefined') {
-            main.currentElement.sources[index] = [];
-        }
-        main.currentElement.sources[index].push(source);
-    }
-
-    main.hasUnstagedChanges = function() {
-        return main.currentElement.form && main.currentElement.form.$dirty;
-    };
-
-    main.setCurrentElement = function(element) {
-        for(var k in element) {
-            if(element.hasOwnProperty(k)) {
-                main.currentElement[k] = element[k];
-            }
         }
     };
 
