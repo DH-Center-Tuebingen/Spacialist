@@ -94,7 +94,9 @@ class ContextController extends Controller {
     }
 
     public function getContextTypes() {
-        return ContextType::all();
+        return ContextType::join('available_layers', 'context_type_id', '=', 'context_types.id')
+            ->select('context_types.*', 'available_layers.type as layer_type')
+            ->get();
     }
 
     public function getContextData($id) {
