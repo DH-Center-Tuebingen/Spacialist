@@ -1286,7 +1286,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             certainty: function(data, $transition$) {
                                 var aid = $transition$.params().aid;
                                 return {
-                                    certainty: data[aid+'_pos'] || 100,
+                                    certainty: data[aid+'_cert'] || 100,
                                     description: data[aid+'_desc'] || ''
                                 };
                             },

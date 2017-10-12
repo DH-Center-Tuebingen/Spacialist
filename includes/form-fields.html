@@ -5,7 +5,7 @@
                 {{ concepts[attr.thesaurus_url].label }}:
             </span>
             <sup ui-sref="root.spacialist.data.sources({aid: attr.id})" style="display: table-cell" class="source-link">
-                <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="(attributeSources | filter:{attribute_id:attr.id}).length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
+                <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="(attributeSources | filter:{attribute_id:attr.id}).length > 0 || attributeOutputs[attr.id+'_cert'] < 100 || attributeOutputs[attr.id+'_desc'].length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
             </sup>
         </div>
     </label>

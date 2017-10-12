@@ -233,7 +233,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         for(var i=0; i<data.length; i++) {
             var value = data[i];
             var index = value.attribute_id;
-            var posIndex = index + '_pos';
+            var posIndex = index + '_cert';
             var descIndex = index + '_desc';
             var val = value.str_val;
             var dType = value.datatype;
