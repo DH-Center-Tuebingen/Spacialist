@@ -9,7 +9,7 @@ spacialistApp.controller('geodataCtrl', function($state) {
         vm.setGlobalGeodata();
         var cid = vm.map.geodata.linkedContexts[vm.geodataId];
         if(cid) {
-            $state.go('root.spacialist.data', {id: cid}, {inherit: true, reload: 'root.spacialist.data'});
+            $state.go('root.spacialist.context.data', {id: cid}, {inherit: true, reload: 'root.spacialist.context.data'});
         }
     };
 

@@ -21,8 +21,26 @@ spacialistApp.component('spacialist', {
     controller: 'mainCtrl'
 });
 
+spacialistApp.component('spacialistcontext', {
+    bindings: {
+        onSetContextWrapper: '&',
+        onSetGeodataWrapper: '&',
+    },
+    templateUrl: 'templates/context-wrapper.html',
+    controller: function() {
+        var vm = this;
+        vm.onSetGeodata = function(gid, geodata) {
+            vm.onSetGeodataWrapper({gid: gid, geodata: geodata});
+        };
+        vm.onSetContext = function(id, data) {
+            vm.onSetContextWrapper({id: id, data: data});
+        };
+    }
+});
+
 spacialistApp.component('spacialistdata', {
     bindings: {
+        tab: '@',
         context: '<',
         editContext: '<',
         data: '<',

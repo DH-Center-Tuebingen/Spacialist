@@ -23,7 +23,7 @@ spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 
     vm.onSearchSelect = function($item, $model, $label) {
         switch($model.type) {
             case 'context':
-                $state.go('root.spacialist.data', {id: $model.id});
+                $state.go('root.spacialist.context.data', {id: $model.id});
                 break;
             case 'layer':
                 $state.go('root.editor.layer.edit', {id: $model.id});

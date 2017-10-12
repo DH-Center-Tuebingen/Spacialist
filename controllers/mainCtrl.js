@@ -31,6 +31,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
             return;
         }
         var layer = geodata.linkedLayers[gid];
+        if(!layer) return vm.onSetGeodata(undefined);
         vm.globalGeodata.geodata.id = gid;
         vm.globalGeodata.geodata.type = layer.feature.geometry.type;
         vm.globalGeodata.geodata.color = layer.feature.properties.color;
@@ -102,7 +103,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                         var newContext = response;
                         mainService.addContextToTree(newContext, c.parent, vm.contexts);
                         $scope.$close(true);
-                        $state.go('root.spacialist.data', {id: newContext.id});
+                        $state.go('root.spacialist.context.data', {id: newContext.id});
                     });
                 };
             }],
@@ -170,7 +171,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                 return '<i class="material-icons md-18 fa-light fa-red context-menu-icon">delete</i> ' + $translate.instant('context-menu.delete');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                $state.go('root.spacialist.data.delete', {id: $itemScope.$parent.id});
+                $state.go('root.spacialist.context.data.delete', {id: $itemScope.$parent.id});
             }
         ]
     ];

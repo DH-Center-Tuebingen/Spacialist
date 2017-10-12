@@ -99,7 +99,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             var parent = contexts.data[contexts.data[id].root_context_id];
             var copy = newElem.obj;
             main.addContextToTree(copy, copy.root_context_id, contexts);
-            $state.go('root.spacialist.data', {id: copy.id});
+            $state.go('root.spacialist.context.data', {id: copy.id});
         });
     };
 
