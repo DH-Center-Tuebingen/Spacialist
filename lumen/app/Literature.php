@@ -38,7 +38,8 @@ class Literature extends Model
         'note',
         'organization',
         'school',
-        'series'
+        'series',
+        'citekey'
     ];
 
     const patchRules = [
