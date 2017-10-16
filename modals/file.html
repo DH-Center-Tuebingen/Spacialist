@@ -48,6 +48,14 @@
                         {{ status.progress }}%
                     </div>
                 </div>
+                <div ng-show="!status.vr.errored">
+                    <button type="button" class="btn btn-default" ng-click="status.vr.button.toggle()">
+                        {{ status.vr.button.text }}
+                    </button>
+                </div>
+                <div class="alert alert-warning" ng-show="status.vr.errored">
+                    <i class="material-icons alert-decoration">warning</i> <span ng-bind-html="status.vr.message"></span>
+                </div>
             </div>
             <div ng-switch-default ng-controller="pdfCtrl">
                 <div ng-if="$ctrl.file.filename.endsWith('.md')">

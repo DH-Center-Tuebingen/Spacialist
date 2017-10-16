@@ -675,7 +675,7 @@ g.compound > rect {
 }
 
 /* Material Icons (should be part of the bower component) */
-ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons, span.snackbar-content .material-icons {
+ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons, span.snackbar-content .material-icons, .alert .material-icons {
     vertical-align: bottom;
 }
 
