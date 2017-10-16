@@ -437,6 +437,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         lo.style = function(feature) {
             var currentStyle = angular.copy(mapArr.style);
             currentStyle.fillColor = feature.properties.color;
+            currentStyle.fillOpacity = lo.opacity;
+            currentStyle.opacity = lo.opacity;
             return currentStyle;
         };
         lo.pointToLayer = function(feature, latlng) {

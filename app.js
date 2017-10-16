@@ -704,6 +704,30 @@ spacialistApp.filter('fileFilter', function(searchService) {
     };
 });
 
+spacialistApp.filter('formatGeopos', function($sce) {
+    return function(geodata) {
+        var lat = geodata.lat;
+        var lng = geodata.lng;
+        var rest, latDir, lngDir;
+        latDir = lat >= 0 ? 'N' : 'S';
+        lngDir = lng >= 0 ? 'E' : 'W';
+        lat = Math.abs(lat);
+        lng = Math.abs(lng);
+        // use bitwise or (|) to round to zero, not neg infinity
+        var latDeg = lat | 0;
+        rest = (lat - latDeg) * 60;
+        var latMin = rest | 0;
+        var latSec = (rest - latMin) * 60;
+        var lngDeg = lng | 0;
+        rest = (lng - lngDeg) * 60;
+        var lngMin = rest | 0;
+        var lngSec = (rest - lngMin) * 60;
+
+        var text = latDeg + '° ' + latMin + '\' ' + latSec.toFixed(2) + '\'\' ' + latDir + ', ' + lngDeg + '° ' + lngMin + '\' ' + lngSec.toFixed(2) + '\'\' ' + lngDir;
+        return text;
+    }
+});
+
 spacialistApp.filter('urlify', function() {
     var urls = /(\b(https?|ftp):\/\/[A-Z0-9+&@#\/%?=~_|!:,.;-]*[-A-Z0-9+&@#\/%=~_|])/gim;
     return function(text) {
@@ -1313,6 +1337,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 vm.availableProperties = ['copyright', 'description'];
                                 vm.fileEdits = {};
 
+                                vm.openContext = function(cid) {
+                                    $scope.$close('context');
+                                    $state.go('root.spacialist.data', {id: cid});
+                                };
+
                                 vm.cancelFilePropertyEdit = function(editArray, index) {
                                     editArray[index].text = '';
                                     editArray[index].editMode = false;
@@ -1337,11 +1366,12 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     });
                                 };
                                 vm.close = function() {
-                                    $scope.$dismiss();
+                                    $scope.$dismiss('close');
                                 };
                             }],
                             controllerAs: '$ctrl'
-                        }).result.finally(function() {
+                        }).result.then(function(reason) {
+                        }, function(reason) {
                             $state.router.transitionService.back();
                         });
                     }]

@@ -38,7 +38,7 @@
     <button ng-click="collapsed=!collapsed" class="btn btn-primary clickable">{{'map-marker.options.label'|translate}} <i class="material-icons">{{ collapsed ? 'arrow_drop_down' : 'arrow_drop_up' }}</i></button>
     <div ng-if="!collapsed">
         <form class="form-horizontal" role="form">
-            <div class="form-group">
+            <div class="form-group form-group-unpadded">
                 <label class="control-label col-md-3" for="color_{{ $ctrl.globalGeodata.geodata.id }}">
                     {{'map-marker.options.color'|translate}}:
                 </label>
@@ -47,21 +47,22 @@
                 </div>
             </div>
             <div ng-if="$ctrl.globalGeodata.geodata.type == 'Point'">
-                <div class="form-group">
+                <div class="form-group form-group-unpadded">
                     <label class="control-label col-md-3" for="lat_{{ $ctrl.globalGeodata.geodata.id }}">
                         {{'map-marker.options.lat'|translate}}:
                     </label>
                     <div class="col-md-9">
-                        <input class="form-control" type="number" step="0.000001" min="-180" max="180" name="lat_{{ $ctrl.globalGeodata.geodata.id }}" ng-model="$ctrl.globalGeodata.geodata.lat" id="lat_{{ $ctrl.globalGeodata.geodata.id }}" ng-disabled="!$ctrl.user.permissions.duplicate_edit_concepts"/>
+                        <input class="form-control" type="number" step="0.000001" min="-90" max="90" name="lat_{{ $ctrl.globalGeodata.geodata.id }}" ng-model="$ctrl.globalGeodata.geodata.lat" id="lat_{{ $ctrl.globalGeodata.geodata.id }}" ng-disabled="!$ctrl.user.permissions.duplicate_edit_concepts"/>
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group form-group-unpadded">
                     <label class="control-label col-md-3" for="lng_{{ $ctrl.globalGeodata.geodata.id }}">
                         {{'map-marker.options.lng'|translate}}:
                     </label>
                     <div class="col-md-9">
                         <input class="form-control" type="number" step="0.000001" min="-180" max="180" name="lng_{{ $ctrl.globalGeodata.geodata.id }}" ng-model="$ctrl.globalGeodata.geodata.lng" id="lng_{{ $ctrl.globalGeodata.geodata.id }}" ng-disabled="!$ctrl.user.permissions.duplicate_edit_concepts"/>
                     </div>
+                    <span class="col-md-offset-3 formatted-geodata" ng-bind-html="$ctrl.globalGeodata.geodata | formatGeopos"></span>
                 </div>
             </div>
 
