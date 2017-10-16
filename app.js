@@ -1745,6 +1745,15 @@ spacialistApp.run(function($state, mainService, mapService, userService, literat
     };
     // Workaround to prevent reload of data state on sources close
     $transitions.onSuccess({ from: 'root.spacialist.context.data.sources', to: 'root.spacialist.context.data'}, function(trans) {
+        // update 'to' context and certainty with values from 'from'
+        // Update certainty
+        var certainty  = trans.injector(null, 'from').get('certainty');
+        var dTo  = trans.injector().get('data');
+        var aid = trans.params('from').aid;
+        dTo[aid+'_pos'] = certainty.certainty;
+        dTo[aid+'_desc'] = certainty.description;
+
+        // Update sources
         var c = trans.injector().get('context');
         var s = trans.injector().get('sources');
         literatureService.getByContext(c.id).then(function(response) {
@@ -1756,6 +1765,11 @@ spacialistApp.run(function($state, mainService, mapService, userService, literat
     });
     // Check for unstaged changes
     $transitions.onBefore({ from: 'root.spacialist.context.data' }, function(trans) {
+        if(trans.$to().name == 'root.spacialist.context.data.sources') {
+            var fromParams = trans.params('from');
+            var toParams = trans.params('to');
+            if(fromParams.id == toParams.id) return true;
+        }
         var editContext = trans.injector(null, 'from').get('editContext');
         var form = editContext.form;
         if(form && form.$dirty) {

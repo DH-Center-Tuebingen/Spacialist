@@ -78,7 +78,7 @@ spacialistApp.component('sourcemodal', {
         },
         controller: ['$scope', 'snackbarService', 'httpPutFactory', 'httpPostFactory', 'httpDeleteFactory', '$translate', function($scope, snackbarService, httpPutFactory, httpPostFactory, httpDeleteFactory, $translate) {
             var vm = this;
-            console.log(vm.attributesources);
+
             vm.newEntry = {
                 source: '',
                 desc: ''
