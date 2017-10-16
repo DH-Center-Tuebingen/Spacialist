@@ -44,7 +44,7 @@ class SourceController extends Controller {
             'aid' => 'required|integer',
             'cid' => 'required|integer',
             'lid' => 'required|integer',
-            'desc' => 'required|string',
+            'desc' => 'string',
         ]);
 
         $user = \Auth::user();
