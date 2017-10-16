@@ -1374,22 +1374,24 @@ class ContextController extends Controller {
     }
 
     private function updateOrInsert($values, $cid, $user) {
+        // instead of checking for changes we delete all entries
+        // to the given cid/aid pair and insert the one from the request again
+        $oldValues = AttributeValue::where([
+            ['context_id', $cid]
+            // ['attribute_id', $aid]
+            ])->get();
         foreach($values as $key => $value) {
             $ids = explode("_", $key);
             $aid = $ids[0];
             if($aid == "" || (isset($ids[1]) && $ids[1] != "")) continue;
+            if(array_key_exists($aid.'_pos', $values)) $pos = $values[$aid.'_pos'];
+            if(array_key_exists($aid.'_desc', $values)) $desc = $values[$aid.'_desc'];
 
             try {
                 $datatype = Attribute::findOrFail($aid)->datatype;
             } catch(ModelNotFoundException $e) {
                 continue;
             }
-            // instead of checking for changes we delete all entries
-            // to the given cid/aid pair and insert the one from the request again
-            AttributeValue::where([
-                ['context_id', $cid],
-                ['attribute_id', $aid]
-            ])->delete();
 
             // if a key exists but the value is null the attribute value was deleted
             if($value == 'null' || $value === null) {
@@ -1440,6 +1442,8 @@ class ContextController extends Controller {
                             continue;
                         }
                     }
+                    if(isset($pos)) $attr->possibility = $pos;
+                    if(isset($desc)) $attr->possibility_description = $desc;
                     $attr->save();
                 }
             } else {
@@ -1484,8 +1488,13 @@ class ContextController extends Controller {
                             $attrValue->str_val = $value;
                     }
                 }
+                if(isset($pos)) $attrValue->possibility = $pos;
+                if(isset($desc)) $attrValue->possibility_description = $desc;
                 $attrValue->save();
             }
+        }
+        foreach($oldValues as $ov) {
+            $ov->delete();
         }
     }
 }

@@ -23,12 +23,18 @@ spacialistApp.component('spacialist', {
 
 spacialistApp.component('spacialistcontext', {
     bindings: {
+        onStore: '&',
         onSetContextWrapper: '&',
         onSetGeodataWrapper: '&',
     },
     templateUrl: 'templates/context-wrapper.html',
     controller: function() {
         var vm = this;
+
+        vm.onStoreWrapper = function(context, data) {
+            vm.onStore({context: context, data: data});
+        }
+
         vm.onSetGeodata = function(gid, geodata) {
             vm.onSetGeodataWrapper({gid: gid, geodata: geodata});
         };

@@ -120,7 +120,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         for(var key in data) {
             if(data.hasOwnProperty(key)) {
                 var value = data[key];
-                if(key != 'name' && !key.endsWith('pos') && !key.endsWith('desc')) {
+                if(key != 'name') {
                     var attr = {};
                     attr.key = key;
                     attr.value = value;

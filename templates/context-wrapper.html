@@ -1,4 +1,4 @@
-<div ui-view="context-detail" on-store="$ctrl.onStore(context, data)" on-source-add="$ctrl.onSourceAdd(entry)" on-set-context="$ctrl.onSetContext(id, data)" on-set-geodata="$ctrl.onSetGeodata(gid, geodata)">
+<div ui-view="context-detail" on-store="$ctrl.onStoreWrapper(context, data)" on-source-add="$ctrl.onSourceAdd(entry)" on-set-context="$ctrl.onSetContext(id, data)" on-set-geodata="$ctrl.onSetGeodata(gid, geodata)">
     <!-- ui-view element for context detail template -->
     <h3>{{'context-form.heading'|translate}}</h3>
     <div class="alert alert-info">
