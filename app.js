@@ -1280,7 +1280,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                     }
                                 }
                             }).result.finally(function() {
-                                $state.go('^', {}, {reload: true});
+                                $state.go('^');
                             });
                         }
                     })
@@ -1699,7 +1699,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 /**
  * Redirect user to 'spacialist' state if they are already logged in and access the 'auth' state
  */
-spacialistApp.run(function($state, mainService, mapService, userService, modalFactory, $transitions, $rootScope, $timeout) {
+spacialistApp.run(function($state, mainService, mapService, userService, literatureService, modalFactory, $transitions, $rootScope, $timeout) {
     var previousState;
     var previousStateParameters;
     $transitions.onSuccess({}, function (transition) {
@@ -1743,6 +1743,17 @@ spacialistApp.run(function($state, mainService, mapService, userService, modalFa
         }
         $state.go(previousState, previousStateParameters, { reload: false });
     };
+    // Workaround to prevent reload of data state on sources close
+    $transitions.onSuccess({ from: 'root.spacialist.data.sources', to: 'root.spacialist.data'}, function(trans) {
+        var c = trans.injector().get('context');
+        var s = trans.injector().get('sources');
+        literatureService.getByContext(c.id).then(function(response) {
+            s.length = 0;
+            for(var i=0; i<response.length; i++) {
+                s.push(response[i])
+            }
+        });
+    });
     // Check for unstaged changes
     $transitions.onBefore({ from: 'root.spacialist.context.data' }, function(trans) {
         var editContext = trans.injector(null, 'from').get('editContext');
