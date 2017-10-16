@@ -527,9 +527,6 @@ div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
     /*color: red !important;*/
     font-weight: bold;
 }
-.selected-leaf {
-    font-weight: normal;
-}
 
 #tree-container, #attribute-container, #addon-container, #literature-container, .attribute-editor-column, .layer-editor-column {
     overflow: auto;

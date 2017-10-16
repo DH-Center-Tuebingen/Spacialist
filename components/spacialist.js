@@ -4,6 +4,8 @@ spacialistApp.component('spacialist', {
         userConfig: '<',
         editMode: '<',
         contexts: '<',
+        globalContext: '<',
+        globalGeodata: '<',
         user: '<',
         concepts:'<',
         menus: '<',
@@ -19,9 +21,34 @@ spacialistApp.component('spacialist', {
     controller: 'mainCtrl'
 });
 
+spacialistApp.component('spacialistcontext', {
+    bindings: {
+        onStore: '&',
+        onSetContextWrapper: '&',
+        onSetGeodataWrapper: '&',
+    },
+    templateUrl: 'templates/context-wrapper.html',
+    controller: function() {
+        var vm = this;
+
+        vm.onStoreWrapper = function(context, data) {
+            vm.onStore({context: context, data: data});
+        }
+
+        vm.onSetGeodata = function(gid, geodata) {
+            vm.onSetGeodataWrapper({gid: gid, geodata: geodata});
+        };
+        vm.onSetContext = function(id, data) {
+            vm.onSetContextWrapper({id: id, data: data});
+        };
+    }
+});
+
 spacialistApp.component('spacialistdata', {
     bindings: {
+        tab: '@',
         context: '<',
+        editContext: '<',
         data: '<',
         fields: '<',
         sources: '<',
@@ -29,10 +56,14 @@ spacialistApp.component('spacialistdata', {
         user: '<',
         concepts: '<',
         linkedFiles: '<',
+        layer: '<',
         onStore: '&',
         onSourceAdd: '&',
         map: '<',
-        mapContentLoaded: '<'
+        globalGeodata: '<',
+        mapContentLoaded: '<',
+        onSetContext: '&',
+        onSetGeodata: '&'
     },
     templateUrl: 'templates/context-data.html',
     controller: 'contextCtrl'
@@ -53,7 +84,7 @@ spacialistApp.component('sourcemodal', {
         },
         controller: ['$scope', 'snackbarService', 'httpPutFactory', 'httpPostFactory', 'httpDeleteFactory', '$translate', function($scope, snackbarService, httpPutFactory, httpPostFactory, httpDeleteFactory, $translate) {
             var vm = this;
-            console.log(vm.attributesources);
+
             vm.newEntry = {
                 source: '',
                 desc: ''
@@ -123,11 +154,9 @@ spacialistApp.component('sourcemodal', {
 spacialistApp.component('geodata', {
     bindings: {
         map: '<',
-        context: '<',
-        geodataId: '<'
+        geodataId: '<',
+        onSetGeodata: '&'
     },
-    controller: function() {
-        var vm = this;
-    },
+    controller: 'geodataCtrl',
     template: '',
 });

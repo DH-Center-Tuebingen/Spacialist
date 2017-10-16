@@ -1,11 +1,5 @@
 spacialistApp.controller('contextCtrl', ['$scope', 'mainService', function($scope, mainService) {
     var vm = this;
-    vm.currentElement = mainService.currentElement;
-    vm.editContext = angular.copy(vm.context);
-    mainService.setCurrentElement({
-        element: vm.editContext,
-        data: vm.data
-    });
 
     vm.store = function(data) {
         vm.onStore({context: vm.editContext, data: data});
@@ -22,4 +16,34 @@ spacialistApp.controller('contextCtrl', ['$scope', 'mainService', function($scop
     vm.contextSearch = function(searchTerm) {
         return mainService.contextSearch(searchTerm);
     };
+
+    vm.setContext = function() {
+        var geometryType = '';
+        if(vm.layer) {
+            var ctxLayer = vm.layer.find(function(l) {
+                return l.context_type_id == vm.editContext.context_type_id;
+            });
+            if(ctxLayer) geometryType = ctxLayer.type;
+        }
+        vm.onSetContext({
+            id: vm.editContext.id,
+            data: {
+                sources: vm.sources,
+                geometryType: geometryType,
+                linkedFiles: vm.linkedFiles
+            }
+        });
+        if(vm.tab == 'map' && vm.editContext.geodata_id) {
+            vm.onSetGeodata({gid: vm.editContext.geodata_id, geodata: vm.map.geodata});
+            var geodate = vm.map.geodata.linkedLayers[vm.editContext.geodata_id];
+            if(geodate) {
+                if(!geodate.isPopupOpen()) geodate.openPopup();
+            }
+        } else if(vm.map.geodata.linkedContexts[vm.globalGeodata.geodata.id]){
+            // unset geodata if current context is not linked
+            vm.onSetGeodata({gid: undefined});
+        }
+    };
+
+    vm.setContext();
 }]);

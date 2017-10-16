@@ -1,7 +1,5 @@
 spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainService', 'mapService', 'fileService', 'snackbarService', 'modalFactory', '$uibModal', '$state', '$translate', '$timeout', '$compile', function($scope, httpDeleteFactory, mainService, mapService, fileService, snackbarService, modalFactory, $uibModal, $state, $translate, $timeout, $compile) {
     var vm = this;
-    vm.currentElement = mainService.currentElement;
-    vm.currentGeodata = mapService.currentGeodata;
     vm.isLinkPossible = mapService.isLinkPossible;
 
     $scope.moduleExists = mainService.moduleExists;
@@ -9,25 +7,43 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
 
     vm.onStore = function(context, data) {
         mainService.storeElement(context, data).then(function(response) {
-            context.lasteditor = response.context.lasteditor;
-            context.updated_at = response.context.updated_at;
-            context.updated_at = response.context.updated_at;
-            context.lastmodified = updateLastModified(response.context);
-            var c = vm.contexts.data[context.id];
-            for(var k in context) {
-                if(context.hasOwnProperty(k)) {
-                    c[k] = context[k];
+            context.form.$setPristine();
+            mainService.updateContextList(vm.contexts, context, response);
+        });
+    };
+
+    vm.onSetContext = function(id, data) {
+        vm.globalContext.context = vm.contexts.data[id];
+        for(var k in data) {
+            if(data.hasOwnProperty(k)) {
+                vm.globalContext[k] = data[k];
+            }
+        }
+    };
+
+    vm.onSetGeodata = function(gid, geodata) {
+        if(!gid) {
+            for(var k in vm.globalGeodata) {
+                if(vm.globalGeodata.hasOwnProperty(k)) {
+                    vm.globalGeodata[k] = {};
                 }
             }
-            vm.currentElement.form.$setPristine();
-            // TODO elem.form.$setPristine();
-            var content = $translate.instant('snackbar.data-stored.success');
-            snackbarService.addAutocloseSnack(content, 'success');
-            if(response.error){
-                modalFactory.errorModal(response.error);
-                return;
-            }
-        });
+            return;
+        }
+        var layer = geodata.linkedLayers[gid];
+        if(!layer) return vm.onSetGeodata(undefined);
+        vm.globalGeodata.geodata.id = gid;
+        vm.globalGeodata.geodata.type = layer.feature.geometry.type;
+        vm.globalGeodata.geodata.color = layer.feature.properties.color;
+
+        if(vm.globalGeodata.geodata.type == 'Point') {
+            var latlng = layer.getLatLng();
+            vm.globalGeodata.geodata.lat = latlng.lat;
+            vm.globalGeodata.geodata.lng = latlng.lng;
+        } else {
+            vm.globalGeodata.geodata.lat = undefined;
+            vm.globalGeodata.geodata.lng = undefined;
+        }
     };
 
     if(vm.tab == 'map') {
@@ -87,7 +103,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                         var newContext = response;
                         mainService.addContextToTree(newContext, c.parent, vm.contexts);
                         $scope.$close(true);
-                        $state.go('root.spacialist.data', {id: newContext.id});
+                        $state.go('root.spacialist.context.data', {id: newContext.id});
                     });
                 };
             }],
@@ -155,12 +171,13 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                 return '<i class="material-icons md-18 fa-light fa-red context-menu-icon">delete</i> ' + $translate.instant('context-menu.delete');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                $state.go('root.spacialist.data.delete', {id: $itemScope.$parent.id});
+                $state.go('root.spacialist.context.data.delete', {id: $itemScope.$parent.id});
             }
         ]
     ];
 
     vm.hasSources = function(element) {
+        if(!element.sources) return false;
         return Object.keys(element.sources).length > 0;
     };
 
@@ -169,31 +186,12 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
      * listener for different leaflet actions
      */
     $scope.$on('leafletDirectiveMap.mainmap.popupclose', function(event, args) {
-        // mapService.unsetCurrentGeodata();
-        // $state.go('^');
     });
     $scope.$on('leafletDirectiveMap.mainmap.popupopen', function(event, args) {
         var popup = args.leafletEvent.popup;
         var newScope = $scope.$new();
         newScope.stream = popup.options.feature;
         $compile(popup._contentNode)(newScope);
-        // var geodataId = args.leafletEvent.popup._source.feature.id;
-        // mapService.setCurrentGeodata(geodataId);
-        // var promise = mapService.getMatchingContext(geodataId);
-        // promise.then(function(response) {
-        //     if(response.error) {
-        //         modalFactory.errorModal(response.error);
-        //     } else {
-        //         var matchingId = response.context_id;
-        //         if(matchingId !== null) {
-        //             mainService.expandTree(matchingId);
-        //             mainService.setCurrentElement(mainService.contexts.data[matchingId], mainService.currentElement, false);
-        //         } else {
-        //             var dontUnsetUnlinked = true;
-        //             mainService.unsetCurrentElement(dontUnsetUnlinked);
-        //         }
-        //     }
-        // });
     });
     /**
      * If the marker has been created, add the marker to the marker-array and store it in the database
@@ -261,8 +259,8 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                 geodata_id: undefined
             };
             mainService.updateContextById(vm.contexts, cid, updatedValues);
-            delete vm.map.geodata.linkedContexts[vm.currentGeodata.id];
-            linkedLayer = vm.map.geodata.linkedLayers[vm.currentGeodata.id];
+            delete vm.map.geodata.linkedContexts[vm.globalGeodata.geodata.id];
+            linkedLayer = vm.map.geodata.linkedLayers[vm.globalGeodata.geodata.id];
             linkedLayer.bindTooltip(linkedLayer.feature.properties.name);
         });
     };
@@ -273,28 +271,28 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
         var f = $itemScope.f;
         var content;
         for(var i=0; i<f.linked_files.length; i++) {
-            if(f.linked_files[i].context_id == mainService.currentElement.element.id) {
-                content = $translate.instant('file.unlink-from', { name: mainService.currentElement.element.name });
+            if(f.linked_files[i].context_id == vm.globalContext.context.id) {
+                content = $translate.instant('file.unlink-from', { name: vm.globalContext.context.name });
                 break;
             }
         }
         if(!content) {
-            content = $translate.instant('file.link-to', { name: mainService.currentElement.element.name });
+            content = $translate.instant('file.link-to', { name: vm.globalContext.context.name });
         }
         return '<i class="material-icons md-18">add_circle_outline</i> ' + content;
     }, function ($itemScope) {
         var f = $itemScope.f;
         var fileId = f.id;
-        var contextId = mainService.currentElement.element.id;
+        var contextId = vm.globalContext.context.id;
         for(var i=0; i<f.linked_files.length; i++) {
-           if(f.linked_files[i].context_id == mainService.currentElement.element.id) {
+           if(f.linked_files[i].context_id == contextId) {
                fileService.unlinkFile(fileId, contextId);
                return;
            }
         }
         fileService.linkFile(fileId, contextId);
     }, function() {
-        return mainService.currentElement.element.id > 0;
+        return vm.globalContext.context.id > 0;
     }];
     var deleteFile = [function($itemScope) {
         var content = $translate.instant('file.delete', { name: $itemScope.f.filename });

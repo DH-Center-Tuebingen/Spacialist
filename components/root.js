@@ -4,7 +4,7 @@ spacialistApp.component('root', {
         userConfig: '<',
         concepts: '<'
     },
-    template: '<ui-view on-pref-update="$ctrl.onPrefUpdate(pref, uid)"></ui-view>',
+    template: '<div ui-view="content-container" on-pref-update="$ctrl.onPrefUpdate(pref, uid)"></div>',
     controller: function($scope, userService, snackbarService, $translate) {
         var vm = this;
         $scope.concepts = this.concepts;

@@ -1,36 +1,36 @@
 <div ng-if="$ctrl.user.permissions.link_geodata
-       && $ctrl.currentElement.element.id
-       && !$ctrl.currentElement.element.geodata_id"
+       && $ctrl.globalContext.context.id
+       && !$ctrl.globalContext.context.geodata_id"
 >
-    <div ng-if="!$ctrl.isLinkPossible($ctrl.currentGeodata.type, $ctrl.currentElement.geometryType, $ctrl.geometryTypes)" translate="map-marker.wrong-type.info" translate-values="{ gtype: $ctrl.currentGeodata.type, ctype: $ctrl.currentElement.geometryType }">
+    <div ng-if="!$ctrl.isLinkPossible($ctrl.globalGeodata.geodata.type, $ctrl.globalContext.geometryType, $ctrl.geometryTypes)" translate="map-marker.wrong-type.info" translate-values="{ gtype: $ctrl.globalGeodata.geodata.type, ctype: $ctrl.globalContext.geometryType }">
     </div>
     <button
         type="button"
         class="btn btn-sm btn-success"
-        ng-click="linkGeodata($ctrl.currentElement.element.id, $ctrl.currentGeodata.id)"
-        ng-if="$ctrl.isLinkPossible($ctrl.currentGeodata.type, $ctrl.currentElement.geometryType, $ctrl.geometryTypes)"
+        ng-click="linkGeodata($ctrl.globalContext.context.id, $ctrl.globalGeodata.geodata.id)"
+        ng-if="$ctrl.isLinkPossible($ctrl.globalGeodata.geodata.type, $ctrl.globalContext.geometryType, $ctrl.geometryTypes)"
     >
-        <i class="material-icons">link</i> <span translate="map-marker.actions.context-link" translate-values="{ context: $ctrl.currentElement.element.name }"></span>
+        <i class="material-icons">link</i> <span translate="map-marker.actions.context-link" translate-values="{ context: $ctrl.globalContext.context.name }"></span>
     </button>
 </div>
 <h4 ng-if="$ctrl.user.permissions.link_geodata
-       && $ctrl.currentElement.element.geodata_id
-       && $ctrl.currentElement.element.geodata_id == $ctrl.currentGeodata.id">
-    {{ $ctrl.currentElement.element.name }}
+       && $ctrl.globalContext.context.geodata_id
+       && $ctrl.globalContext.context.geodata_id == $ctrl.globalGeodata.geodata.id">
+    {{ $ctrl.globalContext.context.name }}
 </h4>
 
-<div ng-if="!$ctrl.currentElement.element.id">
+<div ng-if="!$ctrl.globalContext.context.id">
     <p translate="map-marker.not-linked-info"></p>
     <p ng-if="$ctrl.user.permissions.link_geodata" translate="map-marker.how-to-link"></p>
 </div>
 <p ng-if="$ctrl.user.permissions.link_geodata
-       && $ctrl.currentElement.element.geodata_id
-       && $ctrl.currentElement.element.geodata_id == $ctrl.currentGeodata.id">
+       && $ctrl.globalContext.context.geodata_id
+       && $ctrl.globalContext.context.geodata_id == $ctrl.globalGeodata.geodata.id">
     <button
         type="button"
         class="btn btn-xs btn-success"
-        ng-click="unlinkGeodata($ctrl.currentElement.element.id)">
-        <i class="material-icons">link</i> <span translate="map-marker.actions.context-unlink" translate-values="{ context: $ctrl.currentElement.element.name }"></span>
+        ng-click="unlinkGeodata($ctrl.globalContext.context.id)">
+        <i class="material-icons">link</i> <span translate="map-marker.actions.context-unlink" translate-values="{ context: $ctrl.globalContext.context.name }"></span>
     </button>
 </p>
 
@@ -39,34 +39,34 @@
     <div ng-if="!collapsed">
         <form class="form-horizontal" role="form">
             <div class="form-group form-group-unpadded">
-                <label class="control-label col-md-3" for="color_{{ $ctrl.currentGeodata.id }}">
+                <label class="control-label col-md-3" for="color_{{ $ctrl.globalGeodata.geodata.id }}">
                     {{'map-marker.options.color'|translate}}:
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="color" name="color_{{ $ctrl.currentGeodata.id }}" ng-model="$ctrl.currentGeodata.color" id="color_{{ $ctrl.currentGeodata.id }}" ng-disabled="!$ctrl.user.permissions.duplicate_edit_concepts"/>
+                    <input class="form-control" type="color" name="color_{{ $ctrl.globalGeodata.geodata.id }}" ng-model="$ctrl.globalGeodata.geodata.color" id="color_{{ $ctrl.globalGeodata.geodata.id }}" ng-disabled="!$ctrl.user.permissions.duplicate_edit_concepts"/>
                 </div>
             </div>
-            <div ng-if="$ctrl.currentGeodata.type == 'Point'">
+            <div ng-if="$ctrl.globalGeodata.geodata.type == 'Point'">
                 <div class="form-group form-group-unpadded">
-                    <label class="control-label col-md-3" for="lat_{{ $ctrl.currentGeodata.id }}">
+                    <label class="control-label col-md-3" for="lat_{{ $ctrl.globalGeodata.geodata.id }}">
                         {{'map-marker.options.lat'|translate}}:
                     </label>
                     <div class="col-md-9">
-                        <input class="form-control" type="number" step="0.000001" min="-90" max="90" name="lat_{{ $ctrl.currentGeodata.id }}" ng-model="$ctrl.currentGeodata.lat" id="lat_{{ $ctrl.currentGeodata.id }}" ng-disabled="!$ctrl.user.permissions.duplicate_edit_concepts"/>
+                        <input class="form-control" type="number" step="0.000001" min="-90" max="90" name="lat_{{ $ctrl.globalGeodata.geodata.id }}" ng-model="$ctrl.globalGeodata.geodata.lat" id="lat_{{ $ctrl.globalGeodata.geodata.id }}" ng-disabled="!$ctrl.user.permissions.duplicate_edit_concepts"/>
                     </div>
                 </div>
                 <div class="form-group form-group-unpadded">
-                    <label class="control-label col-md-3" for="lng_{{ $ctrl.currentGeodata.id }}">
+                    <label class="control-label col-md-3" for="lng_{{ $ctrl.globalGeodata.geodata.id }}">
                         {{'map-marker.options.lng'|translate}}:
                     </label>
                     <div class="col-md-9">
-                        <input class="form-control" type="number" step="0.000001" min="-180" max="180" name="lng_{{ $ctrl.currentGeodata.id }}" ng-model="$ctrl.currentGeodata.lng" id="lng_{{ $ctrl.currentGeodata.id }}" ng-disabled="!$ctrl.user.permissions.duplicate_edit_concepts"/>
+                        <input class="form-control" type="number" step="0.000001" min="-180" max="180" name="lng_{{ $ctrl.globalGeodata.geodata.id }}" ng-model="$ctrl.globalGeodata.geodata.lng" id="lng_{{ $ctrl.globalGeodata.geodata.id }}" ng-disabled="!$ctrl.user.permissions.duplicate_edit_concepts"/>
                     </div>
-                    <span class="col-md-offset-3 formatted-geodata" ng-bind-html="$ctrl.currentGeodata | formatGeopos"></span>
+                    <span class="col-md-offset-3 formatted-geodata" ng-bind-html="$ctrl.globalGeodata.geodata | formatGeopos"></span>
                 </div>
             </div>
 
-            <button type="button" class="btn btn-xs btn-success" ng-click="$ctrl.updateMarkerOptions($ctrl.currentGeodata)" ng-if="$ctrl.user.permissions.duplicate_edit_concepts"><i class="material-icons">save</i> {{'map-marker.save'|translate}}</button>
+            <button type="button" class="btn btn-xs btn-success" ng-click="$ctrl.updateMarkerOptions($ctrl.globalGeodata.geodata)" ng-if="$ctrl.user.permissions.duplicate_edit_concepts"><i class="material-icons">save</i> {{'map-marker.save'|translate}}</button>
 
         </form>
     </div>
