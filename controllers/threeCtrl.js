@@ -3,13 +3,13 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     var container;
     var camera, scene, renderer, controls, animationId;
     var sdisplay, controller1, controller2, group;
-    var raycaster, intersected = [];
+    var raycaster = new THREE.Raycaster();
+    var intersected = [];
 	var tempMatrix = new THREE.Matrix4();
     var fileUrl, extension;
     var width, height;
     var mouse = new THREE.Vector2();
     // var raycaster = new THREE.Raycaster();
-    var sceneObjects = [];
     var particles = [];
     var measureLine;
     var ts = Date.now();
@@ -77,11 +77,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         objLoader.setPath(path);
         objLoader.load(objFile,
             function(object) { // onSuccess
-                // scene.add(object);
                 object.castShadow = true;
 				object.receiveShadow = true;
                 group.add(object);
-                sceneObjects.push(object);
                 onWindowResize();
             },
             function(event) { // onProgress
@@ -97,7 +95,12 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     }
 
     function init() {
-        WEBVR.checkAvailability().catch(function(message) {
+        WEBVR.checkAvailability().then(function() {
+            renderer.vr.enabled = true;
+            renderer.vr.standing = true;
+        }).catch(function(message) {
+            renderer.vr.enabled = false;
+            renderer.vr.standing = false;
             $scope.status.vr.errored = true;
             $scope.status.vr.message = message;
         });
@@ -143,11 +146,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 if(material) {
                     material.side = THREE.DoubleSide;
                 }
-                // scene.add(object);
                 object.castShadow = true;
                 object.receiveShadow = true;
                 group.add(object);
-                sceneObjects.push(object);
                 onWindowResize();
             },
             function(event) { // onProgress
@@ -191,54 +192,54 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		renderer.gammaInput = true;
 		renderer.gammaOutput = true;
 		container.appendChild(renderer.domElement);
-        renderer.vr.enabled = true;
-        renderer.vr.standing = true;
 
-		// controls = new THREE.OrbitControls(camera, renderer.domElement);
-        // Add Vive Controller
-        controller1 = new THREE.ViveController(0);
-		controller1.standingMatrix = renderer.vr.getStandingMatrix();
-		controller1.addEventListener( 'triggerdown', onTriggerDown );
-		controller1.addEventListener( 'triggerup', onTriggerUp );
-		scene.add(controller1);
-		controller2 = new THREE.ViveController(1);
-		controller2.standingMatrix = renderer.vr.getStandingMatrix();
-		controller2.addEventListener( 'triggerdown', onTriggerDown );
-		controller2.addEventListener( 'triggerup', onTriggerUp );
-		scene.add(controller2);
+        if(renderer.vr.enabled) {
+            // Add Vive Controller
+            controller1 = new THREE.ViveController(0);
+    		controller1.standingMatrix = renderer.vr.getStandingMatrix();
+    		controller1.addEventListener( 'triggerdown', onTriggerDown );
+    		controller1.addEventListener( 'triggerup', onTriggerUp );
+    		scene.add(controller1);
+    		controller2 = new THREE.ViveController(1);
+    		controller2.standingMatrix = renderer.vr.getStandingMatrix();
+    		controller2.addEventListener( 'triggerdown', onTriggerDown );
+    		controller2.addEventListener( 'triggerup', onTriggerUp );
+    		scene.add(controller2);
 
-        // Add Models to Vive Controller
-        var cloader = new THREE.OBJLoader2();
-		cloader.setPath('models/obj/vive-controller/');
-		cloader.load('vr_controller_vive_1_5.obj', function(object) {
-			var loader = new THREE.TextureLoader();
-			loader.setPath('models/obj/vive-controller/');
-			var controller = object.children[0];
-			controller.material.map = loader.load('onepointfive_texture.png');
-			controller.material.specularMap = loader.load('onepointfive_spec.png');
-			controller1.add(object.clone());
-			controller2.add(object.clone());
-		} );
+            // Add Models to Vive Controller
+            var cloader = new THREE.OBJLoader2();
+    		cloader.setPath('models/obj/vive-controller/');
+    		cloader.load('vr_controller_vive_1_5.obj', function(object) {
+    			var loader = new THREE.TextureLoader();
+    			loader.setPath('models/obj/vive-controller/');
+    			var controller = object.children[0];
+    			controller.material.map = loader.load('onepointfive_texture.png');
+    			controller.material.specularMap = loader.load('onepointfive_spec.png');
+    			controller1.add(object.clone());
+    			controller2.add(object.clone());
+    		} );
 
-        // Add Controller Rays
-		var geometry = new THREE.Geometry();
-		geometry.vertices.push(new THREE.Vector3(0, 0, 0));
-		geometry.vertices.push(new THREE.Vector3(0, 0, -1));
-		var line = new THREE.Line(geometry);
-		line.name = 'line';
-		line.scale.z = 5;
-		controller1.add(line.clone());
-		controller2.add(line.clone());
-		raycaster = new THREE.Raycaster();
+            // Add Controller Rays
+    		var geometry = new THREE.Geometry();
+    		geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+    		geometry.vertices.push(new THREE.Vector3(0, 0, -1));
+    		var line = new THREE.Line(geometry);
+    		line.name = 'line';
+    		line.scale.z = 5;
+    		controller1.add(line.clone());
+    		controller2.add(line.clone());
 
-        WEBVR.getVRDisplay(function(display) {
-			renderer.vr.setDevice(display);
-            sdisplay = display;
+            WEBVR.getVRDisplay(function(display) {
+    			renderer.vr.setDevice(display);
+                sdisplay = display;
 
-            window.addEventListener('vrdisplaypresentchange', function() {
-                $scope.status.vr.button.text = sdisplay.isPresenting ? 'Exit VR' : 'Enter VR';
-            }, false );
-		});
+                window.addEventListener('vrdisplaypresentchange', function() {
+                    $scope.status.vr.button.text = sdisplay.isPresenting ? 'Exit VR' : 'Enter VR';
+                }, false );
+    		});
+        } else {
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+        }
 
 		window.addEventListener('resize', onWindowResize, false);
         renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
@@ -269,7 +270,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		mouse.x = (event.offsetX/width)*2 - 1;
 		mouse.y = -(event.offsetY/height)*2 + 1;
 		raycaster.setFromCamera(mouse, camera);
-		var intersects = raycaster.intersectObjects(sceneObjects, true);
+		var intersects = raycaster.intersectObjects(group.children, true);
 		if(intersects.length > 0) {
 			var particle = new THREE.Sprite();
 			particle.position.copy(intersects[0].point);
@@ -297,7 +298,6 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 	function onTriggerDown(event) {
 		var controller = event.target;
 		var intersections = getIntersections(controller);
-        console.log(intersections.length);
 		if(intersections.length > 0) {
 			var intersection = intersections[0];
 			tempMatrix.getInverse(controller.matrixWorld);
@@ -353,27 +353,29 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     }
 
     function render() {
-        controller1.update();
-        controller2.update();
-        cleanIntersected();
-        intersectObjects(controller1);
-		intersectObjects(controller2);
+        if(renderer.vr.enabled) {
+            controller1.update();
+            controller2.update();
+            cleanIntersected();
+            intersectObjects(controller1);
+    		intersectObjects(controller2);
+        }
         renderer.render(scene, camera);
     }
 
     $scope.$on('$destroy', function() {
         cancelAnimationFrame(animationId);
-        for(var i=0; i<sceneObjects.length; i++) {
-            scene.remove(sceneObjects[i]);
-            sceneObjects[i] = null;
+        for(var i=0; i<group.length; i++) {
+            scene.remove(group[i]);
+            group[i] = null;
         }
         for(var i=0; i<particles.length; i++) {
             scene.remove(particles[i]);
             particles[i] = null;
         }
-        sceneObjects.length = 0;
+        group.length = 0;
         particles.length = 0;
-        sceneObjects = null;
+        group = null;
         particles = null;
 		window.addEventListener('resize', null, false);
         window.addEventListener('vrdisplaypresentchange', null, false);
