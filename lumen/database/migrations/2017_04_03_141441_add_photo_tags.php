@@ -14,6 +14,7 @@ class AddPhotoTags extends Migration
     public function up()
     {
         Schema::create('photo_tags', function (Blueprint $table) {
+            $table->increments('id');
             $table->integer('photo_id');
             $table->text('concept_url');
             $table->timestamps();

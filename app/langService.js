@@ -67,10 +67,9 @@ spacialistApp.service('langService', ['$translate', 'httpGetPromise', function($
         langKey = langKey || localStorage.getItem('NG_TRANSLATE_LANG_KEY');
         // check if there is a stored language
         if(!langKey) {
-            updateLanguage($translate.resolveClientLocale());
-        } else {
-            updateLanguage(langObject, langKey);
+            langKey = $translate.resolveClientLocale();
         }
+        lang.switchLanguage(langObject, langKey);
     };
 
     function updateLanguage(langObject, langKey, concepts) {

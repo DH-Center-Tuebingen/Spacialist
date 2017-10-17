@@ -6,11 +6,11 @@
         <a class="btn btn-success btn-fab btn-fab-mini" href="" ng-click="$ctrl.store($ctrl.data)">
             <i class="material-icons">save</i>
         </a>
-        <a class="btn btn-danger btn-fab btn-fab-mini" ui-sref="root.spacialist.data.delete">
+        <a class="btn btn-danger btn-fab btn-fab-mini" ui-sref="root.spacialist.context.data.delete">
             <i class="material-icons">delete</i>
         </a>
     </p>
-    <form class="form-horizontal" role="form" ng-if="$ctrl.fields" name="$ctrl.currentElement.form">
+    <form class="form-horizontal" role="form" ng-if="$ctrl.fields" name="$ctrl.editContext.form">
         <div class="form-group form-group-unpadded">
             <label class="control-label col-md-3" for="name">
                 {{'context-form.name'|translate}}:
@@ -33,7 +33,7 @@
             <button type="button" class="btn btn-success" ng-click="$ctrl.store($ctrl.data)">
                 <span class="material-icons">save</span> {{ 'context-form.save-button' | translate }}
             </button>
-            <button type="button" class="btn btn-danger" ui-sref="root.spacialist.data.delete">
+            <button type="button" class="btn btn-danger" ui-sref="root.spacialist.context.data.delete">
                 <span class="material-icons">delete</span> {{ 'context-form.delete-button' | translate }}
             </button>
         </div>

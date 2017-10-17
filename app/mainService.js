@@ -1,4 +1,4 @@
-spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'httpDeletePromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'fileService', 'literatureService', 'mapService', 'searchService', '$timeout', '$state', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, httpDeletePromise, modalFactory, $uibModal, moduleHelper, environmentService, fileService, literatureService, mapService, searchService, $timeout, $state) {
+spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpPostFactory', 'httpPostPromise', 'httpPutFactory', 'httpPutPromise', 'httpPatchFactory', 'httpDeleteFactory', 'httpDeletePromise', 'modalFactory', '$uibModal', 'moduleHelper', 'environmentService', 'fileService', 'literatureService', 'mapService', 'snackbarService', 'searchService', 'langService', '$timeout', '$state', '$translate', function(httpGetFactory, httpGetPromise, httpPostFactory, httpPostPromise, httpPutFactory, httpPutPromise, httpPatchFactory, httpDeleteFactory, httpDeletePromise, modalFactory, $uibModal, moduleHelper, environmentService, fileService, literatureService, mapService, snackbarService, searchService, langService, $timeout, $state, $translate) {
     var main = {};
     var modalFields;
 
@@ -6,7 +6,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         enabled: false
     };
 
-    main.currentElement = {};
     main.contextTypes = [];
     main.contexts = environmentService.contexts;
     main.contextReferences = {};
@@ -22,8 +21,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     // $scope.date = {
     //     opened: false
     // };
-
-    initCurrentElement();
 
     main.treeCallbacks.dropped = function(event, contexts) {
         var hasParent = event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue;
@@ -102,7 +99,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             var parent = contexts.data[contexts.data[id].root_context_id];
             var copy = newElem.obj;
             main.addContextToTree(copy, copy.root_context_id, contexts);
-            $state.go('root.spacialist.data', {id: copy.id});
+            $state.go('root.spacialist.context.data', {id: copy.id});
         });
     };
 
@@ -123,7 +120,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         for(var key in data) {
             if(data.hasOwnProperty(key)) {
                 var value = data[key];
-                if(key != 'name' && !key.endsWith('pos') && !key.endsWith('desc')) {
+                if(key != 'name') {
                     var attr = {};
                     attr.key = key;
                     attr.value = value;
@@ -140,6 +137,16 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.filterTree = function(elements, term) {
         angular.forEach(elements.roots, function(r) {
             isVisible(elements, r, term.toUpperCase());
+        });
+    };
+
+    main.globalSearch = function(term) {
+        var langKey = langService.getCurrentLanguage();
+        // encode search term to allow special chars such as '/', ' '
+        term = window.encodeURIComponent(term);
+        return httpGetPromise.getData('api/context/search/all/term=' + term + '/' + langKey)
+        .then(function(response) {
+            return response;
         });
     };
 
@@ -214,20 +221,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         return promise;
     }
 
-    /**
-     * Remove a source entry at the given index `index` from the given array `arr`.
-     */
-    main.deleteSourceEntry = function(index, key) {
-        var src = main.currentElement.sources[key][index];
-        var id = src.id;
-        var title = src.literature.title + ' (' + src.description + ')';
-        modalFactory.deleteModal(title, function() {
-            httpDeleteFactory('api/source/'+id, function(callback) {
-                main.currentElement.sources[key].splice(index, 1);
-            });
-        }, '');
-    };
-
     function parseData(data) {
         var parsedData = {};
         for(var i=0; i<data.length; i++) {
@@ -275,8 +268,26 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.updateContextById = function(tree, id, newValues) {
         main.expandTree(tree, id);
 
-        angular.merge(main.currentElement.element, newValues);
         angular.merge(tree.data[id], newValues);
+    };
+
+    main.updateContextList = function(contexts, context, response) {
+        context.lasteditor = response.context.lasteditor;
+        context.updated_at = response.context.updated_at;
+        context.updated_at = response.context.updated_at;
+        context.lastmodified = updateLastModified(response.context);
+        var c = contexts.data[context.id];
+        for(var k in context) {
+            if(context.hasOwnProperty(k)) {
+                c[k] = context[k];
+            }
+        }
+        var content = $translate.instant('snackbar.data-stored.success');
+        snackbarService.addAutocloseSnack(content, 'success');
+        if(response.error){
+            modalFactory.errorModal(response.error);
+            return;
+        }
     };
 
     main.deleteContext = function(context, contexts) {
@@ -344,40 +355,6 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         children.splice(index, 0, elem.id);
         for(var i=index+1; i<children.length; i++) {
             children[i].rank++;
-        }
-    };
-
-    function initCurrentElement() {
-        main.currentElement.element = {};
-        main.currentElement.form = {};
-        main.currentElement.data = {};
-        main.currentElement.geometryType = '';
-        main.currentElement.fields = {};
-        main.currentElement.sources = {};
-        main.currentElement.linkedFiles = [];
-    }
-
-    main.unsetCurrentElement = function() {
-        initCurrentElement();
-    };
-
-    function addContextSource(source) {
-        var index = '#' + source.attribute_id;
-        if(typeof main.currentElement.sources[index] == 'undefined') {
-            main.currentElement.sources[index] = [];
-        }
-        main.currentElement.sources[index].push(source);
-    }
-
-    main.hasUnstagedChanges = function() {
-        return main.currentElement.form && main.currentElement.form.$dirty;
-    };
-
-    main.setCurrentElement = function(element) {
-        for(var k in element) {
-            if(element.hasOwnProperty(k)) {
-                main.currentElement[k] = element[k];
-            }
         }
     };
 

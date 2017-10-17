@@ -7,7 +7,7 @@
         <i ng-if="!contexts.children[id] || contexts.children[id].length == 0" class="material-icons placeholder">
         </i>
     </div>
-    <span ui-sref="root.spacialist.data({id: id })" ui-sref-active="selected-leaf-child" ng-class="{ 'selected-leaf': element.id == id }" style="display: table-cell; padding-left: 4px;">
+    <span ui-sref="root.spacialist.context.data({id: id })" ui-sref-active="selected-leaf-child" style="display: table-cell; padding-left: 4px;">
         <i class="material-icons md-18" aria-hidden="true" ng-if="contexts.data[id].type == 0">account_balance</i>
         <i class="material-icons md-18" aria-hidden="true" ng-if="contexts.data[id].type == 1">spa</i>
         <span ng-style="options.getColorForId(contexts.data[id].uri)" ng-bind-html="contexts.data[id].name | highlight:highlight"></span> <span ng-if="contexts.data[id].uri" class="contextPrefix">{{ concepts[contexts.data[id].uri].label}}</span>
