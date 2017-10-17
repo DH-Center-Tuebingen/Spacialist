@@ -98,11 +98,54 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         WEBVR.checkAvailability().then(function() {
             renderer.vr.enabled = true;
             renderer.vr.standing = true;
+            controller1 = new THREE.ViveController(0);
+    		controller1.standingMatrix = renderer.vr.getStandingMatrix();
+    		controller1.addEventListener( 'triggerdown', onTriggerDown );
+    		controller1.addEventListener( 'triggerup', onTriggerUp );
+    		scene.add(controller1);
+    		controller2 = new THREE.ViveController(1);
+    		controller2.standingMatrix = renderer.vr.getStandingMatrix();
+    		controller2.addEventListener( 'triggerdown', onTriggerDown );
+    		controller2.addEventListener( 'triggerup', onTriggerUp );
+    		scene.add(controller2);
+
+            // Add Models to Vive Controller
+            var cloader = new THREE.OBJLoader2();
+    		cloader.setPath('models/obj/vive-controller/');
+    		cloader.load('vr_controller_vive_1_5.obj', function(object) {
+    			var loader = new THREE.TextureLoader();
+    			loader.setPath('models/obj/vive-controller/');
+    			var controller = object.children[0];
+    			controller.material.map = loader.load('onepointfive_texture.png');
+    			controller.material.specularMap = loader.load('onepointfive_spec.png');
+    			controller1.add(object.clone());
+    			controller2.add(object.clone());
+    		} );
+
+            // Add Controller Rays
+    		var geometry = new THREE.Geometry();
+    		geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+    		geometry.vertices.push(new THREE.Vector3(0, 0, -1));
+    		var line = new THREE.Line(geometry);
+    		line.name = 'line';
+    		line.scale.z = 5;
+    		controller1.add(line.clone());
+    		controller2.add(line.clone());
+
+            WEBVR.getVRDisplay(function(display) {
+    			renderer.vr.setDevice(display);
+                sdisplay = display;
+
+                window.addEventListener('vrdisplaypresentchange', function() {
+                    $scope.status.vr.button.text = sdisplay.isPresenting ? 'Exit VR' : 'Enter VR';
+                }, false );
+    		});
         }).catch(function(message) {
             renderer.vr.enabled = false;
             renderer.vr.standing = false;
             $scope.status.vr.errored = true;
             $scope.status.vr.message = message;
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
         });
 
         container = document.getElementById($scope.threeContainer);
@@ -192,54 +235,6 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		renderer.gammaInput = true;
 		renderer.gammaOutput = true;
 		container.appendChild(renderer.domElement);
-
-        if(renderer.vr.enabled) {
-            // Add Vive Controller
-            controller1 = new THREE.ViveController(0);
-    		controller1.standingMatrix = renderer.vr.getStandingMatrix();
-    		controller1.addEventListener( 'triggerdown', onTriggerDown );
-    		controller1.addEventListener( 'triggerup', onTriggerUp );
-    		scene.add(controller1);
-    		controller2 = new THREE.ViveController(1);
-    		controller2.standingMatrix = renderer.vr.getStandingMatrix();
-    		controller2.addEventListener( 'triggerdown', onTriggerDown );
-    		controller2.addEventListener( 'triggerup', onTriggerUp );
-    		scene.add(controller2);
-
-            // Add Models to Vive Controller
-            var cloader = new THREE.OBJLoader2();
-    		cloader.setPath('models/obj/vive-controller/');
-    		cloader.load('vr_controller_vive_1_5.obj', function(object) {
-    			var loader = new THREE.TextureLoader();
-    			loader.setPath('models/obj/vive-controller/');
-    			var controller = object.children[0];
-    			controller.material.map = loader.load('onepointfive_texture.png');
-    			controller.material.specularMap = loader.load('onepointfive_spec.png');
-    			controller1.add(object.clone());
-    			controller2.add(object.clone());
-    		} );
-
-            // Add Controller Rays
-    		var geometry = new THREE.Geometry();
-    		geometry.vertices.push(new THREE.Vector3(0, 0, 0));
-    		geometry.vertices.push(new THREE.Vector3(0, 0, -1));
-    		var line = new THREE.Line(geometry);
-    		line.name = 'line';
-    		line.scale.z = 5;
-    		controller1.add(line.clone());
-    		controller2.add(line.clone());
-
-            WEBVR.getVRDisplay(function(display) {
-    			renderer.vr.setDevice(display);
-                sdisplay = display;
-
-                window.addEventListener('vrdisplaypresentchange', function() {
-                    $scope.status.vr.button.text = sdisplay.isPresenting ? 'Exit VR' : 'Enter VR';
-                }, false );
-    		});
-        } else {
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-        }
 
 		window.addEventListener('resize', onWindowResize, false);
         renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
