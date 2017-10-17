@@ -1203,7 +1203,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'spacialist',
+                        component: 'spacialist'
                     }
                 }
             })
@@ -1266,7 +1266,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     views: {
                         'context-detail': {
-                            component: 'spacialistdata',
+                            component: 'spacialistdata'
                         }
                     }
                 })
@@ -1376,7 +1376,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 
                                 vm.openContext = function(cid) {
                                     $scope.$close('context');
-                                    $state.go('root.spacialist.data', {id: cid});
+                                    $state.go('root.spacialist.context.data', {id: cid});
                                 };
 
                                 vm.cancelFilePropertyEdit = function(editArray, index) {
@@ -1472,7 +1472,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     views: {
                         'geodata-dummy': {
-                            component: 'geodata',
+                            component: 'geodata'
                         }
                     }
                 })
@@ -1493,7 +1493,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'user',
+                        component: 'user'
                     }
                 }
             })
@@ -1550,7 +1550,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'role',
+                        component: 'role'
                     }
                 }
             })
@@ -1599,7 +1599,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'bibliography',
+                        component: 'bibliography'
                     }
                 },
             })
@@ -1650,10 +1650,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 })
             .state('root.editor', {
                 abstract: true,
-                url: '/editor'
+                url: '/editor',
+                views: {
+                    'content-container': {
+                        template: '<ui-view/>'
+                    }
+                }
             })
                 .state('root.editor.data-model', {
                     url: '/data-model',
+                    component: 'datamodel',
                     resolve: {
                         attributes: function(dataEditorService) {
                             return dataEditorService.getAttributes();
@@ -1666,11 +1672,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         },
                         geometryTypes: function(dataEditorService) {
                             return dataEditorService.getGeometryTypes();
-                        }
-                    },
-                    views: {
-                        'content-container': {
-                            component: 'datamodel',
                         }
                     }
                 })
@@ -1698,14 +1699,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     })
                 .state('root.editor.layer', {
                     url: '/layer',
+                    component: 'layer',
                     resolve: {
                         avLayers: function(mapService) {
                             return mapService.getLayers();
-                        }
-                    },
-                    views: {
-                        'content-container': {
-                            component: 'layer',
                         }
                     }
                 })
@@ -1736,7 +1733,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'preferences',
+                        component: 'preferences'
                     }
                 }
             })
@@ -1757,7 +1754,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'upreferences',
+                        component: 'upreferences'
                     }
                 }
             });
@@ -1817,7 +1814,7 @@ spacialistApp.run(function($state, mainService, mapService, userService, literat
         var certainty  = trans.injector(null, 'from').get('certainty');
         var dTo  = trans.injector().get('data');
         var aid = trans.params('from').aid;
-        dTo[aid+'_pos'] = certainty.certainty;
+        dTo[aid+'_cert'] = certainty.certainty;
         dTo[aid+'_desc'] = certainty.description;
 
         // Update sources
