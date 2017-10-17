@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.3.5
+### Added
+- Display csv as table (with support for different delimiters)
+- Display context type's layertype in Data Model Editor
+- citation key in bibliography table (update/overwrite now based on citation key)
+- Vive support for 3D viewer
+- Display reference-indicator if certainty is changed
+
 ## 0.3.4
 ### Fixed
 - Fix missing values of metadata in file popup
