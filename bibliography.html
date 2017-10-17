@@ -28,6 +28,13 @@
                         </a>
                     </td>
                     <td>
+                        <a href="" ng-click="$ctrl.sortType = 'citekey'; $ctrl.sortReverse = !$ctrl.sortReverse">
+                            {{'literature.bibtex.citekey'|translate}}
+                            <i ng-show="$ctrl.sortType == 'citekey' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
+                            <i ng-show="$ctrl.sortType == 'citekey' && $ctrl.sortReverse" class="material-icons">arrow_drop_up</i>
+                        </a>
+                    </td>
+                    <td>
                         <a href="" ng-click="$ctrl.sortType = 'author'; $ctrl.sortReverse = !$ctrl.sortReverse">
                             {{'literature.bibtex.author'|translate}}
                             <i ng-show="$ctrl.sortType == 'author' && !$ctrl.sortReverse" class="material-icons">arrow_drop_down</i>
@@ -136,10 +143,10 @@
                     <td>
                     	{{'literature.bibtex.school'|translate}}
                     </td>
-                    <td ng-if="currentUser.permissions.add_remove_literature">
+                    <td ng-if="$ctrl.user.permissions.add_remove_literature">
                         {{'literature.delete'|translate}}
                     </td>
-                    <td ng-if="currentUser.permissions.edit_literature">
+                    <td ng-if="$ctrl.user.permissions.edit_literature">
                         {{'literature.edit'|translate}}
                     </td>
                 </tr>
@@ -148,6 +155,9 @@
                 <tr ng-repeat="entry in $ctrl.bibliography | orderBy:['!' + $ctrl.sortType, $ctrl.sortType]:$ctrl.sortReverse | filter:$ctrl.searchTerm">
                     <td>
                         {{ entry.type }}
+                    </td>
+                    <td>
+                        {{ entry.citekey }}
                     </td>
                     <td>
                     	{{ entry.author }}

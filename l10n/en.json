@@ -45,6 +45,7 @@
     "main.menu.preferences": "System Preferences",
     "spacialist": "Spacialist",
     "literature.bibtex.type" : "Type",
+    "literature.bibtex.citekey" : "Citation Key",
     "literature.bibtex.author" : "Authors",
     "literature.bibtex.editor" : "Editors",
     "literature.bibtex.title" : "Title",

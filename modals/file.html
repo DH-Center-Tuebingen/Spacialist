@@ -48,6 +48,14 @@
                         {{ status.progress }}%
                     </div>
                 </div>
+                <div ng-show="!status.vr.errored">
+                    <button type="button" class="btn btn-default" ng-click="status.vr.button.toggle()">
+                        {{ status.vr.button.text }}
+                    </button>
+                </div>
+                <div class="alert alert-warning" ng-show="status.vr.errored">
+                    <i class="material-icons alert-decoration">warning</i> <span ng-bind-html="status.vr.message"></span>
+                </div>
             </div>
             <div ng-switch-default ng-controller="pdfCtrl">
                 <div ng-if="$ctrl.file.filename.endsWith('.md')">
@@ -55,9 +63,19 @@
                         <span translate="files.properties.md-preview.toggle"></span>
                     </button>
                 </div>
+                <div ng-if="$ctrl.file.filename.endsWith('.csv')">
+                    <button type="button" class="btn btn-default" ng-click="toggleCsv($ctrl.file.url)">
+                        <span>Show As Table</span>
+                    </button>
+                </div>
                 <div ng-if="!isPreview" class="left scrollable-modal" hljs hljs-include="$ctrl.file.url">
                 </div>
-                <div ng-if="isPreview" class="left scrollable-modal" marked src="$ctrl.file.url">
+                <div ng-if="isPreview && isMd" class="left scrollable-modal" marked src="$ctrl.file.url">
+                </div>
+                <div ng-if="isPreview && isCsv" class="left scrollable-modal">
+                    Delimiter: <input type="text" ng-model="csvDelim" placeholder=","/>
+                    <div ng-bind-html="csvData | csv2table:csvDelim">
+                    </div>
                 </div>
             </div>
         </div>

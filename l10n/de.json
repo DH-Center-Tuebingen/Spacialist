@@ -45,6 +45,7 @@
     "main.menu.preferences": "Allgemeine Einstellungen",
     "spacialist": "Spacialist",
     "literature.bibtex.type" : "Typ",
+    "literature.bibtex.citekey" : "Zitationsschlüssel",
     "literature.bibtex.author" : "Autoren",
     "literature.bibtex.editor" : "Hrsg.",
     "literature.bibtex.title" : "Titel",

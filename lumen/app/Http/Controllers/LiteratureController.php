@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\User;
 use App\Literature;
+use App\Helpers;
 use \DB;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -23,8 +24,7 @@ class LiteratureController extends Controller
 
     public function getLiteratures() {
         return response()->json(
-            DB::table('literature')
-            ->orderBy('author', 'asc')
+            Literature::orderBy('author', 'asc')
             ->get()
         );
     }
@@ -61,6 +61,13 @@ class LiteratureController extends Controller
             $literature->{$key} = $value;
         }
 
+        $ckey = Helpers::computeCitationKey($literature->toArray());
+        if($ckey === null) {
+            return response([
+                'error' => 'Could not compute key.'
+            ]);
+        }
+        $literature->citekey = $ckey;
         $literature->lasteditor = $user['name'];
 
         $literature->save();
@@ -97,10 +104,17 @@ class LiteratureController extends Controller
         $entries = $listener->export();
         $newEntries = [];
         foreach($entries as $entry) {
+            $ckey = $entry['citation-key'];
             $insArray = array_intersect_key($entry, Literature::patchRules);
-            if(Literature::where($insArray)->first() === null) {
-                $literature = new Literature($insArray);
-                $literature->save();
+            // set citation key if none is present
+            if($ckey == null || $ckey == '') {
+                $ckey = Helpers::computeCitationKey($insArray);
+            }
+            $literature = Literature::updateOrCreate(
+                ['citekey' => $ckey],
+                $insArray
+            );
+            if($literature->wasRecentlyCreated) {
                 $newEntries[] = $literature;
             }
         }
@@ -120,13 +134,22 @@ class LiteratureController extends Controller
         }
         $this->validate($request, Literature::patchRules);
 
-        $literature = Literature::find($id); //TODO findorfail
+
+        try {
+            $literature = Literature::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            $entry = [
+                'error' => 'This literature entry does not exist'
+            ];
+        }
 
         $literature->lasteditor = $user['name'];
 
         foreach ($request->intersect(array_keys(Literature::patchRules)) as $key => $value) {
             $literature->{$key} = $value;
         }
+
+        $literature->citekey = Helpers::computeCitationKey($literature);
 
         $literature->save();
 

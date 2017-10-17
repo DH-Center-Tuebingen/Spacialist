@@ -1,6 +1,16 @@
 <div ng-if="$ctrl.contextType">
     <h4 translate="data-model-editor.attr-of.heading" translate-values="{ name: $ctrl.concepts[$ctrl.contextType.thesaurus_url].label }"></h4>
     <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label class="control-label col-md-3" for="layer_type">
+                {{ 'context-type.new.geomtype' | translate }}:
+            </label>
+            <div class="col-md-9">
+                <p class="form-control-static">
+                    {{ $ctrl.contextType.layer_type }}
+                </p>
+            </div>
+        </div>
         <form-field fields="$ctrl.fields" output="tempx" concepts="$ctrl.concepts" label-width="3" input-width="9" offset="0" deletable orderable on-delete="$ctrl.onRemoveAttrFromCt" on-order="$ctrl.onOrderAttrOfCt">
         </form-field>
         <div class="col-md-offset-3">

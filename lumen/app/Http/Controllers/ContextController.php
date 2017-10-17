@@ -98,7 +98,9 @@ class ContextController extends Controller {
     }
 
     public function getContextTypes() {
-        return ContextType::all();
+        return ContextType::join('available_layers', 'context_type_id', '=', 'context_types.id')
+            ->select('context_types.*', 'available_layers.type as layer_type')
+            ->get();
     }
 
     public function getContextData($id) {
@@ -1384,7 +1386,7 @@ class ContextController extends Controller {
             $ids = explode("_", $key);
             $aid = $ids[0];
             if($aid == "" || (isset($ids[1]) && $ids[1] != "")) continue;
-            if(array_key_exists($aid.'_pos', $values)) $pos = $values[$aid.'_pos'];
+            if(array_key_exists($aid.'_cert', $values)) $pos = $values[$aid.'_cert'];
             if(array_key_exists($aid.'_desc', $values)) $desc = $values[$aid.'_desc'];
 
             try {

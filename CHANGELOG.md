@@ -30,7 +30,20 @@ All notable changes to this project will be documented in this file.
     - E-Mail
 ### Changed
 ### Fixed
+- _Unstaged Changes_ Popup is no longer displayed when reference icon (the star icon) next to an attribute of the same context is clicked
+- Description for Literature References Entry is no longer required
+- State changes after a file popup is closed is no longer buggy (clicking another file before the page was reloaded led to weird behaviour)
+- Saving a context no longer requires a page reload
+- Flickering of the References tab in the right-hand view (map, files, ...) is fixed
 ### Removed/Deprecated
+
+## 0.3.5
+### Added
+- Display csv as table (with support for different delimiters)
+- Display context type's layertype in Data Model Editor
+- citation key in bibliography table (update/overwrite now based on citation key)
+- Vive support for 3D viewer
+- Display reference-indicator if certainty is changed
 
 ## 0.3.4
 ### Fixed

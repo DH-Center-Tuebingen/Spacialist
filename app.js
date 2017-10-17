@@ -738,6 +738,43 @@ spacialistApp.filter('urlify', function() {
     };
 });
 
+spacialistApp.filter('csv2table', function() {
+    return function(csv, delimiter) {
+        if(!csv) return '<table></table>';
+        delimiter = delimiter || ',';
+        // RegExp and logic from https://stackoverflow.com/questions/8493195/how-can-i-parse-a-csv-string-with-javascript-which-contains-comma-in-data (posted by https://stackoverflow.com/users/433790/ridgerunner)
+        var re_valid = new RegExp("^\\s*(?:'[^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*'|\"[^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*\"|[^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*)\\s*(?:"+delimiter+"\\s*(?:'[^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*'|\"[^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*\"|[^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*)\\s*)*$");
+        var re_value = new RegExp("(?!\\s*$)\\s*(?:'([^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*)'|\"([^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*)\"|([^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*))\\s*(?:"+delimiter+"|$)", "g");
+        var rows = csv.split('\n');
+        var rendered = '<table class="table table-striped">';
+        for(var i=0; i<rows.length; i++) {
+            rendered += '<tr>';
+            var text = rows[i];
+            // continue if input string is no valid csv row
+            if (!re_valid.test(text)) continue;
+            var cols = [];
+            text.replace(re_value, function(m0, m1, m2, m3) {
+                // unescape ' in single quoted values.
+                if(m1 !== undefined) cols.push(m1.replace(/\\'/g, "'"));
+                // unescape " in double quoted values.
+                else if(m2 !== undefined) cols.push(m2.replace(/\\"/g, '"'));
+                else if(m3 !== undefined) cols.push(m3);
+                return '';
+            });
+            // Handle special case of empty last value.
+            if (/,\s*$/.test(text)) cols.push('');
+            for(var j=0; j<cols.length; j++) {
+                rendered += i==0 ? '<th>' : '<td>';
+                rendered += cols[j];
+                rendered += i==0 ? '</th>' : '</td>';
+            }
+            rendered += '</tr>';
+        }
+        rendered += '</table>';
+        return rendered;
+    };
+});
+
 spacialistApp.filter('bibtexify', function() {
     return function(props, selectedType) {
         var type = selectedType.name;
@@ -1166,7 +1203,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'spacialist',
+                        component: 'spacialist'
                     }
                 }
             })
@@ -1229,7 +1266,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     views: {
                         'context-detail': {
-                            component: 'spacialistdata',
+                            component: 'spacialistdata'
                         }
                     }
                 })
@@ -1244,7 +1281,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             certainty: function(data, $transition$) {
                                 var aid = $transition$.params().aid;
                                 return {
-                                    certainty: data[aid+'_pos'] || 100,
+                                    certainty: data[aid+'_cert'] || 100,
                                     description: data[aid+'_desc'] || ''
                                 };
                             },
@@ -1339,7 +1376,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
 
                                 vm.openContext = function(cid) {
                                     $scope.$close('context');
-                                    $state.go('root.spacialist.data', {id: cid});
+                                    $state.go('root.spacialist.context.data', {id: cid});
                                 };
 
                                 vm.cancelFilePropertyEdit = function(editArray, index) {
@@ -1435,7 +1472,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     views: {
                         'geodata-dummy': {
-                            component: 'geodata',
+                            component: 'geodata'
                         }
                     }
                 })
@@ -1456,7 +1493,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'user',
+                        component: 'user'
                     }
                 }
             })
@@ -1513,7 +1550,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'role',
+                        component: 'role'
                     }
                 }
             })
@@ -1562,7 +1599,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'bibliography',
+                        component: 'bibliography'
                     }
                 },
             })
@@ -1613,10 +1650,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 })
             .state('root.editor', {
                 abstract: true,
-                url: '/editor'
+                url: '/editor',
+                views: {
+                    'content-container': {
+                        template: '<ui-view/>'
+                    }
+                }
             })
                 .state('root.editor.data-model', {
                     url: '/data-model',
+                    component: 'datamodel',
                     resolve: {
                         attributes: function(dataEditorService) {
                             return dataEditorService.getAttributes();
@@ -1629,11 +1672,6 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         },
                         geometryTypes: function(dataEditorService) {
                             return dataEditorService.getGeometryTypes();
-                        }
-                    },
-                    views: {
-                        'content-container': {
-                            component: 'datamodel',
                         }
                     }
                 })
@@ -1661,14 +1699,10 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     })
                 .state('root.editor.layer', {
                     url: '/layer',
+                    component: 'layer',
                     resolve: {
                         avLayers: function(mapService) {
                             return mapService.getLayers();
-                        }
-                    },
-                    views: {
-                        'content-container': {
-                            component: 'layer',
                         }
                     }
                 })
@@ -1699,7 +1733,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'preferences',
+                        component: 'preferences'
                     }
                 }
             })
@@ -1720,7 +1754,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                 },
                 views: {
                     'content-container': {
-                        component: 'upreferences',
+                        component: 'upreferences'
                     }
                 }
             });
@@ -1780,7 +1814,7 @@ spacialistApp.run(function($state, mainService, mapService, userService, literat
         var certainty  = trans.injector(null, 'from').get('certainty');
         var dTo  = trans.injector().get('data');
         var aid = trans.params('from').aid;
-        dTo[aid+'_pos'] = certainty.certainty;
+        dTo[aid+'_cert'] = certainty.certainty;
         dTo[aid+'_desc'] = certainty.description;
 
         // Update sources
