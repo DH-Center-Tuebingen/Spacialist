@@ -7,6 +7,10 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
 
     vm.onStore = function(context, data) {
         mainService.storeElement(context, data).then(function(response) {
+            if(response.error){
+                modalFactory.errorModal(response.error);
+                return;
+            }
             context.form.$setPristine();
             mainService.updateContextList(vm.contexts, context, response);
         });

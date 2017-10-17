@@ -932,9 +932,13 @@ class ContextController extends Controller {
             $context->{$key} = $value;
         }
         $context->lasteditor = $user['name'];
-        $context->save();
 
-        $this->updateOrInsert($request->except(array_keys(Context::patchRules)), $id, $user);
+        $ret = $this->updateOrInsert($request->except(array_keys(Context::patchRules)), $id, $user);
+        if(isset($ret['error'])) {
+            return response()->json($ret);
+        }
+
+        $context->save();
 
         return response()->json(['context' => $context]);
     }
@@ -1408,6 +1412,11 @@ class ContextController extends Controller {
                 if(isset($jsonArr->start)) {
                     $startExists = true;
                     $start = $jsonArr->start;
+                    if(!is_int($start)) {
+                        return [
+                            'error' => 'Epoch values must be of type integer.'
+                        ];
+                    }
                     if(isset($jsonArr->startLabel) && $jsonArr->startLabel === 'bc') {
                         $start = -$start;
                     }
@@ -1416,13 +1425,18 @@ class ContextController extends Controller {
                 if(isset($jsonArr->end)) {
                     $endExists = true;
                     $end = $jsonArr->end;
+                    if(!is_int($end)) {
+                        return [
+                            'error' => 'Epoch values must be of type integer.'
+                        ];
+                    }
                     if(isset($jsonArr->endLabel) && $jsonArr->endLabel === 'bc') {
                         $end = -$end;
                     }
                 }
                 if($endExists && $startExists && $end < $start){
                     return [
-                        'error' => 'End date should be later than start date.'
+                        'error' => 'End date must be later than start date.'
                     ];
                 }
             }
@@ -1458,9 +1472,11 @@ class ContextController extends Controller {
                         $attrValue->context_val = $jsonArr->id;
                     } else {
                         if($datatype == 'epoch') {
-                            $jsonArr->epoch = [
-                                'concept_url' => $jsonArr->epoch->concept_url
-                            ];
+                            if(isset($jsonArr->epoch) && isset($jsonArr->epoch->concept_url)) {
+                                $jsonArr->epoch = [
+                                    'concept_url' => $jsonArr->epoch->concept_url
+                                ];
+                            }
                         }
                         $attrValue->json_val = json_encode($jsonArr);
                     }

@@ -1846,6 +1846,10 @@ spacialistApp.run(function($state, mainService, mapService, userService, literat
                 var contexts = trans.injector(null, 'from').get('contexts');
                 var data = trans.injector(null, 'from').get('data');
                 mainService.storeElement(editContext, data).then(function(response) {
+                    if(response.error){
+                        modalFactory.errorModal(response.error);
+                        return;
+                    }
                     mainService.updateContextList(contexts, editContext, response);
                 });
                 $state.go(trans.targetState().name(), trans.targetState().params());
