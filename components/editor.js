@@ -39,3 +39,15 @@ spacialistApp.component('layeredit', {
     templateUrl: 'templates/layer-edit.html',
     controller: 'layerEditCtrl'
 });
+
+spacialistApp.component('gis', {
+    bindings: {
+        concepts: '<',
+        contexts: '<',
+        map: '<',
+        layer: '<',
+        geodata: '<'
+    },
+    templateUrl: 'templates/gis.html',
+    controller: 'gisCtrl'
+});

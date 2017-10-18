@@ -57,7 +57,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
 
     if(vm.tab == 'map') {
         mapService.setupLayers(vm.layer, vm.map, vm.contexts, vm.concepts);
-        mapService.initMapObject().then(function(obj) {
+        mapService.initMapObject('mainmap').then(function(obj) {
             vm.mapObject = obj;
             var fwOptions = {
                 position: 'topleft',

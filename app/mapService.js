@@ -239,8 +239,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         return leafletBoundsHelpers.createBoundsFromArray(arr);
     };
 
-    map.initMapObject = function() {
-        return leafletData.getMap('mainmap');
+    map.initMapObject = function(mapId) {
+        return leafletData.getMap(mapId);
     };
 
     map.initMapVariables = function() {

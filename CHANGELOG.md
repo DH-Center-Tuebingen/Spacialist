@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased - Ephesus
+### Added
+- GIS Page
+### Changed
+### Fixed
+### Removed/Deprecated
+
 ## 0.4.2
 ### Added
 - New supported filetypes
@@ -26,7 +33,6 @@ All notable changes to this project will be documented in this file.
 ### Removed/Deprecated
 
 ## 0.4 - Delphi
-
 ### Added
 - Preferences to allow customization for admins and users as well
 - Global search, Supports

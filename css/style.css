@@ -110,6 +110,10 @@ textarea {
     font-style: italic;
 }
 
+.list-no-bullets {
+    list-style-type: none;
+}
+
 .inline-list {
     margin-bottom: 0;
     margin-top: 8px;

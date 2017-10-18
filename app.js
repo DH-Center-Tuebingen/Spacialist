@@ -1801,6 +1801,24 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             }
                         }
                     })
+                .state('root.editor.gis', {
+                    url: '/gis',
+                    component: 'gis',
+                    resolve: {
+                        contexts: function(environmentService) {
+                            return environmentService.getContexts();
+                        },
+                        map: function(mapService) {
+                            return mapService.initMapVariables();
+                        },
+                        layer: function(map, mapService) {
+                            return mapService.getLayers();
+                        },
+                        geodata: function(layer, mapService) {
+                            return mapService.getGeodata();
+                        }
+                    }
+                })
             .state('root.preferences', {
                 url: '/preferences',
                 resolve: {
