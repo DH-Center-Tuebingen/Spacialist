@@ -258,6 +258,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
                 parsedData[index] = parseFloat(value.dbl_val);
             } else if(dType == 'date') {
                 parsedData[index] = new Date(value.dt_val);
+            } else if (dType == 'table') {
+                if(typeof parsedData[index] == 'undefined') parsedData[index] = [];
+                parsedData[index].push(JSON.parse(value.json_val));
             } else {
                 parsedData[index] = val;
             }

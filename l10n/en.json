@@ -121,6 +121,7 @@
     "attribute.dimension.desc": "Volume",
     "attribute.list.desc": "List",
     "attribute.geography.desc": "WKT Data",
+    "attribute.table.desc": "Table",
     "context-type.add-attribute-ct.attribute": "Attribute",
     "context-type.add-attribute-ct.heading": "Add Attribute To Context-Type",
     "context-type.edit.heading": "Edit Context-Type",

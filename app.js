@@ -287,22 +287,47 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         var modalInstance = $uibModal.open({
             templateUrl: 'modals/add-attribute.html',
             controller: function($uibModalInstance) {
-                this.needsRoot = {
+                var vm = this;
+                var tableDatatypeKeys = [
+                    'string', 'string-sc', 'integer', 'double', 'boolean'
+                ]
+                vm.needsRoot = {
                     'string-sc': 1,
                     'string-mc': 1,
                     epoch: 1
                 };
-                this.datatypes = datatypes;
-                this.onSearch = searchFn;
-                this.onCreate = function(label, datatype, parent) {
-                    onCreate(label, datatype, parent, attributes);
+                vm.datatypes = datatypes;
+                vm.onSearch = searchFn;
+                vm.table = {
+                    label: undefined,
+                    datatype: '',
+                    parent: undefined,
+                    columns: [],
+                    datatypes: vm.datatypes.filter(function(dt) {
+                        return tableDatatypeKeys.indexOf(dt.datatype) >= 0;
+                    }),
+                    addColumn: function(label, datatype, parent) {
+                        var pid;
+                        if(parent) pid = parent.id;
+                        vm.table.columns.push({
+                            label_id: label.id,
+                            datatype: datatype.datatype,
+                            parent_id: pid
+                        });
+                        vm.table.label = undefined;
+                        vm.table.datatype = undefined;
+                        vm.table.parent = undefined;
+                    }
+                }
+                vm.onCreate = function(label, datatype, parent) {
+                    onCreate(label, datatype, parent, attributes, vm.table.columns);
                     $uibModalInstance.dismiss('ok');
                 };
-                this.cancel = function(result) {
+                vm.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
             },
-            controllerAs: 'mc'
+            controllerAs: '$ctrl'
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
@@ -521,7 +546,9 @@ spacialistApp.directive('formField', function() {
                 }
             }
             scope.addListEntry = function(index, inp) {
-                if(typeof scope.attributeOutputs[index] == 'undefined') scope.attributeOutputs[index] = [];
+                if(!scope.attributeOutputs[index]) {
+                    scope.attributeOutputs[index] = [];
+                }
                 scope.attributeOutputs[index].push({
                     'name': inp[index]
                 });
@@ -529,6 +556,21 @@ spacialistApp.directive('formField', function() {
             };
             scope.removeListItem = function(index, $index) {
                 scope.attributeOutputs[index].splice($index, 1);
+            };
+            scope.addTableRow = function(index, table, cols) {
+                if(!scope.attributeOutputs[index]) {
+                    scope.attributeOutputs[index] = [];
+                }
+                var row = {};
+                var cpy = angular.copy(cols);
+                for(var i=0; i<table.length; i++) {
+                    row[i] = {};
+                    row[i].datatype = table[i].datatype;
+                    row[i].value = cpy[table[i].id];
+                    row[i].attribute_id = table[i].id;
+                }
+                scope.attributeOutputs[index].push(row);
+                for(var k in cols) delete cols[k];
             };
             scope.dimensionUnits = [
                 'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'
@@ -746,7 +788,7 @@ spacialistApp.filter('csv2table', function() {
         var re_valid = new RegExp("^\\s*(?:'[^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*'|\"[^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*\"|[^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*)\\s*(?:"+delimiter+"\\s*(?:'[^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*'|\"[^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*\"|[^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*)\\s*)*$");
         var re_value = new RegExp("(?!\\s*$)\\s*(?:'([^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*)'|\"([^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*)\"|([^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*))\\s*(?:"+delimiter+"|$)", "g");
         var rows = csv.split('\n');
-        var rendered = '<table class="table table-striped">';
+        var rendered = '<table class="table table-striped table-hovered">';
         for(var i=0; i<rows.length; i++) {
             rendered += '<tr>';
             var text = rows[i];

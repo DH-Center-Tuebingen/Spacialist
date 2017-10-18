@@ -83,18 +83,27 @@ class ContextController extends Controller {
     }
 
     public function getContextTypeAttributes($id) {
-        return response()->json(
-            DB::table('context_types as c')
+        $attrs = DB::table('context_types as c')
             ->where('c.id', $id)
+            ->whereNull('a.parent_id')
             ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
             ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
             ->orderBy('ca.position', 'asc')
-            ->get()
+            ->get();
+        foreach($attrs as $a) {
+            $a->columns = Attribute::where('parent_id', $a->id)->get();
+        }
+        return response()->json(
+            $attrs
         );
     }
 
     public function getAttributes() {
-        return Attribute::all();
+        $attrs = Attribute::whereNull('parent_id')->get();
+        foreach($attrs as $a) {
+            $a->columns = Attribute::where('parent_id', $a->id)->get();
+        }
+        return $attrs;
     }
 
     public function getContextTypes() {
@@ -216,6 +225,10 @@ class ContextController extends Controller {
             [
                 'datatype' => 'context',
                 'description' => 'attribute.context.desc'
+            ],
+            [
+                'datatype' => 'table',
+                'description' => 'attribute.table.desc'
             ]
         ]);
     }
@@ -1145,7 +1158,8 @@ class ContextController extends Controller {
         $this->validate($request, [
             'label_id' => 'required|integer|exists:th_concept,id',
             'datatype' => 'required|string',
-            'parent_id' => 'nullable|integer|exists:th_concept,id'
+            'parent_id' => 'nullable|integer|exists:th_concept,id',
+            'columns' => 'json'
         ]);
 
         $lid = $request->get('label_id');
@@ -1160,6 +1174,24 @@ class ContextController extends Controller {
             $attr->thesaurus_root_url = $purl;
         }
         $attr->save();
+
+        if($datatype == 'table') {
+            $cols = json_decode($request->get('columns'));
+            foreach($cols as $col) {
+                if(!isset($col->label_id) && !isset($col->datatype)) continue;
+                $curl = ThConcept::find($col->label_id)->concept_url;
+                $childAttr = new Attribute();
+                $childAttr->thesaurus_url = $curl;
+                $childAttr->datatype = $col->datatype;
+                if(isset($col->parent_id)) {
+                    $pid = $col->parent_id;
+                    $purl = ThConcept::find($pid)->concept_url;
+                    $childAttr->thesaurus_root_url = $purl;
+                }
+                $childAttr->parent_id = $attr->id;
+                $childAttr->save();
+            }
+        }
 
         return response()->json([
             'attribute' => $attr
@@ -1441,8 +1473,8 @@ class ContextController extends Controller {
                 }
             }
 
-            //only string-sc, string-mc and list should be arrays
-            if(is_array($jsonArr) && ($datatype == 'string-sc' || $datatype == 'string-mc' || $datatype == 'list')) {
+            //only string-sc, string-mc, list and table should be arrays
+            if(is_array($jsonArr) && ($datatype == 'string-sc' || $datatype == 'string-mc' || $datatype == 'list' || $datatype == 'table')) {
                 foreach($jsonArr as $v) {
                     $attr = new AttributeValue();
                     $attr->context_id = $cid;
@@ -1450,6 +1482,19 @@ class ContextController extends Controller {
                     $attr->lasteditor = $user['name'];
                     if($datatype === 'list') {
                         $attr->str_val = $v->name;
+                    } else if($datatype == 'table') {
+                        foreach($v as $col) {
+                            if(!isset($col->value)) {
+                                unset($col);
+                                continue;
+                            }
+                            if($col->datatype == 'string-sc') {
+                                $col->value = [
+                                    'concept_url' => $col->value->concept_url
+                                ];
+                            }
+                        }
+                        $attr->json_val = json_encode($v);
                     } else {
                         try {
                             $set = ThConcept::findOrFail($v->narrower_id);

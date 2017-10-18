@@ -1,7 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased - Delphi
+## 0.4.1
+### Added
+- New Datatype: Table
+### Changed
+### Fixed
+- A couple of bugs in epoch datatype (it was possible to store non-integer data and data with a start date > end date)
+- Context form must be valid to store context
+### Removed/Deprecated
+
+## 0.4 - Delphi
 
 ### Added
 - Preferences to allow customization for admins and users as well
@@ -28,14 +37,12 @@ All notable changes to this project will be documented in this file.
   - **Users** by...
     - Name
     - E-Mail
-### Changed
 ### Fixed
 - _Unstaged Changes_ Popup is no longer displayed when reference icon (the star icon) next to an attribute of the same context is clicked
 - Description for Literature References Entry is no longer required
 - State changes after a file popup is closed is no longer buggy (clicking another file before the page was reloaded led to weird behaviour)
 - Saving a context no longer requires a page reload
 - Flickering of the References tab in the right-hand view (map, files, ...) is fixed
-### Removed/Deprecated
 
 ## 0.3.5
 ### Added
@@ -46,14 +53,14 @@ All notable changes to this project will be documented in this file.
 - Display reference-indicator if certainty is changed
 
 ## 0.3.4
-### Fixed
-- Fix missing values of metadata in file popup
-- Marker popup form styles
-- Opacity of layers (Storing was not possible, stored value was ignored)
 ### Added
 - List linked contexts in file popup
 - Exif Data viewer for image files (JPEG and TIFF)
 - Display coordinates in DMS (Degree Minute Second) in marker popup
+### Fixed
+- Fix missing values of metadata in file popup
+- Marker popup form styles
+- Opacity of layers (Storing was not possible, stored value was ignored)
 
 ## 0.3.3
 ### Fixed

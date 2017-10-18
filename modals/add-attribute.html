@@ -5,14 +5,14 @@
     <div class="col-md-12">
         <form class="form-horizontal">
             <div class="form-group">
-                <label class="control-label col-md-3" for="type">{{'attribute.add.label'|translate}}:</label>
+                <label class="control-label col-md-3" for="type">{{'attribute.add.label'|translate}}</label>
                 <div class="col-md-9">
                     <div class="input-group">
-                        <input type="text" class="form-control" ng-model="mc.label" ng-model-options="{ debounce: 250 }" placeholder="Search" uib-typeahead="result as result.label for result in mc.onSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel">
+                        <input type="text" class="form-control" ng-model="$ctrl.label" ng-model-options="{ debounce: 250 }" placeholder="Search" uib-typeahead="result as result.label for result in $ctrl.onSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel">
                         <span class="input-group-addon"><i class="material-icons">search</i></span>
                     </div>
                     <i ng-show="loadingResultsLabel" class="material-icons">refresh</i>
-                    <div ng-show="noResultsLabel && mc.label.length >= 3">
+                    <div ng-show="noResultsLabel && $ctrl.label.length >= 3">
                         <i class="material-icons md-18">clear</i> No Results Found
                     </div>
                 </div>
@@ -20,34 +20,80 @@
             <div class="form-group">
                 <label class="control-label col-md-3">{{ 'attribute.add.datatype' | translate }}</label>
                 <div class="col-md-9">
-                    <ui-select ng-model="mc.datatype">
+                    <ui-select ng-model="$ctrl.datatype">
                         <ui-select-match>
                             <span>{{ $select.selected.description | translate }}</span>
                         </ui-select-match>
-                        <ui-select-choices repeat="datatype in mc.datatypes">
+                        <ui-select-choices repeat="datatype in $ctrl.datatypes">
                             <span>{{ datatype.description | translate }}</span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
             </div>
-            <div class="form-group" ng-if="mc.needsRoot[mc.datatype.datatype]">
-                <label class="control-label col-md-3" for="type">{{'attribute.add.parent'|translate}}:</label>
+            <div class="form-group" ng-if="$ctrl.needsRoot[$ctrl.datatype.datatype]">
+                <label class="control-label col-md-3" for="type">{{'attribute.add.parent'|translate}}</label>
                 <div class="col-md-9">
                     <div class="input-group">
-                        <input type="text" class="form-control" ng-model="mc.parent" ng-model-options="{ debounce: 250 }" placeholder="Search" uib-typeahead="result as result.label for result in mc.onSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsParent" typeahead-no-results="noResultsParent">
+                        <input type="text" class="form-control" ng-model="$ctrl.parent" ng-model-options="{ debounce: 250 }" placeholder="Search" uib-typeahead="result as result.label for result in $ctrl.onSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsParent" typeahead-no-results="noResultsParent">
                         <span class="input-group-addon"><i class="material-icons">search</i></span>
                     </div>
                     <i ng-show="loadingResultsParent" class="material-icons">refresh</i>
-                    <div ng-show="noResultsParent && mc.parent.length >= 3">
+                    <div ng-show="noResultsParent && $ctrl.parent.length >= 3">
                         <i class="material-icons md-18">clear</i> No Results Found
                     </div>
                 </div>
+            </div>
+            <div ng-if="$ctrl.datatype.datatype == 'table'" ng-init="$ctrl.initTable()">
+                <h4>Column {{ $ctrl.table.columns.length+1 }}</h4>
+                <div class="form-group">
+                    <label class="control-label col-md-3" translate="attribute.add.label">
+                    </label>
+                    <div class="col-md-9">
+                        <div class="input-group">
+                            <input type="text" class="form-control" ng-model="$ctrl.table.label" ng-model-options="{ debounce: 250 }" placeholder="Search" uib-typeahead="result as result.label for result in $ctrl.onSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsLabel" typeahead-no-results="noResultsLabel">
+                            <span class="input-group-addon"><i class="material-icons">search</i></span>
+                        </div>
+                        <i ng-show="loadingResultsLabel" class="material-icons">refresh</i>
+                        <div ng-show="noResultsLabel && $ctrl.table.label.length >= 3">
+                            <i class="material-icons md-18">clear</i> No Results Found
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3" translate="attribute.add.datatype"></label>
+                    <div class="col-md-9">
+                        <ui-select ng-model="$ctrl.table.datatype">
+                            <ui-select-match>
+                                <span>{{ $select.selected.description | translate }}</span>
+                            </ui-select-match>
+                            <ui-select-choices repeat="datatype in $ctrl.table.datatypes">
+                                <span>{{ datatype.description | translate }}</span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group" ng-if="$ctrl.needsRoot[$ctrl.table.datatype.datatype]">
+                    <label class="control-label col-md-3" for="type">{{'attribute.add.parent'|translate}}</label>
+                    <div class="col-md-9">
+                        <div class="input-group">
+                            <input type="text" class="form-control" ng-model="$ctrl.table.parent" ng-model-options="{ debounce: 250 }" placeholder="Search" uib-typeahead="result as result.label for result in $ctrl.onSearch($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsParent" typeahead-no-results="noResultsParent">
+                            <span class="input-group-addon"><i class="material-icons">search</i></span>
+                        </div>
+                        <i ng-show="loadingResultsParent" class="material-icons">refresh</i>
+                        <div ng-show="noResultsParent && $ctrl.table.parent.length >= 3">
+                            <i class="material-icons md-18">clear</i> No Results Found
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.table.addColumn($ctrl.table.label, $ctrl.table.datatype, $ctrl.table.parent)" ng-disabled="!$ctrl.table.label || !$ctrl.table.datatype || ($ctrl.needsRoot[$ctrl.table.datatype.name] && !$ctrl.table.parent)">
+                    Add
+                </button>
             </div>
         </form>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.label, mc.datatype, mc.parent)" ng-disabled="!mc.label || !mc.datatype || (mc.needsRoot[mc.datatype.name] && !mc.parent)">{{ 'create' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="$ctrl.onCreate($ctrl.label, $ctrl.datatype, $ctrl.parent)" ng-disabled="!$ctrl.label || !$ctrl.datatype || ($ctrl.needsRoot[$ctrl.datatype.name] && !$ctrl.parent)">{{ 'create' | translate }}</button>
     <button type="button" class="btn btn-danger"
-      ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
+      ng-click="$ctrl.cancel()">{{ 'cancel' | translate }}</button>
 </div>
