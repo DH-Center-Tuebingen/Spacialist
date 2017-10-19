@@ -554,23 +554,26 @@ spacialistApp.directive('formField', function() {
                 });
                 inp[index] = '';
             };
-            scope.removeListItem = function(index, $index) {
+            scope.deleteListItem = function(index, $index) {
                 scope.attributeOutputs[index].splice($index, 1);
             };
-            scope.addTableRow = function(index, table, cols) {
+            scope.addTableRow = function(index, cols, entry) {
                 if(!scope.attributeOutputs[index]) {
                     scope.attributeOutputs[index] = [];
                 }
                 var row = {};
-                var cpy = angular.copy(cols);
-                for(var i=0; i<table.length; i++) {
+                var cpy = angular.copy(entry);
+                for(var i=0; i<cols.length; i++) {
                     row[i] = {};
-                    row[i].datatype = table[i].datatype;
-                    row[i].value = cpy[table[i].id];
-                    row[i].attribute_id = table[i].id;
+                    row[i].datatype = cols[i].datatype;
+                    row[i].value = cpy[cols[i].id];
+                    row[i].attribute_id = cols[i].id;
                 }
                 scope.attributeOutputs[index].push(row);
-                for(var k in cols) delete cols[k];
+                for(var k in entry) delete entry[k];
+            };
+            scope.deleteTableRow = function(index, $index) {
+                scope.attributeOutputs[index].splice($index, 1);
             };
             scope.dimensionUnits = [
                 'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'

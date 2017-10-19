@@ -75,7 +75,7 @@
             <div ng-hide="hiddenLists[attr.id] || !attributeOutputs[attr.id] ||  attributeOutputs[attr.id].length == 0" class="col-md-12 hideable-list">
                 <ol class="list-group inline-list">
                     <li ng-repeat="li in attributeOutputs[attr.id] track by $index" class="list-group-item animated-item" ng-mouseenter="hovered = true;" ng-mouseleave="hovered = false;">
-                        <span class="delete-icon" ng-show="hovered && !editEntry[attr.id][$index]" ng-click="removeListItem(attr.id, $index)">
+                        <span class="delete-icon" ng-show="hovered && !editEntry[attr.id][$index]" ng-click="deleteListItem(attr.id, $index)">
                             <i class="material-icons">delete</i>
                         </span>
                         <span ng-hide="editEntry[attr.id][$index]" ng-click="editListEntry(attr.id, attr.oid, $index, li)">{{ li.name }}</span>
@@ -142,6 +142,9 @@
                     <th ng-repeat="c in attr.columns">
                         {{ concepts[c.thesaurus_url].label }}
                     </th>
+                    <th>
+                        Delete
+                    </th>
                 </tr>
                 <tr ng-repeat="row in attributeOutputs[attr.id] track by $index">
                     <td ng-repeat="col in row track by $index">
@@ -161,6 +164,11 @@
                                 </ui-select>
                             </div>
                         </ng-switch>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-xs" ng-click="deleteTableRow(attr.id, $index)">
+                            <i class="material-icons">delete</i>
+                        </button>
                     </td>
                 </tr>
                 <tr>
