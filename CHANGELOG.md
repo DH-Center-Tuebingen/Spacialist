@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - A couple of bugs in epoch datatype (it was possible to store non-integer data and data with a start date > end date)
 - Context form must be valid to store context
+- Error after adding a literature to the _Additional Information_ popup
 ### Removed/Deprecated
 
 ## 0.4 - Delphi
