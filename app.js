@@ -1809,7 +1809,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return environmentService.getContexts();
                         },
                         map: function(mapService) {
-                            return mapService.initMapVariables();
+                            return mapService.initMapVariables('all');
                         },
                         layer: function(map, mapService) {
                             return mapService.getLayers();

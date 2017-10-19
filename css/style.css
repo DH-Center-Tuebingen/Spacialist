@@ -25,6 +25,10 @@ a.activeLang {
     color: gray !important;
 }
 
+a.toggle {
+    text-decoration: none;
+}
+
 /* override flag settings */
 .flag {
     vertical-align: middle !important;
@@ -733,6 +737,10 @@ g.compound > rect {
 /* Material Icons (should be part of the bower component) */
 ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons, span.snackbar-content .material-icons, .alert .material-icons {
     vertical-align: bottom;
+}
+
+.top {
+    vertical-align: top !important;
 }
 
 .btn-fab-minime {

@@ -39,6 +39,20 @@ spacialistApp.controller('gisCtrl', ['mapService', '$timeout', function(mapServi
                 }
             };
             L.control.fitworld(fwOptions).addTo(vm.mapObject);
+            L.control.togglemeasurements({
+                position: 'topleft'
+            }).addTo(vm.mapObject);
+            L.control.zoomBox({
+                modal: false,
+                position: "topleft"
+            }).addTo(vm.mapObject);
+            L.control.graphicScale({
+                position: 'bottomleft',
+                minUnitWidth: 50,
+                maxUnitsWidth: 300,
+                fill: true,
+                doubleLine: true
+            }).addTo(vm.mapObject);
             // wait a random amount of time, so mapObject.eachLayer has all layers
             $timeout(function() {
                 vm.mapObject.eachLayer(function(l) {

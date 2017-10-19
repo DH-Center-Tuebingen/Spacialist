@@ -243,7 +243,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         return leafletData.getMap(mapId);
     };
 
-    map.initMapVariables = function() {
+    map.initMapVariables = function(range) {
+        range = range || 'default';
         map.map = {};
         map.map.center = {};
         map.map.defaults = {
@@ -264,9 +265,26 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             color: '#808080',
             fillOpacity: 0.5
         };
-        map.map.controls = {
-            scale: true
-        };
+
+        var controls = {};
+        switch(range) {
+            case 'all':
+                controls.minimap = {
+                    type: 'minimap',
+                    layer: {
+                        name: 'OpenStreetMap',
+                        url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        type: 'xyz'
+                    },
+                    toggleDisplay: true,
+                    zoomLevelOffset: -5,
+                    zoomLevelFixed: 1
+                }
+            default:
+                controls.scale = true;
+        }
+        map.map.controls = controls;
+
 
         var guideLayers = [
             map.featureGroup
