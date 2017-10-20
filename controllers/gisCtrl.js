@@ -5,6 +5,31 @@ spacialistApp.controller('gisCtrl', ['mapService', '$timeout', function(mapServi
     vm.sublayerVisibility = {};
     vm.sublayerColors = {};
 
+    vm.layerContextMenu = [
+        [
+            '<i class="material-icons md-18 fa-light context-menu-icon">zoom_in</i> Zoom To Layer',
+            function($itemScope, $event, modelValue, text, $li) {
+                var parentLayer = vm.map.mapLayers[$itemScope.l.id];
+                mapService.fitBoundsToLayer(parentLayer, vm.map);
+            },
+            function($itemScope) {
+                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
+            }
+        ],
+        [
+            '<i class="material-icons md-18 fa-light context-menu-icon">file_upload</i> Export Layer',
+            function($itemScope, $event, modelValue, text, $li) {
+                return;
+            }
+        ],
+        [
+            '<i class="material-icons md-18 fa-light context-menu-icon">settings</i> Properties',
+            function($itemScope, $event, modelValue, text, $li) {
+                return;
+            }
+        ]
+    ];
+
     vm.toggleLayerGroupVisibility = function(layerGroup, isVisible) {
         var p = vm.map.layers.overlays[layerGroup.id];
         p.visible = isVisible;

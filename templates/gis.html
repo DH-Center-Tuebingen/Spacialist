@@ -2,14 +2,14 @@
     <div class="col-md-2">
         <div>
             <ul class="list-unstyled">
-                <li ng-repeat="l in $ctrl.layer" ng-init="$ctrl.layerVisibility[l.id] = true">
+                <li ng-repeat="l in $ctrl.layer" context-menu="$ctrl.layerContextMenu" ng-model="l" ng-init="$ctrl.layerVisibility[l.id] = true">
                     <a href="" class="toggle" ng-click="toggleLayerGroup = !toggleLayerGroup">
                         <span ng-if="!toggleLayerGroup &&  $ctrl.map.mapLayers[l.id].getLayers().length > 0" class="material-icons top">arrow_drop_down</span>
                         <span ng-if="toggleLayerGroup && $ctrl.map.mapLayers[l.id].getLayers().length > 0" class="material-icons top">arrow_drop_up</span>
                         <span ng-if="$ctrl.map.mapLayers[l.id].getLayers().length == 0" class="material-icons placeholder"></span>
                     </a>
-                    <input type="checkbox" ng-model="$ctrl.layerVisibility[l.id]" ng-change="$ctrl.toggleLayerGroupVisibility(l, $ctrl.layerVisibility[l.id])" /> <span ng-if="l.context_type_id">{{ $ctrl.concepts[l.thesaurus_url].label }}</span>
-                    <span ng-if="!l.context_type_id">{{ l.name }}</span>
+                    <input type="checkbox" ng-model="$ctrl.layerVisibility[l.id]" ng-change="$ctrl.toggleLayerGroupVisibility(l, $ctrl.layerVisibility[l.id])" /> <span class="clickable" ng-if="l.context_type_id">{{ $ctrl.concepts[l.thesaurus_url].label }}</span>
+                    <span class="clickable" ng-if="!l.context_type_id">{{ l.name }}</span>
                     <ul class="list-no-bullets" ng-if="toggleLayerGroup && $ctrl.map.mapLayers[l.id]">
                         <li ng-repeat="o in $ctrl.map.mapLayers[l.id].getLayers()" ng-init="$ctrl.sublayerVisibility[o.feature.id] = true">
                             <input type="checkbox" ng-disabled="!$ctrl.layerVisibility[l.id]" ng-model="$ctrl.sublayerVisibility[o.feature.id]" ng-change="$ctrl.toggleLayerVisibility(o, $ctrl.sublayerVisibility[o.feature.id])" /> {{ o.feature.properties.name }}

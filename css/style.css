@@ -872,7 +872,7 @@ span.btn {
     white-space: normal !important;
 }
 
-.leaflet-control-fitworld-button {
+.leaflet-control-fitworld-button, .leaflet-control-toggle-measurements-button {
     cursor: pointer;
 }
 

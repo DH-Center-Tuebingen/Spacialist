@@ -149,6 +149,32 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         mapArr.bounds.southWest.lng = newSW.lng;
     };
 
+    map.fitBoundsToLayer = function(parent, mapArr) {
+        var children = parent.getLayers();
+        if(children.length == 0) return;
+        var newNE = { lat: -180, lng: -90 };
+        var newSW = { lat: 180, lng: 90 };
+        var ne, sw, b, c;
+        for(var i=0; i<children.length; i++) {
+            c = children[i];
+            if(c.feature.geometry.type == 'Point') {
+                ne = sw = c.getLatLng();
+            } else {
+                b = c.getBounds();
+                ne = b.getNorthEast();
+                sw = b.getSouthWest();
+            }
+            if(ne.lat > newNE.lat) newNE.lat = ne.lat;
+            if(ne.lng > newNE.lng) newNE.lng = ne.lng;
+            if(sw.lat < newSW.lat) newSW.lat = sw.lat;
+            if(sw.lng < newSW.lng) newSW.lng = sw.lng;
+        }
+        mapArr.bounds.northEast.lat = newNE.lat;
+        mapArr.bounds.northEast.lng = newNE.lng;
+        mapArr.bounds.southWest.lat = newSW.lat;
+        mapArr.bounds.southWest.lng = newSW.lng;
+    };
+
     map.isLinkPossible = function(geodataType, layerType, allowedTypes) {
         if(!geodataType || !layerType) return false;
         var gt = geodataType.toUpperCase();
