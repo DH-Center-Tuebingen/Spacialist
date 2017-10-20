@@ -173,6 +173,7 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('', 'GeodataController@get');
+        $app->get('epsg_codes', 'GeodataController@getEpsgCodes');
         $app->get('wktToGeojson/{wkt}', 'GeodataController@wktToGeojson');
 
         $app->post('', 'GeodataController@add');

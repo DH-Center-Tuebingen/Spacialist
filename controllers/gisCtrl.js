@@ -65,6 +65,27 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
         ]
     ];
 
+    vm.openImportWindow = function() {
+        $uibModal.open({
+            templateUrl: "modals/gis-import.html",
+            windowClass: 'wide-modal',
+            controller: ['$scope', 'httpGetPromise', function($scope, httpGetPromise) {
+                var vm = this;
+
+                httpGetPromise.getData('api/geodata/epsg_codes').then(function(response) {
+                    vm.epsgs = response;
+                });
+
+                vm.close = function() {
+                    $scope.$dismiss('close');
+                }
+            }],
+            controllerAs: '$ctrl'
+        }).result.then(function(reason) {
+        }, function(reason) {
+        });
+    }
+
     vm.toggleLayerGroupVisibility = function(layerGroup, isVisible) {
         var p = vm.map.layers.overlays[layerGroup.id];
         p.visible = isVisible;

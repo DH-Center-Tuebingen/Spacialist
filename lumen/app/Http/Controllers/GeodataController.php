@@ -56,6 +56,13 @@ class GeodataController extends Controller {
         ]);
     }
 
+    public function getEpsgCodes() {
+        return response()->json(DB::table('spatial_ref_sys')
+            ->select('auth_name', 'auth_srid', 'srtext')
+            ->get()
+        );
+    }
+
     public function wktToGeojson($wkt) {
         if(!isset($wkt)) return; // null or empty
         // the GET request adds % for spaces
