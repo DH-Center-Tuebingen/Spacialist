@@ -299,7 +299,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                     type: 'minimap',
                     layer: {
                         name: 'OpenStreetMap',
-                        url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                         type: 'xyz'
                     },
                     toggleDisplay: true,
