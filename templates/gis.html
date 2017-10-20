@@ -9,7 +9,7 @@
                         <span ng-if="$ctrl.map.mapLayers[l.id].getLayers().length == 0" class="material-icons placeholder"></span>
                     </a>
                     <input type="checkbox" ng-model="$ctrl.layerVisibility[l.id]" ng-change="$ctrl.toggleLayerGroupVisibility(l, $ctrl.layerVisibility[l.id])" /> <span class="clickable" ng-if="l.context_type_id">{{ $ctrl.concepts[l.thesaurus_url].label }}</span>
-                    <span class="clickable" ng-if="!l.context_type_id">{{ l.name }}</span>
+                    <span class="clickable" ng-if="!l.context_type_id">{{ l.name }}</span> <span ng-if="l.counter">{{[l.counter]}}</span>
                     <ul class="list-no-bullets" ng-if="toggleLayerGroup && $ctrl.map.mapLayers[l.id]">
                         <li ng-repeat="o in $ctrl.map.mapLayers[l.id].getLayers()" ng-init="$ctrl.sublayerVisibility[o.feature.id] = true">
                             <input type="checkbox" ng-disabled="!$ctrl.layerVisibility[l.id]" ng-model="$ctrl.sublayerVisibility[o.feature.id]" ng-change="$ctrl.toggleLayerVisibility(o, $ctrl.sublayerVisibility[o.feature.id])" /> {{ o.feature.properties.name }}

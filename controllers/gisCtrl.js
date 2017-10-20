@@ -20,6 +20,23 @@ spacialistApp.controller('gisCtrl', ['mapService', '$timeout', function(mapServi
             '<i class="material-icons md-18 fa-light context-menu-icon">file_upload</i> Export Layer',
             function($itemScope, $event, modelValue, text, $li) {
                 return;
+            },
+            function($itemScope) {
+                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
+            }
+        ],
+        [
+            '<i class="material-icons md-18 fa-light context-menu-icon">timer</i> Toggle Feature Count',
+            function($itemScope, $event, modelValue, text, $li) {
+                var l = $itemScope.l;
+                if(l.counter > 0) {
+                    delete l.counter;
+                } else {
+                    l.counter = vm.map.mapLayers[l.id].getLayers().length;
+                }
+            },
+            function($itemScope) {
+                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
             }
         ],
         [
