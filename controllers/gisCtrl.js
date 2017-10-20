@@ -1,4 +1,4 @@
-spacialistApp.controller('gisCtrl', ['mapService', '$timeout', function(mapService, $timeout) {
+spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', function(mapService, $uibModal, $timeout) {
     var vm = this;
 
     vm.layerVisibility = {};
@@ -42,7 +42,25 @@ spacialistApp.controller('gisCtrl', ['mapService', '$timeout', function(mapServi
         [
             '<i class="material-icons md-18 fa-light context-menu-icon">settings</i> Properties',
             function($itemScope, $event, modelValue, text, $li) {
-                return;
+                var l = $itemScope.l;
+                var concepts = vm.concepts;
+                $uibModal.open({
+                    templateUrl: "modals/gis-properties.html",
+                    windowClass: 'wide-modal',
+                    controller: ['$scope', function($scope) {
+                        var vm = this;
+
+                        vm.layer = l;
+                        vm.layerName = l.context_type_id ? concepts[l.thesaurus_url].label : l.name;
+
+                        vm.close = function() {
+                            $scope.$dismiss('close');
+                        }
+                    }],
+                    controllerAs: '$ctrl'
+                }).result.then(function(reason) {
+                }, function(reason) {
+                });
             }
         ]
     ];

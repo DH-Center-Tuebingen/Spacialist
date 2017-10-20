@@ -70,6 +70,10 @@ a.toggle {
     width: auto;
 }
 
+.nav-left {
+    text-align: left;
+}
+
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
 .nav-undecorated, .nav-undecorated > li {

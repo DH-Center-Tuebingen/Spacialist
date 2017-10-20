@@ -1,0 +1,25 @@
+<div class="modal-header">
+    <h3>Properties of layer {{ $ctrl.layerName }}</h3>
+</div>
+<div class="modal-body row">
+    <div class="col-md-2">
+        <ul class="nav nav-pills nav-stacked nav-left">
+            <li class="active">
+                <a href=""><i class="material-icons">format_paint</i> Style</a>
+            </li>
+            <li>
+                <a href=""><i class="material-icons">label</i> Labels</a>
+            </li>
+            <li>
+                <a href=""><i class="material-icons">insert_chart</i> Diagrams</a>
+            </li>
+        </ul>
+    </div>
+    <div class="col-md-10">
+
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default"
+      ng-click="$ctrl.close()">{{ 'close' | translate }}</button>
+</div>
