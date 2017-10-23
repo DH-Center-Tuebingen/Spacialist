@@ -56,6 +56,9 @@ L.Control.FitWorld = L.Control.extend({
         icon.innerHTML = 'zoom_out_map';
         elem['ui-sref'] = '';
         elem.role = 'button';
+        elem.title = 'Fit map to all features';
+
+        L.DomEvent.on(container, 'dblclick', L.DomEvent.stopPropagation);
 
         container.onclick = function() {
             o.onClick();
@@ -81,6 +84,9 @@ L.Control.ToggleMeasurements = L.Control.extend({
         icon.innerHTML = 'straighten';
         elem['ui-sref'] = '';
         elem.role = 'button';
+        elem.title = 'Toggle Measurements';
+
+        L.DomEvent.on(container, 'dblclick', L.DomEvent.stopPropagation);
 
         container.onclick = function() {
             map.eachLayer(function(l) {
