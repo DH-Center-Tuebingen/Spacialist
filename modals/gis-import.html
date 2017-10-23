@@ -3,34 +3,35 @@
 </div>
 <div class="modal-body row">
     <div class="col-md-2">
-        <ul class="nav nav-pills nav-stacked nav-left" ng-init="activeTab = 'csv'">
-            <li ng-class="{active: activeTab == 'csv'}" ng-click="activeTab = 'csv'">
+        <ul class="nav nav-pills nav-stacked nav-left">
+            <li ng-class="{active: $ctrl.activeTab == 'csv'}" ng-click="$ctrl.activeTab = 'csv'">
                 <a href="">CSV</a>
             </li>
-            <li ng-class="{active: activeTab == 'kml'}" ng-click="activeTab = 'kml'">
+            <li ng-class="{active: $ctrl.activeTab == 'kml'}" ng-click="$ctrl.activeTab = 'kml'">
                 <a href="">KML/KMZ</a>
             </li>
-            <li ng-class="{active: activeTab == 'shape'}" ng-click="activeTab = 'shape'">
+            <li ng-class="{active: $ctrl.activeTab == 'shape'}" ng-click="$ctrl.activeTab = 'shape'">
                 <a href="">Shape-File</a>
             </li>
-            <li ng-class="{active: activeTab == 'wkt'}" ng-click="activeTab = 'wkt'">
+            <li ng-class="{active: $ctrl.activeTab == 'wkt'}" ng-click="$ctrl.activeTab = 'wkt'">
                 <a href="">WKT</a>
             </li>
         </ul>
     </div>
     <div class="col-md-10">
-        <div ng-show="activeTab == 'csv'">
+        <button type="button" class="btn btn-default" ng-model="$ctrl.file[$ctrl.activeTab]" ngf-select="$ctrl.loadFileContent($ctrl.file[$ctrl.activeTab])">{{'context-form.tabs.files.upload-button'|translate}}</button>
+        <div ng-show="$ctrl.activeTab == 'csv'">
             <h4>Import CSV file</h4>
-            <form class="form-inline">
+            <form class="form-inline" ng-show="$ctrl.content['csv']">
                 <div class="form-group">
                     <label for="delimiter">Delimiter</label>
-                    <input type="text" id="delimiter" class="form-control" ng-model="delim" />
+                    <input type="text" id="delimiter" class="form-control" ng-model="$ctrl.csvDelim" ng-change="$ctrl.parseCsvHeader()" />
                 </div>
                 <div class="form-group">
                     <label for="epsg">EPSG</label>
                     <ui-select id="epsg" class="form-control" ng-model="$ctrl.epsg">
                       <ui-select-match allow-clear="true">
-                          {{ $select.selected }}
+                          {{ $select.selected.auth_name }} {{ $select.selected.auth_srid }}
                       </ui-select-match>
                       <ui-select-choices repeat="sr in $ctrl.epsgs | filter: $select.search">
                         <span ng-bind-html="sr.auth_name | highlight: $select.search"></span> <span ng-bind-html="sr.auth_srid | highlight: $select.search"></span>
@@ -43,8 +44,8 @@
                       <ui-select-match allow-clear="true">
                           {{ $select.selected }}
                       </ui-select-match>
-                      <ui-select-choices repeat="c in $ctrl.columns | filter: $select.search">
-                        <span ng-bind-html="sr | highlight: $select.search"></span>
+                      <ui-select-choices repeat="c in $ctrl.csvHeaderColumns | filter: $select.search">
+                        <span ng-bind-html="c | highlight: $select.search"></span>
                       </ui-select-choices>
                     </ui-select>
                 </div>
@@ -54,8 +55,8 @@
                       <ui-select-match allow-clear="true">
                           {{ $select.selected }}
                       </ui-select-match>
-                      <ui-select-choices repeat="c in $ctrl.columns | filter: $select.search">
-                        <span ng-bind-html="sr | highlight: $select.search"></span>
+                      <ui-select-choices repeat="c in $ctrl.csvHeaderColumns | filter: $select.search">
+                        <span ng-bind-html="c | highlight: $select.search"></span>
                       </ui-select-choices>
                     </ui-select>
                 </div>
@@ -65,20 +66,27 @@
                       <ui-select-match allow-clear="true">
                           {{ $select.selected }}
                       </ui-select-match>
-                      <ui-select-choices repeat="c in $ctrl.columns | filter: $select.search">
-                        <span ng-bind-html="sr | highlight: $select.search"></span>
+                      <ui-select-choices repeat="c in $ctrl.csvHeaderColumns | filter: $select.search">
+                        <span ng-bind-html="c | highlight: $select.search"></span>
                       </ui-select-choices>
                     </ui-select>
                 </div>
             </form>
+            <div ng-bind-html="$ctrl.content['csv'] | csv2table:$ctrl.csvDelim">
+            </div>
         </div>
-        <div ng-show="activeTab == 'kml'">
-            KML
+        <div ng-show="$ctrl.activeTab == 'kml'">
+            <ul>
+                <li ng-repeat="f in $ctrl.parsedKml.features">
+                    {{ f.geometry.type }} ({{f.geometry.coordinates}})
+                    <small>{{ f.properties.description }}</small>
+                </li>
+            </ul>
         </div>
-        <div ng-show="activeTab == 'shape'">
+        <div ng-show="$ctrl.activeTab == 'shape'">
             SHAPE
         </div>
-        <div ng-show="activeTab == 'WKT'">
+        <div ng-show="$ctrl.activeTab == 'WKT'">
             WKT
         </div>
     </div>

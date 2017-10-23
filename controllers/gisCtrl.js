@@ -69,12 +69,86 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
         $uibModal.open({
             templateUrl: "modals/gis-import.html",
             windowClass: 'wide-modal',
-            controller: ['$scope', 'httpGetPromise', function($scope, httpGetPromise) {
+            controller: ['$scope', 'fileService', 'httpGetPromise', function($scope, fileService, httpGetPromise) {
                 var vm = this;
+                vm.activeTab = 'csv';
+                vm.content = {};
+                vm.file = {};
+                vm.csvHeaderColumns = [];
+                vm.parsedKml;
 
                 httpGetPromise.getData('api/geodata/epsg_codes').then(function(response) {
                     vm.epsgs = response;
                 });
+
+                vm.loadFileContent = function(file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $scope.$apply(function() {
+                            vm.content[vm.activeTab] = e.target.result;
+                            if(vm.activeTab == 'kml') vm.parseKmlKmz(vm.content[vm.activeTab]);
+                        });
+                    };
+                    if(vm.activeTab == 'kml' && file.name.endsWith('.kmz')) {
+                        reader.readAsDataURL(file);
+                    } else {
+                        reader.readAsText(file);
+                    }
+                }
+
+                vm.uploadFile = function(file) {
+                    fileService.uploadFiles([file], null, vm.uploadedData);
+                }
+
+                vm.parseCsvHeader = function(f) {
+                    var row = vm.content.csv.split('\n')[0];
+                    var delimiter = vm.csvDelim || ',';
+
+                    // RegExp and logic from https://stackoverflow.com/questions/8493195/how-can-i-parse-a-csv-string-with-javascript-which-contains-comma-in-data (posted by https://stackoverflow.com/users/433790/ridgerunner)
+                    var re_valid = new RegExp("^\\s*(?:'[^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*'|\"[^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*\"|[^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*)\\s*(?:"+delimiter+"\\s*(?:'[^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*'|\"[^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*\"|[^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*)\\s*)*$");
+                    var re_value = new RegExp("(?!\\s*$)\\s*(?:'([^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*)'|\"([^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*)\"|([^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*))\\s*(?:"+delimiter+"|$)", "g");
+                    if (!re_valid.test(row)) return;
+                    vm.csvHeaderColumns.length = 0;
+                    row.replace(re_value, function(m0, m1, m2, m3) {
+                        // unescape ' in single quoted values.
+                        if(m1 !== undefined) vm.csvHeaderColumns.push(m1.replace(/\\'/g, "'"));
+                        // unescape " in double quoted values.
+                        else if(m2 !== undefined) vm.csvHeaderColumns.push(m2.replace(/\\"/g, '"'));
+                        else if(m3 !== undefined) vm.csvHeaderColumns.push(m3);
+                        return '';
+                    });
+                    if (/,\s*$/.test(text)) vm.csvHeaderColumns.push('');
+                }
+
+                vm.parseKmlKmz = function(content) {
+                    if(vm.file.kml.name.endsWith('.kmz')) {
+                        zip.workerScriptsPath = 'node_modules/zipjs-browserify/vendor/';
+                        zip.createReader(new zip.Data64URIReader(content), function(reader) {
+                            reader.getEntries(function(entries) {
+                                if(entries.length) {
+                                    for(var i=0, e; e = entries[i]; i++) {
+                                        if(e.directory) continue;
+                                        if(e.filename.endsWith('.kml')) {
+                                            e.getData(new zip.TextWriter(), function(text) {
+                                                vm.parseKml(text);
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+                        }, function(error) {
+                        });
+                    } else {
+                        vm.parseKml(content);
+                    }
+                }
+                vm.parseKml = function(content) {
+                    var parser = new DOMParser();
+                    var kmlDoc = parser.parseFromString(content, "text/xml");
+                    $scope.$apply(function() {
+                        vm.parsedKml = toGeoJSON.kml(kmlDoc);
+                    })
+                }
 
                 vm.close = function() {
                     $scope.$dismiss('close');
