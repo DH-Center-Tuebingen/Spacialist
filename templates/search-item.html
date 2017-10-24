@@ -2,15 +2,15 @@
     <div class="media">
         <div class="media-body">
             <div class="media-heading search-item-title">
-                <span ng-bind-html="match.label | highlight:query"></span> <span class="badge">{{ match.model.count }}</span>
-                <span class="search-item-title-sub" ng-bind-html="match.model.email | highlight:query" ng-if="match.model.email"></span>
+                <span ng-bind-html="match.label | sphighlight:query"></span> <span class="badge">{{ match.model.count }}</span>
+                <span class="search-item-title-sub" ng-bind-html="match.model.email | sphighlight:query" ng-if="match.model.email"></span>
             </div>
             <dl class="dl-horizontal search-result-attr">
                 <dt class="search-item-content" ng-repeat-start="(label, v) in match.model.values">
-                   <span ng-bind-html="$parent.$parent.$parent.$parent.$parent.getLabelValue(label, match.model.type) | highlight:query"></span>
+                   <span ng-bind-html="$parent.$parent.$parent.$parent.$parent.getLabelValue(label, match.model.type) | sphighlight:query"></span>
                 </dt>
                 <dd class="search-item-content search-item-text" ng-repeat-end>
-                    <span ng-bind-html="$parent.$parent.$parent.$parent.$parent.concepts[v].label || v | highlight:query:true"></span>
+                    <span ng-bind-html="$parent.$parent.$parent.$parent.$parent.concepts[v].label || v | sphighlight:query:true"></span>
                 </dd>
             </dl>
             <dl class="dl-horizontal search-result-attr">
@@ -18,7 +18,7 @@
                    {{ s.title }}
                 </dt>
                 <dd class="search-item-content search-item-text" ng-repeat-end>
-                    <span ng-bind-html="s.desc | highlight:query:true"></span>
+                    <span ng-bind-html="s.desc | sphighlight:query:true"></span>
                     <button type="button" class="btn btn-default search-item-sources-btn" ui-sref="root.spacialist.context.data.sources({id: match.model.id, aid: match.model.aid})">
                         <i class="material-icons md-14" aria-hidden="true">stars</i>
                     </button>
@@ -29,21 +29,21 @@
                  <dt class="search-item-content" translate="tags.name">
                  </dt>
                  <dd class="search-item-content search-item-text">
-                     <span ng-bind-html="match.model.tags.join(', ') | highlight:query"></span>
+                     <span ng-bind-html="match.model.tags.join(', ') | sphighlight:query"></span>
                  </dd>
             </dl>
             <dl class="dl-horizontal search-result-attr" ng-if="match.model.context_type">
                  <dt class="search-item-content" translate="context-type.new.type">
                  </dt>
                  <dd class="search-item-content search-item-text">
-                     <span ng-bind-html="$parent.$parent.$parent.$parent.$parent.concepts[match.model.context_type].label | highlight:query"></span>
+                     <span ng-bind-html="$parent.$parent.$parent.$parent.$parent.concepts[match.model.context_type].label | sphighlight:query"></span>
                  </dd>
             </dl>
             <dl class="dl-horizontal search-result-attr" ng-if="match.model.updated_at">
                 <dt class="search-item-content" translate="context-form.last-modified">
                 </dt>
                 <dd class="search-item-content search-item-text">
-                    <span ng-bind-html="match.model.updated_at.date | highlight:query"></span>
+                    <span ng-bind-html="match.model.updated_at.date | sphighlight:query"></span>
                 </dd>
             </dl>
         </div>

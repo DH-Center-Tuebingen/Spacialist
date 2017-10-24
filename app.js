@@ -879,7 +879,7 @@ spacialistApp.filter('truncate', function () {
     };
 });
 
-spacialistApp.filter('highlight', function($sce) {
+spacialistApp.filter('sphighlight', function($sce) {
     return function(text, search, convert) {
         convert = convert || false;
         if(convert && typeof text == 'object') text = angular.toJson(text);
