@@ -69,7 +69,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
         $uibModal.open({
             templateUrl: "modals/gis-import.html",
             windowClass: 'wide-modal',
-            controller: ['$scope', 'fileService', 'httpGetPromise', function($scope, fileService, httpGetPromise) {
+            controller: ['$scope', 'fileService', 'httpGetPromise', 'httpPostPromise', function($scope, fileService, httpGetPromise, httpPostPromise) {
                 var vm = this;
                 vm.activeTab = 'csv';
                 vm.content = {};
@@ -207,6 +207,17 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                         vm.result.shape = response;
                     });
                 };
+
+                vm.upload = function() {
+                    if(!vm.result[vm.activeTab]) return;
+                    if((vm.activeTab == 'csv' || vm.activeTab == 'shape') && !vm.epsg) return;
+                    var formData = new FormData();
+                    formData.append('collection', angular.toJson(vm.result[vm.activeTab]));
+                    formData.append('srid', vm.epsg.auth_srid);
+                    httpPostPromise.getData('api/geodata/geojson', formData).then(function(response) {
+                        // TODO add new geo objects
+                    });
+                }
 
                 vm.close = function() {
                     $scope.$dismiss('close');

@@ -59,6 +59,7 @@ class GeodataController extends Controller {
     public function getEpsgCodes() {
         return response()->json(DB::table('spatial_ref_sys')
             ->select('auth_name', 'auth_srid', 'srtext')
+            ->orderBy('auth_srid')
             ->get()
         );
     }
@@ -108,6 +109,33 @@ class GeodataController extends Controller {
                 'id' => $geodata->id
             ]
         ]);
+    }
+
+    public function addGeoJson(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('create_edit_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'collection' => 'required|json',
+            'srid' => 'required|integer'
+        ]);
+
+        $collection = json_decode($request->get('collection'));
+        $srid = $request->get('srid');
+
+        foreach($collection->features as $feature) {
+            $geom = json_encode($feature->geometry);
+            // ST_GeomFromGeoJSON doesn't support srid...
+            $wkt = DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geom')), $srid), 4326)) AS wkt")[0]->wkt;
+            $geodata = new Geodata();
+            $geodata->geom = Helpers::parseWkt($wkt);
+            $geodata->lasteditor = $user['name'];
+            $geodata->save();
+        }
     }
 
     // PATCH

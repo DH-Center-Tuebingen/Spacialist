@@ -177,6 +177,7 @@ $app->group([
         $app->get('wktToGeojson/{wkt}', 'GeodataController@wktToGeojson');
 
         $app->post('', 'GeodataController@add');
+        $app->post('geojson', 'GeodataController@addGeoJson');
 
         $app->put('{id:[0-9]+}', 'GeodataController@put');
 
