@@ -74,6 +74,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                 vm.activeTab = 'csv';
                 vm.content = {};
                 vm.file = {};
+                vm.result = {};
                 vm.csvHeaderColumns = [];
                 vm.parsedKml;
                 vm.shapeType;
@@ -167,6 +168,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                     }, function(err, data) {
                         console.log(err);
                         console.log(data);
+                        vm.result.csv = data;
                     });
                 };
 
@@ -196,14 +198,13 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                 vm.parseKml = function(content) {
                     var parser = new DOMParser();
                     var kmlDoc = parser.parseFromString(content, "text/xml");
-                    $scope.$apply(function() {
-                        vm.parsedKml = toGeoJSON.kml(kmlDoc);
-                    })
+                    vm.result.kml = toGeoJSON.kml(kmlDoc);
                 };
 
                 vm.parseShape = function(content, epsg) {
                     shapefile.read(content.shp, content.dbf).then(function(response) {
                         console.log(response);
+                        vm.result.shape = response;
                     });
                 };
 
