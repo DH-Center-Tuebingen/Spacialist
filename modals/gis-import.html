@@ -74,7 +74,12 @@
                     Parse CSV
                 </button>
             </form>
-            <div ng-bind-html="$ctrl.content.csv | csv2table:$ctrl.csvDelim">
+            <button type="button" class="btn btn-default" ng-click="showCsvPreview = !showCsvPreview">
+                Toggle Preview
+                <i ng-show="showCsvPreview" class="material-icons">arrow_drop_up</i>
+                <i ng-show="!showCsvPreview" class="material-icons">arrow_drop_down</i>
+            </button>
+            <div ng-show="showCsvPreview" ng-bind-html="$ctrl.content.csv | csv2table:$ctrl.csvDelim">
             </div>
         </div>
         <div ng-show="$ctrl.activeTab == 'kml'">
@@ -102,7 +107,7 @@
                       </ui-select-choices>
                     </ui-select>
                 </div>
-                <button type="button" class="btn btn-success" ng-click="$ctrl.parseShape($ctrl.content.shape, $ctrl.epsg)" ng-disabled="!$ctrl.content.shape.shp || $ctrl.epsg">
+                <button type="button" class="btn btn-success" ng-click="$ctrl.parseShape($ctrl.content.shape, $ctrl.epsg)" ng-disabled="!$ctrl.content.shape.shp || !$ctrl.epsg">
                     Parse Shape Files
                 </button>
             </form>
@@ -110,6 +115,9 @@
         <div ng-show="$ctrl.activeTab == 'WKT'">
         </div>
         <h4>Result <small>{{$ctrl.activeTab.toUpperCase()}}</small></h4>
+        <button type="button" class="btn btn-success" ng-click="$ctrl.upload()" ng-disabled="!$ctrl.result[$ctrl.activeTab]">
+            Upload <i class="material-icons">file_upload</i>
+        </button>
         <ul>
             <li ng-repeat="f in $ctrl.result[$ctrl.activeTab].features">
                 {{ f.geometry.type }} ({{f.geometry.coordinates}})
