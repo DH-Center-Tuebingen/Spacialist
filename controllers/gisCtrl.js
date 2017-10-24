@@ -76,6 +76,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                 vm.file = {};
                 vm.csvHeaderColumns = [];
                 vm.parsedKml;
+                vm.shapeType;
 
                 httpGetPromise.getData('api/geodata/epsg_codes').then(function(response) {
                     vm.epsgs = response;
@@ -85,22 +86,59 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                     var reader = new FileReader();
                     reader.onload = function(e) {
                         $scope.$apply(function() {
-                            vm.content[vm.activeTab] = e.target.result;
-                            if(vm.activeTab == 'kml') vm.parseKmlKmz(vm.content[vm.activeTab]);
+                            if(vm.activeTab == 'shape') {
+                                if(!vm.content[vm.activeTab]) {
+                                    vm.content[vm.activeTab] = {};
+                                }
+                                vm.content[vm.activeTab][vm.shapeType] = e.target.result;
+                            } else {
+                                vm.content[vm.activeTab] = e.target.result;
+                            }
+                            switch(vm.activeTab) {
+                                case 'kml':
+                                    vm.parseKmlKmz(vm.content[vm.activeTab]);
+                                    break;
+                                case 'csv':
+                                    vm.parseCsvHeader();
+                                    break;
+                            }
                         });
                     };
                     if(vm.activeTab == 'kml' && file.name.endsWith('.kmz')) {
                         reader.readAsDataURL(file);
                     } else {
-                        reader.readAsText(file);
+                        // shape allows multiple files
+                        if(vm.activeTab == 'shape') {
+                            vm.readShapeFiles(reader, file, 0);
+                        } else {
+                            reader.readAsText(file);
+                        }
                     }
+                };
+
+                vm.readShapeFiles = function(reader, files, i) {
+                    if(i == files.length) return;
+                    var f = files[i];
+                    if(f.name.endsWith('.shp')) {
+                        vm.shapeType = 'shp';
+                    } else if(f.name.endsWith('.dbf')) {
+                        vm.shapeType = 'dbf';
+                    } else {
+                        // shape2geojson converter only supports shp and dbf files
+                        vm.readShapeFiles(reader, files, i+1);
+                    }
+                    reader.readAsArrayBuffer(f);
+                    reader.onloadend = function() {
+                        vm.shapeType = '';
+                        vm.readShapeFiles(reader, files, i+1);
+                    };
                 }
 
                 vm.uploadFile = function(file) {
                     fileService.uploadFiles([file], null, vm.uploadedData);
-                }
+                };
 
-                vm.parseCsvHeader = function(f) {
+                vm.parseCsvHeader = function() {
                     var row = vm.content.csv.split('\n')[0];
                     var delimiter = vm.csvDelim || ',';
 
@@ -117,8 +155,20 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                         else if(m3 !== undefined) vm.csvHeaderColumns.push(m3);
                         return '';
                     });
-                    if (/,\s*$/.test(text)) vm.csvHeaderColumns.push('');
-                }
+                    if (/,\s*$/.test(row)) vm.csvHeaderColumns.push('');
+                };
+
+                vm.parseCsv = function(content, x, y, delim, epsg) {
+                    delim = delim || ',';
+                    csv2geojson.csv2geojson(content, {
+                        latfield: x,
+                        lonfield: y,
+                        delimiter: delim
+                    }, function(err, data) {
+                        console.log(err);
+                        console.log(data);
+                    });
+                };
 
                 vm.parseKmlKmz = function(content) {
                     if(vm.file.kml.name.endsWith('.kmz')) {
@@ -141,18 +191,25 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                     } else {
                         vm.parseKml(content);
                     }
-                }
+                };
+
                 vm.parseKml = function(content) {
                     var parser = new DOMParser();
                     var kmlDoc = parser.parseFromString(content, "text/xml");
                     $scope.$apply(function() {
                         vm.parsedKml = toGeoJSON.kml(kmlDoc);
                     })
-                }
+                };
+
+                vm.parseShape = function(content, epsg) {
+                    shapefile.read(content.shp, content.dbf).then(function(response) {
+                        console.log(response);
+                    });
+                };
 
                 vm.close = function() {
                     $scope.$dismiss('close');
-                }
+                };
             }],
             controllerAs: '$ctrl'
         }).result.then(function(reason) {

@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <h3>Import</h3>
+    <h3>Import <small>{{$ctrl.activeTab.toUpperCase()}}</small></h3>
 </div>
 <div class="modal-body row">
     <div class="col-md-2">
@@ -19,17 +19,16 @@
         </ul>
     </div>
     <div class="col-md-10">
-        <button type="button" class="btn btn-default" ng-model="$ctrl.file[$ctrl.activeTab]" ngf-select="$ctrl.loadFileContent($ctrl.file[$ctrl.activeTab])">{{'context-form.tabs.files.upload-button'|translate}}</button>
+        <button type="button" class="btn btn-default" ngf-multiple="$ctrl.activeTab == 'shape'" ng-model="$ctrl.file[$ctrl.activeTab]" ngf-select="$ctrl.loadFileContent($ctrl.file[$ctrl.activeTab])">{{'context-form.tabs.files.upload-button'|translate}}</button>
         <div ng-show="$ctrl.activeTab == 'csv'">
-            <h4>Import CSV file</h4>
-            <form class="form-inline" ng-show="$ctrl.content['csv']">
+            <form class="form-inline" ng-show="$ctrl.content.csv">
                 <div class="form-group">
                     <label for="delimiter">Delimiter</label>
                     <input type="text" id="delimiter" class="form-control" ng-model="$ctrl.csvDelim" ng-change="$ctrl.parseCsvHeader()" />
                 </div>
                 <div class="form-group">
-                    <label for="epsg">EPSG</label>
-                    <ui-select id="epsg" class="form-control" ng-model="$ctrl.epsg">
+                    <label for="epsg_csv">EPSG</label>
+                    <ui-select id="epsg_csv" class="form-control" ng-model="$ctrl.epsg">
                       <ui-select-match allow-clear="true">
                           {{ $select.selected.auth_name }} {{ $select.selected.auth_srid }}
                       </ui-select-match>
@@ -71,8 +70,11 @@
                       </ui-select-choices>
                     </ui-select>
                 </div>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.parseCsv($ctrl.content.csv, $ctrl.x, $ctrl.y, $ctrl.csvDelim, $ctrl.epsg)" ng-disabled="!$ctrl.content.csv || !$ctrl.x || !$ctrl.y || !$ctrl.epsg">
+                    Parse CSV
+                </button>
             </form>
-            <div ng-bind-html="$ctrl.content['csv'] | csv2table:$ctrl.csvDelim">
+            <div ng-bind-html="$ctrl.content.csv | csv2table:$ctrl.csvDelim">
             </div>
         </div>
         <div ng-show="$ctrl.activeTab == 'kml'">
@@ -84,10 +86,34 @@
             </ul>
         </div>
         <div ng-show="$ctrl.activeTab == 'shape'">
-            SHAPE
+            <span>
+                <code>.shp</code> uploaded:
+                <i ng-if="$ctrl.content.shape.shp" class="material-icons fa-green">check</i>
+                <i ng-if="!$ctrl.content.shape.shp" class="material-icons fa-red">close</i>
+            </span>
+            <span>
+                <code>.dbf</code> uploaded:
+                <i ng-if="$ctrl.content.shape.dbf" class="material-icons fa-green">check</i>
+                <i ng-if="!$ctrl.content.shape.dbf" class="material-icons fa-red">close</i>
+            </span>
+            <form class="form-inline" ng-show="$ctrl.content.shape">
+                <div class="form-group">
+                    <label for="epsg_shape">EPSG</label>
+                    <ui-select id="epsg_shape" class="form-control" ng-model="$ctrl.epsg">
+                      <ui-select-match allow-clear="true">
+                          {{ $select.selected.auth_name }} {{ $select.selected.auth_srid }}
+                      </ui-select-match>
+                      <ui-select-choices repeat="sr in $ctrl.epsgs | filter: $select.search">
+                        <span ng-bind-html="sr.auth_name | highlight: $select.search"></span> <span ng-bind-html="sr.auth_srid | highlight: $select.search"></span>
+                      </ui-select-choices>
+                    </ui-select>
+                </div>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.parseShape($ctrl.content.shape, $ctrl.epsg)" ng-disabled="!$ctrl.content.shape.shp || $ctrl.epsg">
+                    Parse Shape Files
+                </button>
+            </form>
         </div>
         <div ng-show="$ctrl.activeTab == 'WKT'">
-            WKT
         </div>
     </div>
 </div>
