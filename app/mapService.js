@@ -99,11 +99,12 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         if(!userService.can('view_geodata')) {
             return;
         }
+        var lid, color, geodata;
         for(var k in geodataList) {
             if(geodataList.hasOwnProperty(k)) {
-                var geodata = geodataList[k];
-                var lid;
-                var color;
+                geodata = geodataList[k];
+                lid = undefined;
+                color = undefined;
                 if(mapArr.geodata.linkedContexts[geodata.id]) {
                     var cid = mapArr.geodata.linkedContexts[geodata.id];
                     var c = contexts.data[cid];
