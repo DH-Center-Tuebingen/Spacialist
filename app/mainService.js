@@ -23,57 +23,35 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     // };
 
     main.treeCallbacks.dropped = function(event, contexts) {
-        var hasParent = event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue;
-        var oldParent = environmentService.getParentId(id);
-        var hadParent = oldParent !== null;
-        var id = event.source.nodeScope.$modelValue;
-        var index = event.dest.index;
-        var rank = index + 1;
-        var parent;
-        var formData = new FormData();
-        formData.append('rank', rank);
-        if(hasParent) {
-            parent = event.dest.nodesScope.$nodeScope.$modelValue;
-            formData.append('parent_id', parent);
+        var oldParentId = null;
+        if (event.source.nodesScope.$nodeScope && event.source.nodesScope.$nodeScope.$modelValue) {
+            oldParentId = event.source.nodesScope.$nodeScope.$modelValue.id;
         }
+        var r = event.source.nodeScope.$modelValue;
+        var id = r.id;
+        var parentId = null;
+        if (event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue) {
+            parentId = event.dest.nodesScope.$nodeScope.$modelValue.id;
+        }
+        var index = event.dest.index;
+        var oldIndex = contexts.data[id].rank - 1;
+        var formData = new FormData();
+        if(parentId) {
+            formData.append('parent_id', parentId);
+        }
+        var rank = index + 1;
+        if(((!parentId && !oldParentId) || parentId == oldParentId)) {
+            if(index == oldIndex) {
+                // element has not been moved
+                return;
+            }
+        }
+        formData.append('rank', rank);
         httpPatchFactory('api/context/' + id + "/rank", formData, function(response) {
-            if(response.error) {
-                modalFactory.errorModal(response.error);
-                return;
-            }
-            // element has not been moved
-            if(((!hasParent && !hadParent) || parent == oldParent) && index == oldIndex) {
-                return;
-            }
-            var oldIndex = contexts.data[id].rank - 1;
-            var startIndex = oldIndex;
-            if(((!hasParent && !hadParent) || parent == oldParent) && index < oldIndex) {
-                startIndex++;
-            }
-            var children;
-            var oldChildren;
-            if(hasParent) {
-                children = contexts.children[parent];
-            } else {
-                children = contexts.roots;
-            }
-            if(hadParent) {
-                oldChildren = contexts.children[oldParent];
-            } else {
-                oldChildren = contexts.roots;
-            }
-            var i;
-            for(i=startIndex; i<oldChildren.length; i++) {
-                contexts.data[oldChildren[i]].rank--;
-            }
-            contexts.data[id].rank = rank;
-            for(i=index+1; i<children.length; i++) {
-                contexts.data[children[i]].rank++;
-            }
         });
     };
     main.treeCallbacks.toggle = function(collapsed, sourceNodeScope, contexts) {
-        contexts.data[sourceNodeScope.$modelValue].collapsed = collapsed;
+        contexts.data[sourceNodeScope.$modelValue.id].collapsed = collapsed;
     };
 
     main.getContextData = function(id) {
