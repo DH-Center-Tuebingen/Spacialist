@@ -73,7 +73,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                         vm.map.mapLayers[l.options.layer_id] = l;
                     }
                 });
-                mapService.initGeodata(vm.geodata, vm.contexts, vm.map);
+                mapService.initGeodata(vm.geodata, vm.contexts, vm.map, true);
             }, 100);
         });
     }

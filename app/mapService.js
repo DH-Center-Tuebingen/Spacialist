@@ -94,7 +94,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         return convertToStandardGeomtype(type);
     };
 
-    map.addListToMarkers = function(geodataList, contexts, mapArr, isInit) {
+    map.addListToMarkers = function(geodataList, contexts, mapArr, isInit, redirect) {
         isInit = isInit || false;
         if(!userService.can('view_geodata')) {
             return;
@@ -124,7 +124,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                     properties: {
                         name: 'Geodata #' + geodata.id,
                         color: color,
-                        popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
+                        popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>",
+                        redirect: redirect
                     }
                 };
                 // Add geodata to contexttype layer if it is linked to it
@@ -371,7 +372,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         });
     };
 
-    map.initGeodata = function(geodata, contexts, mapArr) {
+    map.initGeodata = function(geodata, contexts, mapArr, redirect) {
+        redirect = redirect || false;
         for(var k in contexts.data) {
             if(contexts.data.hasOwnProperty(k)) {
                 var elem = contexts.data[k];
@@ -380,7 +382,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                 }
             }
         }
-        map.addListToMarkers(geodata, contexts, mapArr, true);
+        map.addListToMarkers(geodata, contexts, mapArr, true, redirect);
         initHiddenLayers(mapArr);
     };
 
@@ -510,7 +512,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                     if(map.modes.deleting) {
                         return;
                     }
-                    $state.go('root.spacialist.geodata', {id: layer.feature.id});
+                    if(feature.properties.redirect) $state.go('root.spacialist.geodata', {id: layer.feature.id});
                 });
             }
             feature.properties.wkt = map.toWkt(layer);

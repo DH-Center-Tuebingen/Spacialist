@@ -95,6 +95,11 @@
                 <i ng-if="$ctrl.content.shape.dbf" class="material-icons fa-green">check</i>
                 <i ng-if="!$ctrl.content.shape.dbf" class="material-icons fa-red">close</i>
             </span>
+            <span>
+                <code>.prj</code> uploaded:
+                <i ng-if="$ctrl.content.shape.prj" class="material-icons fa-green">check</i>
+                <i ng-if="!$ctrl.content.shape.prj" class="material-icons fa-red">close</i>
+            </span>
             <form class="form-inline" ng-show="$ctrl.content.shape">
                 <div class="form-group">
                     <label for="epsg_shape">EPSG</label>

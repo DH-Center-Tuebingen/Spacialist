@@ -120,19 +120,27 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                 vm.readShapeFiles = function(reader, files, i) {
                     if(i == files.length) return;
                     var f = files[i];
-                    if(f.name.endsWith('.shp')) {
-                        vm.shapeType = 'shp';
-                    } else if(f.name.endsWith('.dbf')) {
-                        vm.shapeType = 'dbf';
-                    } else {
-                        // shape2geojson converter only supports shp and dbf files
-                        vm.readShapeFiles(reader, files, i+1);
+                    var s = f.name;
+                    var suffix = s.substr(s.length-4, s.length);
+                    vm.shapeType = suffix.substr(1);
+                    switch(suffix) {
+                        case '.shp':
+                        case '.dbf':
+                            reader.readAsArrayBuffer(f);
+                            reader.onloadend = function() {
+                                vm.readShapeFiles(reader, files, i+1);
+                            };
+                            break;
+                        case '.prj':
+                            reader.readAsText(f);
+                            reader.onloadend = function() {
+                                vm.readShapeFiles(reader, files, i+1);
+                            };
+                            break;
+                        default:
+                            vm.readShapeFiles(reader, files, i+1);
+                            break;
                     }
-                    reader.readAsArrayBuffer(f);
-                    reader.onloadend = function() {
-                        vm.shapeType = '';
-                        vm.readShapeFiles(reader, files, i+1);
-                    };
                 }
 
                 vm.uploadFile = function(file) {
@@ -284,7 +292,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                         vm.map.mapLayers[l.options.layer_id] = l;
                     }
                 });
-                mapService.initGeodata(vm.geodata, vm.contexts, vm.map);
+                mapService.initGeodata(vm.geodata, vm.contexts, vm.map, false);
             }, 100);
         });
     };
