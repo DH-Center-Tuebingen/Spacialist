@@ -75,6 +75,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                 vm.content = {};
                 vm.file = {};
                 vm.result = {};
+                vm.preview = {};
                 vm.csvHeaderColumns = [];
                 vm.parsedKml;
                 vm.shapeType;
@@ -91,13 +92,13 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                                 if(!vm.content[vm.activeTab]) {
                                     vm.content[vm.activeTab] = {};
                                 }
-                                vm.content[vm.activeTab][vm.shapeType] = e.target.result;
+                                vm.content.shape[vm.shapeType] = e.target.result;
                             } else {
                                 vm.content[vm.activeTab] = e.target.result;
                             }
                             switch(vm.activeTab) {
                                 case 'kml':
-                                    vm.parseKmlKmz(vm.content[vm.activeTab]);
+                                    vm.parseKmlKmz(vm.content.kml);
                                     break;
                                 case 'csv':
                                     vm.parseCsvHeader();
@@ -105,6 +106,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                             }
                         });
                     };
+                    delete vm.content[vm.activeTab];
                     if(vm.activeTab == 'kml' && file.name.endsWith('.kmz')) {
                         reader.readAsDataURL(file);
                     } else {
@@ -132,14 +134,39 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                             };
                             break;
                         case '.prj':
+                        case '.qpj':
                             reader.readAsText(f);
                             reader.onloadend = function() {
+                                if(vm.shapeType == 'qpj') {
+                                    // qpj files has an additional new line
+                                    var epsgText = vm.content.shape.qpj.split('\n', 1)[0];
+                                    // pre-select epsg-code if qpj content matches srtext of one of the existing epsg codes
+                                    vm.setEpsgToText(epsgText);
+                                }
                                 vm.readShapeFiles(reader, files, i+1);
                             };
                             break;
                         default:
                             vm.readShapeFiles(reader, files, i+1);
                             break;
+                    }
+                }
+
+                vm.setEpsgToSrid = function(srid) {
+                    for(var j=0, e; e=vm.epsgs[j]; j++) {
+                        if(e.auth_srid == srid) {
+                            vm.epsg = e;
+                            break;
+                        }
+                    }
+                }
+
+                vm.setEpsgToText = function(srtext) {
+                    for(var j=0, e; e=vm.epsgs[j]; j++) {
+                        if(e.srtext == srtext) {
+                            vm.epsg = e;
+                            break;
+                        }
                     }
                 }
 
@@ -175,7 +202,8 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                         delimiter: delim
                     }, function(err, data) {
                         console.log(err);
-                        console.log(data);
+                        vm.preview.csv = angular.copy(data);
+                        vm.ConvertProjection(vm.preview.csv, epsg);
                         vm.result.csv = data;
                     });
                 };
@@ -207,14 +235,23 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
                     var parser = new DOMParser();
                     var kmlDoc = parser.parseFromString(content, "text/xml");
                     vm.result.kml = toGeoJSON.kml(kmlDoc);
+                    vm.preview.kml = angular.copy(vm.result.kml);
                 };
 
                 vm.parseShape = function(content, epsg) {
                     shapefile.read(content.shp, content.dbf).then(function(response) {
-                        console.log(response);
+                        vm.preview.shape = angular.copy(response);
+                        vm.ConvertProjection(vm.preview.shape, epsg);
                         vm.result.shape = response;
                     });
                 };
+
+                vm.ConvertProjection = function(geojson, epsg) {
+                    var proj = proj4(epsg.srtext);
+                    for(var i=0, f; f=geojson.features[i]; i++) {
+                        f.geometry.coordinates = proj.inverse(f.geometry.coordinates);
+                    }
+                }
 
                 vm.upload = function() {
                     if(!vm.result[vm.activeTab]) return;

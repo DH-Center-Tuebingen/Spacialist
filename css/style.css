@@ -598,6 +598,19 @@ div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
     flex-direction: column;
 }
 
+.flex-hr-start {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.flex-vt-start {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
 .contextPrefix {
     color: gray;
 }

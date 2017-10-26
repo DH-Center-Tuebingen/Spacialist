@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <h3>Import <small>{{$ctrl.activeTab.toUpperCase()}}</small></h3>
+    <h4>Data Importer</h4>
 </div>
 <div class="modal-body row">
     <div class="col-md-2">
@@ -100,6 +100,11 @@
                 <i ng-if="$ctrl.content.shape.prj" class="material-icons fa-green">check</i>
                 <i ng-if="!$ctrl.content.shape.prj" class="material-icons fa-red">close</i>
             </span>
+            <span>
+                <code>.qpj</code> uploaded:
+                <i ng-if="$ctrl.content.shape.qpj" class="material-icons fa-green">check</i>
+                <i ng-if="!$ctrl.content.shape.qpj" class="material-icons fa-red">close</i>
+            </span>
             <form class="form-inline" ng-show="$ctrl.content.shape">
                 <div class="form-group">
                     <label for="epsg_shape">EPSG</label>
@@ -119,19 +124,19 @@
         </div>
         <div ng-show="$ctrl.activeTab == 'WKT'">
         </div>
-        <h4>Result <small>{{$ctrl.activeTab.toUpperCase()}}</small></h4>
-        <button type="button" class="btn btn-success" ng-click="$ctrl.upload()" ng-disabled="!$ctrl.result[$ctrl.activeTab]">
-            Upload <i class="material-icons">file_upload</i>
-        </button>
 
-        <leaflet ng-show="$ctrl.result[$ctrl.activeTab]" id="gis-preview" geojson="{data: $ctrl.result[$ctrl.activeTab]}" height="400px" width="400px">
-        </leaflet>
-        <ul>
-            <li ng-repeat="f in $ctrl.result[$ctrl.activeTab].features">
-                {{ f.geometry.type }} ({{f.geometry.coordinates}})
-                <small>{{ f.properties.description }}</small>
-            </li>
-        </ul>
+        <div class="flex-hr-start" ng-show="$ctrl.preview[$ctrl.activeTab]">
+            <leaflet id="gis-preview" geojson="{data: $ctrl.preview[$ctrl.activeTab]}" height="400px" width="400px">
+            </leaflet>
+            <div class="flex-vt-start" style="padding-left: 10px;">
+                <p>
+                    {{ $ctrl.result[$ctrl.activeTab].features.length }} elements found.
+                </p>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.upload()" ng-disabled="!$ctrl.result[$ctrl.activeTab]">
+                    Upload <i class="material-icons">file_upload</i>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 <div class="modal-footer">
