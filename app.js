@@ -557,7 +557,7 @@ spacialistApp.directive('formField', function() {
             scope.deleteListItem = function(index, $index) {
                 scope.attributeOutputs[index].splice($index, 1);
             };
-            scope.addTableRow = function(index, cols, entry) {
+            scope.addTableRow = function(index, cols, entry, form) {
                 if(!scope.attributeOutputs[index]) {
                     scope.attributeOutputs[index] = [];
                 }
@@ -571,9 +571,11 @@ spacialistApp.directive('formField', function() {
                 }
                 scope.attributeOutputs[index].push(row);
                 for(var k in entry) delete entry[k];
+                form.$setDirty();
             };
-            scope.deleteTableRow = function(index, $index) {
+            scope.deleteTableRow = function(index, $index, form) {
                 scope.attributeOutputs[index].splice($index, 1);
+                form.$setDirty();
             };
             scope.dimensionUnits = [
                 'nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'

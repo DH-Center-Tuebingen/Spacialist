@@ -166,7 +166,7 @@
                         </ng-switch>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-danger btn-xs" ng-click="deleteTableRow(attr.id, $index)">
+                        <button type="button" class="btn btn-danger btn-xs" ng-click="deleteTableRow(attr.id, $index, $ctrl.editContext.form)">
                             <i class="material-icons">delete</i>
                         </button>
                     </td>
@@ -192,7 +192,7 @@
                     </td>
                 </tr>
             </table>
-            <button type="button" class="btn btn-success" ng-click="addTableRow(attr.id, attr.columns, tableCol)">
+            <button type="button" class="btn btn-success" ng-click="addTableRow(attr.id, attr.columns, tableCol, $ctrl.editContext.form)">
                 <i class="material-icons">add</i> Add Row
             </button>
         </div>
