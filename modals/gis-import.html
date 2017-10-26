@@ -123,6 +123,9 @@
         <button type="button" class="btn btn-success" ng-click="$ctrl.upload()" ng-disabled="!$ctrl.result[$ctrl.activeTab]">
             Upload <i class="material-icons">file_upload</i>
         </button>
+
+        <leaflet ng-show="$ctrl.result[$ctrl.activeTab]" id="gis-preview" geojson="{data: $ctrl.result[$ctrl.activeTab]}" height="400px" width="400px">
+        </leaflet>
         <ul>
             <li ng-repeat="f in $ctrl.result[$ctrl.activeTab].features">
                 {{ f.geometry.type }} ({{f.geometry.coordinates}})
