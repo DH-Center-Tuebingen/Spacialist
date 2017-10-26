@@ -333,9 +333,9 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         }
         var index = elem.rank - 1; // rank is 1-n, index 0-(n-1)
         // insert elem at index and update other indices
-        children.splice(index, 0, elem.id);
+        children.splice(index, 0, {id: elem.id});
         for(var i=index+1; i<children.length; i++) {
-            children[i].rank++;
+            tree.data[children[i].id].rank++;
         }
     };
 
