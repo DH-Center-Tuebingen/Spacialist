@@ -1,20 +1,17 @@
 <div class="modal-header">
-    <h4>Data Importer</h4>
+    <h4 translate="gis.importer.heading"></h4>
 </div>
 <div class="modal-body row">
     <div class="col-md-2">
         <ul class="nav nav-pills nav-stacked nav-left">
             <li ng-class="{active: $ctrl.activeTab == 'csv'}" ng-click="$ctrl.activeTab = 'csv'">
-                <a href="">CSV</a>
+                <a href="" translate="gis.importer.type.csv"></a>
             </li>
             <li ng-class="{active: $ctrl.activeTab == 'kml'}" ng-click="$ctrl.activeTab = 'kml'">
-                <a href="">KML/KMZ</a>
+                <a href="" translate="gis.importer.type.kmlkmz"></a>
             </li>
             <li ng-class="{active: $ctrl.activeTab == 'shape'}" ng-click="$ctrl.activeTab = 'shape'">
-                <a href="">Shape-File</a>
-            </li>
-            <li ng-class="{active: $ctrl.activeTab == 'wkt'}" ng-click="$ctrl.activeTab = 'wkt'">
-                <a href="">WKT</a>
+                <a href="" translate="gis.importer.type.shape"></a>
             </li>
         </ul>
     </div>
@@ -23,11 +20,11 @@
         <div ng-show="$ctrl.activeTab == 'csv'">
             <form class="form-inline" ng-show="$ctrl.content.csv">
                 <div class="form-group">
-                    <label for="delimiter">Delimiter</label>
+                    <label for="delimiter" translate="gis.importer.csv.delimiter"></label>
                     <input type="text" id="delimiter" class="form-control" ng-model="$ctrl.csvDelim" ng-change="$ctrl.parseCsvHeader()" />
                 </div>
                 <div class="form-group">
-                    <label for="epsg_csv">EPSG</label>
+                    <label for="epsg_csv" translate="gis.importer.epsg"></label>
                     <ui-select id="epsg_csv" class="form-control" ng-model="$ctrl.epsg">
                       <ui-select-match allow-clear="true">
                           {{ $select.selected.auth_name }} {{ $select.selected.auth_srid }}
@@ -38,7 +35,7 @@
                     </ui-select>
                 </div>
                 <div class="form-group">
-                    <label for="x">X-Spalte</label>
+                    <label for="x" translate="gis.importer.x-column"></label>
                     <ui-select id="x" class="form-control" ng-model="$ctrl.x">
                       <ui-select-match allow-clear="true">
                           {{ $select.selected }}
@@ -49,7 +46,7 @@
                     </ui-select>
                 </div>
                 <div class="form-group">
-                    <label for="y">Y-Spalte</label>
+                    <label for="y" translate="gis.importer.y-column"></label>
                     <ui-select id="y" class="form-control" ng-model="$ctrl.y">
                       <ui-select-match allow-clear="true">
                           {{ $select.selected }}
@@ -60,7 +57,7 @@
                     </ui-select>
                 </div>
                 <div class="form-group">
-                    <label for="z">Z-Spalte</label>
+                    <label for="z" translate="gis.importer.z-column"></label>
                     <ui-select id="z" class="form-control" ng-model="$ctrl.z">
                       <ui-select-match allow-clear="true">
                           {{ $select.selected }}
@@ -70,14 +67,16 @@
                       </ui-select-choices>
                     </ui-select>
                 </div>
-                <button type="button" class="btn btn-success" ng-click="$ctrl.parseCsv($ctrl.content.csv, $ctrl.x, $ctrl.y, $ctrl.csvDelim, $ctrl.epsg)" ng-disabled="!$ctrl.content.csv || !$ctrl.x || !$ctrl.y || !$ctrl.epsg">
-                    Parse CSV
+                <button type="button" class="btn btn-success" ng-click="$ctrl.parseCsv($ctrl.content.csv, $ctrl.x, $ctrl.y, $ctrl.csvDelim, $ctrl.epsg)" ng-disabled="!$ctrl.content.csv || !$ctrl.x || !$ctrl.y || !$ctrl.epsg" translate="gis.importer.parse.csv">
                 </button>
             </form>
-            <button type="button" class="btn btn-default" ng-click="showCsvPreview = !showCsvPreview">
-                Toggle Preview
-                <i ng-show="showCsvPreview" class="material-icons">arrow_drop_up</i>
-                <i ng-show="!showCsvPreview" class="material-icons">arrow_drop_down</i>
+            <button type="button" class="btn btn-default" ng-disabled="!$ctrl.content.csv" ng-click="showCsvPreview = !showCsvPreview">
+                <span ng-show="showCsvPreview">
+                    {{'gis.importer.csv.hide-table'|translate}} <i class="material-icons">arrow_drop_up</i>
+                </span>
+                <span ng-show="!showCsvPreview">
+                    {{'gis.importer.csv.show-table'|translate}} <i ng-show="!showCsvPreview" class="material-icons">arrow_drop_down</i>
+                </span>
             </button>
             <div ng-show="showCsvPreview" ng-bind-html="$ctrl.content.csv | csv2table:$ctrl.csvDelim">
             </div>
@@ -86,28 +85,28 @@
         </div>
         <div ng-show="$ctrl.activeTab == 'shape'">
             <span>
-                <code>.shp</code> uploaded:
+                <span translate="gis.importer.shape.uploaded" translate-values="{type: '.shp'}"></span>:
                 <i ng-if="$ctrl.content.shape.shp" class="material-icons fa-green">check</i>
                 <i ng-if="!$ctrl.content.shape.shp" class="material-icons fa-red">close</i>
             </span>
             <span>
-                <code>.dbf</code> uploaded:
+                <span translate="gis.importer.shape.uploaded" translate-values="{type: '.dbf'}"></span>:
                 <i ng-if="$ctrl.content.shape.dbf" class="material-icons fa-green">check</i>
                 <i ng-if="!$ctrl.content.shape.dbf" class="material-icons fa-red">close</i>
             </span>
             <span>
-                <code>.prj</code> uploaded:
+                <span translate="gis.importer.shape.uploaded" translate-values="{type: '.prj'}"></span>:
                 <i ng-if="$ctrl.content.shape.prj" class="material-icons fa-green">check</i>
                 <i ng-if="!$ctrl.content.shape.prj" class="material-icons fa-red">close</i>
             </span>
             <span>
-                <code>.qpj</code> uploaded:
+                <span translate="gis.importer.shape.uploaded" translate-values="{type: '.qpj'}"></span>:
                 <i ng-if="$ctrl.content.shape.qpj" class="material-icons fa-green">check</i>
                 <i ng-if="!$ctrl.content.shape.qpj" class="material-icons fa-red">close</i>
             </span>
             <form class="form-inline" ng-show="$ctrl.content.shape">
                 <div class="form-group">
-                    <label for="epsg_shape">EPSG</label>
+                    <label for="epsg_shape" translate="gis.importer.epsg"></label>
                     <ui-select id="epsg_shape" class="form-control" ng-model="$ctrl.epsg">
                       <ui-select-match allow-clear="true">
                           {{ $select.selected.auth_name }} {{ $select.selected.auth_srid }}
@@ -117,8 +116,7 @@
                       </ui-select-choices>
                     </ui-select>
                 </div>
-                <button type="button" class="btn btn-success" ng-click="$ctrl.parseShape($ctrl.content.shape, $ctrl.epsg)" ng-disabled="!$ctrl.content.shape.shp || !$ctrl.epsg">
-                    Parse Shape Files
+                <button type="button" class="btn btn-success" ng-click="$ctrl.parseShape($ctrl.content.shape, $ctrl.epsg)" ng-disabled="!$ctrl.content.shape.shp || !$ctrl.epsg" translate="gis.importer.parse.shape">
                 </button>
             </form>
         </div>
@@ -129,11 +127,10 @@
             <leaflet id="gis-preview" geojson="{data: $ctrl.preview[$ctrl.activeTab]}" height="400px" width="400px">
             </leaflet>
             <div class="flex-vt-start" style="padding-left: 10px;">
-                <p>
-                    {{ $ctrl.result[$ctrl.activeTab].features.length }} elements found.
+                <p translate="gis.importer.results.found" translate-values="{ count: $ctrl.result[$ctrl.activeTab].features.length }">
                 </p>
                 <button type="button" class="btn btn-success" ng-click="$ctrl.upload()" ng-disabled="!$ctrl.result[$ctrl.activeTab]">
-                    Upload <i class="material-icons">file_upload</i>
+                    {{'gis.importer.upload-button.title'|translate}} <i class="material-icons">file_upload</i>
                 </button>
             </div>
         </div>

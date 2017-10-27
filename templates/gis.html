@@ -2,7 +2,7 @@
     <div class="col-md-2">
         <div>
             <button type="button" class="btn btn-default" ng-click="$ctrl.openImportWindow()">
-                <i class="material-icons">file_download</i> Import
+                <i class="material-icons">file_download</i> {{'gis.import-button.title'|translate}}
             </button>
             <ul class="list-unstyled">
                 <li ng-repeat="l in $ctrl.layer" context-menu="$ctrl.layerContextMenu" ng-model="l" ng-init="$ctrl.layerVisibility[l.id] = true">

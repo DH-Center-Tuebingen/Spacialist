@@ -1,4 +1,4 @@
-spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', function(mapService, $uibModal, $timeout) {
+spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$timeout', function(mapService, $uibModal, $translate, $timeout) {
     var vm = this;
 
     vm.layerVisibility = {};
@@ -7,7 +7,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
 
     vm.layerContextMenu = [
         [
-            '<i class="material-icons md-18 fa-light context-menu-icon">zoom_in</i> Zoom To Layer',
+            '<i class="material-icons md-18 fa-light context-menu-icon">zoom_in</i> ' + $translate.instant('gis.context-menu.zoom-to-layer'),
             function($itemScope, $event, modelValue, text, $li) {
                 var parentLayer = vm.map.mapLayers[$itemScope.l.id];
                 mapService.fitBoundsToLayer(parentLayer, vm.map);
@@ -17,7 +17,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
             }
         ],
         [
-            '<i class="material-icons md-18 fa-light context-menu-icon">file_upload</i> Export Layer',
+            '<i class="material-icons md-18 fa-light context-menu-icon">file_upload</i> ' + $translate.instant('gis.context-menu.export-layer'),
             function($itemScope, $event, modelValue, text, $li) {
                 return;
             },
@@ -26,7 +26,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
             }
         ],
         [
-            '<i class="material-icons md-18 fa-light context-menu-icon">timer</i> Toggle Feature Count',
+            '<i class="material-icons md-18 fa-light context-menu-icon">timer</i> ' + $translate.instant('gis.context-menu.toggle-feature-count'),
             function($itemScope, $event, modelValue, text, $li) {
                 var l = $itemScope.l;
                 if(l.counter > 0) {
@@ -40,7 +40,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$timeout', func
             }
         ],
         [
-            '<i class="material-icons md-18 fa-light context-menu-icon">settings</i> Properties',
+            '<i class="material-icons md-18 fa-light context-menu-icon">settings</i> ' + $translate.instant('gis.context-menu.properties'),
             function($itemScope, $event, modelValue, text, $li) {
                 var l = $itemScope.l;
                 var concepts = vm.concepts;
