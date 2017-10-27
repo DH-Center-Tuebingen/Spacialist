@@ -90,10 +90,10 @@ class SourceController extends Controller {
 
     private function getById($id) {
         $src = DB::table('sources as s')
-                ->select('s.*', DB::raw("(select label from getconceptlabelsfromurl where concept_url = a.thesaurus_url and short_name = 'de' limit 1) AS attribute_name"))
+                ->select('s.*')
                 ->where('s.id', '=', $id)
                 ->join('attributes as a', 's.attribute_id', '=', 'a.id')
-                ->orderBy('attribute_name', 'asc')
+                ->orderBy('a.thesaurus_url', 'asc')
                 ->first();
         $src->literature = Literature::find($src->literature_id);
         return $src;

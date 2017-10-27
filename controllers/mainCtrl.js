@@ -7,6 +7,10 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
 
     vm.onStore = function(context, data) {
         mainService.storeElement(context, data).then(function(response) {
+            if(response.error){
+                modalFactory.errorModal(response.error);
+                return;
+            }
             context.form.$setPristine();
             mainService.updateContextList(vm.contexts, context, response);
         });
@@ -132,7 +136,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
     $scope.newElementContextMenu = [
         [
             function($itemScope, $event, modelValue, text, $li) {
-                return $translate.instant('context-menu.options-of', { object: vm.contexts.data[$itemScope.$parent.id].name });
+                return '' + $translate.instant('context-menu.options-of', { object: vm.contexts.data[$itemScope.$modelValue.id].name });
             },
             function($itemScope, $event, modelValue, text, $li) {
             },
@@ -144,18 +148,18 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                 return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">add_circle_outline</i> ' + $translate.instant('context-menu.new-artifact');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                vm.openNewContextModal('find', $itemScope.$parent.id);
+                vm.openNewContextModal('find', $itemScope.$modelValue.id);
         }, function($itemScope) {
-            return vm.contexts.data[$itemScope.$parent.id].type === 0;
+            return vm.contexts.data[$itemScope.$modelValue.id].type === 0;
         }],
         [
             function() {
                 return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">add_circle_outline</i> ' + $translate.instant('context-menu.new-context');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                vm.openNewContextModal('context', $itemScope.$parent.id);
+                vm.openNewContextModal('context', $itemScope.$modelValue.id);
         }, function($itemScope) {
-            return vm.contexts.data[$itemScope.$parent.id].type === 0;
+            return vm.contexts.data[$itemScope.$modelValue.id].type === 0;
         }],
         null,
         [
@@ -163,7 +167,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                 return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">content_copy</i> ' + $translate.instant('context-menu.duplicate-element');
             },
                 function($itemScope, $event, modelValue, text, $li) {
-            mainService.duplicateElement($itemScope.$parent.id, vm.contexts);
+            mainService.duplicateElement($itemScope.$modelValue.id, vm.contexts);
         }],
         null,
         [
@@ -171,7 +175,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                 return '<i class="material-icons md-18 fa-light fa-red context-menu-icon">delete</i> ' + $translate.instant('context-menu.delete');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                $state.go('root.spacialist.context.data.delete', {id: $itemScope.$parent.id});
+                $state.go('root.spacialist.context.data.delete', {id: $itemScope.$modelValue.id});
             }
         ]
     ];

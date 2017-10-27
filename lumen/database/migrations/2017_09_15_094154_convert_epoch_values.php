@@ -25,7 +25,7 @@ class ConvertEpochValues extends Migration
             $jsonVal = json_decode($ee->json_val);
             if(!isset($jsonVal)) continue;
 
-            if(isset($jsonVal->epoch)){
+            if(isset($jsonVal->epoch) && isset($jsonVal->epoch->narrower_id)){
                 $nid = $jsonVal->epoch->narrower_id;
                 try {
                     $concept = ThConcept::findOrFail($nid);

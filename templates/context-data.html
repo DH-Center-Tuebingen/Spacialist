@@ -30,7 +30,7 @@
             </div>
         </div>
         <div class="col-md-offset-3" ng-if="$ctrl.user.permissions.duplicate_edit_concepts">
-            <button type="button" class="btn btn-success" ng-click="$ctrl.store($ctrl.data)">
+            <button type="button" class="btn btn-success" ng-click="$ctrl.store($ctrl.data)" ng-disabled="$ctrl.editContext.form.$invalid">
                 <span class="material-icons">save</span> {{ 'context-form.save-button' | translate }}
             </button>
             <button type="button" class="btn btn-danger" ui-sref="root.spacialist.context.data.delete">

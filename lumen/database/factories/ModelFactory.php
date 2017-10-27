@@ -172,7 +172,8 @@ $factory->define(App\Literature::class, function(Faker\Generator $faker) {
         'note' => $faker->optional($weight=0.9)->sentence($faker->numberBetween(3, 10)),
         'organization' => $faker->optional($weight=0.9)->company,
         'school' => $faker->optional($weight=0.9)->company . ' ' . $faker->optional($weight=0.9)->companySuffix,
-        'series' => $faker->optional($weight=0.9)->word
+        'series' => $faker->optional($weight=0.9)->word,
+        'citekey' => $faker->unique()->randomNumber
     ];
 });
 

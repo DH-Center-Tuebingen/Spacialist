@@ -25,7 +25,7 @@ class Helpers {
             return -1;
         }
     }
-  
+
     public static function computeCitationKey($l) {
         $key;
         if($l['author'] != null) {
@@ -34,7 +34,7 @@ class Helpers {
             $key = $l['title'];
         }
         // Use first two letters of author/title as key with only first letter uppercase
-        $key = ucwords(strtolower(substr($key, 0, 2))) . ':';
+        $key = ucwords(mb_strtolower(substr($key, 0, 2))) . ':';
         if($l['year'] != null) {
             $key .= $l['year'];
         } else {
@@ -57,12 +57,12 @@ class Helpers {
         }
         return $key;
     }
-  
+
     public static function sortMatchesDesc($a, $b) {
         if($a['count'] == $b['count']) return 0;
         return $a['count'] > $b['count'] ? -1 : 1;
     }
-    
+
     public static function parseBoolean($str) {
         $acceptable = [true, 1, '1', 'true', 'TRUE'];
         return in_array($str, $acceptable, true);

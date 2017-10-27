@@ -144,10 +144,11 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     }
 
-    function addNewAttribute(label, datatype, parent, attributes) {
+    function addNewAttribute(label, datatype, parent, attributes, columns) {
         var formData = new FormData();
         formData.append('label_id', label.id);
         formData.append('datatype', datatype.datatype);
+        if(datatype.datatype == 'table') formData.append('columns', angular.toJson(columns));
         if(parent) formData.append('parent_id', parent.id);
         httpPostFactory('api/editor/attribute', formData, function(response) {
             if(!response.error) {

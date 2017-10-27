@@ -35,13 +35,25 @@ spacialistApp.service('environmentService', ['httpGetFactory', 'httpGetPromise',
                 c.visible = true;
                 c.collapsed = true;
             });
+            var i;
+            var roots = [];
+            for(i = 0; i < response.roots.length; i++) {
+                roots.push({id: response.roots[i]});
+            }
+            for(var child in response.children) {
+                var children = [];
+                for(i = 0; i < response.children[child].length; i++) {
+                    children.push({id: response.children[child][i]});
+                }
+                response.children[child] = children;
+            }
             return {
                 data: response.contexts,
-                roots: response.roots,
+                roots: roots,
                 children: response.children
             };
         });
-    }
+    };
 
     return env;
 }]);
