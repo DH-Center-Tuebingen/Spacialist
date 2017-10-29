@@ -43,6 +43,7 @@
     "bootstrap": "^3.3.7",
     "bootstrap-material-design": "^v0.5.10",
     "csv2geojson": "^5.0.2",
+    "d3-dsv": "^1.0.7",
     "highlightjs": "^9.10.0",
     "jquery": "^3.2.1",
     "klayjs-d3": "^0.3.6",

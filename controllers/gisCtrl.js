@@ -177,25 +177,22 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                 vm.parseCsvHeader = function() {
                     var row = vm.content.csv.split('\n')[0];
                     var delimiter = vm.csvDelim || ',';
-
-                    // RegExp and logic from https://stackoverflow.com/questions/8493195/how-can-i-parse-a-csv-string-with-javascript-which-contains-comma-in-data (posted by https://stackoverflow.com/users/433790/ridgerunner)
-                    var re_valid = new RegExp("^\\s*(?:'[^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*'|\"[^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*\"|[^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*)\\s*(?:"+delimiter+"\\s*(?:'[^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*'|\"[^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*\"|[^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*)\\s*)*$");
-                    var re_value = new RegExp("(?!\\s*$)\\s*(?:'([^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*)'|\"([^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*)\"|([^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*))\\s*(?:"+delimiter+"|$)", "g");
-                    if (!re_valid.test(row)) return;
+                    if(delimiter == '\\t') {
+                        delimiter = '\t';
+                    }
+                    var dsv = d3.dsv(delimiter);
+                    var cols = dsv.parseRows(row)[0];
                     vm.csvHeaderColumns.length = 0;
-                    row.replace(re_value, function(m0, m1, m2, m3) {
-                        // unescape ' in single quoted values.
-                        if(m1 !== undefined) vm.csvHeaderColumns.push(m1.replace(/\\'/g, "'"));
-                        // unescape " in double quoted values.
-                        else if(m2 !== undefined) vm.csvHeaderColumns.push(m2.replace(/\\"/g, '"'));
-                        else if(m3 !== undefined) vm.csvHeaderColumns.push(m3);
-                        return '';
-                    });
-                    if (/,\s*$/.test(row)) vm.csvHeaderColumns.push('');
+                    for(var i=0,c; c=cols[i]; i++) {
+                        vm.csvHeaderColumns.push(c);
+                    }
                 };
 
                 vm.parseCsv = function(content, x, y, delim, epsg) {
                     delim = delim || ',';
+                    if(delim == '\\t') {
+                        delim = '\t';
+                    }
                     csv2geojson.csv2geojson(content, {
                         latfield: x,
                         lonfield: y,

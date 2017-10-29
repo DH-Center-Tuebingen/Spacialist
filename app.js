@@ -793,31 +793,32 @@ spacialistApp.filter('csv2table', function() {
     return function(csv, delimiter) {
         if(!csv) return '<table></table>';
         delimiter = delimiter || ',';
-        // RegExp and logic from https://stackoverflow.com/questions/8493195/how-can-i-parse-a-csv-string-with-javascript-which-contains-comma-in-data (posted by https://stackoverflow.com/users/433790/ridgerunner)
-        var re_valid = new RegExp("^\\s*(?:'[^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*'|\"[^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*\"|[^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*)\\s*(?:"+delimiter+"\\s*(?:'[^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*'|\"[^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*\"|[^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*)\\s*)*$");
-        var re_value = new RegExp("(?!\\s*$)\\s*(?:'([^'\\\\]*(?:\\\\[\\S\\s][^'\\\\]*)*)'|\"([^\"\\\\]*(?:\\\\[\\S\\s][^\"\\\\]*)*)\"|([^"+delimiter+"'\"\\s\\\\]*(?:\\s+[^"+delimiter+"'\"\\s\\\\]+)*))\\s*(?:"+delimiter+"|$)", "g");
-        var rows = csv.split('\n');
-        var rendered = '<table class="table table-striped table-hovered">';
-        for(var i=0; i<rows.length; i++) {
+        var rendered = '<table class="table table-striped">';
+        if(delimiter == '\\t') {
+            delimiter = '\t';
+        }
+        var dsv = d3.dsv(delimiter);
+        var headers = csv.split('\n')[0];
+        var headerCols = dsv.parseRows(headers)[0];
+        var rows = dsv.parse(csv);
+
         rendered += '<tr>';
-            var text = rows[i];
-            // continue if input string is no valid csv row
-            if (!re_valid.test(text)) continue;
-            var cols = [];
-            text.replace(re_value, function(m0, m1, m2, m3) {
-                // unescape ' in single quoted values.
-                if(m1 !== undefined) cols.push(m1.replace(/\\'/g, "'"));
-                // unescape " in double quoted values.
-                else if(m2 !== undefined) cols.push(m2.replace(/\\"/g, '"'));
-                else if(m3 !== undefined) cols.push(m3);
-                return '';
-            });
-            // Handle special case of empty last value.
-            if (/,\s*$/.test(text)) cols.push('');
-            for(var j=0; j<cols.length; j++) {
-                rendered += i==0 ? '<th>' : '<td>';
-                rendered += cols[j];
-                rendered += i==0 ? '</th>' : '</td>';
+        for(var i=0; i<headerCols.length; i++) {
+            rendered += '<th>';
+            rendered += headerCols[i];
+            rendered += '</th>';
+        }
+        rendered += '</tr>';
+
+        // start at index 1 to skip header row
+        for(var i=1; i<rows.length; i++) {
+            rendered += '<tr>';
+            var r = rows[i];
+
+            for(var c in r) {
+                rendered += '<td>';
+                rendered += r[c];
+                rendered += '</td>';
             }
             rendered += '</tr>';
         }
