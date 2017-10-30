@@ -238,8 +238,8 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                     }
                     if(x && y) {
                         csv2geojson.csv2geojson(content, {
-                            latfield: x,
-                            lonfield: y,
+                            lonfield: x,
+                            latfield: y,
                             delimiter: delim
                         }, function(err, data) {
                             console.log(err);
