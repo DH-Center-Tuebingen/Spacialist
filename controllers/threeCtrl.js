@@ -11,6 +11,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     var mouse = new THREE.Vector2();
     // var raycaster = new THREE.Raycaster();
     var particles = [];
+    // pdb variables
+    var labelRenderer;
+
     var measureLine;
     var ts = Date.now();
 
@@ -59,7 +62,6 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     };
 
     $scope.zoomOut = function() {
-        // console.log(camera.zoom);
         camera.zoom -= 0.1;
         camera.updateProjectionMatrix();
     };
@@ -141,8 +143,10 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 }, false );
     		});
         }).catch(function(message) {
-            renderer.vr.enabled = false;
-            renderer.vr.standing = false;
+            if(renderer.vr) {
+                renderer.vr.enabled = false;
+                renderer.vr.standing = false;
+            }
             $scope.status.vr.errored = true;
             $scope.status.vr.message = message;
             controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -173,59 +177,71 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         group = new THREE.Group();
 		scene.add(group);
 
-        if(extension == 'dae') { // collada
-            var loader = new THREE.ColladaLoader();
-            loader.options.convertUpAxis = true;
-            loader.load(fileUrl, function(collada) {
-                var object = collada.scene;
-                var material, children;
-                var parent = object;
-                do {
-                    children = parent.children;
-                    if(!children || !children[0]) break;
-                    material = children[0].material;
-                    parent = children[0];
-                } while(!material);
-                if(material) {
-                    material.side = THREE.DoubleSide;
-                }
-                object.castShadow = true;
-                object.receiveShadow = true;
-                group.add(object);
-                onWindowResize();
-            },
-            function(event) { // onProgress
-                if(event.lengthComputable) {
-                    $scope.status.progress = Math.round(event.loaded / event.total * 100);
-                    $scope.$apply();
-                    console.log('Downloaded ' + $scope.status.progress + '% of model');
-                }
-            },
-            function(event) { // onError
-            });
-        } else if(extension == 'obj') { // obj
-            var sep = fileUrl.lastIndexOf('/')+1;
-            var path = fileUrl.substr(0, sep);
-            var objUrl = fileUrl.substr(sep);
-            // we assume that the mtl file has the same name as the obj file
-            var mtlUrl = objUrl.substr(0, objUrl.lastIndexOf('.obj')) + '.mtl';
-            THREE.Loader.Handlers.add(/\.dds$/i, new THREE.DDSLoader());
-            var mtlLoader = new THREE.MTLLoader();
-            mtlLoader.setMaterialOptions({
-                side: THREE.DoubleSide
-            });
-            mtlLoader.setPath(path);
-            // try to load mtl file
-            mtlLoader.load(mtlUrl, function(materials) {
-                // load obj file with loaded materials
-                materials.preload();
-                loadObj(path, objUrl, materials);
-            }, function() {}, function() {
-                // onError: try to load obj without materials
-                loadObj(path, objUrl);
-            });
+        switch(extension) {
+            case 'dae': // collada
+                var loader = new THREE.ColladaLoader();
+                loader.options.convertUpAxis = true;
+                loader.load(fileUrl, function(collada) {
+                    var object = collada.scene;
+                    var material, children;
+                    var parent = object;
+                    do {
+                        children = parent.children;
+                        if(!children || !children[0]) break;
+                        material = children[0].material;
+                        parent = children[0];
+                    } while(!material);
+                    if(material) {
+                        material.side = THREE.DoubleSide;
+                    }
+                    object.castShadow = true;
+                    object.receiveShadow = true;
+                    group.add(object);
+                    onWindowResize();
+                },
+                function(event) { // onProgress
+                    if(event.lengthComputable) {
+                        $scope.status.progress = Math.round(event.loaded / event.total * 100);
+                        $scope.$apply();
+                        console.log('Downloaded ' + $scope.status.progress + '% of model');
+                    }
+                },
+                function(event) { // onError
+                });
+                break;
+            case 'obj': // wavefront obj
+                var sep = fileUrl.lastIndexOf('/')+1;
+                var path = fileUrl.substr(0, sep);
+                var objUrl = fileUrl.substr(sep);
+                // we assume that the mtl file has the same name as the obj file
+                var mtlUrl = objUrl.substr(0, objUrl.lastIndexOf('.obj')) + '.mtl';
+                THREE.Loader.Handlers.add(/\.dds$/i, new THREE.DDSLoader());
+                var mtlLoader = new THREE.MTLLoader();
+                mtlLoader.setMaterialOptions({
+                    side: THREE.DoubleSide
+                });
+                mtlLoader.setPath(path);
+                // try to load mtl file
+                mtlLoader.load(mtlUrl, function(materials) {
+                    // load obj file with loaded materials
+                    materials.preload();
+                    loadObj(path, objUrl, materials);
+                }, function() {}, function() {
+                    // onError: try to load obj without materials
+                    loadObj(path, objUrl);
+                });
+                break;
+            case 'pdb':
+                labelRenderer = new THREE.CSS2DRenderer();
+                labelRenderer.setSize(width, height);
+				labelRenderer.domElement.style.position = 'absolute';
+				labelRenderer.domElement.style.top = '0';
+				labelRenderer.domElement.style.pointerEvents = 'none';
+                container.appendChild(labelRenderer.domElement);
+                var pdbLoader = new THREE.PDBLoader();
+                loadMolecule(fileUrl, pdbLoader);
+                break;
         }
-
 		renderer = new THREE.WebGLRenderer({
             antialias: true
         });
@@ -240,12 +256,90 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
     }
 
+    function loadMolecule(url, loader) {
+        while(group.children.length > 0) {
+            var object = group.children[0];
+            object.parent.remove(object);
+        }
+
+        loader.load(url, function(pdb) {
+            var atoms = pdb.geometryAtoms;
+            var bonds = pdb.geometryBonds;
+            var json = pdb.json;
+
+            var boxGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
+            var sphereGeometry = new THREE.IcosahedronBufferGeometry(1, 2);
+
+            var offset = atoms.center();
+            bonds.translate(offset.x, offset.y, offset.z);
+
+            var positions = atoms.getAttribute('position');
+            var colors = atoms.getAttribute('color');
+
+            var position = new THREE.Vector3();
+            var color = new THREE.Color();
+
+            for(var i=0; i<positions.count; i++) {
+                position.x = positions.getX(i);
+                position.y = positions.getY(i);
+                position.z = positions.getZ(i);
+
+                color.r = colors.getX(i);
+                color.g = colors.getY(i);
+                color.b = colors.getZ(i);
+
+                var material = new THREE.MeshPhongMaterial({color: color});
+
+                var object = new THREE.Mesh(sphereGeometry, material);
+                object.position.copy(position);
+                object.position.multiplyScalar(1);
+                object.scale.multiplyScalar(0.33);
+                group.add(object);
+
+                var atom = json.atoms[i];
+				var text = document.createElement('div');
+				text.className = 'label';
+				text.style.color = 'rgb(' + atom[3][0] + ',' + atom[3][1] + ',' + atom[3][2] + ')';
+				text.textContent = atom[4];
+				var label = new THREE.CSS2DObject(text);
+				label.position.copy(object.position);
+				group.add(label);
+            }
+
+            positions = bonds.getAttribute('position');
+            var start = new THREE.Vector3();
+            var end = new THREE.Vector3();
+
+            for(var i=0; i<positions.count; i+=2) {
+                start.x = positions.getX(i);
+                start.y = positions.getY(i);
+                start.z = positions.getZ(i);
+
+                end.x = positions.getX(i+1);
+                end.y = positions.getY(i+1);
+                end.z = positions.getZ(i+1);
+
+                start.multiplyScalar(1);
+                end.multiplyScalar(1);
+
+                var object = new THREE.Mesh(boxGeometry, new THREE.MeshPhongMaterial(0xffffff));
+                object.position.copy(start);
+                object.position.lerp(end, 0.5);
+                object.scale.set(0.1, 0.1, start.distanceTo(end));
+                object.lookAt(end);
+                group.add(object);
+            }
+            onWindowResize();
+        });
+    }
+
     function onWindowResize() {
-        width = renderer.domElement.clientWidth;
-        height = renderer.domElement.clientHeight;
+        width = renderer.domElement.parentElement.clientWidth;
+        height = renderer.domElement.parentElement.clientHeight;
 		camera.aspect = width/height;
 		camera.updateProjectionMatrix();
 		renderer.setSize(width, height);
+        if(labelRenderer) labelRenderer.setSize(width, height);
 	}
 
     function onDocumentMouseDown(event) {
@@ -345,10 +439,12 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     function animate() {
         animationId = requestAnimationFrame(animate);
         renderer.animate(render);
+        // render();
     }
 
     function render() {
-        if(renderer.vr.enabled) {
+        if(labelRenderer) labelRenderer.render(scene, camera);
+        if(renderer.vr && renderer.vr.enabled) {
             controller1.update();
             controller2.update();
             cleanIntersected();
@@ -356,6 +452,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     		intersectObjects(controller2);
         }
         renderer.render(scene, camera);
+        if(labelRenderer) labelRenderer.render(scene, camera);
     }
 
     $scope.$on('$destroy', function() {
@@ -378,6 +475,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         var domParent = renderer.domElement.parentElement;
         domParent.removeChild(renderer.domElement);
         renderer = null;
+        labelRenderer = null;
         scene = null;
         controls = null;
         camera = null;
