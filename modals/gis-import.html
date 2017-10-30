@@ -32,6 +32,62 @@
                     <input type="text" id="delimiter" class="form-control" ng-model="$ctrl.csvDelim" ng-change="$ctrl.parseCsvHeader()" ng-hide="$ctrl.csvDelimDd.key != 'custom'" />
                 </div>
                 <div class="form-group">
+                    <label>
+                        <input type="radio" ng-model="$ctrl.coordType" value="latlon" />
+                        {{'gis.importer.csv.coord-type.latlon'|translate}}
+                    </label>
+                    <label>
+                        <input type="radio" ng-model="$ctrl.coordType" value="wkt" />
+                        {{'gis.importer.csv.coord-type.wkt'|translate}}
+                    </label>
+                </div>
+                <span ng-show="$ctrl.coordType == 'latlon'">
+                    <div class="form-group">
+                        <label for="x" translate="gis.importer.x-column"></label>
+                        <ui-select id="x" class="form-control" ng-model="$ctrl.x">
+                            <ui-select-match allow-clear="true">
+                                {{ $select.selected }}
+                            </ui-select-match>
+                            <ui-select-choices repeat="c in $ctrl.csvHeaderColumns | filter: $select.search">
+                                <span ng-bind-html="c | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                    <div class="form-group">
+                        <label for="y" translate="gis.importer.y-column"></label>
+                        <ui-select id="y" class="form-control" ng-model="$ctrl.y">
+                            <ui-select-match allow-clear="true">
+                                {{ $select.selected }}
+                            </ui-select-match>
+                            <ui-select-choices repeat="c in $ctrl.csvHeaderColumns | filter: $select.search">
+                                <span ng-bind-html="c | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                    <div class="form-group">
+                        <label for="z" translate="gis.importer.z-column"></label>
+                        <ui-select id="z" class="form-control" ng-model="$ctrl.z">
+                            <ui-select-match allow-clear="true">
+                                {{ $select.selected }}
+                            </ui-select-match>
+                            <ui-select-choices repeat="c in $ctrl.csvHeaderColumns | filter: $select.search">
+                                <span ng-bind-html="c | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </span>
+                <div class="form-group" ng-show="$ctrl.coordType == 'wkt'">
+                    <label for="wkt" translate="gis.importer.wkt-column"></label>
+                    <ui-select id="wkt" class="form-control" ng-model="$ctrl.wkt">
+                        <ui-select-match allow-clear="true">
+                            {{ $select.selected }}
+                        </ui-select-match>
+                        <ui-select-choices repeat="c in $ctrl.csvHeaderColumns | filter: $select.search">
+                            <span ng-bind-html="c | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <div class="form-group">
                     <label for="epsg_csv" translate="gis.importer.epsg"></label>
                     <ui-select id="epsg_csv" class="form-control" ng-model="$ctrl.epsg">
                       <ui-select-match allow-clear="true">
@@ -42,40 +98,7 @@
                       </ui-select-choices>
                     </ui-select>
                 </div>
-                <div class="form-group">
-                    <label for="x" translate="gis.importer.x-column"></label>
-                    <ui-select id="x" class="form-control" ng-model="$ctrl.x">
-                      <ui-select-match allow-clear="true">
-                          {{ $select.selected }}
-                      </ui-select-match>
-                      <ui-select-choices repeat="c in $ctrl.csvHeaderColumns | filter: $select.search">
-                        <span ng-bind-html="c | highlight: $select.search"></span>
-                      </ui-select-choices>
-                    </ui-select>
-                </div>
-                <div class="form-group">
-                    <label for="y" translate="gis.importer.y-column"></label>
-                    <ui-select id="y" class="form-control" ng-model="$ctrl.y">
-                      <ui-select-match allow-clear="true">
-                          {{ $select.selected }}
-                      </ui-select-match>
-                      <ui-select-choices repeat="c in $ctrl.csvHeaderColumns | filter: $select.search">
-                        <span ng-bind-html="c | highlight: $select.search"></span>
-                      </ui-select-choices>
-                    </ui-select>
-                </div>
-                <div class="form-group">
-                    <label for="z" translate="gis.importer.z-column"></label>
-                    <ui-select id="z" class="form-control" ng-model="$ctrl.z">
-                      <ui-select-match allow-clear="true">
-                          {{ $select.selected }}
-                      </ui-select-match>
-                      <ui-select-choices repeat="c in $ctrl.csvHeaderColumns | filter: $select.search">
-                        <span ng-bind-html="c | highlight: $select.search"></span>
-                      </ui-select-choices>
-                    </ui-select>
-                </div>
-                <button type="button" class="btn btn-success" ng-click="$ctrl.parseCsv($ctrl.content.csv, $ctrl.x, $ctrl.y, $ctrl.csvDelim, $ctrl.epsg)" ng-disabled="!$ctrl.content.csv || !$ctrl.x || !$ctrl.y || !$ctrl.epsg" translate="gis.importer.parse.csv">
+                <button type="button" class="btn btn-success" ng-click="$ctrl.parseCsv($ctrl.content.csv, $ctrl.x, $ctrl.y, $ctrl.wkt, $ctrl.csvDelim, $ctrl.epsg)" ng-disabled="$ctrl.parsingDisabled()" translate="gis.importer.parse.csv">
                 </button>
             </form>
             <button type="button" class="btn btn-default" ng-disabled="!$ctrl.content.csv" ng-click="showCsvPreview = !showCsvPreview">

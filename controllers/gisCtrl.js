@@ -76,6 +76,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                 vm.file = {};
                 vm.result = {};
                 vm.preview = {};
+                vm.coordType = 'latlon';
                 vm.csvDelimiters = [
                     {
                         label: $translate.instant('gis.importer.csv.delimiter.type-comma'),
@@ -224,21 +225,49 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                     }
                 };
 
-                vm.parseCsv = function(content, x, y, delim, epsg) {
+                vm.parsingDisabled = function() {
+                    return !vm.content.csv || (vm.coordType == 'latlon' && (!vm.x || !vm.y)) || (vm.coordType == 'wkt' && !vm.wkt) || !vm.epsg;
+                };
+
+                vm.parseCsv = function(content, x, y, wkt, delim, epsg) {
+                    if(vm.parsingDisabled()) return;
+
                     delim = delim || ',';
                     if(delim == '\\t') {
                         delim = '\t';
                     }
-                    csv2geojson.csv2geojson(content, {
-                        latfield: x,
-                        lonfield: y,
-                        delimiter: delim
-                    }, function(err, data) {
-                        console.log(err);
-                        vm.preview.csv = angular.copy(data);
+                    if(x && y) {
+                        csv2geojson.csv2geojson(content, {
+                            latfield: x,
+                            lonfield: y,
+                            delimiter: delim
+                        }, function(err, data) {
+                            console.log(err);
+                            vm.preview.csv = angular.copy(data);
+                            vm.ConvertProjection(vm.preview.csv, epsg);
+                            vm.result.csv = data;
+                        });
+                    } else if(wkt) {
+                        var featureCollection = {
+                            type: 'featureCollection',
+                            features: []
+                        };
+                        var wkx = require('wkx');
+                        var dsv = d3.dsv(delim);
+                        var rows = dsv.parse(content);
+                        for(var i=0, r; r=rows[i]; i++) {
+                            var wktString = r[wkt];
+                            var geom = wkx.Geometry.parse(wktString);
+                            geom = geom.toGeoJSON();
+                            featureCollection.features.push({
+                                type: 'Feature',
+                                geometry: geom
+                            });
+                        }
+                        vm.preview.csv = angular.copy(featureCollection);
                         vm.ConvertProjection(vm.preview.csv, epsg);
-                        vm.result.csv = data;
-                    });
+                        vm.result.csv = featureCollection;
+                    }
                 };
 
                 vm.parseKmlKmz = function(content) {
@@ -282,6 +311,9 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                 vm.ConvertProjection = function(geojson, epsg) {
                     var proj = proj4(epsg.srtext);
                     for(var i=0, f; f=geojson.features[i]; i++) {
+                        // TODO proj4js can only convert simple points ([x, y] or {x: x, y: y})
+                        // continue if geometry type is unsupported
+                        if(f.geometry.type != 'Point') continue;
                         f.geometry.coordinates = proj.inverse(f.geometry.coordinates);
                     }
                 };
