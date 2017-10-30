@@ -20,8 +20,16 @@
         <div ng-show="$ctrl.activeTab == 'csv'">
             <form class="form-inline" ng-show="$ctrl.content.csv">
                 <div class="form-group">
-                    <label for="delimiter" translate="gis.importer.csv.delimiter"></label>
-                    <input type="text" id="delimiter" class="form-control" ng-model="$ctrl.csvDelim" ng-change="$ctrl.parseCsvHeader()" />
+                    <label for="delimiter-dd" translate="gis.importer.csv.delimiter"></label>
+                    <ui-select id="delimiter_dd" class="form-control" ng-model="$ctrl.csvDelimDd" ng-change="$ctrl.updateDelimiterType($ctrl.csvDelimDd)">
+                      <ui-select-match>
+                          {{ $select.selected.label }}
+                      </ui-select-match>
+                      <ui-select-choices repeat="d in $ctrl.csvDelimiters | filter: $select.search">
+                        <span ng-bind-html="d.label"></span>
+                      </ui-select-choices>
+                    </ui-select>
+                    <input type="text" id="delimiter" class="form-control" ng-model="$ctrl.csvDelim" ng-change="$ctrl.parseCsvHeader()" ng-hide="$ctrl.csvDelimDd.key != 'custom'" />
                 </div>
                 <div class="form-group">
                     <label for="epsg_csv" translate="gis.importer.epsg"></label>

@@ -69,16 +69,45 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
         $uibModal.open({
             templateUrl: "modals/gis-import.html",
             windowClass: 'wide-modal',
-            controller: ['$scope', 'fileService', 'httpGetPromise', 'httpPostPromise', function($scope, fileService, httpGetPromise, httpPostPromise) {
+            controller: ['$scope', 'fileService', 'httpGetPromise', 'httpPostPromise', '$translate', function($scope, fileService, httpGetPromise, httpPostPromise, $translate) {
                 var vm = this;
                 vm.activeTab = 'csv';
                 vm.content = {};
                 vm.file = {};
                 vm.result = {};
                 vm.preview = {};
+                vm.csvDelimiters = [
+                    {
+                        label: $translate.instant('gis.importer.csv.delimiter.type-comma'),
+                        key: ','
+                    },
+                    {
+                        label: $translate.instant('gis.importer.csv.delimiter.type-tab'),
+                        key: '\t'
+                    },
+                    {
+                        label: $translate.instant('gis.importer.csv.delimiter.type-space'),
+                        key: ' '
+                    },
+                    {
+                        label: $translate.instant('gis.importer.csv.delimiter.type-colon'),
+                        key: ':'
+                    },
+                    {
+                        label: $translate.instant('gis.importer.csv.delimiter.type-semicolon'),
+                        key: ';'
+                    },
+                    {
+                        label: $translate.instant('gis.importer.csv.delimiter.type-pipe'),
+                        key: '|'
+                    },
+                    {
+                        label: $translate.instant('gis.importer.csv.delimiter.type-custom'),
+                        key: 'custom'
+                    }
+                ];
                 vm.csvHeaderColumns = [];
-                vm.parsedKml;
-                vm.shapeType;
+                vm.shapeType = '';
 
                 httpGetPromise.getData('api/geodata/epsg_codes').then(function(response) {
                     vm.epsgs = response;
@@ -150,7 +179,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                             vm.readShapeFiles(reader, files, i+1);
                             break;
                     }
-                }
+                };
 
                 vm.setEpsgToSrid = function(srid) {
                     for(var j=0, e; e=vm.epsgs[j]; j++) {
@@ -159,7 +188,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                             break;
                         }
                     }
-                }
+                };
 
                 vm.setEpsgToText = function(srtext) {
                     for(var j=0, e; e=vm.epsgs[j]; j++) {
@@ -168,10 +197,17 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                             break;
                         }
                     }
-                }
+                };
 
                 vm.uploadFile = function(file) {
                     fileService.uploadFiles([file], null, vm.uploadedData);
+                };
+
+                vm.updateDelimiterType = function(delim) {
+                    if(delim.key != 'custom') {
+                        vm.csvDelim = delim.key;
+                        vm.parseCsvHeader();
+                    }
                 };
 
                 vm.parseCsvHeader = function() {
@@ -248,7 +284,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                     for(var i=0, f; f=geojson.features[i]; i++) {
                         f.geometry.coordinates = proj.inverse(f.geometry.coordinates);
                     }
-                }
+                };
 
                 vm.upload = function() {
                     if(!vm.result[vm.activeTab]) return;
@@ -259,7 +295,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                     httpPostPromise.getData('api/geodata/geojson', formData).then(function(response) {
                         // TODO add new geo objects
                     });
-                }
+                };
 
                 vm.close = function() {
                     $scope.$dismiss('close');
@@ -269,7 +305,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
         }).result.then(function(reason) {
         }, function(reason) {
         });
-    }
+    };
 
     vm.toggleLayerGroupVisibility = function(layerGroup, isVisible) {
         var p = vm.map.layers.overlays[layerGroup.id];
