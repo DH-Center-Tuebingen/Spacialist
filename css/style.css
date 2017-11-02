@@ -816,7 +816,7 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     height: 100% !important;
 }
 
-.label {
+.atom-label {
 	text-shadow: -1px 1px 1px rgb(0,0,0);
 	margin-left: 25px;
 }

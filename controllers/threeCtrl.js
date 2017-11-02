@@ -71,6 +71,14 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         camera.updateProjectionMatrix();
     };
 
+    function updateProgress(event) {
+        if(event.lengthComputable) {
+            $scope.status.progress = Math.round(event.loaded / event.total * 100);
+            $scope.$apply();
+            console.log('Downloaded ' + $scope.status.progress + '% of model');
+        }
+    };
+
     function loadObj(path, objFile, materials) {
         var objLoader = new THREE.OBJLoader2();
         if(materials) {
@@ -85,11 +93,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 onWindowResize();
             },
             function(event) { // onProgress
-                if(event.lengthComputable) {
-                    $scope.status.progress = Math.round(event.loaded / event.total * 100);
-                    $scope.$apply();
-                    console.log('Downloaded ' + $scope.status.progress + '% of model');
-                }
+                updateProgress(event);
             },
             function(event) { // onError
             }
@@ -200,11 +204,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                     onWindowResize();
                 },
                 function(event) { // onProgress
-                    if(event.lengthComputable) {
-                        $scope.status.progress = Math.round(event.loaded / event.total * 100);
-                        $scope.$apply();
-                        console.log('Downloaded ' + $scope.status.progress + '% of model');
-                    }
+                    updateProgress(event);
                 },
                 function(event) { // onError
                 });
@@ -298,7 +298,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 
                 var atom = json.atoms[i];
 				var text = document.createElement('div');
-				text.className = 'label';
+				text.className = 'atom-label';
 				text.style.color = 'rgb(' + atom[3][0] + ',' + atom[3][1] + ',' + atom[3][2] + ')';
 				text.textContent = atom[4];
 				var label = new THREE.CSS2DObject(text);
@@ -330,6 +330,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 group.add(object);
             }
             onWindowResize();
+        },
+        function(event) { // onProgress
+            updateProgress(event);
         });
     }
 
@@ -443,7 +446,6 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     }
 
     function render() {
-        if(labelRenderer) labelRenderer.render(scene, camera);
         if(renderer.vr && renderer.vr.enabled) {
             controller1.update();
             controller2.update();
