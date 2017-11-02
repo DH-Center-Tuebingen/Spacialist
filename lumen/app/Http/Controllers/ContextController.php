@@ -403,7 +403,7 @@ class ContextController extends Controller {
                     'tags' => []
                 ];
                 if(isset($f->thumb) && substr($f->mime_type, 0, 6) === 'image/') {
-                    $thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $f->thumb);
+                    $thumb_url = Helpers::getFullFilePath($f->thumb);
                     $matches[$key]['thumb_url'] = $thumb_url;
                 }
             } else {

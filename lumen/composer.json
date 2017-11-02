@@ -14,7 +14,8 @@
         "zizaco/entrust": "1.8.0-alpha1",
         "phaza/laravel-postgis": "^3.1",
         "renanbr/bibtex-parser": "^0.3",
-        "lsolesen/pel": "^0.9.6"
+        "lsolesen/pel": "^0.9.6",
+        "wapmorgan/unified-archive": "^0.0.10"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

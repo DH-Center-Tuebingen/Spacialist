@@ -795,7 +795,7 @@ spacialistApp.filter('csv2table', function() {
         var rows = csv.split('\n');
         var rendered = '<table class="table table-striped table-hovered">';
         for(var i=0; i<rows.length; i++) {
-            rendered += '<tr>';
+        rendered += '<tr>';
             var text = rows[i];
             // continue if input string is no valid csv row
             if (!re_valid.test(text)) continue;
@@ -1420,6 +1420,32 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 vm.mimeType = mimeType;
                                 vm.availableProperties = ['copyright', 'description'];
                                 vm.fileEdits = {};
+
+                                vm.isMarkdown = function(file) {
+                                    var mimeType = file.mime_type;
+                                    var suffix = file.filename.substr(file.filename.lastIndexOf('.')+1);
+                                    switch(suffix) {
+                                        case 'md':
+                                        case 'markdown':
+                                        case 'mkd':
+                                            return true;
+                                    }
+
+                                    if(mimeType == 'text/markdown') return true;
+                                    return false;
+                                };
+
+                                vm.isCsv = function(file) {
+                                    var mimeType = file.mime_type;
+                                    var suffix = file.filename.substr(file.filename.lastIndexOf('.')+1);
+                                    switch(suffix) {
+                                        case 'csv':
+                                            return true;
+                                    }
+
+                                    if(mimeType == 'text/csv') return true;
+                                    return false;
+                                };
 
                                 vm.openContext = function(cid) {
                                     $scope.$close('context');

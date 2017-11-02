@@ -19,6 +19,8 @@ use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelTag;
 use lsolesen\pel\PelIfd;
 use lsolesen\pel\PelDataWindow;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use \wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class FileController extends Controller
 {
@@ -65,7 +67,7 @@ class FileController extends Controller
         $mimeType = $file->mime_type;
         $isImage = substr($mimeType, 0, strlen($this->imageMime)) === $this->imageMime;
         if(!$isImage) return null;
-        $url = Storage::url(env('SP_FILE_PATH') .'/'. $file->filename);
+        $url = Helpers::getStorageFilePath($file->filename);
         if(Helpers::startsWith($url, '/')) {
             $url = substr($url, 1);
         }
@@ -103,9 +105,9 @@ class FileController extends Controller
                 ->where('id', $id)
                 ->first();
         if($file == null) return null;
-        $file->url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->filename);
+        $file->url = Helpers::getFullFilePath($file->filename);
         if(substr($file->mime_type, 0, 6) === 'image/') {
-            $file->thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->thumbname);
+            $file->thumb_url = Helpers::getFullFilePath($file->thumbname);
         }
         $file->linked_files = ContextFile::where('photo_id', '=', $file->id)->get();
 
@@ -131,6 +133,41 @@ class FileController extends Controller
         return $file;
     }
 
+    private function getFileTreeFromZip($files, $archive, $prefix = '') {
+        $tree = [];
+        $subfolders = [];
+        $folders = [];
+        foreach($files as $file) {
+            $isInSubfolder = false;
+            foreach($subfolders as $fkey) {
+                if(Helpers::startsWith($file, $fkey)) {
+                    $isInSubfolder = true;
+                    $subname = substr($file, strlen($fkey));
+                    $folders[$fkey][] = $subname;
+                    break;
+                }
+            }
+            if($isInSubfolder) continue;
+            $isDirectory = false;
+            // check if "file" is folder
+            if(Helpers::endsWith($file, '/')) {
+                $isDirectory = true;
+                $subfolders[] = $file;
+                $folders[$file] = [];
+            } else {
+                $isDirectory = false;
+            }
+            $data = $archive->getFileData($prefix.$file);
+            $data->is_directory = $isDirectory;
+            $data->clean_filename = $file;
+            $tree[$file] = $data;
+        }
+        foreach($folders as $fkey => $subfiles) {
+            $tree[$fkey]->children = $this->getFileTreeFromZip($subfiles, $archive, $prefix.$fkey);
+        }
+        return $tree;
+    }
+
     // GET
 
     public function getFiles() {
@@ -145,9 +182,9 @@ class FileController extends Controller
                     ->orderBy('id', 'asc')
                     ->get();
         foreach($files as &$file) {
-            $file->url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->filename);
+            $file->url = Helpers::getFullFilePath($file->filename);
             if(substr($file->mime_type, 0, 6) === 'image/');
-            $file->thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $file->thumbname);
+            $file->thumb_url = Helpers::getFullFilePath($file->thumbname);
             $file->linked_files = ContextFile::where('photo_id', '=', $file->id)->get();
 
             if($user->can('edit_photo_props')) {
@@ -223,6 +260,50 @@ class FileController extends Controller
         return response()->json([
             'files' => $files
         ]);
+    }
+
+    public function getZipContents($id) {
+        $user = \Auth::user();
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        try {
+            $file = File::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This file does not exist'
+            ]);
+        }
+        $path = '.' . Helpers::getStorageFilePath($file->name);
+        $archive = UnifiedArchive::open($path);
+        $files = $this->getFileTreeFromZip($archive->getFileNames(), $archive);
+        return response()->json($files);
+    }
+
+    public function downloadZipFileFile($id, $filepath) {
+        // $filepath = urldecode($filepath);
+        \Log::info("Going to download: " . $filepath);
+        $user = \Auth::user();
+        if(!$user->can('view_photos')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        try {
+            $file = File::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This file does not exist'
+            ]);
+        }
+        $path = '.' . Helpers::getStorageFilePath($file->name);
+        $archive = UnifiedArchive::open($path);
+        $content = $archive->getFileContent($filepath);
+        return response($content);
     }
 
     // POST
