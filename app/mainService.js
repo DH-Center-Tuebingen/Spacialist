@@ -278,18 +278,22 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             var index;
             var children;
             if(rootId && rootId > 0) {
-                index = contexts.children[rootId].indexOf(id);
+                index = contexts.children[rootId].findIndex(function(child) {
+                    return child.id == id;
+                });
                 children = contexts.children[rootId];
             }
             else {
-                index = contexts.roots.indexOf(id);
+                index = contexts.roots.findIndex(function(child) {
+                    return child.id == id;
+                });
                 children = contexts.roots;
             }
             if(index > -1) {
                 children.splice(index, 1);
             }
             for(var i=index; i<children.length; i++) {
-                contexts.data[children[i]].rank--;
+                contexts.data[children[i].id].rank--;
             }
             delete contexts.data[id];
         });
