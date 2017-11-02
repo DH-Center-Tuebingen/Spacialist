@@ -810,8 +810,7 @@ spacialistApp.filter('csv2table', function() {
         }
         rendered += '</tr>';
 
-        // start at index 1 to skip header row
-        for(var i=1; i<rows.length; i++) {
+        for(var i=0; i<rows.length; i++) {
             rendered += '<tr>';
             var r = rows[i];
 
