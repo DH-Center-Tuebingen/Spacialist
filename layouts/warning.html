@@ -8,9 +8,9 @@
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-success"
-      ng-click="mc.onConfirm()">{{ 'save-and-continue' | translate }}</button>
+      ng-click="mc.onConfirm()" ng-disabled="!mc.onConfirm">{{ 'save-and-continue' | translate }}</button>
     <button type="button" class="btn btn-default"
-      ng-click="mc.onDiscard()">{{ 'discard-changes' | translate }}</button>
+      ng-click="mc.onDiscard()" ng-disabled="!mc.onDiscard">{{ 'discard-changes' | translate }}</button>
     <button type="button" class="btn btn-danger"
       ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
 </div>

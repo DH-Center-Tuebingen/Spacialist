@@ -229,14 +229,18 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
-                this.onConfirm = function() {
-                    onConfirm();
-                    $uibModalInstance.dismiss('ok');
-                };
-                this.onDiscard = function() {
-                    onDiscard();
-                    $uibModalInstance.dismiss('ok');
-                };
+                if(onConfirm) {
+                    this.onConfirm = function() {
+                        onConfirm();
+                        $uibModalInstance.dismiss('ok');
+                    };
+                }
+                if(onDiscard) {
+                    this.onDiscard = function() {
+                        onDiscard();
+                        $uibModalInstance.dismiss('ok');
+                    };
+                }
             },
             controllerAs: 'mc'
         });
@@ -1914,19 +1918,22 @@ spacialistApp.run(function($state, mainService, mapService, userService, literat
                 form.$setPristine();
                 $state.go(trans.targetState().name(), trans.targetState().params());
             };
-            var onConfirm = function() {
-                form.$setPristine();
-                var contexts = trans.injector(null, 'from').get('contexts');
-                var data = trans.injector(null, 'from').get('data');
-                mainService.storeElement(editContext, data).then(function(response) {
-                    if(response.error){
-                        modalFactory.errorModal(response.error);
-                        return;
-                    }
-                    mainService.updateContextList(contexts, editContext, response);
-                });
-                $state.go(trans.targetState().name(), trans.targetState().params());
-            };
+            var onConfirm;
+            if(form.$valid) {
+                onConfirm = function() {
+                    form.$setPristine();
+                    var contexts = trans.injector(null, 'from').get('contexts');
+                    var data = trans.injector(null, 'from').get('data');
+                    mainService.storeElement(editContext, data).then(function(response) {
+                        if(response.error){
+                            modalFactory.errorModal(response.error);
+                            return;
+                        }
+                        mainService.updateContextList(contexts, editContext, response);
+                    });
+                    $state.go(trans.targetState().name(), trans.targetState().params());
+                };
+            }
             modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
             return false;
         }
