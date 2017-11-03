@@ -137,6 +137,8 @@ $app->group([
     ], function($app) {
         $app->get('', 'OverlayController@getOverlays');
         $app->get('geometry_types', 'OverlayController@getGeometryTypes');
+        $app->get('{id:[0-9]+}/export', 'OverlayController@exportLayer');
+        $app->get('{id:[0-9]+}/export/{type}', 'OverlayController@exportLayer');
 
         $app->post('add', 'OverlayController@addLayer');
 

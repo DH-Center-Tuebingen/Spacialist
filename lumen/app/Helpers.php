@@ -35,6 +35,18 @@ class Helpers {
         return Storage::url(env('SP_FILE_PATH') .'/'. $filename);
     }
 
+    public static function parseSql($builder) {
+        $sql = $builder->toSql();
+        $bindings = $builder->getBindings();
+
+        foreach($bindings as $binding) {
+            $value = is_numeric($binding) ? $binding : "'".$binding."'";
+            $sql = preg_replace('/\?/', $value, $sql, 1);
+        }
+
+        return $sql;
+    }
+
     public static function computeCitationKey($l) {
         $key;
         if($l['author'] != null) {

@@ -426,6 +426,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                         currentLayer.layerOptions.type = layer.layer_type;
                         break;
                     case 'UNLINKED':
+                        var orgId = id;
                         id = layer.id = 'unlinked';
                         currentLayer.data = {
                             type: 'FeatureCollection',
@@ -433,6 +434,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                         };
                         currentLayer.type = 'geoJSONShape';
                         currentLayer.layerOptions = setLayerOptions(layer);
+                        currentLayer.layerOptions.original_id = orgId;
                         setGeojsonLayerOptions(currentLayer.layerOptions, mapArr, contexts);
                         break;
                     default:

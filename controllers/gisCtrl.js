@@ -1,33 +1,110 @@
-spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$timeout', function(mapService, $uibModal, $translate, $timeout) {
+spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal', '$translate', '$timeout', function(mapService, httpGetPromise, $uibModal, $translate, $timeout) {
     var vm = this;
 
     vm.layerVisibility = {};
     vm.sublayerVisibility = {};
     vm.sublayerColors = {};
 
+    vm.exportLayer = function(l, type) {
+        var id = l.id;
+        var filename;
+        if(!Number.isInteger(id) && id.toUpperCase() == 'UNLINKED') {
+            id = vm.map.mapLayers[id].options.original_id;
+            filename = 'Unlinked';
+        } else {
+            filename = vm.concepts[l.thesaurus_url].label;
+        }
+        httpGetPromise.getData('api/overlay/' + id + '/export/' + type).then(function(response) {
+            var suffix;
+            switch(type) {
+                case 'csv':
+                case 'wkt':
+                    suffix = '.csv';
+                    break;
+                case 'kml':
+                    suffix = '.kml';
+                    break;
+                case 'kmz':
+                    suffix = '.kmz';
+                    break;
+                case 'gml':
+                    suffix = '.gml';
+                    break;
+                case 'geojson':
+                default:
+                    suffix = '.json';
+                    break;
+            }
+            filename += suffix;
+            createDownloadLink(response, filename);
+        });
+    }
+
     vm.layerContextMenu = [
-        [
-            '<i class="material-icons md-18 fa-light context-menu-icon">zoom_in</i> ' + $translate.instant('gis.context-menu.zoom-to-layer'),
-            function($itemScope, $event, modelValue, text, $li) {
+        {
+            html: '<a style="padding-right: 8px;" tabindex="-1" href="#"><i class="material-icons md-18 fa-light context-menu-icon">zoom_in</i> ' + $translate.instant('gis.context-menu.zoom-to-layer') + '</a>',
+            click:  function($itemScope, $event, modelValue, text, $li) {
                 var parentLayer = vm.map.mapLayers[$itemScope.l.id];
                 mapService.fitBoundsToLayer(parentLayer, vm.map);
             },
-            function($itemScope) {
+            enabled: function($itemScope) {
+                console.log($itemScope.l);
                 return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
-            }
-        ],
-        [
-            '<i class="material-icons md-18 fa-light context-menu-icon">file_upload</i> ' + $translate.instant('gis.context-menu.export-layer'),
-            function($itemScope, $event, modelValue, text, $li) {
-                return;
             },
-            function($itemScope) {
-                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
+            displayed: function() {
+                return true;
             }
-        ],
-        [
-            '<i class="material-icons md-18 fa-light context-menu-icon">timer</i> ' + $translate.instant('gis.context-menu.toggle-feature-count'),
-            function($itemScope, $event, modelValue, text, $li) {
+        },
+        {
+            html: '<a style="padding-right: 8px;" tabindex="-1" href="#"><i class="material-icons md-18 fa-light context-menu-icon">file_upload</i> ' + $translate.instant('gis.context-menu.export-layer') + '</a>',
+            click: function($itemScope, $event, modelValue, text, $li) {
+                vm.exportLayer($itemScope.l, 'geojson');
+            },
+            enabled: function($itemScope) {
+                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
+            },
+            children: [
+                {
+                    text: 'GeoJSON',
+                    click: function($itemScope, $event, modelValue, text, $li) {
+                        vm.exportLayer($itemScope.l, 'geojson');
+                    },
+                },
+                {
+                    text: 'CSV',
+                    click: function($itemScope, $event, modelValue, text, $li) {
+                        vm.exportLayer($itemScope.l, 'csv');
+                    },
+                },
+                {
+                    text: 'WKT',
+                    click: function($itemScope, $event, modelValue, text, $li) {
+                        vm.exportLayer($itemScope.l, 'wkt');
+                    },
+                },
+                {
+                    text: 'KML',
+                    click: function($itemScope, $event, modelValue, text, $li) {
+                        vm.exportLayer($itemScope.l, 'kml');
+                    },
+                },
+                {
+                    text: 'KMZ',
+                    click: function($itemScope, $event, modelValue, text, $li) {
+                        vm.exportLayer($itemScope.l, 'kmz');
+                    },
+                },
+                {
+                    text: 'GML',
+                    click: function($itemScope, $event, modelValue, text, $li) {
+                        vm.exportLayer($itemScope.l, 'gml');
+                    },
+                }
+            ]
+        },
+        {
+            html: '<a style="padding-right: 8px;" tabindex="-1" href="#"><i class="material-icons md-18 fa-light context-menu-icon">timer</i> ' + $translate.instant('gis.context-menu.toggle-feature-count') + '</a>',
+            click: function($itemScope, $event, modelValue, text, $li) {
                 var l = $itemScope.l;
                 if(l.counter > 0) {
                     delete l.counter;
@@ -35,13 +112,13 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                     l.counter = vm.map.mapLayers[l.id].getLayers().length;
                 }
             },
-            function($itemScope) {
+            enabled: function($itemScope) {
                 return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
             }
-        ],
-        [
-            '<i class="material-icons md-18 fa-light context-menu-icon">settings</i> ' + $translate.instant('gis.context-menu.properties'),
-            function($itemScope, $event, modelValue, text, $li) {
+        },
+        {
+            html: '<a style="padding-right: 8px;" tabindex="-1" href="#"><i class="material-icons md-18 fa-light context-menu-icon">settings</i> ' + $translate.instant('gis.context-menu.properties') + '</a>',
+            click: function($itemScope, $event, modelValue, text, $li) {
                 var l = $itemScope.l;
                 var concepts = vm.concepts;
                 $uibModal.open({
@@ -62,7 +139,7 @@ spacialistApp.controller('gisCtrl', ['mapService', '$uibModal', '$translate', '$
                 }, function(reason) {
                 });
             }
-        ]
+        }
     ];
 
     vm.openImportWindow = function() {
