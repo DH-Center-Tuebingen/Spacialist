@@ -3,7 +3,20 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased - Ephesus
 ### Added
-- GIS Page
+- GIS View
+  - Importer
+    - CSV/DSV
+    - WKT (as CSV)
+    - KML/KMZ
+    - Shape Files
+    - GeoJSON
+  - Export layers
+    - GeoJSON (default)
+    - CSV
+    - WKT (as CSV)
+    - KML/KMZ
+    - GML
+  - Layer options
 ### Changed
 ### Fixed
 ### Removed/Deprecated
