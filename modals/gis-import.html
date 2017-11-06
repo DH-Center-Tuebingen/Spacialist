@@ -13,6 +13,9 @@
             <li ng-class="{active: $ctrl.activeTab == 'shape'}" ng-click="$ctrl.activeTab = 'shape'">
                 <a href="" translate="gis.importer.type.shape"></a>
             </li>
+            <li ng-class="{active: $ctrl.activeTab == 'geojson'}" ng-click="$ctrl.activeTab = 'geojson'">
+                <a href="" translate="gis.importer.type.geojson"></a>
+            </li>
         </ul>
     </div>
     <div class="col-md-10">
@@ -87,16 +90,13 @@
                         </ui-select-choices>
                     </ui-select>
                 </div>
-                <div class="form-group">
+                <div class="form-group scrollable-dropdown">
                     <label for="epsg_csv" translate="gis.importer.epsg"></label>
-                    <ui-select id="epsg_csv" class="form-control" ng-model="$ctrl.epsg">
-                      <ui-select-match allow-clear="true">
-                          {{ $select.selected.auth_name }} {{ $select.selected.auth_srid }}
-                      </ui-select-match>
-                      <ui-select-choices repeat="sr in $ctrl.epsgs | filter: $select.search">
-                        <span ng-bind-html="sr.auth_name | highlight: $select.search"></span> <span ng-bind-html="sr.auth_srid | highlight: $select.search"></span>
-                      </ui-select-choices>
-                    </ui-select>
+                    <input class="form-control" type="text" id="epsg_csv" ng-model="$ctrl.epsg" ng-model-options="{ debounce: 250 }" uib-typeahead="result as (result.auth_name + ' ' + result.auth_srid) for result in $ctrl.searchEPSG($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsEpsg" typeahead-no-results="noResultsEpsg" />
+                    <i ng-show="loadingResultsEpsg" class="material-icons">refresh</i>
+                    <div ng-show="noResultsEpsg && result.name.length >= 3">
+                        <i class="material-icons md-18">clear</i> No Results Found
+                    </div>
                 </div>
                 <button type="button" class="btn btn-success" ng-click="$ctrl.parseCsv($ctrl.content.csv, $ctrl.x, $ctrl.y, $ctrl.wkt, $ctrl.csvDelim, $ctrl.epsg)" ng-disabled="$ctrl.parsingDisabled()" translate="gis.importer.parse.csv">
                 </button>
@@ -136,22 +136,31 @@
                 <i ng-if="!$ctrl.content.shape.qpj" class="material-icons fa-red">close</i>
             </span>
             <form class="form-inline" ng-show="$ctrl.content.shape">
-                <div class="form-group">
+                <div class="form-group scrollable-dropdown">
                     <label for="epsg_shape" translate="gis.importer.epsg"></label>
-                    <ui-select id="epsg_shape" class="form-control" ng-model="$ctrl.epsg">
-                      <ui-select-match allow-clear="true">
-                          {{ $select.selected.auth_name }} {{ $select.selected.auth_srid }}
-                      </ui-select-match>
-                      <ui-select-choices repeat="sr in $ctrl.epsgs | filter: $select.search">
-                        <span ng-bind-html="sr.auth_name | highlight: $select.search"></span> <span ng-bind-html="sr.auth_srid | highlight: $select.search"></span>
-                      </ui-select-choices>
-                    </ui-select>
+                    <input class="form-control" type="text" id="epsg_shape" ng-model="$ctrl.epsg" ng-model-options="{ debounce: 250 }" uib-typeahead="result as (result.auth_name + ' ' + result.auth_srid) for result in $ctrl.searchEPSG($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsEpsg" typeahead-no-results="noResultsEpsg" />
+                    <i ng-show="loadingResultsEpsg" class="material-icons">refresh</i>
+                    <div ng-show="noResultsEpsg && result.name.length >= 3">
+                        <i class="material-icons md-18">clear</i> No Results Found
+                    </div>
                 </div>
                 <button type="button" class="btn btn-success" ng-click="$ctrl.parseShape($ctrl.content.shape, $ctrl.epsg)" ng-disabled="!$ctrl.content.shape.shp || !$ctrl.epsg" translate="gis.importer.parse.shape">
                 </button>
             </form>
         </div>
-        <div ng-show="$ctrl.activeTab == 'WKT'">
+        <div ng-show="$ctrl.activeTab == 'geojson'">
+            <form class="form-inline" ng-show="$ctrl.content.geojson">
+                <div class="form-group scrollable-dropdown">
+                    <label for="epsg_geojson" translate="gis.importer.epsg"></label>
+                    <input class="form-control" type="text" id="epsg_geojson" ng-model="$ctrl.epsg" ng-model-options="{ debounce: 250 }" uib-typeahead="result as (result.auth_name + ' ' + result.auth_srid) for result in $ctrl.searchEPSG($viewValue)" typeahead-min-length="3" typeahead-wait-ms="50" typeahead-loading="loadingResultsEpsg" typeahead-no-results="noResultsEpsg" />
+                    <i ng-show="loadingResultsEpsg" class="material-icons">refresh</i>
+                    <div ng-show="noResultsEpsg && result.name.length >= 3">
+                        <i class="material-icons md-18">clear</i> No Results Found
+                    </div>
+                </div>
+                <button type="button" class="btn btn-success" ng-click="$ctrl.parseGeoJSON($ctrl.content.geojson, $ctrl.epsg)" ng-disabled="!$ctrl.content.geojson || !$ctrl.epsg" translate="gis.importer.parse.geojson">
+                </button>
+            </form>
         </div>
 
         <div class="flex-hr-start" ng-show="$ctrl.preview[$ctrl.activeTab]">

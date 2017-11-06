@@ -48,7 +48,6 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                 mapService.fitBoundsToLayer(parentLayer, vm.map);
             },
             enabled: function($itemScope) {
-                console.log($itemScope.l);
                 return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
             },
             displayed: function() {
@@ -192,6 +191,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                 });
 
                 vm.loadFileContent = function(file) {
+                    if(file == null) return;
                     var reader = new FileReader();
                     reader.onload = function(e) {
                         $scope.$apply(function() {
@@ -209,6 +209,9 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                                     break;
                                 case 'csv':
                                     vm.parseCsvHeader();
+                                    break;
+                                case 'geojson':
+                                    vm.content.geojson = angular.fromJson(vm.content.geojson);
                                     break;
                             }
                         });
@@ -321,7 +324,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                         }, function(err, data) {
                             console.log(err);
                             vm.preview.csv = angular.copy(data);
-                            vm.ConvertProjection(vm.preview.csv, epsg);
+                            vm.convertProjection(vm.preview.csv, epsg);
                             vm.result.csv = data;
                         });
                     } else if(wkt) {
@@ -342,7 +345,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                             });
                         }
                         vm.preview.csv = angular.copy(featureCollection);
-                        vm.ConvertProjection(vm.preview.csv, epsg);
+                        vm.convertProjection(vm.preview.csv, epsg);
                         vm.result.csv = featureCollection;
                     }
                 };
@@ -380,12 +383,29 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                 vm.parseShape = function(content, epsg) {
                     shapefile.read(content.shp, content.dbf).then(function(response) {
                         vm.preview.shape = angular.copy(response);
-                        vm.ConvertProjection(vm.preview.shape, epsg);
+                        vm.convertProjection(vm.preview.shape, epsg);
                         vm.result.shape = response;
                     });
                 };
 
-                vm.ConvertProjection = function(geojson, epsg) {
+                vm.parseGeoJSON = function(content, epsg) {
+                    if(!vm.content.geojson || !vm.epsg) return;
+                    vm.preview.geojson = content;
+                    vm.convertProjection(vm.preview.geojson, epsg);
+                    vm.result.geojson = content;
+                }
+
+                vm.searchEPSG = function(text) {
+                    return vm.epsgs.filter(function(epsg) {
+                        // check if text matches either srid or srtext
+                        // do not add epsg to result if not
+                        text = text.toUpperCase();
+                        if(epsg.auth_srid.toString().indexOf(text) == -1 && epsg.srtext.toUpperCase().indexOf(text) == -1) return false;
+                        return true;
+                    })
+                }
+
+                vm.convertProjection = function(geojson, epsg) {
                     var proj = proj4(epsg.srtext);
                     for(var i=0, f; f=geojson.features[i]; i++) {
                         // TODO proj4js can only convert simple points ([x, y] or {x: x, y: y})

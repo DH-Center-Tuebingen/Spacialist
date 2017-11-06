@@ -263,6 +263,11 @@ div[resizeable] {
     overflow-x: auto;
 }
 
+.scrollable-dropdown > .dropdown-menu {
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
 .thumb-wrapper {
     position: relative;
     height: 225px;
