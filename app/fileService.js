@@ -28,6 +28,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
                 case 'markdown':
                 case 'mkd':
                 case 'csv':
+                case 'json':
                     return 'text';
                 case 'zip':
                 case 'rar':
@@ -55,6 +56,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         if(mt.startsWith('audio/')) return 'audio';
         if(mt.startsWith('video/')) return 'video';
         if(mt == 'text/markdown') return 'text';
+        if(mt == 'application/json') return 'text';
         if(mt == 'text/csv') return 'text';
 
         // default is not supported
