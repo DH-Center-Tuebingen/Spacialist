@@ -255,6 +255,7 @@
     "context-menu.delete": "Delete",
 
     "snackbar.data-stored.success": "Successfully stored data.",
+    "snackbar.data-stored.error": "Error while storing data.",
     "snackbar.data-updated.success": "Successfully updated data.",
     "snackbar.data-updated.error": "Error while updating data.",
     "snackbar.element-deleted.success": "{{ name }} deleted.",

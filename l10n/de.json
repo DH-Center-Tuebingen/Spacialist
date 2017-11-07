@@ -266,6 +266,7 @@
     "context-menu.delete": "Löschen",
 
     "snackbar.data-stored.success": "Daten erfolgreich gespeichert.",
+    "snackbar.data-stored.error": "Fehler beim Speichern der Daten.",
     "snackbar.data-updated.success": "Daten erfolgreich aktualisiert.",
     "snackbar.data-updated.error": "Fehler beim Aktualisieren der Daten.",
     "snackbar.element-deleted.success": "{{ name }} gelöscht.",

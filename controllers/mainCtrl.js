@@ -6,6 +6,11 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
     $scope.filterTree = mainService.filterTree;
 
     vm.onStore = function(context, data) {
+        if(context.form.$invalid) {
+            var content = $translate.instant('snackbar.data-stored.error');
+            snackbarService.addAutocloseSnack(content, 'error');
+            return;
+        }
         mainService.storeElement(context, data).then(function(response) {
             if(response.error){
                 modalFactory.errorModal(response.error);

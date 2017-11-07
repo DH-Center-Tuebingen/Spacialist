@@ -3,12 +3,12 @@
         <small><span ng-if="$ctrl.editContext.uri">{{ $ctrl.concepts[$ctrl.editContext.uri].label }} &mdash; </span>{{'context-form.heading'|translate}}</small>
     </h3>
     <p class="btn-group-sm nav-inline">
-        <a class="btn btn-success btn-fab btn-fab-mini" href="" ng-click="$ctrl.store($ctrl.data)" ng-disabled="$ctrl.editContext.form.$invalid">
+        <button type="button" class="btn btn-success btn-fab btn-fab-mini" ng-click="$ctrl.store($ctrl.data)" ng-disabled="$ctrl.editContext.form.$invalid">
             <i class="material-icons">save</i>
-        </a>
-        <a class="btn btn-danger btn-fab btn-fab-mini" ui-sref="root.spacialist.context.data.delete">
+        </button>
+        <button type="button" class="btn btn-danger btn-fab btn-fab-mini" ui-sref="root.spacialist.context.data.delete">
             <i class="material-icons">delete</i>
-        </a>
+        </button>
     </p>
     <form class="form-horizontal" role="form" ng-if="$ctrl.fields" name="$ctrl.editContext.form">
         <div class="form-group form-group-unpadded">

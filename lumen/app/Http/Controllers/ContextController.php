@@ -1440,6 +1440,11 @@ class ContextController extends Controller {
             if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
 
             if($datatype === 'epoch' && is_object($jsonArr)) {
+                if(empty(get_object_vars($jsonArr))) {
+                    return [
+                        'error' => 'Epoch object is empty.'
+                    ];
+                }
                 $startExists = false;
                 if(isset($jsonArr->start)) {
                     $startExists = true;
