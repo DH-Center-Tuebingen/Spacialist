@@ -25,12 +25,14 @@
         <div ui-view="header"></div>
         <div ui-view="content" class="col-md-12"></div>
         <script src="node_modules/three/build/three.min.js"></script>
+        <script src="node_modules/three/examples/js/renderers/CSS2DRenderer.js"></script>
         <script src="node_modules/three/examples/js/vr/WebVR.js"></script>
         <script src="node_modules/three/examples/js/vr/ViveController.js"></script>
         <script src="node_modules/three/examples/js/loaders/ColladaLoader2.js"></script>
         <script src="node_modules/three/examples/js/loaders/OBJLoader2.js"></script>
         <script src="node_modules/three/examples/js/loaders/MTLLoader.js"></script>
         <script src="node_modules/three/examples/js/loaders/DDSLoader.js"></script>
+        <script src="node_modules/three/examples/js/loaders/PDBLoader.js"></script>
         <script src="node_modules/three/examples/js/controls/OrbitControls.js"></script>
         <script src="node_modules/pdfjs-dist/build/pdf.min.js"></script>
         <script src="node_modules/marked/marked.min.js"></script>
@@ -44,7 +46,7 @@
         <script src="node_modules/angular-filter/dist/angular-filter.min.js"></script>
         <script src="node_modules/angular-messages/angular-messages.min.js"></script>
         <script src="node_modules/angular-translate/dist/angular-translate.min.js"></script>
-        <script src="node_modules/angular-translate-storage-cookie/angular-translate-storage-cookie.min.js"></script>
+        <script src="node_modules/angular-translate/dist/angular-translate-storage-cookie/angular-translate-storage-cookie.min.js"></script>
         <script src="node_modules/angular-translate-storage-local/angular-translate-storage-local.min.js"></script>
         <script src="node_modules/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
         <script src="node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
@@ -104,6 +106,7 @@
         <script src="controllers/layerEditCtrl.js"></script>
         <script src="controllers/pdfCtrl.js"></script>
         <script src="controllers/threeCtrl.js"></script>
+        <script src="controllers/zipCtrl.js"></script>
         <script src="controllers/geodataCtrl.js"></script>
         <script src="components/bibliography.js"></script>
         <script src="components/editor.js"></script>

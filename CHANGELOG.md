@@ -1,6 +1,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.4.2
+### Added
+- New supported filetypes
+  - `.pdb` files (Protein Data Bank)
+  - compressed files (e.g. `.zip`, `.rar`, `.tar`)
+- Download button in the file viewer
+### Changed
+### Fixed
+- Delete Context Modal didn't get closed and context was not removed (see #292)
+- Add disabled state to round _Save_ button and _Unstaged Changes_ Popup (see #293)
+- Better filetype handling.
+### Removed/Deprecated
+
 ## 0.4.1
 ### Added
 - New Datatype: Table

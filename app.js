@@ -229,14 +229,18 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
                 this.cancel = function(result) {
                     $uibModalInstance.dismiss('cancel');
                 };
-                this.onConfirm = function() {
-                    onConfirm();
-                    $uibModalInstance.dismiss('ok');
-                };
-                this.onDiscard = function() {
-                    onDiscard();
-                    $uibModalInstance.dismiss('ok');
-                };
+                if(onConfirm) {
+                    this.onConfirm = function() {
+                        onConfirm();
+                        $uibModalInstance.dismiss('ok');
+                    };
+                }
+                if(onDiscard) {
+                    this.onDiscard = function() {
+                        onDiscard();
+                        $uibModalInstance.dismiss('ok');
+                    };
+                }
             },
             controllerAs: 'mc'
         });
@@ -795,7 +799,7 @@ spacialistApp.filter('csv2table', function() {
         var rows = csv.split('\n');
         var rendered = '<table class="table table-striped table-hovered">';
         for(var i=0; i<rows.length; i++) {
-            rendered += '<tr>';
+        rendered += '<tr>';
             var text = rows[i];
             // continue if input string is no valid csv row
             if (!re_valid.test(text)) continue;
@@ -1421,6 +1425,32 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 vm.availableProperties = ['copyright', 'description'];
                                 vm.fileEdits = {};
 
+                                vm.isMarkdown = function(file) {
+                                    var mimeType = file.mime_type;
+                                    var suffix = file.filename.substr(file.filename.lastIndexOf('.')+1);
+                                    switch(suffix) {
+                                        case 'md':
+                                        case 'markdown':
+                                        case 'mkd':
+                                            return true;
+                                    }
+
+                                    if(mimeType == 'text/markdown') return true;
+                                    return false;
+                                };
+
+                                vm.isCsv = function(file) {
+                                    var mimeType = file.mime_type;
+                                    var suffix = file.filename.substr(file.filename.lastIndexOf('.')+1);
+                                    switch(suffix) {
+                                        case 'csv':
+                                            return true;
+                                    }
+
+                                    if(mimeType == 'text/csv') return true;
+                                    return false;
+                                };
+
                                 vm.openContext = function(cid) {
                                     $scope.$close('context');
                                     $state.go('root.spacialist.context.data', {id: cid});
@@ -1888,19 +1918,22 @@ spacialistApp.run(function($state, mainService, mapService, userService, literat
                 form.$setPristine();
                 $state.go(trans.targetState().name(), trans.targetState().params());
             };
-            var onConfirm = function() {
-                form.$setPristine();
-                var contexts = trans.injector(null, 'from').get('contexts');
-                var data = trans.injector(null, 'from').get('data');
-                mainService.storeElement(editContext, data).then(function(response) {
-                    if(response.error){
-                        modalFactory.errorModal(response.error);
-                        return;
-                    }
-                    mainService.updateContextList(contexts, editContext, response);
-                });
-                $state.go(trans.targetState().name(), trans.targetState().params());
-            };
+            var onConfirm;
+            if(form.$valid) {
+                onConfirm = function() {
+                    form.$setPristine();
+                    var contexts = trans.injector(null, 'from').get('contexts');
+                    var data = trans.injector(null, 'from').get('data');
+                    mainService.storeElement(editContext, data).then(function(response) {
+                        if(response.error){
+                            modalFactory.errorModal(response.error);
+                            return;
+                        }
+                        mainService.updateContextList(contexts, editContext, response);
+                    });
+                    $state.go(trans.targetState().name(), trans.targetState().params());
+                };
+            }
             modalFactory.warningModal('context-form.confirm-discard', onConfirm, onDiscard);
             return false;
         }

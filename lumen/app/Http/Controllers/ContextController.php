@@ -403,7 +403,7 @@ class ContextController extends Controller {
                     'tags' => []
                 ];
                 if(isset($f->thumb) && substr($f->mime_type, 0, 6) === 'image/') {
-                    $thumb_url = Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $f->thumb);
+                    $thumb_url = Helpers::getFullFilePath($f->thumb);
                     $matches[$key]['thumb_url'] = $thumb_url;
                 }
             } else {
@@ -1440,6 +1440,11 @@ class ContextController extends Controller {
             if($datatype === 'string-sc') $jsonArr = [$jsonArr]; //"convert" to array
 
             if($datatype === 'epoch' && is_object($jsonArr)) {
+                if(empty(get_object_vars($jsonArr))) {
+                    return [
+                        'error' => 'Epoch object is empty.'
+                    ];
+                }
                 $startExists = false;
                 if(isset($jsonArr->start)) {
                     $startExists = true;

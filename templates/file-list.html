@@ -42,10 +42,20 @@
                             <i class="material-icons md-96 md-dark">3d_rotation</i>
                             <h4 translate="file-type.3d"></h4>
                         </div>
-                        <div ng-switch-default>
+                        <div ng-switch-when="zip">
+                            <h3>{{ f.filename }}</h3>
+                            <i class="material-icons md-96 md-dark">archive</i>
+                            <h4 translate="file-type.zip"></h4>
+                        </div>
+                        <div ng-switch-when="text">
                             <h3>{{ f.filename }}</h3>
                             <i class="material-icons md-96 md-dark">format_align_left</i>
                             <h4 translate="file-type.plain-text"></h4>
+                        </div>
+                        <div ng-switch-default>
+                            <h3>{{ f.filename }}</h3>
+                            <i class="material-icons md-96 md-dark">help_outline</i>
+                            <h4 translate="file-type.unknown"></h4>
                         </div>
                         <div class="overlay">
                             <i class="material-icons overlay-icon" aria-hidden="true">loupe</i>

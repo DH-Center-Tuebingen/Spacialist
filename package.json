@@ -35,6 +35,7 @@
     "angular-simple-logger": "^0.1.7",
     "angular-translate": "^2.15.2",
     "angular-translate-loader-static-files": "^2.15.2",
+    "angular-translate-storage-cookie": "^2.15.2",
     "angular-translate-storage-local": "^2.15.2",
     "angular-ui-bootstrap": "^2.5.0",
     "angular-ui-tree": "^2.22.6",

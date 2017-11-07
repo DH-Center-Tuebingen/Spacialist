@@ -3,6 +3,7 @@
 namespace App;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
+use Illuminate\Support\Facades\Storage;
 use App\Literature;
 
 class Helpers {
@@ -24,6 +25,14 @@ class Helpers {
         } catch(UnknownWKTTypeException $e) {
             return -1;
         }
+    }
+
+    public static function getFullFilePath($filename) {
+        return Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $filename);
+    }
+
+    public static function getStorageFilePath($filename) {
+        return Storage::url(env('SP_FILE_PATH') .'/'. $filename);
     }
 
     public static function computeCitationKey($l) {

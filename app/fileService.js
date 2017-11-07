@@ -21,7 +21,24 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
             switch(suffix) {
                 case 'dae':
                 case 'obj':
+                case 'pdb':
                     return '3d';
+                case 'txt':
+                case 'md':
+                case 'markdown':
+                case 'mkd':
+                case 'csv':
+                case 'json':
+                    return 'text';
+                case 'zip':
+                case 'rar':
+                case 'tar':
+                case 'tgz':
+                case 'gz':
+                case 'bz2':
+                case 'xz':
+                case '7z':
+                    return 'zip'
             }
         }
 
@@ -29,11 +46,21 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         if(mt == 'application/pdf') return 'pdf';
         if(mt == 'application/xml' || mt == 'text/xml') return 'xml';
         if(mt == 'application/xhtml+xml' || mt == 'text/html') return 'html';
+        if(mt == 'application/zip') return 'zip';
+        if(mt == 'application/gzip') return 'zip';
+        if(mt == 'application/x-tar') return 'zip';
+        if(mt == 'application/x-rar-compressed') return 'zip';
+        if(mt == 'application/x-bzip') return 'zip';
+        if(mt == 'application/x-bzip2') return 'zip';
+        if(mt == 'application/x-7z-compressed') return 'zip';
         if(mt.startsWith('audio/')) return 'audio';
         if(mt.startsWith('video/')) return 'video';
+        if(mt == 'text/markdown') return 'text';
+        if(mt == 'application/json') return 'text';
+        if(mt == 'text/csv') return 'text';
 
-        // default is simple text
-        return 'text';
+        // default is not supported
+        return -1;
     };
 
     files.getFilesForContext = function(id) {
