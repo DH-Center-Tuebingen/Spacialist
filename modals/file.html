@@ -91,10 +91,10 @@
             <div ng-switch-default>
                 <p class="alert alert-info" ng-bind-html="'file-type.unknown-info'|translate:{filename: $ctrl.file.filename}">
                 </p>
-                <p>
+                <a href="{{$ctrl.file.url}}" download="{{$ctrl.file.filename}}" target="_blank">
                     <i class="material-icons md-96">file_download</i>
                     <h4 translate="files.download" translate-values="{filename: $ctrl.file.filename}"></h4>
-                </p>
+                </a>
             </div>
         </div>
     </div>
@@ -176,7 +176,7 @@
                     <td>
                     </td>
                     <td style="text-align:right; font-weight: bold;">
-                        <a href="">
+                        <a href="{{$ctrl.file.url}}" download="{{$ctrl.file.filename}}" target="_blank">
                             Download
                             <i class="material-icons md-18" style="color: gray;">file_download</i>
                         </a>
