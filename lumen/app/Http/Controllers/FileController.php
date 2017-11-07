@@ -283,7 +283,7 @@ class FileController extends Controller
         return response()->json($files);
     }
 
-    public function downloadZipFileFile($id, $filepath) {
+    public function downloadInnerZipFile($id, $filepath) {
         // $filepath = urldecode($filepath);
         \Log::info("Going to download: " . $filepath);
         $user = \Auth::user();
@@ -302,7 +302,7 @@ class FileController extends Controller
         }
         $path = '.' . Helpers::getStorageFilePath($file->name);
         $archive = UnifiedArchive::open($path);
-        $content = $archive->getFileContent($filepath);
+        $content = base64_encode($archive->getFileContent($filepath));
         return response($content);
     }
 

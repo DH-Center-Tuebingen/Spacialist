@@ -73,7 +73,7 @@ $app->group([
         $app->get('tag', 'FileController@getAvailableTags');
         $app->get('by_context/{id:[0-9]+}', 'FileController@getByContext');
         $app->get('{id:[0-9]+}/zip', 'FileController@getZipContents');
-        $app->get('{id:[0-9]+}/zip/filepath={filepath:.*}', 'FileController@downloadZipFileFile'); // TODO name
+        $app->get('{id:[0-9]+}/zip/filepath={filepath:.*}', 'FileController@downloadInnerZipFile');
 
         $app->post('upload', 'FileController@uploadFile');
 

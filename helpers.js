@@ -31,6 +31,14 @@ function nextMatchingDeviceClass(col, currentClass) {
     return null;
 }
 
+function createDownloadLink(raw, filename) {
+    var link = document.createElement("a");
+    link.setAttribute("href", 'data:;base64,' + raw);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+}
+
 // Convert context' last modification (created or updated) to a locale representation
 function updateLastModified(context) {
     var lastmodified = context.updated_at || context.created_at;

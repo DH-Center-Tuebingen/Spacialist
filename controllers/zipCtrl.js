@@ -23,12 +23,7 @@ spacialistApp.controller('zipCtrl', ['$scope', 'httpGetFactory', function($scope
         // var path = window.encodeURIComponent(file.filename);
         var path = file.filename;
         httpGetFactory('api/file/' + file_id + '/zip/filepath=' + path, function(response) {
-            var encodedUri = encodeURI(response);
-            var link = document.createElement("a");
-            link.setAttribute("href", 'data:' + encodedUri);
-            link.setAttribute("download", file.clean_filename);
-            document.body.appendChild(link);
-            link.click();
+            createDownloadLink(response, file.clean_filename);
         });
     }
 }]);
