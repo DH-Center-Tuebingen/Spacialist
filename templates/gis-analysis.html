@@ -1,0 +1,51 @@
+<form class="form-horizontal">
+    <div class="form-group">
+        <label class="control-label col-md-1">Filter</label>
+        <div class="col-md-5">
+            <textarea class="form-control" ng-model="$ctrl.filters">
+            </textarea>
+        </div>
+        <div class="col-md-4">
+            <p>
+                Array mit den Filtern die angewendet werden sollen.
+                Aufbau:
+                <br />
+                id: ID des Attributs das verglichen werden soll. Falls das Attribut (aktuell nur geometry) ein PostGIS-Feld ist, sollte zusätzlich <code>func</code> übergeben werden.
+                <br />
+                comp: Funktion für die Abfragen, z.B. &gt; oder &lt;
+                <br />
+                values: Array von Werten für die Abfrage mit <code>comp</code>. Meistens nur ein Wert. Wenn <code>func</code> gesetzt ist, können auch mehrere Werte vorkommen.
+                <br />
+                func: Falls eine (PostGIS)-Funktion auf die Spalte angewendet werden soll, bevor sie mit <code>comp</code> verglichen wird. Unterstützt werden aktuell <code>distance</code> und <code>area</code>.
+            </p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-1">contextTypes</label>
+        <div class="col-md-5">
+            <textarea class="form-control" ng-model="$ctrl.contextTypes">
+            </textarea>
+        </div>
+        <div class="col-md-4">
+            <p>
+                Array mit IDs von Kontexttypen, für die die Filter angewendet werden sollen. Keins/ein leeres Array sucht in allen Typen.
+            </p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-1">columns</label>
+        <div class="col-md-5">
+            <textarea class="form-control" ng-model="$ctrl.columns">
+            </textarea>
+        </div>
+        <div class="col-md-4">
+            <p>
+                Array mit Spalten auf die das Ergebnis eingeschränkt werden soll. Keins/ein leeres Array gibt alle Spalten zurück.
+            </p>
+        </div>
+    </div>
+    <button type="button" class="btn btn-default" ng-click="$ctrl.filter()">
+        Filtern
+    </button>
+</form>
+<hr />

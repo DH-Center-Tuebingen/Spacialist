@@ -19,6 +19,8 @@ $app->get('/', function () use ($app) {
 });
 
 $app->post('user/login', 'UserController@login');
+$app->post('filter', 'AnalysisController@filterContexts');
+$app->post('filterl/{id}', 'AnalysisController@filterLayer');
 
 $app->group([
         'prefix' => 'context',//TODO api v1
@@ -103,6 +105,8 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('', 'AnalysisController@getAnalyses');
+
+        $app->post('filter', 'AnalysisController@filterContexts');
 });
 
 $app->group([

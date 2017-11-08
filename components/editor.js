@@ -51,3 +51,31 @@ spacialistApp.component('gis', {
     templateUrl: 'templates/gis.html',
     controller: 'gisCtrl'
 });
+
+spacialistApp.component('gisanalysis', {
+    bindings: {
+        concepts: '<',
+        contexts: '<',
+        map: '<',
+        layer: '<',
+        geodata: '<'
+    },
+    templateUrl: 'templates/gis-analysis.html',
+    controller: function(httpPostFactory) {
+        var vm = this;
+
+        vm.filters = '[{"comp":">","values":[6,[48.52,9.05]], "func": "distance"}]';
+        vm.contextTypes = '[2, 20, 17]';
+        vm.columns = '[]';
+
+        vm.filter = function() {
+            var formData = new FormData();
+            formData.append('filters', vm.filters);
+            formData.append('contextTypes', vm.contextTypes);
+            formData.append('columns', vm.columns);
+            httpPostFactory('api/analysis/filter', formData, function(response) {
+                console.log(response);
+            })
+        }
+    }
+});
