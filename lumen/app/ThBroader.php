@@ -16,4 +16,5 @@ class ThBroader extends Model
         'broader_id',
         'narrower_id',
     ];
+
 }

@@ -46,4 +46,8 @@ class User extends Model implements JWTSubject, AuthenticatableContract, Authori
         'email' => 'email|unique:users',
         'password'=> 'string',
     ];
+
+    public function preferences() {
+        return $this->hasMany('App\UserPreference');
+    }
 }

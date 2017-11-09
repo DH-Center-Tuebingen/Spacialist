@@ -26,4 +26,8 @@ class Geodata extends Model
     const availableGeometryTypes = [
         'Point', 'LineString', 'Polygon'
     ];
+
+    public function context() {
+        return $this->hasOne('App\Context');
+    }
 }
