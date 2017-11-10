@@ -53,57 +53,12 @@ class AnalysisController extends Controller {
     }
 
     public function filterContexts(Request $request) {
-        $contextTypes = json_decode($request->get('contextTypes', '[]'));
+        $origin = $request->input('origin');
         $filters = json_decode($request->input('filters', '[]'));
         $columns = json_decode($request->input('columns', '[]'));
-        $query = $this->filter($contextTypes, $filters, $columns);
+        $query = $this->filter($origin, $filters, $columns);
         $rows = $query->get();
-        $results = [];
-        foreach($rows as $r) {
-            $column = $this->getAttributeColumn($r->attribute_id);
-            if(!isset($results[$r->index])) {
-                $results[$r->index] = [
-                    'name' => $r->name,
-                    'context_id' => $r->index,
-                    'root_context_id' => $r->root_context_id,
-                    'rank' => $r->rank,
-                    'geom' => $r->geom,
-                    'color' => $r->color
-                ];
-
-                if($column !== null) {
-                    $results[$r->index]['attributes'] = [
-                        [
-                            'id' => $r->attribute_id,
-                            'value' => $r->{$column},
-                            'datatype' => $column
-                        ]
-                    ];
-                }
-
-                if(isset($r->geom)) {
-                    $filteredValues = [];
-                    for($i=0; $i<count($filters); $i++) {
-                        $f = $filters[$i];
-                        if(isset($f->func)) {
-                            $value = "'$r->geom'";
-                            $raw = $this->getAsRaw($f->func, $value, $f->values);
-                            $filteredValues[$i] = DB::select("SELECT $raw")[0];
-                        }
-                    }
-                    $results[$r->index]['filters'] = $filteredValues;
-                }
-            } else {
-                if($column !== null) {
-                    $results[$r->index]['attributes'][] = [
-                        'id' => $r->attribute_id,
-                        'value' => $r->{$column},
-                        'datatype' => $column
-                    ];
-                }
-            }
-        }
-        return response()->json($results);
+        return response()->json($rows);
     }
 
     // PATCH
@@ -114,74 +69,88 @@ class AnalysisController extends Controller {
 
     // OTHER FUNCTIONS
 
-    private function filter($types, $filters, $columns) {
-        if(!isset($types) || empty($types)) {
-            $query = Context::query();
-        } else {
-            $query = Context::whereIn('context_type_id', $types);
+    private function filter($origin, $filters, $columns) {
+        switch($origin) {
+            case 'contexts':
+                $query = Context::with([
+                    'child_contexts',
+                    'context_type',
+                    'geodata',
+                    'root_context',
+                    'literatures',
+                    'attributes',
+                    'files'
+                ]);
+                break;
+            case 'files':
+                $query = Files::with([
+                    'contexts',
+                    'tags'
+                ]);
+                break;
+            case 'geodata':
+                $query = Geodata::with([
+                    'context'
+                ]);
+                break;
+            case 'literature':
+                $query = Literature::with([
+                    'contexts'
+                ]);
+                break;
         }
-        $query->leftJoin('attribute_values', 'contexts.id', '=', 'attribute_values.context_id');
-        $query->leftJoin('geodata', 'geodata.id', '=', 'contexts.geodata_id');
         if(isset($filters)) {
-            $this->applyFilter($query, $filters[0], true);
-            for($i=1; $i<count($filters); $i++) {
-                $this->applyFilter($query, $filters[$i], false);
+            foreach($filters as $f) {
+                $this->applyFilter($query, $f);
             }
         }
-        // we need the context id to filter results by context id
-        $query->addSelect('contexts.id AS index');
-        if(empty($columns)) {
-            $query->addSelect('*');
-        } else {
-            foreach($columns as $c) {
-                $query->addSelect($c);
-            }
-        }
+
         return $query;
     }
 
-    private function applyFilter($query, $filter, $and = false) {
-        if(!$this->isValidCompare($filter->comp)) return;
-        if(isset($filter->id)) {
-            if($and) {
-                $query->where(function($q) use($query, $filter) {
-                    $q->where('attribute_values.attribute_id', $filter->id);
-                    if(isset($filter->func)) {
-                        $f = $filter->func;
-                        if(!$this->isValidFunction($f)) {
-                            // TODO
-                            return;
-                        }
-                        $col = $this->getAttributeColumn($filter->id);
-                        $raw = $this->getAsRaw($f, $col, $filter->values);
-                        $q->where($raw, $filter->comp, $filter->values[0]);
-                    } else {
-                        $q->where($this->getAttributeColumn($filter->id), $filter->comp, $filter->values[0]);
-                    }
-                });
-            } else {
-                $query->orWhere(function($q) use($query, $filter) {
-                    $q->where('attribute_values.attribute_id', $filter->id);
-                    if(isset($filter->func)) {
-                        $f = $filter->func;
-                        if(!$this->isValidFunction($f)) {
-                            // TODO
-                            return;
-                        }
-                        $col = $this->getAttributeColumn($filter->id);
-                        $raw = $this->getAsRaw($f, $col, $filter->values);
-                        $q->where($raw, $filter->comp, $filter->values[0]);
-                    } else {
-                        $q->where($this->getAttributeColumn($filter->id), $filter->comp, $filter->values[0]);
-                    }
-                });
+    private function applyFilter($query, $filter) {
+        if(!$this->isValidCompare($filter->comp)) {
+            // TODO error?
+            return;
+        }
+        $col = $filter->col;
+        $comp = $filter->comp;
+        $compValue = $filter->comp_value;
+        $and = $filter->and;
+        $usesFunc = isset($filter->func);
+        if($usesFunc) {
+            $func = $filter->func;
+            $funcValues = $filter->func_values;
+            if(!$this->isValidFunction($func)) {
+                // TODO error?
+                return;
             }
-        } else if(isset($filter->func)) {
-            $raw = $this->getAsRaw($filter->func, 'geom', $filter->values);
+        }
+        $cols = explode('.', $col);
+        // has no '.' => object itself
+        if(count($cols) == 1) {
+            if($usesFunc) {
+                $col = $this->getAsRaw($func, $col, $funcValues);
+            }
             if($and) {
-                $query->where($raw, $filter->comp, $filter->values[0]);
+                $query->where($col, $comp, $compValue);
             } else {
-                $query->orWhere($raw, $filter->comp, $filter->values[0]);
+                $query->orWhere($col, $comp, $compValue);
+            }
+        } else {
+            $tbl = $cols[0];
+            $tblCol = $cols[1];
+            if($usesFunc) {
+                $tblCol = $this->getAsRaw($func, $tblCol, $funcValues);
+            }
+            if($and) {
+                $query->whereHas($tbl, function($q) use($tblCol, $comp, $compValue) {
+                    $q->where($tblCol, $comp, $compValue);
+                });
+            } else {
+                $query->orWhereHas($tbl, function($q) use($tblCol, $comp, $compValue) {
+                    $q->where($tblCol, $comp, $compValue);
+                });
             }
         }
     }
@@ -216,7 +185,7 @@ class AnalysisController extends Controller {
     private function getAsRaw($func, $column, $values) {
         switch($func) {
             case 'distance':
-                $pos = $values[1];
+                $pos = $values[0];
                 $point = new Point($pos[0], $pos[1]);
                 $wkt = $point->toWKT();
                 return DB::raw("ST_Distance($column, ST_GeogFromText('$wkt'), true)");

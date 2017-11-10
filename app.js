@@ -1819,12 +1819,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         }
                     }
                 })
-                    .state('root.editor.gis.analysis', {
-                        url: '/analysis',
-                        component: 'gisanalysis',
-                        resolve: {
-                        }
-                    })
+            .state('root.analysis', {
+                url: '/analysis',
+                resolve: {
+                },
+                views: {
+                    'content-container': {
+                        component: 'gisanalysis'
+                    }
+                }
+            })
             .state('root.preferences', {
                 url: '/preferences',
                 resolve: {
