@@ -133,21 +133,21 @@ class AnalysisController extends Controller {
         }
 
         if(isset($limit) && isset($limit->from)) {
-            $query->limit($limit->from);
-            if(isset($limit->to)) {
-                $query->offset($limit->to);
+            $query->offset($limit->from);
+            if(isset($limit->amount)) {
+                $query->limit($limit->amount);
             }
         }
 
         if(isset($columns)) {
             foreach($columns as $c) {
-                $select = '';
-                if(isset($c->as)) {
-                    $select = " AS $c->as";
-                }
-                if(isset($c->func) && $this->isAggregateFunction($c->func)) {
-                    $select = DB::raw("$c->func($c->col)$select");
+                if(isset($c->func) && $this->isValidFunction($c->func)) {
+                    $select =  $this->getAsRaw($c->func, $c->col, $c->func_values, $c->as);
                 } else {
+                    $select = '';
+                    if(isset($c->as)) {
+                        $select = " AS $c->as";
+                    }
                     $select = $c->col.$select;
                 }
                 $query->addSelect($select);
@@ -274,26 +274,30 @@ class AnalysisController extends Controller {
         }
     }
 
-    private function getAsRaw($func, $column, $values) {
+    private function getAsRaw($func, $column, $values, $alias = null) {
+        $as = '';
+        if(isset($alias)) {
+            $as = " AS $alias";
+        }
         switch($func) {
             case 'pg_distance':
                 $pos = $values[0];
                 $point = new Point($pos[0], $pos[1]);
                 $wkt = $point->toWKT();
-                return DB::raw("ST_Distance($column, ST_GeogFromText('$wkt'), true)");
+                return DB::raw("ST_Distance($column, ST_GeogFromText('$wkt'), true)$as");
             case 'pg_area':
                 // return area as sqm, sqm should be default for SRID 4326
-                return DB::raw("ST_Area($column, true)");
+                return DB::raw("ST_Area($column, true)$as");
             case 'count':
-                return DB::raw("COUNT($column)");
+                return DB::raw("COUNT($column)$as");
             case 'min':
-                return DB::raw("MIN($column)");
+                return DB::raw("MIN($column)$as");
             case 'max':
-                return DB::raw("MAX($column)");
+                return DB::raw("MAX($column)$as");
             case 'avg':
-                return DB::raw("AVG($column)");
+                return DB::raw("AVG($column)$as");
             case 'sum':
-                return DB::raw("SUM($column)");
+                return DB::raw("SUM($column)$as");
         }
     }
 

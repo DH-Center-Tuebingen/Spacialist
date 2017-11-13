@@ -604,16 +604,28 @@ div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
 }
 
 .flex-hr-start {
+    align-items: flex-start;
     display: flex;
     justify-content: flex-start;
-    align-items: flex-start;
 }
 
-.flex-vt-start {
+.flex-hr-between {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.flex-vt {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+}
+
+.flex-vt-start {
     align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .contextPrefix {

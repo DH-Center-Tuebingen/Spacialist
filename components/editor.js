@@ -69,6 +69,7 @@ spacialistApp.component('gisanalysis', {
             'geodata',
             'literature'
         ];
+
         vm.comps = [
             '=',
             '<>',
@@ -86,6 +87,24 @@ spacialistApp.component('gisanalysis', {
             'not between',
             'not in'
         ];
+
+        vm.functions = [
+            'pg_distance',
+            'pg_area',
+            'count',
+            'min',
+            'max',
+            'avg',
+            'sum'
+        ];
+
+        vm.dirs = [
+            'asc',
+            'desc'
+        ]
+
+        vm.column = {};
+        vm.order = {};
 
         vm.filters = [];
         vm.origin = vm.origins[0];
@@ -109,9 +128,53 @@ spacialistApp.component('gisanalysis', {
         // });
         // vm.columns.push({
         //     col: '*',
+        //     as: 'Anzahl',
         //     func: 'count',
-        //     as: 'Anzahl'
+        //     func_values: []
         // });
+
+        vm.addColumn = function() {
+            var c = vm.column;
+            vm.columns.push({
+                col: c.col,
+                as: c.as,
+                func: c.func,
+                func_values: angular.fromJson(c.func_values)
+            });
+        };
+
+        vm.removeColumn = function(column) {
+            var index = vm.columns.indexOf(column);
+            if(index > -1) {
+                vm.columns.splice(index, 1);
+            }
+        };
+
+        vm.addOrder = function() {
+            var o = vm.order;
+            vm.orders.push({
+                col: o.col,
+                dir: o.dir
+            });
+        };
+
+        vm.removeOrder = function(order) {
+            var index = vm.orders.indexOf(order);
+            if(index > -1) {
+                vm.orders.splice(index, 1);
+            }
+        };
+
+        vm.addGroup = function() {
+            vm.groups.push(vm.group);
+        };
+
+        vm.removeGroup = function(group) {
+            var index = vm.groups.indexOf(group);
+            if(index > -1) {
+                vm.groups.splice(index, 1);
+            }
+        };
 
         vm.addFilter = function(and) {
             var filter = {
@@ -122,10 +185,36 @@ spacialistApp.component('gisanalysis', {
             };
             if(vm.func) {
                 filter.func = vm.func;
-                filter.func_values = vm.func_values;
+                filter.func_values = angular.fromJson(vm.func_values);
             }
             vm.filters.push(filter);
-        }
+        };
+
+        vm.editFilter = function(filter) {
+
+        };
+
+        vm.removeFilter = function(filter) {
+            var index = vm.filters.indexOf(filter);
+            if(index > -1) {
+                vm.filters.splice(index, 1);
+            }
+        };
+
+        vm.moveFilterUp = function(filter) {
+            var index = vm.filters.indexOf(filter);
+            // index has to be > -1 AND > 0
+            if(index > 0) {
+                swap(vm.filters, index, index-1);
+            }
+        };
+
+        vm.moveFilterDown = function(filter) {
+            var index = vm.filters.indexOf(filter);
+            if(index > -1 && index < vm.filters.length - 1) {
+                swap(vm.filters, index, index+1);
+            }
+        };
 
         vm.filter = function() {
             var formData = new FormData();
@@ -139,9 +228,18 @@ spacialistApp.component('gisanalysis', {
                 console.log(response);
                 vm.results.length = 0;
                 for(var i=0; i<response.length; i++) {
+                    var r = response[i];
+                    for(var k in r) {
+                        if(r.hasOwnProperty(k)) {
+                            var lk = k.toLowerCase();
+                            var tmp = r[k];
+                            delete r[k];
+                            r[lk] = tmp;
+                        }
+                    }
                     vm.results.push(response[i]);
                 }
-            })
-        }
+            });
+        };
     }
 });
