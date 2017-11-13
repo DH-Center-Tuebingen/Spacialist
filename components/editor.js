@@ -63,6 +63,7 @@ spacialistApp.component('gisanalysis', {
         vm.results = [];
 
         vm.origins = [
+            'attribute_values',
             'contexts',
             'files',
             'geodata',
@@ -77,21 +78,40 @@ spacialistApp.component('gisanalysis', {
             '<',
             '<=',
             'like',
-            'ilike'
+            'ilike',
+            'between',
+            'in',
+            'not like',
+            'not ilike',
+            'not between',
+            'not in'
         ];
 
         vm.filters = [];
         vm.origin = vm.origins[0];
-        vm.columns = '[]';
+        vm.columns = [];
+        vm.orders = [];
+        vm.groups = [];
+        vm.limit = {};
 
         vm.filters.push({
             col: 'geodata.geom',
             comp: '<',
             comp_value: 150000,
-            func: 'distance',
+            func: 'pg_distance',
             func_values: [[48.52,9.05]],
             and: true
         });
+
+        // vm.groups.push('context_type_id');
+        // vm.columns.push({
+        //     col: 'context_type_id'
+        // });
+        // vm.columns.push({
+        //     col: '*',
+        //     func: 'count',
+        //     as: 'Anzahl'
+        // });
 
         vm.addFilter = function(and) {
             var filter = {
@@ -111,7 +131,10 @@ spacialistApp.component('gisanalysis', {
             var formData = new FormData();
             formData.append('filters', angular.toJson(vm.filters));
             formData.append('origin', vm.origin);
-            formData.append('columns', vm.columns);
+            formData.append('columns', angular.toJson(vm.columns));
+            formData.append('orders', angular.toJson(vm.orders));
+            formData.append('groups', angular.toJson(vm.groups));
+            formData.append('limit', angular.toJson(vm.limit));
             httpPostFactory('api/analysis/filter', formData, function(response) {
                 console.log(response);
                 vm.results.length = 0;

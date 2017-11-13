@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 use Log;
 use App\User;
 use App\Attribute;
+use App\AttributeValue;
 use App\AvailableLayer;
 use App\Context;
+use App\File;
+use App\Geodata;
+use App\Literature;
 use Phaza\LaravelPostgis\Geometries\Point;
 use \DB;
 use Illuminate\Http\Request;
@@ -48,7 +52,10 @@ class AnalysisController extends Controller {
         $ctid = $layer->context_type_id;
         $filters = json_decode($request->input('filters', '[]'));
         $columns = json_decode($request->input('columns', '[]'));
-        $query = $this->filter([$ctid], $filters, $columns);
+        $orders = json_decode($request->input('orders', '[]'));
+        $groups = json_decode($request->input('groups', '[]'));
+        $limit = json_decode($request->input('limit', '{}'));
+        $query = $this->filter([$ctid], $filters, $columns, $orders, $groups, $limit);
         return response()->json($query->get());
     }
 
@@ -56,7 +63,10 @@ class AnalysisController extends Controller {
         $origin = $request->input('origin');
         $filters = json_decode($request->input('filters', '[]'));
         $columns = json_decode($request->input('columns', '[]'));
-        $query = $this->filter($origin, $filters, $columns);
+        $orders = json_decode($request->input('orders', '[]'));
+        $groups = json_decode($request->input('groups', '[]'));
+        $limit = json_decode($request->input('limit', '{}'));
+        $query = $this->filter($origin, $filters, $columns, $orders, $groups, $limit);
         $rows = $query->get();
         return response()->json($rows);
     }
@@ -69,8 +79,14 @@ class AnalysisController extends Controller {
 
     // OTHER FUNCTIONS
 
-    private function filter($origin, $filters, $columns) {
+    private function filter($origin, $filters, $columns, $orders, $groups, $limit) {
         switch($origin) {
+            case 'attribute_values':
+                $query = AttributeValue::with([
+                    'context_val',
+                    'thesaurus_val'
+                ]);
+                break;
             case 'contexts':
                 $query = Context::with([
                     'child_contexts',
@@ -83,7 +99,7 @@ class AnalysisController extends Controller {
                 ]);
                 break;
             case 'files':
-                $query = Files::with([
+                $query = File::with([
                     'contexts',
                     'tags'
                 ]);
@@ -101,14 +117,47 @@ class AnalysisController extends Controller {
         }
         if(isset($filters)) {
             foreach($filters as $f) {
-                $this->applyFilter($query, $f);
+                $this->applyFilter($query, $f, $groups);
+            }
+        }
+
+        if(isset($groups)) {
+            foreach($groups as $g) {
+                $query->groupBy($g);
+            }
+        }
+        if(isset($orders)) {
+            foreach($orders as $o) {
+                $query->groupBy($o->col, $o->dir);
+            }
+        }
+
+        if(isset($limit) && isset($limit->from)) {
+            $query->limit($limit->from);
+            if(isset($limit->to)) {
+                $query->offset($limit->to);
+            }
+        }
+
+        if(isset($columns)) {
+            foreach($columns as $c) {
+                $select = '';
+                if(isset($c->as)) {
+                    $select = " AS $c->as";
+                }
+                if(isset($c->func) && $this->isAggregateFunction($c->func)) {
+                    $select = DB::raw("$c->func($c->col)$select");
+                } else {
+                    $select = $c->col.$select;
+                }
+                $query->addSelect($select);
             }
         }
 
         return $query;
     }
 
-    private function applyFilter($query, $filter) {
+    private function applyFilter($query, $filter, $groups) {
         if(!$this->isValidCompare($filter->comp)) {
             // TODO error?
             return;
@@ -126,30 +175,49 @@ class AnalysisController extends Controller {
                 return;
             }
         }
+        $isPartOfGroupBy = $this->isGroupBy($col, $groups);
         $cols = explode('.', $col);
         // has no '.' => object itself
         if(count($cols) == 1) {
             if($usesFunc) {
                 $col = $this->getAsRaw($func, $col, $funcValues);
+                $isAgg = $this->isAggregateFunction($func);
             }
             if($and) {
-                $query->where($col, $comp, $compValue);
+                if($isAgg || $isPartOfGroupBy) {
+                    $query->having($col, $comp, $compValue);
+                } else {
+                    $query->where($col, $comp, $compValue);
+                }
             } else {
-                $query->orWhere($col, $comp, $compValue);
+                if($isAgg || $isPartOfGroupBy) {
+                    $query->orHaving($col, $comp, $compValue);
+                } else {
+                    $query->orWhere($col, $comp, $compValue);
+                }
             }
         } else {
             $tbl = $cols[0];
             $tblCol = $cols[1];
             if($usesFunc) {
                 $tblCol = $this->getAsRaw($func, $tblCol, $funcValues);
+                $isAgg = $this->isAggregateFunction($func);
             }
             if($and) {
-                $query->whereHas($tbl, function($q) use($tblCol, $comp, $compValue) {
-                    $q->where($tblCol, $comp, $compValue);
+                $query->whereHas($tbl, function($q) use($tblCol, $comp, $compValue, $isAgg, $isPartOfGroupBy) {
+                    if($isAgg || $isPartOfGroupBy) {
+                        $q->having($tblCol, $comp, $compValue);
+                    } else {
+                        $q->where($tblCol, $comp, $compValue);
+                    }
                 });
             } else {
-                $query->orWhereHas($tbl, function($q) use($tblCol, $comp, $compValue) {
-                    $q->where($tblCol, $comp, $compValue);
+                $query->orWhereHas($tbl, function($q) use($tblCol, $comp, $compValue, $isAgg, $isPartOfGroupBy) {
+                    if($isAgg || $isPartOfGroupBy) {
+                        $q->having($tblCol, $comp, $compValue);
+                    } else {
+                        $q->where($tblCol, $comp, $compValue);
+                    }
                 });
             }
         }
@@ -166,6 +234,12 @@ class AnalysisController extends Controller {
             case '<=':
             case 'like':
             case 'ilike':
+            case 'between':
+            case 'in':
+            case 'not like':
+            case 'not ilike':
+            case 'not between':
+            case 'not in':
                 return true;
             default:
                 return false;
@@ -174,8 +248,26 @@ class AnalysisController extends Controller {
 
     private function isValidFunction($func) {
         switch($func) {
-            case 'distance':
-            case 'area':
+            case 'pg_distance':
+            case 'pg_area':
+            case 'count':
+            case 'min':
+            case 'max':
+            case 'avg':
+            case 'sum':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private function isAggregateFunction($func) {
+        switch($func) {
+            case 'count':
+            case 'min':
+            case 'max':
+            case 'avg':
+            case 'sum':
                 return true;
             default:
                 return false;
@@ -184,15 +276,29 @@ class AnalysisController extends Controller {
 
     private function getAsRaw($func, $column, $values) {
         switch($func) {
-            case 'distance':
+            case 'pg_distance':
                 $pos = $values[0];
                 $point = new Point($pos[0], $pos[1]);
                 $wkt = $point->toWKT();
                 return DB::raw("ST_Distance($column, ST_GeogFromText('$wkt'), true)");
-            case 'area':
+            case 'pg_area':
                 // return area as sqm, sqm should be default for SRID 4326
                 return DB::raw("ST_Area($column, true)");
+            case 'count':
+                return DB::raw("COUNT($column)");
+            case 'min':
+                return DB::raw("MIN($column)");
+            case 'max':
+                return DB::raw("MAX($column)");
+            case 'avg':
+                return DB::raw("AVG($column)");
+            case 'sum':
+                return DB::raw("SUM($column)");
         }
+    }
+
+    private function isGroupBy($column, $groups) {
+        return in_array($column, $groups);
     }
 
     private function getAttributeColumn($aid) {

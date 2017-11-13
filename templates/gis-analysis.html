@@ -47,44 +47,22 @@
 <div class="col-md-12" ng-if="$ctrl.results.length > 0">
     <h1>Results</h1>
     <table class="table table-striped table-hover">
-        <tr>
-            <th>
-                ID
+        <tr ng-if="$ctrl.columns.length > 0">
+            <th ng-repeat="col in $ctrl.columns">
+                {{ col.as || col.col }}
             </th>
-            <th>
-                ContextType
-            </th>
-            <th>
-                Name
-            </th>
-            <th>
-                Last Editor
-            </th>
-            <th>
-                Created At
-            </th>
-            <th>
-                Updated At
+        </tr>
+        <tr ng-if="$ctrl.columns.length == 0">
+            <th ng-repeat="(k, col) in $ctrl.results[0]">
+                {{ k }}
             </th>
         </tr>
         <tr ng-repeat="r in $ctrl.results">
-            <td>
-                {{r.id}}
+            <td ng-if="$ctrl.columns.length > 0" ng-repeat="col in $ctrl.columns">
+                {{ r[col.as.toLowerCase()] || r[col.col.toLowerCase()] }}
             </td>
-            <td>
-                {{$ctrl.concepts[r.context_type.thesaurus_url].label}}
-            </td>
-            <td>
-                {{r.name}}
-            </td>
-            <td>
-                {{r.lasteditor}}
-            </td>
-            <td>
-                {{r.created_at}}
-            </td>
-            <td>
-                {{r.updated_at}}
+            <td ng-if="$ctrl.columns.length == 0" ng-repeat="(k, col) in $ctrl.results[0]">
+                {{ r[k] }}
             </td>
         </tr>
     </table>
