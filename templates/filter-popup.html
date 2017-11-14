@@ -1,0 +1,58 @@
+<div ng-init="useFunc = false;">
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label col-md-2">Comparison:</label>
+            <div class="col-md-10">
+                <ui-select ng-model="$ctrl.comp">
+                    <ui-select-match allow-clear="false">
+                        {{ $select.selected }}
+                    </ui-select-match>
+                    <ui-select-choices repeat="c in $ctrl.comps | filter: $select.search">
+                        <span ng-bind-html="c | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-2">Comparison Value:</label>
+            <div class="col-md-10">
+                <input type="text" class="form-control" ng-model="$ctrl.comp_value" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-2">Use Function:</label>
+            <div class="col-md-10">
+                <input type="checkbox" class="form-control" ng-model="useFunc" />
+            </div>
+        </div>
+        <div ng-show="useFunc">
+            <div class="form-group">
+                <label class="control-label col-md-2">Function:</label>
+                <div class="col-md-10">
+                    <ui-select ng-model="$ctrl.func">
+                        <ui-select-match allow-clear="true">
+                            {{ $select.selected }}
+                        </ui-select-match>
+                        <ui-select-choices repeat="f in $ctrl.functions | filter: $select.search">
+                            <span ng-bind-html="f | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2">Function Values:</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" ng-model="$ctrl.func_values" ng-show="$ctrl.func" />
+                </div>
+            </div>
+        </div>
+        <div class="flex-hr-center">
+            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.comp_values, true)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
+                AND
+            </button>
+            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.comp_values, false)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
+                OR
+            </button>
+        </div>
+    </form>
+</div>

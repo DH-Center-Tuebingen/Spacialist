@@ -1,3 +1,60 @@
+<div class="row">
+    <div class="col-md-5">
+        <h4>Active Order Rules</h4>
+        <p ng-if="$ctrl.orders.length == 0">
+            No order rules present.
+        </p>
+        <ol ng-if="$ctrl.orders.length > 0">
+            <li class="flex-hr-between" ng-repeat="o in $ctrl.orders">
+                <span>{{ $index + 1 }}.</span>
+                <div>
+                    {{ o.col }} {{ o.dir }}
+                </div>
+                <div>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeOrder(o)">
+                        <i class="material-icons md-18 fa-red">delete</i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="$ctrl.moveOrderUp(o)">
+                        <i class="material-icons md-18">arrow_drop_up</i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveOrderDown(o)">
+                        <i class="material-icons md-18">arrow_drop_down</i>
+                    </a>
+                </div>
+            </li>
+        </ol>
+        <h4>Active Filters</h4>
+        <p ng-if="$ctrl.filters.length == 0">
+            No filters present.
+        </p>
+        <ol ng-if="$ctrl.filters.length > 0">
+            <li class="flex-hr-between" ng-repeat="f in $ctrl.filters">
+                <span>{{ $index + 1 }}.</span>
+                <div>
+                    <strong ng-show="!$first">{{ f.and ? 'AND' : 'OR' }}</strong>
+                </div>
+                <div>
+                    {{ f.col }} {{ f.comp }} {{ f.comp_value }} <span ng-if="f.func">(Using {{ f.func }} with {{ f.func_values }})</span>
+                </div>
+                <div>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.editFilter(f)" ng-disabled="true">
+                        <i class="material-icons md-18 fa-cyan">edit</i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeFilter(f)">
+                        <i class="material-icons md-18 fa-red">delete</i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="$ctrl.moveFilterUp(f)">
+                        <i class="material-icons md-18">arrow_drop_up</i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveFilterDown(f)">
+                        <i class="material-icons md-18">arrow_drop_down</i>
+                    </a>
+                </div>
+            </li>
+        </ol>
+    </div>
+</div>
+<h4>Other Result Options</h4>
 <form class="form-horizontal">
     <div class="form-group">
         <label class="control-label col-md-1">Table</label>
@@ -15,8 +72,8 @@
     <div class="form-group">
         <label class="control-label col-md-1">Limit</label>
         <div class="col-md-5">
-            From: <input type="number" step="1" ng-model="$ctrl.limit.from" />
-            Amount: <input type="number" step="1" ng-model="$ctrl.limit.amount" />
+            From: <input type="number" step="1" min="0" ng-model="$ctrl.limit.from" />
+            Amount: <input type="number" step="1" min="1" ng-model="$ctrl.limit.amount" />
         </div>
     </div>
     <div class="form-group">
@@ -58,38 +115,6 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-md-1">Orders</label>
-        <div class="col-md-5">
-            <ol>
-                <li class="flex-hr-between" ng-repeat="o in $ctrl.orders">
-                    <span>{{ $index + 1 }}.</span>
-                    <div>
-                        {{ o.col }} {{ o.dir }}
-                    </div>
-                    <div>
-                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeOrder(o)">
-                            <i class="material-icons md-18 fa-red">delete</i>
-                        </a>
-                    </div>
-                </li>
-            </ol>
-            <div class="flex-hr-start">
-                <input type="text" placeholder="Column" ng-model="$ctrl.order.col" />
-                <ui-select ng-model="$ctrl.order.dir" style="display: inline-block;">
-                    <ui-select-match allow-clear="true">
-                        {{ $select.selected }}
-                    </ui-select-match>
-                    <ui-select-choices repeat="d in $ctrl.dirs | filter: $select.search">
-                        <span ng-bind-html="d | highlight: $select.search"></span>
-                    </ui-select-choices>
-                </ui-select>
-                <button type="button" class="btn btn-default" ng-click="$ctrl.addOrder()" ng-disabled="!$ctrl.order.col || !$ctrl.order.dir">
-                    <i class="material-icons">add</i> Add
-                </button>
-            </div>
-        </div>
-    </div>
-    <div class="form-group">
         <label class="control-label col-md-1">Groups</label>
         <div class="col-md-5">
             <ol>
@@ -126,67 +151,6 @@
             </div>
         </div>
     </div>
-    <div class="form-group">
-        <label class="control-label col-md-1">Filter</label>
-        <div class="col-md-5">
-            <ol>
-                <li class="flex-hr-between" ng-repeat="f in $ctrl.filters">
-                    <span>{{ $index + 1 }}.</span>
-                    <div>
-                        <strong ng-show="!$first">{{ f.and ? 'AND' : 'OR' }}</strong>
-                    </div>
-                    <div>
-                        {{ f.col }} {{ f.comp }} {{ f.comp_value }} <span ng-if="f.func">(Using {{ f.func }} with {{ f.func_values }})</span>
-                    </div>
-                    <div>
-                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.editFilter(f)" ng-disabled="true">
-                            <i class="material-icons md-18 fa-cyan">edit</i>
-                        </a>
-                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeFilter(f)">
-                            <i class="material-icons md-18 fa-red">delete</i>
-                        </a>
-                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="$ctrl.moveFilterUp(f)">
-                            <i class="material-icons md-18">arrow_drop_up</i>
-                        </a>
-                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveFilterDown(f)">
-                            <i class="material-icons md-18">arrow_drop_down</i>
-                        </a>
-                    </div>
-                </li>
-            </ol>
-            <div class="flex-vt">
-                <div class="flex-hr-between">
-                    <input type="text" placeholder="Column" ng-model="$ctrl.col" />
-                    <ui-select ng-model="$ctrl.comp" style="display: inline-block;">
-                        <ui-select-match allow-clear="false">
-                            {{ $select.selected }}
-                        </ui-select-match>
-                        <ui-select-choices repeat="c in $ctrl.comps | filter: $select.search">
-                            <span ng-bind-html="c | highlight: $select.search"></span>
-                        </ui-select-choices>
-                    </ui-select>
-                    <input type="text" placeholder="Value" ng-model="$ctrl.comp_value" />
-                    <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(true)" ng-disabled="!$ctrl.col || !$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
-                        AND
-                    </button>
-                    <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(false)" ng-disabled="!$ctrl.col || !$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
-                        OR
-                    </button>
-                </div>
-                <div class="flex-hr-start">
-                    <ui-select ng-model="$ctrl.func" style="display: inline-block;">
-                        <ui-select-match allow-clear="true">
-                            {{ $select.selected }}
-                        </ui-select-match>
-                        <ui-select-choices repeat="f in $ctrl.functions | filter: $select.search">
-                            <span ng-bind-html="f | highlight: $select.search"></span>
-                        </ui-select-choices>
-                    </ui-select>
-                    <input type="text" placeholder="Function Values" ng-model="$ctrl.func_values" ng-show="$ctrl.func" />
-                </div>
-            </div>
-        </div>
-    </div>
     <button type="button" class="btn btn-default" ng-click="$ctrl.filter()">
         Filtern
     </button>
@@ -195,13 +159,35 @@
     <h1>Results</h1>
     <table class="table table-striped table-hover">
         <tr ng-if="$ctrl.columns.length > 0">
-            <th ng-repeat="col in $ctrl.columns">
-                {{ col.as || col.col }}
+            <th ng-repeat="k in $ctrl.columns">
+                <div class="flex-hr-start">
+                    {{ k.as || k.col }}
+                    <a href="">
+                        <i class="material-icons" ng-click="$ctrl.addOrder(k.col, 'desc')">arrow_drop_up</i>
+                    </a>
+                    <a href="">
+                        <i class="material-icons" ng-click="$ctrl.addOrder(k.col, 'asc')">arrow_drop_down</i>
+                    </a>
+                    <a href="" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                        <i class="material-icons">search</i>
+                    </a>
+                </div>
             </th>
         </tr>
         <tr ng-if="$ctrl.columns.length == 0">
             <th ng-repeat="(k, col) in $ctrl.results[0]">
-                {{ k }}
+                <div class="flex-hr-start">
+                    {{ k }}
+                    <a href="">
+                        <i class="material-icons" ng-click="$ctrl.addOrder(k, 'desc')">arrow_drop_up</i>
+                    </a>
+                    <a href="">
+                        <i class="material-icons" ng-click="$ctrl.addOrder(k, 'asc')">arrow_drop_down</i>
+                    </a>
+                    <a href="" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                        <i class="material-icons">search</i>
+                    </a>
+                </div>
             </th>
         </tr>
         <tr ng-repeat="r in $ctrl.results">

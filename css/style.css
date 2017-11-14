@@ -615,6 +615,12 @@ div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
     justify-content: space-between;
 }
 
+.flex-hr-center {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
 .flex-vt {
     display: flex;
     flex-direction: column;
@@ -898,6 +904,12 @@ span.btn {
 /* btn-xs is barely legible at 10px */
 .btn.btn-xs, .btn.btn-sm {
     font-size: 13px !important;
+}
+
+.popover {
+    background: #fff;
+    width: 500px !important;
+    max-width: none !important;
 }
 /* << MATERIAL DESIGN PATCHES */
 

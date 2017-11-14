@@ -1822,10 +1822,22 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             .state('root.analysis', {
                 url: '/analysis',
                 resolve: {
+                    attributes: function(dataEditorService) {
+                        return dataEditorService.getAttributes();
+                    },
+                    attributetypes: function(dataEditorService) {
+                        return dataEditorService.getAttributeTypes();
+                    },
+                    contextTypes: function(dataEditorService) {
+                        return dataEditorService.getContextTypes();
+                    },
+                    tags: function(fileService) {
+                        return fileService.getAvailableTags();
+                    }
                 },
                 views: {
                     'content-container': {
-                        component: 'gisanalysis'
+                        component: 'analysis'
                     }
                 }
             })

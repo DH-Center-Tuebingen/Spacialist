@@ -177,11 +177,11 @@ class AnalysisController extends Controller {
         }
         $isPartOfGroupBy = $this->isGroupBy($col, $groups);
         $cols = explode('.', $col);
+        $isAgg = $usesFunc && $this->isAggregateFunction($func);
         // has no '.' => object itself
         if(count($cols) == 1) {
             if($usesFunc) {
                 $col = $this->getAsRaw($func, $col, $funcValues);
-                $isAgg = $this->isAggregateFunction($func);
             }
             if($and) {
                 if($isAgg || $isPartOfGroupBy) {
@@ -201,7 +201,6 @@ class AnalysisController extends Controller {
             $tblCol = $cols[1];
             if($usesFunc) {
                 $tblCol = $this->getAsRaw($func, $tblCol, $funcValues);
-                $isAgg = $this->isAggregateFunction($func);
             }
             if($and) {
                 $query->whereHas($tbl, function($q) use($tblCol, $comp, $compValue, $isAgg, $isPartOfGroupBy) {
@@ -262,6 +261,7 @@ class AnalysisController extends Controller {
     }
 
     private function isAggregateFunction($func) {
+        if(!isset($func)) return false;
         switch($func) {
             case 'count':
             case 'min':
