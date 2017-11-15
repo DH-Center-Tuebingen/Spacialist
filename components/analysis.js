@@ -6,7 +6,7 @@ spacialistApp.component('analysis', {
         contextTypes: '<',
         tags: '<'
     },
-    templateUrl: 'templates/gis-analysis.html',
+    templateUrl: 'templates/analysis.html',
     controller: function(httpPostFactory) {
         var vm = this;
 
