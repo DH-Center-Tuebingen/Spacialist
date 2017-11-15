@@ -43,6 +43,10 @@ a.activeLang {
     margin-bottom: 15px;
 }
 
+#loading-indicator {
+    display: none;
+}
+
 .unpadded-alert {
     margin-bottom: 0;
 }
@@ -158,6 +162,12 @@ div[resizeable] {
     -moz-transition: width 0.5s ease;
     -o-transition: width 0.5s ease;
     transition: width 0.5s ease;
+}
+
+.spinner-inline {
+    display: inline-block;
+    padding-right: 5px;
+    vertical-align: middle;
 }
 
 .spinner-container {

@@ -26,6 +26,9 @@
             <button type="submit" class="btn btn-primary">{{ 'login.submit' | translate }}</button>
             <button type="button" class="btn btn-default" ng-click="guestLogin()">{{ 'login.as-guest' | translate }}</button>
         </form>
+        <div id="loading-indicator">
+            <spinner class="spinner-inline"></spinner> <span translate="login.loading"></span>
+        </div>
     </div>
     <div ng-if="loginError.message.length > 0" style="padding-top: 10px;">
         <p class="alert alert-info unpadded-alert">

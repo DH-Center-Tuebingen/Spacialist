@@ -1847,6 +1847,14 @@ spacialistApp.run(function($state, mainService, mapService, userService, literat
         previousState = transition.from().name;
         previousStateParameters = transition.params('from');
     });
+    // Show/Hide loading spinner on login screen
+    $transitions.onStart({from: 'login'}, function() {
+        $('#loading-indicator').show();
+    });
+    $transitions.onFinish({from: 'login'}, function() {
+        $('#loading-indicator').hide();
+    });
+    // Reset global context on state switch
     $transitions.onSuccess({
         from: function(state) {
             return state.includes['root.spacialist.context.data'];
