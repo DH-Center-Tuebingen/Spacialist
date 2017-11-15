@@ -57,6 +57,12 @@
 <h4>Other Query Options</h4>
 <form class="form-horizontal">
     <div class="form-group">
+        <label class="control-label col-md-1">Apply Changes immediately</label>
+        <div class="col-md-5">
+            <input type="checkbox" class="form-control" ng-model="$ctrl.instantFilter" />
+        </div>
+    </div>
+    <div class="form-group">
         <label class="control-label col-md-1">Table</label>
         <div class="col-md-2">
             <ui-select ng-model="$ctrl.origin">
@@ -72,8 +78,8 @@
     <div class="form-group">
         <label class="control-label col-md-1">Limit</label>
         <div class="col-md-5">
-            From: <input type="number" step="1" min="0" ng-model="$ctrl.limit.from" />
-            Amount: <input type="number" step="1" min="1" ng-model="$ctrl.limit.amount" />
+            From: <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.limit.from" />
+            Amount: <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.limit.amount" />
         </div>
     </div>
     <div class="form-group">

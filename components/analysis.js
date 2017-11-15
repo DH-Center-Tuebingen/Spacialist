@@ -48,6 +48,7 @@ spacialistApp.component('analysis', {
             'sum'
         ];
 
+        vm.instantFilter = false;
         vm.column = {};
 
         vm.filters = [];
@@ -85,12 +86,18 @@ spacialistApp.component('analysis', {
                 func: c.func,
                 func_values: angular.fromJson(c.func_values)
             });
+            if(vm.instantFilter) {
+                vm.filter();
+            }
         };
 
         vm.removeColumn = function(column) {
             var index = vm.columns.indexOf(column);
             if(index > -1) {
                 vm.columns.splice(index, 1);
+                if(vm.instantFilter) {
+                    vm.filter();
+                }
             }
         };
 
@@ -101,18 +108,24 @@ spacialistApp.component('analysis', {
             // Order already part of orders array, return
             if(order) {
                 order.dir = dir;
-                return;
+            } else {
+                vm.orders.push({
+                    col: col,
+                    dir: dir
+                });
             }
-            vm.orders.push({
-                col: col,
-                dir: dir
-            });
+            if(vm.instantFilter) {
+                vm.filter();
+            }
         };
 
         vm.removeOrder = function(order) {
             var index = vm.orders.indexOf(order);
             if(index > -1) {
                 vm.orders.splice(index, 1);
+                if(vm.instantFilter) {
+                    vm.filter();
+                }
             }
         };
 
@@ -121,6 +134,9 @@ spacialistApp.component('analysis', {
             // index has to be > -1 AND > 0
             if(index > 0) {
                 swap(vm.orders, index, index-1);
+                if(vm.instantFilter) {
+                    vm.filter();
+                }
             }
         };
 
@@ -128,17 +144,26 @@ spacialistApp.component('analysis', {
             var index = vm.orders.indexOf(order);
             if(index > -1 && index < vm.filters.length - 1) {
                 swap(vm.orders, index, index+1);
+                if(vm.instantFilter) {
+                    vm.filter();
+                }
             }
         };
 
         vm.addGroup = function() {
             vm.groups.push(vm.group);
+            if(vm.instantFilter) {
+                vm.filter();
+            }
         };
 
         vm.removeGroup = function(group) {
             var index = vm.groups.indexOf(group);
             if(index > -1) {
                 vm.groups.splice(index, 1);
+                if(vm.instantFilter) {
+                    vm.filter();
+                }
             }
         };
 
@@ -156,6 +181,9 @@ spacialistApp.component('analysis', {
                 filter.func_values = angular.fromJson(func_values);
             }
             vm.filters.push(filter);
+            if(vm.instantFilter) {
+                vm.filter();
+            }
         };
 
         vm.editFilter = function(filter) {
@@ -166,6 +194,9 @@ spacialistApp.component('analysis', {
             var index = vm.filters.indexOf(filter);
             if(index > -1) {
                 vm.filters.splice(index, 1);
+                if(vm.instantFilter) {
+                    vm.filter();
+                }
             }
         };
 
@@ -174,6 +205,9 @@ spacialistApp.component('analysis', {
             // index has to be > -1 AND > 0
             if(index > 0) {
                 swap(vm.filters, index, index-1);
+                if(vm.instantFilter) {
+                    vm.filter();
+                }
             }
         };
 
@@ -181,6 +215,9 @@ spacialistApp.component('analysis', {
             var index = vm.filters.indexOf(filter);
             if(index > -1 && index < vm.filters.length - 1) {
                 swap(vm.filters, index, index+1);
+                if(vm.instantFilter) {
+                    vm.filter();
+                }
             }
         };
 
