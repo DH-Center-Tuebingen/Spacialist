@@ -128,7 +128,7 @@ class AnalysisController extends Controller {
         }
         if(isset($orders)) {
             foreach($orders as $o) {
-                $query->groupBy($o->col, $o->dir);
+                $query->orderBy($o->col, $o->dir);
             }
         }
 
