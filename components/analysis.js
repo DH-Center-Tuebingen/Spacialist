@@ -32,10 +32,12 @@ spacialistApp.component('analysis', {
             'ilike',
             'between',
             'in',
+            'is null',
             'not like',
             'not ilike',
             'not between',
-            'not in'
+            'not in',
+            'is not null',
         ];
 
         vm.functions = [
@@ -83,6 +85,14 @@ spacialistApp.component('analysis', {
             vm.showFilterOptions = !vm.showFilterOptions;
         }
 
+        vm.resetColumn = function(col) {
+            for(var k in col) {
+                if(col.hasOwnProperty(k)) {
+                    delete col[k];
+                }
+            }
+        };
+
         vm.addColumn = function() {
             var c = vm.column;
             vm.columns.push({
@@ -94,6 +104,7 @@ spacialistApp.component('analysis', {
             if(vm.instantFilter) {
                 vm.filter();
             }
+            vm.resetColumn(c);
         };
 
         vm.removeColumn = function(column) {

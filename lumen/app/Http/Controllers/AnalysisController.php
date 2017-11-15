@@ -187,13 +187,57 @@ class AnalysisController extends Controller {
                 if($isAgg || $isPartOfGroupBy) {
                     $query->having($col, $comp, $compValue);
                 } else {
-                    $query->where($col, $comp, $compValue);
+                    switch($comp) {
+                        case 'between':
+                            $query->whereBetween($col, $compValue);
+                            break;
+                        case 'in':
+                            $query->whereIn($col, $compValue);
+                            break;
+                        case 'is null':
+                            $query->whereNull($col);
+                            break;
+                        case 'not between':
+                            $query->whereNotBetween($col, $compValue);
+                            break;
+                        case 'not in':
+                            $query->whereNotIn($col, $compValue);
+                            break;
+                        case 'is not null':
+                            $query->whereNotNull($col);
+                            break;
+                        default:
+                            $query->where($col, $comp, $compValue);
+                            break;
+                    }
                 }
             } else {
                 if($isAgg || $isPartOfGroupBy) {
                     $query->orHaving($col, $comp, $compValue);
                 } else {
-                    $query->orWhere($col, $comp, $compValue);
+                    switch($comp) {
+                        case 'between':
+                            $query->orWhereBetween($col, $compValue);
+                            break;
+                        case 'in':
+                            $query->orWhereIn($col, $compValue);
+                            break;
+                        case 'is null':
+                            $query->orWhereNull($col);
+                            break;
+                        case 'not between':
+                            $query->orWhereNotBetween($col, $compValue);
+                            break;
+                        case 'not in':
+                            $query->orWhereNotIn($col, $compValue);
+                            break;
+                        case 'is not null':
+                            $query->orWhereNotNull($col);
+                            break;
+                        default:
+                            $query->orWhere($col, $comp, $compValue);
+                            break;
+                    }
                 }
             }
         } else {
@@ -207,7 +251,29 @@ class AnalysisController extends Controller {
                     if($isAgg || $isPartOfGroupBy) {
                         $q->having($tblCol, $comp, $compValue);
                     } else {
-                        $q->where($tblCol, $comp, $compValue);
+                        switch($comp) {
+                            case 'between':
+                                $query->whereBetween($tblCol, $compValue);
+                                break;
+                            case 'in':
+                                $query->whereIn($tblCol, $compValue);
+                                break;
+                            case 'is null':
+                                $query->whereNull($tblCol);
+                                break;
+                            case 'not between':
+                                $query->whereNotBetween($tblCol, $compValue);
+                                break;
+                            case 'not in':
+                                $query->whereNotIn($tblCol, $compValue);
+                                break;
+                            case 'is not null':
+                                $query->whereNotNull($tblCol);
+                                break;
+                            default:
+                                $query->where($tblCol, $comp, $compValue);
+                                break;
+                        }
                     }
                 });
             } else {
@@ -215,7 +281,29 @@ class AnalysisController extends Controller {
                     if($isAgg || $isPartOfGroupBy) {
                         $q->having($tblCol, $comp, $compValue);
                     } else {
-                        $q->where($tblCol, $comp, $compValue);
+                        switch($comp) {
+                            case 'between':
+                                $query->whereBetween($tblCol, $compValue);
+                                break;
+                            case 'in':
+                                $query->whereIn($tblCol, $compValue);
+                                break;
+                            case 'is null':
+                                $query->whereNull($tblCol);
+                                break;
+                            case 'not between':
+                                $query->whereNotBetween($tblCol, $compValue);
+                                break;
+                            case 'not in':
+                                $query->whereNotIn($tblCol, $compValue);
+                                break;
+                            case 'is not null':
+                                $query->whereNotNull($tblCol);
+                                break;
+                            default:
+                                $query->where($tblCol, $comp, $compValue);
+                                break;
+                        }
                     }
                 });
             }
@@ -235,10 +323,12 @@ class AnalysisController extends Controller {
             case 'ilike':
             case 'between':
             case 'in':
+            case 'is null':
             case 'not like':
             case 'not ilike':
             case 'not between':
             case 'not in':
+            case 'is not null':
                 return true;
             default:
                 return false;
