@@ -10,6 +10,7 @@ use App\Context;
 use App\File;
 use App\Geodata;
 use App\Literature;
+use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Point;
 use \DB;
 use Illuminate\Http\Request;
@@ -79,67 +80,123 @@ class AnalysisController extends Controller {
 
     // OTHER FUNCTIONS
 
-    private function filter($origin, $filters, $columns, $orders, $groups, $limit) {
+    private function filter($origin, $filters, $columns, $orders, $groups, $limit, $relations = false) {
+        $hasColumnSelection = !empty($columns);
+
         switch($origin) {
             case 'attribute_values':
-                $query = AttributeValue::with([
-                    'context_val',
-                    'thesaurus_val'
-                ]);
+                if($relations) {
+                    $query = AttributeValue::with([
+                        'context_val',
+                        'thesaurus_val'
+                    ]);
+                } else {
+                    $query = AttributeValue::leftJoin('contexts', 'contexts.id', '=', 'context_val');
+                    if(!$hasColumnSelection) {
+                        $tables = ['attribute_values', 'contexts'];
+
+                        $columnNames = [];
+                        foreach($tables as $table) {
+                            $columnNames[$table] = Helpers::getColumnNames($table);
+                        }
+
+                        $this->renameColumns($query, $tables, $columnNames);
+                    }
+                }
                 break;
             case 'contexts':
-                $query = Context::with([
-                    'child_contexts',
-                    'context_type',
-                    'geodata',
-                    'root_context',
-                    'literatures',
-                    'attributes',
-                    'files'
-                ]);
+                if($relations) {
+                    $query = Context::with([
+                        'child_contexts',
+                        'context_type',
+                        'geodata',
+                        'root_context',
+                        'literatures',
+                        'attributes',
+                        'files'
+                    ]);
+                } else {
+                    $query = Context::leftJoin('contexts as child', 'child.root_context_id', '=', 'contexts.id')
+                                    ->leftJoin('contexts as root', 'root.id', '=', 'contexts.root_context_id')
+                                    ->leftJoin('context_types', 'context_types.id', '=', 'contexts.context_type_id')
+                                    ->leftJoin('geodata', 'geodata.id', '=', 'contexts.geodata_id')
+                                    ->leftJoin('attribute_values', 'attribute_values.context_id', '=', 'contexts.id')
+                                    ->leftJoin('attributes', 'attributes.id', '=', 'attribute_id')
+                                    ->leftJoin('context_photos as cp', 'cp.context_id', '=', 'contexts.id')
+                                    ->leftJoin('photos', 'photos.id', '=', 'photo_id');
+                    if(!$hasColumnSelection) {
+                        $tables = ['contexts', 'child', 'root', 'context_types', 'geodata', 'attribute_values', 'attributes', 'photos'];
+                        $columnNames = [];
+                        foreach($tables as $table) {
+                            if($table === 'child' || $table === 'root') {
+                                $columnNames[$table] = Helpers::getColumnNames('contexts');
+                            } else {
+                                $columnNames[$table] = Helpers::getColumnNames($table);
+                            }
+                        }
+
+                        $this->renameColumns($query, $tables, $columnNames);
+                    }
+                }
                 break;
-            case 'files':
-                $query = File::with([
-                    'contexts',
-                    'tags'
-                ]);
+            case 'files': //TODO: rename columns
+                if($relations) {
+                    $query = File::with([
+                        'contexts',
+                        'tags'
+                    ]);
+                } else {
+                    $query = File::leftJoin('context_photos as cp', 'cp.photo_id', '=', 'id')
+                                    ->leftJoin('contexts', 'contexts.id', '=', 'context_id')
+                                    ->leftJoin('photo_tags as pt', 'pt.photo_id', '=', 'photos.id')
+                                    ->leftJoin('th_concept', 'th_concept.concept_url', '=', 'pt.concept_url');
+                                    if(!$hasColumnSelection) {
+                                        $query->select('contexts.*')->addSelect('th_concept.*')->addSelect('photos.*');
+                                    }
+                }
                 break;
             case 'geodata':
-                $query = Geodata::with([
-                    'context'
-                ]);
-                break;
-            case 'literature':
+                if($relations) {
+                    $query = Geodata::with([
+                        'context'
+                    ]);
+                    break;
+                } else {
+                    $query = Geodata::leftJoin('contexts', 'contexts.geodata_id', '=', 'id');
+                }
+            case 'literature': //TODO: $relation
                 $query = Literature::with([
                     'contexts'
                 ]);
                 break;
         }
-        if(isset($filters)) {
+        if(!empty($filters)) {
             foreach($filters as $f) {
                 $this->applyFilter($query, $f, $groups);
             }
         }
 
-        if(isset($groups)) {
+        if(!empty($groups)) {
             foreach($groups as $g) {
                 $query->groupBy($g);
             }
         }
-        if(isset($orders)) {
+        if(!empty($orders)) {
             foreach($orders as $o) {
                 $query->orderBy($o->col, $o->dir);
             }
         }
 
-        if(isset($limit) && isset($limit->from)) {
-            $query->offset($limit->from);
+        if(!empty($limit)) {
+            if(isset($limit->from)) {
+                $query->offset($limit->from);
+            }
             if(isset($limit->amount)) {
                 $query->limit($limit->amount);
             }
         }
 
-        if(isset($columns)) {
+        if($hasColumnSelection) {
             foreach($columns as $c) {
                 if(isset($c->func) && $this->isValidFunction($c->func)) {
                     $select =  $this->getAsRaw($c->func, $c->col, $c->func_values, $c->as);
@@ -155,6 +212,18 @@ class AnalysisController extends Controller {
         }
 
         return $query;
+    }
+
+    // renames columns from $column to $table.$column to avoid name ambiguities
+    private function renameColumns($query, $tables, $columnNames) {
+        if(empty($tables)) return;
+
+        $query->select($tables[0].".id as ".$tables[0].".id");
+        foreach($tables as $table) {
+            foreach($columnNames[$table] as $c) {
+                $query->addSelect("$table.$c as $table.$c");
+            }
+        }
     }
 
     private function applyFilter($query, $filter, $groups) {
