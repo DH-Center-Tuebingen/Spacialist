@@ -19,6 +19,7 @@ use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelTag;
 use lsolesen\pel\PelIfd;
 use lsolesen\pel\PelDataWindow;
+use lsolesen\pel\PelDataWindowOffsetException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use \wapmorgan\UnifiedArchive\UnifiedArchive;
 
@@ -128,7 +129,11 @@ class FileController extends Controller
         } catch(FileNotFoundException $e) {
         }
         $file->created = strtotime($file->created);
-        $file->exif = $this->getExifData($file);
+        try {
+            $file->exif = $this->getExifData($file);
+        } catch(PelDataWindowOffsetException $e) {
+            // Do nothing for now
+        }
         $file->linked_contexts = $this->getLinkedContexts($file);
         return $file;
     }
@@ -204,7 +209,11 @@ class FileController extends Controller
             } catch(FileNotFoundException $e) {
             }
             $file->created = strtotime($file->created);
-            $file->exif = $this->getExifData($file);
+            try {
+                $file->exif = $this->getExifData($file);
+            } catch(PelDataWindowOffsetException $e) {
+                // Do nothing for now
+            }
             $file->linked_contexts = $this->getLinkedContexts($file);
         }
         return response()->json($files);
