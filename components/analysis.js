@@ -48,6 +48,7 @@ spacialistApp.component('analysis', {
             'sum'
         ];
 
+        vm.showFilterOptions = true;
         vm.instantFilter = false;
         vm.column = {};
 
@@ -77,6 +78,10 @@ spacialistApp.component('analysis', {
         //     func: 'count',
         //     func_values: []
         // });
+
+        vm.toggleShowFilterOptions = function() {
+            vm.showFilterOptions = !vm.showFilterOptions;
+        }
 
         vm.addColumn = function() {
             var c = vm.column;

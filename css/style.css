@@ -835,6 +835,13 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     top: 8px;
 }
 
+.toggle-button {
+    position: absolute;
+    left: 0;
+    top: -25px;
+    z-index: 1;
+}
+
 .list-group-item {
     margin: 5px 0 5px 0;
 }
