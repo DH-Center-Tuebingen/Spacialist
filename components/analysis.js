@@ -184,7 +184,7 @@ spacialistApp.component('analysis', {
             }
         };
 
-        vm.addFilter = function(col, comp, comp_value, func, comp_values, and) {
+        vm.addFilter = function(col, comp, comp_value, func, func_values, and) {
             var filter = {
                 col: col,
                 comp: comp,
