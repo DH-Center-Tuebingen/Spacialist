@@ -185,8 +185,6 @@ spacialistApp.component('analysis', {
         };
 
         vm.addFilter = function(col, comp, comp_value, func, comp_values, and) {
-            // if vm.columns is set, col is an object
-            if(col.col) col = col.col;
             var filter = {
                 col: col,
                 comp: comp,
@@ -251,19 +249,18 @@ spacialistApp.component('analysis', {
                 vm.query = response.query;
                 vm.results.length = 0;
                 for(var i=0; i<response.rows.length; i++) {
-                    var r = response.rows[i];
-                    for(var k in r) {
-                        if(r.hasOwnProperty(k)) {
-                            var lk = k.toLowerCase();
-                            var tmp = r[k];
-                            delete r[k];
-                            r[lk] = tmp;
-                        }
-                    }
                     vm.results.push(response.rows[i]);
                 }
             });
         };
+
+        vm.getOriginalColumnName = function(k) {
+            for(var i=0; i<vm.columns.length; i++) {
+                var col = vm.columns[i];
+                if(k == col.as || k == col.col) return col.col;
+            }
+            return k;
+        }
 
         vm.closePopover = function(event) {
             // get anchor as angluar element
