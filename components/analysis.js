@@ -262,5 +262,16 @@ spacialistApp.component('analysis', {
                 }
             });
         };
+
+        vm.closePopover = function(event) {
+            // get anchor as angluar element
+            var elem = angular.element(event.currentTarget);
+            // get first ancestor with popover class
+            var popover = elem.closest('.popover');
+            // get popover src trigger element
+            var src = popover.siblings('.filter-popover-trigger');
+            // hide the popover
+            src.click();
+        };
     }
 });
