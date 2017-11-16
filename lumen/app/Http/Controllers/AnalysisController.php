@@ -174,12 +174,15 @@ class AnalysisController extends Controller {
                 break;
         }
         $groups = [];
+        $hasGroupBy = false;
         if(!empty($filters)) {
             foreach($filters as $f) {
                 $applied = $this->applyFilter($query, $f, $groups);
                 // check if it was a valid filter and a agg function
                 if($applied && isset($f->func) && $this->isAggregateFunction($f->func)) {
-                    $groups[] = $f->col;
+                    $hasGroupBy = true;
+                } else {
+                    $groups[$col] = 1;
                 }
             }
         }
@@ -201,11 +204,16 @@ class AnalysisController extends Controller {
 
         if($hasColumnSelection) {
             // check if there is at least one agg function
-            $hasGroupBy = !empty($groups);
             foreach($columns as $c) {
                 if(isset($c->func) && $this->isValidFunction($c->func)) {
+                    if($this->isAggregateFunction($c->func)) {
+                        $hasGroupBy = true;
+                    } else {
+                        $groups[$c->col] = 1;
+                    }
                     $select =  $this->getAsRaw($c->func, $c->col, $c->func_values, $c->as);
                 } else {
+                    $groups[$c->col] = 1;
                     $select = '';
                     if(isset($c->as)) {
                         $select = " AS $c->as";
@@ -213,11 +221,11 @@ class AnalysisController extends Controller {
                     $select = $c->col.$select;
                 }
                 $query->addSelect($select);
-                if($hasGroupBy) {
-                    // if current column is selected, but not a agg function
-                    // add it to group by
-                    if(!in_array($c->col, $groups)) {
-                        $query->groupBy($c->col);
+            }
+            if($hasGroupBy && !empty($groups)) {
+                foreach($groups as $col => $set) {
+                    if($set === 1) {
+                        $query->groupBy($col);
                     }
                 }
             }
