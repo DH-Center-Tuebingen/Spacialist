@@ -174,7 +174,7 @@
             <table class="table table-striped table-hover">
                 <tr ng-if="$ctrl.columns.length > 0">
                     <th ng-repeat="k in $ctrl.columns">
-                        <div class="flex-hr-start">
+                        <div class="flex-hr-start" uib-tooltip="{{k.col}}">
                             {{ k.as || k.col }}
                             <a href="">
                                 <i class="material-icons" ng-click="$ctrl.addOrder(k.col, 'desc')">arrow_drop_up</i>
@@ -190,7 +190,7 @@
                 </tr>
                 <tr ng-if="$ctrl.columns.length == 0">
                     <th ng-repeat="(k, col) in $ctrl.results[0]">
-                        <div class="flex-hr-start">
+                        <div class="flex-hr-start" uib-tooltip="{{k}}">
                             {{ k }}
                             <a href="">
                                 <i class="material-icons" ng-click="$ctrl.addOrder(k, 'desc')">arrow_drop_up</i>
