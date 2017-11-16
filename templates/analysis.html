@@ -123,46 +123,15 @@
                     </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="control-label col-md-3">Groups</label>
-                <div class="col-md-9">
-                    <ol>
-                        <li class="flex-hr-between" ng-repeat="g in $ctrl.groups">
-                            <span>{{ $index + 1 }}.</span>
-                            <div>
-                                {{ g }}
-                            </div>
-                            <div>
-                                <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeGroup(g)">
-                                    <i class="material-icons md-18 fa-red">delete</i>
-                                </a>
-                            </div>
-                        </li>
-                    </ol>
-                    <div class="flex-vt">
-                        <div class="flex-hr-start">
-                            <input type="text" placeholder="Group By" ng-model="$ctrl.group" />
-                            <button type="button" class="btn btn-default" ng-click="$ctrl.addGroup()" ng-disabled="!$ctrl.group">
-                                <i class="material-icons">add</i> Add
-                            </button>
-                        </div>
-                        <div class="flex-hr-start">
-                            <ui-select ng-model="$ctrl.column.func" style="display: inline-block;">
-                                <ui-select-match allow-clear="true">
-                                    {{ $select.selected }}
-                                </ui-select-match>
-                                <ui-select-choices repeat="f in $ctrl.functions | filter: $select.search">
-                                    <span ng-bind-html="f | highlight: $select.search"></span>
-                                </ui-select-choices>
-                            </ui-select>
-                            <input type="text" placeholder="Function Values" ng-model="$ctrl.column.func_values" ng-show="$ctrl.column.func" />
-                        </div>
-                    </div>
-                </div>
-            </div>
             <button type="button" class="btn btn-default" ng-click="$ctrl.filter()">
                 Filtern
             </button>
+            <div class="form-group">
+                <label class="control-label col-md-3">Resulting Query</label>
+                <div class="col-md-9">
+                    <textarea class="form-control" rows="6" ng-model="$ctrl.query" ng-readonly="true"></textarea>
+                </div>
+            </div>
         </form>
     </div>
     <div ng-class="$ctrl.showFilterOptions ? 'col-md-9' : 'col-md-12'">

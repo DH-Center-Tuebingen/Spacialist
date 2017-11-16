@@ -54,10 +54,12 @@ class AnalysisController extends Controller {
         $filters = json_decode($request->input('filters', '[]'));
         $columns = json_decode($request->input('columns', '[]'));
         $orders = json_decode($request->input('orders', '[]'));
-        $groups = json_decode($request->input('groups', '[]'));
         $limit = json_decode($request->input('limit', '{}'));
-        $query = $this->filter([$ctid], $filters, $columns, $orders, $groups, $limit);
-        return response()->json($query->get());
+        $query = $this->filter([$ctid], $filters, $columns, $orders, $limit);
+        return response()->json([
+            'rows' => $query->get(),
+            'query' => $this->cleanSql($query->toSql())
+        ]);
     }
 
     public function filterContexts(Request $request) {
@@ -65,11 +67,12 @@ class AnalysisController extends Controller {
         $filters = json_decode($request->input('filters', '[]'));
         $columns = json_decode($request->input('columns', '[]'));
         $orders = json_decode($request->input('orders', '[]'));
-        $groups = json_decode($request->input('groups', '[]'));
         $limit = json_decode($request->input('limit', '{}'));
-        $query = $this->filter($origin, $filters, $columns, $orders, $groups, $limit);
-        $rows = $query->get();
-        return response()->json($rows);
+        $query = $this->filter($origin, $filters, $columns, $orders, $limit);
+        return response()->json([
+            'rows' => $query->get(),
+            'query' => $this->cleanSql($query->toSql())
+        ]);
     }
 
     // PATCH
@@ -80,7 +83,7 @@ class AnalysisController extends Controller {
 
     // OTHER FUNCTIONS
 
-    private function filter($origin, $filters, $columns, $orders, $groups, $limit, $relations = false) {
+    private function filter($origin, $filters, $columns, $orders, $limit, $relations = false) {
         $hasColumnSelection = !empty($columns);
 
         switch($origin) {
@@ -170,17 +173,17 @@ class AnalysisController extends Controller {
                 ]);
                 break;
         }
+        $groups = [];
         if(!empty($filters)) {
             foreach($filters as $f) {
-                $this->applyFilter($query, $f, $groups);
+                $applied = $this->applyFilter($query, $f, $groups);
+                // check if it was a valid filter and a agg function
+                if($applied && isset($f->func) && $this->isAggregateFunction($f->func)) {
+                    $groups[] = $f->col;
+                }
             }
         }
 
-        if(!empty($groups)) {
-            foreach($groups as $g) {
-                $query->groupBy($g);
-            }
-        }
         if(!empty($orders)) {
             foreach($orders as $o) {
                 $query->orderBy($o->col, $o->dir);
@@ -197,6 +200,8 @@ class AnalysisController extends Controller {
         }
 
         if($hasColumnSelection) {
+            // check if there is at least one agg function
+            $hasGroupBy = !empty($groups);
             foreach($columns as $c) {
                 if(isset($c->func) && $this->isValidFunction($c->func)) {
                     $select =  $this->getAsRaw($c->func, $c->col, $c->func_values, $c->as);
@@ -208,6 +213,13 @@ class AnalysisController extends Controller {
                     $select = $c->col.$select;
                 }
                 $query->addSelect($select);
+                if($hasGroupBy) {
+                    // if current column is selected, but not a agg function
+                    // add it to group by
+                    if(!in_array($c->col, $groups)) {
+                        $query->groupBy($c->col);
+                    }
+                }
             }
         }
 
@@ -229,7 +241,7 @@ class AnalysisController extends Controller {
     private function applyFilter($query, $filter, $groups) {
         if(!$this->isValidCompare($filter->comp)) {
             // TODO error?
-            return;
+            return false;
         }
         $col = $filter->col;
         $comp = $filter->comp;
@@ -241,142 +253,71 @@ class AnalysisController extends Controller {
             $funcValues = $filter->func_values;
             if(!$this->isValidFunction($func)) {
                 // TODO error?
-                return;
+                return false;
             }
         }
-        $isPartOfGroupBy = $this->isGroupBy($col, $groups);
-        $cols = explode('.', $col);
         $isAgg = $usesFunc && $this->isAggregateFunction($func);
-        // has no '.' => object itself
-        if(count($cols) == 1) {
-            if($usesFunc) {
-                $col = $this->getAsRaw($func, $col, $funcValues);
-            }
-            if($and) {
-                if($isAgg || $isPartOfGroupBy) {
-                    $query->having($col, $comp, $compValue);
-                } else {
-                    switch($comp) {
-                        case 'between':
-                            $query->whereBetween($col, $compValue);
-                            break;
-                        case 'in':
-                            $query->whereIn($col, $compValue);
-                            break;
-                        case 'is null':
-                            $query->whereNull($col);
-                            break;
-                        case 'not between':
-                            $query->whereNotBetween($col, $compValue);
-                            break;
-                        case 'not in':
-                            $query->whereNotIn($col, $compValue);
-                            break;
-                        case 'is not null':
-                            $query->whereNotNull($col);
-                            break;
-                        default:
-                            $query->where($col, $comp, $compValue);
-                            break;
-                    }
-                }
+        if($usesFunc) {
+            $col = $this->getAsRaw($func, $col, $funcValues);
+        }
+        if($and) {
+            if($isAgg) {
+                $query->having($col, $comp, $compValue);
             } else {
-                if($isAgg || $isPartOfGroupBy) {
-                    $query->orHaving($col, $comp, $compValue);
-                } else {
-                    switch($comp) {
-                        case 'between':
-                            $query->orWhereBetween($col, $compValue);
-                            break;
-                        case 'in':
-                            $query->orWhereIn($col, $compValue);
-                            break;
-                        case 'is null':
-                            $query->orWhereNull($col);
-                            break;
-                        case 'not between':
-                            $query->orWhereNotBetween($col, $compValue);
-                            break;
-                        case 'not in':
-                            $query->orWhereNotIn($col, $compValue);
-                            break;
-                        case 'is not null':
-                            $query->orWhereNotNull($col);
-                            break;
-                        default:
-                            $query->orWhere($col, $comp, $compValue);
-                            break;
-                    }
+                switch($comp) {
+                    case 'between':
+                        $query->whereBetween($col, $compValue);
+                        break;
+                    case 'in':
+                        $query->whereIn($col, $compValue);
+                        break;
+                    case 'is null':
+                        $query->whereNull($col);
+                        break;
+                    case 'not between':
+                        $query->whereNotBetween($col, $compValue);
+                        break;
+                    case 'not in':
+                        $query->whereNotIn($col, $compValue);
+                        break;
+                    case 'is not null':
+                        $query->whereNotNull($col);
+                        break;
+                    default:
+                        $query->where($col, $comp, $compValue);
+                        break;
                 }
             }
         } else {
-            $tbl = $cols[0];
-            $tblCol = $cols[1];
-            if($usesFunc) {
-                $tblCol = $this->getAsRaw($func, $tblCol, $funcValues);
-            }
-            if($and) {
-                $query->whereHas($tbl, function($q) use($tblCol, $comp, $compValue, $isAgg, $isPartOfGroupBy) {
-                    if($isAgg || $isPartOfGroupBy) {
-                        $q->having($tblCol, $comp, $compValue);
-                    } else {
-                        switch($comp) {
-                            case 'between':
-                                $query->whereBetween($tblCol, $compValue);
-                                break;
-                            case 'in':
-                                $query->whereIn($tblCol, $compValue);
-                                break;
-                            case 'is null':
-                                $query->whereNull($tblCol);
-                                break;
-                            case 'not between':
-                                $query->whereNotBetween($tblCol, $compValue);
-                                break;
-                            case 'not in':
-                                $query->whereNotIn($tblCol, $compValue);
-                                break;
-                            case 'is not null':
-                                $query->whereNotNull($tblCol);
-                                break;
-                            default:
-                                $query->where($tblCol, $comp, $compValue);
-                                break;
-                        }
-                    }
-                });
+            if($isAgg) {
+                $query->orHaving($col, $comp, $compValue);
             } else {
-                $query->orWhereHas($tbl, function($q) use($tblCol, $comp, $compValue, $isAgg, $isPartOfGroupBy) {
-                    if($isAgg || $isPartOfGroupBy) {
-                        $q->having($tblCol, $comp, $compValue);
-                    } else {
-                        switch($comp) {
-                            case 'between':
-                                $query->whereBetween($tblCol, $compValue);
-                                break;
-                            case 'in':
-                                $query->whereIn($tblCol, $compValue);
-                                break;
-                            case 'is null':
-                                $query->whereNull($tblCol);
-                                break;
-                            case 'not between':
-                                $query->whereNotBetween($tblCol, $compValue);
-                                break;
-                            case 'not in':
-                                $query->whereNotIn($tblCol, $compValue);
-                                break;
-                            case 'is not null':
-                                $query->whereNotNull($tblCol);
-                                break;
-                            default:
-                                $query->where($tblCol, $comp, $compValue);
-                                break;
-                        }
-                    }
-                });
+                switch($comp) {
+                    case 'between':
+                        $query->orWhereBetween($col, $compValue);
+                        break;
+                    case 'in':
+                        $query->orWhereIn($col, $compValue);
+                        break;
+                    case 'is null':
+                        $query->orWhereNull($col);
+                        break;
+                    case 'not between':
+                        $query->orWhereNotBetween($col, $compValue);
+                        break;
+                    case 'not in':
+                        $query->orWhereNotIn($col, $compValue);
+                        break;
+                    case 'is not null':
+                        $query->orWhereNotNull($col);
+                        break;
+                    default:
+                        $query->orWhere($col, $comp, $compValue);
+                        break;
+                }
             }
         }
+        return true;
     }
 
     private function isValidCompare($comp) {
@@ -405,14 +346,11 @@ class AnalysisController extends Controller {
     }
 
     private function isValidFunction($func) {
+        if(!isset($func)) return false;
+        if($this->isAggregateFunction($func)) return true;
         switch($func) {
             case 'pg_distance':
             case 'pg_area':
-            case 'count':
-            case 'min':
-            case 'max':
-            case 'avg':
-            case 'sum':
                 return true;
             default:
                 return false;
@@ -460,8 +398,8 @@ class AnalysisController extends Controller {
         }
     }
 
-    private function isGroupBy($column, $groups) {
-        return in_array($column, $groups);
+    private function cleanSql($queryString) {
+        return str_replace('"', '', $queryString);
     }
 
     private function getAttributeColumn($aid) {

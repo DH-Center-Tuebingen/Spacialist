@@ -11,6 +11,7 @@ spacialistApp.component('analysis', {
         var vm = this;
 
         vm.results = [];
+        vm.query = '';
 
         vm.origins = [
             'attribute_values',
@@ -247,9 +248,10 @@ spacialistApp.component('analysis', {
             formData.append('limit', angular.toJson(vm.limit));
             httpPostFactory('api/analysis/filter', formData, function(response) {
                 console.log(response);
+                vm.query = response.query;
                 vm.results.length = 0;
-                for(var i=0; i<response.length; i++) {
-                    var r = response[i];
+                for(var i=0; i<response.rows.length; i++) {
+                    var r = response.rows[i];
                     for(var k in r) {
                         if(r.hasOwnProperty(k)) {
                             var lk = k.toLowerCase();
@@ -258,7 +260,7 @@ spacialistApp.component('analysis', {
                             r[lk] = tmp;
                         }
                     }
-                    vm.results.push(response[i]);
+                    vm.results.push(response.rows[i]);
                 }
             });
         };
