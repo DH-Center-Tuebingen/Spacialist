@@ -55,6 +55,7 @@ spacialistApp.component('analysis', {
         vm.instantFilter = false;
         vm.column = {};
 
+        vm.availableColumns = [];
         vm.filters = [];
         vm.origin = vm.origins[0];
         vm.columns = [];
@@ -97,7 +98,7 @@ spacialistApp.component('analysis', {
         vm.addColumn = function() {
             var c = vm.column;
             vm.columns.push({
-                col: c.col,
+                col: c.col.col,
                 as: c.as,
                 func: c.func,
                 func_values: angular.fromJson(c.func_values)
@@ -242,14 +243,27 @@ spacialistApp.component('analysis', {
             formData.append('origin', vm.origin);
             formData.append('columns', angular.toJson(vm.columns));
             formData.append('orders', angular.toJson(vm.orders));
-            formData.append('groups', angular.toJson(vm.groups));
             formData.append('limit', angular.toJson(vm.limit));
             httpPostFactory('api/analysis/filter', formData, function(response) {
                 console.log(response);
                 vm.query = response.query;
                 vm.results.length = 0;
-                for(var i=0; i<response.rows.length; i++) {
-                    vm.results.push(response.rows[i]);
+                if(response.rows.length > 0) {
+                    var row = response.rows[0];
+                    vm.availableColumns.length = 0;
+                    // add all returned column names to selection array
+                    for(var k in row) {
+                        var o = vm.getOriginalColumnName(k);
+                        var ac = {
+                            col: o
+                        };
+                        // if names are different, AS property is set
+                        if(k != o) ac.as = k;
+                        vm.availableColumns.push(ac)
+                    }
+                    for(var i=0; i<response.rows.length; i++) {
+                        vm.results.push(response.rows[i]);
+                    }
                 }
             });
         };

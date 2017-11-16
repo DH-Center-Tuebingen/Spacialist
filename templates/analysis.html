@@ -103,7 +103,19 @@
                     </ol>
                     <div class="flex-vt">
                         <div class="flex-hr-start">
-                            <input type="text" placeholder="Column" ng-model="$ctrl.column.col" />
+                            <ui-select ng-model="$ctrl.column.col">
+                                <ui-select-match allow-clear="false">
+                                    {{ $select.selected.as || $select.selected.col }}
+                                </ui-select-match>
+                                <ui-select-choices repeat="ac in $ctrl.availableColumns | filter: $select.search">
+                                    <span ng-show="ac.as">
+                                        <span ng-bind-html="ac.as | highlight: $select.search"></span> (<span ng-bind-html="ac.col | highlight: $select.search"></span>)
+                                    </span>
+                                    <span ng-hide="ac.as">
+                                        <span ng-bind-html="ac.col | highlight: $select.search"></span>
+                                    </span>
+                                </ui-select-choices>
+                            </ui-select>
                             <input type="text" placeholder="AS" ng-model="$ctrl.column.as" />
                             <button type="button" class="btn btn-default" ng-click="$ctrl.addColumn()" ng-disabled="!$ctrl.column.col || ($ctrl.column.func && !$ctrl.column.func_values)">
                                 <i class="material-icons">add</i> Add
