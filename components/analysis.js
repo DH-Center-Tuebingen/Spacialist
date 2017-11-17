@@ -19,28 +19,132 @@ spacialistApp.component('analysis', {
                 values: [],
                 selectLabel: function() {
                     vm.vis.pie.labels.length = 0;
-                    var c = vm.vis.labelCol.col;
+                    var c = vm.vis.labelCol.as || vm.vis.labelCol.col;
                     for(var i=0; i<vm.results.length; i++) {
                         var r = vm.results[i];
-                        vm.vis.pie.labels.push(vm.concepts[r[c]].label);
+                        vm.vis.pie.labels.push(r[c]);
                     }
                 },
                 selectValues: function() {
                     vm.vis.pie.values.length = 0;
-                    var c = vm.vis.valueCol.col;
+                    var c = vm.vis.valueCol.as || vm.vis.valueCol.col;
                     for(var i=0; i<vm.results.length; i++) {
                         var r = vm.results[i];
                         vm.vis.pie.values.push(r[c]);
                     }
                 },
                 validate: function() {
-                    return vm.vis.pie.values.length > 0 && vm.vis.pie.labels.length > 0;
+                    var t = vm.vis.pie;
+                    return t.values.length > 0 && t.labels.length > 0;
                 },
                 createData: function() {
                     return [{
                         values: vm.vis.pie.values,
                         labels: vm.vis.pie.labels,
                         type: 'pie'
+                    }];
+                }
+            },
+            bar: {
+                x: [],
+                y: [],
+                selectX: function() {
+                    vm.vis.bar.x.length = 0;
+                    var c = vm.vis.x.as || vm.vis.x.col;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.bar.x.push(r[c]);
+                    }
+                },
+                selectY: function() {
+                    vm.vis.bar.y.length = 0;
+                    var c = vm.vis.y.as || vm.vis.y.col;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.bar.y.push(r[c]);
+                    }
+                },
+                validate: function() {
+                    var t = vm.vis.bar;
+                    return t.x.length > 0 && t.y.length > 0;
+                },
+                createData: function() {
+                    return [{
+                        x: vm.vis.bar.x,
+                        y: vm.vis.bar.y,
+                        type: 'bar'
+                    }];
+                }
+            },
+            line: {
+                x: [],
+                y: [],
+                name: '',
+                selectX: function() {
+                    vm.vis.line.x.length = 0;
+                    var c = vm.vis.x.as || vm.vis.x.col;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.line.x.push(r[c]);
+                    }
+                },
+                selectY: function() {
+                    vm.vis.line.y.length = 0;
+                    var c = vm.vis.y.as || vm.vis.y.col;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.line.y.push(r[c]);
+                    }
+                },
+                validate: function() {
+                    var t = vm.vis.line;
+                    return t.x.length > 0 && t.y.length > 0 && t.name.length > 0;
+                },
+                createData: function() {
+                    return [{
+                        x: vm.vis.line.x,
+                        y: vm.vis.line.y,
+                        mode: 'lines',
+                        type: 'scatter',
+                        name: vm.vis.line.name
+                    }];
+                }
+            },
+            scatter: {
+                x: [],
+                y: [],
+                name: '',
+                marker: {
+                    size: 24
+                },
+                selectX: function() {
+                    vm.vis.scatter.x.length = 0;
+                    var c = vm.vis.x.as || vm.vis.x.col;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.scatter.x.push(r[c]);
+                    }
+                },
+                selectY: function() {
+                    vm.vis.scatter.y.length = 0;
+                    var c = vm.vis.y.as || vm.vis.y.col;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.scatter.y.push(r[c]);
+                    }
+                },
+                validate: function() {
+                    var t = vm.vis.scatter;
+                    return t.x.length > 0 && t.y.length > 0 && t.name.length > 0 && t.marker.size > 0;
+                },
+                createData: function() {
+                    return [{
+                        x: vm.vis.scatter.x,
+                        y: vm.vis.scatter.y,
+                        mode: 'markers',
+                        type: 'scatter',
+                        name: vm.vis.scatter.name,
+                        marker: vm.vis.scatter.marker
                     }];
                 }
             }

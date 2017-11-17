@@ -412,7 +412,7 @@ class AnalysisController extends Controller {
     private function getAsRaw($func, $column, $values, $alias = null) {
         $as = '';
         if(isset($alias)) {
-            $as = " AS $alias";
+            $as = " AS \"$alias\"";
         }
         switch($func) {
             case 'pg_distance':

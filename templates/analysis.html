@@ -190,49 +190,47 @@
                 </table>
             </div>
             <div ng-show="$ctrl.activeResultTab == 'vis'">
-                <div class="col-md-12">
-                    <form class="form-horizontal col-md-5">
-                        <div class="form-group">
-                            <label class="control-label col-md-3">Type</label>
-                            <div class="col-md-9">
-                                <ui-select ng-model="$ctrl.vis.type">
-                                    <ui-select-match allow-clear="false">
-                                        {{ $select.selected }}
-                                    </ui-select-match>
-                                    <ui-select-choices repeat="av in $ctrl.availableVisualizations | filter: $select.search">
-                                        <span ng-bind-html="av | highlight: $select.search"></span>
-                                    </ui-select-choices>
-                                </ui-select>
-                            </div>
+                <form class="form-horizontal col-md-5">
+                    <div class="form-group">
+                        <label class="control-label col-md-3">Type</label>
+                        <div class="col-md-9">
+                            <ui-select ng-model="$ctrl.vis.type">
+                                <ui-select-match allow-clear="false">
+                                    {{ $select.selected }}
+                                </ui-select-match>
+                                <ui-select-choices repeat="av in $ctrl.availableVisualizations | filter: $select.search">
+                                    <span ng-bind-html="av | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
                         </div>
-                        <div ng-if="$ctrl.vis.type == 'scatter'" ng-include src="'templates/visualizations/scatter.html'">
-                        </div>
-                        <div ng-if="$ctrl.vis.type == 'line'" ng-include src="'templates/visualizations/line.html'">
-                        </div>
-                        <div ng-if="$ctrl.vis.type == 'bar'" ng-include src="'templates/visualizations/bar.html'">
-                        </div>
-                        <div ng-if="$ctrl.vis.type == 'pie'" ng-include src="'templates/visualizations/pie.html'">
-                        </div>
-                        <div ng-if="$ctrl.vis.type == 'histogram'" ng-include src="'templates/visualizations/histogram.html'">
-                        </div>
-                        <div ng-if="$ctrl.vis.type == 'histogram2d'" ng-include src="'templates/visualizations/histogram2d.html'">
-                        </div>
-                        <div ng-if="$ctrl.vis.type == 'ternary'" ng-include src="'templates/visualizations/ternary.html'">
-                        </div>
-                        <div ng-if="$ctrl.vis.type == 'ternarycontour'" ng-include src="'templates/visualizations/ternarycontour.html'">
-                        </div>
-                        <div ng-if="$ctrl.vis.type == 'heatmap'" ng-include src="'templates/visualizations/heatmap.html'">
-                        </div>
-                        <div ng-if="$ctrl.vis.type == 'windrose'" ng-include src="'templates/visualizations/windrose.html'">
-                        </div>
-                        <div ng-if="$ctrl.vis.type == 'radar'" ng-include src="'templates/visualizations/radar.html'">
-                        </div>
-                        <button type="button" class="btn btn-default" ng-click="$ctrl.visualize($ctrl.vis.type)" ng-disabled="!$ctrl.vis[$ctrl.vis.type].validate()">
-                            <i class="material-icons">visibility</i> Visualize it!
-                        </button>
-                    </form>
-                </div>
-                <div class="col-md-12" id="plotly-visualization-container"></div>
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'scatter'" ng-include src="'templates/visualizations/scatter.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'line'" ng-include src="'templates/visualizations/line.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'bar'" ng-include src="'templates/visualizations/bar.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'pie'" ng-include src="'templates/visualizations/pie.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'histogram'" ng-include src="'templates/visualizations/histogram.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'histogram2d'" ng-include src="'templates/visualizations/histogram2d.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'ternary'" ng-include src="'templates/visualizations/ternary.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'ternarycontour'" ng-include src="'templates/visualizations/ternarycontour.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'heatmap'" ng-include src="'templates/visualizations/heatmap.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'windrose'" ng-include src="'templates/visualizations/windrose.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type == 'radar'" ng-include src="'templates/visualizations/radar.html'">
+                    </div>
+                    <button type="button" class="btn btn-default" ng-click="$ctrl.visualize($ctrl.vis.type)" ng-disabled="!$ctrl.vis[$ctrl.vis.type].validate()">
+                        <i class="material-icons">visibility</i> Visualize it!
+                    </button>
+                </form>
+                <div class="col-md-7" id="plotly-visualization-container"></div>
             </div>
         </div>
     </div>
