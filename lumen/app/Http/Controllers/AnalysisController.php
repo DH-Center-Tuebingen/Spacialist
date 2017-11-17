@@ -142,7 +142,7 @@ class AnalysisController extends Controller {
                     }
                 }
                 break;
-            case 'files': //TODO: rename columns
+            case 'files':
                 if($relations) {
                     $query = File::with([
                         'contexts',
@@ -153,9 +153,15 @@ class AnalysisController extends Controller {
                                     ->leftJoin('contexts', 'contexts.id', '=', 'context_id')
                                     ->leftJoin('photo_tags as pt', 'pt.photo_id', '=', 'photos.id')
                                     ->leftJoin('th_concept', 'th_concept.concept_url', '=', 'pt.concept_url');
-                                    if(!$hasColumnSelection) {
-                                        $query->select('contexts.*')->addSelect('th_concept.*')->addSelect('photos.*');
-                                    }
+                    if(!$hasColumnSelection) {
+                        $tables = ['photos', 'contexts', 'th_concept'];
+                        $columnNames = [];
+                        foreach($tables as $table) {
+                            $columnNames[$table] = Helpers::getColumnNames($table);
+                        }
+
+                        $this->renameColumns($query, $tables, $columnNames);
+                    }
                 }
                 break;
             case 'geodata':
@@ -163,14 +169,38 @@ class AnalysisController extends Controller {
                     $query = Geodata::with([
                         'context'
                     ]);
-                    break;
                 } else {
-                    $query = Geodata::leftJoin('contexts', 'contexts.geodata_id', '=', 'id');
+                    $query = Geodata::leftJoin('contexts', 'contexts.geodata_id', '=', 'geodata.id');
+                    if(!$hasColumnSelection) {
+                        $tables = ['geodata', 'contexts'];
+                        $columnNames = [];
+                        foreach($tables as $table) {
+                            $columnNames[$table] = Helpers::getColumnNames($table);
+                        }
+
+                        $this->renameColumns($query, $tables, $columnNames);
+                    }
                 }
-            case 'literature': //TODO: $relation
-                $query = Literature::with([
-                    'contexts'
-                ]);
+                break;
+            case 'literature':
+                if($relations) {
+                    $query = Literature::with([
+                        'contexts'
+                    ]);
+                } else {
+                    $query = Literature::leftJoin('sources', 'sources.literature_id', '=', 'literature.id')
+                        ->leftJoin('contexts', 'sources.context_id', '=', 'contexts.id')
+                        ->leftJoin('attributes', 'sources.attribute_id', '=', 'attributes.id');
+                    if(!$hasColumnSelection) {
+                        $tables = ['literature', 'attributes', 'contexts', 'sources'];
+                        $columnNames = [];
+                        foreach($tables as $table) {
+                            $columnNames[$table] = Helpers::getColumnNames($table);
+                        }
+
+                        $this->renameColumns($query, $tables, $columnNames);
+                    }
+                }
                 break;
         }
         $groups = [];
