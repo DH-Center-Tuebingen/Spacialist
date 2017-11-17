@@ -12,6 +12,39 @@ spacialistApp.component('analysis', {
 
         vm.results = [];
         vm.query = '';
+        vm.vis = {
+            type: '',
+            pie: {
+                labels: [],
+                values: [],
+                selectLabel: function() {
+                    vm.vis.pie.labels.length = 0;
+                    var c = vm.vis.labelCol.col;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.pie.labels.push(vm.concepts[r[c]].label);
+                    }
+                },
+                selectValues: function() {
+                    vm.vis.pie.values.length = 0;
+                    var c = vm.vis.valueCol.col;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.pie.values.push(r[c]);
+                    }
+                },
+                validate: function() {
+                    return vm.vis.pie.values.length > 0 && vm.vis.pie.labels.length > 0;
+                },
+                createData: function() {
+                    return [{
+                        values: vm.vis.pie.values,
+                        labels: vm.vis.pie.labels,
+                        type: 'pie'
+                    }];
+                }
+            }
+        };
 
         vm.origins = [
             'attribute_values',
@@ -51,6 +84,20 @@ spacialistApp.component('analysis', {
             'sum'
         ];
 
+        vm.availableVisualizations = [
+            'scatter',
+            'line',
+            'bar',
+            'pie',
+            'histogram',
+            'histogram2d',
+            'ternary',
+            'ternarycontour',
+            'heatmap',
+            'windrose',
+            'radar'
+        ]
+
         vm.showFilterOptions = true;
         vm.instantFilter = false;
         vm.column = {};
@@ -71,17 +118,6 @@ spacialistApp.component('analysis', {
             func_values: [[48.52,9.05]],
             and: true
         });
-
-        // vm.groups.push('context_type_id');
-        // vm.columns.push({
-        //     col: 'context_type_id'
-        // });
-        // vm.columns.push({
-        //     col: '*',
-        //     as: 'Anzahl',
-        //     func: 'count',
-        //     func_values: []
-        // });
 
         vm.toggleShowFilterOptions = function() {
             vm.showFilterOptions = !vm.showFilterOptions;
@@ -245,7 +281,6 @@ spacialistApp.component('analysis', {
             formData.append('orders', angular.toJson(vm.orders));
             formData.append('limit', angular.toJson(vm.limit));
             httpPostFactory('api/analysis/filter', formData, function(response) {
-                console.log(response);
                 vm.query = response.query;
                 vm.results.length = 0;
                 if(response.rows.length > 0) {
@@ -266,6 +301,17 @@ spacialistApp.component('analysis', {
                     }
                 }
             });
+        };
+
+        vm.visualize = function(type) {
+            if(!vm.vis[type].validate()) return;
+            var data = vm.vis[type].createData();
+            console.log(data);
+            var layout = {
+                width: 500,
+                height: 500
+            }
+            Plotly.newPlot('plotly-visualization-container', data, layout);
         };
 
         vm.getOriginalColumnName = function(k) {
