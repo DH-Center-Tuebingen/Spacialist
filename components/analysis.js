@@ -410,10 +410,11 @@ spacialistApp.component('analysis', {
         vm.visualize = function(type) {
             if(!vm.vis[type].validate()) return;
             var data = vm.vis[type].createData();
-            console.log(data);
             var layout = {
                 width: 500,
-                height: 500
+                height: 500,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)'
             }
             Plotly.newPlot('plotly-visualization-container', data, layout);
         };
