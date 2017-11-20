@@ -10,6 +10,13 @@ spacialistApp.component('analysis', {
     controller: function(httpPostFactory) {
         var vm = this;
 
+        vm.defaultVisLayout = {
+            width: 500,
+            height: 500,
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)'
+        };
+
         vm.results = [];
         vm.query = '';
         vm.vis = {
@@ -43,6 +50,9 @@ spacialistApp.component('analysis', {
                         labels: vm.vis.pie.labels,
                         type: 'pie'
                     }];
+                },
+                createLayout: function() {
+                    return vm.defaultVisLayout;
                 }
             },
             bar: {
@@ -74,6 +84,9 @@ spacialistApp.component('analysis', {
                         y: vm.vis.bar.y,
                         type: 'bar'
                     }];
+                },
+                createLayout: function() {
+                    return vm.defaultVisLayout;
                 }
             },
             line: {
@@ -108,6 +121,9 @@ spacialistApp.component('analysis', {
                         type: 'scatter',
                         name: vm.vis.line.name
                     }];
+                },
+                createLayout: function() {
+                    return vm.defaultVisLayout;
                 }
             },
             scatter: {
@@ -146,6 +162,9 @@ spacialistApp.component('analysis', {
                         name: vm.vis.scatter.name,
                         marker: vm.vis.scatter.marker
                     }];
+                },
+                createLayout: function() {
+                    return vm.defaultVisLayout;
                 }
             },
             histogram: {
@@ -177,6 +196,92 @@ spacialistApp.component('analysis', {
                         trace.xbins = xbins;
                     }
                     return [trace];
+                },
+                createLayout: function() {
+                    return vm.defaultVisLayout;
+                }
+            },
+            ternary: {
+                x: [],
+                y: [],
+                z: [],
+                text: '',
+                titles: {},
+                marker: {
+                    size: 6
+                },
+                selectX: function() {
+                    vm.vis.ternary.x.length = 0;
+                    var c = vm.vis.x.as || vm.vis.x.col;
+                    vm.vis.ternary.titles.x = c;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.ternary.x.push(r[c]);
+                    }
+                },
+                selectY: function() {
+                    vm.vis.ternary.y.length = 0;
+                    var c = vm.vis.y.as || vm.vis.y.col;
+                    vm.vis.ternary.titles.y = c;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.ternary.y.push(r[c]);
+                    }
+                },
+                selectZ: function() {
+                    vm.vis.ternary.z.length = 0;
+                    var c = vm.vis.z.as || vm.vis.z.col;
+                    vm.vis.ternary.titles.z = c;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.ternary.z.push(r[c]);
+                    }
+                },
+                validate: function() {
+                    var t = vm.vis.ternary;
+                    return t.x.length > 0 && t.y.length > 0 && t.z.length > 0;
+                },
+                createData: function() {
+                    return [{
+                        a: vm.vis.ternary.x,
+                        b: vm.vis.ternary.y,
+                        c: vm.vis.ternary.z,
+                        type: 'scatterternary',
+                        mode: 'markers',
+                        marker: vm.vis.ternary.marker
+                    }];
+                },
+                createLayout: function() {
+                    var t = vm.vis.ternary;
+                    var layout = vm.defaultVisLayout;
+                    layout.ternary = {
+                        sum: 100,
+                        aaxis: {
+                            title: t.titles.x,
+                            showline: true,
+                            showgrid: true
+                        },
+                        baxis: {
+                            title: t.titles.y,
+                            showline: true,
+                            showgrid: true
+                        },
+                        caxis: {
+                            title: t.titles.z,
+                            showline: true,
+                            showgrid: true
+                        }
+                    };
+                    layout.annotations = [{
+                        showarrow: false,
+                        text: t.text,
+                        x: 0.5,
+                        y: 1.2,
+                        font: {
+                            size: 16
+                        }
+                    }];
+                    return layout;
                 }
             }
         };
@@ -442,12 +547,7 @@ spacialistApp.component('analysis', {
         vm.visualize = function(type) {
             if(!vm.vis[type].validate()) return;
             var data = vm.vis[type].createData();
-            var layout = {
-                width: 500,
-                height: 500,
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)'
-            }
+            var layout = vm.vis[type].createLayout();
             Plotly.newPlot('plotly-visualization-container', data, layout);
         };
 

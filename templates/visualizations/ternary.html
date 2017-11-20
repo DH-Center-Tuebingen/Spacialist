@@ -1,1 +1,67 @@
-<h2>Not yet implemented</h2>
+<div class="form-group">
+    <label class="control-label col-md-3">X-Column</label>
+    <div class="col-md-9">
+        <ui-select ng-model="$ctrl.vis.x" on-select="$ctrl.vis.ternary.selectX()">
+            <ui-select-match allow-clear="false">
+                {{ $select.selected.as || $select.selected.col }}
+            </ui-select-match>
+            <ui-select-choices repeat="ac in $ctrl.availableColumns | filter: $select.search">
+                <span ng-show="ac.as">
+                    <span ng-bind-html="ac.as | highlight: $select.search"></span> (<span ng-bind-html="ac.col | highlight: $select.search"></span>)
+                </span>
+                <span ng-hide="ac.as">
+                    <span ng-bind-html="ac.col | highlight: $select.search"></span>
+                </span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</div>
+<div class="form-group">
+    <label class="control-label col-md-3">Y-Column</label>
+    <div class="col-md-9">
+        <ui-select ng-model="$ctrl.vis.y" on-select="$ctrl.vis.ternary.selectY()">
+            <ui-select-match allow-clear="false">
+                {{ $select.selected.as || $select.selected.col }}
+            </ui-select-match>
+            <ui-select-choices repeat="ac in $ctrl.availableColumns | filter: $select.search">
+                <span ng-show="ac.as">
+                    <span ng-bind-html="ac.as | highlight: $select.search"></span> (<span ng-bind-html="ac.col | highlight: $select.search"></span>)
+                </span>
+                <span ng-hide="ac.as">
+                    <span ng-bind-html="ac.col | highlight: $select.search"></span>
+                </span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</div>
+<div class="form-group">
+    <label class="control-label col-md-3">Z-Column</label>
+    <div class="col-md-9">
+        <ui-select ng-model="$ctrl.vis.z" on-select="$ctrl.vis.ternary.selectZ()">
+            <ui-select-match allow-clear="false">
+                {{ $select.selected.as || $select.selected.col }}
+            </ui-select-match>
+            <ui-select-choices repeat="ac in $ctrl.availableColumns | filter: $select.search">
+                <span ng-show="ac.as">
+                    <span ng-bind-html="ac.as | highlight: $select.search"></span> (<span ng-bind-html="ac.col | highlight: $select.search"></span>)
+                </span>
+                <span ng-hide="ac.as">
+                    <span ng-bind-html="ac.col | highlight: $select.search"></span>
+                </span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</div>
+<div class="form-group">
+    <label class="control-label col-md-3">Title</label>
+    <div class="col-md-9">
+        <input type="text" class="form-control" ng-model="$ctrl.vis.ternary.text" />
+    </div>
+</div>
+<div class="form-group">
+    <label class="control-label col-md-3">Marker Size</label>
+    <div class="col-md-9">
+        <input type="range" class="form-control slider" ng-model="$ctrl.vis.ternary.marker.size" min="1" max="250" step="1" />
+        <span class="slider-text">{{ $ctrl.vis.ternary.marker.size }}px</span>
+    </div>
+</div>
