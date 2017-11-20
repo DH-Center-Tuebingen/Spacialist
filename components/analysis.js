@@ -147,6 +147,37 @@ spacialistApp.component('analysis', {
                         marker: vm.vis.scatter.marker
                     }];
                 }
+            },
+            histogram: {
+                x: [],
+                selectX: function() {
+                    vm.vis.histogram.x.length = 0;
+                    var c = vm.vis.x.as || vm.vis.x.col;
+                    for(var i=0; i<vm.results.length; i++) {
+                        var r = vm.results[i];
+                        vm.vis.histogram.x.push(r[c]);
+                    }
+                },
+                validate: function() {
+                    var t = vm.vis.histogram;
+                    return t.x.length > 0 && (t.auto_bins || (!t.auto_bins && typeof t.start != 'undefined' && typeof t.end != 'undefined' && typeof t.size != 'undefined'));
+                },
+                createData: function() {
+                    var trace = {
+                        x: vm.vis.histogram.x,
+                        type: 'histogram'
+                    };
+                    if(!vm.vis.histogram.auto_bins) {
+                        var t = vm.vis.histogram;
+                        var xbins = {
+                            end: t.end,
+                            size: t.size,
+                            start: t.start
+                        };
+                        trace.xbins = xbins;
+                    }
+                    return [trace];
+                }
             }
         };
 
@@ -326,6 +357,7 @@ spacialistApp.component('analysis', {
         };
 
         vm.addFilter = function(col, comp, comp_value, func, func_values, and) {
+            col = vm.getOriginalColumnName(col);
             var filter = {
                 col: col,
                 comp: comp,

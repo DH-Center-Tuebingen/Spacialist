@@ -212,7 +212,7 @@ class AnalysisController extends Controller {
                 if($applied && isset($f->func) && $this->isAggregateFunction($f->func)) {
                     $hasGroupBy = true;
                 } else {
-                    $groups[$col] = 1;
+                    $groups[$f->col] = 1;
                 }
             }
         }
