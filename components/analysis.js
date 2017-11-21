@@ -550,6 +550,7 @@ spacialistApp.component('analysis', {
             formData.append('orders', angular.toJson(vm.orders));
             formData.append('limit', angular.toJson(vm.limit));
             formData.append('simple', !vm.expertMode);
+            formData.append('distinct', vm.distinct);
             httpPostFactory('api/analysis/filter', formData, function(response) {
                 vm.query = response.query;
                 vm.results.length = 0;

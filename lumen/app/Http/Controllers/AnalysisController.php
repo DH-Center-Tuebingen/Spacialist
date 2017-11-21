@@ -68,8 +68,9 @@ class AnalysisController extends Controller {
         $columns = json_decode($request->input('columns', '[]'));
         $orders = json_decode($request->input('orders', '[]'));
         $limit = json_decode($request->input('limit', '{}'));
-        $simple = Helpers::parseBoolean($request->input('simple'));
-        $query = $this->filter($origin, $filters, $columns, $orders, $limit, $simple);
+        $simple = Helpers::parseBoolean($request->input('simple', false));
+        $distinct = Helpers::parseBoolean($request->input('distinct', false));
+        $query = $this->filter($origin, $filters, $columns, $orders, $limit, $distinct, $simple);
         $result = [
             'rows' => $query->get()
         ];
@@ -87,7 +88,7 @@ class AnalysisController extends Controller {
 
     // OTHER FUNCTIONS
 
-    private function filter($origin, $filters, $columns, $orders, $limit, $relations = false) {
+    private function filter($origin, $filters, $columns, $orders, $limit, $distinct, $relations = false) {
         $hasColumnSelection = !empty($columns);
 
         switch($origin) {
@@ -234,6 +235,10 @@ class AnalysisController extends Controller {
             if(isset($limit->amount)) {
                 $query->limit($limit->amount);
             }
+        }
+
+        if($distinct) {
+            $query->distinct();
         }
 
         if($hasColumnSelection) {

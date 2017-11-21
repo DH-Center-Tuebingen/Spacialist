@@ -137,6 +137,12 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group" ng-if="$ctrl.expertMode">
+                <label class="control-label col-md-3">Use <code>DISTINCT</code></label>
+                <div class="col-md-9">
+                    <input type="checkbox" class="form-control" ng-model="$ctrl.distinct" />
+                </div>
+            </div>
             <div class="form-group">
                 <label class="control-label col-md-3">Expert Mode <sup uib-popover="The Expert Mode enables several additional settings. It also allows you to use your resulting (SQL) query outside of Spacialist. If you are unfamiliar with SQL you should use the default simple mode." popover-trigger="'mouseover'" popover-placement="auto right"><i class="material-icons md-14">help_outline</i></sup></label>
                 <div class="col-md-9">
