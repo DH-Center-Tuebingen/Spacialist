@@ -72,6 +72,9 @@ class FileController extends Controller
         if(Helpers::startsWith($url, '/')) {
             $url = substr($url, 1);
         }
+        if(!\Illuminate\Support\Facades\File::exists($url)) {
+            return null;
+        }
         $data = new PelDataWindow(file_get_contents($url));
         if(PelJpeg::isValid($data)) {
             $jpg = new PelJpeg();
@@ -126,14 +129,12 @@ class FileController extends Controller
             Storage::get($storageUrl);
             $file->filesize = Storage::size($storageUrl);
             $file->modified = Storage::lastModified($storageUrl);
-        } catch(FileNotFoundException $e) {
-        }
-        $file->created = strtotime($file->created);
-        try {
             $file->exif = $this->getExifData($file);
+        } catch(FileNotFoundException $e) {
         } catch(PelDataWindowOffsetException $e) {
             // Do nothing for now
         }
+        $file->created = strtotime($file->created);
         $file->linked_contexts = $this->getLinkedContexts($file);
         return $file;
     }
@@ -206,14 +207,12 @@ class FileController extends Controller
                 Storage::get($storageUrl);
                 $file->filesize = Storage::size($storageUrl);
                 $file->modified = Storage::lastModified($storageUrl);
-            } catch(FileNotFoundException $e) {
-            }
-            $file->created = strtotime($file->created);
-            try {
                 $file->exif = $this->getExifData($file);
+            } catch(FileNotFoundException $e) {
             } catch(PelDataWindowOffsetException $e) {
                 // Do nothing for now
             }
+            $file->created = strtotime($file->created);
             $file->linked_contexts = $this->getLinkedContexts($file);
         }
         return response()->json($files);
