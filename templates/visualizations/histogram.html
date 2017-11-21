@@ -17,6 +17,25 @@
     </div>
 </div>
 <div class="form-group">
+    <label class="control-label col-md-3">Horizontal</label>
+    <div class="col-md-9">
+        <input type="checkbox" class="form-control" ng-model="$ctrl.vis.histogram.horizontal" />
+    </div>
+</div>
+<div class="form-group">
+    <label class="control-label col-md-3">Type</label>
+    <div class="col-md-9">
+        <ui-select ng-model="$ctrl.vis.subtype">
+            <ui-select-match allow-clear="false">
+                {{ $select.selected }}
+            </ui-select-match>
+            <ui-select-choices repeat="type in $ctrl.vis.histogram.types | filter: $select.search">
+                <span ng-bind-html="type | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</div>
+<div class="form-group">
     <label class="control-label col-md-3">Auto Bins</label>
     <div class="col-md-9">
         <input type="checkbox" class="form-control" ng-model="$ctrl.vis.histogram.auto_bins" />

@@ -170,6 +170,11 @@ spacialistApp.component('analysis', {
             },
             histogram: {
                 x: [],
+                types: [
+                    'cumulative',
+                    'normalized'
+                ],
+                horizontal: false,
                 selectX: function() {
                     vm.vis.histogram.x.length = 0;
                     var c = vm.vis.x.as || vm.vis.x.col;
@@ -183,12 +188,26 @@ spacialistApp.component('analysis', {
                     return t.x.length > 0 && (t.auto_bins || (!t.auto_bins && typeof t.start != 'undefined' && typeof t.end != 'undefined' && typeof t.size != 'undefined'));
                 },
                 createData: function() {
+                    var t = vm.vis.histogram;
                     var trace = {
-                        x: vm.vis.histogram.x,
                         type: 'histogram'
                     };
-                    if(!vm.vis.histogram.auto_bins) {
-                        var t = vm.vis.histogram;
+                    if(t.horizontal) {
+                        trace.y = t.x;
+                    } else {
+                        trace.x = t.x;
+                    }
+                    switch(vm.vis.subtype) {
+                        case 'cumulative':
+                            trace.cumulative = {
+                                enabled: true
+                            };
+                            break;
+                        case 'normalized':
+                            trace.histnorm = 'probability';
+                            break;
+                    }
+                    if(!t.auto_bins) {
                         var xbins = {
                             end: t.end,
                             size: t.size,
