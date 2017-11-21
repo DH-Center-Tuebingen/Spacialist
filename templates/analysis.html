@@ -165,7 +165,7 @@
             Query returned no results or you didn't run the query yet.
         </p>
         <div ng-if="$ctrl.hasResults()">
-            <h2>Results <span class="badge">{{ $ctrl.results.length }}</span></h2>
+            <h2>Results <span class="badge">{{ $ctrl.countResults() }}</span></h2>
             <ul class="nav nav-tabs">
                 <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'raw'}" ng-if="$ctrl.expertMode">
                     <a ng-click="$ctrl.activeResultTab = 'raw'">

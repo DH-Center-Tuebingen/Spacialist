@@ -369,7 +369,11 @@ spacialistApp.component('analysis', {
         vm.columns = [];
         vm.orders = [];
         vm.groups = [];
-        vm.limit = {};
+        vm.limit = {
+            from: 0,
+            amount: 20
+        };
+        vm.distinct = true;
 
         vm.filters.push({
             col: 'geodata.geom',
@@ -597,6 +601,14 @@ spacialistApp.component('analysis', {
             }
             return k;
         };
+
+        vm.countResults = function() {
+            if(vm.expertMode) {
+                return vm.results.length;
+            } else {
+                return vm.combinedResults.length;
+            }
+        }
 
         vm.hasResults = function() {
             return (vm.expertMode && vm.results.length > 0) || (!vm.expertMode && vm.combinedResults.length > 0);
