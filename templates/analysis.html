@@ -5,29 +5,31 @@
     </button>
     <div ng-class="$ctrl.showFilterOptions ? 'col-md-3' : 'hidden'">
         <h2>Query Options</h2>
-        <h4>Active Order Rules</h4>
-        <p ng-if="$ctrl.orders.length == 0">
-            No order rules present.
-        </p>
-        <ol ng-if="$ctrl.orders.length > 0">
-            <li class="flex-hr-between" ng-repeat="o in $ctrl.orders">
-                <span>{{ $index + 1 }}.</span>
-                <div>
-                    {{ o.col }} {{ o.dir }}
-                </div>
-                <div>
-                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeOrder(o)">
-                        <i class="material-icons md-18 fa-red">delete</i>
-                    </a>
-                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="$ctrl.moveOrderUp(o)">
-                        <i class="material-icons md-18">arrow_drop_up</i>
-                    </a>
-                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveOrderDown(o)">
-                        <i class="material-icons md-18">arrow_drop_down</i>
-                    </a>
-                </div>
-            </li>
-        </ol>
+        <div ng-if="$ctrl.expertMode">
+            <h4>Active Order Rules</h4>
+            <p ng-if="$ctrl.orders.length == 0">
+                No order rules present.
+            </p>
+            <ol ng-if="$ctrl.orders.length > 0">
+                <li class="flex-hr-between" ng-repeat="o in $ctrl.orders">
+                    <span>{{ $index + 1 }}.</span>
+                    <div>
+                        {{ o.col }} {{ o.dir }}
+                    </div>
+                    <div>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeOrder(o)">
+                            <i class="material-icons md-18 fa-red">delete</i>
+                        </a>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="$ctrl.moveOrderUp(o)">
+                            <i class="material-icons md-18">arrow_drop_up</i>
+                        </a>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveOrderDown(o)">
+                            <i class="material-icons md-18">arrow_drop_down</i>
+                        </a>
+                    </div>
+                </li>
+            </ol>
+        </div>
         <h4>Active Filters</h4>
         <p ng-if="$ctrl.filters.length == 0">
             No filters present.
@@ -78,14 +80,14 @@
                     </ui-select>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-if="$ctrl.expertMode">
                 <label class="control-label col-md-3">Limit</label>
                 <div class="col-md-9">
                     From: <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.limit.from" />
                     Amount: <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.limit.amount" />
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-if="$ctrl.expertMode">
                 <label class="control-label col-md-3">Columns</label>
                 <div class="col-md-9">
                     <ol>
@@ -135,10 +137,16 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="control-label col-md-3">Expert Mode <sup uib-popover="The Expert Mode enables several additional settings. It also allows you to use your resulting (SQL) query outside of Spacialist. If you are unfamiliar with SQL you should use the default simple mode." popover-trigger="'mouseover'" popover-placement="auto right"><i class="material-icons md-14">help_outline</i></sup></label>
+                <div class="col-md-9">
+                    <input type="checkbox" class="form-control" ng-model="$ctrl.expertMode" ng-change="$ctrl.toggleExpertMode()" />
+                </div>
+            </div>
             <button type="button" class="btn btn-default" ng-click="$ctrl.filter()">
                 Filtern
             </button>
-            <div class="form-group">
+            <div class="form-group" ng-if="$ctrl.expertMode">
                 <label class="control-label col-md-3">Resulting Query</label>
                 <div class="col-md-9">
                     <textarea class="form-control" rows="6" ng-model="$ctrl.query" ng-readonly="true"></textarea>
@@ -147,15 +155,20 @@
         </form>
     </div>
     <div ng-class="$ctrl.showFilterOptions ? 'col-md-9' : 'col-md-12'">
-        <p class="alert alert-info" ng-if="$ctrl.results.length == 0">
+        <p class="alert alert-info" ng-show="!$ctrl.hasResults()">
             Query returned no results or you didn't run the query yet.
         </p>
-        <div ng-if="$ctrl.results.length > 0" ng-init="$ctrl.activeResultTab = 'raw'">
+        <div ng-if="$ctrl.hasResults()">
             <h2>Results <span class="badge">{{ $ctrl.results.length }}</span></h2>
             <ul class="nav nav-tabs">
-                <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'raw'}">
+                <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'raw'}" ng-if="$ctrl.expertMode">
                     <a ng-click="$ctrl.activeResultTab = 'raw'">
                         <i class="material-icons">list</i> Raw
+                    </a>
+                </li>
+                <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'simple'}">
+                    <a ng-click="$ctrl.activeResultTab = 'simple'">
+                        <i class="material-icons">extension</i> Query Builder
                     </a>
                 </li>
                 <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'vis'}">
@@ -164,7 +177,7 @@
                     </a>
                 </li>
             </ul>
-            <div class="table-responsive" ng-show="$ctrl.activeResultTab == 'raw'">
+            <div class="table-responsive" ng-show="$ctrl.activeResultTab == 'raw'" ng-if="$ctrl.expertMode">
                 <table class="table table-striped table-hover">
                     <tr>
                         <th ng-repeat="(k, col) in $ctrl.results[0]">
@@ -185,6 +198,151 @@
                     <tr ng-repeat="r in $ctrl.results">
                         <td ng-repeat="(k, col) in $ctrl.results[0]">
                             {{ r[k] }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="table-responsive" ng-show="$ctrl.activeResultTab == 'simple'">
+                <table class="table table-striped table-hover">
+                    <tr>
+                        <th>
+                            <div class="flex-hr-start">
+                                Name
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flex-hr-start">
+                                Attributes
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flex-hr-start">
+                                Context Type
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flex-hr-start">
+                                Geodata
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flex-hr-start">
+                                Literature
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flex-hr-start">
+                                Files
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flex-hr-start">
+                                Child Contexts
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flex-hr-start">
+                                Parent Context
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flex-hr-start">
+                                Created At
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flex-hr-start">
+                                Updated At
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="flex-hr-start">
+                                Last Editor
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons">search</i>
+                                </a>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr ng-repeat="r in $ctrl.combinedResults">
+                        <td>
+                            {{ r.name }}
+                        </td>
+                        <td>
+                            <ul>
+                                <li ng-repeat="attr in r.attributes">
+                                    {{ $ctrl.concepts[attr.thesaurus_url].label }} ({{ attr.datatype }})
+                                </li>
+                            </ul>
+                        </td>
+                        <td>
+                            <i class="material-icons md-14">{{ r.context_type.type == 0 ? 'account_balance' : 'spa' }}</i> {{ $ctrl.concepts[r.context_type.thesaurus_url].label }}
+                        </td>
+                        <td>
+                            {{ r.geodata.geom }}
+                        </td>
+                        <td>
+                            <ul>
+                                <li ng-repeat="lit in r.literatures">
+                                    {{ lit.title }} - {{ lit.author }}
+                                </li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul>
+                                <li ng-repeat="f in r.files">
+                                    {{ f.name }}
+                                </li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul>
+                                <li ng-repeat="c in r.child_contexts">
+                                    {{ c.name }}
+                                </li>
+                            </ul>
+                        </td>
+                        <td>
+                            {{ r.root_context.name }}
+                        </td>
+                        <td>
+                            {{ r.created_at }}
+                        </td>
+                        <td>
+                            {{ r.updated_at }}
+                        </td>
+                        <td>
+                            {{ r.lasteditor }}
                         </td>
                     </tr>
                 </table>

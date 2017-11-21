@@ -18,6 +18,7 @@ spacialistApp.component('analysis', {
         };
 
         vm.results = [];
+        vm.combinedResults = [];
         vm.query = '';
         vm.vis = {
             type: '',
@@ -338,6 +339,7 @@ spacialistApp.component('analysis', {
             'radar'
         ]
 
+        vm.expertMode = false;
         vm.showFilterOptions = true;
         vm.instantFilter = false;
         vm.column = {};
@@ -358,6 +360,13 @@ spacialistApp.component('analysis', {
             func_values: [[48.52,9.05]],
             and: true
         });
+
+        vm.toggleExpertMode = function() {
+            // switch to simple mode if we no longer in expert mode
+            if(!vm.expertMode && vm.activeResultTab == 'raw') {
+                vm.activeResultTab = 'simple';
+            }
+        }
 
         vm.toggleShowFilterOptions = function() {
             vm.showFilterOptions = !vm.showFilterOptions;
@@ -521,25 +530,35 @@ spacialistApp.component('analysis', {
             formData.append('columns', angular.toJson(vm.columns));
             formData.append('orders', angular.toJson(vm.orders));
             formData.append('limit', angular.toJson(vm.limit));
+            formData.append('simple', !vm.expertMode);
             httpPostFactory('api/analysis/filter', formData, function(response) {
                 vm.query = response.query;
                 vm.results.length = 0;
+                vm.combinedResults.length = 0;
+                var res;
                 if(response.rows.length > 0) {
-                    var row = response.rows[0];
                     vm.availableColumns.length = 0;
-                    // add all returned column names to selection array
-                    for(var k in row) {
-                        var o = vm.getOriginalColumnName(k);
-                        var ac = {
-                            col: o
-                        };
-                        // if names are different, AS property is set
-                        if(k != o) ac.as = k;
-                        vm.availableColumns.push(ac)
+                    if(vm.expertMode) {
+                        var row = response.rows[0];
+                        // add all returned column names to selection array
+                        for(var k in row) {
+                            var o = vm.getOriginalColumnName(k);
+                            var ac = {
+                                col: o
+                            };
+                            // if names are different, AS property is set
+                            if(k != o) ac.as = k;
+                            vm.availableColumns.push(ac)
+                        }
+                        for(var i=0; i<response.rows.length; i++) {
+                            vm.results.push(response.rows[i]);
+                        }
+                    } else {
+                        for(var i=0; i<response.rows.length; i++) {
+                            vm.combinedResults.push(response.rows[i]);
+                        }
                     }
-                    for(var i=0; i<response.rows.length; i++) {
-                        vm.results.push(response.rows[i]);
-                    }
+                    vm.activeResultTab = vm.expertMode ? 'raw' : 'simple';
                 }
             });
         };
@@ -557,7 +576,11 @@ spacialistApp.component('analysis', {
                 if(k == col.as || k == col.col) return col.col;
             }
             return k;
-        }
+        };
+
+        vm.hasResults = function() {
+            return (vm.expertMode && vm.results.length > 0) || (!vm.expertMode && vm.combinedResults.length > 0);
+        };
 
         vm.closePopover = function(event) {
             // get anchor as angluar element

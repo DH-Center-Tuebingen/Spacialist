@@ -68,11 +68,15 @@ class AnalysisController extends Controller {
         $columns = json_decode($request->input('columns', '[]'));
         $orders = json_decode($request->input('orders', '[]'));
         $limit = json_decode($request->input('limit', '{}'));
-        $query = $this->filter($origin, $filters, $columns, $orders, $limit);
-        return response()->json([
-            'rows' => $query->get(),
-            'query' => $this->cleanSql($query->toSql())
-        ]);
+        $simple = Helpers::parseBoolean($request->input('simple'));
+        $query = $this->filter($origin, $filters, $columns, $orders, $limit, $simple);
+        $result = [
+            'rows' => $query->get()
+        ];
+        if(!$simple) {
+            $result['query'] = $this->cleanSql($query->toSql());
+        }
+        return response()->json($result);
     }
 
     // PATCH
