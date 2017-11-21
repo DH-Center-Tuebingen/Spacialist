@@ -288,22 +288,51 @@ $factory->define(App\AttributeValue::class, function(Faker\Generator $faker) {
     if(!isset($attribute)){
         $attribute = factory(App\Attribute::class)->create();
     }
-    $context_val = App\Context::inRandomOrder()->first();
-    if(!isset($context_val)){
-        $context_val = factory(App\Context::class)->create();
+    $dts = ['str_val', 'int_val', 'dbl_val', 'context_val', 'thesaurus_val', 'geography_val', 'dt_val']; // json_val not implemented
+    $dt = $faker->randomElement($dts);
+    $val;
+    switch($dt) {
+        case 'str_val':
+        $val = $faker->sentence($nbWords = 6, $variableNbWords = true);
+        break;
+        case 'int_val':
+        $val = $faker->randomDigit;
+        break;
+        case 'dbl_val':
+        $val = $faker->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 42);
+        break;
+        case 'context_val':
+        $context_val = App\Context::inRandomOrder()->first();
+        if(!isset($context_val)){
+            $context_val = factory(App\Context::class)->create();
+        }
+        $val = $context_val->id;
+        break;
+        case 'thesaurus_val':
+        $thesaurus_val = App\ThConcept::inRandomOrder()->first();
+        if(!isset($thesaurus_val)){
+            $thesaurus_val = factory(App\ThConcept::class)->create();
+        }
+        $val = $thesaurus_val->concept_url;
+        break;
+        case 'geography_val':
+        $gd = factory(App\Geodata::class)->make();
+        $val = $gd->geom;
+        break;
+        case 'dt_val':
+        $val = $faker->dateTime();
+        break;
+        default:
+        $dt = 'str_val';
+        $val = 'Something strange happened in the RandomSeeder.';
     }
+
     return [
         'context_id' => $context->id,
         'attribute_id' => $attribute->id,
-        'context_val' => $faker->optional()->randomElement([$context_val->id]),
-        'str_val' => $faker->optional()->sentence($nbWords = 6, $variableNbWords = true),
-        'int_val' => $faker->optional()->randomDigit,
-        'dbl_val' => $faker->optional()->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 42),
-        'dt_val' => $faker->optional()->dateTime(),
         'possibility' => $faker->numberBetween($min = 0, $max = 100),
-        'thesaurus_val' => $faker->optional()->randomElement([App\ThConcept::inRandomOrder()->first()->value('concept_url')]),
-        // 'json_val' => TODO
         'lasteditor' => $faker->name,
+        $dt => $val
     ];
 });
 
