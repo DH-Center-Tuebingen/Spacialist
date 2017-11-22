@@ -169,6 +169,7 @@
     "login.submit": "Log In",
     "login.as-guest": "Guest Login",
     "login.title": "Login",
+    "login.loading": "Logging in…",
     "logout": "Log Out",
     "create-dialog.new-top-context": "New Top-Level Context",
     "create-dialog.new-context-description": "Provide the name of and type of the new context to create.",

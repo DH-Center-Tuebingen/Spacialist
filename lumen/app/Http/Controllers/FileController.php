@@ -19,6 +19,7 @@ use lsolesen\pel\PelTiff;
 use lsolesen\pel\PelTag;
 use lsolesen\pel\PelIfd;
 use lsolesen\pel\PelDataWindow;
+use lsolesen\pel\PelDataWindowOffsetException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use \wapmorgan\UnifiedArchive\UnifiedArchive;
 
@@ -70,6 +71,9 @@ class FileController extends Controller
         $url = Helpers::getStorageFilePath($file->filename);
         if(Helpers::startsWith($url, '/')) {
             $url = substr($url, 1);
+        }
+        if(!\Illuminate\Support\Facades\File::exists($url)) {
+            return null;
         }
         $data = new PelDataWindow(file_get_contents($url));
         if(PelJpeg::isValid($data)) {
@@ -125,10 +129,12 @@ class FileController extends Controller
             Storage::get($storageUrl);
             $file->filesize = Storage::size($storageUrl);
             $file->modified = Storage::lastModified($storageUrl);
+            $file->exif = $this->getExifData($file);
         } catch(FileNotFoundException $e) {
+        } catch(PelDataWindowOffsetException $e) {
+            // Do nothing for now
         }
         $file->created = strtotime($file->created);
-        $file->exif = $this->getExifData($file);
         $file->linked_contexts = $this->getLinkedContexts($file);
         return $file;
     }
@@ -201,10 +207,12 @@ class FileController extends Controller
                 Storage::get($storageUrl);
                 $file->filesize = Storage::size($storageUrl);
                 $file->modified = Storage::lastModified($storageUrl);
+                $file->exif = $this->getExifData($file);
             } catch(FileNotFoundException $e) {
+            } catch(PelDataWindowOffsetException $e) {
+                // Do nothing for now
             }
             $file->created = strtotime($file->created);
-            $file->exif = $this->getExifData($file);
             $file->linked_contexts = $this->getLinkedContexts($file);
         }
         return response()->json($files);

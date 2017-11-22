@@ -180,6 +180,7 @@
     "login.submit": "Einloggen",
     "login.as-guest": "Als Gast einloggen",
     "login.title": "Einloggen",
+    "login.loading": "Logge ein…",
     "logout": "Ausloggen",
     "create-dialog.new-top-context": "Neuer Top-Kontext",
     "create-dialog.new-context-description": "Geben Sie den Namen des neuen Kontexts an und wählen Sie dessen Typ aus.",
