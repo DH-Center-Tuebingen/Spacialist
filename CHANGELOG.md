@@ -1,29 +1,33 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.4.3
+### Added
+- Spinner icon to login screen as indicator for loading data (For some instances it can take several seconds to load the required data)
+### Fixed
+- Roles/Permissions are now only seeded if they don't exist yet (It was not possible to add new permissions to existing projects without reseed everything)
+- Catch exception in exif parser to keep Spacialist running even if exif parsing failed
+- Check if file exists before parsing exif to keep Spacialist running even if a file gets lost on disk, but is still present in the database.
+
 ## 0.4.2
 ### Added
 - New supported filetypes
   - `.pdb` files (Protein Data Bank)
   - compressed files (e.g. `.zip`, `.rar`, `.tar`)
 - Download button in the file viewer
-### Changed
 ### Fixed
 - Delete Context Modal didn't get closed and context was not removed (see #292)
 - Add disabled state to round _Save_ button and _Unstaged Changes_ Popup (see #293)
 - Better filetype handling.
-### Removed/Deprecated
 
 ## 0.4.1
 ### Added
 - New Datatype: Table
-### Changed
 ### Fixed
 - A couple of bugs in epoch datatype (it was possible to store non-integer data and data with a start date > end date)
 - Context form must be valid to store context
 - Error after adding a literature to the _Additional Information_ popup
 - Fixed a drag&drop bug in the context tree (see #255)
-### Removed/Deprecated
 
 ## 0.4 - Delphi
 
