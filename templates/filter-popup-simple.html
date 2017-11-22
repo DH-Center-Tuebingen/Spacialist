@@ -22,7 +22,12 @@
             <label class="control-label col-md-2">Comparison Value:</label>
             <div class="col-md-10">
                 <input type="text" class="form-control" ng-if="$ctrl.selectedType == 'string'" ng-model="$ctrl.selectedComp_value" />
-
+                <input type="number" step="1" class="form-control" ng-if="$ctrl.selectedType == 'integer'" ng-model="$ctrl.selectedComp_value" />
+                <div ng-if="$ctrl.selectedType == 'percentage'">
+                    <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.selectedComp_value" />
+                    <span class="slider-text">{{ $ctrl.selectedComp_value }}%</span>
+                </div>
+                <input type="color" class="form-control" ng-if="$ctrl.selectedType == 'color'" ng-model="$ctrl.selectedComp_value" />
                 <div ng-if="$ctrl.selectedType == 'date'">
                     <input type="text" class="form-control" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" is-open="opened" close-text="{{ 'close' | translate }}" ng-model="$ctrl.selectedComp_value"  ng-model-options="{timezone:'utc'}" />
                     <span class="input-group-btn">

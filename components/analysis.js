@@ -316,22 +316,21 @@ spacialistApp.component('analysis', {
 
         vm.comps = [
             '=',
-            '<>',
             '!=',
             '>',
             '>=',
             '<',
             '<=',
-            'like',
-            'ilike',
-            'between',
-            'in',
-            'is null',
-            'not like',
-            'not ilike',
-            'not between',
-            'not in',
-            'is not null',
+            'IS NULL',
+            'IS NOT NULL',
+            'LIKE',
+            'NOT LIKE',
+            'ILIKE',
+            'NOT ILIKE',
+            'BETWEEN',
+            'NOT BETWEEN',
+            'IN',
+            'NOT IN'
         ];
 
         vm.simpleComps = {
@@ -641,6 +640,12 @@ spacialistApp.component('analysis', {
         };
 
         vm.filter = function() {
+            // check if current origin is different from last one
+            // and reset filters and columns
+            if(vm.filteredOrigin != vm.origin) {
+                vm.filters.length = 0;
+                vm.columns.length = 0;
+            }
             var formData = new FormData();
             formData.append('filters', angular.toJson(vm.filters));
             formData.append('origin', vm.origin);
@@ -730,7 +735,46 @@ spacialistApp.component('analysis', {
         vm.getSupportedComps = function(datatype) {
             var sc = vm.simpleComps;
             switch(datatype) {
+                case 'date':
+                    return [
+                        sc.is,
+                        sc.isNull,
+                        sc.equals,
+                        sc.notEquals,
+                        sc.between,
+                        sc.notBetween,
+                        sc.in,
+                        sc.notIn,
+                        sc.comesBefore,
+                        sc.comesAfter,
+                    ];
+                case 'percentage':
+                case 'integer':
+                    return [
+                        sc.is,
+                        sc.isNull,
+                        sc.lessThan,
+                        sc.lessOrEqual,
+                        sc.greaterThan,
+                        sc.greaterOrEqual,
+                        sc.equals,
+                        sc.notEquals,
+                        sc.between,
+                        sc.notBetween,
+                        sc.in,
+                        sc.notIn,
+                    ];
+                case 'color':
+                    return [
+                        sc.is,
+                        sc.isNull,
+                        sc.equals,
+                        sc.notEquals,
+                        sc.in,
+                        sc.notIn
+                    ];
                 case 'string':
+                default:
                     return [
                         sc.beginsWith,
                         sc.endsWith,
@@ -740,19 +784,6 @@ spacialistApp.component('analysis', {
                         sc.isNull,
                         sc.equals,
                         sc.notEquals,
-                        sc.in,
-                        sc.notIn,
-                        sc.comesBefore,
-                        sc.comesAfter,
-                    ];
-                case 'date':
-                    return [
-                        sc.is,
-                        sc.isNull,
-                        sc.equals,
-                        sc.notEquals,
-                        sc.between,
-                        sc.notBetween,
                         sc.in,
                         sc.notIn,
                         sc.comesBefore,

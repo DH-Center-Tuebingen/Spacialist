@@ -17,7 +17,7 @@
 <th>
     <div class="flex-hr-start">
         Color
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('color', 'color')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -25,7 +25,7 @@
 <th>
     <div class="flex-hr-start">
         Created At
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('created_at', 'date')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -33,7 +33,7 @@
 <th>
     <div class="flex-hr-start">
         Updated At
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('updated_at', 'date')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -41,7 +41,7 @@
 <th>
     <div class="flex-hr-start">
         Last Editor
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('lasteditor', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>

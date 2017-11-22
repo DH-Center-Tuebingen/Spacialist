@@ -1,7 +1,7 @@
 <th>
     <div class="flex-hr-start">
         Author
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('author', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -9,7 +9,7 @@
 <th>
     <div class="flex-hr-start">
         Title
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('title', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -17,7 +17,7 @@
 <th>
     <div class="flex-hr-start">
         Type
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('type', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -25,7 +25,7 @@
 <th>
     <div class="flex-hr-start">
         Year
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('year', 'integer')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -33,7 +33,7 @@
 <th>
     <div class="flex-hr-start">
         Volume
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('volume', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -41,7 +41,7 @@
 <th>
     <div class="flex-hr-start">
         Series
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('series', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -49,7 +49,7 @@
 <th>
     <div class="flex-hr-start">
         School
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('school', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -57,7 +57,7 @@
 <th>
     <div class="flex-hr-start">
         Publisher
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('publisher', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -65,7 +65,7 @@
 <th>
     <div class="flex-hr-start">
         Pages
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('pages', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -73,7 +73,7 @@
 <th>
     <div class="flex-hr-start">
         Organization
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('organization', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -81,7 +81,7 @@
 <th>
     <div class="flex-hr-start">
         Number
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('number', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -89,7 +89,7 @@
 <th>
     <div class="flex-hr-start">
         Note
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('note', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -97,7 +97,7 @@
 <th>
     <div class="flex-hr-start">
         Month
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('month', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -105,7 +105,7 @@
 <th>
     <div class="flex-hr-start">
         Journal
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('journal', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -113,7 +113,7 @@
 <th>
     <div class="flex-hr-start">
         Institution
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('institution', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -121,7 +121,7 @@
 <th>
     <div class="flex-hr-start">
         Chapter
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('chapter', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -129,7 +129,7 @@
 <th>
     <div class="flex-hr-start">
         Created At
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('created_at', 'date')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -137,7 +137,7 @@
 <th>
     <div class="flex-hr-start">
         Updated At
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('updated_at', 'date')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -145,7 +145,7 @@
 <th>
     <div class="flex-hr-start">
         Last Editor
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('lasteditor', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
