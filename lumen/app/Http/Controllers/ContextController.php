@@ -1399,13 +1399,17 @@ class ContextController extends Controller {
                 $attr->val = json_encode($attrVal);
             } else if($attr->datatype == 'geography') {
                 $tmp = AttributeValue::find($attr->id);
-                $attr->val = $tmp->geography_val->toWKT();
+                if(isset($tmp->geography_val)) {
+                    $attr->val = $tmp->geography_val->toWKT();
+                }
             } else if($attr->datatype == 'context') {
                 $ctx = Context::find($attr->context_val);
-                $attr->val = [
-                    'name' => $ctx->name,
-                    'id' => $ctx->id
-                ];
+                if($ctx) {
+                    $attr->val = [
+                        'name' => $ctx->name,
+                        'id' => $ctx->id
+                    ];
+                }
             }
         }
         return $data;
