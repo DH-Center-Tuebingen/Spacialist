@@ -34,6 +34,14 @@ class AttributeValue extends Model
         'geography_val',
     ];
 
+    public function context() {
+        return $this->belongsTo('App\Context');
+    }
+
+    public function attribute() {
+        return $this->belongsTo('App\Attribute');
+    }
+
     public function context_val() {
         return $this->belongsTo('App\Context', 'context_val');
     }

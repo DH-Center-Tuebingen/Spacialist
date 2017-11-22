@@ -1,0 +1,51 @@
+<tr ng-repeat="r in $ctrl.combinedResults">
+    <td>
+        {{ r.name }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        <ul>
+            <li ng-repeat="attr in r.attributes">
+                {{ $ctrl.concepts[attr.thesaurus_url].label }} ({{ attr.datatype }})
+            </li>
+        </ul>
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        <i class="material-icons md-14">{{ r.context_type.type == 0 ? 'account_balance' : 'spa' }}</i> {{ $ctrl.concepts[r.context_type.thesaurus_url].label }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        {{ r.geodata.geom }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        <ul>
+            <li ng-repeat="lit in r.literatures">
+                {{ lit.title }} - {{ lit.author }}
+            </li>
+        </ul>
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        <ul>
+            <li ng-repeat="f in r.files">
+                {{ f.name }}
+            </li>
+        </ul>
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        <ul>
+            <li ng-repeat="c in r.child_contexts">
+                {{ c.name }}
+            </li>
+        </ul>
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        {{ r.root_context.name }}
+    </td>
+    <td>
+        {{ r.created_at }}
+    </td>
+    <td>
+        {{ r.updated_at }}
+    </td>
+    <td>
+        {{ r.lasteditor }}
+    </td>
+</tr>

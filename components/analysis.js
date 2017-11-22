@@ -334,6 +334,97 @@ spacialistApp.component('analysis', {
             'is not null',
         ];
 
+        vm.simpleComps = {
+            beginsWith: {
+                label: 'begins with',
+                comp: 'ILIKE%',
+                needs_value: true
+            },
+            endsWith: {
+                label: 'ends with',
+                comp: '%ILIKE',
+                needs_value: true
+            },
+            DoesntBeginWith: {
+                label: 'does not begin with',
+                comp: 'NOT ILIKE%',
+                needs_value: true
+            },
+            DoesntEndWith: {
+                label: 'does not end with',
+                comp: '%NOT ILIKE',
+                needs_value: true
+            },
+            is: {
+                label: 'exists',
+                comp: 'IS NOT NULL'
+            },
+            isNull: {
+                label: 'does not exist',
+                comp: 'IS NULL'
+            },
+            lessThan: {
+                label: 'less than',
+                comp: '<',
+                needs_value: true
+            },
+            lessOrEqual: {
+                label: 'less or equal to',
+                comp: '<=',
+                needs_value: true
+            },
+            greaterThan: {
+                label: 'greater than',
+                comp: '>',
+                needs_value: true
+            },
+            greaterOrEqual: {
+                label: 'greater or equal to',
+                comp: '>=',
+                needs_value: true
+            },
+            equals: {
+                label: 'equals',
+                comp: '=',
+                needs_value: true
+            },
+            notEquals: {
+                label: 'equals not',
+                comp: '!=',
+                needs_value: true
+            },
+            between: {
+                label: 'between',
+                comp: 'BETWEEN',
+                needs_value: true
+            },
+            notBetween: {
+                label: 'not between',
+                comp: 'NOT BETWEEN',
+                needs_value: true
+            },
+            in: {
+                label: 'is in',
+                comp: 'IN',
+                needs_value: true
+            },
+            notIn: {
+                label: 'is not in',
+                comp: 'NOT IN',
+                needs_value: true
+            },
+            comesBefore: {
+                label: 'comes before',
+                comp: '<',
+                needs_value: true
+            },
+            comesAfter: {
+                label: 'comes after',
+                comp: '>',
+                needs_value: true
+            },
+        };
+
         vm.functions = [
             'pg_distance',
             'pg_area',
@@ -360,12 +451,14 @@ spacialistApp.component('analysis', {
 
         vm.expertMode = false;
         vm.showFilterOptions = true;
+        vm.showAmbiguous = false;
         vm.instantFilter = false;
         vm.column = {};
 
         vm.availableColumns = [];
         vm.filters = [];
         vm.origin = vm.origins[0];
+        vm.filteredOrigin;
         vm.columns = [];
         vm.orders = [];
         vm.groups = [];
@@ -375,17 +468,8 @@ spacialistApp.component('analysis', {
         };
         vm.distinct = true;
 
-        vm.filters.push({
-            col: 'geodata.geom',
-            comp: '<',
-            comp_value: 150000,
-            func: 'pg_distance',
-            func_values: [[48.52,9.05]],
-            and: true
-        });
-
         vm.toggleExpertMode = function() {
-            // switch to simple mode if we no longer in expert mode
+            // switch to simple tab if we no longer in expert mode
             if(!vm.expertMode && vm.activeResultTab == 'raw') {
                 vm.activeResultTab = 'simple';
             }
@@ -495,6 +579,16 @@ spacialistApp.component('analysis', {
 
         vm.addFilter = function(col, comp, comp_value, func, func_values, and) {
             col = vm.getOriginalColumnName(col);
+            // check if endsWith or beginsWith comp is used
+            if(comp == '%ILIKE' || comp == '% NOT ILIKE') {
+                // cut off % and add it to the value
+                comp = comp.substring(1);
+                comp_value = '%' + comp_value;
+            } else if(comp == 'ILIKE%' || comp == 'NOT ILIKE%') {
+                // cut off % and add it to the value
+                comp = comp.substring(0, comp.length - 1);
+                comp_value = comp_value + '%';
+            }
             var filter = {
                 col: col,
                 comp: comp,
@@ -556,6 +650,8 @@ spacialistApp.component('analysis', {
             formData.append('simple', !vm.expertMode);
             formData.append('distinct', vm.distinct);
             httpPostFactory('api/analysis/filter', formData, function(response) {
+                vm.filteredOrigin = vm.origin;
+                console.log(response.rows[0]);
                 vm.query = response.query;
                 vm.results.length = 0;
                 vm.combinedResults.length = 0;
@@ -614,6 +710,12 @@ spacialistApp.component('analysis', {
             return (vm.expertMode && vm.results.length > 0) || (!vm.expertMode && vm.combinedResults.length > 0);
         };
 
+        vm.onOpenPopover = function(column, type) {
+            vm.selectedColumn = column;
+            vm.selectedComps = vm.getSupportedComps(type);
+            vm.selectedType = type;
+        };
+
         vm.closePopover = function(event) {
             // get anchor as angluar element
             var elem = angular.element(event.currentTarget);
@@ -623,6 +725,40 @@ spacialistApp.component('analysis', {
             var src = popover.siblings('.filter-popover-trigger');
             // hide the popover
             src.click();
+        };
+
+        vm.getSupportedComps = function(datatype) {
+            var sc = vm.simpleComps;
+            switch(datatype) {
+                case 'string':
+                    return [
+                        sc.beginsWith,
+                        sc.endsWith,
+                        sc.DoesntBeginWith,
+                        sc.DoesntEndWith,
+                        sc.is,
+                        sc.isNull,
+                        sc.equals,
+                        sc.notEquals,
+                        sc.in,
+                        sc.notIn,
+                        sc.comesBefore,
+                        sc.comesAfter,
+                    ];
+                case 'date':
+                    return [
+                        sc.is,
+                        sc.isNull,
+                        sc.equals,
+                        sc.notEquals,
+                        sc.between,
+                        sc.notBetween,
+                        sc.in,
+                        sc.notIn,
+                        sc.comesBefore,
+                        sc.comesAfter,
+                    ];
+            }
         };
     }
 });

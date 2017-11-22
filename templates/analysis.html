@@ -80,6 +80,12 @@
                     </ui-select>
                 </div>
             </div>
+            <div class="form-group" ng-if="!$ctrl.expertMode">
+                <label class="control-label col-md-3">Show ambiguous columns</label>
+                <div class="col-md-9">
+                    <input type="checkbox" class="form-control" ng-model="$ctrl.showAmbiguous" />
+                </div>
+            </div>
             <div class="form-group" ng-if="$ctrl.expertMode">
                 <label class="control-label col-md-3">Limit</label>
                 <div class="col-md-9">
@@ -210,147 +216,26 @@
             </div>
             <div class="table-responsive" ng-show="$ctrl.activeResultTab == 'simple'">
                 <table class="table table-striped table-hover">
-                    <tr>
-                        <th>
-                            <div class="flex-hr-start">
-                                Name
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="flex-hr-start">
-                                Attributes
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="flex-hr-start">
-                                Context Type
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="flex-hr-start">
-                                Geodata
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="flex-hr-start">
-                                Literature
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="flex-hr-start">
-                                Files
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="flex-hr-start">
-                                Child Contexts
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="flex-hr-start">
-                                Parent Context
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="flex-hr-start">
-                                Created At
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="flex-hr-start">
-                                Updated At
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="flex-hr-start">
-                                Last Editor
-                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
-                                    <i class="material-icons">search</i>
-                                </a>
-                            </div>
-                        </th>
+                    <tr ng-if="$ctrl.filteredOrigin == 'contexts'" ng-include src="'templates/table-row-contexts-header.html'">
                     </tr>
-                    <tr ng-repeat="r in $ctrl.combinedResults">
-                        <td>
-                            {{ r.name }}
-                        </td>
-                        <td>
-                            <ul>
-                                <li ng-repeat="attr in r.attributes">
-                                    {{ $ctrl.concepts[attr.thesaurus_url].label }} ({{ attr.datatype }})
-                                </li>
-                            </ul>
-                        </td>
-                        <td>
-                            <i class="material-icons md-14">{{ r.context_type.type == 0 ? 'account_balance' : 'spa' }}</i> {{ $ctrl.concepts[r.context_type.thesaurus_url].label }}
-                        </td>
-                        <td>
-                            {{ r.geodata.geom }}
-                        </td>
-                        <td>
-                            <ul>
-                                <li ng-repeat="lit in r.literatures">
-                                    {{ lit.title }} - {{ lit.author }}
-                                </li>
-                            </ul>
-                        </td>
-                        <td>
-                            <ul>
-                                <li ng-repeat="f in r.files">
-                                    {{ f.name }}
-                                </li>
-                            </ul>
-                        </td>
-                        <td>
-                            <ul>
-                                <li ng-repeat="c in r.child_contexts">
-                                    {{ c.name }}
-                                </li>
-                            </ul>
-                        </td>
-                        <td>
-                            {{ r.root_context.name }}
-                        </td>
-                        <td>
-                            {{ r.created_at }}
-                        </td>
-                        <td>
-                            {{ r.updated_at }}
-                        </td>
-                        <td>
-                            {{ r.lasteditor }}
-                        </td>
+                    <tr ng-if="$ctrl.filteredOrigin == 'attribute_values'" ng-include src="'templates/table-row-attributes-header.html'">
                     </tr>
+                    <tr ng-if="$ctrl.filteredOrigin == 'files'" ng-include src="'templates/table-row-files-header.html'">
+                    </tr>
+                    <tr ng-if="$ctrl.filteredOrigin == 'geodata'" ng-include src="'templates/table-row-geodata-header.html'">
+                    </tr>
+                    <tr ng-if="$ctrl.filteredOrigin == 'literature'" ng-include src="'templates/table-row-literature-header.html'">
+                    </tr>
+                    <tbody ng-if="$ctrl.filteredOrigin == 'contexts'" ng-include src="'templates/table-row-contexts-body.html'">
+                    </tbody>
+                    <tbody ng-if="$ctrl.filteredOrigin == 'attribute_values'" ng-include src="'templates/table-row-attributes-body.html'">
+                    </tbody>
+                    <tbody ng-if="$ctrl.filteredOrigin == 'files'" ng-include src="'templates/table-row-files-body.html'">
+                    </tbody>
+                    <tbody ng-if="$ctrl.filteredOrigin == 'geodata'" ng-include src="'templates/table-row-geodata-body.html'">
+                    </tbody>
+                    <tbody ng-if="$ctrl.filteredOrigin == 'literature'" ng-include src="'templates/table-row-literature-body.html'">
+                    </tbody>
                 </table>
             </div>
             <div ng-show="$ctrl.activeResultTab == 'vis'">

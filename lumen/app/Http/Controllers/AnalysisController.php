@@ -95,6 +95,8 @@ class AnalysisController extends Controller {
             case 'attribute_values':
                 if($relations) {
                     $query = AttributeValue::with([
+                        'attribute',
+                        'context',
                         'context_val',
                         'thesaurus_val'
                     ]);
@@ -151,7 +153,7 @@ class AnalysisController extends Controller {
                 if($relations) {
                     $query = File::with([
                         'contexts',
-                        'tags'
+                        // 'tags'
                     ]);
                 } else {
                     $query = File::leftJoin('context_photos as cp', 'cp.photo_id', '=', 'id')
@@ -368,24 +370,22 @@ class AnalysisController extends Controller {
     }
 
     private function isValidCompare($comp) {
+        $compU = strtoupper($comp);
         switch($comp) {
             case '=':
-            case '<>':
             case '!=':
             case '>':
             case '>=':
             case '<':
             case '<=':
-            case 'like':
-            case 'ilike':
-            case 'between':
-            case 'in':
-            case 'is null':
-            case 'not like':
-            case 'not ilike':
-            case 'not between':
-            case 'not in':
-            case 'is not null':
+            case 'ILIKE':
+            case 'NOT ILIKE':
+            case 'BETWEEN':
+            case 'NOT BETWEEN':
+            case 'IS NULL':
+            case 'IS NOT NULL':
+            case 'IN':
+            case 'NOT IN':
                 return true;
             default:
                 return false;

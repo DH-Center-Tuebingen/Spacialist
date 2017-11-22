@@ -1,0 +1,20 @@
+<tr ng-repeat="r in $ctrl.combinedResults">
+    <td ng-show="$ctrl.showAmbiguous">
+        {{ r.geom.type }}: {{ r.geom.coordinates }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        {{ r.context.name }}
+    </td>
+    <td>
+        {{ r.color }}
+    </td>
+    <td>
+        {{ r.created_at }}
+    </td>
+    <td>
+        {{ r.updated_at }}
+    </td>
+    <td>
+        {{ r.lasteditor }}
+    </td>
+</tr>
