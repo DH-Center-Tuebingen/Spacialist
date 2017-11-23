@@ -344,14 +344,24 @@ spacialistApp.component('analysis', {
                 comp: '%ILIKE',
                 needs_value: true
             },
-            DoesntBeginWith: {
+            doesntBeginWith: {
                 label: 'does not begin with',
                 comp: 'NOT ILIKE%',
                 needs_value: true
             },
-            DoesntEndWith: {
+            doesntEndWith: {
                 label: 'does not end with',
                 comp: '%NOT ILIKE',
+                needs_value: true
+            },
+            contains: {
+                label: 'contains',
+                comp: '%ILIKE%',
+                needs_value: true
+            },
+            doesntContain: {
+                label: 'does not contain',
+                comp: '%NOT ILIKE%',
                 needs_value: true
             },
             is: {
@@ -450,20 +460,22 @@ spacialistApp.component('analysis', {
 
         vm.expertMode = false;
         vm.showFilterOptions = true;
-        vm.showAmbiguous = false;
+        vm.showAmbiguous = true;
         vm.instantFilter = false;
         vm.column = {};
+        vm.relation = {};
 
         vm.availableColumns = [];
         vm.filters = [];
-        vm.origin = vm.origins[0];
+        vm.origin = vm.origins[1];
         vm.filteredOrigin;
         vm.columns = [];
+        vm.subColumns = [];
         vm.orders = [];
         vm.groups = [];
         vm.limit = {
             from: 0,
-            amount: 20
+            amount: 30
         };
         vm.distinct = true;
 
@@ -576,10 +588,15 @@ spacialistApp.component('analysis', {
             }
         };
 
-        vm.addFilter = function(col, comp, comp_value, func, func_values, and) {
-            col = vm.getOriginalColumnName(col);
+        vm.addFilter = function(col, comp, comp_value, func, func_values, and, relation) {
+            if(relation && (relation.name == 'literatures' || relation.name == 'files') && col == 'entry count') {
+                relation.comp = comp;
+                relation.value = comp_value;
+            } else {
+                col = vm.getOriginalColumnName(col);
+            }
             // check if endsWith or beginsWith comp is used
-            if(comp == '%ILIKE' || comp == '% NOT ILIKE') {
+            if(comp == '%ILIKE' || comp == '%NOT ILIKE') {
                 // cut off % and add it to the value
                 comp = comp.substring(1);
                 comp_value = '%' + comp_value;
@@ -587,6 +604,9 @@ spacialistApp.component('analysis', {
                 // cut off % and add it to the value
                 comp = comp.substring(0, comp.length - 1);
                 comp_value = comp_value + '%';
+            } else if(comp == '%ILIKE%' || comp == '%NOT ILIKE%') {
+                comp = comp.substring(1, comp.length - 1);
+                comp_value = '%' + comp_value + '%';
             }
             var filter = {
                 col: col,
@@ -597,6 +617,9 @@ spacialistApp.component('analysis', {
             if(func) {
                 filter.func = func;
                 filter.func_values = angular.fromJson(func_values);
+            }
+            if(relation) {
+                filter.relation = relation;
             }
             vm.filters.push(filter);
             if(vm.instantFilter) {
@@ -656,7 +679,6 @@ spacialistApp.component('analysis', {
             formData.append('distinct', vm.distinct);
             httpPostFactory('api/analysis/filter', formData, function(response) {
                 vm.filteredOrigin = vm.origin;
-                console.log(response.rows[0]);
                 vm.query = response.query;
                 vm.results.length = 0;
                 vm.combinedResults.length = 0;
@@ -715,10 +737,177 @@ spacialistApp.component('analysis', {
             return (vm.expertMode && vm.results.length > 0) || (!vm.expertMode && vm.combinedResults.length > 0);
         };
 
-        vm.onOpenPopover = function(column, type) {
-            vm.selectedColumn = column;
+        vm.getSubPopover = function(item, relation) {
+            var type, subcolumn;
+            switch(relation.name) {
+                case 'attributes':
+                    switch(item.datatype) {
+                        case 'string':
+                        case 'stringf':
+                            type = 'string';
+                            subcolumn = 'str_val';
+                            break;
+                        case 'double':
+                            type = 'double';
+                            subcolumn = 'dbl_val';
+                            break;
+                        case 'integer':
+                            type = 'integer';
+                            subcolumn = 'int_val';
+                            break;
+                        case 'percentage':
+                            type = 'percentage';
+                            subcolumn = 'int_val';
+                            break;
+                        case 'boolean':
+                            type = 'boolean';
+                            subcolumn = 'int_val';
+                            break;
+                        case 'date':
+                            type = 'date';
+                            subcolumn = 'int_val';
+                            break;
+                        // TODO
+                        case 'string-sc':
+                        case 'string-mc':
+                        case 'epoch':
+                        case 'dimension':
+                        case 'list':
+                        case 'geography':
+                        case 'context':
+                        case 'table':
+                        default:
+                            type = 'string';
+                            subcolumn = 'str_val';
+                    }
+                    break;
+                case 'geodata':
+                    type = 'geodata';
+                    break;
+                case 'literatures':
+                    subcolumn = item;
+                    switch(item) {
+                        case 'year':
+                        case 'entry count':
+                            type = 'integer';
+                            break;
+                        default:
+                            type = 'string';
+                            break;
+                    }
+                    break;
+                case 'files':
+                    subcolumn = item;
+                    switch(item) {
+                        case 'entry count':
+                            type = 'integer';
+                            break;
+                        default:
+                            type = 'string';
+                            break;
+                    }
+                    break;
+                case 'child_contexts':
+                    type = 'child_contexts';
+                    break;
+                case 'attribute':
+                    type = 'attribute';
+                    break;
+                case 'root_context':
+                case 'context':
+                    type = 'context';
+                    break;
+            }
+
+            vm.selectedColumn = subcolumn;
             vm.selectedComps = vm.getSupportedComps(type);
             vm.selectedType = type;
+            if(relation) {
+                relation.id = item.id;
+            }
+        };
+
+        vm.setContextTypeValue = function(item) {
+            vm.selectedComp_value = item.id;
+            delete vm.relation.id;
+        };
+
+        vm.onOpenPopover = function(column, type) {
+            vm.resetFilterOptions();
+            if(type == 'ambiguous') {
+                vm.relation.name = column;
+                var insertedIds = {};
+                switch(column) {
+                    case 'attributes':
+                        for(var i=0; i<vm.combinedResults.length; i++) {
+                            var r = vm.combinedResults[i];
+                            for(var j=0; j<r[column].length; j++) {
+                                var attr = r[column][j];
+                                if(!insertedIds[attr.id]) {
+                                    insertedIds[attr.id] = 1;
+                                    vm.subColumns.push(attr);
+                                }
+                            }
+                        }
+                        break;
+                    case 'context_type':
+                        for(var i=0; i<vm.combinedResults.length; i++) {
+                            var r = vm.combinedResults[i].context_type;
+                            if(!insertedIds[r.id]) {
+                                insertedIds[r.id] = 1;
+                                vm.subColumns.push(r);
+                            }
+                        }
+                        vm.selectedColumn = 'id';
+                        vm.selectedComps = vm.getSupportedComps('context_type');
+                        vm.selectedType = 'context_type';
+                        break;
+                    case 'geodata':
+                        for(var i=0; i<vm.combinedResults.length; i++) {
+                            var r = vm.combinedResults[i];
+                        }
+                        break;
+                    case 'literatures':
+                        for(var i=0; i<vm.combinedResults.length; i++) {
+                            var lit = vm.combinedResults[i].literatures;
+                            if(lit.length > 0) {
+                                var row = lit[0];
+                                for(var k in row) {
+                                    if(row.hasOwnProperty(k)) {
+                                        vm.subColumns.push(k);
+                                    }
+                                }
+                                vm.subColumns.push('entry count');
+                                break;
+                            }
+                        }
+                        break;
+                    case 'files':
+                        vm.subColumns.push('name');
+                        vm.subColumns.push('entry count');
+                        break;
+                    case 'child_contexts':
+                        for(var i=0; i<vm.combinedResults.length; i++) {
+                            var r = vm.combinedResults[i];
+                        }
+                        break;
+                    case 'attribute':
+                        for(var i=0; i<vm.combinedResults.length; i++) {
+                            var r = vm.combinedResults[i];
+                        }
+                        break;
+                    case 'context':
+                    case 'root_context':
+                        for(var i=0; i<vm.combinedResults.length; i++) {
+                            var r = vm.combinedResults[i];
+                        }
+                        break;
+                }
+            } else {
+                vm.selectedColumn = column;
+                vm.selectedComps = vm.getSupportedComps(type);
+                vm.selectedType = type;
+            }
         };
 
         vm.closePopover = function(event) {
@@ -732,8 +921,32 @@ spacialistApp.component('analysis', {
             src.click();
         };
 
+        vm.resetFilterOptions = function() {
+            if(vm.subColumns) vm.subColumns.length = 0;
+            if(vm.comps) vm.comps.length = 0;
+            if(vm.selectedComps) vm.selectedComps.length = 0;
+            vm.comp = undefined;
+            vm.selectedColumn = undefined;
+            vm.selectedType = undefined;
+            vm.selectedComp_value = undefined;
+            for(var k in vm.selectedComp) {
+                if(vm.selectedComp.hasOwnProperty(k)) {
+                    delete vm.selectedComp[k];
+                }
+            }
+            vm.unsetRelation();
+        }
+
+        vm.unsetRelation = function() {
+            for(var k in vm.relation) {
+                if(vm.relation.hasOwnProperty(k)) {
+                    delete vm.relation[k];
+                }
+            }
+        };
+
         vm.getSupportedComps = function(datatype) {
-            var sc = vm.simpleComps;
+            var sc = angular.copy(vm.simpleComps);
             switch(datatype) {
                 case 'date':
                     return [
@@ -748,6 +961,7 @@ spacialistApp.component('analysis', {
                         sc.comesBefore,
                         sc.comesAfter,
                     ];
+                case 'double':
                 case 'percentage':
                 case 'integer':
                     return [
@@ -764,6 +978,13 @@ spacialistApp.component('analysis', {
                         sc.in,
                         sc.notIn,
                     ];
+                case 'boolean':
+                    return [
+                        sc.is,
+                        sc.isNull,
+                        sc.equals,
+                        sc.notEquals
+                    ];
                 case 'color':
                     return [
                         sc.is,
@@ -773,13 +994,39 @@ spacialistApp.component('analysis', {
                         sc.in,
                         sc.notIn
                     ];
+                case 'context_type':
+                    return [
+                        sc.equals,
+                        sc.notEquals
+                    ];
+                case 'geodata':
+                    return [
+                        sc.is,
+                        sc.isNull
+                    ];
+                case 'literatures':
+                    return [];
+                case 'files':
+                    return [];
+                case 'child_contexts':
+                    return [
+                        sc.is,
+                        sc.isNull
+                    ];
+                case 'root_context':
+                    return [
+                        sc.is,
+                        sc.isNull
+                    ];
                 case 'string':
                 default:
                     return [
                         sc.beginsWith,
                         sc.endsWith,
-                        sc.DoesntBeginWith,
-                        sc.DoesntEndWith,
+                        sc.doesntBeginWith,
+                        sc.doesntEndWith,
+                        sc.contains,
+                        sc.doesntContain,
                         sc.is,
                         sc.isNull,
                         sc.equals,

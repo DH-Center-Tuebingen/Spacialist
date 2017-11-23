@@ -5,7 +5,33 @@
         </a>
     </div>
     <form class="form-horizontal">
-        <div class="form-group">
+        <div class="form-group" ng-if="$ctrl.relation.name == 'attributes' && $ctrl.subColumns.length > 0">
+            <label class="control-label col-md-2">Attribute:</label>
+            <div class="col-md-10">
+                <ui-select ng-model="$ctrl.foo" on-select="$ctrl.getSubPopover($item, $ctrl.relation)">
+                    <ui-select-match allow-clear="false">
+                        {{ $ctrl.concepts[$select.selected.thesaurus_url].label }}
+                    </ui-select-match>
+                    <ui-select-choices repeat="sc in $ctrl.subColumns | filter: $select.search">
+                        <span ng-bind-html="$ctrl.concepts[sc.thesaurus_url].label | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="form-group" ng-if="($ctrl.relation.name == 'literatures' || $ctrl.relation.name == 'files') && $ctrl.subColumns.length > 0">
+            <label class="control-label col-md-2">Action?:</label>
+            <div class="col-md-10">
+                <ui-select ng-model="$ctrl.foo" on-select="$ctrl.getSubPopover($item, $ctrl.relation)">
+                    <ui-select-match allow-clear="false">
+                        {{ $select.selected }}
+                    </ui-select-match>
+                    <ui-select-choices repeat="sc in $ctrl.subColumns | filter: $select.search">
+                        <span ng-bind-html="sc | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="form-group" ng-show="$ctrl.selectedComps.length > 0">
             <label class="control-label col-md-2">Comparison:</label>
             <div class="col-md-10">
                 <ui-select ng-model="$ctrl.selectedComp">
@@ -34,13 +60,21 @@
                         <button type="button" class="btn btn-default" ng-init="opened=false" ng-click="opened=!opened"><i class="material-icons">event</i></button>
                     </span>
                 </div>
+                <ui-select ng-model="$ctrl.foo" ng-if="$ctrl.selectedType == 'context_type'" on-select="$ctrl.setContextTypeValue($item)">
+                    <ui-select-match allow-clear="false">
+                        {{ $ctrl.concepts[$select.selected.thesaurus_url].label }}
+                    </ui-select-match>
+                    <ui-select-choices repeat="sc in $ctrl.subColumns | filter: $select.search">
+                        <span ng-bind-html="$ctrl.concepts[sc.thesaurus_url].label | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
             </div>
         </div>
         <div class="flex-hr-center">
-            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.func, $ctrl.func_values, true)" ng-disabled="!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)">
+            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.func, $ctrl.func_values, true, $ctrl.relation)" ng-disabled="!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)">
                 AND
             </button>
-            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.func, $ctrl.func_values, false)" ng-disabled="!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)">
+            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.func, $ctrl.func_values, false, $ctrl.relation)" ng-disabled="!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)">
                 OR
             </button>
         </div>

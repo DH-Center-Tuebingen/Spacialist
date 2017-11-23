@@ -279,10 +279,10 @@ class AnalysisController extends Controller {
     private function renameColumns($query, $tables, $columnNames) {
         if(empty($tables)) return;
 
-        $query->select($tables[0].".id as ".$tables[0].".id");
+        $query->select($tables[0].".id AS ".$tables[0].".id");
         foreach($tables as $table) {
             foreach($columnNames[$table] as $c) {
-                $query->addSelect("$table.$c as $table.$c");
+                $query->addSelect("$table.$c AS $table.$c");
             }
         }
     }
@@ -293,8 +293,17 @@ class AnalysisController extends Controller {
             return false;
         }
         $col = $filter->col;
-        $comp = $filter->comp;
-        $compValue = $filter->comp_value;
+        $comp = strtoupper($filter->comp);
+        $compValue = null;
+        if(isset($filter->comp_value)) {
+            $compValue = $filter->comp_value;
+        }
+        if(isset($filter->relation) && isset($filter->relation->name)) {
+            $isRelationFilter = true;
+            $relation = $filter->relation;
+        } else {
+            $isRelationFilter = false;
+        }
         $and = $filter->and;
         $usesFunc = isset($filter->func);
         if($usesFunc) {
@@ -309,64 +318,99 @@ class AnalysisController extends Controller {
         if($usesFunc) {
             $col = $this->getAsRaw($func, $col, $funcValues);
         }
-        if($and) {
+        if($isRelationFilter) {
             if($isAgg) {
-                $query->having($col, $comp, $compValue);
+                if($and) {
+                    $query->whereHas($relation->name, function($q) use($col, $comp, $compValue, $relation) {
+                        $q->where('id', '=', $relation->id);
+                        $q->having($col, $comp, $compValue);
+                    });
+                } else {
+                    $query->orWhereHas($relation->name, function($q) use($col, $comp, $compValue, $relation) {
+                        $q->where('id', '=', $relation->id);
+                        $q->having($col, $comp, $compValue);
+                    });
+                }
             } else {
-                switch($comp) {
-                    case 'between':
-                        $query->whereBetween($col, $compValue);
-                        break;
-                    case 'in':
-                        $query->whereIn($col, $compValue);
-                        break;
-                    case 'is null':
-                        $query->whereNull($col);
-                        break;
-                    case 'not between':
-                        $query->whereNotBetween($col, $compValue);
-                        break;
-                    case 'not in':
-                        $query->whereNotIn($col, $compValue);
-                        break;
-                    case 'is not null':
-                        $query->whereNotNull($col);
-                        break;
-                    default:
-                        $query->where($col, $comp, $compValue);
-                        break;
+                if(isset($relation->comp)) {
+                    if($relation->comp == 'IS NULL') {
+                        if($and) $query->doesntHave($relation->name);
+                        else $query->orDoesntHave($relation->name);
+                    } else if($relation->comp == 'IS NOT NULL') {
+                        if($and) $query->has($relation->name);
+                        else $query->orHas($relation->name);
+                    } else {
+                        if($and) $query->has($relation->name, $relation->comp, $relation->value);
+                        else $query->orHas($relation->name, $relation->comp, $relation->value);
+                    }
+                } else {
+                    if($and) {
+                        $query->whereHas($relation->name, function($q) use($col, $comp, $compValue, $relation) {
+                            if(isset($relation->id)) {
+                                $q->where($relation->name . '.id', '=', $relation->id);
+                            }
+                            // TODO is null and is not null are only reasonable
+                            // for relation itself?
+                            if($comp != 'IS NULL' && $comp != 'IS NOT NULL') {
+                                $this->applyQueryPart($q, $col, $comp, $compValue, true);
+                            }
+                        });
+                    } else {
+                        $query->orWhereHas($relation->name, function($q) use($col, $comp, $compValue, $relation) {
+                            if(isset($relation->id)) {
+                                $q->where($relation->name . '.id', '=', $relation->id);
+                            }
+                            // TODO is null and is not null are only reasonable
+                            // for relation itself?
+                            if($comp != 'IS NULL' && $comp != 'IS NOT NULL') {
+                                $this->applyQueryPart($q, $col, $comp, $compValue, true);
+                            }
+                        });
+                    }
                 }
             }
         } else {
             if($isAgg) {
-                $query->orHaving($col, $comp, $compValue);
+                if($and) $query->having($col, $comp, $compValue);
+                else $query->orHaving($col, $comp, $compValue);
             } else {
-                switch($comp) {
-                    case 'between':
-                        $query->orWhereBetween($col, $compValue);
-                        break;
-                    case 'in':
-                        $query->orWhereIn($col, $compValue);
-                        break;
-                    case 'is null':
-                        $query->orWhereNull($col);
-                        break;
-                    case 'not between':
-                        $query->orWhereNotBetween($col, $compValue);
-                        break;
-                    case 'not in':
-                        $query->orWhereNotIn($col, $compValue);
-                        break;
-                    case 'is not null':
-                        $query->orWhereNotNull($col);
-                        break;
-                    default:
-                        $query->orWhere($col, $comp, $compValue);
-                        break;
-                }
+                $this->applyQueryPart($query, $col, $comp, $compValue, $and);
             }
         }
         return true;
+    }
+
+    private function applyQueryPart($query, $col, $comp, $compValue, $and) {
+        switch($comp) {
+            case 'BETWEEN':
+                if($and) $query->whereBetween($col, $compValue);
+                else $query->orWhereBetween($col, $compValue);
+                break;
+            case 'IN':
+                if($and) $query->whereIn($col, $compValue);
+                else $query->orWhereIn($col, $compValue);
+                break;
+            case 'IS NULL':
+                if($and) $query->whereNull($col);
+                else $query->orWhereNull($col);
+                break;
+            case 'NOT BETWEEN':
+                if($and) $query->whereNotBetween($col, $compValue);
+                else $query->whereNotBetween($col, $compValue);
+                break;
+            case 'NOT IN':
+                if($and) $query->whereNotIn($col, $compValue);
+                else $query->orWhereNotIn($col, $compValue);
+                break;
+            case 'IS NOT NULL':
+                if($and) $query->whereNotNull($col);
+                else $query->orWhereNotNull($col);
+                break;
+            default:
+                if($and) $query->where($col, $comp, $compValue);
+                else $query->orWhere($col, $comp, $compValue);
+                break;
+        }
     }
 
     private function isValidCompare($comp) {
@@ -394,10 +438,11 @@ class AnalysisController extends Controller {
 
     private function isValidFunction($func) {
         if(!isset($func)) return false;
+        $func = strtoupper($func);
         if($this->isAggregateFunction($func)) return true;
         switch($func) {
-            case 'pg_distance':
-            case 'pg_area':
+            case 'PG_DISTANCE':
+            case 'PG_AREA':
                 return true;
             default:
                 return false;
@@ -406,12 +451,13 @@ class AnalysisController extends Controller {
 
     private function isAggregateFunction($func) {
         if(!isset($func)) return false;
+        $func = strtoupper($func);
         switch($func) {
-            case 'count':
-            case 'min':
-            case 'max':
-            case 'avg':
-            case 'sum':
+            case 'COUNT':
+            case 'MIN':
+            case 'MAX':
+            case 'AVG':
+            case 'SUM':
                 return true;
             default:
                 return false;
@@ -423,24 +469,25 @@ class AnalysisController extends Controller {
         if(isset($alias)) {
             $as = " AS \"$alias\"";
         }
+        $func = strtoupper($func);
         switch($func) {
-            case 'pg_distance':
+            case 'PG_DISTANCE':
                 $pos = $values[0];
                 $point = new Point($pos[0], $pos[1]);
                 $wkt = $point->toWKT();
                 return DB::raw("ST_Distance($column, ST_GeogFromText('$wkt'), true)$as");
-            case 'pg_area':
+            case 'PG_AREA':
                 // return area as sqm, sqm should be default for SRID 4326
                 return DB::raw("ST_Area($column, true)$as");
-            case 'count':
+            case 'COUNT':
                 return DB::raw("COUNT($column)$as");
-            case 'min':
+            case 'MIN':
                 return DB::raw("MIN($column)$as");
-            case 'max':
+            case 'MAX':
                 return DB::raw("MAX($column)$as");
-            case 'avg':
+            case 'AVG':
                 return DB::raw("AVG($column)$as");
-            case 'sum':
+            case 'SUM':
                 return DB::raw("SUM($column)$as");
         }
     }
