@@ -34,7 +34,7 @@
         <div class="form-group" ng-show="$ctrl.selectedComps.length > 0">
             <label class="control-label col-md-2">Comparison:</label>
             <div class="col-md-10">
-                <ui-select ng-model="$ctrl.selectedComp">
+                <ui-select ng-model="$ctrl.selectedComp" on-select="$ctrl.adjustFilterValues()">
                     <ui-select-match allow-clear="false">
                         {{ $select.selected.label }}
                     </ui-select-match>
@@ -60,7 +60,7 @@
                         <button type="button" class="btn btn-default" ng-init="opened=false" ng-click="opened=!opened"><i class="material-icons">event</i></button>
                     </span>
                 </div>
-                <ui-select ng-model="$ctrl.foo" ng-if="$ctrl.selectedType == 'context_type'" on-select="$ctrl.setContextTypeValue($item)">
+                <ui-select ng-model="$ctrl.foo" ng-if="$ctrl.selectedType == 'context_type' || $ctrl.selectedType == 'context' || $ctrl.selectedType == 'root_context'" on-select="$ctrl.setContextTypeValue($item, $ctrl.selectedType)">
                     <ui-select-match allow-clear="false">
                         {{ $ctrl.concepts[$select.selected.thesaurus_url].label }}
                     </ui-select-match>

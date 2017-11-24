@@ -588,13 +588,18 @@ spacialistApp.component('analysis', {
             }
         };
 
-        vm.addFilter = function(col, comp, comp_value, func, func_values, and, relation) {
-            if(relation && (relation.name == 'literatures' || relation.name == 'files') && col == 'entry count') {
-                relation.comp = comp;
-                relation.value = comp_value;
-            } else {
-                col = vm.getOriginalColumnName(col);
+        vm.adjustFilterValues = function() {
+            if(vm.relation && (vm.relation.name == 'literatures' || vm.relation.name == 'files') && vm.selectedColumn == 'entry count') {
+                vm.relation.comp = comp;
+                vm.relation.value = comp_value;
+            } else if(vm.relation && (vm.relation.name == 'context' || vm.relation.name == 'root_context') && (vm.selectedComp.comp == 'IS NULL' || vm.selectedComp.comp == 'IS NOT NULL')) {
+                vm.relation.comp = vm.selectedComp.comp;
+                vm.relation.value = vm.selectedComp_value;
             }
+        }
+
+        vm.addFilter = function(col, comp, comp_value, func, func_values, and, relation) {
+            col = vm.getOriginalColumnName(col);
             // check if endsWith or beginsWith comp is used
             if(comp == '%ILIKE' || comp == '%NOT ILIKE') {
                 // cut off % and add it to the value
@@ -621,6 +626,7 @@ spacialistApp.component('analysis', {
             if(relation) {
                 filter.relation = relation;
             }
+            console.log(filter);
             vm.filters.push(filter);
             if(vm.instantFilter) {
                 vm.filter();
@@ -678,6 +684,7 @@ spacialistApp.component('analysis', {
             formData.append('simple', !vm.expertMode);
             formData.append('distinct', vm.distinct);
             httpPostFactory('api/analysis/filter', formData, function(response) {
+                console.log(response.rows);
                 vm.filteredOrigin = vm.origin;
                 vm.query = response.query;
                 vm.results.length = 0;
@@ -813,11 +820,9 @@ spacialistApp.component('analysis', {
                 case 'attribute':
                     type = 'attribute';
                     break;
-                case 'root_context':
-                case 'context':
-                    type = 'context';
-                    break;
             }
+
+            vm.adjustFilterValues();
 
             vm.selectedColumn = subcolumn;
             vm.selectedComps = vm.getSupportedComps(type);
@@ -827,7 +832,7 @@ spacialistApp.component('analysis', {
             }
         };
 
-        vm.setContextTypeValue = function(item) {
+        vm.setContextTypeValue = function(item, type) {
             vm.selectedComp_value = item.id;
             delete vm.relation.id;
         };
@@ -851,13 +856,7 @@ spacialistApp.component('analysis', {
                         }
                         break;
                     case 'context_type':
-                        for(var i=0; i<vm.combinedResults.length; i++) {
-                            var r = vm.combinedResults[i].context_type;
-                            if(!insertedIds[r.id]) {
-                                insertedIds[r.id] = 1;
-                                vm.subColumns.push(r);
-                            }
-                        }
+                        vm.subColumns = angular.copy(vm.contextTypes);
                         vm.selectedColumn = 'id';
                         vm.selectedComps = vm.getSupportedComps('context_type');
                         vm.selectedType = 'context_type';
@@ -898,9 +897,10 @@ spacialistApp.component('analysis', {
                         break;
                     case 'context':
                     case 'root_context':
-                        for(var i=0; i<vm.combinedResults.length; i++) {
-                            var r = vm.combinedResults[i];
-                        }
+                        vm.subColumns = angular.copy(vm.contextTypes);
+                        vm.selectedColumn = 'context_type_id';
+                        vm.selectedComps = vm.getSupportedComps('context');
+                        vm.selectedType = column;
                         break;
                 }
             } else {
@@ -1004,19 +1004,17 @@ spacialistApp.component('analysis', {
                         sc.is,
                         sc.isNull
                     ];
-                case 'literatures':
-                    return [];
-                case 'files':
-                    return [];
                 case 'child_contexts':
                     return [
                         sc.is,
                         sc.isNull
                     ];
-                case 'root_context':
+                case 'context':
                     return [
                         sc.is,
-                        sc.isNull
+                        sc.isNull,
+                        sc.equals,
+                        sc.notEquals
                     ];
                 case 'string':
                 default:
