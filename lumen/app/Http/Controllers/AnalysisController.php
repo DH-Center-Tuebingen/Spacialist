@@ -349,8 +349,6 @@ class AnalysisController extends Controller {
                             if(isset($relation->id)) {
                                 $q->where($relation->name . '.id', '=', $relation->id);
                             }
-                            // TODO is null and is not null are only reasonable
-                            // for relation itself?
                             if($comp != 'IS NULL' && $comp != 'IS NOT NULL') {
                                 $this->applyQueryPart($q, $col, $comp, $compValue, true);
                             }
@@ -360,8 +358,6 @@ class AnalysisController extends Controller {
                             if(isset($relation->id)) {
                                 $q->where($relation->name . '.id', '=', $relation->id);
                             }
-                            // TODO is null and is not null are only reasonable
-                            // for relation itself?
                             if($comp != 'IS NULL' && $comp != 'IS NOT NULL') {
                                 $this->applyQueryPart($q, $col, $comp, $compValue, true);
                             }

@@ -5,27 +5,27 @@
         </a>
     </div>
     <form class="form-horizontal">
-        <div class="form-group" ng-if="$ctrl.relation.name == 'attributes' && $ctrl.subColumns.length > 0">
+        <div class="form-group" ng-if="$ctrl.relation.name == 'attributes' && $ctrl.attributeColumns.length > 0">
             <label class="control-label col-md-2">Attribute:</label>
             <div class="col-md-10">
-                <ui-select ng-model="$ctrl.foo" on-select="$ctrl.getSubPopover($item, $ctrl.relation)">
+                <ui-select ng-model="$ctrl.tmpAttribute" on-select="$ctrl.getSubPopover($item, $ctrl.relation)">
                     <ui-select-match allow-clear="false">
                         {{ $ctrl.concepts[$select.selected.thesaurus_url].label }}
                     </ui-select-match>
-                    <ui-select-choices repeat="sc in $ctrl.subColumns | filter: $select.search">
+                    <ui-select-choices repeat="sc in $ctrl.attributeColumns | filter: $select.search">
                         <span ng-bind-html="$ctrl.concepts[sc.thesaurus_url].label | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>
             </div>
         </div>
-        <div class="form-group" ng-if="($ctrl.relation.name == 'literatures' || $ctrl.relation.name == 'files') && $ctrl.subColumns.length > 0">
-            <label class="control-label col-md-2">Action?:</label>
+        <div class="form-group" ng-if="($ctrl.relation.name == 'literatures' || $ctrl.relation.name == 'files' || $ctrl.relation.name == 'child_contexts') && $ctrl.actionColumns.length > 0">
+            <label class="control-label col-md-2">Action:</label>
             <div class="col-md-10">
-                <ui-select ng-model="$ctrl.foo" on-select="$ctrl.getSubPopover($item, $ctrl.relation)">
+                <ui-select ng-model="$ctrl.tmpAction" on-select="$ctrl.getSubPopover($item, $ctrl.relation)">
                     <ui-select-match allow-clear="false">
                         {{ $select.selected }}
                     </ui-select-match>
-                    <ui-select-choices repeat="sc in $ctrl.subColumns | filter: $select.search">
+                    <ui-select-choices repeat="sc in $ctrl.actionColumns | filter: $select.search">
                         <span ng-bind-html="sc | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>
@@ -34,7 +34,7 @@
         <div class="form-group" ng-show="$ctrl.selectedComps.length > 0">
             <label class="control-label col-md-2">Comparison:</label>
             <div class="col-md-10">
-                <ui-select ng-model="$ctrl.selectedComp" on-select="$ctrl.adjustFilterValues()">
+                <ui-select ng-model="$ctrl.selectedComp">
                     <ui-select-match allow-clear="false">
                         {{ $select.selected.label }}
                     </ui-select-match>
@@ -48,7 +48,7 @@
             <label class="control-label col-md-2">Comparison Value:</label>
             <div class="col-md-10">
                 <input type="text" class="form-control" ng-if="$ctrl.selectedType == 'string'" ng-model="$ctrl.selectedComp_value" />
-                <input type="number" step="1" class="form-control" ng-if="$ctrl.selectedType == 'integer'" ng-model="$ctrl.selectedComp_value" />
+                <input type="number" step="1" class="form-control" ng-if="$ctrl.selectedType == 'integer' || $ctrl.selectedType == 'count'" ng-model="$ctrl.selectedComp_value" />
                 <div ng-if="$ctrl.selectedType == 'percentage'">
                     <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.selectedComp_value" />
                     <span class="slider-text">{{ $ctrl.selectedComp_value }}%</span>
@@ -60,11 +60,11 @@
                         <button type="button" class="btn btn-default" ng-init="opened=false" ng-click="opened=!opened"><i class="material-icons">event</i></button>
                     </span>
                 </div>
-                <ui-select ng-model="$ctrl.foo" ng-if="$ctrl.selectedType == 'context_type' || $ctrl.selectedType == 'context' || $ctrl.selectedType == 'root_context'" on-select="$ctrl.setContextTypeValue($item, $ctrl.selectedType)">
+                <ui-select ng-model="$ctrl.tmpContext" ng-if="$ctrl.selectedType == 'context_type' || $ctrl.selectedType == 'context' || $ctrl.selectedType == 'root_context' || ($ctrl.selectedType == 'yesno' && $ctrl.selectedColumn == 'context_type_id')" on-select="$ctrl.setContextTypeValue($item)">
                     <ui-select-match allow-clear="false">
                         {{ $ctrl.concepts[$select.selected.thesaurus_url].label }}
                     </ui-select-match>
-                    <ui-select-choices repeat="sc in $ctrl.subColumns | filter: $select.search">
+                    <ui-select-choices repeat="sc in $ctrl.contextColumns | filter: $select.search">
                         <span ng-bind-html="$ctrl.concepts[sc.thesaurus_url].label | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>

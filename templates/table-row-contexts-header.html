@@ -49,7 +49,7 @@
 <th ng-show="$ctrl.showAmbiguous">
     <div class="flex-hr-start">
         Child Contexts
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('child_contexts', 'ambiguous')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
