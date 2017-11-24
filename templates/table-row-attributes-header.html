@@ -1,7 +1,7 @@
 <th ng-show="$ctrl.showAmbiguous">
     <div class="flex-hr-start">
         Name
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('attribute', 'ambiguous')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -9,7 +9,7 @@
 <th ng-show="$ctrl.showAmbiguous">
     <div class="flex-hr-start">
         Corresponding Context
-        <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('context', 'ambiguous')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>

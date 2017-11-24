@@ -473,6 +473,7 @@ spacialistApp.component('analysis', {
         vm.contextColumns = [];
         vm.attributeColumns = [];
         vm.actionColumns = [];
+        vm.datatypeColumns = [];
         vm.orders = [];
         vm.groups = [];
         vm.limit = {
@@ -843,7 +844,19 @@ spacialistApp.component('analysis', {
                     }
                     break;
                 case 'attribute':
-                    type = 'attribute';
+                    switch(item) {
+                        case 'name':
+                            type = 'yesno';
+                            subcolumn = 'thesaurus_url';
+                            vm.contextColumns = angular.copy(vm.attributes)
+                            break;
+                        case 'type':
+                            type = 'yesno';
+                            subcolumn = 'datatype';
+                            console.log(vm.attributetypes);
+                            vm.datatypeColumns = angular.copy(vm.attributetypes);
+                            break;
+                    }
                     break;
             }
 
@@ -855,8 +868,17 @@ spacialistApp.component('analysis', {
             }
         };
 
-        vm.setContextTypeValue = function(item) {
-            vm.selectedComp_value = item.id;
+        vm.setContextTypeValue = function(item, name) {
+            if(name == 'attribute') {
+                vm.selectedComp_value = item.thesaurus_url;
+            } else {
+                vm.selectedComp_value = item.id;
+            }
+            delete vm.relation.id;
+        };
+
+        vm.setDataTypeValue = function(item, name) {
+            vm.selectedComp_value = item.datatype;
             delete vm.relation.id;
         };
 
@@ -913,9 +935,8 @@ spacialistApp.component('analysis', {
                         vm.actionColumns.push('entry count');
                         break;
                     case 'attribute':
-                        for(var i=0; i<vm.combinedResults.length; i++) {
-                            var r = vm.combinedResults[i];
-                        }
+                        vm.actionColumns.push('type');
+                        vm.actionColumns.push('name');
                         break;
                     case 'context':
                     case 'root_context':
@@ -947,6 +968,7 @@ spacialistApp.component('analysis', {
             if(vm.contextColumns) vm.contextColumns.length = 0;
             if(vm.attributeColumns) vm.attributeColumns.length = 0;
             if(vm.actionColumns) vm.actionColumns.length = 0;
+            if(vm.datatypeColumns) vm.datatypeColumns.length = 0;
             if(vm.comps) vm.comps.length = 0;
             if(vm.selectedComps) vm.selectedComps.length = 0;
             vm.comp = undefined;

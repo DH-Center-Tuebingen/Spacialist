@@ -5,7 +5,7 @@
         </a>
     </div>
     <form class="form-horizontal">
-        <div class="form-group" ng-if="$ctrl.relation.name == 'attributes' && $ctrl.attributeColumns.length > 0">
+        <div class="form-group" ng-if="$ctrl.attributeColumns.length > 0">
             <label class="control-label col-md-2">Attribute:</label>
             <div class="col-md-10">
                 <ui-select ng-model="$ctrl.tmpAttribute" on-select="$ctrl.getSubPopover($item, $ctrl.relation)">
@@ -18,7 +18,7 @@
                 </ui-select>
             </div>
         </div>
-        <div class="form-group" ng-if="($ctrl.relation.name == 'literatures' || $ctrl.relation.name == 'files' || $ctrl.relation.name == 'child_contexts') && $ctrl.actionColumns.length > 0">
+        <div class="form-group" ng-if="$ctrl.actionColumns.length > 0">
             <label class="control-label col-md-2">Action:</label>
             <div class="col-md-10">
                 <ui-select ng-model="$ctrl.tmpAction" on-select="$ctrl.getSubPopover($item, $ctrl.relation)">
@@ -60,12 +60,20 @@
                         <button type="button" class="btn btn-default" ng-init="opened=false" ng-click="opened=!opened"><i class="material-icons">event</i></button>
                     </span>
                 </div>
-                <ui-select ng-model="$ctrl.tmpContext" ng-if="$ctrl.selectedType == 'context_type' || $ctrl.selectedType == 'context' || $ctrl.selectedType == 'root_context' || ($ctrl.selectedType == 'yesno' && $ctrl.selectedColumn == 'context_type_id')" on-select="$ctrl.setContextTypeValue($item)">
+                <ui-select ng-model="$ctrl.tmpContext" ng-if="$ctrl.contextColumns.length > 0" on-select="$ctrl.setContextTypeValue($item, $ctrl.relation.name)">
                     <ui-select-match allow-clear="false">
                         {{ $ctrl.concepts[$select.selected.thesaurus_url].label }}
                     </ui-select-match>
                     <ui-select-choices repeat="sc in $ctrl.contextColumns | filter: $select.search">
                         <span ng-bind-html="$ctrl.concepts[sc.thesaurus_url].label | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+                <ui-select ng-model="$ctrl.tmpDatatype" ng-if="$ctrl.datatypeColumns.length > 0" on-select="$ctrl.setDataTypeValue($item, $ctrl.relation.name)">
+                    <ui-select-match allow-clear="false">
+                        <span translate="{{$select.selected.description}}"></span>
+                    </ui-select-match>
+                    <ui-select-choices repeat="sc in $ctrl.datatypeColumns | filter: $select.search">
+                        <span translate="{{sc.description}}"></span>
                     </ui-select-choices>
                 </ui-select>
             </div>
