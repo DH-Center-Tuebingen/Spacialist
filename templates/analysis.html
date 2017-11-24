@@ -20,10 +20,16 @@
                         <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeOrder(o)">
                             <i class="material-icons md-18 fa-red">delete</i>
                         </a>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveOrderDown(o)">
+                            <i class="material-icons md-18">arrow_drop_down</i>
+                        </a>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="$last" ng-click="$ctrl.moveOrderDown(o)" style="visibility: hidden;">
+                            <i class="material-icons md-18">arrow_drop_down</i>
+                        </a>
                         <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="$ctrl.moveOrderUp(o)">
                             <i class="material-icons md-18">arrow_drop_up</i>
                         </a>
-                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveOrderDown(o)">
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="$first" ng-click="$ctrl.moveOrderDown(o)" style="visibility: hidden;">
                             <i class="material-icons md-18">arrow_drop_down</i>
                         </a>
                     </div>
@@ -50,11 +56,17 @@
                     <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeFilter(f)">
                         <i class="material-icons md-18 fa-red">delete</i>
                     </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveFilterDown(f)">
+                        <i class="material-icons md-18">arrow_drop_down</i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="$last" style="visibility: hidden;">
+                        <i class="material-icons md-18"></i>
+                    </a>
                     <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="$ctrl.moveFilterUp(f)">
                         <i class="material-icons md-18">arrow_drop_up</i>
                     </a>
-                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveFilterDown(f)">
-                        <i class="material-icons md-18">arrow_drop_down</i>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="$first" style="visibility: hidden;">
+                        <i class="material-icons md-18"></i>
                     </a>
                 </div>
             </li>
