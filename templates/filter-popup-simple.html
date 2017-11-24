@@ -31,6 +31,25 @@
                 </ui-select>
             </div>
         </div>
+        <div class="form-group" ng-show="$ctrl.functionColumns.length > 0">
+            <label class="control-label col-md-2">Function:</label>
+            <div class="col-md-10">
+                <ui-select ng-model="$ctrl.selectedFunc" on-select="$ctrl.functionSelected()">
+                    <ui-select-match allow-clear="false">
+                        {{ $select.selected.label }}
+                    </ui-select-match>
+                    <ui-select-choices repeat="f in $ctrl.functionColumns | filter: $select.search">
+                        <span ng-bind-html="f.label | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="form-group" ng-if="$ctrl.selectedFunc.needs_value">
+            <label class="control-label col-md-2">Function Value:</label>
+            <div class="col-md-10">
+                <input type="text" class="form-control" ng-model="$ctrl.selectedFunc_value" />
+            </div>
+        </div>
         <div class="form-group" ng-show="$ctrl.selectedComps.length > 0">
             <label class="control-label col-md-2">Comparison:</label>
             <div class="col-md-10">
@@ -72,17 +91,25 @@
                     <ui-select-match allow-clear="false">
                         <span translate="{{$select.selected.description}}"></span>
                     </ui-select-match>
-                    <ui-select-choices repeat="sc in $ctrl.datatypeColumns | filter: $select.search">
-                        <span translate="{{sc.description}}"></span>
+                    <ui-select-choices repeat="dc in $ctrl.datatypeColumns | filter: $select.search">
+                        <span translate="{{dc.description}}"></span>
+                    </ui-select-choices>
+                </ui-select>
+                <ui-select ng-model="$ctrl.tmpGeotype" ng-if="$ctrl.geoTypeColumns.length > 0" on-select="$ctrl.setGeoTypeValue($item, $ctrl.relation.name)">
+                    <ui-select-match allow-clear="false">
+                        {{ $select.selected }}
+                    </ui-select-match>
+                    <ui-select-choices repeat="gc in $ctrl.geoTypeColumns | filter: $select.search">
+                        <span ng-bind-html="gc | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>
             </div>
         </div>
         <div class="flex-hr-center">
-            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.func, $ctrl.func_values, true, $ctrl.relation)" ng-disabled="!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)">
+            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, true, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
                 AND
             </button>
-            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.func, $ctrl.func_values, false, $ctrl.relation)" ng-disabled="!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)">
+            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, false, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
                 OR
             </button>
         </div>

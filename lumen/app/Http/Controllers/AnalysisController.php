@@ -308,7 +308,10 @@ class AnalysisController extends Controller {
         $usesFunc = isset($filter->func);
         if($usesFunc) {
             $func = $filter->func;
-            $funcValues = $filter->func_values;
+            $funcValues = null;
+            if(isset($filter->func_values)) {
+                $funcValues = $filter->func_values;
+            }
             if(!$this->isValidFunction($func)) {
                 // TODO error?
                 return false;

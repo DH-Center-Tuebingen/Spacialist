@@ -444,6 +444,18 @@ spacialistApp.component('analysis', {
             'sum'
         ];
 
+        vm.simpleFunctions = {
+            geoDistance: {
+                label: 'distance to (in m)',
+                comp: 'pg_distance',
+                needs_value: true
+            },
+            geoArea: {
+                label: 'area (in qm)',
+                comp: 'pg_area'
+            }
+        };
+
         vm.availableVisualizations = [
             'scatter',
             'line',
@@ -600,6 +612,7 @@ spacialistApp.component('analysis', {
                     case 'child_contexts':
                         needsAdjustment = col == 'entry count';
                         break;
+                    case 'geodata':
                     case 'context':
                     case 'root_context':
                         needsAdjustment = comp == 'IS NULL' || comp == 'IS NOT NULL';
@@ -760,7 +773,20 @@ spacialistApp.component('analysis', {
             return (vm.expertMode && vm.results.length > 0) || (!vm.expertMode && vm.combinedResults.length > 0);
         };
 
+        vm.functionSelected = function() {
+            var type;
+            switch(vm.selectedFunc.comp) {
+                case 'pg_distance':
+                case 'pg_area':
+                    type = 'count';
+                    vm.selectedComps = vm.getSupportedComps(type);
+                    vm.selectedType = type;
+                    break;
+            }
+        }
+
         vm.getSubPopover = function(item, relation) {
+            var needsCompare = true;
             var type, subcolumn;
             switch(relation.name) {
                 case 'attributes':
@@ -805,7 +831,25 @@ spacialistApp.component('analysis', {
                     }
                     break;
                 case 'geodata':
-                    type = 'geodata';
+                    subcolumn = 'geom';
+                    switch(item) {
+                        case 'existance':
+                            type = 'geodata';
+                            break;
+                        case 'type':
+                            type = 'yesno';
+                            vm.geoTypeColumns = [
+                                'Point',
+                                'LineString',
+                                'Polygon'
+                            ];
+                            break;
+                        case 'functions':
+                            type = 'geo_functions';
+                            vm.functionColumns = vm.getSupportedFuncs(type);
+                            needsCompare = false;
+                            break;
+                    }
                     break;
                 case 'literatures':
                     subcolumn = item;
@@ -853,7 +897,6 @@ spacialistApp.component('analysis', {
                         case 'type':
                             type = 'yesno';
                             subcolumn = 'datatype';
-                            console.log(vm.attributetypes);
                             vm.datatypeColumns = angular.copy(vm.attributetypes);
                             break;
                     }
@@ -861,8 +904,10 @@ spacialistApp.component('analysis', {
             }
 
             vm.selectedColumn = subcolumn;
-            vm.selectedComps = vm.getSupportedComps(type);
             vm.selectedType = type;
+            if(needsCompare) {
+                vm.selectedComps = vm.getSupportedComps(type);
+            }
             if(relation) {
                 relation.id = item.id;
             }
@@ -879,6 +924,11 @@ spacialistApp.component('analysis', {
 
         vm.setDataTypeValue = function(item, name) {
             vm.selectedComp_value = item.datatype;
+            delete vm.relation.id;
+        };
+
+        vm.setGeoTypeValue = function(item, name) {
+            vm.selectedComp_value = item;
             delete vm.relation.id;
         };
 
@@ -907,9 +957,9 @@ spacialistApp.component('analysis', {
                         vm.selectedType = 'context_type';
                         break;
                     case 'geodata':
-                        for(var i=0; i<vm.combinedResults.length; i++) {
-                            var r = vm.combinedResults[i];
-                        }
+                        vm.actionColumns.push('existance');
+                        vm.actionColumns.push('type');
+                        vm.actionColumns.push('functions');
                         break;
                     case 'literatures':
                         for(var i=0; i<vm.combinedResults.length; i++) {
@@ -973,23 +1023,21 @@ spacialistApp.component('analysis', {
             if(vm.selectedComps) vm.selectedComps.length = 0;
             vm.comp = undefined;
             vm.selectedColumn = undefined;
+            vm.selectedFunc = undefined;
             vm.selectedType = undefined;
             vm.selectedComp_value = undefined;
+            vm.selectedFunc_value = undefined;
             for(var k in vm.selectedComp) {
                 if(vm.selectedComp.hasOwnProperty(k)) {
                     delete vm.selectedComp[k];
                 }
             }
-            vm.unsetRelation();
-        }
-
-        vm.unsetRelation = function() {
             for(var k in vm.relation) {
                 if(vm.relation.hasOwnProperty(k)) {
                     delete vm.relation[k];
                 }
             }
-        };
+        }
 
         vm.getSupportedComps = function(datatype) {
             var sc = angular.copy(vm.simpleComps);
@@ -1094,6 +1142,17 @@ spacialistApp.component('analysis', {
                         sc.comesBefore,
                         sc.comesAfter,
                     ];
+            }
+        };
+
+        vm.getSupportedFuncs = function(datatype) {
+            var sf = angular.copy(vm.simpleFunctions);
+            switch(datatype) {
+                case 'geo_functions':
+                 return [
+                     sf.geoDistance,
+                     sf.geoArea
+                 ];
             }
         };
     }
