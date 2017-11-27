@@ -46,6 +46,14 @@ function updateLastModified(context) {
     return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
 }
 
+function resetObject(o) {
+    for(var k in o) {
+        if(o.hasOwnProperty(k)) {
+            delete o[k];
+        }
+    }
+}
+
 L.Control.FitWorld = L.Control.extend({
 	onAdd: function(map) {
         var o = this.options;

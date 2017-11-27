@@ -3,14 +3,17 @@
     <div class="col-md-9">
         <ui-select ng-model="$ctrl.vis.x" on-select="$ctrl.vis.bar.selectX()">
             <ui-select-match allow-clear="false">
-                {{ $select.selected.as || $select.selected.col }}
+                {{ $select.selected.as || $select.selected.col || $select.selected }}
             </ui-select-match>
-            <ui-select-choices repeat="ac in $ctrl.availableColumns | filter: $select.search">
+            <ui-select-choices repeat="ac in $ctrl.visualizationColumns | filter: $select.search">
                 <span ng-show="ac.as">
                     <span ng-bind-html="ac.as | highlight: $select.search"></span> (<span ng-bind-html="ac.col | highlight: $select.search"></span>)
                 </span>
-                <span ng-hide="ac.as">
+                <span ng-hide="ac.as || !ac.col">
                     <span ng-bind-html="ac.col | highlight: $select.search"></span>
+                </span>
+                <span ng-show="!ac.as && !ac.col">
+                    <span ng-bind-html="ac | highlight:$select.search"></span>
                 </span>
             </ui-select-choices>
         </ui-select>
@@ -21,14 +24,17 @@
     <div class="col-md-9">
         <ui-select ng-model="$ctrl.vis.y" on-select="$ctrl.vis.bar.selectY()">
             <ui-select-match allow-clear="false">
-                {{ $select.selected.as || $select.selected.col }}
+                {{ $select.selected.as || $select.selected.col || $select.selected }}
             </ui-select-match>
-            <ui-select-choices repeat="ac in $ctrl.availableColumns | filter: $select.search">
+            <ui-select-choices repeat="ac in $ctrl.visualizationColumns | filter: $select.search">
                 <span ng-show="ac.as">
                     <span ng-bind-html="ac.as | highlight: $select.search"></span> (<span ng-bind-html="ac.col | highlight: $select.search"></span>)
                 </span>
-                <span ng-hide="ac.as">
+                <span ng-hide="ac.as || !ac.col">
                     <span ng-bind-html="ac.col | highlight: $select.search"></span>
+                </span>
+                <span ng-show="!ac.as && !ac.col">
+                    <span ng-bind-html="ac | highlight:$select.search"></span>
                 </span>
             </ui-select-choices>
         </ui-select>

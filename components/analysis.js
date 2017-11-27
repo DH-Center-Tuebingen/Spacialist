@@ -17,8 +17,11 @@ spacialistApp.component('analysis', {
             plot_bgcolor: 'rgba(0,0,0,0)'
         };
 
+        vm.resultCount = 0;
         vm.results = [];
+        vm.visualizationResults = [];
         vm.combinedResults = [];
+        vm.splitResults = {};
         vm.query = '';
         vm.vis = {
             type: '',
@@ -27,17 +30,17 @@ spacialistApp.component('analysis', {
                 values: [],
                 selectLabel: function() {
                     vm.vis.pie.labels.length = 0;
-                    var c = vm.vis.labelCol.as || vm.vis.labelCol.col;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    var c = vm.vis.labelCol.as || vm.vis.labelCol.col || vm.vis.labelCol;
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.pie.labels.push(r[c]);
                     }
                 },
                 selectValues: function() {
                     vm.vis.pie.values.length = 0;
-                    var c = vm.vis.valueCol.as || vm.vis.valueCol.col;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    var c = vm.vis.valueCol.as || vm.vis.valueCol.col || vm.vis.valueCol;
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.pie.values.push(r[c]);
                     }
                 },
@@ -61,17 +64,17 @@ spacialistApp.component('analysis', {
                 y: [],
                 selectX: function() {
                     vm.vis.bar.x.length = 0;
-                    var c = vm.vis.x.as || vm.vis.x.col;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    var c = vm.vis.x.as || vm.vis.x.col || vm.vis.x;
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.bar.x.push(r[c]);
                     }
                 },
                 selectY: function() {
                     vm.vis.bar.y.length = 0;
-                    var c = vm.vis.y.as || vm.vis.y.col;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    var c = vm.vis.y.as || vm.vis.y.col || vm.vis.y;
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.bar.y.push(r[c]);
                     }
                 },
@@ -96,17 +99,17 @@ spacialistApp.component('analysis', {
                 name: '',
                 selectX: function() {
                     vm.vis.line.x.length = 0;
-                    var c = vm.vis.x.as || vm.vis.x.col;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    var c = vm.vis.x.as || vm.vis.x.col || vm.vis.x;
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.line.x.push(r[c]);
                     }
                 },
                 selectY: function() {
                     vm.vis.line.y.length = 0;
-                    var c = vm.vis.y.as || vm.vis.y.col;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    var c = vm.vis.y.as || vm.vis.y.col || vm.vis.y;
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.line.y.push(r[c]);
                     }
                 },
@@ -136,17 +139,17 @@ spacialistApp.component('analysis', {
                 },
                 selectX: function() {
                     vm.vis.scatter.x.length = 0;
-                    var c = vm.vis.x.as || vm.vis.x.col;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    var c = vm.vis.x.as || vm.vis.x.col || vm.vis.x;
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.scatter.x.push(r[c]);
                     }
                 },
                 selectY: function() {
                     vm.vis.scatter.y.length = 0;
-                    var c = vm.vis.y.as || vm.vis.y.col;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    var c = vm.vis.y.as || vm.vis.y.col || vm.vis.y;
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.scatter.y.push(r[c]);
                     }
                 },
@@ -177,9 +180,9 @@ spacialistApp.component('analysis', {
                 horizontal: false,
                 selectX: function() {
                     vm.vis.histogram.x.length = 0;
-                    var c = vm.vis.x.as || vm.vis.x.col;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    var c = vm.vis.x.as || vm.vis.x.col || vm.vis.x;
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.histogram.x.push(r[c]);
                     }
                 },
@@ -232,28 +235,28 @@ spacialistApp.component('analysis', {
                 },
                 selectX: function() {
                     vm.vis.ternary.x.length = 0;
-                    var c = vm.vis.x.as || vm.vis.x.col;
+                    var c = vm.vis.x.as || vm.vis.x.col || vm.vis.x;
                     vm.vis.ternary.titles.x = c;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.ternary.x.push(r[c]);
                     }
                 },
                 selectY: function() {
                     vm.vis.ternary.y.length = 0;
-                    var c = vm.vis.y.as || vm.vis.y.col;
+                    var c = vm.vis.y.as || vm.vis.y.col || vm.vis.y;
                     vm.vis.ternary.titles.y = c;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.ternary.y.push(r[c]);
                     }
                 },
                 selectZ: function() {
                     vm.vis.ternary.z.length = 0;
-                    var c = vm.vis.z.as || vm.vis.z.col;
+                    var c = vm.vis.z.as || vm.vis.z.col || vm.vis.z;
                     vm.vis.ternary.titles.z = c;
-                    for(var i=0; i<vm.results.length; i++) {
-                        var r = vm.results[i];
+                    for(var i=0; i<vm.visualizationResults.length; i++) {
+                        var r = vm.visualizationResults[i];
                         vm.vis.ternary.z.push(r[c]);
                     }
                 },
@@ -477,6 +480,7 @@ spacialistApp.component('analysis', {
         vm.column = {};
         vm.relation = {};
 
+        vm.visualizationColumns = [];
         vm.availableColumns = [];
         vm.filters = [];
         vm.origin = vm.origins[1];
@@ -488,6 +492,7 @@ spacialistApp.component('analysis', {
         vm.datatypeColumns = [];
         vm.orders = [];
         vm.groups = [];
+        vm.splits = [];
         vm.limit = {
             from: 0,
             amount: 30
@@ -505,14 +510,6 @@ spacialistApp.component('analysis', {
             vm.showFilterOptions = !vm.showFilterOptions;
         }
 
-        vm.resetColumn = function(col) {
-            for(var k in col) {
-                if(col.hasOwnProperty(k)) {
-                    delete col[k];
-                }
-            }
-        };
-
         vm.addColumn = function() {
             var c = vm.column;
             vm.columns.push({
@@ -524,7 +521,7 @@ spacialistApp.component('analysis', {
             if(vm.instantFilter) {
                 vm.filter();
             }
-            vm.resetColumn(c);
+            resetObject(c);
         };
 
         vm.removeColumn = function(column) {
@@ -601,6 +598,36 @@ spacialistApp.component('analysis', {
                     vm.filter();
                 }
             }
+        };
+
+        vm.datatypeSupportsSplit = function(datatype) {
+            switch(datatype) {
+                case 'string':
+                case 'stringf':
+                case 'double':
+                case 'date':
+                case 'integer':
+                case 'boolean':
+                case 'percentage':
+                    return true;
+                default:
+                    return false;
+            }
+        };
+
+        vm.addSplit = function(relation, column, value, name) {
+            // check if split on given parameters already exist
+            var matchingSplit = vm.splits.find(function(s) {
+                return s.relation == relation && s.column == column && s.value == value;
+            });
+            // don't add it, if it exists
+            if(matchingSplit) return;
+            vm.splits.push({
+                relation: relation,
+                column: column,
+                value: value,
+                name: name
+            });
         };
 
         vm.adjustFilterValues = function(relation, col, comp, comp_value) {
@@ -713,11 +740,17 @@ spacialistApp.component('analysis', {
             formData.append('limit', angular.toJson(vm.limit));
             formData.append('simple', !vm.expertMode);
             formData.append('distinct', vm.distinct);
+            if(!vm.expertMode) {
+                formData.append('splits', angular.toJson(vm.splits));
+            }
             httpPostFactory('api/analysis/filter', formData, function(response) {
+                console.log(response);
                 vm.filteredOrigin = vm.origin;
+                vm.resultCount = response.count;
                 vm.query = response.query;
                 vm.results.length = 0;
                 vm.combinedResults.length = 0;
+                resetObject(vm.splitResults);
                 var res;
                 if(response.rows.length > 0) {
                     vm.availableColumns.length = 0;
@@ -740,11 +773,66 @@ spacialistApp.component('analysis', {
                         for(var i=0; i<response.rows.length; i++) {
                             vm.combinedResults.push(response.rows[i]);
                         }
+                        for(var k in response.splits) {
+                            if(response.splits.hasOwnProperty(k)) {
+                                vm.splitResults[k] = response.splits[k];
+                            }
+                        }
                     }
                     vm.activeResultTab = vm.expertMode ? 'raw' : 'simple';
                 }
+                vm.visualizationColumns.length = 0;
+                vm.visualizationResults.length = 0;
+                vm.visualizationColumns = vm.getAvailableColumns();
+                vm.visualizationResults = vm.getResults();
             });
         };
+
+        vm.getAvailableColumns = function() {
+            if(vm.expertMode) {
+                return vm.availableColumns;
+            } else {
+                var columns = [];
+                // add predefined columns
+                if(vm.combinedResults.length > 0) {
+                    var header = vm.combinedResults[0];
+                    for(var k in header) {
+                        if(header.hasOwnProperty(k)) {
+                            columns.push(k);
+                        }
+                    }
+                }
+
+                // add splits
+                for(var k in vm.splitResults) {
+                    if(vm.splitResults.hasOwnProperty(k)) {
+                        var label = k;
+                        if(vm.concepts[k]) {
+                            label = vm.concepts[k].label;
+                        }
+                        columns.push(label);
+                    }
+                }
+                return columns;
+            }
+        };
+
+        vm.getResults = function() {
+            if(vm.expertMode) {
+                return vm.results;
+            } else {
+                var results = angular.copy(vm.combinedResults);
+                for(var i=0; i<results.length; i++) {
+                    var r = results[i];
+                    for(var k in vm.splitResults) {
+                        if(vm.splitResults.hasOwnProperty(k)) {
+                            r[k] = vm.splitResults[k][i];
+                        }
+                    }
+                }
+                return results;
+            }
+        }
 
         vm.visualize = function(type) {
             if(!vm.vis[type].validate()) return;
@@ -1027,16 +1115,8 @@ spacialistApp.component('analysis', {
             vm.selectedType = undefined;
             vm.selectedComp_value = undefined;
             vm.selectedFunc_value = undefined;
-            for(var k in vm.selectedComp) {
-                if(vm.selectedComp.hasOwnProperty(k)) {
-                    delete vm.selectedComp[k];
-                }
-            }
-            for(var k in vm.relation) {
-                if(vm.relation.hasOwnProperty(k)) {
-                    delete vm.relation[k];
-                }
-            }
+            resetObject(vm.selectedComp);
+            resetObject(vm.relation);
         }
 
         vm.getSupportedComps = function(datatype) {

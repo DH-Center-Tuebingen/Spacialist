@@ -55,7 +55,7 @@ class AnalysisController extends Controller {
         $columns = json_decode($request->input('columns', '[]'));
         $orders = json_decode($request->input('orders', '[]'));
         $limit = json_decode($request->input('limit', '{}'));
-        $query = $this->filter([$ctid], $filters, $columns, $orders, $limit);
+        $query = $this->filter([$ctid], $filters, $columns, $orders);
         return response()->json([
             'rows' => $query->get(),
             'query' => $this->cleanSql($query->toSql())
@@ -68,11 +68,21 @@ class AnalysisController extends Controller {
         $columns = json_decode($request->input('columns', '[]'));
         $orders = json_decode($request->input('orders', '[]'));
         $limit = json_decode($request->input('limit', '{}'));
+        $splits = json_decode($request->input('splits', '[]'));
         $simple = Helpers::parseBoolean($request->input('simple', false));
         $distinct = Helpers::parseBoolean($request->input('distinct', false));
-        $query = $this->filter($origin, $filters, $columns, $orders, $limit, $distinct, $simple);
+        $query = $this->filter($origin, $filters, $columns, $orders, $distinct, $simple);
+
+        $count = $query->count();
+        $this->addLimit($query, $limit);
+        $rows = $query->get();
+
+        $splitArray = $this->addRelationSplits($rows, $splits);
+
         $result = [
-            'rows' => $query->get()
+            'count' => $count,
+            'rows' => $rows,
+            'splits' => $splitArray
         ];
         if(!$simple) {
             $result['query'] = $this->cleanSql($query->toSql());
@@ -88,7 +98,87 @@ class AnalysisController extends Controller {
 
     // OTHER FUNCTIONS
 
-    private function filter($origin, $filters, $columns, $orders, $limit, $distinct, $relations = false) {
+    private function addLimit($query, $limit) {
+        if(!empty($limit)) {
+            if(isset($limit->from)) {
+                $query->offset($limit->from);
+            }
+            if(isset($limit->amount)) {
+                $query->limit($limit->amount);
+            }
+        }
+    }
+
+    private function addRelationSplits($rows, $splits) {
+        if(empty($splits)) return null;
+
+        $splitArray = [];
+        foreach($splits as $s) {
+            $curr = [];
+            foreach($rows as $row) {
+                $rel = $row->{$s->relation};
+                $value = null;
+                // check if $rel is a collection
+                if(is_a($rel, 'Illuminate\Database\Eloquent\Collection')) {
+                    // if so, loop over all items
+                    foreach($rel->all() as $r) {
+                        if($r->{$s->column} == $s->value) {
+                            $value = null;
+                            if(isset($r->pivot->str_val)) {
+                                $value = $r->pivot->str_val;
+                            } else if(isset($r->pivot->int_val)) {
+                                $value = $r->pivot->int_val;
+                            } else if(isset($r->pivot->dbl_val)) {
+                                $value = $r->pivot->dbl_val;
+                            } else if(isset($r->pivot->thesaurus_val)) {
+                                $value = $r->pivot->thesaurus_val;
+                            } else if(isset($r->pivot->dt_val)) {
+                                $value = $r->pivot->dt_val;
+                            }
+                        }
+                    }
+                    // otherwise, should be object
+                } else if(is_object($rel)) {
+                    if($rel->{$s->column} == $s->value) {
+                        $value = null;
+                        if(isset($rel->pivot->str_val)) {
+                            $value = $rel->pivot->str_val;
+                        } else if(isset($rel->pivot->int_val)) {
+                            $value = $rel->pivot->int_val;
+                        } else if(isset($rel->pivot->dbl_val)) {
+                            $value = $rel->pivot->dbl_val;
+                        } else if(isset($rel->pivot->thesaurus_val)) {
+                            $value = $rel->pivot->thesaurus_val;
+                        } else if(isset($rel->pivot->dt_val)) {
+                            $value = $rel->pivot->dt_val;
+                        }
+                    }
+                } else {
+                    // should not happen ;)
+                }
+                $curr[] = $value;
+            }
+            $relName = "$s->name";
+            $keys = array_keys($splitArray);
+            if(!empty($keys)) {
+                $hits = 0;
+                $quotedName = "|". preg_quote($relName) . "( \(\d+\))?|";
+                foreach($keys as $key) {
+                    if(preg_match($quotedName, $key) === 1) {
+                        $hits++;
+                    }
+                }
+                if($hits > 0) {
+                    $relName .= " ($hits)";
+                }
+            }
+            $splitArray[$relName] = $curr;
+        }
+
+        return $splitArray;
+    }
+
+    private function filter($origin, $filters, $columns, $orders, $distinct, $relations = false) {
         $hasColumnSelection = !empty($columns);
 
         switch($origin) {
@@ -227,15 +317,6 @@ class AnalysisController extends Controller {
         if(!empty($orders)) {
             foreach($orders as $o) {
                 $query->orderBy($o->col, $o->dir);
-            }
-        }
-
-        if(!empty($limit)) {
-            if(isset($limit->from)) {
-                $query->offset($limit->from);
-            }
-            if(isset($limit->amount)) {
-                $query->limit($limit->amount);
             }
         }
 

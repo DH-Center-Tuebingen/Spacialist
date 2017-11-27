@@ -3,14 +3,17 @@
         {{ r.name }}
     </td>
     <td ng-show="$ctrl.showAmbiguous">
+        <i class="material-icons md-14">{{ r.context_type.type == 0 ? 'account_balance' : 'spa' }}</i> {{ $ctrl.concepts[r.context_type.thesaurus_url].label }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
         <ul>
             <li ng-repeat="attr in r.attributes">
                 {{ $ctrl.concepts[attr.thesaurus_url].label }} ({{ attr.datatype }})
+                <a ng-if="$ctrl.datatypeSupportsSplit(attr.datatype)" href="" ng-click="$ctrl.addSplit('attributes', 'id', attr.id, attr.thesaurus_url)">
+                    <i class="material-icons md-14">reply</i>
+                </a>
             </li>
         </ul>
-    </td>
-    <td ng-show="$ctrl.showAmbiguous">
-        <i class="material-icons md-14">{{ r.context_type.type == 0 ? 'account_balance' : 'spa' }}</i> {{ $ctrl.concepts[r.context_type.thesaurus_url].label }}
     </td>
     <td ng-show="$ctrl.showAmbiguous">
         {{ r.geodata.geom }}
@@ -47,5 +50,8 @@
     </td>
     <td>
         {{ r.lasteditor }}
+    </td>
+    <td ng-repeat="(k, value) in $ctrl.splitResults">
+        {{ $ctrl.concepts[value[$parent.$index]].label || value[$parent.$index] }}
     </td>
 </tr>

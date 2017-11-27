@@ -8,16 +8,16 @@
 </th>
 <th ng-show="$ctrl.showAmbiguous">
     <div class="flex-hr-start">
-        Attributes
-        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('attributes', 'ambiguous')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        Context Type
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('context_type', 'ambiguous')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
 </th>
 <th ng-show="$ctrl.showAmbiguous">
     <div class="flex-hr-start">
-        Context Type
-        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('context_type', 'ambiguous')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
+        Attributes
+        <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('attributes', 'ambiguous')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
     </div>
@@ -84,5 +84,10 @@
         <a href="" class="filter-popover-trigger" ng-click="$ctrl.onOpenPopover('lasteditor', 'string')" uib-popover-template="'templates/filter-popup-simple.html'" popover-placement="bottom" popover-trigger="'click'">
             <i class="material-icons">search</i>
         </a>
+    </div>
+</th>
+<th ng-repeat="(k, value) in $ctrl.splitResults">
+    <div class="flex-hr-start">
+        {{ $ctrl.concepts[k].label || k }}
     </div>
 </th>
