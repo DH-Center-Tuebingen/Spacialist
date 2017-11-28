@@ -476,7 +476,7 @@ spacialistApp.component('analysis', {
         vm.expertMode = false;
         vm.showFilterOptions = true;
         vm.showAmbiguous = true;
-        vm.instantFilter = false;
+        vm.instantFilter = !vm.expertMode;
         vm.column = {};
         vm.relation = {};
 
@@ -628,6 +628,9 @@ spacialistApp.component('analysis', {
                 value: value,
                 name: name
             });
+            if(vm.instantFilter) {
+                vm.filter();
+            }
         };
 
         vm.removeSplit = function(index) {
@@ -744,8 +747,9 @@ spacialistApp.component('analysis', {
             formData.append('orders', angular.toJson(vm.orders));
             formData.append('limit', angular.toJson(vm.limit));
             formData.append('simple', !vm.expertMode);
-            formData.append('distinct', vm.distinct);
-            if(!vm.expertMode) {
+            if(vm.expertMode) {
+                formData.append('distinct', vm.distinct);
+            } else {
                 formData.append('splits', angular.toJson(vm.splits));
             }
             httpPostFactory('api/analysis/filter', formData, function(response) {
