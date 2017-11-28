@@ -202,7 +202,7 @@
                 </li>
             </ul>
             <div class="table-responsive" ng-show="$ctrl.activeResultTab == 'raw'" ng-if="$ctrl.expertMode">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover table-bordered">
                     <tr>
                         <th ng-repeat="(k, col) in $ctrl.results[0]">
                             <div class="flex-hr-start" uib-tooltip="{{$ctrl.getOriginalColumnName(k)}}">
@@ -227,7 +227,7 @@
                 </table>
             </div>
             <div class="table-responsive" ng-show="$ctrl.activeResultTab == 'simple'">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover table-bordered">
                     <tr ng-if="$ctrl.filteredOrigin == 'contexts'" ng-include src="'templates/table-row-contexts-header.html'">
                     </tr>
                     <tr ng-if="$ctrl.filteredOrigin == 'attribute_values'" ng-include src="'templates/table-row-attributes-header.html'">
