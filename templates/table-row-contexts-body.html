@@ -3,7 +3,7 @@
         {{ r.name }}
     </td>
     <td ng-show="$ctrl.showAmbiguous">
-        <i class="material-icons md-14">{{ r.context_type.type == 0 ? 'account_balance' : 'spa' }}</i> {{ $ctrl.concepts[r.context_type.thesaurus_url].label }}
+        <i class="material-icons md-14" style="vertical-align: middle;">{{ r.context_type.type == 0 ? 'account_balance' : 'spa' }}</i> {{ $ctrl.concepts[r.context_type.thesaurus_url].label }}
     </td>
     <td ng-show="$ctrl.showAmbiguous">
         <ul>
@@ -19,7 +19,12 @@
         {{ $ctrl.concepts[value[$parent.$index]].label || value[$parent.$index] }}
     </td>
     <td ng-show="$ctrl.showAmbiguous">
-        {{ r.geodata.geom }}
+        <dl ng-if="r.geodata.geom" class="dl-horizontal">
+            <dt>Type:</dt>
+            <dd>{{ r.geodata.geom.type }}</dd>
+            <dt>Coordinates:</dt>
+            <dd>{{ r.geodata.geom.coordinates }}</dd>
+        </dl>
     </td>
     <td ng-show="$ctrl.showAmbiguous">
         <ul>
