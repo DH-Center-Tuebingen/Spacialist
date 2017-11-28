@@ -630,6 +630,11 @@ spacialistApp.component('analysis', {
             });
         };
 
+        vm.removeSplit = function(index) {
+            vm.splits.splice(index, 1);
+            vm.filter();
+        };
+
         vm.adjustFilterValues = function(relation, col, comp, comp_value) {
             var needsAdjustment = false;
             if(relation) {

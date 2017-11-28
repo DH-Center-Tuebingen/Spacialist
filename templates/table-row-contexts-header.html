@@ -25,6 +25,9 @@
 <th ng-repeat="(k, value) in $ctrl.splitResults">
     <div class="flex-hr-start">
         {{ $ctrl.concepts[k].label || k }}
+        <a href="" ng-click="$ctrl.removeSplit($index)">
+            <i class="material-icons">delete</i>
+        </a>
     </div>
 </th>
 <th ng-show="$ctrl.showAmbiguous">
