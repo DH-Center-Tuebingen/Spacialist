@@ -15,6 +15,9 @@
             </li>
         </ul>
     </td>
+    <td ng-repeat="(k, value) in $ctrl.splitResults">
+        {{ $ctrl.concepts[value[$parent.$index]].label || value[$parent.$index] }}
+    </td>
     <td ng-show="$ctrl.showAmbiguous">
         {{ r.geodata.geom }}
     </td>
@@ -42,16 +45,13 @@
     <td ng-show="$ctrl.showAmbiguous">
         {{ r.root_context.name }}
     </td>
-    <td>
+    <td ng-show="$ctrl.showAmbiguous">
         {{ r.created_at }}
     </td>
-    <td>
+    <td ng-show="$ctrl.showAmbiguous">
         {{ r.updated_at }}
     </td>
-    <td>
+    <td ng-show="$ctrl.showAmbiguous">
         {{ r.lasteditor }}
-    </td>
-    <td ng-repeat="(k, value) in $ctrl.splitResults">
-        {{ $ctrl.concepts[value[$parent.$index]].label || value[$parent.$index] }}
     </td>
 </tr>

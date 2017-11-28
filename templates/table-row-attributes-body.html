@@ -11,13 +11,13 @@
     <td>
         {{ r.possibility }}%
     </td>
-    <td>
+    <td ng-show="$ctrl.showAmbiguous">
         {{ r.created_at }}
     </td>
-    <td>
+    <td ng-show="$ctrl.showAmbiguous">
         {{ r.updated_at }}
     </td>
-    <td>
+    <td ng-show="$ctrl.showAmbiguous">
         {{ r.lasteditor }}
     </td>
 </tr>
