@@ -6,7 +6,7 @@
     </div>
     <form class="form-horizontal">
         <div class="form-group" ng-if="$ctrl.attributeColumns.length > 0">
-            <label class="control-label col-md-2">Attribute:</label>
+            <label class="control-label col-md-2" translate="analysis.popup.attribute"></label>:
             <div class="col-md-10">
                 <ui-select ng-model="$ctrl.tmpAttribute" on-select="$ctrl.getSubPopover($item, $ctrl.relation)">
                     <ui-select-match allow-clear="false">
@@ -19,7 +19,7 @@
             </div>
         </div>
         <div class="form-group" ng-if="$ctrl.actionColumns.length > 0">
-            <label class="control-label col-md-2">Action:</label>
+            <label class="control-label col-md-2" translate="analysis.popup.attribute"></label>:
             <div class="col-md-10">
                 <ui-select ng-model="$ctrl.tmpAction" on-select="$ctrl.getSubPopover($item, $ctrl.relation)">
                     <ui-select-match allow-clear="false">
@@ -32,7 +32,7 @@
             </div>
         </div>
         <div class="form-group" ng-show="$ctrl.functionColumns.length > 0">
-            <label class="control-label col-md-2">Function:</label>
+            <label class="control-label col-md-2" translate="analysis.popup.function"></label>:
             <div class="col-md-10">
                 <ui-select ng-model="$ctrl.selectedFunc" on-select="$ctrl.functionSelected()">
                     <ui-select-match allow-clear="false">
@@ -45,26 +45,26 @@
             </div>
         </div>
         <div class="form-group" ng-if="$ctrl.selectedFunc.needs_value">
-            <label class="control-label col-md-2">Function Value:</label>
+            <label class="control-label col-md-2" translate="analysis.popup.function-values"></label>:
             <div class="col-md-10">
                 <input type="text" class="form-control" ng-model="$ctrl.selectedFunc_value" />
             </div>
         </div>
         <div class="form-group" ng-show="$ctrl.selectedComps.length > 0">
-            <label class="control-label col-md-2">Comparison:</label>
+            <label class="control-label col-md-2" translate="analysis.popup.comparison"></label>:
             <div class="col-md-10">
                 <ui-select ng-model="$ctrl.selectedComp">
                     <ui-select-match allow-clear="false">
-                        {{ $select.selected.label }}
+                        {{ $select.selected.label | translate }}
                     </ui-select-match>
                     <ui-select-choices repeat="c in $ctrl.selectedComps | filter: $select.search">
-                        <span ng-bind-html="c.label | highlight: $select.search"></span>
+                        <span ng-bind-html="c.label | translate | highlight: $select.search"></span>
                     </ui-select-choices>
                 </ui-select>
             </div>
         </div>
         <div class="form-group" ng-if="$ctrl.selectedComp.needs_value">
-            <label class="control-label col-md-2">Comparison Value:</label>
+            <label class="control-label col-md-2" translate="analysis.popup.comparison-value"></label>:
             <div class="col-md-10">
                 <input type="text" class="form-control" ng-if="$ctrl.selectedType == 'string'" ng-model="$ctrl.selectedComp_value" />
                 <input type="number" step="1" class="form-control" ng-if="$ctrl.selectedType == 'integer' || $ctrl.selectedType == 'count'" ng-model="$ctrl.selectedComp_value" />
@@ -107,10 +107,10 @@
         </div>
         <div class="flex-hr-center">
             <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, true, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
-                AND
+                <span translate="analysis.and-button"></span>
             </button>
             <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, false, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
-                OR
+                <span translate="analysis.or-button"></span>
             </button>
         </div>
     </form>

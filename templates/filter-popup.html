@@ -6,7 +6,7 @@
     </div>
     <form class="form-horizontal">
         <div class="form-group">
-            <label class="control-label col-md-2">Comparison:</label>
+            <label class="control-label col-md-2" translate="analysis.popup.comparison"></label>:
             <div class="col-md-10">
                 <ui-select ng-model="$ctrl.comp">
                     <ui-select-match allow-clear="false">
@@ -19,20 +19,20 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="control-label col-md-2">Comparison Value:</label>
+            <label class="control-label col-md-2" translate="analysis.popup.comparison-value"></label>:
             <div class="col-md-10">
                 <input type="text" class="form-control" ng-model="$ctrl.comp_value" />
             </div>
         </div>
         <div class="form-group">
-            <label class="control-label col-md-2">Use Function:</label>
+            <label class="control-label col-md-2" translate="analysis.popup.use-function"></label>:
             <div class="col-md-10">
                 <input type="checkbox" class="form-control" ng-model="useFunc" />
             </div>
         </div>
         <div ng-show="useFunc">
             <div class="form-group">
-                <label class="control-label col-md-2">Function:</label>
+                <label class="control-label col-md-2" translate="analysis.popup.function"></label>:
                 <div class="col-md-10">
                     <ui-select ng-model="$ctrl.func">
                         <ui-select-match allow-clear="true">
@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-md-2">Function Values:</label>
+                <label class="control-label col-md-2" translate="analysis.popup.function-values"></label>:
                 <div class="col-md-10">
                     <input type="text" class="form-control" ng-model="$ctrl.func_values" ng-show="$ctrl.func" />
                 </div>
@@ -53,10 +53,10 @@
         </div>
         <div class="flex-hr-center">
             <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.func_values, true)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
-                AND
+                <span translate="analysis.and-button"></span>
             </button>
             <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.func_values, false)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
-                OR
+                <span translate="analysis.or-button"></span>
             </button>
         </div>
     </form>

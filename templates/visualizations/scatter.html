@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label class="control-label col-md-3">X-Column</label>
+    <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.x-column"></label>
     <div class="col-md-9">
         <ui-select ng-model="$ctrl.vis.x" on-select="$ctrl.vis.scatter.selectX()">
             <ui-select-match allow-clear="false">
@@ -20,7 +20,7 @@
     </div>
 </div>
 <div class="form-group">
-    <label class="control-label col-md-3">Y-Column</label>
+    <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.y-column"></label>
     <div class="col-md-9">
         <ui-select ng-model="$ctrl.vis.y" on-select="$ctrl.vis.scatter.selectY()">
             <ui-select-match allow-clear="false">
@@ -41,13 +41,13 @@
     </div>
 </div>
 <div class="form-group">
-    <label class="control-label col-md-3">Name</label>
+    <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.name"></label>
     <div class="col-md-9">
         <input type="text" class="form-control" ng-model="$ctrl.vis.scatter.name" />
     </div>
 </div>
 <div class="form-group">
-    <label class="control-label col-md-3">Marker Size</label>
+    <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.marker-size"></label>
     <div class="col-md-9">
         <input type="range" class="form-control slider" ng-model="$ctrl.vis.scatter.marker.size" min="1" max="250" step="1" />
         <span class="slider-text">{{ $ctrl.vis.scatter.marker.size }}px</span>

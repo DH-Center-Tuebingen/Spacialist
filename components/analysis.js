@@ -310,11 +310,26 @@ spacialistApp.component('analysis', {
         };
 
         vm.origins = [
-            'attribute_values',
-            'contexts',
-            'files',
-            'geodata',
-            'literature'
+            {
+                label: 'analysis.query-options.table.attribute-values',
+                name: 'attribute_values'
+            },
+            {
+                label: 'analysis.query-options.table.contexts',
+                name: 'contexts'
+            },
+            {
+                label: 'analysis.query-options.table.files',
+                name: 'files'
+            },
+            {
+                label: 'analysis.query-options.table.geodata',
+                name: 'geodata'
+            },
+            {
+                label: 'analysis.query-options.table.literature',
+                name: 'literature'
+            }
         ];
 
         vm.comps = [
@@ -338,100 +353,100 @@ spacialistApp.component('analysis', {
 
         vm.simpleComps = {
             beginsWith: {
-                label: 'begins with',
+                label: 'analysis.comparisons.label.begins-with',
                 comp: 'ILIKE%',
                 needs_value: true
             },
             endsWith: {
-                label: 'ends with',
+                label: 'analysis.comparisons.label.ends-with',
                 comp: '%ILIKE',
                 needs_value: true
             },
             doesntBeginWith: {
-                label: 'does not begin with',
+                label: 'analysis.comparisons.label.not-begins-with',
                 comp: 'NOT ILIKE%',
                 needs_value: true
             },
             doesntEndWith: {
-                label: 'does not end with',
+                label: 'analysis.comparisons.label.not-ends-with',
                 comp: '%NOT ILIKE',
                 needs_value: true
             },
             contains: {
-                label: 'contains',
+                label: 'analysis.comparisons.label.contains',
                 comp: '%ILIKE%',
                 needs_value: true
             },
             doesntContain: {
-                label: 'does not contain',
+                label: 'analysis.comparisons.label.not-contains',
                 comp: '%NOT ILIKE%',
                 needs_value: true
             },
             is: {
-                label: 'exists',
+                label: 'analysis.comparisons.label.exists',
                 comp: 'IS NOT NULL'
             },
             isNull: {
-                label: 'does not exist',
+                label: 'analysis.comparisons.label.not-exists',
                 comp: 'IS NULL'
             },
             lessThan: {
-                label: 'less than',
+                label: 'analysis.comparisons.label.less-than',
                 comp: '<',
                 needs_value: true
             },
             lessOrEqual: {
-                label: 'less or equal to',
+                label: 'analysis.comparisons.label.less-than-or-equal',
                 comp: '<=',
                 needs_value: true
             },
             greaterThan: {
-                label: 'greater than',
+                label: 'analysis.comparisons.label.greater-than',
                 comp: '>',
                 needs_value: true
             },
             greaterOrEqual: {
-                label: 'greater or equal to',
+                label: 'analysis.comparisons.label.greater-than-or-equal',
                 comp: '>=',
                 needs_value: true
             },
             equals: {
-                label: 'equals',
+                label: 'analysis.comparisons.label.equals',
                 comp: '=',
                 needs_value: true
             },
             notEquals: {
-                label: 'equals not',
+                label: 'analysis.comparisons.label.not-equals',
                 comp: '!=',
                 needs_value: true
             },
             between: {
-                label: 'between',
+                label: 'analysis.comparisons.label.between',
                 comp: 'BETWEEN',
                 needs_value: true
             },
             notBetween: {
-                label: 'not between',
+                label: 'analysis.comparisons.label.not-between',
                 comp: 'NOT BETWEEN',
                 needs_value: true
             },
             in: {
-                label: 'is in',
+                label: 'analysis.comparisons.label.in',
                 comp: 'IN',
                 needs_value: true
             },
             notIn: {
-                label: 'is not in',
+                label: 'analysis.comparisons.label.not-in',
                 comp: 'NOT IN',
                 needs_value: true
             },
             comesBefore: {
-                label: 'comes before',
+                label: 'analysis.comparisons.label.comes-before',
                 comp: '<',
                 needs_value: true
             },
             comesAfter: {
-                label: 'comes after',
+                label: 'analysis.comparisons.label.comes-after',
                 comp: '>',
                 needs_value: true
             },
@@ -460,17 +475,50 @@ spacialistApp.component('analysis', {
         };
 
         vm.availableVisualizations = [
-            'scatter',
-            'line',
-            'bar',
-            'pie',
-            'histogram',
-            'histogram2d',
-            'ternary',
-            'ternarycontour',
-            'heatmap',
-            'windrose',
-            'radar'
+            {
+                label: 'analysis.results.tabs.visualization.type.scatter',
+                type: 'scatter'
+            },
+            {
+                label: 'analysis.results.tabs.visualization.type.line',
+                type: 'line'
+            },
+            {
+                label: 'analysis.results.tabs.visualization.type.bar',
+                type: 'bar'
+            },
+            {
+                label: 'analysis.results.tabs.visualization.type.pie',
+                type: 'pie'
+            },
+            {
+                label: 'analysis.results.tabs.visualization.type.histogram',
+                type: 'histogram'
+            },
+            {
+                label: 'analysis.results.tabs.visualization.type.histogram2d',
+                type: 'histogram2d'
+            },
+            {
+                label: 'analysis.results.tabs.visualization.type.ternary',
+                type: 'ternary'
+            },
+            {
+                label: 'analysis.results.tabs.visualization.type.ternarycontour',
+                type: 'ternarycontour'
+            },
+            {
+                label: 'analysis.results.tabs.visualization.type.heatmap',
+                type: 'heatmap'
+            },
+            {
+                label: 'analysis.results.tabs.visualization.type.windrose',
+                type: 'windrose'
+            },
+            {
+                label: 'analysis.results.tabs.visualization.type.radar',
+                type: 'radar'
+            }
         ]
 
         vm.expertMode = false;
@@ -742,7 +790,7 @@ spacialistApp.component('analysis', {
             }
             var formData = new FormData();
             formData.append('filters', angular.toJson(vm.filters));
-            formData.append('origin', vm.origin);
+            formData.append('origin', vm.origin.name);
             formData.append('columns', angular.toJson(vm.columns));
             formData.append('orders', angular.toJson(vm.orders));
             formData.append('limit', angular.toJson(vm.limit));

@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label class="control-label col-md-3">X-Column</label>
+    <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.x-column"></label>
     <div class="col-md-9">
         <ui-select ng-model="$ctrl.vis.x" on-select="$ctrl.vis.histogram.selectX()">
             <ui-select-match allow-clear="false">
@@ -20,13 +20,13 @@
     </div>
 </div>
 <div class="form-group">
-    <label class="control-label col-md-3">Horizontal</label>
+    <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.histogram.horizontal"></label>
     <div class="col-md-9">
         <input type="checkbox" class="form-control" ng-model="$ctrl.vis.histogram.horizontal" />
     </div>
 </div>
 <div class="form-group">
-    <label class="control-label col-md-3">Type</label>
+    <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.histogram.type"></label>
     <div class="col-md-9">
         <ui-select ng-model="$ctrl.vis.subtype">
             <ui-select-match allow-clear="false">
@@ -39,26 +39,26 @@
     </div>
 </div>
 <div class="form-group">
-    <label class="control-label col-md-3">Auto Bins</label>
+    <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.histogram.auto-bins"></label>
     <div class="col-md-9">
         <input type="checkbox" class="form-control" ng-model="$ctrl.vis.histogram.auto_bins" />
     </div>
 </div>
 <div ng-show="!$ctrl.vis.histogram.auto_bins">
     <div class="form-group">
-        <label class="control-label col-md-3">Start</label>
+        <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.histogram.auto-bins.start"></label>
         <div class="col-md-9">
             <input type="number" class="form-control" step="0.00001" ng-model="$ctrl.vis.histogram.start" />
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-md-3">End</label>
+        <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.histogram.auto-bins.end"></label>
         <div class="col-md-9">
             <input type="number" class="form-control" step="0.00001" ng-model="$ctrl.vis.histogram.end" />
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-md-3">Size</label>
+        <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.histogram.auto-bins.size"></label>
         <div class="col-md-9">
             <input type="number" class="form-control" min="0" step="0.00001" ng-model="$ctrl.vis.histogram.size" />
         </div>
