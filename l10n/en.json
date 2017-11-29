@@ -14,6 +14,7 @@
     "context-form.fields.open-map": "Open Map",
     "context-form.fields.placeholder-context": "Search for Contexts",
     "map-placer-popup.title": "Draw location marker on map",
+    "map-modal.title": "Geometry location",
     "context-form.confirm-discard": "There are unsaved changes. Do you really want to discard these changes?",
     "context-form.tabs.map": "Map",
     "context-form.tabs.further-properties": "Further Properties",

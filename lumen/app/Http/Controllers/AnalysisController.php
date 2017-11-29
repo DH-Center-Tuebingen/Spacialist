@@ -148,7 +148,10 @@ class AnalysisController extends Controller {
                             } else if(isset($r->pivot->dt_val)) {
                                 $value = $r->pivot->dt_val;
                             } else if(isset($r->pivot->geography_val)) {
-                                $value = Geometry::fromWKB($r->pivot->geography_val)->toWKT();
+                                $value = [
+                                    'wkt' => Geometry::fromWKB($r->pivot->geography_val)->toWKT(),
+                                    'geom' => Geometry::fromWKB($r->pivot->geography_val)
+                                ];
                             }
                             $type = $r->datatype;
                         }
@@ -168,7 +171,10 @@ class AnalysisController extends Controller {
                         } else if(isset($rel->pivot->dt_val)) {
                             $value = $rel->pivot->dt_val;
                         } else if(isset($r->pivot->geography_val)) {
-                            $value = Geometry::fromWKB($rel->pivot->geography_val)->toWKT();
+                            $value = [
+                                'wkt' => Geometry::fromWKB($rel->pivot->geography_val)->toWKT(),
+                                'geom' => Geometry::fromWKB($rel->pivot->geography_val)
+                            ];
                         }
                         $type = $rel->datatype;
                     }

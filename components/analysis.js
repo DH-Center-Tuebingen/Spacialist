@@ -7,7 +7,7 @@ spacialistApp.component('analysis', {
         tags: '<'
     },
     templateUrl: 'templates/analysis.html',
-    controller: function(httpPostFactory) {
+    controller: function(httpPostFactory, $uibModal) {
         var vm = this;
 
         vm.defaultVisLayout = {
@@ -1329,6 +1329,54 @@ spacialistApp.component('analysis', {
                      sf.geoArea
                  ];
             }
+        };
+
+        vm.openGeographyModal = function(geom) {
+            console.log(geom);
+            var featureGroup = new L.FeatureGroup();
+            var feature = {
+                type: 'Feature',
+                id: 1,
+                geometry: geom
+            };
+
+            var bounds = {
+                northEast: {lat: 90, lng: -180},
+                southWest: {lat: -90, lng: 180}
+            };
+            var geojson = {
+                data: {
+                    type: 'FeatureCollection',
+                    features: []
+                },
+                pointToLayer: function(feature, latlng) {
+                    return L.circleMarker(latlng);
+                },
+                onEachFeature: function(feature, layer) {
+                    featureGroup.addLayer(layer);
+                    var newBounds = featureGroup.getBounds();
+                    var newNE = newBounds.getNorthEast();
+                    var newSW = newBounds.getSouthWest();
+                    bounds.northEast.lat = newNE.lat;
+                    bounds.northEast.lng = newNE.lng;
+                    bounds.southWest.lat = newSW.lat;
+                    bounds.southWest.lng = newSW.lng;
+                }
+            };
+            geojson.data.features.push(feature);
+            var modalInstance = $uibModal.open({
+                templateUrl: 'layouts/map-modal.html',
+                windowClass: 'wide-modal',
+                controller: function($uibModalInstance) {
+                    this.bounds = bounds;
+                    this.geojson = geojson;
+                    this.cancel = function(result) {
+                        $uibModalInstance.dismiss('cancel');
+                    };
+                },
+                controllerAs: '$ctrl'
+            });
+            modalInstance.result.then(function(selectedItem) {}, function() {});
         };
     }
 });

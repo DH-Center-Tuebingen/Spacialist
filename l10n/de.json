@@ -14,6 +14,7 @@
     "context-form.fields.open-map": "Karte öffnen",
     "context-form.fields.placeholder-context": "Nach Kontexten suchen",
     "map-placer-popup.title": "Markierung auf die Karte zeichnen",
+    "map-modal.title": "Geodaten-Vorschau",
     "context-form.confirm-discard": "Es sind noch ungespeicherte Daten vorhanden. Möchten Sie die Änderungen verwerfen?",
     "context-form.tabs.map": "Karte",
     "context-form.tabs.further-properties": "Weitere Eigenschaften",

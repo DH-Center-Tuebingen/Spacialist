@@ -1,7 +1,7 @@
 <tr ng-repeat="r in $ctrl.combinedResults">
     <td ng-show="$ctrl.showAmbiguous">
         {{ r.geowkt }}
-        <a href="" ng-click="">
+        <a href="" ng-click="$ctrl.openGeographyModal(r.geom)">
             <i class="material-icons md-14">place</i>
         </a>
     </td>

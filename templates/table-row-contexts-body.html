@@ -16,14 +16,26 @@
         </ul>
     </td>
     <td ng-repeat="(k, value) in $ctrl.splitResults">
-        {{ $ctrl.concepts[value[$parent.$index]].label || value[$parent.$index] }}
-        <a ng-if="$ctrl.splitType[k] == 'geography' && value[$parent.$index]" href="" ng-click="">
-            <i class="material-icons md-14">place</i>
-        </a>
+        <div ng-switch="$ctrl.splitType[k]">
+            <span ng-switch-when="string-sc">
+                {{ $ctrl.concepts[value[$parent.$parent.$index]].label}}
+            </span>
+            <span ng-switch-when="geography">
+                {{ value[$parent.$parent.$index].wkt }}
+                <a ng-if="value[$parent.$parent.$index]" href="" ng-click="$ctrl.openGeographyModal(value[$parent.$parent.$parent.$index].geom)">
+                    <i class="material-icons md-14">place</i>
+                </a>
+            </span>
+            <span ng-switch-default>
+                {{ value[$parent.$parent.$index] }}
+            </span>
+        </div>
+
+
     </td>
     <td ng-show="$ctrl.showAmbiguous">
         {{ r.geodata.wkt }}
-        <a ng-if="r.geodata.wkt" href="" ng-click="">
+        <a ng-if="r.geodata.wkt" href="" ng-click="$ctrl.openGeographyModal(r.geodata.geom)">
             <i class="material-icons md-14">place</i>
         </a>
     </td>
