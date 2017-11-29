@@ -1,6 +1,9 @@
 <tr ng-repeat="r in $ctrl.combinedResults">
     <td ng-show="$ctrl.showAmbiguous">
-        {{ r.geom.type }}: {{ r.geom.coordinates }}
+        {{ r.geowkt }}
+        <a href="" ng-click="">
+            <i class="material-icons md-14">place</i>
+        </a>
     </td>
     <td ng-show="$ctrl.showAmbiguous">
         {{ r.context.name }}

@@ -11,6 +11,7 @@ use App\File;
 use App\Geodata;
 use App\Literature;
 use App\Helpers;
+use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
 use \DB;
 use Illuminate\Http\Request;
@@ -79,6 +80,18 @@ class AnalysisController extends Controller {
 
         $splitArray = $this->addRelationSplits($rows, $splits);
 
+        if($origin === 'contexts') {
+            foreach($rows as $r) {
+                if(isset($r->geodata)) {
+                    $r->geodata['wkt'] = $r->geodata->geom->toWKT();
+                }
+            }
+        } else if($origin === 'geodata') {
+            foreach($rows as &$r) {
+                $r->geowkt = $r->geom->toWKT();
+            }
+        }
+
         $result = [
             'count' => $count,
             'rows' => $rows,
@@ -134,7 +147,10 @@ class AnalysisController extends Controller {
                                 $value = $r->pivot->thesaurus_val;
                             } else if(isset($r->pivot->dt_val)) {
                                 $value = $r->pivot->dt_val;
+                            } else if(isset($r->pivot->geography_val)) {
+                                $value = Geometry::fromWKB($r->pivot->geography_val)->toWKT();
                             }
+                            $type = $r->datatype;
                         }
                     }
                     // otherwise, should be object
@@ -151,7 +167,10 @@ class AnalysisController extends Controller {
                             $value = $rel->pivot->thesaurus_val;
                         } else if(isset($rel->pivot->dt_val)) {
                             $value = $rel->pivot->dt_val;
+                        } else if(isset($r->pivot->geography_val)) {
+                            $value = Geometry::fromWKB($rel->pivot->geography_val)->toWKT();
                         }
+                        $type = $rel->datatype;
                     }
                 } else {
                     // should not happen ;)
@@ -172,7 +191,10 @@ class AnalysisController extends Controller {
                     $relName .= " ($hits)";
                 }
             }
-            $splitArray[$relName] = $curr;
+            $splitArray[$relName] = [
+                'values' => $curr,
+                'type'   => $type
+            ];
         }
 
         return $splitArray;

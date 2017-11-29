@@ -22,6 +22,7 @@ spacialistApp.component('analysis', {
         vm.visualizationResults = [];
         vm.combinedResults = [];
         vm.splitResults = {};
+        vm.splitType = {};
         vm.query = '';
         vm.vis = {
             type: '',
@@ -677,6 +678,7 @@ spacialistApp.component('analysis', {
                 case 'integer':
                 case 'boolean':
                 case 'percentage':
+                case 'geography':
                     return true;
                 default:
                     return false;
@@ -845,6 +847,7 @@ spacialistApp.component('analysis', {
                 vm.results.length = 0;
                 vm.combinedResults.length = 0;
                 resetObject(vm.splitResults);
+                resetObject(vm.splitType);
                 var res;
                 if(response.rows.length > 0) {
                     vm.availableColumns.length = 0;
@@ -869,7 +872,8 @@ spacialistApp.component('analysis', {
                         }
                         for(var k in response.splits) {
                             if(response.splits.hasOwnProperty(k)) {
-                                vm.splitResults[k] = response.splits[k];
+                                vm.splitResults[k] = response.splits[k].values;
+                                vm.splitType[k] = response.splits[k].type;
                             }
                         }
                     }
