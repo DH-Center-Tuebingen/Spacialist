@@ -421,8 +421,8 @@
     "analysis.comparisons.label.not-equals": "Does not equal",
     "analysis.comparisons.label.between": "Between",
     "analysis.comparisons.label.not-between": "Is not between",
-    "analysis.comparisons.label.in": "Is in",
-    "analysis.comparisons.label.not-in": "Is not in",
+    "analysis.comparisons.label.in": "Is one of",
+    "analysis.comparisons.label.not-in": "Is none of",
     "analysis.comparisons.label.comes-before": "Comes before",
     "analysis.comparisons.label.comes-after": "Comes after",
 

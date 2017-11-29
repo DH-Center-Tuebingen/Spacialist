@@ -65,9 +65,9 @@
         </div>
         <div class="form-group" ng-if="$ctrl.selectedComp.needs_value">
             <label class="control-label col-md-2" translate="analysis.popup.comparison-value"></label>:
-            <div class="col-md-10">
+            <div class="col-md-10" ng-if="$ctrl.selectedComp.id != 'between' && $ctrl.selectedComp.id != 'not_between' && $ctrl.selectedComp.id != 'in' && $ctrl.selectedComp.id != 'not_in'">
                 <input type="text" class="form-control" ng-if="$ctrl.selectedType == 'string'" ng-model="$ctrl.selectedComp_value" />
-                <input type="number" step="1" class="form-control" ng-if="$ctrl.selectedType == 'integer' || $ctrl.selectedType == 'count'" ng-model="$ctrl.selectedComp_value" />
+                <input type="number" step="1" class="form-control" ng-if="$ctrl.selectedType == 'integer' || $ctrl.selectedType == 'double' || $ctrl.selectedType == 'count'" ng-model="$ctrl.selectedComp_value" />
                 <div ng-if="$ctrl.selectedType == 'percentage'">
                     <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.selectedComp_value" />
                     <span class="slider-text">{{ $ctrl.selectedComp_value }}%</span>
@@ -104,12 +104,59 @@
                     </ui-select-choices>
                 </ui-select>
             </div>
+            <div class="col-md-10" ng-if="$ctrl.selectedComp.id == 'between' || $ctrl.selectedComp.id == 'not_between'">
+                From: <input type="number" step="1" class="form-control" ng-if="$ctrl.selectedType == 'integer' || $ctrl.selectedType == 'double'" ng-model="$ctrl.selectedComp_value[0]" />
+                <div ng-if="$ctrl.selectedType == 'percentage'">
+                    <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.selectedComp_value[0]" />
+                    <span class="slider-text">{{ $ctrl.selectedComp_value[0] }}%</span>
+                </div>
+                <input type="color" class="form-control" ng-if="$ctrl.selectedType == 'color'" ng-model="$ctrl.selectedComp_value[0]" />
+                <div ng-if="$ctrl.selectedType == 'date'">
+                    <input type="text" class="form-control" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" is-open="opened" close-text="{{ 'close' | translate }}" ng-model="$ctrl.selectedComp_value[0]"  ng-model-options="{timezone:'utc'}" />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-init="opened=false" ng-click="opened=!opened"><i class="material-icons">event</i></button>
+                    </span>
+                </div>
+                To: <input type="number" step="1" class="form-control" ng-if="$ctrl.selectedType == 'integer' || $ctrl.selectedType == 'double'" ng-model="$ctrl.selectedComp_value[1]" />
+                <div ng-if="$ctrl.selectedType == 'percentage'">
+                    <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.selectedComp_value[1]" />
+                    <span class="slider-text">{{ $ctrl.selectedComp_value[1] }}%</span>
+                </div>
+                <input type="color" class="form-control" ng-if="$ctrl.selectedType == 'color'" ng-model="$ctrl.selectedComp_value[1]" />
+                <div ng-if="$ctrl.selectedType == 'date'">
+                    <input type="text" class="form-control" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" is-open="opened" close-text="{{ 'close' | translate }}" ng-model="$ctrl.selectedComp_value[1]"  ng-model-options="{timezone:'utc'}" />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-init="opened=false" ng-click="opened=!opened"><i class="material-icons">event</i></button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-10" ng-if="$ctrl.selectedComp.id == 'in' || $ctrl.selectedComp.id == 'not_in'" ng-init="$ctrl.selectedComp_value = []">
+                <ul>
+                    <li ng-repeat="part in $ctrl.selectedComp_value">
+                        {{ part }}
+                    </li>
+                </ul>
+                <input type="text" class="form-control" ng-if="$ctrl.selectedType == 'string'" ng-model="$ctrl.tmpInValue" />
+                <input type="number" step="1" class="form-control" ng-if="$ctrl.selectedType == 'integer' || $ctrl.selectedType == 'double' || $ctrl.selectedType == 'count'" ng-model="$ctrl.tmpInValue" />
+                <div ng-if="$ctrl.selectedType == 'percentage'">
+                    <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.tmpInValue" />
+                    <span class="slider-text">{{ $ctrl.tmpInValue }}%</span>
+                </div>
+                <input type="color" class="form-control" ng-if="$ctrl.selectedType == 'color'" ng-model="$ctrl.tmpInValue" />
+                <div ng-if="$ctrl.selectedType == 'date'">
+                    <input type="text" class="form-control" uib-datepicker-popup="{{ 'date_format_lg' | translate }}" is-open="opened" close-text="{{ 'close' | translate }}" ng-model="$ctrl.tmpInValue"  ng-model-options="{timezone:'utc'}" />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-init="opened=false" ng-click="opened=!opened"><i class="material-icons">event</i></button>
+                    </span>
+                </div>
+                <button type="button" class="btn btn-primary" ng-click="$ctrl.selectedComp_value.push($ctrl.tmpInValue)">Add</button>
+            </div>
         </div>
         <div class="flex-hr-center">
-            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, true, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
+            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, true, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
                 <span translate="analysis.and-button"></span>
             </button>
-            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp.comp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, false, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
+            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, false, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
                 <span translate="analysis.or-button"></span>
             </button>
         </div>

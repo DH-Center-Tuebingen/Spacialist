@@ -354,99 +354,119 @@ spacialistApp.component('analysis', {
         vm.simpleComps = {
             beginsWith: {
                 label: 'analysis.comparisons.label.begins-with',
+                id: 'begins_with',
                 comp: 'ILIKE%',
                 needs_value: true
             },
             endsWith: {
                 label: 'analysis.comparisons.label.ends-with',
+                id: 'ends_with',
                 comp: '%ILIKE',
                 needs_value: true
             },
             doesntBeginWith: {
                 label: 'analysis.comparisons.label.not-begins-with',
+                id: 'doesnt_begin_with',
                 comp: 'NOT ILIKE%',
                 needs_value: true
             },
             doesntEndWith: {
                 label: 'analysis.comparisons.label.not-ends-with',
+                id: 'doesnt_end_with',
                 comp: '%NOT ILIKE',
                 needs_value: true
             },
             contains: {
                 label: 'analysis.comparisons.label.contains',
+                id: 'containts',
                 comp: '%ILIKE%',
                 needs_value: true
             },
             doesntContain: {
                 label: 'analysis.comparisons.label.not-contains',
+                id: 'doesnt_contain',
                 comp: '%NOT ILIKE%',
                 needs_value: true
             },
             is: {
                 label: 'analysis.comparisons.label.exists',
+                id: 'is',
                 comp: 'IS NOT NULL'
             },
             isNull: {
                 label: 'analysis.comparisons.label.not-exists',
+                id: 'is_not',
                 comp: 'IS NULL'
             },
             lessThan: {
                 label: 'analysis.comparisons.label.less-than',
+                id: 'less_than',
                 comp: '<',
                 needs_value: true
             },
             lessOrEqual: {
                 label: 'analysis.comparisons.label.less-than-or-equal',
+                id: 'less_than_equal',
                 comp: '<=',
                 needs_value: true
             },
             greaterThan: {
                 label: 'analysis.comparisons.label.greater-than',
+                id: 'greater_than',
                 comp: '>',
                 needs_value: true
             },
             greaterOrEqual: {
                 label: 'analysis.comparisons.label.greater-than-or-equal',
+                id: 'greater_than_equal',
                 comp: '>=',
                 needs_value: true
             },
             equals: {
                 label: 'analysis.comparisons.label.equals',
+                id: 'equals',
                 comp: '=',
                 needs_value: true
             },
             notEquals: {
                 label: 'analysis.comparisons.label.not-equals',
+                id: 'doesnt_equal',
                 comp: '!=',
                 needs_value: true
             },
             between: {
                 label: 'analysis.comparisons.label.between',
+                id: 'between',
                 comp: 'BETWEEN',
                 needs_value: true
             },
             notBetween: {
                 label: 'analysis.comparisons.label.not-between',
+                id: 'not_between',
                 comp: 'NOT BETWEEN',
                 needs_value: true
             },
             in: {
                 label: 'analysis.comparisons.label.in',
+                id: 'in',
                 comp: 'IN',
                 needs_value: true
             },
             notIn: {
                 label: 'analysis.comparisons.label.not-in',
+                id: 'not_in',
                 comp: 'NOT IN',
                 needs_value: true
             },
             comesBefore: {
                 label: 'analysis.comparisons.label.comes-before',
+                id: 'comes_before',
                 comp: '<',
                 needs_value: true
             },
             comesAfter: {
                 label: 'analysis.comparisons.label.comes-after',
+                id: 'comes_after',
                 comp: '>',
                 needs_value: true
             },
@@ -710,6 +730,23 @@ spacialistApp.component('analysis', {
         }
 
         vm.addFilter = function(col, comp, comp_value, func, func_values, and, relation) {
+            if(typeof comp == 'object') {
+                // if comparison is * between, convert object to array
+                // because they are stored as object on JS side
+                switch(comp.id) {
+                    case 'between':
+                    case 'not_between':
+                        var newValues = [];
+                        for(var k in comp_value) {
+                            if(comp_value.hasOwnProperty(k)) {
+                                newValues.push(comp_value[k]);
+                            }
+                        }
+                        comp_value = newValues;
+                        break;
+                }
+                comp = comp.comp;
+            }
             var adjusted = vm.adjustFilterValues(relation, col, comp, comp_value);
             if(!adjusted) {
                 col = vm.getOriginalColumnName(col);
@@ -1166,6 +1203,7 @@ spacialistApp.component('analysis', {
             if(vm.datatypeColumns) vm.datatypeColumns.length = 0;
             if(vm.comps) vm.comps.length = 0;
             if(vm.selectedComps) vm.selectedComps.length = 0;
+            if(vm.functionColumns) vm.functionColumns.length = 0;
             vm.comp = undefined;
             vm.selectedColumn = undefined;
             vm.selectedFunc = undefined;
@@ -1216,11 +1254,7 @@ spacialistApp.component('analysis', {
                         sc.greaterThan,
                         sc.greaterOrEqual,
                         sc.equals,
-                        sc.notEquals,
-                        sc.between,
-                        sc.notBetween,
-                        sc.in,
-                        sc.notIn,
+                        sc.notEquals
                     ];
                 case 'boolean':
                     return [

@@ -432,8 +432,8 @@
     "analysis.comparisons.label.not-equals": "ist nicht gleich",
     "analysis.comparisons.label.between": "zwischen",
     "analysis.comparisons.label.not-between": "nicht zwischen",
-    "analysis.comparisons.label.in": "in",
-    "analysis.comparisons.label.not-in": "nicht in",
+    "analysis.comparisons.label.in": "Eins von",
+    "analysis.comparisons.label.not-in": "Keins von",
     "analysis.comparisons.label.comes-before": "Kommt vor",
     "analysis.comparisons.label.comes-after": "Kommt nach",
 
