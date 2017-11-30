@@ -33,15 +33,23 @@
                         </div>
                     </form>
                 </li>
-                <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
-                    <a href="db" target="_blank">
-                        <i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} <sup class="material-icons md-14">open_in_new</sup>
+                <li class="dropdown" uib-dropdown>
+                    <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <i class="material-icons">poll</i>
+                        {{'main.menu.data-analysis'|translate}} <i class="material-icons">arrow_drop_down</i>
                     </a>
-                </li>
-                <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
-                    <a ui-sref="root.analysis">
-                        <i class="material-icons">poll</i> {{ 'main.menu.data-analysis' | translate }} (Internal)
-                    </a>
+                    <ul class="dropdown-menu" uib-dropdown-menu>
+                        <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
+                            <a href="db" target="_blank">
+                                {{ 'main.menu.data-analysis.dbwebgen' | translate }} <sup class="material-icons md-14">open_in_new</sup>
+                            </a>
+                        </li>
+                        <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
+                            <a ui-sref="root.analysis">
+                                {{ 'main.menu.data-analysis.internal' | translate }}
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li ng-if="$ctrl.user.permissions.edit_literature && $ctrl.userConfig['prefs.load-extensions'].value.bibliography">
                     <a ui-sref="root.bibliography">
