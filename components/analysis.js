@@ -947,6 +947,27 @@ spacialistApp.component('analysis', {
             return k;
         };
 
+        vm.noPrevPage = function() {
+            return vm.limit.from <= 0;
+        };
+
+        vm.showPreviousResults = function() {
+            if(vm.noPrevPage()) return;
+            var newOffset = Math.max(0, vm.limit.from-vm.limit.amount);
+            vm.limit.from = newOffset;
+            vm.filter();
+        };
+
+        vm.noNextPage = function() {
+            return vm.limit.from + vm.limit.amount >= vm.resultCount;
+        };
+
+        vm.showNextResults = function() {
+            if(vm.noNextPage()) return;
+            vm.limit.from += vm.limit.amount;
+            vm.filter();
+        };
+
         vm.countResults = function() {
             if(vm.expertMode) {
                 return vm.results.length;

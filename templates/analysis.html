@@ -181,6 +181,20 @@
         </p>
         <div ng-if="$ctrl.hasResults()">
             <h2><span translate="analysis.results.heading"></span> <span class="badge">{{ $ctrl.countResults() }}/{{ $ctrl.resultCount }}</span></h2>
+            <nav ng-if="!$ctrl.expertMode">
+                <ul class="pager left">
+                    <li>
+                        <a href="" ng-click="$ctrl.showPreviousResults()" ng-class="{'disabled-pagination': $ctrl.noPrevPage()}">
+                            <i class="material-icons md-18">arrow_back</i> Previous {{ $ctrl.limit.amount}} results
+                        </a>
+                    </li>
+                    <li>
+                        <a href="" ng-click="$ctrl.showNextResults()" ng-class="{'disabled-pagination': $ctrl.noNextPage()}">
+                            Next {{ $ctrl.limit.amount}} results <i class="material-icons md-18">arrow_forward</i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
             <ul class="nav nav-tabs">
                 <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'raw'}" ng-if="$ctrl.expertMode">
                     <a ng-click="$ctrl.activeResultTab = 'raw'">

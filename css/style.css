@@ -70,10 +70,6 @@ a.toggle {
     width: auto;
 }
 
-.nav-left {
-    text-align: left;
-}
-
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
 .nav-undecorated, .nav-undecorated > li {
@@ -558,8 +554,12 @@ div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
     cursor: zoom-in;
 }
 
-.disabled {
+.disabled, .disabled-pagination {
     cursor: not-allowed;
+}
+
+.disabled-pagination {
+    opacity: 0.5;
 }
 
 @media(max-width:767px){
