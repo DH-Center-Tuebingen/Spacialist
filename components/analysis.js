@@ -7,7 +7,7 @@ spacialistApp.component('analysis', {
         tags: '<'
     },
     templateUrl: 'templates/analysis.html',
-    controller: function(httpPostFactory, $uibModal) {
+    controller: function(httpPostFactory, $uibModal, leafletBoundsHelpers) {
         var vm = this;
 
         vm.defaultVisLayout = {
@@ -1332,7 +1332,6 @@ spacialistApp.component('analysis', {
         };
 
         vm.openGeographyModal = function(geom) {
-            console.log(geom);
             var featureGroup = new L.FeatureGroup();
             var feature = {
                 type: 'Feature',
@@ -1340,10 +1339,11 @@ spacialistApp.component('analysis', {
                 geometry: geom
             };
 
-            var bounds = {
-                northEast: {lat: 90, lng: -180},
-                southWest: {lat: -90, lng: 180}
-            };
+            var bounds = leafletBoundsHelpers.createBoundsFromArray([
+                [-90, 180],
+                [90, -180]
+            ]);
+
             var geojson = {
                 data: {
                     type: 'FeatureCollection',
@@ -1368,9 +1368,11 @@ spacialistApp.component('analysis', {
                 templateUrl: 'layouts/map-modal.html',
                 windowClass: 'wide-modal',
                 controller: function($uibModalInstance) {
-                    this.bounds = bounds;
-                    this.geojson = geojson;
-                    this.cancel = function(result) {
+                    var vm = this;
+
+                    vm.bounds = bounds;
+                    vm.geojson = geojson;
+                    vm.cancel = function(result) {
                         $uibModalInstance.dismiss('cancel');
                     };
                 },
