@@ -2,21 +2,126 @@
     <h3 translate="gis.properties.header" translate-values="{ layer: $ctrl.layerName }"></h3>
 </div>
 <div class="modal-body row">
-    <div class="col-md-2">
+    <div class="col-md-2" ng-init="$ctrl.activePropertyTab = 'style'">
         <ul class="nav nav-pills nav-stacked nav-left">
-            <li class="active">
-                <a href=""><i class="material-icons">format_paint</i> {{'gis.properties.style'|translate}}</a>
+            <li role="presentation" ng-class="{ 'active': $ctrl.activePropertyTab == 'style'}">
+                <a href="" ng-click="$ctrl.activePropertyTab = 'style'">
+                    <i class="material-icons">format_paint</i> {{'gis.properties.style'|translate}}
+                </a>
             </li>
-            <li>
-                <a href=""><i class="material-icons">label</i> {{'gis.properties.labels'|translate}}</a>
+            <li role="presentation" ng-class="{ 'active': $ctrl.activePropertyTab == 'labels'}">
+                <a href="" ng-click="$ctrl.activePropertyTab = 'labels'">
+                    <i class="material-icons">label</i> {{'gis.properties.labels'|translate}}
+                </a>
             </li>
-            <li>
-                <a href=""><i class="material-icons">insert_chart</i> {{'gis.properties.diagrams'|translate}}</a>
+            <li role="presentation" ng-class="{ 'active': $ctrl.activePropertyTab == 'diagrams'}">
+                <a href="" ng-click="$ctrl.activePropertyTab = 'diagrams'">
+                    <i class="material-icons">insert_chart</i> {{'gis.properties.diagrams'|translate}}
+                </a>
             </li>
         </ul>
     </div>
     <div class="col-md-10">
-
+        <div ng-show="$ctrl.activePropertyTab == 'style'">
+            <h2>Style</h2>
+        </div>
+        <div ng-show="$ctrl.activePropertyTab == 'labels'">
+            <h5>Beschriftung <small>
+                <a href="" ng-click="$ctrl.toggleForm('label')">
+                    <i class="material-icons" ng-show="$ctrl.formShown['label']">arrow_drop_up</i>
+                    <i class="material-icons" ng-show="!$ctrl.formShown['label']">arrow_drop_down</i>
+                </a>
+            </small></h5>
+            <form class="form-horizontal" ng-show="$ctrl.formShown['label']">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Attribut</label>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" />
+                    </div>
+                </div>
+            </form>
+            <h5>Schrift <small>
+                <a href="" ng-click="$ctrl.toggleForm('font')">
+                    <i class="material-icons" ng-show="$ctrl.formShown['font']">arrow_drop_up</i>
+                    <i class="material-icons" ng-show="!$ctrl.formShown['font']">arrow_drop_down</i>
+                </a>
+            </small></h5>
+            <form class="form-horizontal" ng-show="$ctrl.formShown['font']">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Attribut</label>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" />
+                    </div>
+                </div>
+            </form>
+            <h5>Puffer <small>
+                <a href="" ng-click="$ctrl.toggleForm('buffer')">
+                    <i class="material-icons" ng-show="$ctrl.formShown['buffer']">arrow_drop_up</i>
+                    <i class="material-icons" ng-show="!$ctrl.formShown['buffer']">arrow_drop_down</i>
+                </a>
+            </small></h5>
+            <form class="form-horizontal" ng-show="$ctrl.formShown['buffer']">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Puffer aktivieren</label>
+                    <div class="col-md-9">
+                        <input type="checkbox" class="form-control" ng-model="$ctrl.buffer.active" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Größe</label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.buffer.size" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Farbe</label>
+                    <div class="col-md-9">
+                        <input type="color" class="form-control" ng-model="$ctrl.buffer.color" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Transparenz</label>
+                    <div class="col-md-9">
+                        <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" id="a{{ attr.id }}" ng-model="$ctrl.buffer.transparency" />
+                        <span class="slider-text">{{ $ctrl.buffer.transparency }}%</span>
+                    </div>
+                </div>
+            </form>
+            <h5>Hintergrund <small>
+                <a href="" ng-click="$ctrl.toggleForm('background')">
+                    <i class="material-icons" ng-show="$ctrl.formShown['background']">arrow_drop_up</i>
+                    <i class="material-icons" ng-show="!$ctrl.formShown['background']">arrow_drop_down</i>
+                </a>
+            </small></h5>
+            <form class="form-horizontal" ng-show="$ctrl.formShown['background']">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Attribut</label>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" />
+                    </div>
+                </div>
+            </form>
+            <h5>Position <small>
+                <a href="" ng-click="$ctrl.toggleForm('position')">
+                    <i class="material-icons" ng-show="$ctrl.formShown['position']">arrow_drop_up</i>
+                    <i class="material-icons" ng-show="!$ctrl.formShown['position']">arrow_drop_down</i>
+                </a>
+            </small></h5>
+            <form class="form-horizontal" ng-show="$ctrl.formShown['position']">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Attribut</label>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" />
+                    </div>
+                </div>
+            </form>
+            <button type="button" class="btn btn-success" ng-click="$ctrl.applyStyleSettings()">
+                <i class="material-icons">refresh</i> Apply
+            </button>
+        </div>
+        <div ng-show="$ctrl.activePropertyTab == 'diagrams'">
+            <h2>Diagrams</h2>
+        </div>
     </div>
 </div>
 <div class="modal-footer">

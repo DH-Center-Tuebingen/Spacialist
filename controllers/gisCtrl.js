@@ -120,12 +120,62 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
             click: function($itemScope, $event, modelValue, text, $li) {
                 var l = $itemScope.l;
                 var concepts = vm.concepts;
+                var map = vm.map;
                 $uibModal.open({
                     templateUrl: "modals/gis-properties.html",
                     windowClass: 'wide-modal',
                     controller: ['$scope', function($scope) {
                         var vm = this;
 
+                        vm.label = {};
+                        vm.font = {};
+                        vm.buffer = {};
+                        vm.background = {};
+                        vm.position = {};
+
+                        vm.formShown = {
+                            label: true,
+                            font: false,
+                            buffer: false,
+                            background: false,
+                            position: false
+                        };
+
+                        vm.applyStyleSettings = function() {
+                            var tooltip = {};
+                            tooltip.permanent = true;
+                            tooltip.interactive = false;
+                            var isOneActive = false;
+                            if(vm.buffer.active) {
+                                vm.applyBuffer(tooltip);
+                                isOneActive = true;
+                            } else {
+                                vm.removeBuffer(tooltip);
+                            }
+
+                            var layers = vm.map.mapLayers[vm.layer.id].getLayers();
+                            for(var i=0; i<layers.length; i++) {
+                                var l = layers[i];
+                                l.bindTooltip("Foobar", tooltip);
+                            }
+                        };
+
+                        vm.applyBuffer = function(tooltip) {
+                            // if transparency is present, set opacity to 100%-transparency
+                            if($ctrl.buffer.transparency) {
+                                tooltip.opacity = 1 - $ctrl.buffer.transparency
+                            }
+                        };
+
+                        vm.removeBuffer = function(tooltip) {
+
+                        }
+
+                        vm.toggleForm = function(id) {
+                            vm.formShown[id] = !vm.formShown[id];
+                        };
+
+                        vm.map = map;
                         vm.layer = l;
                         vm.layerName = l.context_type_id ? concepts[l.thesaurus_url].label : l.name;
 
