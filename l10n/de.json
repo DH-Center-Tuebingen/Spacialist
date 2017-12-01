@@ -308,6 +308,7 @@
 
     "analysis.and-button": "UND",
     "analysis.or-button": "ODER",
+    "analysis.add-filter-button": "Filter hinzufügen",
     "analysis.query-options.heading": "Abfrage-Optionen",
     "analysis.query-options.further.heading": "Weitere Abfrage-Optionen",
     "analysis.query-options.order-rules.heading": "Aktive Sortierregeln",

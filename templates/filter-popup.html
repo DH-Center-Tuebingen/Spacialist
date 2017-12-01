@@ -52,11 +52,16 @@
             </div>
         </div>
         <div class="flex-hr-center">
-            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.func_values, true)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
-                <span translate="analysis.and-button"></span>
-            </button>
-            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.func_values, false)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
-                <span translate="analysis.or-button"></span>
+            <div ng-if="$ctrl.filters.length > 0">
+                <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.func_values, true)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
+                    <span translate="analysis.and-button"></span>
+                </button>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.func_values, false)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
+                    <span translate="analysis.or-button"></span>
+                </button>
+            </div>
+            <button type="button" class="btn btn-default" ng-if="$ctrl.filters.length == 0" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.func_values, true)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
+                <span translate="analysis.add-filter-button"></span>
             </button>
         </div>
     </form>

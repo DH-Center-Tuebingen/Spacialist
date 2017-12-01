@@ -297,6 +297,7 @@
 
     "analysis.and-button": "AND",
     "analysis.or-button": "OR",
+    "analysis.add-filter-button": "Add Filter",
     "analysis.query-options.heading": "Query Options",
     "analysis.query-options.further.heading": "Further Query Options",
     "analysis.query-options.order-rules.heading": "Active Order Rules",

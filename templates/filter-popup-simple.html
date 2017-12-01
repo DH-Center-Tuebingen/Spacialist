@@ -153,11 +153,16 @@
             </div>
         </div>
         <div class="flex-hr-center">
-            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, true, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
-                <span translate="analysis.and-button"></span>
-            </button>
-            <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, false, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
-                <span translate="analysis.or-button"></span>
+            <div ng-if="$ctrl.filters.length > 0">
+                <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, true, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
+                    <span translate="analysis.and-button"></span>
+                </button>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, false, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
+                    <span translate="analysis.or-button"></span>
+                </button>
+            </div>
+            <button type="button" class="btn btn-default" ng-if="$ctrl.filters.length == 0" ng-click="$ctrl.addFilter($ctrl.selectedColumn, $ctrl.selectedComp, $ctrl.selectedComp_value, $ctrl.selectedFunc.comp, $ctrl.selectedFunc_value, true, $ctrl.relation)" ng-disabled="(!$ctrl.selectedComp || ($ctrl.selectedComp.needs_value && !$ctrl.selectedComp_value)) && (!$ctrl.selectedFunc || ($ctrl.selectedFunc.needs_value && !$ctrl.selectedFunc_value))">
+                <span translate="analysis.add-filter-button"></span>
             </button>
         </div>
     </form>
