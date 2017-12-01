@@ -67,27 +67,29 @@
                                 </div>
                                 <div class="form-group label-floating">
                                     <label class="control-label" translate="tags.name"></label>
-                                    <ui-select multiple ng-disabled="readonlyInput" ng-model="search.terms.tags" close-on-select="false">
-                                        <ui-select-match>{{$item.label}}</ui-select-match>
-                                        <ui-select-choices repeat="choice in availableSearchTerms.tags | filter:$select.search">
-                                            {{choice.label}}
+                                    <ui-select multiple ng-disabled="readonlyInput" ng-model="$ctrl.selectedSearchTerms.tags" close-on-select="false">
+                                        <ui-select-match>
+                                            {{ $ctrl.concepts[$item.uri].label }}
+                                        </ui-select-match>
+                                        <ui-select-choices repeat="choice in $ctrl.availableSearchTerms.tags | filter:$select.search">
+                                            {{ $ctrl.concepts[choice.uri].label }}
                                         </ui-select-choices>
                                     </ui-select>
                                 </div>
                                 <div class="form-group label-floating">
                                     <label class="control-label" translate="files.properties.file.created"></label>
-                                    <ui-select multiple ng-disabled="readonlyInput" ng-model="search.terms.dates" close-on-select="false">
+                                    <ui-select multiple ng-disabled="readonlyInput" ng-model="$ctrl.selectedSearchTerms.dates" close-on-select="false">
                                         <ui-select-match>{{$item}}</ui-select-match>
-                                        <ui-select-choices repeat="choice in availableSearchTerms.dates | filter:$select.search">
+                                        <ui-select-choices repeat="choice in $ctrl.availableSearchTerms.dates | filter:$select.search">
                                             {{choice}}
                                         </ui-select-choices>
                                     </ui-select>
                                 </div>
                                 <div class="form-group label-floating">
                                     <label class="control-label" translate="files.properties.file.cameraname"></label>
-                                    <ui-select multiple ng-disabled="readonlyInput" ng-model="search.terms.cameras" close-on-select="false">
+                                    <ui-select multiple ng-disabled="readonlyInput" ng-model="$ctrl.selectedSearchTerms.cameras" close-on-select="false">
                                         <ui-select-match>{{$item}}</ui-select-match>
-                                        <ui-select-choices repeat="choice in availableSearchTerms.cameras | filter:$select.search">
+                                        <ui-select-choices repeat="choice in $ctrl.availableSearchTerms.cameras | filter:$select.search">
                                             {{choice}}
                                         </ui-select-choices>
                                     </ui-select>
@@ -102,7 +104,7 @@
                                     {{'context-form.tabs.files.linked'|translate}}
                                 </span>
                             </uib-accordion-heading>
-                            <file-list files="$ctrl.globalContext.linkedFiles" context-menu="$ctrl.fileContextMenu" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags"></file-list>
+                            <file-list files="$ctrl.globalContext.linkedFiles" context-menu="$ctrl.fileContextMenu" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags" search-terms="$ctrl.selectedSearchTerms"></file-list>
                         </div>
                         <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.newOpen">
                             <uib-accordion-heading>
@@ -136,7 +138,7 @@
                             <uib-accordion-heading>
                                 {{'context-form.tabs.files.all'|translate}}
                             </uib-accordion-heading>
-                            <file-list files="$ctrl.files" context-menu="$ctrl.fileContextMenu" concepts="$ctrl.concepts" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags"></file-list>
+                            <file-list files="$ctrl.files" context-menu="$ctrl.fileContextMenu" concepts="$ctrl.concepts" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags" search-terms="$ctrl.selectedSearchTerms"></file-list>
                         </div>
                     </uib-accordion>
                 </div>

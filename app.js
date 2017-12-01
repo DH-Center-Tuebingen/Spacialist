@@ -724,8 +724,24 @@ spacialistApp.directive("number", function() {
 spacialistApp.filter('fileFilter', function(searchService) {
     var foundAll = function(haystack, needle) {
         if(!needle || needle.length === 0) return true;
+        if(!haystack || haystack.length === 0) return false;
         return needle.every(function(v) {
-            return haystack.indexOf(v) >= 0;
+            // compare all own properties of haystack with the
+            // properties of needle and only return true if
+            // all are the same
+            for(var i=0; i<haystack.length; i++) {
+                var matches = true;
+                var h = haystack[i];
+                for(var k in h) {
+                    if(h.hasOwnProperty(k)) {
+                        if(!v[k] || v[k] != h[k]) {
+                            matches = false;
+                        }
+                    }
+                }
+                if(matches) return true;
+            }
+            return false;
         });
     };
 
@@ -1253,6 +1269,29 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     availableTags: function(fileService) {
                         return fileService.getAvailableTags();
+                    },
+                    availableSearchTerms: function(files, availableTags, searchService) {
+                         var searchTerms = {
+                             tags: availableTags,
+                             dates: [],
+                             cameras: []
+                         };
+                         for(var i=0; i<files.length; i++) {
+                             var f = files[i];
+                             // Add day of creation to search terms, if not yet added
+                             var createdDay = searchService.formatUnixDate(f.created*1000);
+                             if(searchTerms.dates.indexOf(createdDay) == -1) {
+                                 searchTerms.dates.push(createdDay);
+                             }
+                             // Add camera name search terms, if not yet added
+                             var cam = f.cameraname;
+                             if(searchTerms.cameras.indexOf(cam) == -1) {
+                                 searchTerms.cameras.push(cam);
+                             }
+                         }
+                         searchTerms.dates.sort();
+                         searchTerms.cameras.sort();
+                         return searchTerms;
                     },
                     mapContentLoaded: function(tab) {
                         return tab == 'map';
