@@ -1454,7 +1454,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return fileService.getMimeType(file);
                         }
                     },
-                    onEnter: ['file', 'mimeType', 'httpPatchFactory', '$uibModal', '$state', '$transition$', function(file, mimeType, httpPatchFactory, $uibModal, $state, $transition$) {
+                    onEnter: ['file', 'mimeType', 'concepts', 'availableTags', 'fileService', 'httpPatchFactory', '$uibModal', '$state', '$transition$', function(file, mimeType, concepts, availableTags, fileService, httpPatchFactory, $uibModal, $state, $transition$) {
                         if(!file) {
                             var params = $transition$.params();
                             delete params.id;
@@ -1465,6 +1465,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             windowClass: 'wide-modal',
                             controller: ['$scope', function($scope) {
                                 var vm = this;
+
+                                vm.concepts = concepts;
+                                vm.availableTags = availableTags;
                                 vm.file = file;
                                 vm.mimeType = mimeType;
                                 vm.availableProperties = ['copyright', 'description'];
@@ -1499,6 +1502,14 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 vm.openContext = function(cid) {
                                     $scope.$close('context');
                                     $state.go('root.spacialist.context.data', {id: cid});
+                                };
+
+                                vm.addTag = function(file, item) {
+                                    fileService.addTag(file, item);
+                                };
+
+                                vm.removeTag = function(file, item) {
+                                    fileService.removeTag(file, item);
                                 };
 
                                 vm.cancelFilePropertyEdit = function(editArray, index) {

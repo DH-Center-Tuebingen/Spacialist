@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - Fix Tree Search
 - Fix empty and non-working filter in files tab
 - Map (and files, if both deactivated) was still visible/selected, if deactivated
+- Fix tag section in file modal
 
 ## 0.4.3
 ### Added
