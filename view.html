@@ -37,7 +37,7 @@
                     <a><i class="material-icons">book</i><span class="tab-desc"> {{'context-form.tabs.sources'|translate}}</span></a>
                 </li>
             </ul>
-            <div ng-show="$ctrl.tab == 'map'" class="padded-content">
+            <div ng-show="$ctrl.tab == 'map' && $ctrl.userConfig['prefs.load-extensions'].value.map" class="padded-content">
                 <div ng-if="$ctrl.user.permissions.view_geodata">
                     <div id="map-container" ng-if="$ctrl.map" ng-controller="mapCtrl">
                         <leaflet id="mainmap" layers="$ctrl.map.layers" lf-center="$ctrl.map.center" bounds="$ctrl.map.bounds" defaults="$ctrl.map.defaults" lf-draw="$ctrl.map.drawOptions" controls="$ctrl.map.controls" height="{{addonContainerHeight}}px" width="100%">
@@ -48,7 +48,7 @@
                     <div ng-include="'layouts/restricted-access.html'"></div>
                 </div>
             </div>
-            <div ng-show="$ctrl.tab == 'files'" class="padded-content" style="max-height: 100%;">
+            <div ng-show="$ctrl.tab == 'files' && $ctrl.userConfig['prefs.load-extensions'].value.files" class="padded-content" style="max-height: 100%;">
                 <div ng-if="$ctrl.user.permissions.view_photos">
                     <div class="container col-md-12" ng-init="filter_collapsed=true">
                         <div ng-click="filter_collapsed=!filter_collapsed" style="cursor: pointer;">

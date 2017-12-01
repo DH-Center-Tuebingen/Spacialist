@@ -1208,10 +1208,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             .state('root.spacialist', {
                 url: '/s?tab',
                 resolve: {
-                    tab: function($state, $transition$) {
+                    tab: function(userConfig, $state, $transition$) {
                         var tabId = $transition$.params().tab;
                         if(!tabId) {
-                            return 'map';
+                            if(userConfig['prefs.load-extensions'].value.map) {
+                                return 'map';
+                            } else if(userConfig['prefs.load-extensions'].value.files) {
+                                return 'files';
+                            } else {
+                                return '';
+                            }
                         }
                         return tabId; // TODO unsupported id
                     },
