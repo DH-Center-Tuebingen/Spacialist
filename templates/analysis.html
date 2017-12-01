@@ -198,17 +198,22 @@
             <ul class="nav nav-tabs">
                 <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'raw'}" ng-if="$ctrl.expertMode">
                     <a ng-click="$ctrl.activeResultTab = 'raw'">
-                        <i class="material-icons">list</i> <span translate="analysis.results.tabs.raw.heading"></span>
+                        <i class="material-icons md-18 top">list</i> <span translate="analysis.results.tabs.raw.heading"></span>
                     </a>
                 </li>
                 <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'simple'}">
                     <a ng-click="$ctrl.activeResultTab = 'simple'">
-                        <i class="material-icons">extension</i> <span translate="analysis.results.tabs.simple.heading"></span>
+                        <i class="material-icons md-18 top">extension</i> <span translate="analysis.results.tabs.simple.heading"></span>
                     </a>
                 </li>
                 <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'vis'}">
                     <a ng-click="$ctrl.activeResultTab = 'vis'">
-                        <i class="material-icons">show_chart</i> <span translate="analysis.results.tabs.visualization.heading"></span>
+                        <i class="material-icons md-18 top">show_chart</i> <span translate="analysis.results.tabs.visualization.heading"></span>
+                    </a>
+                </li>
+                <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'export'}">
+                    <a ng-click="$ctrl.activeResultTab = 'export'">
+                        <i class="material-icons md-18 top">file_upload</i> <span translate="analysis.results.tabs.export.heading"></span>
                     </a>
                 </li>
             </ul>
@@ -303,6 +308,35 @@
                     </button>
                 </form>
                 <div class="col-md-7" id="plotly-visualization-container"></div>
+            </div>
+            <div ng-show="$ctrl.activeResultTab == 'export'">
+                <div class="btn-group" uib-dropdown>
+                    <button type="button" class="btn btn-default" ng-click="$ctrl.export('csv', true)" translate="analysis.results.tabs.export.export-button">
+                    </button>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" uib-dropdown-toggle aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu>
+                        <li role="menuitem">
+                            <a href="" ng-click="$ctrl.export('csv', true)" translate="analysis.results.tabs.export.as-csv.all">
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="" class="disabled" ng-click="$ctrl.export('json', true)" translate="analysis.results.tabs.export.as-json.all">
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="menuitem">
+                            <a href="" ng-click="$ctrl.export('csv', false)" translate="analysis.results.tabs.export.as-csv.limited" translate-values="{ from: $ctrl.limit.from + 1, to: ($ctrl.limit.amount+$ctrl.limit.from) }">
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="" class="disabled" ng-click="$ctrl.export('json', false)" translate="analysis.results.tabs.export.as-json.limited" translate-values="{ from: $ctrl.limit.from + 1, to: ($ctrl.limit.amount+$ctrl.limit.from) }">
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

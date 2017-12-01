@@ -411,6 +411,12 @@
     "analysis.results.tabs.visualization.histogram.auto-bins.size": "Größe",
     "analysis.results.tabs.visualization.pie.values": "Werte",
     "analysis.results.tabs.visualization.pie.labels": "Beschriftungen",
+    "analysis.results.tabs.export.heading": "Export",
+    "analysis.results.tabs.export.export-button": "Exportieren",
+    "analysis.results.tabs.export.as-csv.all": "Als CSV (Alle Einträge)",
+    "analysis.results.tabs.export.as-json.all": "Als JSON (Alle Einträge)",
+    "analysis.results.tabs.export.as-csv.limited": "Als CSV (Eintrag {{ from }}-{{ to }})",
+    "analysis.results.tabs.export.as-json.limited": "Als JSON (Eintrag {{ from }}-{{ to }})",
 
     "analysis.popup.comparison": "Vergleich",
     "analysis.popup.comparison-value": "Vergleichswert",

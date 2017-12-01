@@ -7,7 +7,7 @@ spacialistApp.component('analysis', {
         tags: '<'
     },
     templateUrl: 'templates/analysis.html',
-    controller: function(httpPostFactory, $uibModal, leafletBoundsHelpers) {
+    controller: function(httpPostFactory, $uibModal, $translate, leafletBoundsHelpers) {
         var vm = this;
 
         vm.defaultVisLayout = {
@@ -827,18 +827,7 @@ spacialistApp.component('analysis', {
                 vm.filters.length = 0;
                 vm.columns.length = 0;
             }
-            var formData = new FormData();
-            formData.append('filters', angular.toJson(vm.filters));
-            formData.append('origin', vm.origin.name);
-            formData.append('columns', angular.toJson(vm.columns));
-            formData.append('orders', angular.toJson(vm.orders));
-            formData.append('limit', angular.toJson(vm.limit));
-            formData.append('simple', !vm.expertMode);
-            if(vm.expertMode) {
-                formData.append('distinct', vm.distinct);
-            } else {
-                formData.append('splits', angular.toJson(vm.splits));
-            }
+            var formData = vm.setupFormData();
             httpPostFactory('api/analysis/filter', formData, function(response) {
                 console.log(response);
                 vm.filteredOrigin = vm.origin;
@@ -884,6 +873,35 @@ spacialistApp.component('analysis', {
                 vm.visualizationColumns = vm.getAvailableColumns();
                 vm.visualizationResults = vm.getResults();
             });
+        };
+
+        vm.export = function(type, exportAll) {
+            // exporting all rows is default
+            if(exportAll != false) {
+                exportAll = true;
+            }
+            var formData = vm.setupFormData();
+            formData.append('all', exportAll);
+            httpPostFactory('api/analysis/export/' + type, formData, function(response) {
+                var name = $translate.instant(vm.origin.label) + '.' + type;
+                createDownloadLink(response, name);
+            });
+        };
+
+        vm.setupFormData = function() {
+            var formData = new FormData();
+            formData.append('filters', angular.toJson(vm.filters));
+            formData.append('origin', vm.origin.name);
+            formData.append('columns', angular.toJson(vm.columns));
+            formData.append('orders', angular.toJson(vm.orders));
+            formData.append('limit', angular.toJson(vm.limit));
+            formData.append('simple', !vm.expertMode);
+            if(vm.expertMode) {
+                formData.append('distinct', vm.distinct);
+            } else {
+                formData.append('splits', angular.toJson(vm.splits));
+            }
+            return formData;
         };
 
         vm.getAvailableColumns = function() {

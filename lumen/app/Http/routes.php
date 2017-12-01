@@ -19,8 +19,6 @@ $app->get('/', function () use ($app) {
 });
 
 $app->post('user/login', 'UserController@login');
-$app->post('filter', 'AnalysisController@filterContexts');
-$app->post('filterl/{id}', 'AnalysisController@filterLayer');
 
 $app->group([
         'prefix' => 'context',//TODO api v1
@@ -106,7 +104,10 @@ $app->group([
     ], function($app) {
         $app->get('', 'AnalysisController@getAnalyses');
 
+        // TODO are they really POST?
         $app->post('filter', 'AnalysisController@filterContexts');
+        $app->post('export', 'AnalysisController@export');
+        $app->post('export/{type}', 'AnalysisController@export');
 });
 
 $app->group([

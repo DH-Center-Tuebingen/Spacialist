@@ -783,6 +783,10 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     vertical-align: top !important;
 }
 
+.middle {
+    vertical-align: middle !important;
+}
+
 .btn-fab-minime {
     height: 24px !important;
     min-width: 24px !important;

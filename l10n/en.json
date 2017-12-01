@@ -400,6 +400,12 @@
     "analysis.results.tabs.visualization.histogram.auto-bins.size": "Size",
     "analysis.results.tabs.visualization.pie.values": "Values",
     "analysis.results.tabs.visualization.pie.labels": "Labels",
+    "analysis.results.tabs.export.heading": "Export",
+    "analysis.results.tabs.export.export-button": "Export",
+    "analysis.results.tabs.export.as-csv.all": "As CSV (All entries)",
+    "analysis.results.tabs.export.as-json.all": "As JSON (All entries)",
+    "analysis.results.tabs.export.as-csv.limited": "As CSV (Entry {{ from }}-{{ to }})",
+    "analysis.results.tabs.export.as-json.limited": "As JSON (Entry {{ from }}-{{ to }})",
 
     "analysis.popup.comparison": "Comparison",
     "analysis.popup.comparison-value": "Comparison Value",

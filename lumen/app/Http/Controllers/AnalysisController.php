@@ -38,32 +38,8 @@ class AnalysisController extends Controller {
 
     // POST
 
-    public function filterLayer($id, Request $request) {
-        try {
-            $layer = AvailableLayer::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => 'This layer does not exist.'
-            ]);
-        }
-        if(!isset($layer->context_type_id)) {
-            return response()->json([
-                'error' => 'This layer is not linked to a contexttype.'
-            ]);
-        }
-        $ctid = $layer->context_type_id;
-        $filters = json_decode($request->input('filters', '[]'));
-        $columns = json_decode($request->input('columns', '[]'));
-        $orders = json_decode($request->input('orders', '[]'));
-        $limit = json_decode($request->input('limit', '{}'));
-        $query = $this->filter([$ctid], $filters, $columns, $orders);
-        return response()->json([
-            'rows' => $query->get(),
-            'query' => $this->cleanSql($query->toSql())
-        ]);
-    }
-
-    public function filterContexts(Request $request) {
+    public function export($type = 'csv', Request $request) {
+        // TODO validate
         $origin = $request->input('origin');
         $filters = json_decode($request->input('filters', '[]'));
         $columns = json_decode($request->input('columns', '[]'));
@@ -72,13 +48,133 @@ class AnalysisController extends Controller {
         $splits = json_decode($request->input('splits', '[]'));
         $simple = Helpers::parseBoolean($request->input('simple', false));
         $distinct = Helpers::parseBoolean($request->input('distinct', false));
+        $all = Helpers::parseBoolean($request->input('all', true));
+        if($all) {
+            // if we want all entries, remove limit before filtering
+            $limit = json_decode('{}');
+        }
+        $result = $this->requestToQuery($origin, $filters, $columns, $orders, $limit, $splits, $simple, $distinct);
+        switch($type) {
+            case 'csv':
+                $suffix = '.csv';
+                break;
+            default:
+                return response()->json([
+                    'error' => "The type $type is not supported."
+                ]);
+        }
+        $dt = date('dmYHis');
+        $tmpFile = '/tmp/export-'.$dt.$suffix;
+        $handle = fopen($tmpFile, 'w');
+        $firstRow = true;
+        $exceptions = [];
+        if($simple) {
+            switch($origin) {
+                case 'attribute_values':
+                    $exceptions = [
+                        'attribute',
+                        'context',
+                        'context_val',
+                        'thesaurus_val'
+                    ];
+                    break;
+                case 'contexts':
+                    $exceptions = [
+                        'child_contexts',
+                        'context_type',
+                        'geodata',
+                        'root_context',
+                        'literatures',
+                        'attributes',
+                        'files'
+                    ];
+                case 'files':
+                    $exceptions = [
+                        'contexts',
+                        // 'tags'
+                    ];
+                    break;
+                case 'geodata':
+                    $exceptions = [
+                        'context'
+                    ];
+                    break;
+                case 'literature':
+                    $exceptions = [
+                        'contexts'
+                    ];
+                    break;
+            }
+        } else {
+        }
+        $splitIndex = 0;
+        foreach($result['rows'] as $row) {
+            $curr = [];
+            $header = [];
+            foreach($row->getAttributes() as $k => $a) {
+                // TODO skip ambiguous attributes for now
+                if(in_array($k, $exceptions)) continue;
+                if($firstRow) {
+                    $header[] = $k;
+                }
+                $curr[] = $a;
+            }
+            if(isset($result['splits'])) {
+                foreach($result['splits'] as $k => $s) {
+                    if($firstRow) {
+                        $header[] = $k;
+                    }
+                    $curr[] = $s->values[$splitIndex];
+                }
+            }
+            if($firstRow) {
+                fputcsv($handle, $header);
+                $firstRow = false;
+            }
+            fputcsv($handle, $curr);
+            $splitIndex++;
+        }
+        // get raw parsed content
+        $content = file_get_contents($tmpFile);
+        // delete tmp file
+        fclose($handle);
+        unlink($tmpFile);
+
+        return response(base64_encode($content));
+    }
+
+    public function filterContexts(Request $request) {
+        // TODO validate
+        $origin = $request->input('origin');
+        $filters = json_decode($request->input('filters', '[]'));
+        $columns = json_decode($request->input('columns', '[]'));
+        $orders = json_decode($request->input('orders', '[]'));
+        $limit = json_decode($request->input('limit', '{}'));
+        $splits = json_decode($request->input('splits', '[]'));
+        $simple = Helpers::parseBoolean($request->input('simple', false));
+        $distinct = Helpers::parseBoolean($request->input('distinct', false));
+        $result = $this->requestToQuery($origin, $filters, $columns, $orders, $limit, $splits, $simple, $distinct);
+        return response()->json($result);
+    }
+
+    // PATCH
+
+    // PUT
+
+    // DELETE
+
+    // OTHER FUNCTIONS
+
+    private function requestToQuery($origin, $filters, $columns, $orders, $limit, $splits, $simple, $distinct) {
         $query = $this->filter($origin, $filters, $columns, $orders, $distinct, $simple);
 
         $count = $query->count();
         $this->addLimit($query, $limit);
         $rows = $query->get();
 
-        $splitArray = $this->addRelationSplits($rows, $splits);
+        if($simple) {
+            $splitArray = $this->addRelationSplits($rows, $splits);
+        }
 
         if($origin === 'contexts') {
             foreach($rows as $r) {
@@ -94,22 +190,15 @@ class AnalysisController extends Controller {
 
         $result = [
             'count' => $count,
-            'rows' => $rows,
-            'splits' => $splitArray
+            'rows' => $rows
         ];
         if(!$simple) {
             $result['query'] = $this->cleanSql($query->toSql());
+        } else {
+            $result['splits'] = $splitArray;
         }
-        return response()->json($result);
+        return $result;
     }
-
-    // PATCH
-
-    // PUT
-
-    // DELETE
-
-    // OTHER FUNCTIONS
 
     private function addLimit($query, $limit) {
         if(!empty($limit)) {
