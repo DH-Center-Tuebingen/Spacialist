@@ -136,38 +136,38 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     };
 
-    function isVisible(elems, id, term) {
+    function isVisible(elems, e, term) {
         var noSearchTerm = !term || term.length === 0;
         var data = elems.data;
         var children = elems.children;
         if(noSearchTerm) {
-            data[id].visible = true;
-            data[id].collapsed = true;
-        } else if(filters(data[id], term)) {
-            data[id].visible = true;
-            data[id].collapsed = true;
+            data[e.id].visible = true;
+            data[e.id].collapsed = true;
+        } else if(filters(data[e.id], term)) {
+            data[e.id].visible = true;
+            data[e.id].collapsed = true;
         } else {
-            data[id].visible = false;
-            data[id].collapsed = true;
+            data[e.id].visible = false;
+            data[e.id].collapsed = true;
         }
-        if(children[id]) {
-            for(var i=0; i<children[id].length; i++) {
-                if(data[id].visible) {
-                    var tmpId = children[id][i];
+        if(children[e.id]) {
+            for(var i=0; i<children[e.id].length; i++) {
+                if(data[e.id].visible) {
+                    var tmpId = children[e.id][i];
                     data[tmpId].visible = true;
-                } else if(isVisible(elems, children[id][i], term)) {
-                    data[id].visible = true;
-                    data[id].collapsed = false;
+                } else if(isVisible(elems, children[e.id][i], term)) {
+                    data[e.id].visible = true;
+                    data[e.id].collapsed = false;
                 } else {
-                    data[id].collapsed = false;
+                    data[e.id].collapsed = false;
                 }
             }
         }
-        return data[id].visible;
+        return data[e.id].visible;
     }
 
     function filters(elem, term) {
-        return elem.name.toUpperCase().indexOf(term) > -1;
+        return elem && elem.name.toUpperCase().indexOf(term) > -1;
     }
 
     /**
