@@ -724,8 +724,24 @@ spacialistApp.directive("number", function() {
 spacialistApp.filter('fileFilter', function(searchService) {
     var foundAll = function(haystack, needle) {
         if(!needle || needle.length === 0) return true;
+        if(!haystack || haystack.length === 0) return false;
         return needle.every(function(v) {
-            return haystack.indexOf(v) >= 0;
+            // compare all own properties of haystack with the
+            // properties of needle and only return true if
+            // all are the same
+            for(var i=0; i<haystack.length; i++) {
+                var matches = true;
+                var h = haystack[i];
+                for(var k in h) {
+                    if(h.hasOwnProperty(k)) {
+                        if(!v[k] || v[k] != h[k]) {
+                            matches = false;
+                        }
+                    }
+                }
+                if(matches) return true;
+            }
+            return false;
         });
     };
 
@@ -1208,10 +1224,16 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
             .state('root.spacialist', {
                 url: '/s?tab',
                 resolve: {
-                    tab: function($state, $transition$) {
+                    tab: function(userConfig, $state, $transition$) {
                         var tabId = $transition$.params().tab;
                         if(!tabId) {
-                            return 'map';
+                            if(userConfig['prefs.load-extensions'].value.map) {
+                                return 'map';
+                            } else if(userConfig['prefs.load-extensions'].value.files) {
+                                return 'files';
+                            } else {
+                                return '';
+                            }
                         }
                         return tabId; // TODO unsupported id
                     },
@@ -1247,6 +1269,29 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     },
                     availableTags: function(fileService) {
                         return fileService.getAvailableTags();
+                    },
+                    availableSearchTerms: function(files, availableTags, searchService) {
+                         var searchTerms = {
+                             tags: availableTags,
+                             dates: [],
+                             cameras: []
+                         };
+                         for(var i=0; i<files.length; i++) {
+                             var f = files[i];
+                             // Add day of creation to search terms, if not yet added
+                             var createdDay = searchService.formatUnixDate(f.created*1000);
+                             if(searchTerms.dates.indexOf(createdDay) == -1) {
+                                 searchTerms.dates.push(createdDay);
+                             }
+                             // Add camera name search terms, if not yet added
+                             var cam = f.cameraname;
+                             if(searchTerms.cameras.indexOf(cam) == -1) {
+                                 searchTerms.cameras.push(cam);
+                             }
+                         }
+                         searchTerms.dates.sort();
+                         searchTerms.cameras.sort();
+                         return searchTerms;
                     },
                     mapContentLoaded: function(tab) {
                         return tab == 'map';
@@ -1409,7 +1454,7 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             return fileService.getMimeType(file);
                         }
                     },
-                    onEnter: ['file', 'mimeType', 'httpPatchFactory', '$uibModal', '$state', '$transition$', function(file, mimeType, httpPatchFactory, $uibModal, $state, $transition$) {
+                    onEnter: ['file', 'mimeType', 'concepts', 'availableTags', 'fileService', 'httpPatchFactory', '$uibModal', '$state', '$transition$', function(file, mimeType, concepts, availableTags, fileService, httpPatchFactory, $uibModal, $state, $transition$) {
                         if(!file) {
                             var params = $transition$.params();
                             delete params.id;
@@ -1420,6 +1465,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                             windowClass: 'wide-modal',
                             controller: ['$scope', function($scope) {
                                 var vm = this;
+
+                                vm.concepts = concepts;
+                                vm.availableTags = availableTags;
                                 vm.file = file;
                                 vm.mimeType = mimeType;
                                 vm.availableProperties = ['copyright', 'description'];
@@ -1454,6 +1502,14 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 vm.openContext = function(cid) {
                                     $scope.$close('context');
                                     $state.go('root.spacialist.context.data', {id: cid});
+                                };
+
+                                vm.addTag = function(file, item) {
+                                    fileService.addTag(file, item);
+                                };
+
+                                vm.removeTag = function(file, item) {
+                                    fileService.removeTag(file, item);
                                 };
 
                                 vm.cancelFilePropertyEdit = function(editArray, index) {
@@ -1887,6 +1943,14 @@ spacialistApp.run(function($state, mainService, mapService, userService, literat
         previousState = transition.from().name;
         previousStateParameters = transition.params('from');
     });
+    // Show/Hide loading spinner on login screen
+    $transitions.onStart({from: 'login'}, function() {
+        $('#loading-indicator').show();
+    });
+    $transitions.onFinish({from: 'login'}, function() {
+        $('#loading-indicator').hide();
+    });
+    // Reset global context on state switch
     $transitions.onSuccess({
         from: function(state) {
             return state.includes['root.spacialist.context.data'];

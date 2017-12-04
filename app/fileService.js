@@ -166,39 +166,6 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
         });
     };
 
-    files.getAllFiles = function(forceUpdate) {
-        forceUpdate = forceUpdate || false;
-        var currentTime = (new Date()).getTime();
-        //only fetch files again if it is a force update or last time checked is > 60s
-        if(!forceUpdate && currentTime - lastTimeFileChecked <= 60000) {
-            return;
-        } else {
-            lastTimeFileChecked = currentTime;
-            httpGetFactory('api/file', function(response) {
-                var allCopy = files.all.slice();
-                for(var i=0; i<response.length; i++) {
-                    var newImg = response[i];
-                    var alreadyLinked = false;
-                    for(var j=0; j<allCopy.length; j++) {
-                        var one = allCopy[j];
-                        if(newImg.id == one.id) {
-                            if(!angular.equals(newImg, one)) {
-                                updateSearchOptions(newImg);
-                                files.all[j] = newImg;
-                            }
-                            alreadyLinked = true;
-                            break;
-                        }
-                    }
-                    if(!alreadyLinked) {
-                        updateSearchOptions(newImg);
-                        files.all.push(newImg);
-                    }
-                }
-            });
-        }
-    };
-
     files.addTag = function(img, tag) {
         var formData = new FormData();
         formData.append('file_id', img.id);
@@ -225,46 +192,6 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
             return response.tags;
         });
     };
-
-    function updateSearchOptions(img) {
-        updateTags(img);
-        updateDates(img);
-        updateCameras(img);
-    }
-
-    function updateTags(img) {
-        for(var i=0; i<img.tags.length; i++) {
-            var tag = img.tags[i];
-            var found = false;
-            for(var j=0; j<files.availableTags.length; j++) {
-                var aTag = files.availableTags[j];
-                if(tag.id == aTag.id) {
-                    found = true;
-                    img.tags[i] = files.availableTags[j];
-                }
-            }
-            if(!found) {
-                delete img.tags[i];
-            }
-        }
-    }
-
-    function updateDates(img) {
-        var dateTerms = searchService.availableSearchTerms.dates;
-        var createdDay = searchService.formatUnixDate(img.created*1000);
-        if(dateTerms.indexOf(createdDay) == -1) {
-            dateTerms.push(createdDay);
-            dateTerms.sort();
-        }
-    }
-
-    function updateCameras(img) {
-        var camTerms = searchService.availableSearchTerms.cameras;
-        if(camTerms.indexOf(img.cameraname) == -1) {
-            camTerms.push(img.cameraname);
-            camTerms.sort();
-        }
-    }
 
     function filterLinkedFiles(id) {
         return files.all.filter(function(img) {

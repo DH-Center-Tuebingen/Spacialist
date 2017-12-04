@@ -15,7 +15,8 @@ spacialistApp.component('spacialist', {
         contextTypes: '<',
         geometryTypes: '<',
         files: '<',
-        availableTags: '<'
+        availableTags: '<',
+        availableSearchTerms: '<'
     },
     templateUrl: 'view.html',
     controller: 'mainCtrl'
