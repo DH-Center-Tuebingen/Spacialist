@@ -27,8 +27,12 @@ class Helpers {
         }
     }
 
+    public static function getDisk() {
+        return env('SP_FILE_DRIVER', config('filesystems.default'));
+    }
+
     public static function getFullFilePath($filename) {
-        return Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $filename);
+        return Storage::disk(Helpers::getDisk())->url($filename);
     }
 
     public static function getStorageFilePath($filename) {

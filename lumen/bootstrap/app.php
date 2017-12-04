@@ -33,8 +33,8 @@ config([
             ],
             'public' => [
                 'driver' => 'local',
-                'root' => app()->basePath('/public/storage'),
-                'url' => './lumen/public/storage',
+                'root' => app()->basePath('/public/storage') . '/' . env('SP_FILE_PATH'),
+                'url' => './lumen/public/storage' . '/' . env('SP_FILE_PATH'),
                 'visibility' => 'public',
             ],
         ],

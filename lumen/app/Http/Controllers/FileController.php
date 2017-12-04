@@ -124,15 +124,16 @@ class FileController extends Controller
         }
 
         // try to get file to check if it exists
-        $storageUrl = 'images/' . $file->filename;
-        try {
-            Storage::get($storageUrl);
-            $file->filesize = Storage::size($storageUrl);
-            $file->modified = Storage::lastModified($storageUrl);
-            $file->exif = $this->getExifData($file);
-        } catch(FileNotFoundException $e) {
-        } catch(PelDataWindowOffsetException $e) {
-            // Do nothing for now
+        $storageUrl = $file->filename;
+        $disk = Helpers::getDisk();
+        if(Storage::disk($disk)->exists($storageUrl)) {
+            $file->filesize = Storage::disk($disk)->size($storageUrl);
+            $file->modified = Storage::disk($disk)->lastModified($storageUrl);
+            try {
+                $file->exif = $this->getExifData($file);
+            } catch(PelDataWindowOffsetException $e) {
+                // Do nothing for now
+            }
         }
         $file->created = strtotime($file->created);
         $file->linked_contexts = $this->getLinkedContexts($file);
@@ -189,8 +190,9 @@ class FileController extends Controller
                     ->get();
         foreach($files as &$file) {
             $file->url = Helpers::getFullFilePath($file->filename);
-            if(substr($file->mime_type, 0, 6) === 'image/');
-            $file->thumb_url = Helpers::getFullFilePath($file->thumbname);
+            if(substr($file->mime_type, 0, 6) === 'image/') {
+                $file->thumb_url = Helpers::getFullFilePath($file->thumbname);
+            }
             $file->linked_files = ContextFile::where('photo_id', '=', $file->id)->get();
 
             if($user->can('edit_photo_props')) {
@@ -202,15 +204,16 @@ class FileController extends Controller
             }
 
             // try to get file to check if it exists
-            $storageUrl = 'images/' . $file->filename;
-            try {
-                Storage::get($storageUrl);
-                $file->filesize = Storage::size($storageUrl);
-                $file->modified = Storage::lastModified($storageUrl);
-                $file->exif = $this->getExifData($file);
-            } catch(FileNotFoundException $e) {
-            } catch(PelDataWindowOffsetException $e) {
-                // Do nothing for now
+            $storageUrl = $file->filename;
+            $disk = Helpers::getDisk();
+            if(Storage::disk($disk)->exists($storageUrl)) {
+                $file->filesize = Storage::disk($disk)->size($storageUrl);
+                $file->modified = Storage::disk($disk)->lastModified($storageUrl);
+                try {
+                    $file->exif = $this->getExifData($file);
+                } catch(PelDataWindowOffsetException $e) {
+                    // Do nothing for now
+                }
             }
             $file->created = strtotime($file->created);
             $file->linked_contexts = $this->getLinkedContexts($file);
@@ -331,14 +334,12 @@ class FileController extends Controller
         $file = $request->file('file');
         $filename = $file->getClientOriginalName();
         $filehandle = fopen($file->getRealPath(), 'r');
-        Storage::put(
-            'images/' . $filename,
+        Storage::disk(Helpers::getDisk())->put(
+            $filename,
             $filehandle
         );
         fclose($filehandle);
-        $url = storage_path() . '/app/images';
-        //$file->move($url, $filename);
-        $fileUrl = $url . '/' . $filename;
+        $fileUrl = Helpers::getFullFilePath($filename);
         $fileMime = 'image/';
         $mimeType = $file->getMimeType();
         $isImage = substr($mimeType, 0, strlen($fileMime)) === $fileMime;
@@ -351,7 +352,6 @@ class FileController extends Controller
             $ext = $file->getClientOriginalExtension();
             $cleanName = substr($filename, 0, strlen($filename)-strlen($ext)-1);
             $thumbName = $cleanName . $THUMB_SUFFIX . $EXP_SUFFIX;
-            $thumbUrl = $url . '/' . $thumbName;
 
             $imageInfo = getimagesize($fileUrl);
             $width = $imageInfo[0];
@@ -381,18 +381,19 @@ class FileController extends Controller
                 }
                 $scaled = imagescale($image, $THUMB_WIDTH);
                 ob_start();
-                imagejpeg($scaled/*, $thumbUrl*/);
+                imagejpeg($scaled);
                 $image = ob_get_clean();
-                Storage::put(
-                    'images/' . $thumbName,
+                Storage::disk(Helpers::getDisk())->put(
+                    $thumbName,
                     $image
                 );
             } else {
-                Storage::copy('images/' . $filename, 'images/' . $thumbName);
+                Storage::disk(Helpers::getDisk())->copy($filename, $thumbName);
             }
         }
 
-        $mod = date('Y-m-d H:i:s', filemtime($fileUrl));
+        $mod = date('Y-m-d H:i:s', Storage::disk(Helpers::getDisk())->lastModified($filename));
+        // $mod = date('Y-m-d H:i:s', filemtime('../'.$fileUrl));
         $exifFound = false;
         if($isImage && ($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM)) {
             $exif = @exif_read_data($fileUrl, 'ANY_TAG', true);
@@ -537,9 +538,8 @@ class FileController extends Controller
             ], 403);
         }
         $file = File::find($id);
-        $pathPrefix = 'images/';
-        Storage::delete($pathPrefix . $file->name);
-        if($file->thumb != null) Storage::delete($pathPrefix . $file->thumb);
+        Storage::disk(Helpers::getDisk())->delete($file->name);
+        if($file->thumb != null) Storage::disk(Helpers::getDisk())->delete($file->thumb);
         $file->delete();
     }
 
