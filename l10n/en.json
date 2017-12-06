@@ -324,6 +324,8 @@
     "analysis.query-options.resulting-query": "Resulting Query",
     "analysis.query.no-results": "Query returned no results or you didn't run the query yet.",
     "analysis.results.heading": "Results",
+    "analysis.results.prev-button": "Previous {{cnt}} results",
+    "analysis.results.next-button": "Next {{cnt}} results",
     "analysis.results.tabs.raw.heading": "Raw",
     "analysis.results.tabs.simple.heading": "Query Builder",
     "analysis.results.tabs.simple.header.created_at": "Created At",

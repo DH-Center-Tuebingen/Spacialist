@@ -180,17 +180,18 @@
         <p class="alert alert-info" ng-show="!$ctrl.hasResults()" translate="analysis.query.no-results">
         </p>
         <div ng-if="$ctrl.hasResults()">
-            <h2><span translate="analysis.results.heading"></span> <span class="badge">{{ $ctrl.countResults() }}/{{ $ctrl.resultCount }}</span></h2>
+            <h2><span translate="analysis.results.heading"></span> <span class="badge">{{ $ctrl.countResults() }}</span></h2>
+            <span>{{ $ctrl.limit.from }} - {{ $ctrl.limit.from + $ctrl.countResults() }} / {{ $ctrl.resultCount }}</span>
             <nav ng-if="!$ctrl.expertMode">
                 <ul class="pager left">
                     <li>
                         <a href="" ng-click="$ctrl.showPreviousResults()" ng-class="{'disabled-pagination': $ctrl.noPrevPage()}">
-                            <i class="material-icons md-18">arrow_back</i> Previous {{ $ctrl.limit.amount}} results
+                            <i class="material-icons md-18">arrow_back</i> <span translate="analysis.results.prev-button" translate-values="{cnt: $ctrl.previousCount()}"></span>
                         </a>
                     </li>
                     <li>
                         <a href="" ng-click="$ctrl.showNextResults()" ng-class="{'disabled-pagination': $ctrl.noNextPage()}">
-                            Next {{ $ctrl.limit.amount}} results <i class="material-icons md-18">arrow_forward</i>
+                            <span translate="analysis.results.next-button" translate-values="{cnt: $ctrl.nextCount()}"></span> <i class="material-icons md-18">arrow_forward</i>
                         </a>
                     </li>
                 </ul>

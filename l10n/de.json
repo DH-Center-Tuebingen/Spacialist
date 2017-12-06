@@ -335,6 +335,8 @@
     "analysis.query-options.resulting-query": "Ergebnis-Abfrage",
     "analysis.query.no-results": "Abfrage lieferte keine Ergebnisse oder es wurde noch keine Abfrage gestartet.",
     "analysis.results.heading": "Ergebnisse",
+    "analysis.results.prev-button": "Vorherige {{cnt}} Ergebnisse",
+    "analysis.results.next-button": "Nächste {{cnt}} Ergebnisse",
     "analysis.results.tabs.raw.heading": "Roh",
     "analysis.results.tabs.simple.heading": "Abfragen-Editor",
     "analysis.results.tabs.simple.header.created_at": "Erzeugt am",
