@@ -232,14 +232,12 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         return httpGetPromise.getData('api/context/byGeodata/' + featureId);
     };
 
-    map.updateMarker = function(geodata) {
+    map.updateMarker = function(geodata, map) {
         if(typeof geodata.id == 'undefined') return;
         if(geodata.id <= 0) return;
-        var color = geodata.color;
         var lat = geodata.lat;
         var lng = geodata.lng;
         var formData = new FormData();
-        if(typeof color != 'undefined') formData.append('color', color);
         if(typeof lat != 'undefined' && typeof lng != 'undefined') {
             var coords = [{
                 lat: geodata.lat,
@@ -250,13 +248,12 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         }
         httpPutPromise.getData('api/geodata/' + geodata.id, formData).then(
             function(response) {
-                map.map.selectedLayer.feature.properties.color = response.color || '#000000';
-                if(map.map.selectedLayer.feature.geometry.type == 'Point') {
+                if(map.geodata.linkedLayers[geodata.id].feature.geometry.type == 'Point') {
                     if(typeof response.geodata != 'undefined') {
                         var lng = response.geodata.geodata.coordinates[0];
                         var lat = response.geodata.geodata.coordinates[1];
                         var latlng = L.latLng(lat, lng);
-                        map.map.selectedLayer.setLatLng(latlng);
+                        map.geodata.linkedLayers[geodata.id].setLatLng(latlng);
                     }
                 }
             }

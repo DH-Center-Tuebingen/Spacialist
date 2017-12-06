@@ -1408,6 +1408,12 @@ spacialistApp.component('analysis', {
                     var newBounds = featureGroup.getBounds();
                     var newNE = newBounds.getNorthEast();
                     var newSW = newBounds.getSouthWest();
+                    var minWidth = 0.05;
+                    var width = newSW.lng - newNE.lng;
+                    if(width < minWidth) {
+                        newSW.lng += (minWidth - width) / 2;
+                        newNE.lng -= (minWidth - width) / 2;
+                    }
                     bounds.northEast.lat = newNE.lat;
                     bounds.northEast.lng = newNE.lng;
                     bounds.southWest.lat = newSW.lat;

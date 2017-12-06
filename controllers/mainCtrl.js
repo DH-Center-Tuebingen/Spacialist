@@ -121,7 +121,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
     };
 
     vm.updateMarkerOptions = function(geodata) {
-        mapService.updateMarker(geodata);
+        mapService.updateMarker(geodata, vm.map);
     };
 
     $scope.treeCallbacks = {
