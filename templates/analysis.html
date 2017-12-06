@@ -323,7 +323,7 @@
                             </a>
                         </li>
                         <li role="menuitem">
-                            <a href="" class="disabled" ng-click="$ctrl.export('json', true)" translate="analysis.results.tabs.export.as-json.all">
+                            <a href="" ng-click="$ctrl.export('json', true)" translate="analysis.results.tabs.export.as-json.all">
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -332,7 +332,7 @@
                             </a>
                         </li>
                         <li role="menuitem">
-                            <a href="" class="disabled" ng-click="$ctrl.export('json', false)" translate="analysis.results.tabs.export.as-json.limited" translate-values="{ from: $ctrl.limit.from + 1, to: ($ctrl.limit.amount+$ctrl.limit.from) }">
+                            <a href="" ng-click="$ctrl.export('json', false)" translate="analysis.results.tabs.export.as-json.limited" translate-values="{ from: $ctrl.limit.from + 1, to: ($ctrl.limit.amount+$ctrl.limit.from) }">
                             </a>
                         </li>
                     </ul>

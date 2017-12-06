@@ -58,6 +58,9 @@ class AnalysisController extends Controller {
             case 'csv':
                 $suffix = '.csv';
                 break;
+            case 'json':
+                $suffix = '.json';
+                break;
             default:
                 return response()->json([
                     'error' => "The type $type is not supported."
@@ -108,37 +111,48 @@ class AnalysisController extends Controller {
         } else {
         }
         $splitIndex = 0;
-        foreach($result['rows'] as $row) {
-            $curr = [];
-            $header = [];
-            foreach($row->getAttributes() as $k => $a) {
-                // TODO skip ambiguous attributes for now
-                if(in_array($k, $exceptions)) continue;
-                if($firstRow) {
-                    $header[] = $k;
-                }
-                $curr[] = $a;
-            }
-            if(isset($result['splits'])) {
-                foreach($result['splits'] as $k => $s) {
-                    if($firstRow) {
-                        $header[] = $k;
+        switch($type) {
+            case 'csv':
+                foreach($result['rows'] as $row) {
+                    $curr = [];
+                    $header = [];
+                    foreach($row->getAttributes() as $k => $a) {
+                        // TODO skip ambiguous attributes for now
+                        if(in_array($k, $exceptions)) continue;
+                        if($firstRow) {
+                            $header[] = $k;
+                        }
+                        $curr[] = $a;
                     }
-                    $curr[] = $s->values[$splitIndex];
+                    if(isset($result['splits'])) {
+                        foreach($result['splits'] as $k => $s) {
+                            if($firstRow) {
+                                $header[] = $k;
+                            }
+                            $curr[] = $s['values'][$splitIndex];
+                        }
+                    }
+                    if($firstRow) {
+                        fputcsv($handle, $header);
+                        $firstRow = false;
+                    }
+                    fputcsv($handle, $curr);
+                    $splitIndex++;
                 }
-            }
-            if($firstRow) {
-                fputcsv($handle, $header);
-                $firstRow = false;
-            }
-            fputcsv($handle, $curr);
-            $splitIndex++;
+                // get raw parsed content
+                $content = file_get_contents($tmpFile);
+                // delete tmp file
+                fclose($handle);
+                unlink($tmpFile);
+                break;
+            case 'json':
+                $content = json_encode($result['rows'], JSON_PRETTY_PRINT);
+                break;
+            default:
+                return response()->json([
+                    'error' => "The type $type is not supported."
+                ]);
         }
-        // get raw parsed content
-        $content = file_get_contents($tmpFile);
-        // delete tmp file
-        fclose($handle);
-        unlink($tmpFile);
 
         return response(base64_encode($content));
     }
