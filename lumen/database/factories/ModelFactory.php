@@ -126,7 +126,7 @@ $factory->define(App\Attribute::class, function(Faker\Generator $faker) {
     return [
         'thesaurus_url' => $concept->concept_url,
         'thesaurus_root_url' => $faker->optional()->randomElement([$root_concept->concept_url]),
-        'datatype' => $faker->randomElement(['string', 'list', 'date', 'stringf', 'epoch', 'string-sc', 'string-mc', 'dimension']),
+        'datatype' => $faker->randomElement(['string', 'list', 'date', 'stringf', 'epoch', 'string-sc', 'string-mc', 'dimension', 'integer', 'boolean', 'percentage', 'context', 'geography', 'double']),
     ];
 });
 
@@ -288,22 +288,71 @@ $factory->define(App\AttributeValue::class, function(Faker\Generator $faker) {
     if(!isset($attribute)){
         $attribute = factory(App\Attribute::class)->create();
     }
-    $context_val = App\Context::inRandomOrder()->first();
-    if(!isset($context_val)){
-        $context_val = factory(App\Context::class)->create();
+    $val;
+
+    switch($attribute->datatype) {
+        case 'string':
+        case 'stringf':
+        case 'list':
+            $dt = 'str_val';
+            $val = $faker->sentence($nbWords = 6, $variableNbWords = true);
+            break;
+        case 'string-sc':
+        case 'string-mc':
+            $dt = 'thesaurus_val';
+            $thesaurus_val = App\ThConcept::inRandomOrder()->first();
+            if(!isset($thesaurus_val)){
+                $thesaurus_val = factory(App\ThConcept::class)->create();
+            }
+            $val = $thesaurus_val->concept_url;
+            break;
+        case 'integer':
+        case 'percentage':
+            $dt = 'int_val';
+            $val = $faker->randomDigit;
+            break;
+        case 'boolean':
+            $dt = 'int_val';
+            $val = $faker->randomElement([0,1]);
+            break;
+        case 'epoch':
+        case 'dimension':
+            $dt = 'json_val';
+            // TODO: json_val
+            $val = json_encode('{"Error": "Not implemented"}');
+            break;
+        case 'date':
+            $dt = 'dt_val';
+            $val = $faker->dateTime();
+            break;
+        case 'context':
+            $dt = 'context_val';
+            $context_val = App\Context::inRandomOrder()->first();
+            if(!isset($context_val)){
+                $context_val = factory(App\Context::class)->create();
+            }
+            $val = $context_val->id;
+            break;
+        case 'double':
+            $dt = 'dbl_val';
+            $val = $faker->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 42);
+            break;
+        case 'geography':
+            $dt = 'geography_val';
+            $gd = factory(App\Geodata::class)->make();
+            $val = $gd->geom;
+            break;
+        default:
+            $dt = 'str_val';
+            $val = 'Something strange happened in the RandomSeeder.';
     }
+
     return [
         'context_id' => $context->id,
         'attribute_id' => $attribute->id,
-        'context_val' => $faker->optional()->randomElement([$context_val->id]),
-        'str_val' => $faker->optional()->sentence($nbWords = 6, $variableNbWords = true),
-        'int_val' => $faker->optional()->randomDigit,
-        'dbl_val' => $faker->optional()->randomFloat($nbMaxDecimals = NULL, $min = 0, $max = 42),
-        'dt_val' => $faker->optional()->dateTime(),
         'possibility' => $faker->numberBetween($min = 0, $max = 100),
-        'thesaurus_val' => $faker->optional()->randomElement([App\ThConcept::inRandomOrder()->first()->value('concept_url')]),
-        // 'json_val' => TODO
         'lasteditor' => $faker->name,
+        $dt => $val
     ];
 });
 

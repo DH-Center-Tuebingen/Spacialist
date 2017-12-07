@@ -34,18 +34,10 @@
     </button>
 </p>
 
-<div ng-init="collapsed=true">
+<div ng-init="collapsed=true" ng-if="$ctrl.globalGeodata.geodata.type == 'Point'">
     <button ng-click="collapsed=!collapsed" class="btn btn-primary clickable">{{'map-marker.options.label'|translate}} <i class="material-icons">{{ collapsed ? 'arrow_drop_down' : 'arrow_drop_up' }}</i></button>
     <div ng-if="!collapsed">
         <form class="form-horizontal" role="form">
-            <div class="form-group form-group-unpadded">
-                <label class="control-label col-md-3" for="color_{{ $ctrl.globalGeodata.geodata.id }}">
-                    {{'map-marker.options.color'|translate}}:
-                </label>
-                <div class="col-md-9">
-                    <input class="form-control" type="color" name="color_{{ $ctrl.globalGeodata.geodata.id }}" ng-model="$ctrl.globalGeodata.geodata.color" id="color_{{ $ctrl.globalGeodata.geodata.id }}" ng-disabled="!$ctrl.user.permissions.duplicate_edit_concepts"/>
-                </div>
-            </div>
             <div ng-if="$ctrl.globalGeodata.geodata.type == 'Point'">
                 <div class="form-group form-group-unpadded">
                     <label class="control-label col-md-3" for="lat_{{ $ctrl.globalGeodata.geodata.id }}">

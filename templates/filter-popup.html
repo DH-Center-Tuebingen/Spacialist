@@ -1,0 +1,68 @@
+<div ng-init="useFunc = false;">
+    <div style="text-align: right;">
+        <a href="" ng-click="$ctrl.closePopover($event)">
+            <i class="material-icons md-dark">clear</i>
+        </a>
+    </div>
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label col-md-2" translate="analysis.popup.comparison"></label>:
+            <div class="col-md-10">
+                <ui-select ng-model="$ctrl.comp">
+                    <ui-select-match allow-clear="false">
+                        {{ $select.selected }}
+                    </ui-select-match>
+                    <ui-select-choices repeat="c in $ctrl.comps | filter: $select.search">
+                        <span ng-bind-html="c | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-2" translate="analysis.popup.comparison-value"></label>:
+            <div class="col-md-10">
+                <input type="text" class="form-control" ng-model="$ctrl.comp_value" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-2" translate="analysis.popup.use-function"></label>:
+            <div class="col-md-10">
+                <input type="checkbox" class="form-control" ng-model="useFunc" />
+            </div>
+        </div>
+        <div ng-show="useFunc">
+            <div class="form-group">
+                <label class="control-label col-md-2" translate="analysis.popup.function"></label>:
+                <div class="col-md-10">
+                    <ui-select ng-model="$ctrl.func">
+                        <ui-select-match allow-clear="true">
+                            {{ $select.selected }}
+                        </ui-select-match>
+                        <ui-select-choices repeat="f in $ctrl.functions | filter: $select.search">
+                            <span ng-bind-html="f | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2" translate="analysis.popup.function-values"></label>:
+                <div class="col-md-10">
+                    <input type="text" class="form-control" ng-model="$ctrl.func_values" ng-show="$ctrl.func" />
+                </div>
+            </div>
+        </div>
+        <div class="flex-hr-center">
+            <div ng-if="$ctrl.filters.length > 0">
+                <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.func_values, true)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
+                    <span translate="analysis.and-button"></span>
+                </button>
+                <button type="button" class="btn btn-default" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.func_values, false)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
+                    <span translate="analysis.or-button"></span>
+                </button>
+            </div>
+            <button type="button" class="btn btn-default" ng-if="$ctrl.filters.length == 0" ng-click="$ctrl.addFilter(k, $ctrl.comp, $ctrl.comp_value, $ctrl.func, $ctrl.func_values, true)" ng-disabled="!$ctrl.comp || !$ctrl.comp_value || ($ctrl.func && !$ctrl.func_values)">
+                <span translate="analysis.add-filter-button"></span>
+            </button>
+        </div>
+    </form>
+</div>

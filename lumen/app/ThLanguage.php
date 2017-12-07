@@ -17,4 +17,8 @@ class ThLanguage extends Model
         'display_name',
         'short_name',
     ];
+
+    public function labels() {
+        return $this->hasMany('App\ThConceptLabel', 'language_id');
+    }
 }

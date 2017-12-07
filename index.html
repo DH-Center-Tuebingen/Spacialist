@@ -7,6 +7,10 @@
         <link rel="stylesheet" type="text/css" href="node_modules/world-flags-sprite/stylesheets/flags16.css" />
         <link rel="stylesheet" type="text/css" href="node_modules/angular-ui-tree/dist/angular-ui-tree.min.css" />
         <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
+        <link rel="stylesheet" href="node_modules/leaflet-minimap/dist/Control.MiniMap.min.css" />
+        <link rel="stylesheet" href="node_modules/leaflet-graphicscale/dist/Leaflet.GraphicScale.min.css" />
+        <link rel="stylesheet" href="node_modules/leaflet-measure-path/leaflet-measure-path.css" />
+        <link rel="stylesheet" href="node_modules/leaflet-zoombox/L.Control.ZoomBox.css" />
         <link rel="stylesheet" href="node_modules/leaflet-draw/dist/leaflet.draw.css" />
         <link rel="stylesheet" href="css/animate.css" />
         <link rel="stylesheet" href="node_modules/ui-select/dist/select.min.css" />
@@ -61,9 +65,21 @@
         <script src="node_modules/leaflet-geometryutil/src/leaflet.geometryutil.js"></script>
         <script src="node_modules/leaflet.gridlayer.googlemutant/Leaflet.GoogleMutant.js"></script>
         <script src="node_modules/leaflet-plugins/layer/tile/Bing.js"></script>
+        <script src="node_modules/d3-dsv/build/d3-dsv.min.js"></script>
+        <script src="node_modules/proj4/dist/proj4.js"></script>
+        <script src="node_modules/wkx/dist/wkx.min.js"></script>
+        <script src="node_modules/csv2geojson/csv2geojson.js"></script>
+        <script src="node_modules/shapefile/dist/shapefile.min.js"></script>
+        <script src="node_modules/@mapbox/togeojson/togeojson.js"></script>
+        <script src="node_modules/zipjs-browserify/vendor/zip.js"></script>
+        <script src="node_modules/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
+        <script src="node_modules/leaflet-graphicscale/dist/Leaflet.GraphicScale.min.js"></script>
+        <script src="node_modules/leaflet-measure-path/leaflet-measure-path.js"></script>
+        <script src="node_modules/leaflet-zoombox/L.Control.ZoomBox.min.js"></script>
         <script src="node_modules/ui-leaflet/dist/ui-leaflet.min.js"></script>
         <script src="node_modules/ui-leaflet-draw/dist/ui-leaflet-draw.js"></script>
         <script src="node_modules/ui-leaflet-layers/dist/ui-leaflet-layers.min.js"></script>
+        <script src="node_modules/plotly.js/dist/plotly.min.js"></script>
         <script src="node_modules/angular-simple-logger/dist/angular-simple-logger.min.js"></script>
         <script src="node_modules/ng-infinite-scroll/build/ng-infinite-scroll.min.js"></script>
         <script src="node_modules/ui-select/dist/select.min.js"></script>
@@ -104,10 +120,12 @@
         <script src="controllers/dataEditorCtrl.js"></script>
         <script src="controllers/layerEditorCtrl.js"></script>
         <script src="controllers/layerEditCtrl.js"></script>
+        <script src="controllers/gisCtrl.js"></script>
         <script src="controllers/pdfCtrl.js"></script>
         <script src="controllers/threeCtrl.js"></script>
         <script src="controllers/zipCtrl.js"></script>
         <script src="controllers/geodataCtrl.js"></script>
+        <script src="components/analysis.js"></script>
         <script src="components/bibliography.js"></script>
         <script src="components/editor.js"></script>
         <script src="components/role.js"></script>

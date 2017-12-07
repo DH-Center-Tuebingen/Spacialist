@@ -25,6 +25,10 @@ a.activeLang {
     color: gray !important;
 }
 
+a.toggle {
+    text-decoration: none;
+}
+
 /* override flag settings */
 .flag {
     vertical-align: middle !important;
@@ -112,6 +116,10 @@ textarea {
     border: none;
     border-bottom: 1px solid gray;
     font-style: italic;
+}
+
+.list-no-bullets {
+    list-style-type: none;
 }
 
 .inline-list {
@@ -259,6 +267,11 @@ div[resizeable] {
 .scrollable-modal {
     max-height: calc(100vh - 20vh);
     overflow-x: auto;
+}
+
+.scrollable-dropdown > .dropdown-menu {
+    max-height: 50vh;
+    overflow-y: auto;
 }
 
 .thumb-wrapper {
@@ -551,8 +564,12 @@ div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
     cursor: zoom-in;
 }
 
-.disabled {
+.disabled, .disabled-pagination {
     cursor: not-allowed;
+}
+
+.disabled-pagination {
+    opacity: 0.5;
 }
 
 @media(max-width:767px){
@@ -594,6 +611,37 @@ div:hover > .resizeable-button-left, div:hover > .resizeable-button-right {
     justify-content: center;
     align-content: center;
     flex-direction: column;
+}
+
+.flex-hr-start {
+    align-items: flex-start;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.flex-hr-between {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.flex-hr-center {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.flex-vt {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.flex-vt-start {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .contextPrefix {
@@ -741,6 +789,14 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     vertical-align: bottom;
 }
 
+.top {
+    vertical-align: top !important;
+}
+
+.middle {
+    vertical-align: middle !important;
+}
+
 .btn-fab-minime {
     height: 24px !important;
     min-width: 24px !important;
@@ -791,6 +847,13 @@ ul.nav .material-icons, button .material-icons, ul.dropdown-menu .material-icons
     position: absolute;
     right: -2px;
     top: 8px;
+}
+
+.toggle-button {
+    position: absolute;
+    left: 0;
+    top: -25px;
+    z-index: 1;
 }
 
 .list-group-item {
@@ -863,6 +926,12 @@ span.btn {
 .btn.btn-xs, .btn.btn-sm {
     font-size: 13px !important;
 }
+
+.popover {
+    background: #fff;
+    width: 500px !important;
+    max-width: none !important;
+}
 /* << MATERIAL DESIGN PATCHES */
 
 /* Leaflet popups have fixed width, and buttons have nowrap, so buttons with longer text cross the popup border. This should fix that */
@@ -870,7 +939,7 @@ span.btn {
     white-space: normal !important;
 }
 
-.leaflet-control-fitworld-button {
+.leaflet-control-fitworld-button, .leaflet-control-toggle-measurements-button {
     cursor: pointer;
 }
 

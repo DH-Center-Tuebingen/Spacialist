@@ -1,0 +1,26 @@
+<tr ng-repeat="r in $ctrl.combinedResults">
+    <td>
+        {{ r.name }}
+    </td>
+    <td>
+        {{ r.modified }}
+    </td>
+    <td>
+        {{ r.created }}
+    </td>
+    <td>
+        {{ r.description }}
+    </td>
+    <td>
+        {{ r.copyright }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        {{ r.created_at }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        {{ r.updated_at }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        {{ r.lasteditor }}
+    </td>
+</tr>

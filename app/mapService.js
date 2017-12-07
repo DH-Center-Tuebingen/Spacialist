@@ -94,16 +94,17 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         return convertToStandardGeomtype(type);
     };
 
-    map.addListToMarkers = function(geodataList, contexts, mapArr, isInit) {
+    map.addListToMarkers = function(geodataList, contexts, mapArr, isInit, redirect) {
         isInit = isInit || false;
         if(!userService.can('view_geodata')) {
             return;
         }
+        var lid, color, geodata;
         for(var k in geodataList) {
             if(geodataList.hasOwnProperty(k)) {
-                var geodata = geodataList[k];
-                var lid;
-                var color;
+                geodata = geodataList[k];
+                lid = undefined;
+                color = undefined;
                 if(mapArr.geodata.linkedContexts[geodata.id]) {
                     var cid = mapArr.geodata.linkedContexts[geodata.id];
                     var c = contexts.data[cid];
@@ -123,7 +124,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                     properties: {
                         name: 'Geodata #' + geodata.id,
                         color: color,
-                        popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>"
+                        popupContent: "<div ng-include src=\"'layouts/marker.html'\"></div>",
+                        redirect: redirect
                     }
                 };
                 // Add geodata to contexttype layer if it is linked to it
@@ -143,6 +145,32 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         var newBounds = map.featureGroup.getBounds();
         var newNE = newBounds.getNorthEast();
         var newSW = newBounds.getSouthWest();
+        mapArr.bounds.northEast.lat = newNE.lat;
+        mapArr.bounds.northEast.lng = newNE.lng;
+        mapArr.bounds.southWest.lat = newSW.lat;
+        mapArr.bounds.southWest.lng = newSW.lng;
+    };
+
+    map.fitBoundsToLayer = function(parent, mapArr) {
+        var children = parent.getLayers();
+        if(children.length == 0) return;
+        var newNE = { lat: -180, lng: -90 };
+        var newSW = { lat: 180, lng: 90 };
+        var ne, sw, b, c;
+        for(var i=0; i<children.length; i++) {
+            c = children[i];
+            if(c.feature.geometry.type == 'Point') {
+                ne = sw = c.getLatLng();
+            } else {
+                b = c.getBounds();
+                ne = b.getNorthEast();
+                sw = b.getSouthWest();
+            }
+            if(ne.lat > newNE.lat) newNE.lat = ne.lat;
+            if(ne.lng > newNE.lng) newNE.lng = ne.lng;
+            if(sw.lat < newSW.lat) newSW.lat = sw.lat;
+            if(sw.lng < newSW.lng) newSW.lng = sw.lng;
+        }
         mapArr.bounds.northEast.lat = newNE.lat;
         mapArr.bounds.northEast.lng = newNE.lng;
         mapArr.bounds.southWest.lat = newSW.lat;
@@ -204,14 +232,12 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         return httpGetPromise.getData('api/context/byGeodata/' + featureId);
     };
 
-    map.updateMarker = function(geodata) {
+    map.updateMarker = function(geodata, map) {
         if(typeof geodata.id == 'undefined') return;
         if(geodata.id <= 0) return;
-        var color = geodata.color;
         var lat = geodata.lat;
         var lng = geodata.lng;
         var formData = new FormData();
-        if(typeof color != 'undefined') formData.append('color', color);
         if(typeof lat != 'undefined' && typeof lng != 'undefined') {
             var coords = [{
                 lat: geodata.lat,
@@ -222,13 +248,12 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         }
         httpPutPromise.getData('api/geodata/' + geodata.id, formData).then(
             function(response) {
-                map.map.selectedLayer.feature.properties.color = response.color || '#000000';
-                if(map.map.selectedLayer.feature.geometry.type == 'Point') {
+                if(map.geodata.linkedLayers[geodata.id].feature.geometry.type == 'Point') {
                     if(typeof response.geodata != 'undefined') {
                         var lng = response.geodata.geodata.coordinates[0];
                         var lat = response.geodata.geodata.coordinates[1];
                         var latlng = L.latLng(lat, lng);
-                        map.map.selectedLayer.setLatLng(latlng);
+                        map.geodata.linkedLayers[geodata.id].setLatLng(latlng);
                     }
                 }
             }
@@ -239,11 +264,12 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         return leafletBoundsHelpers.createBoundsFromArray(arr);
     };
 
-    map.initMapObject = function() {
-        return leafletData.getMap('mainmap');
+    map.initMapObject = function(mapId) {
+        return leafletData.getMap(mapId);
     };
 
-    map.initMapVariables = function() {
+    map.initMapVariables = function(range) {
+        range = range || 'default';
         map.map = {};
         map.map.center = {};
         map.map.defaults = {
@@ -264,9 +290,26 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
             color: '#808080',
             fillOpacity: 0.5
         };
-        map.map.controls = {
-            scale: true
-        };
+
+        var controls = {};
+        switch(range) {
+            case 'all':
+                controls.minimap = {
+                    type: 'minimap',
+                    layer: {
+                        name: 'OpenStreetMap',
+                        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        type: 'xyz'
+                    },
+                    toggleDisplay: true,
+                    zoomLevelOffset: -5,
+                    zoomLevelFixed: 1
+                }
+            default:
+                controls.scale = true;
+        }
+        map.map.controls = controls;
+
 
         var guideLayers = [
             map.featureGroup
@@ -326,7 +369,8 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         });
     };
 
-    map.initGeodata = function(geodata, contexts, mapArr) {
+    map.initGeodata = function(geodata, contexts, mapArr, redirect) {
+        redirect = redirect || false;
         for(var k in contexts.data) {
             if(contexts.data.hasOwnProperty(k)) {
                 var elem = contexts.data[k];
@@ -335,7 +379,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                 }
             }
         }
-        map.addListToMarkers(geodata, contexts, mapArr, true);
+        map.addListToMarkers(geodata, contexts, mapArr, true, redirect);
         initHiddenLayers(mapArr);
     };
 
@@ -379,6 +423,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                         currentLayer.layerOptions.type = layer.layer_type;
                         break;
                     case 'UNLINKED':
+                        var orgId = id;
                         id = layer.id = 'unlinked';
                         currentLayer.data = {
                             type: 'FeatureCollection',
@@ -386,6 +431,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                         };
                         currentLayer.type = 'geoJSONShape';
                         currentLayer.layerOptions = setLayerOptions(layer);
+                        currentLayer.layerOptions.original_id = orgId;
                         setGeojsonLayerOptions(currentLayer.layerOptions, mapArr, contexts);
                         break;
                     default:
@@ -465,7 +511,7 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
                     if(map.modes.deleting) {
                         return;
                     }
-                    $state.go('root.spacialist.geodata', {id: layer.feature.id});
+                    if(feature.properties.redirect) $state.go('root.spacialist.geodata', {id: layer.feature.id});
                 });
             }
             feature.properties.wkt = map.toWkt(layer);

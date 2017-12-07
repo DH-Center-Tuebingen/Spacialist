@@ -1396,7 +1396,7 @@ class ContextController extends Controller {
                 if(isset($jsonVal->epoch)){
                     $attrVal['epoch'] = $jsonVal->epoch;
                 }
-                $attr->val = json_encode($attrVal);
+                if(isset($attrVal)) $attr->val = json_encode($attrVal);
             } else if($attr->datatype == 'geography') {
                 $tmp = AttributeValue::find($attr->id);
                 if(isset($tmp->geography_val)) {

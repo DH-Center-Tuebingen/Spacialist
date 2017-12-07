@@ -24,6 +24,7 @@ class AttributeValue extends Model
         'dbl_val',
         'dt_val',
         'possibility',
+        'possibility_description',
         'lasteditor',
         'thesaurus_val',
         'json_val'
@@ -32,4 +33,20 @@ class AttributeValue extends Model
     protected $postgisFields = [
         'geography_val',
     ];
+
+    public function context() {
+        return $this->belongsTo('App\Context');
+    }
+
+    public function attribute() {
+        return $this->belongsTo('App\Attribute');
+    }
+
+    public function context_val() {
+        return $this->belongsTo('App\Context', 'context_val');
+    }
+
+    public function thesaurus_val() {
+        return $this->belongsTo('App\ThConcept', 'thesaurus_val', 'concept_url');
+    }
 }

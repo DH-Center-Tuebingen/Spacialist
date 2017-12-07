@@ -212,6 +212,7 @@ class FileController extends Controller
             } catch(PelDataWindowOffsetException $e) {
                 // Do nothing for now
             }
+        
             $file->created = strtotime($file->created);
             $file->linked_contexts = $this->getLinkedContexts($file);
         }

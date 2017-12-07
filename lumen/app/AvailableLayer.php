@@ -31,4 +31,8 @@ class AvailableLayer extends Model
         'layer_type' => 'string',
         'color' => 'color',
     ];
+
+    public function context_type() {
+        return $this->belongsTo('App\ContextType');
+    }
 }

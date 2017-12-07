@@ -1,0 +1,59 @@
+<tr ng-repeat="r in $ctrl.combinedResults">
+    <td>
+        {{ r.author }}
+    </td>
+    <td>
+        {{ r.title || r.booktitle }}
+    </td>
+    <td>
+        {{ r.type }}
+    </td>
+    <td>
+        {{ r.year }}
+    </td>
+    <td>
+        {{ r.volume }}
+    </td>
+    <td>
+        {{ r.series }}
+    </td>
+    <td>
+        {{ r.school }}
+    </td>
+    <td>
+        {{ r.publisher }}
+    </td>
+    <td>
+        {{ r.pages }}
+    </td>
+    <td>
+        {{ r.organization }}
+    </td>
+    <td>
+        {{ r.number }}
+    </td>
+    <td>
+        {{ r.note }}
+    </td>
+    <td>
+        {{ r.month }}
+    </td>
+    <td>
+        {{ r.journal }}
+    </td>
+    <td>
+        {{ r.institution }}
+    </td>
+    <td>
+        {{ r.chapter }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        {{ r.created_at }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        {{ r.updated_at }}
+    </td>
+    <td ng-show="$ctrl.showAmbiguous">
+        {{ r.lasteditor }}
+    </td>
+</tr>

@@ -46,6 +46,14 @@ function updateLastModified(context) {
     return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
 }
 
+function resetObject(o) {
+    for(var k in o) {
+        if(o.hasOwnProperty(k)) {
+            delete o[k];
+        }
+    }
+}
+
 L.Control.FitWorld = L.Control.extend({
 	onAdd: function(map) {
         var o = this.options;
@@ -56,10 +64,14 @@ L.Control.FitWorld = L.Control.extend({
         icon.innerHTML = 'zoom_out_map';
         elem['ui-sref'] = '';
         elem.role = 'button';
+        elem.title = 'Fit map to all features';
 
-        container.onclick = function(){
+        L.DomEvent.on(container, 'dblclick', L.DomEvent.stopPropagation);
+
+        container.onclick = function() {
             o.onClick();
         };
+
         return container;
 	},
 
@@ -69,4 +81,40 @@ L.Control.FitWorld = L.Control.extend({
 
 L.control.fitworld = function(opts) {
 	return new L.Control.FitWorld(opts);
+};
+
+L.Control.ToggleMeasurements = L.Control.extend({
+	onAdd: function(map) {
+        var state = false;
+        var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-toggle-measurements');
+        var elem = L.DomUtil.create('a', 'leaflet-control-toggle-measurements-button', container);
+        var icon = L.DomUtil.create('i', 'material-icons md-18', elem);
+        icon.innerHTML = 'straighten';
+        elem['ui-sref'] = '';
+        elem.role = 'button';
+        elem.title = 'Toggle Measurements';
+
+        L.DomEvent.on(container, 'dblclick', L.DomEvent.stopPropagation);
+
+        container.onclick = function() {
+            map.eachLayer(function(l) {
+                if(l.feature && l.feature.geometry.type != 'Point') {
+                    if(state) {
+                        l.hideMeasurements();
+                    } else {
+                        l.showMeasurements();
+                    }
+                }
+            });
+            state = !state;
+        }
+        return container;
+	},
+
+	onRemove: function(map) {
+	}
+});
+
+L.control.togglemeasurements = function(opts) {
+	return new L.Control.ToggleMeasurements(opts);
 };

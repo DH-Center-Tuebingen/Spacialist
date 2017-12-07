@@ -57,7 +57,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
 
     if(vm.tab == 'map') {
         mapService.setupLayers(vm.layer, vm.map, vm.contexts, vm.concepts);
-        mapService.initMapObject().then(function(obj) {
+        mapService.initMapObject('mainmap').then(function(obj) {
             vm.mapObject = obj;
             var fwOptions = {
                 position: 'topleft',
@@ -73,7 +73,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                         vm.map.mapLayers[l.options.layer_id] = l;
                     }
                 });
-                mapService.initGeodata(vm.geodata, vm.contexts, vm.map);
+                mapService.initGeodata(vm.geodata, vm.contexts, vm.map, true);
             }, 100);
         });
     }
@@ -121,7 +121,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
     };
 
     vm.updateMarkerOptions = function(geodata) {
-        mapService.updateMarker(geodata);
+        mapService.updateMarker(geodata, vm.map);
     };
 
     $scope.treeCallbacks = {

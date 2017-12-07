@@ -69,4 +69,8 @@ class Literature extends Model
         'school'    => 'string',
         'series'    => 'string'
     ];
+
+    public function contexts() {
+        return $this->belongsToMany('App\Context', 'sources')->withPivot('description', 'attribute_id');
+    }
 }

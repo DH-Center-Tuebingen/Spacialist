@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 use App\AvailableLayer;
+use App\Geodata;
+use App\Context;
+use App\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use \Log;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use \wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class OverlayController extends Controller {
-    public $availableGeometryTypes = \App\Geodata::availableGeometryTypes;
+    public $availableGeometryTypes = Geodata::availableGeometryTypes;
 
     /**
      * Create a new controller instance.
@@ -39,6 +45,99 @@ class OverlayController extends Controller {
 
     public function getGeometryTypes() {
         return response()->json($this->availableGeometryTypes);
+    }
+
+    public function exportLayer($id, $type = 'geojson') {
+        $user = \Auth::user();
+        if(!$user->can('view_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        try {
+            $layer = AvailableLayer::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This layer does not exist'
+            ]);
+        }
+        if(strtoupper($layer->type) != 'UNLINKED' && !isset($layer->context_type_id)) {
+            return response()->json([
+                'error' => 'This layer does not support export'
+            ]);
+        }
+        if(strtoupper($layer->type) == 'UNLINKED') {
+            $linkedGeodataIds = Context::whereNotNull('geodata_id')->pluck('geodata_id');
+            $geodataBuilder = Geodata::whereNotIn('id', $linkedGeodataIds);
+        } else {
+            $geodataBuilder = Geodata::join('contexts', 'contexts.geodata_id', '=', 'geodata.id')
+                ->where('contexts.context_type_id', $layer->context_type_id)
+                ->select('geodata.*');
+        }
+        $query = Helpers::parseSql($geodataBuilder);
+
+        $type = strtoupper($type);
+        switch($type) {
+            case 'CSV':
+                $geometry = 'AS_XYZ';
+                $separator = 'COMMA';
+                $exptype = 'CSV';
+                $suffix = '.csv';
+                break;
+            case 'WKT':
+                $geometry = 'AS_WKT';
+                $separator = 'COMMA';
+                $exptype = 'CSV';
+                $suffix = '.csv';
+                break;
+            case 'KML':
+            case 'KMZ':
+                $exptype = 'KML';
+                $suffix = '.kml';
+                break;
+            case 'GML':
+                $exptype = 'GML';
+                $suffix = '.gml';
+                break;
+            case 'GEOJSON':
+                //GeoJSON is default
+            default:
+                $exptype = 'GeoJSON';
+                $suffix = '.json';
+                break;
+        }
+        $host = env('DB_HOST');
+        $port = env('DB_PORT');
+        $user = env('DB_USERNAME');
+        $db = env('DB_DATABASE');
+        $pw = env('DB_PASSWORD');
+        $dt = date('dmYHis');
+        $tmpFile = '/tmp/export-'.$dt.$suffix;
+        $command = "ogr2ogr -f \"$exptype\" $tmpFile PG:\"host=$host port=$port user=$user dbname=$db password=$pw\" -sql \"$query\"";
+        if($exptype == 'CSV') {
+            $command .= " -lco GEOMETRY=$geometry -lco SEPARATOR=$separator -lco LINEFORMAT=LF";
+        }
+        $process = new Process($command);
+        $process->run();
+
+        if(!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
+
+        if($type == 'KMZ') {
+            $tmpZip = '/tmp/export-kml-'.$dt.'.zip';
+            UnifiedArchive::archiveNodes($tmpFile, $tmpZip);
+            // overwrite tmpFile path, because the zip should be downloaded
+            unlink($tmpFile);
+            $tmpFile = $tmpZip;
+        }
+        // get raw parsed content
+        $content = file_get_contents($tmpFile);
+        // delete tmp file
+        unlink($tmpFile);
+
+        return response(base64_encode($content));
     }
 
     // POST

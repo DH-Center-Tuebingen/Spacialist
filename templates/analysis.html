@@ -1,0 +1,344 @@
+<div class="row">
+    <button type="button" class="btn btn-default toggle-button" ng-click="$ctrl.toggleShowFilterOptions()">
+        <i class="material-icons" ng-show="$ctrl.showFilterOptions">arrow_back</i>
+        <i class="material-icons" ng-show="!$ctrl.showFilterOptions">menu</i>
+    </button>
+    <div ng-class="$ctrl.showFilterOptions ? 'col-md-3' : 'hidden'">
+        <h2 translate="analysis.query-options.heading"></h2>
+        <div ng-if="$ctrl.expertMode">
+            <h4 translate="analysis.query-options.order-rules.heading"></h4>
+            <p ng-if="$ctrl.orders.length == 0" translate="analysis.query-options.order-rules.none">
+            </p>
+            <ol ng-if="$ctrl.orders.length > 0">
+                <li class="flex-hr-between" ng-repeat="o in $ctrl.orders">
+                    <span>{{ $index + 1 }}.</span>
+                    <div>
+                        {{ o.col }} {{ o.dir }}
+                    </div>
+                    <div>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeOrder(o)">
+                            <i class="material-icons md-18 fa-red">delete</i>
+                        </a>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveOrderDown(o)">
+                            <i class="material-icons md-18">arrow_drop_down</i>
+                        </a>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="$last" ng-click="$ctrl.moveOrderDown(o)" style="visibility: hidden;">
+                            <i class="material-icons md-18">arrow_drop_down</i>
+                        </a>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="$ctrl.moveOrderUp(o)">
+                            <i class="material-icons md-18">arrow_drop_up</i>
+                        </a>
+                        <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="$first" ng-click="$ctrl.moveOrderDown(o)" style="visibility: hidden;">
+                            <i class="material-icons md-18">arrow_drop_down</i>
+                        </a>
+                    </div>
+                </li>
+            </ol>
+        </div>
+        <h4 translate="analysis.query-options.filters.heading"></h4>
+        <p ng-if="$ctrl.filters.length == 0" translate="analysis.query-options.filters.none">
+        </p>
+        <ol ng-if="$ctrl.filters.length > 0">
+            <li class="flex-hr-between" ng-repeat="f in $ctrl.filters">
+                <span>{{ $index + 1 }}.</span>
+                <div>
+                    <strong ng-show="!$first">{{ f.and ? 'AND' : 'OR' }}</strong>
+                </div>
+                <div>
+                    {{ f.col }} {{ f.comp }} {{ f.comp_value }} <span ng-if="f.func">(Using {{ f.func }} with {{ f.func_values }})</span>
+                </div>
+                <div>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.editFilter(f)" ng-disabled="true">
+                        <i class="material-icons md-18 fa-cyan">edit</i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeFilter(f)">
+                        <i class="material-icons md-18 fa-red">delete</i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$last" ng-click="$ctrl.moveFilterDown(f)">
+                        <i class="material-icons md-18">arrow_drop_down</i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="$last" style="visibility: hidden;">
+                        <i class="material-icons md-18"></i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="!$first" ng-click="$ctrl.moveFilterUp(f)">
+                        <i class="material-icons md-18">arrow_drop_up</i>
+                    </a>
+                    <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-if="$first" style="visibility: hidden;">
+                        <i class="material-icons md-18"></i>
+                    </a>
+                </div>
+            </li>
+        </ol>
+        <h4 translate="analysis.query-options.further.heading"></h4>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-md-3" translate="analysis.query-options.apply-immediately"></label>
+                <div class="col-md-9">
+                    <input type="checkbox" class="form-control" ng-model="$ctrl.instantFilter" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-3" translate="analysis.query-options.table"></label>
+                <div class="col-md-9">
+                    <ui-select ng-model="$ctrl.origin">
+                        <ui-select-match allow-clear="false">
+                            {{ $select.selected.label | translate }}
+                        </ui-select-match>
+                        <ui-select-choices repeat="o in $ctrl.origins | filter: $select.search">
+                            <span ng-bind-html="o.label | translate | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="form-group" ng-if="!$ctrl.expertMode">
+                <label class="control-label col-md-3" translate="analysis.query-options.show-metadata-columns"></label>
+                <div class="col-md-9">
+                    <input type="checkbox" class="form-control" ng-model="$ctrl.showAmbiguous" />
+                </div>
+            </div>
+            <div class="form-group" ng-if="$ctrl.expertMode">
+                <label class="control-label col-md-3" translate="analysis.query-options.limit"></label>
+                <div class="col-md-9">
+                    <span translate="analysis.query-options.limit.from"></span>: <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.limit.from" />
+                    <span translate="analysis.query-options.limit.amount"></span>: <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.limit.amount" />
+                </div>
+            </div>
+            <div class="form-group" ng-if="$ctrl.expertMode">
+                <label class="control-label col-md-3" translate="analysis.query-options.selected-columns"></label>
+                <div class="col-md-9">
+                    <ol>
+                        <li class="flex-hr-between" ng-repeat="col in $ctrl.columns">
+                            <span>{{ $index + 1 }}.</span>
+                            <div>
+                                {{ col.col }} <span ng-if="col.as"> AS {{ col.as }}</span>
+                            </div>
+                            <div>
+                                <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.removeColumn(col)">
+                                    <i class="material-icons md-18 fa-red">delete</i>
+                                </a>
+                            </div>
+                        </li>
+                    </ol>
+                    <div class="flex-vt">
+                        <div class="flex-hr-start">
+                            <ui-select ng-model="$ctrl.column.col">
+                                <ui-select-match allow-clear="false">
+                                    {{ $select.selected.as || $select.selected.col }}
+                                </ui-select-match>
+                                <ui-select-choices repeat="ac in $ctrl.availableColumns | filter: $select.search">
+                                    <span ng-show="ac.as">
+                                        <span ng-bind-html="ac.as | highlight: $select.search"></span> (<span ng-bind-html="ac.col | highlight: $select.search"></span>)
+                                    </span>
+                                    <span ng-hide="ac.as">
+                                        <span ng-bind-html="ac.col | highlight: $select.search"></span>
+                                    </span>
+                                </ui-select-choices>
+                            </ui-select>
+                            <input type="text" placeholder="AS" ng-model="$ctrl.column.as" />
+                            <button type="button" class="btn btn-default" ng-click="$ctrl.addColumn()" ng-disabled="!$ctrl.column.col || ($ctrl.column.func && !$ctrl.column.func_values)">
+                                <i class="material-icons">add</i> <span translate="analysis.query-options.add-button"></span>
+                            </button>
+                        </div>
+                        <div class="flex-hr-start">
+                            <ui-select ng-model="$ctrl.column.func" style="display: inline-block;">
+                                <ui-select-match allow-clear="true">
+                                    {{ $select.selected }}
+                                </ui-select-match>
+                                <ui-select-choices repeat="f in $ctrl.functions | filter: $select.search">
+                                    <span ng-bind-html="f | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                            <input type="text" placeholder="Function Values" ng-model="$ctrl.column.func_values" ng-show="$ctrl.column.func" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" ng-if="$ctrl.expertMode">
+                <label class="control-label col-md-3"><code>DISTINCT</code></label>
+                <div class="col-md-9">
+                    <input type="checkbox" class="form-control" ng-model="$ctrl.distinct" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-3"><span translate="analysis.query-options.expert-mode"></span> <sup uib-popover="{{ 'analysis.query-options.expert-mode.info' | translate }}" popover-trigger="'mouseover'" popover-placement="auto right"><i class="material-icons md-14">help_outline</i></sup></label>
+                <div class="col-md-9">
+                    <input type="checkbox" class="form-control" ng-model="$ctrl.expertMode" ng-change="$ctrl.toggleExpertMode()" />
+                </div>
+            </div>
+            <button type="button" class="btn btn-default" ng-click="$ctrl.filter()">
+                <span translate="analysis.query-options.filter-button"></span>
+            </button>
+            <div class="form-group" ng-if="$ctrl.expertMode">
+                <label class="control-label col-md-3" translate="analysis.query-options.resulting-query"></label>
+                <div class="col-md-9">
+                    <textarea class="form-control" rows="6" ng-model="$ctrl.query" ng-readonly="true"></textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div ng-class="$ctrl.showFilterOptions ? 'col-md-9' : 'col-md-12'">
+        <p class="alert alert-info" ng-show="!$ctrl.hasResults()" translate="analysis.query.no-results">
+        </p>
+        <div ng-if="$ctrl.hasResults()">
+            <h2><span translate="analysis.results.heading"></span> <span class="badge">{{ $ctrl.countResults() }}</span></h2>
+            <span>{{ $ctrl.limit.from }} - {{ $ctrl.limit.from + $ctrl.countResults() }} / {{ $ctrl.resultCount }}</span>
+            <nav ng-if="!$ctrl.expertMode">
+                <ul class="pager left">
+                    <li>
+                        <a href="" ng-click="$ctrl.showPreviousResults()" ng-class="{'disabled-pagination': $ctrl.noPrevPage()}">
+                            <i class="material-icons md-18">arrow_back</i> <span translate="analysis.results.prev-button" translate-values="{cnt: $ctrl.previousCount()}"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="" ng-click="$ctrl.showNextResults()" ng-class="{'disabled-pagination': $ctrl.noNextPage()}">
+                            <span translate="analysis.results.next-button" translate-values="{cnt: $ctrl.nextCount()}"></span> <i class="material-icons md-18">arrow_forward</i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <ul class="nav nav-tabs">
+                <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'raw'}" ng-if="$ctrl.expertMode">
+                    <a ng-click="$ctrl.activeResultTab = 'raw'">
+                        <i class="material-icons md-18 top">list</i> <span translate="analysis.results.tabs.raw.heading"></span>
+                    </a>
+                </li>
+                <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'simple'}">
+                    <a ng-click="$ctrl.activeResultTab = 'simple'">
+                        <i class="material-icons md-18 top">extension</i> <span translate="analysis.results.tabs.simple.heading"></span>
+                    </a>
+                </li>
+                <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'vis'}">
+                    <a ng-click="$ctrl.activeResultTab = 'vis'">
+                        <i class="material-icons md-18 top">show_chart</i> <span translate="analysis.results.tabs.visualization.heading"></span>
+                    </a>
+                </li>
+                <li role="presentation" ng-class="{ 'active': $ctrl.activeResultTab == 'export'}">
+                    <a ng-click="$ctrl.activeResultTab = 'export'">
+                        <i class="material-icons md-18 top">file_upload</i> <span translate="analysis.results.tabs.export.heading"></span>
+                    </a>
+                </li>
+            </ul>
+            <div class="table-responsive" ng-show="$ctrl.activeResultTab == 'raw'" ng-if="$ctrl.expertMode">
+                <table class="table table-striped table-hover table-bordered">
+                    <tr>
+                        <th ng-repeat="(k, col) in $ctrl.results[0]">
+                            <div class="flex-hr-start" uib-tooltip="{{$ctrl.getOriginalColumnName(k)}}">
+                                {{ k }}
+                                <a href="">
+                                    <i class="material-icons md-18" ng-click="$ctrl.addOrder(k, 'desc')">arrow_drop_up</i>
+                                </a>
+                                <a href="">
+                                    <i class="material-icons md-18" ng-click="$ctrl.addOrder(k, 'asc')">arrow_drop_down</i>
+                                </a>
+                                <a href="" class="filter-popover-trigger" uib-popover-template="'templates/filter-popup.html'" popover-placement="bottom" popover-trigger="'click'">
+                                    <i class="material-icons md-18">search</i>
+                                </a>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr ng-repeat="r in $ctrl.results">
+                        <td ng-repeat="(k, col) in $ctrl.results[0]">
+                            {{ r[k] }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="table-responsive" ng-show="$ctrl.activeResultTab == 'simple'">
+                <table class="table table-striped table-hover table-bordered">
+                    <tr ng-if="$ctrl.filteredOrigin.name == 'contexts'" ng-include src="'templates/table-row-contexts-header.html'">
+                    </tr>
+                    <tr ng-if="$ctrl.filteredOrigin.name == 'attribute_values'" ng-include src="'templates/table-row-attributes-header.html'">
+                    </tr>
+                    <tr ng-if="$ctrl.filteredOrigin.name == 'files'" ng-include src="'templates/table-row-files-header.html'">
+                    </tr>
+                    <tr ng-if="$ctrl.filteredOrigin.name == 'geodata'" ng-include src="'templates/table-row-geodata-header.html'">
+                    </tr>
+                    <tr ng-if="$ctrl.filteredOrigin.name == 'literature'" ng-include src="'templates/table-row-literature-header.html'">
+                    </tr>
+                    <tbody ng-if="$ctrl.filteredOrigin.name == 'contexts'" ng-include src="'templates/table-row-contexts-body.html'">
+                    </tbody>
+                    <tbody ng-if="$ctrl.filteredOrigin.name == 'attribute_values'" ng-include src="'templates/table-row-attributes-body.html'">
+                    </tbody>
+                    <tbody ng-if="$ctrl.filteredOrigin.name == 'files'" ng-include src="'templates/table-row-files-body.html'">
+                    </tbody>
+                    <tbody ng-if="$ctrl.filteredOrigin.name == 'geodata'" ng-include src="'templates/table-row-geodata-body.html'">
+                    </tbody>
+                    <tbody ng-if="$ctrl.filteredOrigin.name == 'literature'" ng-include src="'templates/table-row-literature-body.html'">
+                    </tbody>
+                </table>
+            </div>
+            <div ng-show="$ctrl.activeResultTab == 'vis'">
+                <form class="form-horizontal col-md-5">
+                    <div class="form-group">
+                        <label class="control-label col-md-3" translate="analysis.results.tabs.visualization.type"></label>
+                        <div class="col-md-9">
+                            <ui-select ng-model="$ctrl.vis.type">
+                                <ui-select-match allow-clear="false">
+                                    {{ $select.selected.label | translate }}
+                                </ui-select-match>
+                                <ui-select-choices repeat="av in $ctrl.availableVisualizations | filter: $select.search">
+                                    <span ng-bind-html="av.label | translate | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'scatter'" ng-include src="'templates/visualizations/scatter.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'line'" ng-include src="'templates/visualizations/line.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'bar'" ng-include src="'templates/visualizations/bar.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'pie'" ng-include src="'templates/visualizations/pie.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'histogram'" ng-include src="'templates/visualizations/histogram.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'histogram2d'" ng-include src="'templates/visualizations/histogram2d.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'ternary'" ng-include src="'templates/visualizations/ternary.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'ternarycontour'" ng-include src="'templates/visualizations/ternarycontour.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'heatmap'" ng-include src="'templates/visualizations/heatmap.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'windrose'" ng-include src="'templates/visualizations/windrose.html'">
+                    </div>
+                    <div ng-if="$ctrl.vis.type.type == 'radar'" ng-include src="'templates/visualizations/radar.html'">
+                    </div>
+                    <button type="button" class="btn btn-default" ng-click="$ctrl.visualize($ctrl.vis.type.type)" ng-disabled="!$ctrl.vis[$ctrl.vis.type.type].validate()">
+                        <i class="material-icons">visibility</i> <span translate="analysis.results.tabs.visualization.visualize-button"></span>
+                    </button>
+                </form>
+                <div class="col-md-7" id="plotly-visualization-container"></div>
+            </div>
+            <div ng-show="$ctrl.activeResultTab == 'export'">
+                <div class="btn-group" uib-dropdown>
+                    <button type="button" class="btn btn-default" ng-click="$ctrl.export('csv', true)" translate="analysis.results.tabs.export.export-button">
+                    </button>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" uib-dropdown-toggle aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu" uib-dropdown-menu>
+                        <li role="menuitem">
+                            <a href="" ng-click="$ctrl.export('csv', true)" translate="analysis.results.tabs.export.as-csv.all">
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="" ng-click="$ctrl.export('json', true)" translate="analysis.results.tabs.export.as-json.all">
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="menuitem">
+                            <a href="" ng-click="$ctrl.export('csv', false)" translate="analysis.results.tabs.export.as-csv.limited" translate-values="{ from: $ctrl.limit.from + 1, to: ($ctrl.limit.amount+$ctrl.limit.from) }">
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="" ng-click="$ctrl.export('json', false)" translate="analysis.results.tabs.export.as-json.limited" translate-values="{ from: $ctrl.limit.from + 1, to: ($ctrl.limit.amount+$ctrl.limit.from) }">
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

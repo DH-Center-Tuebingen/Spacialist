@@ -1,6 +1,35 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.5 - Ephesus
+### Added
+- GIS View
+  - Importer
+    - CSV/DSV
+    - WKT (as CSV)
+    - KML/KMZ
+    - Shape Files
+    - GeoJSON
+  - Export layers
+    - GeoJSON (default)
+    - CSV
+    - WKT (as CSV)
+    - KML/KMZ
+    - GML
+  - Layer options
+- Analysis View (Beta)
+  - SQL-like expert mode
+  - simple non-SQL mode (default)
+  - Visualizations based on [plot.ly](https://plot.ly/)
+    - Scatter
+    - Line
+    - Bar
+    - Pie
+    - Histogram
+    - Ternary
+  - Export
+    - as CSV (ambiguous columns are currently not supported)
+
 ## 0.4.4
 ### Fixed
 - Error on empty Geo Objects
@@ -38,7 +67,6 @@ All notable changes to this project will be documented in this file.
 - Fixed a drag&drop bug in the context tree (see #255)
 
 ## 0.4 - Delphi
-
 ### Added
 - Preferences to allow customization for admins and users as well
 - Global search, Supports

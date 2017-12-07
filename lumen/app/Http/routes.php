@@ -103,6 +103,11 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('', 'AnalysisController@getAnalyses');
+
+        // TODO are they really POST?
+        $app->post('filter', 'AnalysisController@filterContexts');
+        $app->post('export', 'AnalysisController@export');
+        $app->post('export/{type}', 'AnalysisController@export');
 });
 
 $app->group([
@@ -137,6 +142,8 @@ $app->group([
     ], function($app) {
         $app->get('', 'OverlayController@getOverlays');
         $app->get('geometry_types', 'OverlayController@getGeometryTypes');
+        $app->get('{id:[0-9]+}/export', 'OverlayController@exportLayer');
+        $app->get('{id:[0-9]+}/export/{type}', 'OverlayController@exportLayer');
 
         $app->post('add', 'OverlayController@addLayer');
 
@@ -173,9 +180,11 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('', 'GeodataController@get');
+        $app->get('epsg_codes', 'GeodataController@getEpsgCodes');
         $app->get('wktToGeojson/{wkt}', 'GeodataController@wktToGeojson');
 
         $app->post('', 'GeodataController@add');
+        $app->post('geojson', 'GeodataController@addGeoJson');
 
         $app->put('{id:[0-9]+}', 'GeodataController@put');
 
