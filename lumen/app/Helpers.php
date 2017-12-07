@@ -32,7 +32,14 @@ class Helpers {
     }
 
     public static function getFullFilePath($filename) {
-        return Storage::disk(Helpers::getDisk())->url($filename);
+        try {
+            return Storage::disk(Helpers::getDisk())->url($filename);
+        } catch(\RuntimeException $e) {
+            // If ->url() is not supported by the storage driver/disk,
+            // a RuntimeException is thrown. Return url for file link route
+            $route = route('fileLink', ['filename' => $filename]);
+            return $route;
+        }
     }
 
     public static function getStorageFilePath($filename) {

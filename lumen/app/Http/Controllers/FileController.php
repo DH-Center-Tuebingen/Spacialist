@@ -231,6 +231,15 @@ class FileController extends Controller
         return response()->json($this->getFileById($id));
     }
 
+    public function getFileFromLink($filename) {
+        $file = File::where('name', $filename)->orWhere('thumb', $filename)->first();
+        if(isset($file)) {
+            return response(Storage::disk(Helpers::getDisk())->get($file->name))
+                ->header('Content-Type', $file->mime_type);
+        }
+        return '';
+    }
+
     public function getAvailableTags() {
         $tagObj = Preference::where('label', 'prefs.tag-root')->value('default_value');
         $tagUri = json_decode($tagObj)->uri;

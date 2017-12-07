@@ -17,6 +17,13 @@ use Illuminate\Http\Request;
 $app->get('/', function () use ($app) {
     return $app->version();
 });
+// needed to display files from servers, that do not
+// support Storage::url (e.g. (s)ftp), without middleware,
+// because ng-src can not set auth token
+$app->get('file/{filename}/link', [
+    'uses' => 'FileController@getFileFromLink',
+    'as' => 'fileLink'
+]);
 
 $app->post('user/login', 'UserController@login');
 
