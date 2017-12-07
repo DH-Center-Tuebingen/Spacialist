@@ -342,7 +342,8 @@ class FileController extends Controller
 
         $file = $request->file('file');
         $filename = $file->getClientOriginalName();
-        $filehandle = fopen($file->getRealPath(), 'r');
+        $realPath = $file->getRealPath();
+        $filehandle = fopen($realPath, 'r');
         Storage::disk(Helpers::getDisk())->put(
             $filename,
             $filehandle
@@ -362,25 +363,25 @@ class FileController extends Controller
             $cleanName = substr($filename, 0, strlen($filename)-strlen($ext)-1);
             $thumbName = $cleanName . $THUMB_SUFFIX . $EXP_SUFFIX;
 
-            $imageInfo = getimagesize($fileUrl);
+            $imageInfo = getimagesize($realPath);
             $width = $imageInfo[0];
             $height = $imageInfo[1];
             $mime = $imageInfo[2];//$imageInfo['mime'];
             if($width > $THUMB_WIDTH) {
                 switch($mime) {
                     case IMAGETYPE_JPEG:
-                        $image = imagecreatefromjpeg($fileUrl);
+                        $image = imagecreatefromjpeg($realPath);
                         break;
                     case IMAGETYPE_PNG:
-                        $image = imagecreatefrompng($fileUrl);
+                        $image = imagecreatefrompng($realPath);
                         break;
                     case IMAGETYPE_GIF:
-                        $image = imagecreatefromgif($fileUrl);
+                        $image = imagecreatefromgif($realPath);
                         break;
                     default:
                         //echo "is of UNSUPPORTED type " . $imageInfo['mime'];
                         // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
-                        $im = new Imagick($fileUrl);
+                        $im = new Imagick($realPath);
                         $fileUrl = $url . '/' . $cleanName . $EXP_SUFFIX;
                         $im->setImageFormat($EXP_FORMAT);
                         $im->writeImage($fileUrl);
