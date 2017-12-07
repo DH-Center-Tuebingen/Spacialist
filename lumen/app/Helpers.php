@@ -38,6 +38,15 @@ class Helpers {
             // If ->url() is not supported by the storage driver/disk,
             // a RuntimeException is thrown. Return url for file link route
             $route = route('fileLink', ['filename' => $filename]);
+            $base = url("");
+            // We want to remove trailing / as well
+            if(!Helpers::endsWith($base, '/')) {
+                $base .= '/';
+            }
+            // remove base url
+            $route = substr($route, strlen($base));
+            // add api prefix to route url
+            $route = env('SP_API_PREFIX', 'api/') . $route;
             return $route;
         }
     }

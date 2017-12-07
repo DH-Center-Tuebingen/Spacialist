@@ -25,7 +25,7 @@ $app = new Laravel\Lumen\Application(
 
 config([
     "filesystems" => [
-        'default' => 'local',
+        'default' => 'public',
         'disks' => [
             'local' => [
                 'driver' => 'local',
