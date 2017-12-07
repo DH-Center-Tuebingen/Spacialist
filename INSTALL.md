@@ -179,6 +179,10 @@ Example:
 Lumen (5.3.2) (Laravel Components 5.3.*)
 ```
 
+### Seeds
+
+Run `php artisan db:seed` for seeding your database with initial data (default Admin Account, Languages, Roles and Permissions). See [list of available seeds](https://github.com/eScienceCenter/Spacialist/tree/master/lumen/database/seeds) for additional available seeds like creating a Guest User Account or random test data). To run only a specific seeder appand `--class=<ClassName>` (e.g. `php artisan db:seed --class=GuestUserSeeder` to create a Guest User Account).
+
 #### External storage
 Lumen supports different filesystems. Some of the most popular adapters:
 - AWS S3
