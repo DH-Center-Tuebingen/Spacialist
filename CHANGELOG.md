@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.5.1
+### Added
+- Only show up to first 10 rows in csv preview
+- Add option to parse csv without header row
+
 ## 0.5 - Ephesus
 ### Added
 - GIS View

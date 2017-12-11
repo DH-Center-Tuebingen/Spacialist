@@ -805,8 +805,9 @@ spacialistApp.filter('urlify', function() {
     };
 });
 
-spacialistApp.filter('csv2table', function() {
-    return function(csv, delimiter) {
+spacialistApp.filter('csv2table', function($translate) {
+    return function(csv, delimiter, hasHeader, rowCount) {
+        if(hasHeader !== false) hasHeader = true;
         if(!csv) return '<table></table>';
         delimiter = delimiter || ',';
         var rendered = '<table class="table table-striped">';
@@ -814,9 +815,15 @@ spacialistApp.filter('csv2table', function() {
             delimiter = '\t';
         }
         var dsv = d3.dsv(delimiter);
+        var rows;
         var headers = csv.split('\n')[0];
         var headerCols = dsv.parseRows(headers)[0];
-        var rows = dsv.parse(csv);
+        if(hasHeader) {
+            rows = dsv.parse(csv);
+        } else {
+            headerCols = createCountingCsvHeader(headerCols.length, $translate);
+            rows = dsv.parseRows(csv);
+        }
 
         rendered += '<tr>';
         for(var i=0; i<headerCols.length; i++) {
@@ -826,7 +833,11 @@ spacialistApp.filter('csv2table', function() {
         }
         rendered += '</tr>';
 
-        for(var i=0; i<rows.length; i++) {
+        var toParse = rows.length;
+        if(rowCount > 0) {
+            toParse = Math.min(toParse, rowCount);
+        }
+        for(var i=0; i<toParse; i++) {
             rendered += '<tr>';
             var r = rows[i];
 

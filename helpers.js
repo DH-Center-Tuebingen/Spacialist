@@ -54,6 +54,15 @@ function resetObject(o) {
     }
 }
 
+function createCountingCsvHeader(cnt, translate) {
+    var columns = [];
+    for(var i=0; i<cnt; i++) {
+        var c = translate.instant('csv.header.unnamed-column', {col: i+1});
+        columns.push(c);
+    }
+    return columns;
+}
+
 L.Control.FitWorld = L.Control.extend({
 	onAdd: function(map) {
         var o = this.options;

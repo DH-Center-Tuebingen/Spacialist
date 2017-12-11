@@ -35,6 +35,10 @@
                     <input type="text" id="delimiter" class="form-control" ng-model="$ctrl.csvDelim" ng-change="$ctrl.parseCsvHeader()" ng-hide="$ctrl.csvDelimDd.key != 'custom'" />
                 </div>
                 <div class="form-group">
+                    <label for="hasHeader" translate="gis.importer.has-header"></label>
+                    <input type="checkbox" class="form-control" ng-model="$ctrl.csvHasHeader" ng-change="$ctrl.updateIsHeaderSet()" />
+                </div>
+                <div class="form-group">
                     <label>
                         <input type="radio" ng-model="$ctrl.coordType" value="latlon" />
                         {{'gis.importer.csv.coord-type.latlon'|translate}}
@@ -109,7 +113,8 @@
                     {{'gis.importer.csv.show-table'|translate}} <i ng-show="!showCsvPreview" class="material-icons">arrow_drop_down</i>
                 </span>
             </button>
-            <div ng-show="showCsvPreview" ng-bind-html="$ctrl.content.csv | csv2table:$ctrl.csvDelim">
+            <p ng-show="showCsvPreview" translate="gis.importer.csv.preview-count" translate-values="{cnt: $ctrl.csvPreviewCount}"></p>
+            <div ng-show="showCsvPreview" ng-bind-html="$ctrl.content.csv | csv2table:$ctrl.csvDelim:$ctrl.csvHasHeader:$ctrl.csvPreviewCount">
             </div>
         </div>
         <div ng-show="$ctrl.activeTab == 'kml'">
