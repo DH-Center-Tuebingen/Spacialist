@@ -343,6 +343,23 @@ class FileController extends Controller
 
         $file = $request->file('file');
         $filename = $file->getClientOriginalName();
+        $fileext = $file->getClientOriginalExtension();
+        // Compute length of extension + separator ('.')
+        // Only actual set length > 0 and add separator if an extension is found
+        $extlen = 0;
+        if(strlen($fileext) > 0) {
+            $extlen = strlen($fileext) + 1;
+        }
+        // Cut off extension + separator '.'
+        $withoutExt = substr($filename, 0, strlen($filename)-$extlen);
+        $nameCtr = 1;
+        $disk = Helpers::getDisk();
+        // Check if file with name already exists, if so append counter
+        // until name is unique
+        while(Storage::disk($disk)->exists($filename)) {
+            $filename = $withoutExt . "-$nameCtr" . ".$fileext";
+            $nameCtr++;
+        }
         $realPath = $file->getRealPath();
         $filehandle = fopen($realPath, 'r');
         Storage::disk(Helpers::getDisk())->put(
