@@ -68,14 +68,11 @@ class FileController extends Controller
         $mimeType = $file->mime_type;
         $isImage = substr($mimeType, 0, strlen($this->imageMime)) === $this->imageMime;
         if(!$isImage) return null;
-        $url = Helpers::getStorageFilePath($file->filename);
-        if(Helpers::startsWith($url, '/')) {
-            $url = substr($url, 1);
-        }
-        if(!\Illuminate\Support\Facades\File::exists($url)) {
+        $disk = Helpers::getDisk();
+        if(!Storage::disk($disk)->exists($file->filename)) {
             return null;
         }
-        $data = new PelDataWindow(file_get_contents($url));
+        $data = new PelDataWindow(Storage::disk($disk)->get($file->filename));
         if(PelJpeg::isValid($data)) {
             $jpg = new PelJpeg();
             $jpg->load($data);

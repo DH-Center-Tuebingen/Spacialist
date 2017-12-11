@@ -52,7 +52,7 @@ class Helpers {
     }
 
     public static function getStorageFilePath($filename) {
-        return Storage::url(env('SP_FILE_PATH') .'/'. $filename);
+        return Storage::url($filename);
     }
 
     public static function computeCitationKey($l) {
