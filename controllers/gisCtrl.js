@@ -203,6 +203,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                 vm.result = {};
                 vm.preview = {};
                 vm.coordType = 'latlon';
+                vm.csvPreviewCount = 10;
                 vm.csvDelimiters = [
                     {
                         label: $translate.instant('gis.importer.csv.delimiter.type-comma'),

@@ -806,7 +806,7 @@ spacialistApp.filter('urlify', function() {
 });
 
 spacialistApp.filter('csv2table', function() {
-    return function(csv, delimiter) {
+    return function(csv, delimiter, rowCount) {
         if(!csv) return '<table></table>';
         delimiter = delimiter || ',';
         var rendered = '<table class="table table-striped">';
@@ -826,7 +826,11 @@ spacialistApp.filter('csv2table', function() {
         }
         rendered += '</tr>';
 
-        for(var i=0; i<rows.length; i++) {
+        var toParse = rows.length;
+        if(rowCount > 0) {
+            toParse = Math.min(toParse, rowCount);
+        }
+        for(var i=0; i<toParse; i++) {
             rendered += '<tr>';
             var r = rows[i];
 

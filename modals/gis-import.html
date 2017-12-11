@@ -109,7 +109,8 @@
                     {{'gis.importer.csv.show-table'|translate}} <i ng-show="!showCsvPreview" class="material-icons">arrow_drop_down</i>
                 </span>
             </button>
-            <div ng-show="showCsvPreview" ng-bind-html="$ctrl.content.csv | csv2table:$ctrl.csvDelim">
+            <p ng-show="showCsvPreview" translate="gis.importer.csv.preview-count" translate-values="{cnt: $ctrl.csvPreviewCount}"></p>
+            <div ng-show="showCsvPreview" ng-bind-html="$ctrl.content.csv | csv2table:$ctrl.csvDelim:$ctrl.csvPreviewCount">
             </div>
         </div>
         <div ng-show="$ctrl.activeTab == 'kml'">

@@ -299,6 +299,7 @@
     "gis.importer.parse.geojson": "GeoJSON-Datei parsen",
     "gis.importer.csv.hide-table": "Tabelle ausblenden",
     "gis.importer.csv.show-table": "Tabelle anzeigen",
+    "gis.importer.csv.preview-count": "Vorschau der ersten {{cnt}} Einträge.",
     "gis.importer.shape.uploaded": "<code>{{ type }}</code> hochgeladen",
     "gis.importer.results.found": "{{ count }} Elemente gefunden.",
     "gis.importer.upload-button.title": "Hochladen",
