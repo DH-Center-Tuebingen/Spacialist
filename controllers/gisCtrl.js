@@ -204,6 +204,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                 vm.preview = {};
                 vm.coordType = 'latlon';
                 vm.csvPreviewCount = 10;
+                vm.csvHasHeader = true;
                 vm.csvDelimiters = [
                     {
                         label: $translate.instant('gis.importer.csv.delimiter.type-comma'),
@@ -342,6 +343,10 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                     }
                 };
 
+                vm.updateIsHeaderSet = function() {
+                    vm.parseCsvHeader();
+                }
+
                 vm.parseCsvHeader = function() {
                     var row = vm.content.csv.split('\n')[0];
                     var delimiter = vm.csvDelim || ',';
@@ -350,6 +355,9 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                     }
                     var dsv = d3.dsv(delimiter);
                     var cols = dsv.parseRows(row)[0];
+                    if(!vm.csvHasHeader) {
+                        cols = createCountingCsvHeader(cols.length, $translate);
+                    }
                     vm.csvHeaderColumns.length = 0;
                     for(var i=0,c; c=cols[i]; i++) {
                         vm.csvHeaderColumns.push(c);
@@ -368,6 +376,15 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                         delim = '\t';
                     }
                     if(x && y) {
+                        if(!vm.csvHasHeader) {
+                            var delimiter = vm.csvDelim || ',';
+                            if(delimiter == '\\t') {
+                                delimiter = '\t';
+                            }
+                            var tmpHeader = vm.csvHeaderColumns.join(delimiter);
+                            tmpHeader += "\n";
+                            content = tmpHeader + content;
+                        }
                         csv2geojson.csv2geojson(content, {
                             lonfield: x,
                             latfield: y,
