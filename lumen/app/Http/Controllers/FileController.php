@@ -232,6 +232,7 @@ class FileController extends Controller
     }
 
     public function getFileFromLink($filename) {
+        $filename = urldecode($filename);
         $file = File::where('name', $filename)->orWhere('thumb', $filename)->first();
         if(isset($file)) {
             return response(Storage::disk(Helpers::getDisk())->get($file->name))

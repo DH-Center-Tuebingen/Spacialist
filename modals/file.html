@@ -33,7 +33,7 @@
                 </video>
             </div>
             <div class="hg-100" ng-switch-when="3d" ng-controller="threeCtrl">
-                <div class="hg-100" id="threejs-container" ng-init="initThree($ctrl.file.url)">
+                <div class="hg-100" id="threejs-container" ng-init="initThree($ctrl.file.url, $ctrl.file.filename)">
                     <div style="position: absolute; top: 10px; left: 10px;">
                         <button class="btn btn-primary" style="display: block;" ng-click="zoomOut()"><i class="material-icons">zoom_out</i></button>
                         <button class="btn btn-primary" style="display: block;" ng-click="zoomIn()"><i class="material-icons">zoom_in</i></button>

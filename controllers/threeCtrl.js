@@ -42,9 +42,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         length: 0.0
     };
 
-    $scope.initThree = function(url) {
+    $scope.initThree = function(url, filename) {
         fileUrl = url;
-        extension = url.substr(url.lastIndexOf('.')+1);
+        extension = filename.substr(filename.lastIndexOf('.')+1);
         init();
         animate();
     };
