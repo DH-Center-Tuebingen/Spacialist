@@ -1,9 +1,11 @@
-spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 'mainService', '$state', '$translate', function($scope, langService, userService, mainService, $state, $translate) {
+spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 'mainService', 'Upload', '$timeout', '$state', '$translate', function($scope, langService, userService, mainService, Upload, $timeout, $state, $translate) {
     var vm = this;
+
     vm.state = $state;
     vm.currentLanguage = {};
     vm.isLangSet = langService.isLangSet;
     $scope.concepts = vm.concepts;
+
     $scope.getLabelValue = function(label, type) {
         if(vm.concepts[label]) {
             return vm.concepts[label].label;
@@ -36,6 +38,27 @@ spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 
                 break;
             case 'bibliography':
                 $state.go('root.bibliography.edit', {id: $model.id});
+        }
+    };
+
+    vm.uploadCsvFiles = function(files) {
+        if(files && files.length) {
+            Upload.upload({
+                url: 'api/context/import',
+                data: {
+                    files: files
+                }
+            }).then(function (response) {
+                $timeout(function () {
+                    console.log(response.data);
+                });
+            }, function (response) {
+                if (response.status > 0) {
+                    console.log(response.status);
+                    console.log(response.data);
+                }
+            }, function (evt) {
+            });
         }
     };
 

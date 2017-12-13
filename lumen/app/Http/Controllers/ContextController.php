@@ -11,11 +11,14 @@ use App\ContextType;
 use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
+use App\ThBroader;
+use App\ThLanguage;
 use App\ContextAttribute;
 use App\AvailableLayer;
 use App\File;
 use App\Source;
 use App\Literature;
+use App\Preference;
 use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
@@ -42,6 +45,217 @@ class ContextController extends Controller {
     }
 
     // GET
+
+    public function importFromCsv(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('create_concepts') && !$user->can('view_concepts_th') && !$user->can('add_move_concepts_th')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'files.*' => 'required|mimes:csv,txt|file',
+            'language' => 'string',
+        ]);
+
+        //
+        $startTime = time();
+        $oldMaxRootRank = Context::whereNull('root_context_id')->max('rank');
+
+        $files = $request->file('files');
+        $languageCode = $request->input('language', 'de');
+        $language = ThLanguage::where('short_name', $languageCode)->first();
+        if(!isset($language)) {
+            $language = ThLanguage::orderBy('id')->first();
+        }
+        $contentFiles = [];
+        $relationFile = null;
+        foreach($files as $file) {
+            $filename = $file->getClientOriginalName();
+            if($filename != 'relations.csv') {
+                $contentFiles[] = [
+                    'filename' => $filename,
+                    'filepath' => $file->getRealPath()
+                ];
+            } else {
+                $relationFile = [
+                    'filename' => $filename,
+                    'filepath' => $file->getRealPath()
+                ];
+            }
+        }
+        $newSuffix = '_NEW';
+        $failed = [];
+        $idMap = [];
+        foreach($contentFiles as $c) {
+            $i = 0;
+            $columnConcepts = [];
+            $columnAttributes = [];
+            $columnDatatypeUrl = [];
+            $currentContextTypeId = -1;
+            $fileFailed = [];
+            $filehandle = fopen($c['filepath'], 'r');
+            for($i=0; ($data = fgetcsv($filehandle)) !== false; $i++) {
+                $j = 0;
+                if($i === 0) { // row 1
+                    foreach($data as $d) {
+                        // skip id column (0) in header
+                        if($j > 0) {
+                            $concept = [];
+                            $concept['url'] = ThesaurusController::getConceptUrlForLabel($d, $language->short_name);
+                            if(ends_with($d, $newSuffix) || !isset($concept['url'])) {
+                                $label = $d;
+                                $isnew = false;
+                                if(ends_with($d, $newSuffix)) {
+                                    $label = substr($d, 0, strlen($d)-strlen($newSuffix));
+                                    $isnew = true;
+                                }
+                                $newConcept = [];
+                                $projName = Helpers::getProjectName($user);
+                                $thConcept = ThesaurusController::createConcept($projName, $label, $user, $language->id, true, 1);
+                                $newConcept['url'] = $thConcept->concept_url;
+                                $newConcept['isnew'] = $isnew;
+                                $concept = $newConcept;
+                            }
+                            $columnConcepts[$j] = $concept;
+                            if($j === 1) {
+                                // TODO geomtype
+                                $contextType = self::createContextType($concept['url'], 0, 'MultiPolygon');
+                                $currentContextTypeId = $contextType->id;
+                            }
+                        }
+                        $j++;
+                    }
+                } else if($i === 1) { // row 2
+                    foreach($data as $d) {
+                        // start at 2, id and name column have no datatype
+                        if($j >= 2) {
+                            $currentConcept = $columnConcepts[$j];
+                            $rootUrl = null;
+                            if($d == 'string-sc') {
+                                $rootUrl = $currentConcept['url'];
+                            }
+                            $attribute = self::createAttribute($currentConcept['url'], $d, $rootUrl);
+                            $cA = self::createContextAttribute($currentContextTypeId, $attribute->id);
+                            $columnAttributes[$j] = $attribute;
+                        }
+                        $j++;
+                    }
+                } else { // actual data
+                    $currentContextId = -1;
+                    // TODO $values = []
+                    $currentDataId = -1;
+                    foreach($data as $d) {
+                        if($j === 0) {
+                            $currentDataId = $d;
+                        } else if($j === 1) {
+                            $attributes = [
+                                'name' => $d,
+                                'context_type_id' => $currentContextTypeId
+                            ];
+                            $context = self::createContext($attributes, $user);
+                            $currentContextId = $context->id;
+                            $idMap[$currentDataId] = $currentContextId;
+                        } else if($d != null) { // if current data has no value, skip
+                            // TODO collect all attributes and
+                            // call $this->updateOrInsert
+                            // values[$attr->id.'_'] = $d;
+                            $attr = $columnAttributes[$j];
+                            $av = new AttributeValue();
+                            $av->context_id = $currentContextId;
+                            $av->attribute_id = $attr->id;
+                            $valueColumn;
+                            $value = $d;
+                            switch($attr->datatype) {
+                                case 'integer':
+                                case 'boolean':
+                                case 'percentage':
+                                    $valueColumn = 'int_val';
+                                    break;
+                                case 'double':
+                                    $valueColumn = 'dbl_val';
+                                    break;
+                                case 'date':
+                                    $valueColumn = 'dt_val';
+                                    break;
+                                case 'geography':
+                                    $valueColumn = 'geography_val';
+                                    $value = Helpers::parseWkt($value);
+                                    // if parsing failed, add error and continue
+                                    // with next column
+                                    if(!($value instanceof Geometry)) {
+                                        $fileFailed[] = 'Failed to parse Geography in line ' . ($i+1) . '. Please make sure it is a valid WKT object.';
+                                        continue;
+                                    }
+                                    break;
+                                case 'string-sc':
+                                    $valueColumn = 'thesaurus_val';
+                                    $url = ThesaurusController::getConceptUrlForLabel($value, $language->short_name);
+                                    if(!isset($url)) {
+                                        $projName = Helpers::getProjectName($user);
+                                        $thConcept = ThesaurusController::createConcept($projName, $value, $user, $language->id, false, 1);
+                                        $url = $thConcept->concept_url;
+                                        // Add broader
+                                        $currentParentConcept = $columnConcepts[$j]['url'];
+                                        $parentId = ThConcept::where('concept_url', $currentParentConcept)->value('id');
+                                        $broader = new ThBroader();
+                                        $broader->broader_id = $parentId;
+                                        $broader->narrower_id = $thConcept->id;
+                                        $broader->save();
+                                    }
+                                    $value = $url;
+                                    break;
+                                case 'string':
+                                case 'stringf':
+                                default:
+                                    $valueColumn = 'str_val';
+                            }
+                            $av->{$valueColumn} = $value;
+                            $av->lasteditor = $user['name'];
+                            $av->save();
+                        }
+                        $j++;
+                    }
+                    // TODO $this->updateOrInsert($values, $currentContextId, $user);
+                }
+            }
+            $failed[$c['filename']] = $fileFailed;
+            fclose($filehandle);
+        }
+        if(isset($relationFile) && !empty($relationFile)) {
+            $filehandle = fopen($relationFile['filepath'], 'r');
+            for($i=0; ($data = fgetcsv($filehandle)) !== false; $i++) {
+                // skip header
+                if($i === 0) continue;
+                if($data[0] != NULL && $data[1] != NULL) {
+                    $pId = $idMap[$data[0]];
+                    $cId = $idMap[$data[1]];
+                    // We can simply set the rank without adjusting
+                    // the rank of siblings, because it is appended
+                    $newRank = Context::where('root_context_id', '=', $pId)->max('rank') + 1;
+                    $context = Context::find($cId);
+                    $context->root_context_id = $pId;
+                    $context->rank = $newRank;
+                    $context->save();
+                }
+            }
+            // root context ranks may be wrong
+            // get all root contexts that have been updated after the start
+            // of the import
+            $rootContexts = Context::whereNull('root_context_id')->where('updated_at', '>=', date('Y-m-d H:i:s', $startTime))->get();
+            $rankOffset = 1;
+            foreach($rootContexts as $rc) {
+                $rc->rank = $oldMaxRootRank + $rankOffset;
+                $rc->save();
+                $rankOffset++;
+            }
+        }
+
+        return response()->json([
+            'failed' => $failed
+        ]);
+    }
 
     public function getContexts() {
         $user = \Auth::user();
@@ -719,20 +933,11 @@ class ContextController extends Controller {
         }
         $this->validate($request, Context::rules);
 
-        $context = new Context();
-        $rank;
+        $rcid = null;
         if($request->has('root_context_id')) {
-            $rank = Context::where('root_context_id', '=', $request->get('root_context_id'))->max('rank') + 1;
-        } else {
-            $rank = Context::whereNull('root_context_id')->max('rank') + 1;
+            $rcid = $request->get('root_context_id');
         }
-        $context->rank = $rank;
-
-        foreach($request->intersect(array_keys(Context::rules)) as $key => $value) {
-            $context->{$key} = $value;
-        }
-        $context->lasteditor = $user['name'];
-        $context->save();
+        $context = self::createContext($request->intersect(array_keys(Context::rules)), $user, $rcid);
 
         return response()->json([
             'context' => ContextType::join('contexts',
@@ -818,16 +1023,27 @@ class ContextController extends Controller {
             'parent_id' => 'nullable|integer|exists:contexts,id',
         ]);
 
+        $rank = $request->get('rank');
+        $parent = null;
+        if($request->has('parent_id')) {
+            $parent = $request->get('parent_id');
+        }
+        $error = self::patchRankings($rank, $id, $user, $parent);
+        if(isset($error) && !empty($error)) {
+            return response()->json($error);
+        }
+    }
+
+    public static function patchRankings($rank, $id, $user, $parent = null) {
         try {
             $context = Context::findOrFail($id);
         } catch(ModelNotFoundException $e) {
-            return response()->json([
+            return [
                 'error' => 'This context does not exist'
-            ]);
+            ];
         }
 
-        $rank = $request->get('rank');
-        $hasParent = $request->has('parent_id');
+        $hasParent = isset($parent);
         $oldRank = $context->rank;
         $context->rank = $rank;
         $context->lasteditor = $user['name'];
@@ -849,7 +1065,6 @@ class ContextController extends Controller {
 
         $contexts;
         if($hasParent) {
-            $parent = $request->get('parent_id');
             $context->root_context_id = $parent;
             $contexts = Context::where('root_context_id', '=', $parent)
                 ->where('rank', '>=', $rank)
@@ -865,6 +1080,7 @@ class ContextController extends Controller {
             $c->save();
         }
         $context->save();
+        return null;
     }
 
     public function linkGeodata(Request $request, $cid, $gid = null) {
@@ -1093,22 +1309,8 @@ class ContextController extends Controller {
         $curl = $request->get('concept_url');
         $type = $request->get('type');
         $geomtype = $request->get('geomtype');
-        $cType = new ContextType();
-        $cType->thesaurus_url = $curl;
-        $cType->type = $type;
-        $cType->save();
 
-        $layer = new AvailableLayer();
-        $layer->name = '';
-        $layer->url = '';
-        $layer->type = $geomtype;
-        $layer->opacity = 1;
-        $layer->visible = true;
-        $layer->is_overlay = true;
-        $layer->position = AvailableLayer::where('is_overlay', '=', true)->max('position') + 1;
-        $layer->context_type_id = $cType->id;
-        $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-        $layer->save();
+        $cType = self::createContextType($curl, $type, $geomtype);
 
         return response()->json([
             'contexttype' => $cType
@@ -1128,15 +1330,7 @@ class ContextController extends Controller {
         ]);
 
         $aid = $request->get('attribute_id');
-        $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
-        $ca = new ContextAttribute();
-        $ca->context_type_id = $ctid;
-        $ca->attribute_id = $aid;
-        $ca->position = $attrsCnt + 1; // add new attribute to the end
-        $ca->save();
-
-        $a = Attribute::find($aid);
-        $ca->datatype = $a->datatype;
+        $ca = self::createContextAttribute($ctid, $aid);
 
         return response()->json([
             'attribute' => DB::table('context_types as c')
@@ -1165,15 +1359,14 @@ class ContextController extends Controller {
         $lid = $request->get('label_id');
         $datatype = $request->get('datatype');
         $curl = ThConcept::find($lid)->concept_url;
-        $attr = new Attribute();
-        $attr->thesaurus_url = $curl;
-        $attr->datatype = $datatype;
+        $purl = null;
+
         if($request->has('parent_id')) {
             $pid = $request->get('parent_id');
             $purl = ThConcept::find($pid)->concept_url;
-            $attr->thesaurus_root_url = $purl;
         }
-        $attr->save();
+
+        $attr = self::createAttribute($curl, $datatype, $purl);
 
         if($datatype == 'table') {
             $cols = json_decode($request->get('columns'));
@@ -1348,6 +1541,68 @@ class ContextController extends Controller {
             $s->position--;
             $s->save();
         }
+    }
+
+    // STATIC FUNCTIONS
+
+    public static function createContextType($url, $type, $geomtype) {
+        $cType = new ContextType();
+        $cType->thesaurus_url = $url;
+        $cType->type = $type;
+        $cType->save();
+
+        $layer = new AvailableLayer();
+        $layer->name = '';
+        $layer->url = '';
+        $layer->type = $geomtype;
+        $layer->opacity = 1;
+        $layer->visible = true;
+        $layer->is_overlay = true;
+        $layer->position = AvailableLayer::where('is_overlay', '=', true)->max('position') + 1;
+        $layer->context_type_id = $cType->id;
+        $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        $layer->save();
+
+        return $cType;
+    }
+
+    public static function createContext($attributes, $user, $rcid = null) {
+        $context = new Context();
+        $rank;
+        if(isset($rcid)) {
+            $rank = Context::where('root_context_id', '=', $rcid)->max('rank') + 1;
+        } else {
+            $rank = Context::whereNull('root_context_id')->max('rank') + 1;
+        }
+        $context->rank = $rank;
+
+        foreach($attributes as $key => $value) {
+            $context->{$key} = $value;
+        }
+        $context->lasteditor = $user['name'];
+        $context->save();
+        return $context;
+    }
+
+    public static function createAttribute($url, $datatype, $rootUrl = null) {
+        $attr = new Attribute();
+        $attr->thesaurus_url = $url;
+        $attr->datatype = $datatype;
+        if(isset($rootUrl)) {
+            $attr->thesaurus_root_url = $rootUrl;
+        }
+        $attr->save();
+        return $attr;
+    }
+
+    public static function createContextAttribute($ctid, $aid) {
+        $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
+        $ca = new ContextAttribute();
+        $ca->context_type_id = $ctid;
+        $ca->attribute_id = $aid;
+        $ca->position = $attrsCnt + 1; // add new attribute to the end
+        $ca->save();
+        return $ca;
     }
 
     // OTHER FUNCTIONS
@@ -1543,7 +1798,6 @@ class ContextController extends Controller {
                             }
                             break;
                         case 'date':
-                            \Log::info($value);
                             $attrValue->dt_val = $value;
                             break;
                         case 'percentage':
