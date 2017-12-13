@@ -7,7 +7,7 @@
         </li>
         <li ng-repeat="r in contexts.roots" ng-show="contexts.data[r.id].visible" ui-tree-node data-collapsed="contexts.data[r.id].collapsed" data-expand-on-hover="500" ng-include="'includes/tree-child.html'" context-menu="setContextMenu">
         </li>
-        <spinner ng-if="contexts.roots.length == 0"></spinner>
+        <spinner ng-if="!contexts.roots"></spinner>
         <li class="btn btn-primary clickable" ng-click="onClickCallback({type: 'context'})">
             <i class="material-icons md-18">add</i>
             <span class="contextPrefix">{{'context-tree.new-toplevel-context'|translate}}</span>
