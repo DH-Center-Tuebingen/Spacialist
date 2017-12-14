@@ -112,9 +112,30 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     };
 
+    main.expandAll = function(tree) {
+        angular.forEach(tree.data, function(d) {
+            d.collapsed = false;
+        });
+    };
+
+    main.collapseAll = function(tree) {
+        angular.forEach(tree.data, function(d) {
+            d.collapsed = true;
+        });
+    };
+
+    main.setAllVisible = function(tree) {
+        angular.forEach(tree.data, function(d) {
+            d.visible = true;
+        });
+    };
+
     main.filterTree = function(elements, term) {
+        main.setAllVisible(elements);
+        main.collapseAll(elements);
+        if(!term || term.length === 0) return;
         angular.forEach(elements.roots, function(r) {
-            isVisible(elements, r, term.toUpperCase());
+            setVisible(elements, r, term.toUpperCase());
         });
     };
 
@@ -136,34 +157,25 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         });
     };
 
-    function isVisible(elems, e, term) {
-        var noSearchTerm = !term || term.length === 0;
+    function setVisible(elems, e, term) {
         var data = elems.data;
         var children = elems.children;
-        if(noSearchTerm) {
-            data[e.id].visible = true;
-            data[e.id].collapsed = true;
-        } else if(filters(data[e.id], term)) {
-            data[e.id].visible = true;
-            data[e.id].collapsed = true;
-        } else {
-            data[e.id].visible = false;
-            data[e.id].collapsed = true;
-        }
+        var match = filters(data[e.id], term);
+        var cMatch = false;
         if(children[e.id]) {
-            for(var i=0; i<children[e.id].length; i++) {
-                if(data[e.id].visible) {
-                    var tmpId = children[e.id][i];
-                    data[tmpId].visible = true;
-                } else if(isVisible(elems, children[e.id][i], term)) {
-                    data[e.id].visible = true;
-                    data[e.id].collapsed = false;
-                } else {
-                    data[e.id].collapsed = false;
-                }
-            }
+            angular.forEach(children[e.id], function(child) {
+                cMatch = cMatch || setVisible(elems, child, term);
+            });
         }
-        return data[e.id].visible;
+
+        if(!match && !cMatch) { // term not found in subtree, do not show this element in result tree
+            data[e.id].visible = false;
+        }
+        else if(cMatch) { // term found in subtree, expand this node
+            data[e.id].collapsed = false;
+        }
+
+        return match || cMatch;
     }
 
     function filters(elem, term) {
