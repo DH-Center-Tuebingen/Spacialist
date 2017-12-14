@@ -112,7 +112,7 @@
                 <ui-select ng-model="attributeOutputs[attr.id].epoch"
                 name="{{ attr.id }}" id="{{ attr.id }}"
                 ng-disabled="readonlyInput">
-                  <ui-select-match placeholder="{{ attr.val }}">{{ concepts[$select.selected.concept_url].label }}</ui-select-match>
+                  <ui-select-match placeholder="{{ attr.val }}" allow-clear=true>{{ concepts[$select.selected.concept_url].label }}</ui-select-match>
                   <ui-select-choices repeat="choice in menus[attr.id] | filter: $select.search">
                     <span ng-bind-html="concepts[choice.concept_url].label | highlight: $select.search"></span>
                   </ui-select-choices>
