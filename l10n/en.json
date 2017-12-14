@@ -32,6 +32,8 @@
     "context-new.name": "Name",
     "context-new.type": "Type",
     "main.navigation-toggle": "Toggle navigation",
+    "main.menu.tools": "Tools",
+    "main.menu.external-tools": "External Tools",
     "main.menu.data-analysis": "Data Analysis",
     "main.menu.data-analysis.dbwebgen": "dbWebGen",
     "main.menu.data-analysis.internal": "Internal (BETA)",
