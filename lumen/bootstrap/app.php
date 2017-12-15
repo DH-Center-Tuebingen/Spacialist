@@ -25,7 +25,7 @@ $app = new Laravel\Lumen\Application(
 
 config([
     "filesystems" => [
-        'default' => 'local',
+        'default' => 'public',
         'disks' => [
             'local' => [
                 'driver' => 'local',
@@ -33,8 +33,8 @@ config([
             ],
             'public' => [
                 'driver' => 'local',
-                'root' => app()->basePath('/public/storage'),
-                'url' => './lumen/public/storage',
+                'root' => app()->basePath('/public/storage') . '/' . env('SP_FILE_PATH'),
+                'url' => './lumen/public/storage' . '/' . env('SP_FILE_PATH'),
                 'visibility' => 'public',
             ],
         ],
@@ -108,6 +108,7 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 $app->register(Zizaco\Entrust\EntrustServiceProvider::class);
 $app->register(Phaza\LaravelPostgis\DatabaseServiceProvider::class);
+$app->register(Neoxia\Filesystem\SftpServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

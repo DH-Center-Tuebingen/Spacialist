@@ -28,12 +28,32 @@ class Helpers {
         }
     }
 
+    public static function getDisk() {
+        return env('SP_FILE_DRIVER', config('filesystems.default'));
+    }
+
     public static function getFullFilePath($filename) {
-        return Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $filename);
+        try {
+            return Storage::disk(Helpers::getDisk())->url($filename);
+        } catch(\RuntimeException $e) {
+            // If ->url() is not supported by the storage driver/disk,
+            // a RuntimeException is thrown. Return url for file link route
+            $route = route('fileLink', ['filename' => $filename]);
+            $base = url("");
+            // We want to remove trailing / as well
+            if(!Helpers::endsWith($base, '/')) {
+                $base .= '/';
+            }
+            // remove base url
+            $route = substr($route, strlen($base));
+            // add api prefix to route url
+            $route = env('SP_API_PREFIX', 'api/') . $route;
+            return $route;
+        }
     }
 
     public static function getStorageFilePath($filename) {
-        return Storage::url(env('SP_FILE_PATH') .'/'. $filename);
+        return Storage::url($filename);
     }
 
     public static function parseSql($builder) {

@@ -68,14 +68,11 @@ class FileController extends Controller
         $mimeType = $file->mime_type;
         $isImage = substr($mimeType, 0, strlen($this->imageMime)) === $this->imageMime;
         if(!$isImage) return null;
-        $url = Helpers::getStorageFilePath($file->filename);
-        if(Helpers::startsWith($url, '/')) {
-            $url = substr($url, 1);
-        }
-        if(!\Illuminate\Support\Facades\File::exists($url)) {
+        $disk = Helpers::getDisk();
+        if(!Storage::disk($disk)->exists($file->filename)) {
             return null;
         }
-        $data = new PelDataWindow(file_get_contents($url));
+        $data = new PelDataWindow(Storage::disk($disk)->get($file->filename));
         if(PelJpeg::isValid($data)) {
             $jpg = new PelJpeg();
             $jpg->load($data);
@@ -124,15 +121,16 @@ class FileController extends Controller
         }
 
         // try to get file to check if it exists
-        $storageUrl = 'images/' . $file->filename;
-        try {
-            Storage::get($storageUrl);
-            $file->filesize = Storage::size($storageUrl);
-            $file->modified = Storage::lastModified($storageUrl);
-            $file->exif = $this->getExifData($file);
-        } catch(FileNotFoundException $e) {
-        } catch(PelDataWindowOffsetException $e) {
-            // Do nothing for now
+        $storageUrl = $file->filename;
+        $disk = Helpers::getDisk();
+        if(Storage::disk($disk)->exists($storageUrl)) {
+            $file->filesize = Storage::disk($disk)->size($storageUrl);
+            $file->modified = Storage::disk($disk)->lastModified($storageUrl);
+            try {
+                $file->exif = $this->getExifData($file);
+            } catch(PelDataWindowOffsetException $e) {
+                // Do nothing for now
+            }
         }
         $file->created = strtotime($file->created);
         $file->linked_contexts = $this->getLinkedContexts($file);
@@ -189,8 +187,9 @@ class FileController extends Controller
                     ->get();
         foreach($files as &$file) {
             $file->url = Helpers::getFullFilePath($file->filename);
-            if(substr($file->mime_type, 0, 6) === 'image/');
-            $file->thumb_url = Helpers::getFullFilePath($file->thumbname);
+            if(substr($file->mime_type, 0, 6) === 'image/') {
+                $file->thumb_url = Helpers::getFullFilePath($file->thumbname);
+            }
             $file->linked_files = ContextFile::where('photo_id', '=', $file->id)->get();
 
             if($user->can('edit_photo_props')) {
@@ -202,15 +201,16 @@ class FileController extends Controller
             }
 
             // try to get file to check if it exists
-            $storageUrl = 'images/' . $file->filename;
-            try {
-                Storage::get($storageUrl);
-                $file->filesize = Storage::size($storageUrl);
-                $file->modified = Storage::lastModified($storageUrl);
-                $file->exif = $this->getExifData($file);
-            } catch(FileNotFoundException $e) {
-            } catch(PelDataWindowOffsetException $e) {
-                // Do nothing for now
+            $storageUrl = $file->filename;
+            $disk = Helpers::getDisk();
+            if(Storage::disk($disk)->exists($storageUrl)) {
+                $file->filesize = Storage::disk($disk)->size($storageUrl);
+                $file->modified = Storage::disk($disk)->lastModified($storageUrl);
+                try {
+                    $file->exif = $this->getExifData($file);
+                } catch(PelDataWindowOffsetException $e) {
+                    // Do nothing for now
+                }
             }
         
             $file->created = strtotime($file->created);
@@ -227,6 +227,16 @@ class FileController extends Controller
             ], 403);
         }
         return response()->json($this->getFileById($id));
+    }
+
+    public function getFileFromLink($filename) {
+        $filename = urldecode($filename);
+        $file = File::where('name', $filename)->orWhere('thumb', $filename)->first();
+        if(isset($file)) {
+            return response(Storage::disk(Helpers::getDisk())->get($file->name))
+                ->header('Content-Type', $file->mime_type);
+        }
+        return '';
     }
 
     public function getAvailableTags() {
@@ -331,15 +341,31 @@ class FileController extends Controller
 
         $file = $request->file('file');
         $filename = $file->getClientOriginalName();
-        $filehandle = fopen($file->getRealPath(), 'r');
-        Storage::put(
-            'images/' . $filename,
+        $fileext = $file->getClientOriginalExtension();
+        // Compute length of extension + separator ('.')
+        // Only actual set length > 0 and add separator if an extension is found
+        $extlen = 0;
+        if(strlen($fileext) > 0) {
+            $extlen = strlen($fileext) + 1;
+        }
+        // Cut off extension + separator '.'
+        $withoutExt = substr($filename, 0, strlen($filename)-$extlen);
+        $nameCtr = 1;
+        $disk = Helpers::getDisk();
+        // Check if file with name already exists, if so append counter
+        // until name is unique
+        while(Storage::disk($disk)->exists($filename)) {
+            $filename = $withoutExt . "-$nameCtr" . ".$fileext";
+            $nameCtr++;
+        }
+        $realPath = $file->getRealPath();
+        $filehandle = fopen($realPath, 'r');
+        Storage::disk(Helpers::getDisk())->put(
+            $filename,
             $filehandle
         );
         fclose($filehandle);
-        $url = storage_path() . '/app/images';
-        //$file->move($url, $filename);
-        $fileUrl = $url . '/' . $filename;
+        $fileUrl = Helpers::getFullFilePath($filename);
         $fileMime = 'image/';
         $mimeType = $file->getMimeType();
         $isImage = substr($mimeType, 0, strlen($fileMime)) === $fileMime;
@@ -352,27 +378,26 @@ class FileController extends Controller
             $ext = $file->getClientOriginalExtension();
             $cleanName = substr($filename, 0, strlen($filename)-strlen($ext)-1);
             $thumbName = $cleanName . $THUMB_SUFFIX . $EXP_SUFFIX;
-            $thumbUrl = $url . '/' . $thumbName;
 
-            $imageInfo = getimagesize($fileUrl);
+            $imageInfo = getimagesize($realPath);
             $width = $imageInfo[0];
             $height = $imageInfo[1];
             $mime = $imageInfo[2];//$imageInfo['mime'];
             if($width > $THUMB_WIDTH) {
                 switch($mime) {
                     case IMAGETYPE_JPEG:
-                        $image = imagecreatefromjpeg($fileUrl);
+                        $image = imagecreatefromjpeg($realPath);
                         break;
                     case IMAGETYPE_PNG:
-                        $image = imagecreatefrompng($fileUrl);
+                        $image = imagecreatefrompng($realPath);
                         break;
                     case IMAGETYPE_GIF:
-                        $image = imagecreatefromgif($fileUrl);
+                        $image = imagecreatefromgif($realPath);
                         break;
                     default:
                         //echo "is of UNSUPPORTED type " . $imageInfo['mime'];
                         // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
-                        $im = new Imagick($fileUrl);
+                        $im = new Imagick($realPath);
                         $fileUrl = $url . '/' . $cleanName . $EXP_SUFFIX;
                         $im->setImageFormat($EXP_FORMAT);
                         $im->writeImage($fileUrl);
@@ -382,18 +407,19 @@ class FileController extends Controller
                 }
                 $scaled = imagescale($image, $THUMB_WIDTH);
                 ob_start();
-                imagejpeg($scaled/*, $thumbUrl*/);
+                imagejpeg($scaled);
                 $image = ob_get_clean();
-                Storage::put(
-                    'images/' . $thumbName,
+                Storage::disk(Helpers::getDisk())->put(
+                    $thumbName,
                     $image
                 );
             } else {
-                Storage::copy('images/' . $filename, 'images/' . $thumbName);
+                Storage::disk(Helpers::getDisk())->copy($filename, $thumbName);
             }
         }
 
-        $mod = date('Y-m-d H:i:s', filemtime($fileUrl));
+        $mod = date('Y-m-d H:i:s', Storage::disk(Helpers::getDisk())->lastModified($filename));
+        // $mod = date('Y-m-d H:i:s', filemtime('../'.$fileUrl));
         $exifFound = false;
         if($isImage && ($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM)) {
             $exif = @exif_read_data($fileUrl, 'ANY_TAG', true);
@@ -538,9 +564,8 @@ class FileController extends Controller
             ], 403);
         }
         $file = File::find($id);
-        $pathPrefix = 'images/';
-        Storage::delete($pathPrefix . $file->name);
-        if($file->thumb != null) Storage::delete($pathPrefix . $file->thumb);
+        Storage::disk(Helpers::getDisk())->delete($file->name);
+        if($file->thumb != null) Storage::disk(Helpers::getDisk())->delete($file->thumb);
         $file->delete();
     }
 
