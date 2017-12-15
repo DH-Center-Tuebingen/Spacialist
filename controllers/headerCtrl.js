@@ -43,6 +43,8 @@ spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 
 
     vm.importCsvFiles = function(files) {
         if(files && files.length) {
+            var content = $translate.instant('data-import.loading-message', {cnt: files.length});
+            showLoadingOverlay(content);
             Upload.upload({
                 url: 'api/context/import',
                 data: {
@@ -50,13 +52,13 @@ spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 
                 }
             }).then(function (response) {
                 $timeout(function () {
-                    console.log(response.data);
+                    hideLoadingOverlay();
+                    if($state.includes('root.spacialist')) {
+                        $state.reload();
+                    }
                 });
             }, function (response) {
-                if (response.status > 0) {
-                    console.log(response.status);
-                    console.log(response.data);
-                }
+                hideLoadingOverlay();
             }, function (evt) {
             });
         }

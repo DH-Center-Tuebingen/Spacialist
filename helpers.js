@@ -54,6 +54,16 @@ function resetObject(o) {
     }
 }
 
+function showLoadingOverlay(msg) {
+    $('#loadingUiMessage').text(msg);
+    $('#loadingUiWrapper').show();
+}
+
+function hideLoadingOverlay() {
+    $('#loadingUiMessage').text('');
+    $('#loadingUiWrapper').hide();
+}
+
 L.Control.FitWorld = L.Control.extend({
 	onAdd: function(map) {
         var o = this.options;
