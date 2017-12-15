@@ -41,7 +41,7 @@ spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 
         }
     };
 
-    vm.uploadCsvFiles = function(files) {
+    vm.importCsvFiles = function(files) {
         if(files && files.length) {
             Upload.upload({
                 url: 'api/context/import',
