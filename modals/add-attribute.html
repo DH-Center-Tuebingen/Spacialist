@@ -3,7 +3,7 @@
 </div>
 <div class="modal-body">
     <div class="col-md-12">
-        <form class="form-horizontal">
+        <form class="form-horizontal" role="form" ng-submit="$ctrl.onCreate($ctrl.label, $ctrl.datatype, $ctrl.parent)">
             <div class="form-group">
                 <label class="control-label col-md-3" for="type">{{'attribute.add.label'|translate}}</label>
                 <div class="col-md-9">
@@ -89,6 +89,7 @@
                     Add
                 </button>
             </div>
+            <button type="submit" class="btn btn-success hidden" ng-disabled="!$ctrl.label || !$ctrl.datatype || ($ctrl.needsRoot[$ctrl.datatype.name] && !$ctrl.parent)"></button>
         </form>
     </div>
 </div>

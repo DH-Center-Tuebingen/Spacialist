@@ -3,13 +3,13 @@
 </div>
 <div class="modal-body">
     <div class="col-md-12">
-        <form class="form-horizontal" role="form">
+        <form name="newUserForm" class="form-horizontal" role="form" ng-submit="mc.onCreate(mc.name, mc.email, mc.password)">
             <div class="form-group" id="name-container">
                 <label class="control-label col-md-3" for="name">
                     {{'user.name'|translate}}:
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" id="name" ng-model="mc.name" />
+                    <input class="form-control" type="text" id="name" ng-model="mc.name" required />
                 </div>
             </div>
             <div class="form-group" id="email-container">
@@ -17,7 +17,7 @@
                     {{'user.email'|translate}}:
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="email" id="email" ng-model="mc.email" />
+                    <input class="form-control" type="email" id="email" ng-model="mc.email" required />
                 </div>
             </div>
             <div class="form-group" id="password-container">
@@ -25,14 +25,15 @@
                     {{'user.password'|translate}}:
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="password" id="password" ng-model="mc.password" />
+                    <input class="form-control" type="password" id="password" ng-model="mc.password" required />
                 </div>
             </div>
+            <button type="submit" class="btn btn-success hidden" ng-disabled="newUserForm.$invalid"></button>
         </form>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.name, mc.email, mc.password)">{{ 'create' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.name, mc.email, mc.password)" ng-disabled="newUserForm.$invalid">{{ 'create' | translate }}</button>
     <button type="button" class="btn btn-danger"
       ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
 </div>

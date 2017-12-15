@@ -3,7 +3,7 @@
 </div>
 <div class="modal-body">
     <div class="col-md-12">
-        <form class="form-horizontal" role="form">
+        <form name="editRoleForm" class="form-horizontal" role="form" ng-submit="onEdit(editRole)">
             <div class="form-group">
                 <label class="control-label col-md-3" for="name">
                     {{'role.name'|translate}}:
@@ -19,7 +19,7 @@
                     {{'role.display_name'|translate}}
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" id="display_name" ng-model="editRole.display_name" />
+                    <input class="form-control" type="text" id="display_name" ng-model="editRole.display_name" required />
                 </div>
             </div>
             <div class="form-group">
@@ -27,14 +27,15 @@
                     {{'role.description'|translate}}:
                 </label>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" id="description" ng-model="editRole.description" />
+                    <input class="form-control" type="text" id="description" ng-model="editRole.description" required />
                 </div>
             </div>
+            <button type="submit" class="btn btn-success hidden" ng-disabled="editRoleForm.$invalid"></button>
         </form>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="onEdit(editRole)">{{ 'Save' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="onEdit(editRole)" ng-disabled="editRoleForm.$invalid">{{ 'Save' | translate }}</button>
     <button type="button" class="btn btn-danger"
       ng-click="cancel()">{{ 'cancel' | translate }}</button>
 </div>
