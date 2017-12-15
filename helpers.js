@@ -39,6 +39,14 @@ function createDownloadLink(raw, filename) {
     link.click();
 }
 
+function getElementHeight(elem) {
+    var style = getComputedStyle(elem);
+    var height = elem.offsetHeight;
+    var margin = parseInt(style.marginTop) + parseInt(style.marginBottom);
+    var padding = parseInt(style.paddingTop) + parseInt(style.paddingBottom);
+    return height + margin + padding;
+}
+
 // Convert context' last modification (created or updated) to a locale representation
 function updateLastModified(context) {
     var lastmodified = context.updated_at || context.created_at;
