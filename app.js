@@ -368,7 +368,8 @@ spacialistApp.directive('spinner', function() {
 
 spacialistApp.directive('resizeWatcher', function($window, $timeout) {
     var headerPadding = 20;
-    var bottomPadding = 20;
+    var bottomPadding = 10;
+    var paddedContentClassPadding = 10; // .padded-content (style.css)
 
     function getViewportDim() {
         return {
@@ -392,31 +393,39 @@ spacialistApp.directive('resizeWatcher', function($window, $timeout) {
             var height = newValue.height;
             var width = newValue.width;
 
-            var headerHeight = document.getElementById('header-nav').offsetHeight;
-            var addonNavHeight = 0;
+            var header = document.getElementById('header-nav');
+            var headerHeight = 71 + headerPadding; // 71px; measured in desktop mode
+            if(header) {
+                headerHeight = getElementHeight(header);
+            }
+            var addonNavHeight = 44 + paddedContentClassPadding; // 44px; measured in desktop mode
             var addonNav = document.getElementById('addon-nav');
-            if(addonNav) addonNavHeight = addonNav.offsetHeight;
+            if(addonNav && addonNav.offsetHeight > 1) addonNavHeight = getElementHeight(addonNav);
             var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
             var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
             var attributeEditor = document.getElementById('attribute-editor');
             if(attributeEditor) {
                 $(attributeEditor).css('height', containerHeight);
                 var editorHeading = document.getElementById('editor-heading');
-                $('.attribute-editor-column').css('height', containerHeight - (editorHeading.offsetHeight+headerPadding));
+                if(editorHeading) {
+                    $('.attribute-editor-column').css('height', containerHeight - (getElementHeight(editorHeading) + headerPadding));
+                }
             }
             var layerEditor = document.getElementById('layer-editor');
             if(layerEditor) {
                 $(layerEditor).css('height', containerHeight);
                 var layerHeading = document.getElementById('editor-heading');
-                $('.layer-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
+                if(layerHeading) {
+                    $('.layer-editor-column').css('height', containerHeight - (getElementHeight(layerHeading) + headerPadding));
+                }
             }
             var literatureContainer = document.getElementById('literature-container');
             if(literatureContainer) {
                 var literatureHeight = containerHeight;
                 var literatureAddButton = document.getElementById('literature-add-button');
-                if(literatureAddButton) literatureHeight -= literatureAddButton.offsetHeight;
+                if(literatureAddButton) literatureHeight -= getElementHeight(literatureAddButton);
                 var literatureSearch = document.getElementById('literature-search-form');
-                if(literatureSearch) literatureHeight -= literatureSearch.offsetHeight;
+                if(literatureSearch) literatureHeight -= getElementHeight(literatureSearch);
                 var literatureTable = document.getElementById('literature-table');
                 if(literatureTable) {
                     var head = literatureTable.tHead;
@@ -424,7 +433,7 @@ spacialistApp.directive('resizeWatcher', function($window, $timeout) {
                         var t = 'translate(0, ' + this.scrollTop + 'px)';
                         head.style.transform = t;
                     });
-                    var headHeight = head.offsetHeight;
+                    var headHeight = getElementHeight(head);
                     var body = literatureTable.tBodies[0];
                     $(body).css('max-height', literatureHeight - headHeight);
                     $(literatureContainer).css('height', literatureHeight);

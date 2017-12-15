@@ -6,6 +6,9 @@
             <p class="alert alert-info" ng-if="$ctrl.userConfig['prefs.show-tooltips'].value">
                 Die Label der Eltern-Elemente (relevant für Dropdown-Elemente) können angezeigt werden, indem man mit der Maus über das Label des entsprechenden Attributs fährt.
             </p>
+            <button type="button" class="btn btn-success" ng-click="$ctrl.addNewAttribute()">
+                <i class="material-icons">add</i> {{ 'attribute.add-button' | translate }}
+            </button>
             <form class="form-horizontal" role="form">
                 <form-field fields="$ctrl.attributes" output="temp" concepts="$ctrl.concepts" label-width="3" input-width="9" offset="0" deletable on-delete="$ctrl.onDeleteAttribute">
                 </form-field>
