@@ -59,7 +59,7 @@ class ContextController extends Controller {
             'language' => 'string',
         ]);
 
-        //
+        // needed for later rank patching
         $startTime = time();
         $oldMaxRootRank = Context::whereNull('root_context_id')->max('rank');
 
@@ -144,7 +144,7 @@ class ContextController extends Controller {
                     }
                 } else { // actual data
                     $currentContextId = -1;
-                    // TODO $values = []
+                    $values = [];
                     $currentDataId = -1;
                     foreach($data as $d) {
                         if($j === 0) {
@@ -158,66 +158,31 @@ class ContextController extends Controller {
                             $currentContextId = $context->id;
                             $idMap[$currentDataId] = $currentContextId;
                         } else if($d != null) { // if current data has no value, skip
-                            // TODO collect all attributes and
-                            // call $this->updateOrInsert
-                            // values[$attr->id.'_'] = $d;
                             $attr = $columnAttributes[$j];
-                            $av = new AttributeValue();
-                            $av->context_id = $currentContextId;
-                            $av->attribute_id = $attr->id;
-                            $valueColumn;
-                            $value = $d;
-                            switch($attr->datatype) {
-                                case 'integer':
-                                case 'boolean':
-                                case 'percentage':
-                                    $valueColumn = 'int_val';
-                                    break;
-                                case 'double':
-                                    $valueColumn = 'dbl_val';
-                                    break;
-                                case 'date':
-                                    $valueColumn = 'dt_val';
-                                    break;
-                                case 'geography':
-                                    $valueColumn = 'geography_val';
-                                    $value = Helpers::parseWkt($value);
-                                    // if parsing failed, add error and continue
-                                    // with next column
-                                    if(!($value instanceof Geometry)) {
-                                        $fileFailed[] = 'Failed to parse Geography in line ' . ($i+1) . '. Please make sure it is a valid WKT object.';
-                                        continue;
-                                    }
-                                    break;
-                                case 'string-sc':
-                                    $valueColumn = 'thesaurus_val';
-                                    $url = ThesaurusController::getConceptUrlForLabel($value, $language->short_name);
-                                    if(!isset($url)) {
-                                        $projName = Helpers::getProjectName($user);
-                                        $thConcept = ThesaurusController::createConcept($projName, $value, $user, $language->id, false, 1);
-                                        $url = $thConcept->concept_url;
-                                        // Add broader
-                                        $currentParentConcept = $columnConcepts[$j]['url'];
-                                        $parentId = ThConcept::where('concept_url', $currentParentConcept)->value('id');
-                                        $broader = new ThBroader();
-                                        $broader->broader_id = $parentId;
-                                        $broader->narrower_id = $thConcept->id;
-                                        $broader->save();
-                                    }
-                                    $value = $url;
-                                    break;
-                                case 'string':
-                                case 'stringf':
-                                default:
-                                    $valueColumn = 'str_val';
+                            if($attr->datatype == 'string-sc') {
+                                $conceptId = ThesaurusController::getConceptIdForLabel($d, $language->short_name);
+                                if(!isset($conceptId)) {
+                                    $projName = Helpers::getProjectName($user);
+                                    $thConcept = ThesaurusController::createConcept($projName, $d, $user, $language->id, false, 1);
+                                    $conceptId = $thConcept->id;
+                                    // Add broader
+                                    $currentParentConcept = $columnConcepts[$j]['url'];
+                                    $parentId = ThConcept::where('concept_url', $currentParentConcept)->value('id');
+                                    $broader = new ThBroader();
+                                    $broader->broader_id = $parentId;
+                                    $broader->narrower_id = $thConcept->id;
+                                    $broader->save();
+                                }
+                                $value = [
+                                    'narrower_id' => $conceptId
+                                ];
+                                $d = json_encode($value);
                             }
-                            $av->{$valueColumn} = $value;
-                            $av->lasteditor = $user['name'];
-                            $av->save();
+                            $values[$attr->id.'_'] = $d;
                         }
                         $j++;
                     }
-                    // TODO $this->updateOrInsert($values, $currentContextId, $user);
+                    $this->updateOrInsert($values, $currentContextId, $user);
                 }
             }
             $failed[$c['filename']] = $fileFailed;
@@ -251,7 +216,6 @@ class ContextController extends Controller {
                 $rankOffset++;
             }
         }
-
         return response()->json([
             'failed' => $failed
         ]);

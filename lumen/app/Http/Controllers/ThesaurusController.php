@@ -46,17 +46,17 @@ class ThesaurusController extends Controller
         ]);
     }
 
-    public static function getConceptUrlForLabel($label, $lang = 'de') {
+    private static function getConceptForLabel($label, $lang) {
         $user = \Auth::user();
         if(!$user->can('view_concepts_th')) {
             return null;
         }
         $thConcept = 'th_concept';
         $thLabel = 'th_concept_label';
-        $url = \DB::select(\DB::raw("
+        $concept = \DB::select(\DB::raw("
             WITH summary AS
             (
-                SELECT c.concept_url,
+                SELECT c.concept_url, c.id,
                 ROW_NUMBER() OVER
                 (
                     PARTITION BY c.id
@@ -67,12 +67,21 @@ class ThesaurusController extends Controller
                 JOIN $thConcept as c ON l.concept_id = c.id
                 WHERE l.label = '$label'
             )
-            SELECT concept_url
+            SELECT concept_url, id
             FROM summary s
             WHERE s.rk = 1"));
+        return $concept;
+    }
 
-        if(isset($url) && !empty($url)) return $url[0]->concept_url;
+    public static function getConceptUrlForLabel($label, $lang = 'de') {
+        $concept = self::getConceptForLabel($label, $lang);
+        if(isset($concept) && !empty($concept)) return $concept[0]->concept_url;
+        return null;
+    }
 
+    public static function getConceptIdForLabel($label, $lang = 'de') {
+        $concept = self::getConceptForLabel($label, $lang);
+        if(isset($concept) && !empty($concept)) return $concept[0]->id;
         return null;
     }
 
