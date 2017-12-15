@@ -398,9 +398,10 @@ spacialistApp.directive('resizeWatcher', function($window, $timeout) {
             if(header) {
                 headerHeight = getElementHeight(header);
             }
-            var addonNavHeight = 44 + paddedContentClassPadding; // 44px; measured in desktop mode
+            var addonNavHeight = 44; // 44px; measured in desktop mode
             var addonNav = document.getElementById('addon-nav');
             if(addonNav && addonNav.offsetHeight > 1) addonNavHeight = getElementHeight(addonNav);
+            addonNavHeight +=  paddedContentClassPadding;
             var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
             var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
             var attributeEditor = document.getElementById('attribute-editor');
