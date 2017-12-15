@@ -36,7 +36,7 @@
     "main.menu.external-tools": "External Tools",
     "main.menu.data-analysis": "Data Analysis",
     "main.menu.data-analysis.dbwebgen": "dbWebGen",
-    "main.menu.data-analysis.internal": "Internal (BETA)",
+    "main.menu.data-analysis.internal": "Data Analysis (beta)",
     "main.menu.new-data-analysis": "New Data Analysis",
     "main.menu.browse-data-analysis": "Browse Data Analysis",
     "main.menu.literature": "Bibliography",
