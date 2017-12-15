@@ -46,181 +46,6 @@ class ContextController extends Controller {
 
     // GET
 
-    public function importFromCsv(Request $request) {
-        $user = \Auth::user();
-        if(!$user->can('create_concepts') && !$user->can('view_concepts_th') && !$user->can('add_move_concepts_th')) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
-
-        $this->validate($request, [
-            'files.*' => 'required|mimes:csv,txt|file',
-            'language' => 'string',
-        ]);
-
-        // needed for later rank patching
-        $startTime = time();
-        $oldMaxRootRank = Context::whereNull('root_context_id')->max('rank');
-
-        $files = $request->file('files');
-        $languageCode = $request->input('language', 'de');
-        $language = ThLanguage::where('short_name', $languageCode)->first();
-        if(!isset($language)) {
-            $language = ThLanguage::orderBy('id')->first();
-        }
-        $contentFiles = [];
-        $relationFile = null;
-        foreach($files as $file) {
-            $filename = $file->getClientOriginalName();
-            if($filename != 'relations.csv') {
-                $contentFiles[] = [
-                    'filename' => $filename,
-                    'filepath' => $file->getRealPath()
-                ];
-            } else {
-                $relationFile = [
-                    'filename' => $filename,
-                    'filepath' => $file->getRealPath()
-                ];
-            }
-        }
-        $newSuffix = '_NEW';
-        $failed = [];
-        $idMap = [];
-        foreach($contentFiles as $c) {
-            $i = 0;
-            $columnConcepts = [];
-            $columnAttributes = [];
-            $columnDatatypeUrl = [];
-            $currentContextTypeId = -1;
-            $fileFailed = [];
-            $filehandle = fopen($c['filepath'], 'r');
-            for($i=0; ($data = fgetcsv($filehandle)) !== false; $i++) {
-                $j = 0;
-                if($i === 0) { // row 1
-                    foreach($data as $d) {
-                        // skip id column (0) in header
-                        if($j > 0) {
-                            $concept = [];
-                            $concept['url'] = ThesaurusController::getConceptUrlForLabel($d, $language->short_name);
-                            if(ends_with($d, $newSuffix) || !isset($concept['url'])) {
-                                $label = $d;
-                                $isnew = false;
-                                if(ends_with($d, $newSuffix)) {
-                                    $label = substr($d, 0, strlen($d)-strlen($newSuffix));
-                                    $isnew = true;
-                                }
-                                $newConcept = [];
-                                $projName = Helpers::getProjectName($user);
-                                $thConcept = ThesaurusController::createConcept($projName, $label, $user, $language->id, true, 1);
-                                $newConcept['url'] = $thConcept->concept_url;
-                                $newConcept['isnew'] = $isnew;
-                                $concept = $newConcept;
-                            }
-                            $columnConcepts[$j] = $concept;
-                            if($j === 1) {
-                                // TODO geomtype
-                                $contextType = self::createContextType($concept['url'], 0, 'MultiPolygon');
-                                $currentContextTypeId = $contextType->id;
-                            }
-                        }
-                        $j++;
-                    }
-                } else if($i === 1) { // row 2
-                    foreach($data as $d) {
-                        // start at 2, id and name column have no datatype
-                        if($j >= 2) {
-                            $currentConcept = $columnConcepts[$j];
-                            $rootUrl = null;
-                            if($d == 'string-sc') {
-                                $rootUrl = $currentConcept['url'];
-                            }
-                            $attribute = self::createAttribute($currentConcept['url'], $d, $rootUrl);
-                            $cA = self::createContextAttribute($currentContextTypeId, $attribute->id);
-                            $columnAttributes[$j] = $attribute;
-                        }
-                        $j++;
-                    }
-                } else { // actual data
-                    $currentContextId = -1;
-                    $values = [];
-                    $currentDataId = -1;
-                    foreach($data as $d) {
-                        if($j === 0) {
-                            $currentDataId = $d;
-                        } else if($j === 1) {
-                            $attributes = [
-                                'name' => $d,
-                                'context_type_id' => $currentContextTypeId
-                            ];
-                            $context = self::createContext($attributes, $user);
-                            $currentContextId = $context->id;
-                            $idMap[$currentDataId] = $currentContextId;
-                        } else if($d != null) { // if current data has no value, skip
-                            $attr = $columnAttributes[$j];
-                            if($attr->datatype == 'string-sc') {
-                                $conceptId = ThesaurusController::getConceptIdForLabel($d, $language->short_name);
-                                if(!isset($conceptId)) {
-                                    $projName = Helpers::getProjectName($user);
-                                    $thConcept = ThesaurusController::createConcept($projName, $d, $user, $language->id, false, 1);
-                                    $conceptId = $thConcept->id;
-                                    // Add broader
-                                    $currentParentConcept = $columnConcepts[$j]['url'];
-                                    $parentId = ThConcept::where('concept_url', $currentParentConcept)->value('id');
-                                    $broader = new ThBroader();
-                                    $broader->broader_id = $parentId;
-                                    $broader->narrower_id = $thConcept->id;
-                                    $broader->save();
-                                }
-                                $value = [
-                                    'narrower_id' => $conceptId
-                                ];
-                                $d = json_encode($value);
-                            }
-                            $values[$attr->id.'_'] = $d;
-                        }
-                        $j++;
-                    }
-                    $this->updateOrInsert($values, $currentContextId, $user);
-                }
-            }
-            $failed[$c['filename']] = $fileFailed;
-            fclose($filehandle);
-        }
-        if(isset($relationFile) && !empty($relationFile)) {
-            $filehandle = fopen($relationFile['filepath'], 'r');
-            for($i=0; ($data = fgetcsv($filehandle)) !== false; $i++) {
-                // skip header
-                if($i === 0) continue;
-                if($data[0] != NULL && $data[1] != NULL) {
-                    $pId = $idMap[$data[0]];
-                    $cId = $idMap[$data[1]];
-                    // We can simply set the rank without adjusting
-                    // the rank of siblings, because it is appended
-                    $newRank = Context::where('root_context_id', '=', $pId)->max('rank') + 1;
-                    $context = Context::find($cId);
-                    $context->root_context_id = $pId;
-                    $context->rank = $newRank;
-                    $context->save();
-                }
-            }
-            // root context ranks may be wrong
-            // get all root contexts that have been updated after the start
-            // of the import
-            $rootContexts = Context::whereNull('root_context_id')->where('updated_at', '>=', date('Y-m-d H:i:s', $startTime))->get();
-            $rankOffset = 1;
-            foreach($rootContexts as $rc) {
-                $rc->rank = $oldMaxRootRank + $rankOffset;
-                $rc->save();
-                $rankOffset++;
-            }
-        }
-        return response()->json([
-            'failed' => $failed
-        ]);
-    }
-
     public function getContexts() {
         $user = \Auth::user();
         if(!$user->can('view_concepts')) {
@@ -970,6 +795,181 @@ class ContextController extends Controller {
         $newDuplicate->type = $additionalProps->type;
         $newDuplicate->uri = $additionalProps->uri;
         return response()->json(['obj' => $newDuplicate]);
+    }
+
+    public function importFromCsv(Request $request) {
+        $user = \Auth::user();
+        if(!$user->can('create_concepts') && !$user->can('view_concepts_th') && !$user->can('add_move_concepts_th')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'files.*' => 'required|mimes:csv,txt|file',
+            'language' => 'string',
+        ]);
+
+        // needed for later rank patching
+        $startTime = time();
+        $oldMaxRootRank = Context::whereNull('root_context_id')->max('rank');
+
+        $files = $request->file('files');
+        $languageCode = $request->input('language', 'de');
+        $language = ThLanguage::where('short_name', $languageCode)->first();
+        if(!isset($language)) {
+            $language = ThLanguage::orderBy('id')->first();
+        }
+        $contentFiles = [];
+        $relationFile = null;
+        foreach($files as $file) {
+            $filename = $file->getClientOriginalName();
+            if($filename != 'relations.csv') {
+                $contentFiles[] = [
+                    'filename' => $filename,
+                    'filepath' => $file->getRealPath()
+                ];
+            } else {
+                $relationFile = [
+                    'filename' => $filename,
+                    'filepath' => $file->getRealPath()
+                ];
+            }
+        }
+        $newSuffix = '_NEW';
+        $failed = [];
+        $idMap = [];
+        foreach($contentFiles as $c) {
+            $i = 0;
+            $columnConcepts = [];
+            $columnAttributes = [];
+            $columnDatatypeUrl = [];
+            $currentContextTypeId = -1;
+            $fileFailed = [];
+            $filehandle = fopen($c['filepath'], 'r');
+            for($i=0; ($data = fgetcsv($filehandle)) !== false; $i++) {
+                $j = 0;
+                if($i === 0) { // row 1
+                    foreach($data as $d) {
+                        // skip id column (0) in header
+                        if($j > 0) {
+                            $concept = [];
+                            $concept['url'] = ThesaurusController::getConceptUrlForLabel($d, $language->short_name);
+                            if(ends_with($d, $newSuffix) || !isset($concept['url'])) {
+                                $label = $d;
+                                $isnew = false;
+                                if(ends_with($d, $newSuffix)) {
+                                    $label = substr($d, 0, strlen($d)-strlen($newSuffix));
+                                    $isnew = true;
+                                }
+                                $newConcept = [];
+                                $projName = Helpers::getProjectName($user);
+                                $thConcept = ThesaurusController::createConcept($projName, $label, $user, $language->id, true, 1);
+                                $newConcept['url'] = $thConcept->concept_url;
+                                $newConcept['isnew'] = $isnew;
+                                $concept = $newConcept;
+                            }
+                            $columnConcepts[$j] = $concept;
+                            if($j === 1) {
+                                // TODO geomtype
+                                $contextType = self::createContextType($concept['url'], 0, 'MultiPolygon');
+                                $currentContextTypeId = $contextType->id;
+                            }
+                        }
+                        $j++;
+                    }
+                } else if($i === 1) { // row 2
+                    foreach($data as $d) {
+                        // start at 2, id and name column have no datatype
+                        if($j >= 2) {
+                            $currentConcept = $columnConcepts[$j];
+                            $rootUrl = null;
+                            if($d == 'string-sc') {
+                                $rootUrl = $currentConcept['url'];
+                            }
+                            $attribute = self::createAttribute($currentConcept['url'], $d, $rootUrl);
+                            $cA = self::createContextAttribute($currentContextTypeId, $attribute->id);
+                            $columnAttributes[$j] = $attribute;
+                        }
+                        $j++;
+                    }
+                } else { // actual data
+                    $currentContextId = -1;
+                    $values = [];
+                    $currentDataId = -1;
+                    foreach($data as $d) {
+                        if($j === 0) {
+                            $currentDataId = $d;
+                        } else if($j === 1) {
+                            $attributes = [
+                                'name' => $d,
+                                'context_type_id' => $currentContextTypeId
+                            ];
+                            $context = self::createContext($attributes, $user);
+                            $currentContextId = $context->id;
+                            $idMap[$currentDataId] = $currentContextId;
+                        } else if($d != null) { // if current data has no value, skip
+                            $attr = $columnAttributes[$j];
+                            if($attr->datatype == 'string-sc') {
+                                $conceptId = ThesaurusController::getConceptIdForLabel($d, $language->short_name);
+                                if(!isset($conceptId)) {
+                                    $projName = Helpers::getProjectName($user);
+                                    $thConcept = ThesaurusController::createConcept($projName, $d, $user, $language->id, false, 1);
+                                    $conceptId = $thConcept->id;
+                                    // Add broader
+                                    $currentParentConcept = $columnConcepts[$j]['url'];
+                                    $parentId = ThConcept::where('concept_url', $currentParentConcept)->value('id');
+                                    $broader = new ThBroader();
+                                    $broader->broader_id = $parentId;
+                                    $broader->narrower_id = $thConcept->id;
+                                    $broader->save();
+                                }
+                                $value = [
+                                    'narrower_id' => $conceptId
+                                ];
+                                $d = json_encode($value);
+                            }
+                            $values[$attr->id.'_'] = $d;
+                        }
+                        $j++;
+                    }
+                    $this->updateOrInsert($values, $currentContextId, $user);
+                }
+            }
+            $failed[$c['filename']] = $fileFailed;
+            fclose($filehandle);
+        }
+        if(isset($relationFile) && !empty($relationFile)) {
+            $filehandle = fopen($relationFile['filepath'], 'r');
+            for($i=0; ($data = fgetcsv($filehandle)) !== false; $i++) {
+                // skip header
+                if($i === 0) continue;
+                if($data[0] != NULL && $data[1] != NULL) {
+                    $pId = $idMap[$data[0]];
+                    $cId = $idMap[$data[1]];
+                    // We can simply set the rank without adjusting
+                    // the rank of siblings, because it is appended
+                    $newRank = Context::where('root_context_id', '=', $pId)->max('rank') + 1;
+                    $context = Context::find($cId);
+                    $context->root_context_id = $pId;
+                    $context->rank = $newRank;
+                    $context->save();
+                }
+            }
+            // root context ranks may be wrong
+            // get all root contexts that have been updated after the start
+            // of the import
+            $rootContexts = Context::whereNull('root_context_id')->where('updated_at', '>=', date('Y-m-d H:i:s', $startTime))->get();
+            $rankOffset = 1;
+            foreach($rootContexts as $rc) {
+                $rc->rank = $oldMaxRootRank + $rankOffset;
+                $rc->save();
+                $rankOffset++;
+            }
+        }
+        return response()->json([
+            'failed' => $failed
+        ]);
     }
 
     // PATCH
