@@ -5,26 +5,51 @@ namespace App;
 class VersionInfo {
     private static $file = '.VERSION';
     // Semantic versioning
-    private $major = 1;
-    private $minor = 0;
-    private $patch = 0;
+    private $major;
+    private $minor;
+    private $patch;
 
-    private $release = "v$major.$minor.$patch";
-    private $releaseName = "No Release Title";
+    private $release;
+    private $releaseName;
     private $releaseHash;
 
+    private $time;
+
     function __construct() {
-        if(file_exists($file)) {
-            $content = file_get_contents($file);
-            // content should have this format "v0.5.0-ephesus-16-g7109034"
-            $parts = explode('-', $content);
-            if(count($parts) != 4) {
-                return;
+        $dir = dirname(__FILE__);
+        $fullpath = "$dir/" . self::$file;
+        if(file_exists($fullpath)) {
+            $content = explode("\n", file_get_contents($fullpath));
+            // \Log::info($content);
+        } else {
+            exec('git describe --tags', $tag, $exitcode);
+            exec('git log -1 --format=%at', $ts, $exitcodeTs);
+            if($exitcode === 0 && $exitcodeTs === 0) {
+                $content = [
+                    $tag[0], $ts[0]
+                ];
+            } else {
+                $content = [
+                    'v0.0.0-unreleased-1-gNOHASH',
+                    time()
+                ];
             }
-            $release = $parts[0];
-            $releaseName = ucfirst($parts[1]);
-            $releaseHash = $parts[3];
         }
+        // content should have this format "v0.5.0-ephesus-16-g7109034"
+        $parts = explode('-', $content[0]);
+        if(count($parts) != 4) {
+            return;
+        }
+        $this->release = $parts[0];
+        $this->releaseName = ucfirst($parts[1]);
+        $this->releaseHash = $parts[3];
+        // cut off 'v' for semantic versioning
+        $semVer = explode('.', substr($this->release, 1));
+        $this->major = $semVer[0];
+        $this->minor = $semVer[1];
+        $this->patch = $semVer[2];
+
+        $this->time = $content[1];
     }
 
     public function getRelease() {
@@ -44,7 +69,8 @@ class VersionInfo {
     }
 
     public function getFullRelease() {
-        return "$this->release-$this->releaseName-$this->releaseHash";
+        $releaseName = strtolower($this->releaseName);
+        return "$this->release-$releaseName-$this->releaseHash";
     }
 
     public function getMajor() {
@@ -57,5 +83,9 @@ class VersionInfo {
 
     public function getPatch() {
         return $this->patch;
+    }
+
+    public function getTime() {
+        return $this->time;
     }
 }

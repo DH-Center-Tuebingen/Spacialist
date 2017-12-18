@@ -20,6 +20,17 @@ $app->get('/', function () use ($app) {
 
 $app->post('user/login', 'UserController@login');
 
+$app->get('version', ['middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh'], function() {
+    $versionInfo = new App\VersionInfo();
+    return response()->json([
+        'full' => $versionInfo->getFullRelease(),
+        'readable' => $versionInfo->getReadableRelease(),
+        'release' => $versionInfo->getRelease(),
+        'name' => $versionInfo->getReleaseName(),
+        'time' => $versionInfo->getTime()
+    ]);
+}]);
+
 $app->group([
         'prefix' => 'context',//TODO api v1
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']

@@ -54,6 +54,12 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
         contexts.data[sourceNodeScope.$modelValue.id].collapsed = collapsed;
     };
 
+    main.getVersion = function() {
+        return httpGetPromise.getData('api/version').then(function(response) {
+            return response;
+        });
+    };
+
     main.getContextData = function(id) {
         return httpGetPromise.getData('api/context/' + id + '/data').then(function(response) {
             return parseData(response.data);
