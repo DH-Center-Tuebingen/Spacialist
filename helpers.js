@@ -62,6 +62,42 @@ function resetObject(o) {
     }
 }
 
+function hex2rgba(c) {
+    var rgba = {};
+    var r, g, b, a;
+    c = c.substr(1); // cut off #
+    if(c.length == 3) {
+        r = c[0]+c[0];
+        g = c[1]+c[1];
+        b = c[2]+c[2];
+        a = 'ff';
+    } else if(c.length == 4) {
+        r = c[0]+c[0];
+        g = c[1]+c[1];
+        b = c[2]+c[2];
+        a = c[3]+c[3];
+    } else if(c.length == 6) {
+        r = c[0]+c[1];
+        g = c[2]+c[3];
+        b = c[4]+c[5];
+        a = 'ff';
+    } else if(c.length == 8) {
+        r = c[0]+c[1];
+        g = c[2]+c[3];
+        b = c[4]+c[5];
+        a = c[6]+c[7];
+    }
+    rgba.r = parseInt(r, 16);
+    rgba.g = parseInt(g, 16);
+    rgba.b = parseInt(b, 16);
+    rgba.a = parseInt(a, 16);
+    return rgba;
+}
+
+function rgba2str(rgba) {
+    return 'rgba(' + rgba.r + ', ' + rgba.g + ', ' + rgba.b + ', ' + rgba.a + ')';
+}
+
 function createCountingCsvHeader(cnt, translate) {
     var columns = [];
     for(var i=0; i<cnt; i++) {

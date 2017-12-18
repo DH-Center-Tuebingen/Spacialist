@@ -26,11 +26,9 @@
             <h2>Style</h2>
         </div>
         <div ng-show="$ctrl.activePropertyTab == 'labels'">
-            <h5>Beschriftung <small>
-                <a href="" ng-click="$ctrl.toggleForm('label')">
-                    <i class="material-icons" ng-show="$ctrl.formShown['label']">arrow_drop_up</i>
-                    <i class="material-icons" ng-show="!$ctrl.formShown['label']">arrow_drop_down</i>
-                </a>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('label')">Beschriftung <small>
+                <i class="material-icons middle" ng-show="$ctrl.formShown['label']">arrow_drop_up</i>
+                <i class="material-icons middle" ng-show="!$ctrl.formShown['label']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['label']">
                 <div class="form-group">
@@ -40,25 +38,62 @@
                     </div>
                 </div>
             </form>
-            <h5>Schrift <small>
-                <a href="" ng-click="$ctrl.toggleForm('font')">
-                    <i class="material-icons" ng-show="$ctrl.formShown['font']">arrow_drop_up</i>
-                    <i class="material-icons" ng-show="!$ctrl.formShown['font']">arrow_drop_down</i>
-                </a>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('font')">Schrift <small>
+                <i class="material-icons middle" ng-show="$ctrl.formShown['font']">arrow_drop_up</i>
+                <i class="material-icons middle" ng-show="!$ctrl.formShown['font']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['font']">
                 <div class="form-group">
-                    <label class="control-label col-md-3">Attribut</label>
+                    <label class="control-label col-md-3">Schrift aktivieren</label>
                     <div class="col-md-9">
-                        <input type="text" class="form-control" />
+                        <input type="checkbox" class="form-control" ng-model="$ctrl.font.active" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Schriftgröße</label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.font.size" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Schriftfarbe</label>
+                    <div class="col-md-9">
+                        <input type="color" class="form-control" ng-model="$ctrl.font.color" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Stil</label>
+                    <div class="col-md-9">
+                        <ui-select ng-model="$ctrl.font.style">
+                            <ui-select-match>{{ $select.selected.label }}</ui-select-match>
+                            <ui-select-choices repeat="style in $ctrl.fontStyles | filter:$select.search">
+                                <span ng-bind-html="style.label | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Groß-/Kleinschreibung</label>
+                    <div class="col-md-9">
+                        <ui-select ng-model="$ctrl.font.mod">
+                            <ui-select-match>{{ $select.selected.label }}</ui-select-match>
+                            <ui-select-choices repeat="mod in $ctrl.fontMods | filter:$select.search">
+                                <span ng-bind-html="mod.label | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Transparenz</label>
+                    <div class="col-md-9">
+                        <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.font.transparency" />
+                        <span class="slider-text">{{ $ctrl.font.transparency }}%</span>
                     </div>
                 </div>
             </form>
-            <h5>Puffer <small>
-                <a href="" ng-click="$ctrl.toggleForm('buffer')">
-                    <i class="material-icons" ng-show="$ctrl.formShown['buffer']">arrow_drop_up</i>
-                    <i class="material-icons" ng-show="!$ctrl.formShown['buffer']">arrow_drop_down</i>
-                </a>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('buffer')">Puffer <small>
+                    <i class="material-icons middle" ng-show="$ctrl.formShown['buffer']">arrow_drop_up</i>
+                    <i class="material-icons middle" ng-show="!$ctrl.formShown['buffer']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['buffer']">
                 <div class="form-group">
@@ -82,30 +117,63 @@
                 <div class="form-group">
                     <label class="control-label col-md-3">Transparenz</label>
                     <div class="col-md-9">
-                        <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" id="a{{ attr.id }}" ng-model="$ctrl.buffer.transparency" />
+                        <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.buffer.transparency" />
                         <span class="slider-text">{{ $ctrl.buffer.transparency }}%</span>
                     </div>
                 </div>
             </form>
-            <h5>Hintergrund <small>
-                <a href="" ng-click="$ctrl.toggleForm('background')">
-                    <i class="material-icons" ng-show="$ctrl.formShown['background']">arrow_drop_up</i>
-                    <i class="material-icons" ng-show="!$ctrl.formShown['background']">arrow_drop_down</i>
-                </a>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('background')">Hintergrund <small>
+                <i class="material-icons middle" ng-show="$ctrl.formShown['background']">arrow_drop_up</i>
+                <i class="material-icons middle" ng-show="!$ctrl.formShown['background']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['background']">
                 <div class="form-group">
-                    <label class="control-label col-md-3">Attribut</label>
+                    <label class="control-label col-md-3">Hintergrund aktivieren</label>
                     <div class="col-md-9">
-                        <input type="text" class="form-control" />
+                        <input type="checkbox" class="form-control" ng-model="$ctrl.background.active" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Größe X</label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.background.size.x" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Größe Y</label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.background.size.y" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Füllfarbe</label>
+                    <div class="col-md-9">
+                        <input type="color" class="form-control" ng-model="$ctrl.background.color.fill" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Randfarbe</label>
+                    <div class="col-md-9">
+                        <input type="color" class="form-control" ng-model="$ctrl.background.color.border" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Randgröße</label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.background.size.border" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Transparenz</label>
+                    <div class="col-md-9">
+                        <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.background.transparency" />
+                        <span class="slider-text">{{ $ctrl.background.transparency }}%</span>
                     </div>
                 </div>
             </form>
-            <h5>Position <small>
-                <a href="" ng-click="$ctrl.toggleForm('position')">
-                    <i class="material-icons" ng-show="$ctrl.formShown['position']">arrow_drop_up</i>
-                    <i class="material-icons" ng-show="!$ctrl.formShown['position']">arrow_drop_down</i>
-                </a>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('position')">Position <small>
+                <i class="material-icons middle" ng-show="$ctrl.formShown['position']">arrow_drop_up</i>
+                <i class="material-icons middle" ng-show="!$ctrl.formShown['position']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['position']">
                 <div class="form-group">

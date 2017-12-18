@@ -120,6 +120,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
             click: function($itemScope, $event, modelValue, text, $li) {
                 var l = $itemScope.l;
                 var concepts = vm.concepts;
+                var contexts = vm.contexts;
                 var map = vm.map;
                 $uibModal.open({
                     templateUrl: "modals/gis-properties.html",
@@ -127,11 +128,56 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                     controller: ['$scope', function($scope) {
                         var vm = this;
 
+                        vm.fontStyles = [
+                            {
+                                label: 'font.bold',
+                                index: 'bold'
+                            },
+                            {
+                                label: 'font.italic',
+                                index: 'italic'
+                            },
+                            {
+                                label: 'font.oblique',
+                                index: 'oblique'
+                            },
+                            {
+                                label: 'font.bolditalic',
+                                index: 'bolditalic'
+                            },
+                            {
+                                label: 'font.boldoblique',
+                                index: 'boldoblique'
+                            },
+                            {
+                                label: 'font.regular',
+                                index: 'regular'
+                            }
+                        ];
+
+                        vm.fontMods = [
+                            {
+                                label: 'font.mod.lower',
+                                index: 'lower'
+                            },
+                            {
+                                label: 'font.mod.upper',
+                                index: 'upper'
+                            },
+                            {
+                                label: 'font.mod.firstupper',
+                                index: 'firstupper'
+                            }
+                        ];
+
                         vm.label = {};
-                        vm.font = {};
+                        vm.font = {
+                            style: vm.fontStyles[5]
+                        };
                         vm.buffer = {};
                         vm.background = {};
                         vm.position = {};
+                        vm.shadow = {};
 
                         vm.formShown = {
                             label: true,
@@ -142,34 +188,143 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                         };
 
                         vm.applyStyleSettings = function() {
-                            var tooltip = {};
+                            var className = 'tooltip-' + (new Date()).getTime();
+                            var tooltip = {
+                                className: className
+                            };
+                            var styleActive = vm.label.active || vm.font.active || vm.buffer.active || vm.background.active || vm.position.active || vm.shadow.active;
+
                             tooltip.permanent = true;
                             tooltip.interactive = false;
-                            var isOneActive = false;
-                            if(vm.buffer.active) {
-                                vm.applyBuffer(tooltip);
-                                isOneActive = true;
-                            } else {
-                                vm.removeBuffer(tooltip);
-                            }
 
                             var layers = vm.map.mapLayers[vm.layer.id].getLayers();
                             for(var i=0; i<layers.length; i++) {
                                 var l = layers[i];
-                                l.bindTooltip("Foobar", tooltip);
+                                console.log(l);
+                                l.unbindTooltip();
+                                if(styleActive) {
+                                    var label = "Foobar";
+                                    l.bindTooltip(label, tooltip);
+                                } else {
+                                    var name;
+                                    if(map.geodata.linkedContexts[l.feature.id]){
+                                        name = contexts.data[map.geodata.linkedContexts[l.feature.id]].name;
+                                    }
+                                    else{
+                                        name = l.feature.properties.name;
+                                    }
+                                    l.bindTooltip(name);
+                                }
+                            }
+                            var tooltipInstances = $('.'+className);
+                            vm.removeTooltipClasses(tooltipInstances);
+                            vm.applyBuffer(tooltipInstances);
+                            vm.applyFont(tooltipInstances, "Test");
+                            vm.applyBackground(tooltipInstances);
+                        };
+
+                        vm.removeTooltipClasses = function(tti) {
+                            tti.removeClass('leaflet-tooltip');
+                            tti.removeClass('leaflet-tooltip-left');
+                            tti.removeClass('leaflet-tooltip-right');
+                            tti.removeClass('leaflet-tooltip-top');
+                            tti.removeClass('leaflet-tooltip-bottom');
+                        };
+
+                        vm.applyFont = function(tti, label) {
+                            if(!vm.font.active) return;
+                            var opacity = vm.getOpacity(vm.font.transparency);
+                            var c = hex2rgba(vm.font.color);
+                            c.a = opacity;
+                            c = rgba2str(c);
+                            var s = vm.font.size;
+                            tti.css('color', c);
+                            tti.css('font-size', s + 'px');
+                            // TODO font family
+                            // tti.css('font-family', '');
+                            var style = vm.font.style;
+                            var mod = vm.font.mod;
+                            switch(style.index) {
+                                case 'bold':
+                                    tti.css('font-weight', 'bold');
+                                    break;
+                                case 'italic':
+                                    tti.css('font-style', 'italic');
+                                    break;
+                                case 'oblique':
+                                    tti.css('font-style', 'oblique');
+                                    break;
+                                case 'bolditalic':
+                                    tti.css('font-weight', 'bold');
+                                    tti.css('font-style', 'italic');
+                                    break;
+                                case 'boldoblique':
+                                    tti.css('font-weight', 'bold');
+                                    tti.css('font-style', 'oblique');
+                                    break;
+                                case 'regular':
+                                default:
+                                    tti.css('font-weight', 'normal');
+                                    tti.css('font-style', 'normal');
+                                    break;
+                            }
+                            switch(mod.index) {
+                                case 'lower':
+                                    label = label.toLowerCase();
+                                    break;
+                                case 'upper':
+                                    label = label.toUpperCase();
+                                    break;
+                                case 'firstupper':
+                                    var first = label[0].toUpperCase();
+                                    var rest = label.substring(1);
+                                    label = first + rest;
+                                    break;
                             }
                         };
 
-                        vm.applyBuffer = function(tooltip) {
-                            // if transparency is present, set opacity to 100%-transparency
-                            if($ctrl.buffer.transparency) {
-                                tooltip.opacity = 1 - $ctrl.buffer.transparency
-                            }
+                        vm.applyBuffer = function(tti) {
+                            if(!vm.buffer.active) return;
+                            var opacity = vm.getOpacity(vm.buffer.transparency);
+                            var c = hex2rgba(vm.buffer.color);
+                            c.a = opacity;
+                            var cs = rgba2str(c);
+                            var ss = vm.createRoundBuffer(vm.buffer.size, cs);
+                            tti.css('text-shadow', ss);
                         };
 
-                        vm.removeBuffer = function(tooltip) {
+                        // if transparency is present, set opacity to 100%-transparency
+                        vm.getOpacity = function(trans) {
+                            if(trans) return 1 - (trans/100);
+                            return 1;
+                        };
 
+                        vm.createRoundBuffer = function(s, color) {
+                            var ms = -s;
+                            var dirs = [
+                                '-1px -1px ' + s + 'px ' + color,
+                                '-1px 1px ' + s + 'px ' + color,
+                                '1px -1px ' + s + 'px ' + color,
+                                '1px 1px ' + s + 'px ' + color
+                            ];
+                            return dirs.join(', ');
                         }
+
+                        vm.applyBackground = function(tti) {
+                            if(!vm.background.active) return;
+                            var opacity = vm.getOpacity(vm.background.transparency);
+                            var fc = hex2rgba(vm.background.color.fill);
+                            var bc = hex2rgba(vm.background.color.border);
+                            fc.a = bc.a = opacity;
+                            fc = rgba2str(fc);
+                            bc = rgba2str(bc);
+                            var x = vm.background.size.x
+                            var y = vm.background.size.y
+                            var border = vm.background.size.border
+                            tti.css('padding', y +'px ' + x + 'px');
+                            tti.css('border', border + 'px solid ' + bc)
+                            tti.css('background-color', fc);
+                        };
 
                         vm.toggleForm = function(id) {
                             vm.formShown[id] = !vm.formShown[id];
