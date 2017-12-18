@@ -33,62 +33,52 @@
                         </div>
                     </form>
                 </li>
-                <li class="dropdown" uib-dropdown>
-                    <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        <i class="material-icons">poll</i>
-                        {{'main.menu.data-analysis'|translate}} <i class="material-icons">arrow_drop_down</i>
-                    </a>
-                    <ul class="dropdown-menu" uib-dropdown-menu>
-                        <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
-                            <a href="db" target="_blank">
-                                {{ 'main.menu.data-analysis.dbwebgen' | translate }} <sup class="material-icons md-14">open_in_new</sup>
-                            </a>
-                        </li>
-                        <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
-                            <a ui-sref="root.analysis">
-                                {{ 'main.menu.data-analysis.internal' | translate }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li ng-if="$ctrl.user.permissions.edit_literature && $ctrl.userConfig['prefs.load-extensions'].value.bibliography">
-                    <a ui-sref="root.bibliography">
-                        <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
-                    </a>
-                </li>
-                <li ng-if="$ctrl.userConfig['prefs.link-to-thesaurex'].value.length > 0">
-                    <a ng-href="{{ $ctrl.userConfig['prefs.link-to-thesaurex'].value }}" target="_blank">
-                        <i class="material-icons">pets</i> ThesauRex <sup class="material-icons md-14">open_in_new</sup>
-                    </a>
-                </li>
             </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown" uib-dropdown>
-                    <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        <flag ng-if="$ctrl.currentLanguage.flagCode != 'en'" country="{{ $ctrl.currentLanguage.flagCode }}" size="16"></flag><flag ng-if="$ctrl.currentLanguage.flagCode == 'en'" country="us" size="16"></flag> <i class="material-icons">arrow_drop_down</i>
-                    </a>
-                    <ul class="dropdown-menu" uib-dropdown-menu>
-                        <li ng-repeat="(code,lang) in $ctrl.availableLanguages">
-                            <a href="" ng-click="$ctrl.switchLanguage(code)" ng-class="{ activeLang: $ctrl.isLangSet(code) }">
-                                <flag country="{{lang.flagCode}}" size="16"></flag>
-                                {{ lang.label }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a target="_blank" href="https://github.com/eScienceCenter/Spacialist/wiki/User-manual">
-                        <i class="material-icons">help</i>
-                    </a>
-                </li>
-	    </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li ng-if="$ctrl.user.user.name">
                     <a href="" ng-click="$ctrl.logoutUser()">
                         <i class="material-icons">power_settings_new</i> {{ $ctrl.user.user.name }}
                     </a>
                 </li>
-                <li ng-if="$ctrl.user.permissions.view_users || $ctrl.user.permissions.add_edit_role" class="dropdown" uib-dropdown>
+                <li class="dropdown" uib-dropdown>
+                    <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <i class="material-icons">build</i>
+                        {{'main.menu.tools'|translate}} <i class="material-icons">arrow_drop_down</i>
+                    </a>
+                    <ul class="dropdown-menu" uib-dropdown-menu>
+                        <li>
+                            <a ui-sref="root.editor.gis">
+                                <i class="material-icons">map</i> {{'main.menu.gis'|translate}}
+                            </a>
+                        </li>
+                        <li ng-if="$ctrl.user.permissions.edit_literature && $ctrl.userConfig['prefs.load-extensions'].value.bibliography">
+                            <a ui-sref="root.bibliography">
+                                <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
+                            <a ui-sref="root.analysis">
+                                <i class="material-icons">poll</i> {{ 'main.menu.data-analysis.internal' | translate }}
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">
+                            {{'main.menu.external-tools'|translate}} <sup class="material-icons md-14">open_in_new</sup>
+                        </li>
+                        <li ng-if="$ctrl.userConfig['prefs.link-to-thesaurex'].value.length > 0">
+                            <a ng-href="{{ $ctrl.userConfig['prefs.link-to-thesaurex'].value }}" target="_blank">
+                                <i class="material-icons">pets</i> ThesauRex
+                            </a>
+                        </li>
+                        <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
+                            <a href="db" target="_blank">
+                                <i class="material-icons">poll</i> {{ 'main.menu.data-analysis.dbwebgen' | translate }}
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown" uib-dropdown>
                     <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         <i class="material-icons">settings</i>
                         {{'main.menu.settings'|translate}} <i class="material-icons">arrow_drop_down</i>
@@ -115,11 +105,6 @@
                             </a>
                         </li>
                         <li>
-                            <a ui-sref="root.editor.gis">
-                                <i class="material-icons">map</i> {{'main.menu.gis'|translate}}
-                            </a>
-                        </li>
-                        <li>
                             <a ui-sref="root.upreferences({id: $ctrl.user.user.id})">
                                 <i class="material-icons">star</i> {{'main.menu.user-preferences'|translate}}
                             </a>
@@ -135,6 +120,24 @@
                             </a>
                         </li>
                     </ul>
+                </li>
+                <li class="dropdown" uib-dropdown>
+                    <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <flag ng-if="$ctrl.currentLanguage.flagCode != 'en'" country="{{ $ctrl.currentLanguage.flagCode }}" size="16"></flag><flag ng-if="$ctrl.currentLanguage.flagCode == 'en'" country="us" size="16"></flag> <i class="material-icons">arrow_drop_down</i>
+                    </a>
+                    <ul class="dropdown-menu" uib-dropdown-menu>
+                        <li ng-repeat="(code,lang) in $ctrl.availableLanguages">
+                            <a href="" ng-click="$ctrl.switchLanguage(code)" ng-class="{ activeLang: $ctrl.isLangSet(code) }">
+                                <flag country="{{lang.flagCode}}" size="16"></flag>
+                                {{ lang.label }}
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a target="_blank" href="https://github.com/eScienceCenter/Spacialist/wiki/User-manual">
+                        <i class="material-icons">help</i>
+                    </a>
                 </li>
             </ul>
         </div>
