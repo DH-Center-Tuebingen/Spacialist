@@ -1231,6 +1231,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     return {
                         enabled: false
                     };
+                },
+                version: function(mainService) {
+                    return mainService.getVersion();
                 }
             },
             views: {
@@ -1324,6 +1327,26 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     }
                 }
             })
+                .state('root.spacialist.about', {
+                    url: '/about',
+                    onEnter: function($state, $uibModal, version) {
+                        $uibModal.open({
+                            templateUrl: "modals/about.html",
+                            // windowClass: '',
+                            controller: ['$scope', function($scope) {
+                                var vm = this;
+
+                                vm.version = version;
+                                vm.close = function() {
+                                    $scope.$dismiss('close');
+                                };
+                            }],
+                            controllerAs: '$ctrl',
+                        }).result.finally(function() {
+                            $state.router.transitionService.back();
+                        });
+                    }
+                })
                 .state('root.spacialist.context', {
                     url: '/context',
                     sticky: true,
