@@ -45,6 +45,7 @@ $app->group([
 
     $app->post('', 'ContextController@add');
     $app->post('{id:[0-9]+}/duplicate', 'ContextController@duplicate');
+    $app->post('import', 'ContextController@importFromCsv');
 
     $app->patch('{id:[0-9]+}/rank', 'ContextController@patchRank');
     $app->patch('geodata/{cid:[0-9]+}', 'ContextController@linkGeodata');

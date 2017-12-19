@@ -1,9 +1,11 @@
-spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 'mainService', '$state', '$translate', function($scope, langService, userService, mainService, $state, $translate) {
+spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 'mainService', 'Upload', '$timeout', '$state', '$translate', function($scope, langService, userService, mainService, Upload, $timeout, $state, $translate) {
     var vm = this;
+
     vm.state = $state;
     vm.currentLanguage = {};
     vm.isLangSet = langService.isLangSet;
     $scope.concepts = vm.concepts;
+
     $scope.getLabelValue = function(label, type) {
         if(vm.concepts[label]) {
             return vm.concepts[label].label;
@@ -36,6 +38,29 @@ spacialistApp.controller('headerCtrl', ['$scope', 'langService', 'userService', 
                 break;
             case 'bibliography':
                 $state.go('root.bibliography.edit', {id: $model.id});
+        }
+    };
+
+    vm.importCsvFiles = function(files) {
+        if(files && files.length) {
+            var content = $translate.instant('data-import.loading-message', {cnt: files.length});
+            showLoadingOverlay(content);
+            Upload.upload({
+                url: 'api/context/import',
+                data: {
+                    files: files
+                }
+            }).then(function (response) {
+                $timeout(function () {
+                    hideLoadingOverlay();
+                    if($state.includes('root.spacialist')) {
+                        $state.reload();
+                    }
+                });
+            }, function (response) {
+                hideLoadingOverlay();
+            }, function (evt) {
+            });
         }
     };
 

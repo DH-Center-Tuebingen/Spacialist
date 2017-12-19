@@ -5,6 +5,42 @@
     vertical-align: middle;
 }
 
+#loadingUiWrapper {
+    display: none;
+}
+
+#loadingUi {
+    background-color: transparant;
+    color: #eee;
+    height: 50%;
+    width: 50%;
+    left: 25%;
+    top: 35%;
+    position: absolute;
+    text-align: center;
+    vertical-align: middle;
+    z-index: 99999;
+}
+
+#loadingUi spinner {
+    position: absolute;
+}
+
+#loadingUiBackdrop {
+    background-color: #000;
+    height: 100vh;
+    width: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0.5;
+    position: fixed;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+    z-index: 99998;
+}
+
 #literature-table thead {
     background: white;
 }

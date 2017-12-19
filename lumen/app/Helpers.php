@@ -6,6 +6,8 @@ use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use App\Literature;
+use App\Preference;
+use App\UserPreference;
 
 class Helpers {
     public static function startsWith($haystack, $needle) {
@@ -98,6 +100,34 @@ class Helpers {
             $key = $initalKey . $suffixes[$i++];
         }
         return $key;
+    }
+
+    public static function getProjectName($user = null) {
+        $query = Preference::where('label', 'prefs.project-name');
+        if(isset($user)) {
+            $query->leftJoin('user_preferences', 'pref_id', '=', 'preferences.id')
+                ->where(function($q) use($user) {
+                    $q->where('user_id', $user['id'])
+                        ->orWhereNull('user_id');
+                });
+        }
+
+        $pref = $query->first();
+        $value = isset($pref->value) ? $pref->value : $pref->default_value;
+        $decoded = json_decode($value);
+        return $decoded->name;
+    }
+
+    public static function labelToUrlPart($label) {
+        return Helpers::removeIllegalChars(Helpers::transliterate($label));
+    }
+
+    public static function transliterate($str) {
+        return transliterator_transliterate('Any-Latin; Latin-ASCII; [\u0100-\u7fff] remove; Lower()', $str);
+    }
+
+    public static function removeIllegalChars($input) {
+        return str_replace(['.', ',', ' ', '?', '!'], '_', $input);
     }
 
     public static function sortMatchesDesc($a, $b) {
