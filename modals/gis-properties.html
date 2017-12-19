@@ -171,6 +171,55 @@
                     </div>
                 </div>
             </form>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('shadow')">Schatten <small>
+                <i class="material-icons middle" ng-show="$ctrl.formShown['shadow']">arrow_drop_up</i>
+                <i class="material-icons middle" ng-show="!$ctrl.formShown['shadow']">arrow_drop_down</i>
+            </small></h5>
+            <form class="form-horizontal" ng-show="$ctrl.formShown['shadow']">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Schatten aktivieren</label>
+                    <div class="col-md-9">
+                        <input type="checkbox" class="form-control" ng-model="$ctrl.shadow.active" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Offset X</label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" class="form-control" ng-model="$ctrl.shadow.offset.x" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Offset Y</label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" class="form-control" ng-model="$ctrl.shadow.offset.y" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Blur</label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.shadow.blur" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Spread</label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" class="form-control" ng-model="$ctrl.shadow.spread" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Farbe</label>
+                    <div class="col-md-9">
+                        <input type="color" class="form-control" ng-model="$ctrl.shadow.color" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Transparenz</label>
+                    <div class="col-md-9">
+                        <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.shadow.transparency" />
+                        <span class="slider-text">{{ $ctrl.shadow.transparency }}%</span>
+                    </div>
+                </div>
+            </form>
             <h5 class="clickable" ng-click="$ctrl.toggleForm('position')">Position <small>
                 <i class="material-icons middle" ng-show="$ctrl.formShown['position']">arrow_drop_up</i>
                 <i class="material-icons middle" ng-show="!$ctrl.formShown['position']">arrow_drop_down</i>

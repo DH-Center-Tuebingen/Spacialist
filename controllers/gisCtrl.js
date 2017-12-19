@@ -165,26 +165,54 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                                 index: 'upper'
                             },
                             {
-                                label: 'font.mod.firstupper',
-                                index: 'firstupper'
+                                label: 'font.mod.capitalize',
+                                index: 'capitalize'
                             }
                         ];
 
                         vm.label = {};
                         vm.font = {
+                            transparency: 0,
+                            color: '#000000',
+                            size: 12,
                             style: vm.fontStyles[5]
                         };
-                        vm.buffer = {};
-                        vm.background = {};
+                        vm.buffer = {
+                            transparency: 0,
+                            color: '#FFFFFF',
+                            size: 1
+                        };
+                        vm.background = {
+                            transparency: 0,
+                            color: {
+                                fill: '#FFFFFF',
+                                border: '#000000'
+                            },
+                            size: {
+                                x: 0,
+                                y: 0,
+                                border: 1
+                            }
+                        };
                         vm.position = {};
-                        vm.shadow = {};
+                        vm.shadow = {
+                            transparency: 0,
+                            color: '#000000',
+                            offset: {
+                                x: 0,
+                                y: 0
+                            },
+                            blur: 0,
+                            spread: 0
+                        };
 
                         vm.formShown = {
                             label: true,
                             font: false,
                             buffer: false,
                             background: false,
-                            position: false
+                            position: false,
+                            shadow: false
                         };
 
                         vm.applyStyleSettings = function() {
@@ -200,10 +228,9 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                             var layers = vm.map.mapLayers[vm.layer.id].getLayers();
                             for(var i=0; i<layers.length; i++) {
                                 var l = layers[i];
-                                console.log(l);
                                 l.unbindTooltip();
                                 if(styleActive) {
-                                    var label = "Foobar";
+                                    var label = "foo Bar";
                                     l.bindTooltip(label, tooltip);
                                 } else {
                                     var name;
@@ -219,19 +246,19 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                             var tooltipInstances = $('.'+className);
                             vm.removeTooltipClasses(tooltipInstances);
                             vm.applyBuffer(tooltipInstances);
-                            vm.applyFont(tooltipInstances, "Test");
+                            vm.applyFont(tooltipInstances);
                             vm.applyBackground(tooltipInstances);
+                            vm.applyShadow(tooltipInstances);
                         };
 
                         vm.removeTooltipClasses = function(tti) {
-                            tti.removeClass('leaflet-tooltip');
                             tti.removeClass('leaflet-tooltip-left');
                             tti.removeClass('leaflet-tooltip-right');
                             tti.removeClass('leaflet-tooltip-top');
                             tti.removeClass('leaflet-tooltip-bottom');
                         };
 
-                        vm.applyFont = function(tti, label) {
+                        vm.applyFont = function(tti) {
                             if(!vm.font.active) return;
                             var opacity = vm.getOpacity(vm.font.transparency);
                             var c = hex2rgba(vm.font.color);
@@ -239,47 +266,49 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                             c = rgba2str(c);
                             var s = vm.font.size;
                             tti.css('color', c);
-                            tti.css('font-size', s + 'px');
+                            if(s) tti.css('font-size', s + 'px');
                             // TODO font family
                             // tti.css('font-family', '');
-                            var style = vm.font.style;
                             var mod = vm.font.mod;
-                            switch(style.index) {
-                                case 'bold':
-                                    tti.css('font-weight', 'bold');
-                                    break;
-                                case 'italic':
-                                    tti.css('font-style', 'italic');
-                                    break;
-                                case 'oblique':
-                                    tti.css('font-style', 'oblique');
-                                    break;
-                                case 'bolditalic':
-                                    tti.css('font-weight', 'bold');
-                                    tti.css('font-style', 'italic');
-                                    break;
-                                case 'boldoblique':
-                                    tti.css('font-weight', 'bold');
-                                    tti.css('font-style', 'oblique');
-                                    break;
-                                case 'regular':
-                                default:
-                                    tti.css('font-weight', 'normal');
-                                    tti.css('font-style', 'normal');
-                                    break;
+                            var style = vm.font.style;
+                            if(style) {
+                                switch(style.index) {
+                                    case 'bold':
+                                        tti.css('font-weight', 'bold');
+                                        break;
+                                    case 'italic':
+                                        tti.css('font-style', 'italic');
+                                        break;
+                                    case 'oblique':
+                                        tti.css('font-style', 'oblique');
+                                        break;
+                                    case 'bolditalic':
+                                        tti.css('font-weight', 'bold');
+                                        tti.css('font-style', 'italic');
+                                        break;
+                                    case 'boldoblique':
+                                        tti.css('font-weight', 'bold');
+                                        tti.css('font-style', 'oblique');
+                                        break;
+                                    case 'regular':
+                                    default:
+                                        tti.css('font-weight', 'normal');
+                                        tti.css('font-style', 'normal');
+                                        break;
+                                }
                             }
-                            switch(mod.index) {
-                                case 'lower':
-                                    label = label.toLowerCase();
+                            if(mod) {
+                                switch(mod.index) {
+                                    case 'lower':
+                                    tti.css('text-transform', 'lowercase');
                                     break;
-                                case 'upper':
-                                    label = label.toUpperCase();
+                                    case 'upper':
+                                    tti.css('text-transform', 'uppercase');
                                     break;
-                                case 'firstupper':
-                                    var first = label[0].toUpperCase();
-                                    var rest = label.substring(1);
-                                    label = first + rest;
+                                    case 'capitalize':
+                                    tti.css('text-transform', 'capitalize');
                                     break;
+                                }
                             }
                         };
 
@@ -293,23 +322,6 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                             tti.css('text-shadow', ss);
                         };
 
-                        // if transparency is present, set opacity to 100%-transparency
-                        vm.getOpacity = function(trans) {
-                            if(trans) return 1 - (trans/100);
-                            return 1;
-                        };
-
-                        vm.createRoundBuffer = function(s, color) {
-                            var ms = -s;
-                            var dirs = [
-                                '-1px -1px ' + s + 'px ' + color,
-                                '-1px 1px ' + s + 'px ' + color,
-                                '1px -1px ' + s + 'px ' + color,
-                                '1px 1px ' + s + 'px ' + color
-                            ];
-                            return dirs.join(', ');
-                        }
-
                         vm.applyBackground = function(tti) {
                             if(!vm.background.active) return;
                             var opacity = vm.getOpacity(vm.background.transparency);
@@ -318,12 +330,41 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                             fc.a = bc.a = opacity;
                             fc = rgba2str(fc);
                             bc = rgba2str(bc);
-                            var x = vm.background.size.x
-                            var y = vm.background.size.y
+                            var x = vm.background.size.x || 0;
+                            var y = vm.background.size.y || 0;
                             var border = vm.background.size.border
                             tti.css('padding', y +'px ' + x + 'px');
                             tti.css('border', border + 'px solid ' + bc)
                             tti.css('background-color', fc);
+                        };
+
+                        vm.applyShadow = function(tti) {
+                            if(!vm.shadow.active) return;
+                            var opacity = vm.getOpacity(vm.shadow.transparency);
+                            var c = hex2rgba(vm.shadow.color);
+                            c.a = opacity;
+                            c = rgba2str(c);
+                            var x = vm.shadow.offset.x || 0;
+                            var y = vm.shadow.offset.y || 0;
+                            var blur = vm.shadow.blur || 0;
+                            var spread = vm.shadow.spread || 0;
+                            tti.css('box-shadow', x + 'px ' + y + 'px ' + blur + 'px ' + spread + 'px ' + c);
+                        };
+
+                        // if transparency is present, set opacity to 100%-transparency
+                        vm.getOpacity = function(trans) {
+                            if(trans) return 1 - (trans/100);
+                            return 1;
+                        };
+
+                        vm.createRoundBuffer = function(s, color) {
+                            var dirs = [
+                                '-1px -1px ' + s + 'px ' + color,
+                                '-1px 1px ' + s + 'px ' + color,
+                                '1px -1px ' + s + 'px ' + color,
+                                '1px 1px ' + s + 'px ' + color
+                            ];
+                            return dirs.join(', ');
                         };
 
                         vm.toggleForm = function(id) {
