@@ -130,42 +130,42 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
 
                         vm.fontStyles = [
                             {
-                                label: 'font.bold',
+                                label: 'gis.properties.labels.font.bold',
                                 index: 'bold'
                             },
                             {
-                                label: 'font.italic',
+                                label: 'gis.properties.labels.font.italic',
                                 index: 'italic'
                             },
                             {
-                                label: 'font.oblique',
+                                label: 'gis.properties.labels.font.oblique',
                                 index: 'oblique'
                             },
                             {
-                                label: 'font.bolditalic',
+                                label: 'gis.properties.labels.font.bolditalic',
                                 index: 'bolditalic'
                             },
                             {
-                                label: 'font.boldoblique',
+                                label: 'gis.properties.labels.font.boldoblique',
                                 index: 'boldoblique'
                             },
                             {
-                                label: 'font.regular',
+                                label: 'gis.properties.labels.font.regular',
                                 index: 'regular'
                             }
                         ];
 
                         vm.fontMods = [
                             {
-                                label: 'font.mod.lower',
+                                label: 'gis.properties.labels.font.mod.lower',
                                 index: 'lower'
                             },
                             {
-                                label: 'font.mod.upper',
+                                label: 'gis.properties.labels.font.mod.upper',
                                 index: 'upper'
                             },
                             {
-                                label: 'font.mod.capitalize',
+                                label: 'gis.properties.labels.font.mod.capitalize',
                                 index: 'capitalize'
                             }
                         ];

@@ -23,10 +23,10 @@
     </div>
     <div class="col-md-10">
         <div ng-show="$ctrl.activePropertyTab == 'style'">
-            <h2>Style</h2>
+            <h2 translate="gis.properties.style"></h2>
         </div>
         <div ng-show="$ctrl.activePropertyTab == 'labels'">
-            <h5 class="clickable" ng-click="$ctrl.toggleForm('label')">Beschriftung <small>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('label')">{{ 'gis.properties.labels.heading.label' | translate }}<small>
                 <i class="material-icons middle" ng-show="$ctrl.formShown['label']">arrow_drop_up</i>
                 <i class="material-icons middle" ng-show="!$ctrl.formShown['label']">arrow_drop_down</i>
             </small></h5>
@@ -38,206 +38,200 @@
                     </div>
                 </div>
             </form>
-            <h5 class="clickable" ng-click="$ctrl.toggleForm('font')">Schrift <small>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('font')">{{ 'gis.properties.labels.heading.font' | translate }}<small>
                 <i class="material-icons middle" ng-show="$ctrl.formShown['font']">arrow_drop_up</i>
                 <i class="material-icons middle" ng-show="!$ctrl.formShown['font']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['font']">
                 <div class="form-group">
-                    <label class="control-label col-md-3">Schrift aktivieren</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.font.activate"></label>
                     <div class="col-md-9">
                         <input type="checkbox" class="form-control" ng-model="$ctrl.font.active" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Schriftgröße</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.font.size"></label>
                     <div class="col-md-9">
                         <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.font.size" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Schriftfarbe</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.font.color"></label>
                     <div class="col-md-9">
                         <input type="color" class="form-control" ng-model="$ctrl.font.color" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Stil</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.font.style"></label>
                     <div class="col-md-9">
                         <ui-select ng-model="$ctrl.font.style">
-                            <ui-select-match>{{ $select.selected.label }}</ui-select-match>
+                            <ui-select-match>{{ $select.selected.label | translate }}</ui-select-match>
                             <ui-select-choices repeat="style in $ctrl.fontStyles | filter:$select.search">
-                                <span ng-bind-html="style.label | highlight: $select.search"></span>
+                                <span ng-bind-html="style.label | translate | highlight: $select.search"></span>
                             </ui-select-choices>
                         </ui-select>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Groß-/Kleinschreibung</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.font.upper-lower-case"></label>
                     <div class="col-md-9">
                         <ui-select ng-model="$ctrl.font.mod">
-                            <ui-select-match>{{ $select.selected.label }}</ui-select-match>
+                            <ui-select-match>{{ $select.selected.label | translate }}</ui-select-match>
                             <ui-select-choices repeat="mod in $ctrl.fontMods | filter:$select.search">
-                                <span ng-bind-html="mod.label | highlight: $select.search"></span>
+                                <span ng-bind-html="mod.label | translate | highlight: $select.search"></span>
                             </ui-select-choices>
                         </ui-select>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Transparenz</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.font.transparency"></label>
                     <div class="col-md-9">
                         <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.font.transparency" />
                         <span class="slider-text">{{ $ctrl.font.transparency }}%</span>
                     </div>
                 </div>
             </form>
-            <h5 class="clickable" ng-click="$ctrl.toggleForm('buffer')">Puffer <small>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('buffer')">{{ 'gis.properties.labels.heading.buffer' | translate }}<small>
                     <i class="material-icons middle" ng-show="$ctrl.formShown['buffer']">arrow_drop_up</i>
                     <i class="material-icons middle" ng-show="!$ctrl.formShown['buffer']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['buffer']">
                 <div class="form-group">
-                    <label class="control-label col-md-3">Puffer aktivieren</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.buffer.activate"></label>
                     <div class="col-md-9">
                         <input type="checkbox" class="form-control" ng-model="$ctrl.buffer.active" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Größe</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.buffer.size"></label>
                     <div class="col-md-9">
                         <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.buffer.size" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Farbe</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.buffer.color"></label>
                     <div class="col-md-9">
                         <input type="color" class="form-control" ng-model="$ctrl.buffer.color" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Transparenz</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.buffer.transparency"></label>
                     <div class="col-md-9">
                         <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.buffer.transparency" />
                         <span class="slider-text">{{ $ctrl.buffer.transparency }}%</span>
                     </div>
                 </div>
             </form>
-            <h5 class="clickable" ng-click="$ctrl.toggleForm('background')">Hintergrund <small>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('background')">{{ 'gis.properties.labels.heading.background' | translate }}<small>
                 <i class="material-icons middle" ng-show="$ctrl.formShown['background']">arrow_drop_up</i>
                 <i class="material-icons middle" ng-show="!$ctrl.formShown['background']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['background']">
                 <div class="form-group">
-                    <label class="control-label col-md-3">Hintergrund aktivieren</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.background.activate"></label>
                     <div class="col-md-9">
                         <input type="checkbox" class="form-control" ng-model="$ctrl.background.active" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Größe X</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.background.size-x"></label>
                     <div class="col-md-9">
                         <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.background.size.x" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Größe Y</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.background.size-y"></label>
                     <div class="col-md-9">
                         <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.background.size.y" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Füllfarbe</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.background.color-fill"></label>
                     <div class="col-md-9">
                         <input type="color" class="form-control" ng-model="$ctrl.background.color.fill" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Randfarbe</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.background.color-border"></label>
                     <div class="col-md-9">
                         <input type="color" class="form-control" ng-model="$ctrl.background.color.border" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Randgröße</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.background.size-border"></label>
                     <div class="col-md-9">
                         <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.background.size.border" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Transparenz</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.background.transparency"></label>
                     <div class="col-md-9">
                         <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.background.transparency" />
                         <span class="slider-text">{{ $ctrl.background.transparency }}%</span>
                     </div>
                 </div>
             </form>
-            <h5 class="clickable" ng-click="$ctrl.toggleForm('shadow')">Schatten <small>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('shadow')">{{ 'gis.properties.labels.heading.shadow' | translate }}<small>
                 <i class="material-icons middle" ng-show="$ctrl.formShown['shadow']">arrow_drop_up</i>
                 <i class="material-icons middle" ng-show="!$ctrl.formShown['shadow']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['shadow']">
                 <div class="form-group">
-                    <label class="control-label col-md-3">Schatten aktivieren</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.shadow.activate"></label>
                     <div class="col-md-9">
                         <input type="checkbox" class="form-control" ng-model="$ctrl.shadow.active" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Offset X</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.shadow.offset-x"></label>
                     <div class="col-md-9">
                         <input type="number" step="1" class="form-control" ng-model="$ctrl.shadow.offset.x" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Offset Y</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.shadow.offset-y"></label>
                     <div class="col-md-9">
                         <input type="number" step="1" class="form-control" ng-model="$ctrl.shadow.offset.y" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Blur</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.shadow.blur"></label>
                     <div class="col-md-9">
                         <input type="number" step="1" min="0" class="form-control" ng-model="$ctrl.shadow.blur" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Spread</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.shadow.spread"></label>
                     <div class="col-md-9">
                         <input type="number" step="1" class="form-control" ng-model="$ctrl.shadow.spread" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Farbe</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.shadow.color"></label>
                     <div class="col-md-9">
                         <input type="color" class="form-control" ng-model="$ctrl.shadow.color" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3">Transparenz</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.shadow.transparency">Transparenz</label>
                     <div class="col-md-9">
                         <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.shadow.transparency" />
                         <span class="slider-text">{{ $ctrl.shadow.transparency }}%</span>
                     </div>
                 </div>
             </form>
-            <h5 class="clickable" ng-click="$ctrl.toggleForm('position')">Position <small>
+            <h5 class="clickable" ng-click="$ctrl.toggleForm('position')">{{ 'gis.properties.labels.heading.position' | translate }}<small>
                 <i class="material-icons middle" ng-show="$ctrl.formShown['position']">arrow_drop_up</i>
                 <i class="material-icons middle" ng-show="!$ctrl.formShown['position']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['position']">
-                <div class="form-group">
-                    <label class="control-label col-md-3">Attribut</label>
-                    <div class="col-md-9">
-                        <input type="text" class="form-control" />
-                    </div>
-                </div>
             </form>
             <button type="button" class="btn btn-success" ng-click="$ctrl.applyStyleSettings()">
-                <i class="material-icons">refresh</i> Apply
+                <i class="material-icons">refresh</i> <span translate="gis.properties.labels.button-apply"></span>
             </button>
         </div>
         <div ng-show="$ctrl.activePropertyTab == 'diagrams'">
-            <h2>Diagrams</h2>
+            <h2 translate="gis.properties.diagrams"></h2>
         </div>
     </div>
 </div>
