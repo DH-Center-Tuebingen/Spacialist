@@ -1,4 +1,4 @@
-spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal', '$translate', '$timeout', function(mapService, httpGetPromise, $uibModal, $translate, $timeout) {
+spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', 'httpGetFactory', 'httpPostPromise', 'httpPostFactory', '$uibModal', '$translate', '$timeout', function(mapService, httpGetPromise, httpGetFactory, httpPostPromise, httpPostFactory, $uibModal, $translate, $timeout) {
     var vm = this;
 
     vm.layerVisibility = {};
@@ -141,6 +141,19 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                             position: false
                         };
 
+                        vm.styleModes = [
+                            {
+                                label: 'gis.properties.style.modes.categorized',
+                                index: 'categorized'
+                            },
+                            {
+                                label: 'gis.properties.style.modes.graduated',
+                                index: 'graduated'
+                            },
+                        ];
+
+                        vm.styleMode = vm.styleModes[0];
+
                         vm.applyStyleSettings = function() {
                             var tooltip = {};
                             tooltip.permanent = true;
@@ -178,6 +191,36 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                         vm.map = map;
                         vm.layer = l;
                         vm.layerName = l.context_type_id ? concepts[l.thesaurus_url].label : l.name;
+
+                        vm.getData = function (additionalFilters) {
+                            return httpGetPromise.getData('api/analysis/context_type/'+vm.layer.context_type_id);
+                        };
+
+                        vm.getNumericalColumns = function() {
+                            httpGetFactory('api/analysis/context_type/' + vm.layer.context_type_id + '/numerical', function (response) {
+                                vm.columns = response;
+                            });
+                        };
+
+                        vm.getAllColumns = function() {
+                            vm.getData([]).then(function (response) {
+                                console.log(Object.keys(response[0]));
+                            });
+                        };
+
+                        vm.getColumns = function(mode) {
+                            switch(mode.index) {
+                                case 'categorized':
+                                    vm.getAllColumns();
+                                break;
+                                case 'graduated':
+                                    vm.getNumericalColumns();
+                                break;
+                            }
+                        }
+
+                        vm
+
 
                         vm.close = function() {
                             $scope.$dismiss('close');

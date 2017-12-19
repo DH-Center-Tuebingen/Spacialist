@@ -24,6 +24,24 @@
     <div class="col-md-10">
         <div ng-show="$ctrl.activePropertyTab == 'style'">
             <h2>Style</h2>
+            <ui-select ng-model="$ctrl.styleMode" close-on-select="true" on-select="$ctrl.getColumns($select.selected)">
+                <ui-select-match>{{$select.selected.label | translate}}</ui-select-match>
+                <ui-select-choices repeat="mode in $ctrl.styleModes | filter:$select.search">
+                    <span ng-bind-html="mode.label | translate | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+            <div ng-show="$ctrl.styleMode.index == 'categorized'">
+
+            </div>
+            <div ng-show="$ctrl.styleMode.index == 'graduated'">
+                <ui-select ng-model="$ctrl.column" close-on-select="true">
+                    <ui-select-match>{{$ctrl.concepts[$select.selected.thesaurus_url].label}}</ui-select-match>
+                    <ui-select-choices repeat="col in $ctrl.numericalColumns | filter:$select.search">
+                        <span ng-bind-html="$ctrl.concepts[col.thesaurus_url].label | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+                <!-- TODO: dropdown for seperation mode -->
+            </div>
         </div>
         <div ng-show="$ctrl.activePropertyTab == 'labels'">
             <h5>Beschriftung <small>
