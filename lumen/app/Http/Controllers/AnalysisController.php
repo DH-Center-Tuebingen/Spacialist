@@ -7,6 +7,7 @@ use App\Attribute;
 use App\AttributeValue;
 use App\AvailableLayer;
 use App\Context;
+use App\ContextType;
 use App\File;
 use App\Geodata;
 use App\Literature;
@@ -34,6 +35,42 @@ class AnalysisController extends Controller {
             DB::table('stored_queries')
                 ->get()
         );
+    }
+
+    public function getNumericalAttributes($id) {
+        $ct = ContextType::with(['attributes'])
+            ->whereHas('attributes', function($query) {
+                $query->whereIn('datatype', [
+                    'percentage',
+                    'integer',
+                    'double',
+                ]);
+            })
+            ->find($id);
+        if(isset($ct->attributes)) {
+            return response()->json($ct->attributes);
+        }
+        return response()->json([]);
+    }
+
+    public function getContextsForLayer($id){
+        return Context::with([
+            'child_contexts',
+            'geodata',
+            'root_context',
+            'attributes'
+        ])
+        ->select('name', 'id')
+        ->has('geodata')
+        ->whereHas('attributes', function($query) {
+            $query->whereIn('datatype', [
+                'epoch',
+                'string',
+                'string-sc',
+                'boolean',
+                'context'
+            ]);
+        })->get();
     }
 
     // POST
