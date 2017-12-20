@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Data Importer
 
+## 0.5.1
+### Added
+- Only show up to first 10 rows in csv preview
+- Add option to parse csv without header row
+- Add help icon to header (links to github wiki)
+- Allow to clear selected epoch
+- Submit buttons to most forms (hit enter to submit)
+- Version info/about popup in header bar (settings menu)
+### Changed
+- Revamp header bar
+### Fixed
+- Tree search (deleting last char in search didn't show whole tree)
+- Height of containters (global scroll bar should be gone)
+- Missing map
+
 ## 0.5 - Ephesus
 ### Added
 - GIS View

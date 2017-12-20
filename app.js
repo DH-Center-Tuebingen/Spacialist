@@ -368,7 +368,8 @@ spacialistApp.directive('spinner', function() {
 
 spacialistApp.directive('resizeWatcher', function($window, $timeout) {
     var headerPadding = 20;
-    var bottomPadding = 20;
+    var bottomPadding = 10;
+    var paddedContentClassPadding = 10; // .padded-content (style.css)
 
     function getViewportDim() {
         return {
@@ -392,31 +393,40 @@ spacialistApp.directive('resizeWatcher', function($window, $timeout) {
             var height = newValue.height;
             var width = newValue.width;
 
-            var headerHeight = document.getElementById('header-nav').offsetHeight;
-            var addonNavHeight = 0;
+            var header = document.getElementById('header-nav');
+            var headerHeight = 71 + headerPadding; // 71px; measured in desktop mode
+            if(header) {
+                headerHeight = getElementHeight(header);
+            }
+            var addonNavHeight = 44; // 44px; measured in desktop mode
             var addonNav = document.getElementById('addon-nav');
-            if(addonNav) addonNavHeight = addonNav.offsetHeight;
+            if(addonNav && addonNav.offsetHeight > 1) addonNavHeight = getElementHeight(addonNav);
+            addonNavHeight +=  paddedContentClassPadding;
             var containerHeight = scope.containerHeight = height - headerHeight - headerPadding - bottomPadding;
             var addonContainerHeight = scope.addonContainerHeight = containerHeight - addonNavHeight;
             var attributeEditor = document.getElementById('attribute-editor');
             if(attributeEditor) {
                 $(attributeEditor).css('height', containerHeight);
                 var editorHeading = document.getElementById('editor-heading');
-                $('.attribute-editor-column').css('height', containerHeight - (editorHeading.offsetHeight+headerPadding));
+                if(editorHeading) {
+                    $('.attribute-editor-column').css('height', containerHeight - (getElementHeight(editorHeading) + headerPadding));
+                }
             }
             var layerEditor = document.getElementById('layer-editor');
             if(layerEditor) {
                 $(layerEditor).css('height', containerHeight);
                 var layerHeading = document.getElementById('editor-heading');
-                $('.layer-editor-column').css('height', containerHeight - (heading.offsetHeight+headerPadding));
+                if(layerHeading) {
+                    $('.layer-editor-column').css('height', containerHeight - (getElementHeight(layerHeading) + headerPadding));
+                }
             }
             var literatureContainer = document.getElementById('literature-container');
             if(literatureContainer) {
                 var literatureHeight = containerHeight;
                 var literatureAddButton = document.getElementById('literature-add-button');
-                if(literatureAddButton) literatureHeight -= literatureAddButton.offsetHeight;
+                if(literatureAddButton) literatureHeight -= getElementHeight(literatureAddButton);
                 var literatureSearch = document.getElementById('literature-search-form');
-                if(literatureSearch) literatureHeight -= literatureSearch.offsetHeight;
+                if(literatureSearch) literatureHeight -= getElementHeight(literatureSearch);
                 var literatureTable = document.getElementById('literature-table');
                 if(literatureTable) {
                     var head = literatureTable.tHead;
@@ -424,7 +434,7 @@ spacialistApp.directive('resizeWatcher', function($window, $timeout) {
                         var t = 'translate(0, ' + this.scrollTop + 'px)';
                         head.style.transform = t;
                     });
-                    var headHeight = head.offsetHeight;
+                    var headHeight = getElementHeight(head);
                     var body = literatureTable.tBodies[0];
                     $(body).css('max-height', literatureHeight - headHeight);
                     $(literatureContainer).css('height', literatureHeight);
@@ -805,8 +815,9 @@ spacialistApp.filter('urlify', function() {
     };
 });
 
-spacialistApp.filter('csv2table', function() {
-    return function(csv, delimiter) {
+spacialistApp.filter('csv2table', function($translate) {
+    return function(csv, delimiter, hasHeader, rowCount) {
+        if(hasHeader !== false) hasHeader = true;
         if(!csv) return '<table></table>';
         delimiter = delimiter || ',';
         var rendered = '<table class="table table-striped">';
@@ -814,9 +825,15 @@ spacialistApp.filter('csv2table', function() {
             delimiter = '\t';
         }
         var dsv = d3.dsv(delimiter);
+        var rows;
         var headers = csv.split('\n')[0];
         var headerCols = dsv.parseRows(headers)[0];
-        var rows = dsv.parse(csv);
+        if(hasHeader) {
+            rows = dsv.parse(csv);
+        } else {
+            headerCols = createCountingCsvHeader(headerCols.length, $translate);
+            rows = dsv.parseRows(csv);
+        }
 
         rendered += '<tr>';
         for(var i=0; i<headerCols.length; i++) {
@@ -826,7 +843,11 @@ spacialistApp.filter('csv2table', function() {
         }
         rendered += '</tr>';
 
-        for(var i=0; i<rows.length; i++) {
+        var toParse = rows.length;
+        if(rowCount > 0) {
+            toParse = Math.min(toParse, rowCount);
+        }
+        for(var i=0; i<toParse; i++) {
             rendered += '<tr>';
             var r = rows[i];
 
@@ -1210,6 +1231,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     return {
                         enabled: false
                     };
+                },
+                version: function(mainService) {
+                    return mainService.getVersion();
                 }
             },
             views: {
@@ -1303,6 +1327,26 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     }
                 }
             })
+                .state('root.spacialist.about', {
+                    url: '/about',
+                    onEnter: function($state, $uibModal, version) {
+                        $uibModal.open({
+                            templateUrl: "modals/about.html",
+                            // windowClass: '',
+                            controller: ['$scope', function($scope) {
+                                var vm = this;
+
+                                vm.version = version;
+                                vm.close = function() {
+                                    $scope.$dismiss('close');
+                                };
+                            }],
+                            controllerAs: '$ctrl',
+                        }).result.finally(function() {
+                            $state.router.transitionService.back();
+                        });
+                    }
+                })
                 .state('root.spacialist.context', {
                     url: '/context',
                     sticky: true,

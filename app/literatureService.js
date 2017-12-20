@@ -203,22 +203,6 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetPromise', 'h
     literature.addLiterature = function(fields, type, bibliography) {
         if(typeof type == 'undefined') return;
         if(typeof fields == 'undefined') return;
-        var mandatorySet = true;
-        for(var i=0; i<type.mandatoryFields.length; i++) {
-            var m = type.mandatoryFields[i];
-            if(typeof fields[m] == 'undefined') {
-                mandatorySet = false;
-                break;
-            }
-            if(fields[m].length === 0) {
-                mandatorySet = false;
-                break;
-            }
-        }
-        if(!mandatorySet) {
-            alert('Not all mandatory fields are set!');
-            return;
-        }
         var formData = new FormData();
         for(var field in fields) {
             if(fields[field] !== null && fields[field] !== '') {
@@ -242,18 +226,6 @@ spacialistApp.service('literatureService', ['modalFactory', 'httpGetPromise', 'h
 
     literature.editLiterature = function(entry, type) {
         if(!type || !entry) return;
-        var mandatorySet = true;
-        for(var i=0; i<type.mandatoryFields.length; i++) {
-            var m = type.mandatoryFields[i];
-            if(!entry[m] || entry[m].length === 0) {
-                mandatorySet = false;
-                break;
-            }
-        }
-        if(!mandatorySet) {
-            alert('Not all mandatory fields are set!');
-            return;
-        }
         var formData = new FormData();
         for(var k in entry) {
             if(entry.hasOwnProperty(k)) {

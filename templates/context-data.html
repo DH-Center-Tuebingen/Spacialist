@@ -10,7 +10,7 @@
             <i class="material-icons">delete</i>
         </button>
     </p>
-    <form class="form-horizontal" role="form" ng-if="$ctrl.fields" name="$ctrl.editContext.form">
+    <form class="form-horizontal" role="form" ng-if="$ctrl.fields" name="$ctrl.editContext.form" ng-submit="$ctrl.store($ctrl.data)">
         <div class="form-group form-group-unpadded">
             <label class="control-label col-md-3" for="name">
                 {{'context-form.name'|translate}}:
@@ -30,7 +30,7 @@
             </div>
         </div>
         <div class="col-md-offset-3" ng-if="$ctrl.user.permissions.duplicate_edit_concepts">
-            <button type="button" class="btn btn-success" ng-click="$ctrl.store($ctrl.data)" ng-disabled="$ctrl.editContext.form.$invalid">
+            <button type="submit" class="btn btn-success" ng-disabled="$ctrl.editContext.form.$invalid">
                 <span class="material-icons">save</span> {{ 'context-form.save-button' | translate }}
             </button>
             <button type="button" class="btn btn-danger" ui-sref="root.spacialist.context.data.delete">

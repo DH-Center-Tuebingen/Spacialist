@@ -1,10 +1,10 @@
 <div class="modal-header">
     <h4 translate="modals.new-context.heading"></h4>
 </div>
-<div class="modal-body">
+<div class="modal-body text-center">
     <div class="col-md-12">
         <p translate="modals.new-context.desc" class="alert alert-info" ng-if="userConfig['prefs.show-tooltips'].value"></p>
-        <form class="form-horizontal" role="form">
+        <form class="form-horizontal" role="form" ng-submit="onAdd(newContext)">
             <div class="form-group">
                 <label class="control-label col-md-3" for="name">
                     {{'context-new.name'|translate}}:
@@ -25,11 +25,12 @@
                   </ui-select-choices>
                 </ui-select>
             </div>
+            <button type="submit" class="btn btn-success hidden" ng-disabled="!newContext.name || !newContext.type"></button>
         </form>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-disabled="!newContext.name || !newContext.type" ng-click="onAdd(newContext)">{{ 'create' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="onAdd(newContext)" ng-disabled="!newContext.name || !newContext.type">{{ 'create' | translate }}</button>
     <button type="button" class="btn btn-danger"
       ng-click="cancel()">{{ 'cancel' | translate }}</button>
 </div>

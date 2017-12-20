@@ -1,9 +1,9 @@
 <div class="modal-header">
     <h4>{{'context-type.add-attribute-ct.heading'|translate}}</h4>
 </div>
-<div class="modal-body">
+<div class="modal-body text-center">
     <div class="col-md-12">
-        <form class="form-horizontal">
+        <form class="form-horizontal" role="form" ng-submit="mc.onCreate(mc.attribute)">
             <div class="form-group">
                 <label class="control-label col-md-3">{{ 'context-type.add-attribute-ct.attribute' | translate }}</label>
                 <div class="col-md-9">
@@ -18,6 +18,7 @@
                     {{ mc.attribute.datatype }}
                 </div>
             </div>
+            <button type="submit" class="btn btn-success hidden" ng-disabled="!mc.attribute"></button>
         </form>
     </div>
 </div>

@@ -1,0 +1,35 @@
+<div class="modal-header">
+    <h2 translate="about.title"></h2>
+</div>
+<div class="modal-body row">
+    <div class="media">
+        <div class="media-left">
+            <a href="#">
+                <img class="media-object" src="img/logo.png" alt="spacialist logo" width="64px" />
+            </a>
+        </div>
+        <div class="media-body">
+            <h4 class="media-heading" translate="spacialist"></h4>
+            <span translate="about.description"></span>
+        </div>
+    </div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt translate="about.release-name"></dt>
+        <dd>
+            {{ $ctrl.version.name }}
+        </dd>
+        <dt translate="about.release-time"></dt>
+        <dd>
+            {{ $ctrl.version.time*1000 | date:'medium' }}
+        </dd>
+        <dt translate="about.release-name.full"></dt>
+        <dd>
+            {{ $ctrl.version.full | date }}
+        </dd>
+    </dl>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default"
+      ng-click="$ctrl.close()">{{ 'close' | translate }}</button>
+</div>

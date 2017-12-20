@@ -1,9 +1,9 @@
 <div class="modal-header">
     <h4>{{'user.edit.heading'|translate}}</h4>
 </div>
-<div class="modal-body">
+<div class="modal-body text-center">
     <div class="col-md-12">
-        <form class="form-horizontal" role="form">
+        <form name="editUserForm" class="form-horizontal" role="form" ng-submit="onEdit(editUser)">
             <div class="form-group">
                 <label class="control-label col-md-3" for="name">
                     {{'user.name'|translate}}:
@@ -34,11 +34,12 @@
                     <input class="form-control" type="password" id="password" ng-model="editUser.password" />
                 </div>
             </div>
+            <button type="submit" class="btn btn-success hidden" ng-disabled="editUserForm.$invalid"></button>
         </form>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="onEdit(editUser)">{{ 'Save' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="onEdit(editUser)" ng-disabled="editUserForm.$invalid">{{ 'Save' | translate }}</button>
     <button type="button" class="btn btn-danger"
       ng-click="cancel()">{{ 'cancel' | translate }}</button>
 </div>
