@@ -702,6 +702,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
 
     vm.toggleLayerGroupVisibility = function(layerGroup, isVisible) {
         var p = vm.map.layers.overlays[layerGroup.id];
+        if(!p) return;
         p.visible = isVisible;
         p.layerOptions.visible = isVisible;
         layerGroup.visible = isVisible;

@@ -46,6 +46,7 @@ spacialistApp.component('gis', {
         contexts: '<',
         map: '<',
         layer: '<',
+        contextLayer: '<',
         geodata: '<'
     },
     templateUrl: 'templates/gis.html',

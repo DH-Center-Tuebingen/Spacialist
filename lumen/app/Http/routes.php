@@ -152,6 +152,7 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('', 'OverlayController@getOverlays');
+        $app->get('contexts', 'OverlayController@getContextOverlays');
         $app->get('geometry_types', 'OverlayController@getGeometryTypes');
         $app->get('{id:[0-9]+}/export', 'OverlayController@exportLayer');
         $app->get('{id:[0-9]+}/export/{type}', 'OverlayController@exportLayer');

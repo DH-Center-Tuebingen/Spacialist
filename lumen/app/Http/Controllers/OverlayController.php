@@ -43,6 +43,30 @@ class OverlayController extends Controller {
         ]);
     }
 
+    public function getContextOverlays() {
+        $user = \Auth::user();
+        if(!$user->can('view_geodata')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+        $layers = AvailableLayer::with(['context_type'])
+            ->whereNotNull('context_type_id')
+            ->orWhere('type', 'unlinked')
+            ->get();
+        foreach($layers as &$layer) {
+            if(isset($layer->context_type)) {
+                $layer->thesaurus_url = $layer->context_type->thesaurus_url;
+            } else {
+                unset($layer->thesaurus_url);
+            }
+            unset($layer->context_type);
+        }
+        return response()->json([
+            'layers' => $layers
+        ]);
+    }
+
     public function getGeometryTypes() {
         return response()->json($this->availableGeometryTypes);
     }

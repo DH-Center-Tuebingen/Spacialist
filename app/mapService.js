@@ -363,6 +363,15 @@ spacialistApp.service('mapService', ['httpGetFactory', 'httpPostFactory', 'httpP
         });
     };
 
+    map.getContextLayers = function() {
+        return httpGetPromise.getData('api/overlay/contexts').then(function(response) {
+            angular.forEach(response.layers, function(l) {
+                l.opacity = parseFloat(l.opacity);
+            });
+            return response.layers;
+        });
+    };
+
     map.getGeodata = function() {
         return httpGetPromise.getData('api/geodata').then(function(response) {
             return response.geodata;
