@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## Unreleased - Federsee
 ### Added
 - Data Importer
+- External Storage (e.g. (S)FTP, AWS, WebDAV)
 
 ## 0.5.1
 ### Added
