@@ -56,6 +56,11 @@
                                 <i class="material-icons">scanner</i> {{'main.menu.literature'|translate}}
                             </a>
                         </li>
+                        <li ng-if="$ctrl.user.permissions.create_concepts && $ctrl.user.permissions.add_move_concepts_th && $ctrl.user.permissions.view_concepts_th">
+                            <a ngf-select="$ctrl.importCsvFiles($files)" multiple>
+                                <i class="material-icons">file_download</i> Import Data
+                            </a>
+                        </li>
                         <li role="separator" class="divider"></li>
                         <li ng-if="$ctrl.userConfig['prefs.load-extensions'].value['data-analysis']">
                             <a ui-sref="root.analysis">
@@ -78,6 +83,8 @@
                         </li>
                     </ul>
                 </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown" uib-dropdown>
                     <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         <i class="material-icons">settings</i>

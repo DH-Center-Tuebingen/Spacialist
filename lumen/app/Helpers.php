@@ -6,6 +6,8 @@ use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use App\Literature;
+use App\Preference;
+use App\UserPreference;
 
 class Helpers {
     public static function startsWith($haystack, $needle) {
@@ -28,12 +30,32 @@ class Helpers {
         }
     }
 
+    public static function getDisk() {
+        return env('SP_FILE_DRIVER', config('filesystems.default'));
+    }
+
     public static function getFullFilePath($filename) {
-        return Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $filename);
+        try {
+            return Storage::disk(Helpers::getDisk())->url($filename);
+        } catch(\RuntimeException $e) {
+            // If ->url() is not supported by the storage driver/disk,
+            // a RuntimeException is thrown. Return url for file link route
+            $route = route('fileLink', ['filename' => $filename]);
+            $base = url("");
+            // We want to remove trailing / as well
+            if(!Helpers::endsWith($base, '/')) {
+                $base .= '/';
+            }
+            // remove base url
+            $route = substr($route, strlen($base));
+            // add api prefix to route url
+            $route = env('SP_API_PREFIX', 'api/') . $route;
+            return $route;
+        }
     }
 
     public static function getStorageFilePath($filename) {
-        return Storage::url(env('SP_FILE_PATH') .'/'. $filename);
+        return Storage::url($filename);
     }
 
     public static function parseSql($builder) {
@@ -78,6 +100,34 @@ class Helpers {
             $key = $initalKey . $suffixes[$i++];
         }
         return $key;
+    }
+
+    public static function getProjectName($user = null) {
+        $query = Preference::where('label', 'prefs.project-name');
+        if(isset($user)) {
+            $query->leftJoin('user_preferences', 'pref_id', '=', 'preferences.id')
+                ->where(function($q) use($user) {
+                    $q->where('user_id', $user['id'])
+                        ->orWhereNull('user_id');
+                });
+        }
+
+        $pref = $query->first();
+        $value = isset($pref->value) ? $pref->value : $pref->default_value;
+        $decoded = json_decode($value);
+        return $decoded->name;
+    }
+
+    public static function labelToUrlPart($label) {
+        return Helpers::removeIllegalChars(Helpers::transliterate($label));
+    }
+
+    public static function transliterate($str) {
+        return transliterator_transliterate('Any-Latin; Latin-ASCII; [\u0100-\u7fff] remove; Lower()', $str);
+    }
+
+    public static function removeIllegalChars($input) {
+        return str_replace(['.', ',', ' ', '?', '!'], '_', $input);
     }
 
     public static function sortMatchesDesc($a, $b) {

@@ -17,6 +17,13 @@ use Illuminate\Http\Request;
 $app->get('/', function () use ($app) {
     return $app->version();
 });
+// needed to display files from servers, that do not
+// support Storage::url (e.g. (s)ftp), without middleware,
+// because ng-src can not set auth token
+$app->get('file/{filename}/link', [
+    'uses' => 'FileController@getFileFromLink',
+    'as' => 'fileLink'
+]);
 
 $app->post('user/login', 'UserController@login');
 
@@ -49,6 +56,7 @@ $app->group([
 
     $app->post('', 'ContextController@add');
     $app->post('{id:[0-9]+}/duplicate', 'ContextController@duplicate');
+    $app->post('import', 'ContextController@importFromCsv');
 
     $app->patch('{id:[0-9]+}/rank', 'ContextController@patchRank');
     $app->patch('geodata/{cid:[0-9]+}', 'ContextController@linkGeodata');

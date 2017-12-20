@@ -151,8 +151,8 @@ JWT_REFRESH_TTL=* #the ttl (in minutes) in which you can generate a new token. D
 JWT_BLACKLIST_GRACE_PERIOD=* #a time span in seconds which allows you to use the same token several times in this time span without blacklisting it (good for async api calls)
 ```
 
-#### Protected Files
-Your uploaded files are stored in a public folder. To increase security it is recommended to define a random path in your `.env` file. The matching key is `SP_FILE_PATH`. You also have to create the path on your system (Do not actually create the last part of the path, you have to create it as a softlink later).
+#### Protected Files (Local driver only)
+If you use the local (public) filesystem driver, your uploaded files are stored in a public folder. To increase security it is recommended to define a random path in your `.env` file. The matching key is `SP_FILE_PATH`. You also have to create the path on your system (Do not actually create the last part of the path, you have to create it as a softlink later).
 
 **Example:**
 ```bash
@@ -179,18 +179,33 @@ Example:
 Lumen (5.3.2) (Laravel Components 5.3.*)
 ```
 
+### Seeds
+
+Run `php artisan db:seed` for seeding your database with initial data (default Admin Account, Languages, Roles and Permissions). See [list of available seeds](https://github.com/eScienceCenter/Spacialist/tree/master/lumen/database/seeds) for additional available seeds like creating a Guest User Account or random test data). To run only a specific seeder appand `--class=<ClassName>` (e.g. `php artisan db:seed --class=GuestUserSeeder` to create a Guest User Account).
+
 #### External storage
 Lumen supports different filesystems. Some of the most popular adapters:
 - AWS S3
-- Dropbox
-- Rackspace
 - SFTP
-- WebDAV
+- Dropbox (Not yet supported by Spacialist)
+- Rackspace (Not yet supported by Spacialist)
+- WebDAV (Not yet supported by Spacialist)
 
-To enable one of these adapters you need to add the driver to your `composer.json`. For a list of available adapters, see [here](https://github.com/thephpleague/flysystem). To use one of the drivers add it to the `config => filesystems => disks` array in `bootstrap/app.php`. The `local` driver is already configured and set as default. To switch to another default adapter simply add the configuration to the `disks` array and set the `default` to the key of your added driver.
+To enable one of these adapters (AWS, (S)FTP are enabled by default) you need to add the driver to your `composer.json`. For a list of available adapters, see [here](https://github.com/thephpleague/flysystem). To use one of the drivers add it to the `config => filesystems => disks` array in `bootstrap/app.php`. The `local` and `public` drivers are already configured and `public` is set as default. To switch to another default adapter simply add the configuration to the `disks` array and set the `default` to the key of your added driver.
+Instead of manipulating the `default` key in `bootstrap/app.php` one can set the `SP_FILE_DRIVER` key in the `.env` file. If not provided, it defaults to the `default` setting.
+
+##### Limitations
+Some drivers do not support to create accessible URLs. Thus, there is a new method which creates an URL. Unfortunately, this method does not respect the `ProxyPass` setting (`ProxyPass "/Spacialist/api" "http://spacialist-lumen.tld"`) in the apache config file. To ensure that the correct URL is returned, an additional `env` key (`SP_API_PREFIX`) is added to the `.env` file. It must contain the path to the API defined in the `ProxyPass` setting, but without the name of the cloned folder. E.g. if your ProxyPass is the one above, the API path would be `/api`. However, the `SP_API_PREFIX` must not start with a / and must end with a /. In this example the result would be:
+```bash
+SP_API_PREFIX=api/
+```
+If not provided, it defaults to `api/`.
+
+The following drivers do not support URLs:
+- (S)FTP
 
 For further informations regarding the cotent of `config => filesystems => disks` see these documentations:
-- [Laravel Filesystem](https://laravel.com/docs/5.4/filesystem)
+- [Laravel Filesystem](https://laravel.com/docs/5.3/filesystem)
 - [Laravel Sample Config](https://github.com/laravel/laravel/blob/master/config/filesystems.php)
 - [Flysystem Github Page](https://github.com/thephpleague/flysystem)
 - [Flysystem Laravel Integration](https://github.com/GrahamCampbell/Laravel-Flysystem)

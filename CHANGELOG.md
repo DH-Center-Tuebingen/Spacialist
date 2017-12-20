@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased - Federsee
+### Added
+- Data Importer
+
 ## 0.5.1
 ### Added
 - Only show up to first 10 rows in csv preview

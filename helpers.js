@@ -71,6 +71,16 @@ function createCountingCsvHeader(cnt, translate) {
     return columns;
 }
 
+function showLoadingOverlay(msg) {
+    $('#loadingUiMessage').text(msg);
+    $('#loadingUiWrapper').show();
+}
+
+function hideLoadingOverlay() {
+    $('#loadingUiMessage').text('');
+    $('#loadingUiWrapper').hide();
+}
+
 L.Control.FitWorld = L.Control.extend({
 	onAdd: function(map) {
         var o = this.options;
