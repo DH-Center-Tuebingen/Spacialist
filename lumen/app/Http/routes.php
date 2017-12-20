@@ -114,6 +114,8 @@ $app->group([
         'middleware' => ['before' => 'jwt.auth', 'after' => 'jwt.refresh']
     ], function($app) {
         $app->get('', 'AnalysisController@getAnalyses');
+        $app->get('context_type/{id:[0-9]+}/string', 'AnalysisController@getStringAttributes');
+        $app->get('context_type/{id:[0-9]+}/attribute/{aid:[0-9]+}', 'AnalysisController@getAttributeOfContextTypeLayer');
 
         // TODO are they really POST?
         $app->post('filter', 'AnalysisController@filterContexts');

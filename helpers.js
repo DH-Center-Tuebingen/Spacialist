@@ -31,6 +31,53 @@ function nextMatchingDeviceClass(col, currentClass) {
     return null;
 }
 
+function parseData(data) {
+    var parsedData = {};
+    for(var i=0; i<data.length; i++) {
+        var value = data[i];
+        var index = value.attribute_id;
+        var posIndex = index + '_cert';
+        var descIndex = index + '_desc';
+        var val = value.str_val;
+        var dType = value.datatype;
+        parsedData[posIndex] = value.possibility || 100;
+        parsedData[descIndex] = value.possibility_description;
+        if(dType == 'list') {
+            if(typeof parsedData[index] == 'undefined') parsedData[index] = [];
+            parsedData[index].push({
+                name: val
+            });
+        } else if(dType == 'string-sc') {
+            parsedData[index] = value.val;
+        } else if(dType == 'string-mc') {
+            if(typeof parsedData[index] == 'undefined') parsedData[index] = [];
+            parsedData[index].push(value.val);
+        } else if(dType == 'dimension') {
+            if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
+        } else if(dType == 'epoch') {
+            if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
+        } else if(dType == 'geography') {
+            parsedData[index] = value.val;
+        } else if(dType == 'context') {
+            parsedData[index] = value.val;
+        } else if(dType == 'integer' || dType == 'percentage') {
+            parsedData[index] = parseInt(value.int_val);
+        } else if(dType == 'boolean') {
+            parsedData[index] = (parseInt(value.int_val) != 0);
+        } else if(dType == 'double') {
+            parsedData[index] = parseFloat(value.dbl_val);
+        } else if(dType == 'date') {
+            parsedData[index] = new Date(value.dt_val);
+        } else if (dType == 'table') {
+            if(typeof parsedData[index] == 'undefined') parsedData[index] = [];
+            parsedData[index].push(JSON.parse(value.json_val));
+        } else {
+            parsedData[index] = val;
+        }
+    }
+    return parsedData;
+}
+
 function createDownloadLink(raw, filename) {
     var link = document.createElement("a");
     link.setAttribute("href", 'data:;base64,' + raw);

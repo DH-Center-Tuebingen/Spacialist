@@ -48,7 +48,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                 mapService.fitBoundsToLayer(parentLayer, vm.map);
             },
             enabled: function($itemScope) {
-                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
+                return vm.map.mapLayers[$itemScope.l.id] && vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
             },
             displayed: function() {
                 return true;
@@ -60,7 +60,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                 vm.exportLayer($itemScope.l, 'geojson');
             },
             enabled: function($itemScope) {
-                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
+                return vm.map.mapLayers[$itemScope.l.id] && vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
             },
             children: [
                 {
@@ -108,11 +108,11 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                 if(l.counter > 0) {
                     delete l.counter;
                 } else {
-                    l.counter = vm.map.mapLayers[l.id].getLayers().length;
+                    l.counter = vm.map.mapLayers[$itemScope.l.id] && vm.map.mapLayers[l.id].getLayers().length;
                 }
             },
             enabled: function($itemScope) {
-                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
+                return vm.map.mapLayers[$itemScope.l.id] && vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
             }
         },
         {
@@ -125,8 +125,27 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                 $uibModal.open({
                     templateUrl: "modals/gis-properties.html",
                     windowClass: 'wide-modal',
-                    controller: ['$scope', function($scope) {
+                    controller: ['$scope', 'mainService', 'httpGetFactory', function($scope, mainService, httpGetFactory) {
                         var vm = this;
+
+                        vm.map = map;
+                        vm.layer = l;
+                        vm.concepts = concepts;
+                        vm.contexts = contexts;
+                        vm.layerName = l.context_type_id ? concepts[l.thesaurus_url].label : l.name;
+
+                        vm.labelAttributes = [];
+
+                        httpGetFactory('api/analysis/context_type/' + vm.layer.context_type_id + '/string', function (response) {
+                            vm.labelAttributes.length = 0;
+                            vm.labelAttributes.push({
+                                id: -1, // indicate that it is not a real attribute
+                                label: 'gis.properties.labels.label-name'
+                            });
+                            for(var i=0; i<response.length; i++) {
+                                vm.labelAttributes.push(response[i]);
+                            }
+                        });
 
                         vm.fontStyles = [
                             {
@@ -170,6 +189,33 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                             }
                         ];
 
+                        vm.positions = [
+                            {
+                                label: 'gis.properties.labels.position.top',
+                                index: 'top'
+                            },
+                            {
+                                label: 'gis.properties.labels.position.bottom',
+                                index: 'bottom'
+                            },
+                            {
+                                label: 'gis.properties.labels.position.left',
+                                index: 'left'
+                            },
+                            {
+                                label: 'gis.properties.labels.position.right',
+                                index: 'right'
+                            },
+                            {
+                                label: 'gis.properties.labels.position.center',
+                                index: 'center'
+                            },
+                            {
+                                label: 'gis.properties.labels.position.auto',
+                                index: 'auto'
+                            },
+                        ];
+
                         vm.label = {};
                         vm.font = {
                             transparency: 0,
@@ -194,7 +240,12 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                                 border: 1
                             }
                         };
-                        vm.position = {};
+                        vm.position = {
+                            offset: {
+                                x: 0,
+                                y: 0
+                            }
+                        };
                         vm.shadow = {
                             transparency: 0,
                             color: '#000000',
@@ -216,31 +267,55 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                         };
 
                         vm.applyStyleSettings = function() {
+                            if(!vm.map.mapLayers[vm.layer.id]) return;
+                            if(!vm.label.attribute) return;
+
+                            var layers = vm.map.mapLayers[vm.layer.id].getLayers();
+                            var values = [];
+                            // if attribute id is set, async load data of set attribute
+                            // then loop over layers and set value to async loaded values (use empty string for non-present data)
+                            if(vm.label.attribute.id > 0) {
+                                httpGetFactory('api/analysis/context_type/' + vm.layer.context_type_id + '/attribute/' + vm.label.attribute.id, function(response) {
+                                    for(var i=0; i<layers.length; i++) {
+                                        var l = layers[i];
+                                        var linkedContextId = vm.map.geodata.linkedContexts[l.feature.id];
+                                        var linkedContext = vm.contexts.data[linkedContextId];
+                                        if(response[linkedContext.id]) {
+                                            var data = parseData([response[linkedContext.id].pivot]);
+                                            values.push(data[vm.label.attribute.id]);
+                                        } else {
+                                            values.push('');
+                                        }
+                                    }
+                                    vm.applyStyleValues(layers, values);
+                                });
+                            } else {
+                                for(var i=0; i<layers.length; i++) {
+                                    var l = layers[i];
+                                    var linkedContextId = vm.map.geodata.linkedContexts[l.feature.id];
+                                    var linkedContext = vm.contexts.data[linkedContextId];
+                                    values.push(linkedContext.name);
+                                }
+                                vm.applyStyleValues(layers, values);
+                            }
+                        };
+
+                        vm.applyStyleValues = function(layers, values) {
                             var className = 'tooltip-' + (new Date()).getTime();
                             var tooltip = {
                                 className: className
                             };
-                            var styleActive = vm.label.active || vm.font.active || vm.buffer.active || vm.background.active || vm.position.active || vm.shadow.active;
 
                             tooltip.permanent = true;
                             tooltip.interactive = false;
 
-                            var layers = vm.map.mapLayers[vm.layer.id].getLayers();
+                            vm.applyPosition(tooltip);
+
                             for(var i=0; i<layers.length; i++) {
                                 var l = layers[i];
                                 l.unbindTooltip();
-                                if(styleActive) {
-                                    var label = "foo Bar";
-                                    l.bindTooltip(label, tooltip);
-                                } else {
-                                    var name;
-                                    if(map.geodata.linkedContexts[l.feature.id]){
-                                        name = contexts.data[map.geodata.linkedContexts[l.feature.id]].name;
-                                    }
-                                    else{
-                                        name = l.feature.properties.name;
-                                    }
-                                    l.bindTooltip(name);
+                                if(values[i].length > 0) {
+                                    l.bindTooltip(values[i], tooltip);
                                 }
                             }
                             var tooltipInstances = $('.'+className);
@@ -249,7 +324,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                             vm.applyFont(tooltipInstances);
                             vm.applyBackground(tooltipInstances);
                             vm.applyShadow(tooltipInstances);
-                        };
+                        }
 
                         vm.removeTooltipClasses = function(tti) {
                             tti.removeClass('leaflet-tooltip-left');
@@ -351,6 +426,16 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                             tti.css('box-shadow', x + 'px ' + y + 'px ' + blur + 'px ' + spread + 'px ' + c);
                         };
 
+                        vm.applyPosition = function(tt) {
+                            if(!vm.position.active) return;
+                            var x = vm.position.offset.x || 0;
+                            var y = vm.position.offset.y || 0;
+                            tt.offset = L.point(x, y);
+                            if(vm.position.position) {
+                                tt.direction = vm.position.position.index;
+                            }
+                        };
+
                         // if transparency is present, set opacity to 100%-transparency
                         vm.getOpacity = function(trans) {
                             if(trans) return 1 - (trans/100);
@@ -370,10 +455,6 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                         vm.toggleForm = function(id) {
                             vm.formShown[id] = !vm.formShown[id];
                         };
-
-                        vm.map = map;
-                        vm.layer = l;
-                        vm.layerName = l.context_type_id ? concepts[l.thesaurus_url].label : l.name;
 
                         vm.close = function() {
                             $scope.$dismiss('close');

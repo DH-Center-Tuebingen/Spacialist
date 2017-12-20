@@ -14,11 +14,6 @@
                     <i class="material-icons">label</i> {{'gis.properties.labels'|translate}}
                 </a>
             </li>
-            <li role="presentation" ng-class="{ 'active': $ctrl.activePropertyTab == 'diagrams'}">
-                <a href="" ng-click="$ctrl.activePropertyTab = 'diagrams'">
-                    <i class="material-icons">insert_chart</i> {{'gis.properties.diagrams'|translate}}
-                </a>
-            </li>
         </ul>
     </div>
     <div class="col-md-10">
@@ -32,9 +27,24 @@
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['label']">
                 <div class="form-group">
-                    <label class="control-label col-md-3">Attribut</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.label.attribute"></label>
                     <div class="col-md-9">
-                        <input type="text" class="form-control" />
+                        <ui-select ng-model="$ctrl.label.attribute">
+                            <ui-select-match>
+                                <span ng-if="$select.selected.id > 0">
+                                    {{ $ctrl.concepts[$select.selected.thesaurus_url].label }}
+                                </span>
+                                <span ng-if="$select.selected.id == -1">
+                                    {{ $select.selected.label | translate }}
+                                </span>
+                            </ui-select-match>
+                            <ui-select-choices repeat="attr in $ctrl.labelAttributes | filter:$select.search">
+                                <span ng-if="attr.id > 0" ng-bind-html="$ctrl.concepts[attr.thesaurus_url].label | highlight: $select.search">
+                                </span>
+                                <span ng-if="attr.id == -1" ng-bind-html="attr.label | translate | highlight: $select.search">
+                                </span>
+                            </ui-select-choices>
+                        </ui-select>
                     </div>
                 </div>
             </form>
@@ -213,7 +223,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3" translate="gis.properties.labels.shadow.transparency">Transparenz</label>
+                    <label class="control-label col-md-3" translate="gis.properties.labels.shadow.transparency"></label>
                     <div class="col-md-9">
                         <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" ng-model="$ctrl.shadow.transparency" />
                         <span class="slider-text">{{ $ctrl.shadow.transparency }}%</span>
@@ -225,13 +235,39 @@
                 <i class="material-icons middle" ng-show="!$ctrl.formShown['position']">arrow_drop_down</i>
             </small></h5>
             <form class="form-horizontal" ng-show="$ctrl.formShown['position']">
+                <div class="form-group">
+                    <label class="control-label col-md-3" translate="gis.properties.labels.position.activate"></label>
+                    <div class="col-md-9">
+                        <input type="checkbox" class="form-control" ng-model="$ctrl.position.active" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3" translate="gis.properties.labels.position.offset-x"></label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" class="form-control" ng-model="$ctrl.position.offset.x" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3" translate="gis.properties.labels.position.offset-y"></label>
+                    <div class="col-md-9">
+                        <input type="number" step="1" class="form-control" ng-model="$ctrl.position.offset.y" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3" translate="gis.properties.labels.position.position"></label>
+                    <div class="col-md-9">
+                        <ui-select ng-model="$ctrl.position.position">
+                            <ui-select-match>{{ $select.selected.label | translate }}</ui-select-match>
+                            <ui-select-choices repeat="pos in $ctrl.positions | filter:$select.search">
+                                <span ng-bind-html="pos.label | translate | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
             </form>
-            <button type="button" class="btn btn-success" ng-click="$ctrl.applyStyleSettings()">
+            <button type="button" class="btn btn-success" ng-click="$ctrl.applyStyleSettings()" ng-disabled="!$ctrl.label.attribute">
                 <i class="material-icons">refresh</i> <span translate="gis.properties.labels.button-apply"></span>
             </button>
-        </div>
-        <div ng-show="$ctrl.activePropertyTab == 'diagrams'">
-            <h2 translate="gis.properties.diagrams"></h2>
         </div>
     </div>
 </div>
