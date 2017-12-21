@@ -20,7 +20,6 @@ class VersionInfo {
         $fullpath = "$dir/" . self::$file;
         if(file_exists($fullpath)) {
             $content = explode("\n", file_get_contents($fullpath));
-            // \Log::info($content);
         } else {
             exec('git describe --tags', $tag, $exitcode);
             exec('git log -1 --format=%at', $ts, $exitcodeTs);
@@ -35,14 +34,10 @@ class VersionInfo {
                 ];
             }
         }
-        // content should have this format "v0.5.0-ephesus-16-g7109034"
         $parts = explode('-', $content[0]);
-        if(count($parts) != 4) {
-            return;
-        }
         $this->release = $parts[0];
         $this->releaseName = ucfirst($parts[1]);
-        $this->releaseHash = $parts[3];
+        if(count($parts) >= 4)$this->releaseHash = $parts[3];
         // cut off 'v' for semantic versioning
         $semVer = explode('.', substr($this->release, 1));
         $this->major = $semVer[0];
@@ -70,7 +65,11 @@ class VersionInfo {
 
     public function getFullRelease() {
         $releaseName = strtolower($this->releaseName);
-        return "$this->release-$releaseName-$this->releaseHash";
+        $release = "$this->release-$releaseName";
+        if(isset($this->releaseHash)) {
+            $release .= "-$this->releaseHash";
+        }
+        return $release;
     }
 
     public function getMajor() {
