@@ -35,11 +35,6 @@
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li ng-if="$ctrl.user.user.name">
-                    <a href="" ng-click="$ctrl.logoutUser()">
-                        <i class="material-icons">power_settings_new</i> {{ $ctrl.user.user.name }}
-                    </a>
-                </li>
                 <li class="dropdown" uib-dropdown>
                     <a href="#" class="dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         <i class="material-icons">build</i>
@@ -146,6 +141,11 @@
                             </a>
                         </li>
                     </ul>
+                </li>
+                <li ng-if="$ctrl.user.user.name">
+                    <a href="" ng-click="$ctrl.logoutUser()">
+                        <i class="material-icons">power_settings_new</i> {{ $ctrl.user.user.name }}
+                    </a>
                 </li>
                 <li>
                     <a target="_blank" href="https://github.com/eScienceCenter/Spacialist/wiki/User-manual">
