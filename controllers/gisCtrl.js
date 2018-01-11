@@ -132,6 +132,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', 'httpGetFac
                         vm.buffer = {};
                         vm.background = {};
                         vm.position = {};
+                        vm.concepts = concepts;
 
                         vm.formShown = {
                             label: true,
@@ -151,6 +152,17 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', 'httpGetFac
                                 index: 'graduated'
                             },
                         ];
+
+                        vm.graduateModes = [
+                            {
+                                label: 'gis.properties.style.graduate.modes.same_interval',
+                                index: 'same_interval'
+                            },
+                            {
+                                label: 'gis.properties.style.graduate.modes.same_count',
+                                index: 'same_count'
+                            },
+                        ]
 
                         vm.styleMode = vm.styleModes[0];
 
