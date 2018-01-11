@@ -31,6 +31,53 @@ function nextMatchingDeviceClass(col, currentClass) {
     return null;
 }
 
+function parseData(data) {
+    var parsedData = {};
+    for(var i=0; i<data.length; i++) {
+        var value = data[i];
+        var index = value.attribute_id;
+        var posIndex = index + '_cert';
+        var descIndex = index + '_desc';
+        var val = value.str_val;
+        var dType = value.datatype;
+        parsedData[posIndex] = value.possibility || 100;
+        parsedData[descIndex] = value.possibility_description;
+        if(dType == 'list') {
+            if(typeof parsedData[index] == 'undefined') parsedData[index] = [];
+            parsedData[index].push({
+                name: val
+            });
+        } else if(dType == 'string-sc') {
+            parsedData[index] = value.val;
+        } else if(dType == 'string-mc') {
+            if(typeof parsedData[index] == 'undefined') parsedData[index] = [];
+            parsedData[index].push(value.val);
+        } else if(dType == 'dimension') {
+            if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
+        } else if(dType == 'epoch') {
+            if(typeof value.val != 'undefined') parsedData[index] = JSON.parse(value.val);
+        } else if(dType == 'geography') {
+            parsedData[index] = value.val;
+        } else if(dType == 'context') {
+            parsedData[index] = value.val;
+        } else if(dType == 'integer' || dType == 'percentage') {
+            parsedData[index] = parseInt(value.int_val);
+        } else if(dType == 'boolean') {
+            parsedData[index] = (parseInt(value.int_val) != 0);
+        } else if(dType == 'double') {
+            parsedData[index] = parseFloat(value.dbl_val);
+        } else if(dType == 'date') {
+            parsedData[index] = new Date(value.dt_val);
+        } else if (dType == 'table') {
+            if(typeof parsedData[index] == 'undefined') parsedData[index] = [];
+            parsedData[index].push(JSON.parse(value.json_val));
+        } else {
+            parsedData[index] = val;
+        }
+    }
+    return parsedData;
+}
+
 function createDownloadLink(raw, filename) {
     var link = document.createElement("a");
     link.setAttribute("href", 'data:;base64,' + raw);
@@ -60,6 +107,50 @@ function resetObject(o) {
             delete o[k];
         }
     }
+}
+
+function hex2rgba(c) {
+    if(!c) {
+        return {
+            r: 255,
+            g: 255,
+            b: 255,
+            a: 1
+        };
+    }
+    var rgba = {};
+    var r, g, b, a;
+    c = c.substr(1); // cut off #
+    if(c.length == 3) {
+        r = c[0]+c[0];
+        g = c[1]+c[1];
+        b = c[2]+c[2];
+        a = 'ff';
+    } else if(c.length == 4) {
+        r = c[0]+c[0];
+        g = c[1]+c[1];
+        b = c[2]+c[2];
+        a = c[3]+c[3];
+    } else if(c.length == 6) {
+        r = c[0]+c[1];
+        g = c[2]+c[3];
+        b = c[4]+c[5];
+        a = 'ff';
+    } else if(c.length == 8) {
+        r = c[0]+c[1];
+        g = c[2]+c[3];
+        b = c[4]+c[5];
+        a = c[6]+c[7];
+    }
+    rgba.r = parseInt(r, 16);
+    rgba.g = parseInt(g, 16);
+    rgba.b = parseInt(b, 16);
+    rgba.a = parseInt(a, 16);
+    return rgba;
+}
+
+function rgba2str(rgba) {
+    return 'rgba(' + rgba.r + ', ' + rgba.g + ', ' + rgba.b + ', ' + rgba.a + ')';
 }
 
 function createCountingCsvHeader(cnt, translate) {

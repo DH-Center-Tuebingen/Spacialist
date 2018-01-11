@@ -1914,6 +1914,9 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         layer: function(map, mapService) {
                             return mapService.getLayers();
                         },
+                        contextLayer: function(map, mapService) {
+                            return mapService.getContextLayers();
+                        },
                         geodata: function(layer, mapService) {
                             return mapService.getGeodata();
                         }

@@ -48,7 +48,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', 'httpGetFac
                 mapService.fitBoundsToLayer(parentLayer, vm.map);
             },
             enabled: function($itemScope) {
-                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
+                return vm.map.mapLayers[$itemScope.l.id] && vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
             },
             displayed: function() {
                 return true;
@@ -60,7 +60,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', 'httpGetFac
                 vm.exportLayer($itemScope.l, 'geojson');
             },
             enabled: function($itemScope) {
-                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
+                return vm.map.mapLayers[$itemScope.l.id] && vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
             },
             children: [
                 {
@@ -108,11 +108,11 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', 'httpGetFac
                 if(l.counter > 0) {
                     delete l.counter;
                 } else {
-                    l.counter = vm.map.mapLayers[l.id].getLayers().length;
+                    l.counter = vm.map.mapLayers[$itemScope.l.id] && vm.map.mapLayers[l.id].getLayers().length;
                 }
             },
             enabled: function($itemScope) {
-                return vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
+                return vm.map.mapLayers[$itemScope.l.id] && vm.map.mapLayers[$itemScope.l.id].getLayers().length > 0;
             }
         },
         {
@@ -120,26 +120,153 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', 'httpGetFac
             click: function($itemScope, $event, modelValue, text, $li) {
                 var l = $itemScope.l;
                 var concepts = vm.concepts;
+                var contexts = vm.contexts;
                 var map = vm.map;
                 $uibModal.open({
                     templateUrl: "modals/gis-properties.html",
                     windowClass: 'wide-modal',
-                    controller: ['$scope', function($scope) {
+                    controller: ['$scope', 'mainService', 'httpGetFactory', function($scope, mainService, httpGetFactory) {
                         var vm = this;
 
-                        vm.label = {};
-                        vm.font = {};
-                        vm.buffer = {};
-                        vm.background = {};
-                        vm.position = {};
+                        vm.map = map;
+                        vm.layer = l;
                         vm.concepts = concepts;
+                        vm.contexts = contexts;
+                        vm.layerName = l.context_type_id ? concepts[l.thesaurus_url].label : l.name;
+
+                        vm.labelAttributes = [];
+
+                        httpGetFactory('api/analysis/context_type/' + vm.layer.context_type_id + '/string', function (response) {
+                            vm.labelAttributes.length = 0;
+                            vm.labelAttributes.push({
+                                id: -1, // indicate that it is not a real attribute
+                                label: 'gis.properties.labels.label-name'
+                            });
+                            for(var i=0; i<response.length; i++) {
+                                vm.labelAttributes.push(response[i]);
+                            }
+                        });
+
+                        vm.fontStyles = [
+                            {
+                                label: 'gis.properties.labels.font.bold',
+                                index: 'bold'
+                            },
+                            {
+                                label: 'gis.properties.labels.font.italic',
+                                index: 'italic'
+                            },
+                            {
+                                label: 'gis.properties.labels.font.oblique',
+                                index: 'oblique'
+                            },
+                            {
+                                label: 'gis.properties.labels.font.bolditalic',
+                                index: 'bolditalic'
+                            },
+                            {
+                                label: 'gis.properties.labels.font.boldoblique',
+                                index: 'boldoblique'
+                            },
+                            {
+                                label: 'gis.properties.labels.font.regular',
+                                index: 'regular'
+                            }
+                        ];
+
+                        vm.fontMods = [
+                            {
+                                label: 'gis.properties.labels.font.mod.lower',
+                                index: 'lower'
+                            },
+                            {
+                                label: 'gis.properties.labels.font.mod.upper',
+                                index: 'upper'
+                            },
+                            {
+                                label: 'gis.properties.labels.font.mod.capitalize',
+                                index: 'capitalize'
+                            }
+                        ];
+
+                        vm.positions = [
+                            {
+                                label: 'gis.properties.labels.position.top',
+                                index: 'top'
+                            },
+                            {
+                                label: 'gis.properties.labels.position.bottom',
+                                index: 'bottom'
+                            },
+                            {
+                                label: 'gis.properties.labels.position.left',
+                                index: 'left'
+                            },
+                            {
+                                label: 'gis.properties.labels.position.right',
+                                index: 'right'
+                            },
+                            {
+                                label: 'gis.properties.labels.position.center',
+                                index: 'center'
+                            },
+                            {
+                                label: 'gis.properties.labels.position.auto',
+                                index: 'auto'
+                            },
+                        ];
+
+                        vm.label = {};
+
+                        vm.concepts = concepts;
+
+                        vm.font = {
+                            transparency: 0,
+                            color: '#000000',
+                            size: 12,
+                            style: vm.fontStyles[5]
+                        };
+                        vm.buffer = {
+                            transparency: 0,
+                            color: '#FFFFFF',
+                            size: 1
+                        };
+                        vm.background = {
+                            transparency: 0,
+                            color: {
+                                fill: '#FFFFFF',
+                                border: '#000000'
+                            },
+                            size: {
+                                x: 0,
+                                y: 0,
+                                border: 1
+                            }
+                        };
+                        vm.position = {
+                            offset: {
+                                x: 0,
+                                y: 0
+                            }
+                        };
+                        vm.shadow = {
+                            transparency: 0,
+                            color: '#000000',
+                            offset: {
+                                x: 0,
+                                y: 0
+                            },
+                            blur: 0,
+                            spread: 0
+                        };
 
                         vm.formShown = {
                             label: true,
                             font: false,
                             buffer: false,
                             background: false,
-                            position: false
+                            position: false,
+                            shadow: false
                         };
 
                         vm.styleModes = [
@@ -167,34 +294,190 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', 'httpGetFac
                         vm.styleMode = vm.styleModes[0];
 
                         vm.applyStyleSettings = function() {
-                            var tooltip = {};
-                            tooltip.permanent = true;
-                            tooltip.interactive = false;
-                            var isOneActive = false;
-                            if(vm.buffer.active) {
-                                vm.applyBuffer(tooltip);
-                                isOneActive = true;
-                            } else {
-                                vm.removeBuffer(tooltip);
-                            }
+                            if(!vm.map.mapLayers[vm.layer.id]) return;
+                            if(!vm.label.attribute) return;
 
                             var layers = vm.map.mapLayers[vm.layer.id].getLayers();
+                            var values = [];
+                            // if attribute id is set, async load data of set attribute
+                            // then loop over layers and set value to async loaded values (use empty string for non-present data)
+                            if(vm.label.attribute.id > 0) {
+                                httpGetFactory('api/analysis/context_type/' + vm.layer.context_type_id + '/attribute/' + vm.label.attribute.id, function(response) {
+                                    for(var i=0; i<layers.length; i++) {
+                                        var l = layers[i];
+                                        var linkedContextId = vm.map.geodata.linkedContexts[l.feature.id];
+                                        var linkedContext = vm.contexts.data[linkedContextId];
+                                        if(response[linkedContext.id]) {
+                                            var data = parseData([response[linkedContext.id].pivot]);
+                                            values.push(data[vm.label.attribute.id]);
+                                        } else {
+                                            values.push('');
+                                        }
+                                    }
+                                    vm.applyStyleValues(layers, values);
+                                });
+                            } else {
+                                for(var i=0; i<layers.length; i++) {
+                                    var l = layers[i];
+                                    var linkedContextId = vm.map.geodata.linkedContexts[l.feature.id];
+                                    var linkedContext = vm.contexts.data[linkedContextId];
+                                    values.push(linkedContext.name);
+                                }
+                                vm.applyStyleValues(layers, values);
+                            }
+                        };
+
+                        vm.applyStyleValues = function(layers, values) {
+                            var className = 'tooltip-' + (new Date()).getTime();
+                            var tooltip = {
+                                className: className
+                            };
+
+                            tooltip.permanent = true;
+                            tooltip.interactive = false;
+
+                            vm.applyPosition(tooltip);
+
                             for(var i=0; i<layers.length; i++) {
                                 var l = layers[i];
-                                l.bindTooltip("Foobar", tooltip);
+                                l.unbindTooltip();
+                                if(values[i].length > 0) {
+                                    l.bindTooltip(values[i], tooltip);
+                                }
                             }
-                        };
-
-                        vm.applyBuffer = function(tooltip) {
-                            // if transparency is present, set opacity to 100%-transparency
-                            if($ctrl.buffer.transparency) {
-                                tooltip.opacity = 1 - $ctrl.buffer.transparency
-                            }
-                        };
-
-                        vm.removeBuffer = function(tooltip) {
-
+                            var tooltipInstances = $('.'+className);
+                            vm.removeTooltipClasses(tooltipInstances);
+                            vm.applyBuffer(tooltipInstances);
+                            vm.applyFont(tooltipInstances);
+                            vm.applyBackground(tooltipInstances);
+                            vm.applyShadow(tooltipInstances);
                         }
+
+                        vm.removeTooltipClasses = function(tti) {
+                            tti.removeClass('leaflet-tooltip-left');
+                            tti.removeClass('leaflet-tooltip-right');
+                            tti.removeClass('leaflet-tooltip-top');
+                            tti.removeClass('leaflet-tooltip-bottom');
+                        };
+
+                        vm.applyFont = function(tti) {
+                            if(!vm.font.active) return;
+                            var opacity = vm.getOpacity(vm.font.transparency);
+                            var c = hex2rgba(vm.font.color);
+                            c.a = opacity;
+                            c = rgba2str(c);
+                            var s = vm.font.size;
+                            tti.css('color', c);
+                            if(s) tti.css('font-size', s + 'px');
+                            // TODO font family
+                            // tti.css('font-family', '');
+                            var mod = vm.font.mod;
+                            var style = vm.font.style;
+                            if(style) {
+                                switch(style.index) {
+                                    case 'bold':
+                                        tti.css('font-weight', 'bold');
+                                        break;
+                                    case 'italic':
+                                        tti.css('font-style', 'italic');
+                                        break;
+                                    case 'oblique':
+                                        tti.css('font-style', 'oblique');
+                                        break;
+                                    case 'bolditalic':
+                                        tti.css('font-weight', 'bold');
+                                        tti.css('font-style', 'italic');
+                                        break;
+                                    case 'boldoblique':
+                                        tti.css('font-weight', 'bold');
+                                        tti.css('font-style', 'oblique');
+                                        break;
+                                    case 'regular':
+                                    default:
+                                        tti.css('font-weight', 'normal');
+                                        tti.css('font-style', 'normal');
+                                        break;
+                                }
+                            }
+                            if(mod) {
+                                switch(mod.index) {
+                                    case 'lower':
+                                    tti.css('text-transform', 'lowercase');
+                                    break;
+                                    case 'upper':
+                                    tti.css('text-transform', 'uppercase');
+                                    break;
+                                    case 'capitalize':
+                                    tti.css('text-transform', 'capitalize');
+                                    break;
+                                }
+                            }
+                        };
+
+                        vm.applyBuffer = function(tti) {
+                            if(!vm.buffer.active) return;
+                            var opacity = vm.getOpacity(vm.buffer.transparency);
+                            var c = hex2rgba(vm.buffer.color);
+                            c.a = opacity;
+                            var cs = rgba2str(c);
+                            var ss = vm.createRoundBuffer(vm.buffer.size, cs);
+                            tti.css('text-shadow', ss);
+                        };
+
+                        vm.applyBackground = function(tti) {
+                            if(!vm.background.active) return;
+                            var opacity = vm.getOpacity(vm.background.transparency);
+                            var fc = hex2rgba(vm.background.color.fill);
+                            var bc = hex2rgba(vm.background.color.border);
+                            fc.a = bc.a = opacity;
+                            fc = rgba2str(fc);
+                            bc = rgba2str(bc);
+                            var x = vm.background.size.x || 0;
+                            var y = vm.background.size.y || 0;
+                            var border = vm.background.size.border
+                            tti.css('padding', y +'px ' + x + 'px');
+                            tti.css('border', border + 'px solid ' + bc)
+                            tti.css('background-color', fc);
+                        };
+
+                        vm.applyShadow = function(tti) {
+                            if(!vm.shadow.active) return;
+                            var opacity = vm.getOpacity(vm.shadow.transparency);
+                            var c = hex2rgba(vm.shadow.color);
+                            c.a = opacity;
+                            c = rgba2str(c);
+                            var x = vm.shadow.offset.x || 0;
+                            var y = vm.shadow.offset.y || 0;
+                            var blur = vm.shadow.blur || 0;
+                            var spread = vm.shadow.spread || 0;
+                            tti.css('box-shadow', x + 'px ' + y + 'px ' + blur + 'px ' + spread + 'px ' + c);
+                        };
+
+                        vm.applyPosition = function(tt) {
+                            if(!vm.position.active) return;
+                            var x = vm.position.offset.x || 0;
+                            var y = vm.position.offset.y || 0;
+                            tt.offset = L.point(x, y);
+                            if(vm.position.position) {
+                                tt.direction = vm.position.position.index;
+                            }
+                        };
+
+                        // if transparency is present, set opacity to 100%-transparency
+                        vm.getOpacity = function(trans) {
+                            if(trans) return 1 - (trans/100);
+                            return 1;
+                        };
+
+                        vm.createRoundBuffer = function(s, color) {
+                            var dirs = [
+                                '-1px -1px ' + s + 'px ' + color,
+                                '-1px 1px ' + s + 'px ' + color,
+                                '1px -1px ' + s + 'px ' + color,
+                                '1px 1px ' + s + 'px ' + color
+                            ];
+                            return dirs.join(', ');
+                        };
 
                         vm.toggleForm = function(id) {
                             vm.formShown[id] = !vm.formShown[id];
@@ -230,9 +513,6 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', 'httpGetFac
                                 break;
                             }
                         }
-
-                        vm
-
 
                         vm.close = function() {
                             $scope.$dismiss('close');
@@ -561,6 +841,7 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', 'httpGetFac
 
     vm.toggleLayerGroupVisibility = function(layerGroup, isVisible) {
         var p = vm.map.layers.overlays[layerGroup.id];
+        if(!p) return;
         p.visible = isVisible;
         p.layerOptions.visible = isVisible;
         layerGroup.visible = isVisible;

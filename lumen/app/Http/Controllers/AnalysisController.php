@@ -51,6 +51,24 @@ class AnalysisController extends Controller {
             return response()->json($ct->attributes);
         }
         return response()->json([]);
+    } 
+
+    public function getStringAttributes($id) {
+        $ct = ContextType::with(['attributes'])
+            ->whereHas('attributes', function($query) {
+                $query->where('datatype', 'string');
+            })
+            ->find($id);
+        if(isset($ct->attributes)) {
+            $matchingAttrs = [];
+            foreach($ct->attributes as $attr) {
+                if($attr->datatype == 'string') {
+                    $matchingAttrs[] = $attr;
+                }
+            }
+            return response()->json($matchingAttrs);
+        }
+        return response()->json([]);
     }
 
     public function getContextsForLayer($id){
@@ -71,6 +89,27 @@ class AnalysisController extends Controller {
                 'context'
             ]);
         })->get();
+    }
+  
+    public function getAttributeOfContextTypeLayer($id, $aid) {
+        $contexts = Context::with(['attributes'])
+            ->whereNotNull('geodata_id')
+            ->where('context_type_id', $id)
+            ->get();
+        $attributes = [];
+        foreach($contexts as $c) {
+            $attr = null;
+            foreach($c->attributes as $a) {
+                if($a->id == $aid) {
+                    $attr = $a;
+                    break;
+                }
+            }
+            if(isset($attr)) {
+                $attributes[$c->id] = $attr;
+            }
+        }
+        return response()->json($attributes);
     }
 
     // POST
