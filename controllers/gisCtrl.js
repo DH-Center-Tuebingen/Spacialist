@@ -1,8 +1,6 @@
 spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal', '$translate', '$timeout', function(mapService, httpGetPromise, $uibModal, $translate, $timeout) {
     var vm = this;
 
-    vm.layerVisibility = {};
-    vm.sublayerVisibility = {};
     vm.sublayerColors = {};
 
     vm.exportLayer = function(l, type) {
@@ -39,6 +37,16 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
             createDownloadLink(response, filename);
         });
     }
+
+    vm.getGeodataName = function(g) {
+        var cid = vm.map.geodata.linkedContexts[g.feature.id];
+        if(cid){
+            return vm.contexts.data[cid].name;
+        }
+        else{
+            return g.feature.properties.name;
+        }
+    };
 
     vm.layerContextMenu = [
         {
@@ -525,6 +533,10 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
                 fillColor: 'rgba(0,0,0,0)'
             });
         }
+    };
+
+    vm.initLayerVisiblity = function(layer, layerGroup) {
+        vm.toggleLayerVisibility(layer, layerGroup.visible);
     };
 
     vm.init = function() {
