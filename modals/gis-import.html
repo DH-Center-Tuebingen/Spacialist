@@ -169,7 +169,7 @@
         </div>
 
         <div class="flex-hr-start" ng-show="$ctrl.preview[$ctrl.activeTab]">
-            <leaflet id="gis-preview" geojson="{data: $ctrl.preview[$ctrl.activeTab]}" height="400px" width="400px">
+            <leaflet id="gis-preview" layers="$ctrl.layers" geojson="{data: $ctrl.preview[$ctrl.activeTab]}" height="400px" width="400px">
             </leaflet>
             <div class="flex-vt-start" style="padding-left: 10px;">
                 <p translate="gis.importer.results.found" translate-values="{ count: $ctrl.result[$ctrl.activeTab].features.length }">

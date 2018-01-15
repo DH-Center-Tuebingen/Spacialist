@@ -200,11 +200,24 @@ spacialistApp.controller('gisCtrl', ['mapService', 'httpGetPromise', '$uibModal'
     ];
 
     vm.openImportWindow = function() {
+        // temporary layers var, because vm gets overwritten
+        var layers = vm.map.layers;
         $uibModal.open({
             templateUrl: "modals/gis-import.html",
             windowClass: 'wide-modal',
             controller: ['$scope', 'fileService', 'httpGetPromise', 'httpPostPromise', '$translate', function($scope, fileService, httpGetPromise, httpPostPromise, $translate) {
                 var vm = this;
+                vm.layers = {
+                    baselayers: layers.baselayers,
+                    overlays: {}
+                };
+                // only add user-added layers (aka not context-type layers)
+                for(var k in layers.overlays) {
+                    if(!layers.overlays.hasOwnProperty(k)) continue;
+                    if(layers.overlays[k].layerOptions.context_type_id) continue;
+                    if(layers.overlays[k].layerOptions.layer_id == 'unlinked') continue;
+                    vm.layers.overlays[k] = layers.overlays[k];
+                }
                 vm.activeTab = 'csv';
                 vm.content = {};
                 vm.file = {};
