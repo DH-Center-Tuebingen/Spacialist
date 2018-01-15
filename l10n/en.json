@@ -21,7 +21,7 @@
     "context-form.tabs.harris-matrix": "Harris Matrix",
     "context-form.tabs.files": "Files",
     "context-form.tabs.files.linked": "Files Assigned To This Context",
-    "context-form.tabs.files.linked.to-children": "To child contexts assigned files",
+    "context-form.tabs.files.linked.to-children": "Files assigned to child contexts",
     "context-form.tabs.files.upload": "Upload Files",
     "context-form.tabs.files.drag+drop": "Drag and drop files here or use the upload button.",
     "context-form.tabs.files.upload-button": "Select Files To Upload...",
