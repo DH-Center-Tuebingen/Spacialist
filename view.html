@@ -105,6 +105,18 @@
                                 </span>
                             </uib-accordion-heading>
                             <file-list files="$ctrl.globalContext.linkedFiles" context-menu="$ctrl.fileContextMenu" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags" search-terms="$ctrl.selectedSearchTerms"></file-list>
+                            <div ng-if="$ctrl.globalContext.linkedFilesChildren.length > 0" ng-init="displayChildFiles = false">
+                                <h5 class="clickable" ng-click="displayChildFiles = !displayChildFiles">
+                                    {{ 'context-form.tabs.files.linked.to-children' | translate }} ({{ $ctrl.globalContext.linkedFilesChildren.length }})
+                                    <a href="" ng-show="displayChildFiles">
+                                        <i class="material-icons">arrow_drop_up</i>
+                                    </a>
+                                    <a href="" ng-show="!displayChildFiles">
+                                        <i class="material-icons">arrow_drop_down</i>
+                                    </a>
+                                </h5>
+                                <file-list ng-if="displayChildFiles" files="$ctrl.globalContext.linkedFilesChildren" show-tags="$ctrl.tags.visible" available-tags="$ctrl.availableTags" search-terms="$ctrl.selectedSearchTerms"></file-list>
+                            </div>
                         </div>
                         <div uib-accordion-group class="panel-default" is-open="layerTwo.imageTab.newOpen">
                             <uib-accordion-heading>

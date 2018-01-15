@@ -30,7 +30,8 @@ spacialistApp.controller('contextCtrl', ['$scope', 'mainService', function($scop
             data: {
                 sources: vm.sources,
                 geometryType: geometryType,
-                linkedFiles: vm.linkedFiles
+                linkedFiles: vm.linkedFiles,
+                linkedFilesChildren: vm.linkedFilesChildren
             }
         });
         if(vm.tab == 'map' && vm.editContext.geodata_id) {

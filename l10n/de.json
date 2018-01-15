@@ -21,6 +21,7 @@
     "context-form.tabs.harris-matrix": "Harris-Matrix",
     "context-form.tabs.files": "Dateien",
     "context-form.tabs.files.linked": "Mit diesem Kontext verknüpfte Dateien",
+    "context-form.tabs.files.linked.to-children": "Mit untergeordneten Kontexten verknüpfte Dateien",
     "context-form.tabs.files.upload": "Dateien Hochladen",
     "context-form.tabs.files.drag+drop": "Entweder per Drag &amp; Drop hierherziehen oder über den Button hochladen.",
     "context-form.tabs.files.upload-button": "Dateien zum Hochladen auswählen...",
