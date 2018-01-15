@@ -1394,6 +1394,11 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                                 return true;
                             });
                             return linkedFiles;
+                        },
+                        linkedFilesChildren: function(contexts, files, $transition$) {
+                            if(!files) return [];
+                            var cid = $transition$.params().id;
+                            return getChildImages(contexts, files, cid);
                         }
                     },
                     onEnter: function(contexts, context, mainService, $state, $transition$) {

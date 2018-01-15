@@ -57,6 +57,7 @@ spacialistApp.component('spacialistdata', {
         user: '<',
         concepts: '<',
         linkedFiles: '<',
+        linkedFilesChildren: '<',
         layer: '<',
         onStore: '&',
         onSourceAdd: '&',

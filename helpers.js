@@ -62,6 +62,28 @@ function resetObject(o) {
     }
 }
 
+function getChildImages(contexts, files, cid) {
+    var childIds = contexts.children[cid];
+    var linkedFiles = files.filter(function(f) {
+        if(!f.linked_contexts || !childIds) return false;
+        for(var i=0; i<f.linked_contexts.length; i++) {
+            var lc = f.linked_contexts[i];
+            for(var j=0; j<childIds.length; j++) {
+                var child = childIds[j];
+                if(lc.id == child.id) return true;
+            }
+        }
+        return false;
+    });
+    if(childIds) {
+        for(var i=0; i<childIds.length; i++) {
+            var linkedChilds = getChildImages(contexts, files, childIds[i].id);
+            linkedFiles = linkedFiles.concat(linkedChilds);
+        }
+    }
+    return linkedFiles;
+}
+
 function createCountingCsvHeader(cnt, translate) {
     var columns = [];
     for(var i=0; i<cnt; i++) {
