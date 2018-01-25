@@ -34,7 +34,7 @@
                         <i class="material-icons">map</i> <span ng-if="l.name">{{ l.name }}</span><span ng-if="l.thesaurus_url">{{ $ctrl.concepts[l.thesaurus_url].label }}</span>
                     </a>
                     <div ng-if="hovered">
-                        <div ng-if="!l.layerOptions.context_type_id && l.layerOptions.layer_id != 'unlinked'" style="float: left; padding-left: 5px;">
+                        <div ng-if="!l.context_type_id && l.type != 'unlinked'" style="float: left; padding-left: 5px;">
                             <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.onDelete(l)">
                                 <i class="material-icons md-18 fa-red">delete</i>
                             </a>
