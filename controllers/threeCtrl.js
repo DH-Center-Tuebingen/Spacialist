@@ -10,6 +10,8 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     var width, height;
     var mouse = new THREE.Vector2();
     var flashlight;
+	var flashlightIntensity = 1;
+	var flashlightOn = false;
     // var raycaster = new THREE.Raycaster();
     var particles = [];
     // pdb variables
@@ -102,60 +104,15 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     }
 
     function init() {
-        WEBVR.checkAvailability().then(function() {
-            renderer.vr.enabled = true;
-            renderer.vr.standing = true;
-            controller1 = new THREE.ViveController(0);
-    		controller1.standingMatrix = renderer.vr.getStandingMatrix();
-    		controller1.addEventListener('triggerdown', onGrabDown);
-    		controller1.addEventListener('triggerup', onGrabUp);
-    		scene.add(controller1);
-    		controller2 = new THREE.ViveController(1);
-    		controller2.standingMatrix = renderer.vr.getStandingMatrix();
-    		controller2.addEventListener('triggerdown', onLightOn);
-    		controller2.addEventListener('triggerup', onLightOff);
-    		scene.add(controller2);
-
-            // Add Models to Vive Controller
-            var cloader = new THREE.OBJLoader2();
-    		cloader.setPath('./img/vive-controller/');
-    		cloader.load('vr_controller_vive_1_5.obj', function(object) {
-    			var loader = new THREE.TextureLoader();
-    			loader.setPath('./img/vive-controller/');
-    			var controller = object.children[0];
-    			controller.material.map = loader.load('onepointfive_texture.png');
-    			controller.material.specularMap = loader.load('onepointfive_spec.png');
-    			controller1.add(object.clone());
-    			controller2.add(object.clone());
-    		} );
-
-            // Add Controller Rays
-    		var geometry = new THREE.Geometry();
-    		geometry.vertices.push(new THREE.Vector3(0, 0, 0));
-    		geometry.vertices.push(new THREE.Vector3(0, 0, -1));
-    		var line = new THREE.Line(geometry);
-    		line.name = 'line';
-    		line.scale.z = 5;
-    		controller1.add(line.clone());
-    		controller2.add(line.clone());
-
-            WEBVR.getVRDisplay(function(display) {
-    			renderer.vr.setDevice(display);
-                sdisplay = display;
-
-                window.addEventListener('vrdisplaypresentchange', function() {
-                    $scope.status.vr.button.text = sdisplay.isPresenting ? 'Exit VR' : 'Enter VR';
-                }, false );
-    		});
-        }).catch(function(message) {
-            if(renderer.vr) {
-                renderer.vr.enabled = false;
-                renderer.vr.standing = false;
-            }
-            $scope.status.vr.errored = true;
-            $scope.status.vr.message = message;
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
+		renderer = new THREE.WebGLRenderer({
+            antialias: true
         });
+		renderer.setPixelRatio(window.devicePixelRatio);
+		renderer.setSize(width, height);
+		renderer.shadowMap.enabled = true;
+		renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		renderer.gammaInput = true;
+		renderer.gammaOutput = true;
 
         container = document.getElementById($scope.threeContainer);
         width = container.clientWidth;
@@ -164,8 +121,64 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 2000);
 		camera.position.set(7, 5, 7);
         scene.add(camera);
+		
+		container.appendChild(renderer.domElement);
+		container.appendChild(WEBVR.createButton(renderer));
 
-		var gridHelper = new THREE.GridHelper(10, 20);
+		window.addEventListener('resize', onWindowResize, false);
+        renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
+		renderer.vr.enabled = true;
+		controller1 = new THREE.ViveController(0);
+		controller1.addEventListener('triggerdown', onGrabDown);
+		controller1.addEventListener('triggerup', onGrabUp);
+		scene.add(controller1);
+		controller2 = new THREE.ViveController(1);
+		controller2.addEventListener('triggerdown', onLightOn);
+		controller2.addEventListener('triggerup', onLightOff);
+		controller2.addEventListener('thumbpadup', dimLight);
+		scene.add(controller2);
+
+		// Add spot light to controller2
+		flashlight = new THREE.SpotLight(0xffffff, 1, 20, 0.05, 1, 2);
+		flashlight.castShadow = true;
+		flashlight.shadow.mapSize.width = 1024;
+		flashlight.shadow.mapSize.height = 1024;
+		flashlight.shadow.camera.near = 0.05;
+		flashlight.shadow.camera.far = 1000;
+		// switch light off, is triggered using button on the ctrl
+		flashlight.intensity = 0;
+		// position the light source right behind the ctrl
+		flashlight.position.set(controller2.position.x, controller2.position.y, controller2.position.z + 0.05);
+		controller2.add(flashlight);
+
+		// Add Models to Vive Controller
+		var cloader = new THREE.OBJLoader();
+		cloader.setPath('./img/vive-controller/');
+		cloader.load('vr_controller_vive_1_5.obj', function(object) {
+			var loader = new THREE.TextureLoader();
+			loader.setPath('./img/vive-controller/');
+			var controller = object.children[0];
+			controller.material.map = loader.load('onepointfive_texture.png');
+			controller1.add(object.clone());
+			controller2.add(object.clone());
+		} );
+
+		// Add Controller Rays
+		var geometry = new THREE.Geometry();
+		geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+		geometry.vertices.push(new THREE.Vector3(0, 0, -1));
+		var line = new THREE.Line(geometry);
+		line.name = 'line';
+		line.scale.z = 5;
+		controller1.add(line.clone());
+		// point the light source to the controller's "view" direction
+		var c2line = line.clone();
+		controller2.add(c2line);
+		flashlight.target = c2line;
+		controller2.add(flashlight.target);
+		controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        var gridHelper = new THREE.GridHelper(10, 20);
 		scene.add(gridHelper);
 
         scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
@@ -185,7 +198,6 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         switch(extension) {
             case 'dae': // collada
                 var loader = new THREE.ColladaLoader();
-                loader.options.convertUpAxis = true;
                 loader.load(fileUrl, function(collada) {
                     var object = collada.scene;
                     var material, children;
@@ -243,18 +255,6 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 loadMolecule(fileUrl, pdbLoader);
                 break;
         }
-		renderer = new THREE.WebGLRenderer({
-            antialias: true
-        });
-		renderer.setPixelRatio(window.devicePixelRatio);
-		renderer.setSize(width, height);
-		renderer.shadowMap.enabled = true;
-		renderer.gammaInput = true;
-		renderer.gammaOutput = true;
-		container.appendChild(renderer.domElement);
-
-		window.addEventListener('resize', onWindowResize, false);
-        renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
     }
 
     function loadMolecule(url, loader) {
@@ -389,23 +389,20 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 	}
 
     function onLightOn(event) {
-        var controller = event.target;
-        console.log(controller);
-        flashlight = new THREE.SpotLight(0xffffff, 1, 200, 0.1, 1);
-        flashlight.position.set(controller.position);
-        spotLight.castShadow = true;
-        spotLight.shadow.mapSize.width = 1024;
-        spotLight.shadow.mapSize.height = 1024;
-        spotLight.shadow.camera.near = 0.05;
-        spotLight.shadow.camera.far = 1000;
-        scene.add(flashlight);
+		flashlight.intensity = flashlightIntensity;
+		flashlightOn = true;
     }
 
     function onLightOff(event) {
-        var controller = event.target;
-        scene.remove(flashlight);
-        flashlight = null;
+        flashlight.intensity = 0;
+		flashlightOn = false;
     }
+	
+	function dimLight(event) {
+		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
+		flashlightIntensity = event.axes[0] + 1;
+		if(flashlightOn) flashlight.intensity = flashlightIntensity;
+	}
 
 	function onGrabDown(event) {
 		var controller = event.target;
@@ -462,16 +459,12 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     function animate() {
         animationId = requestAnimationFrame(animate);
         renderer.animate(render);
-        // render();
     }
 
     function render() {
         if(renderer.vr && renderer.vr.enabled) {
             controller1.update();
             controller2.update();
-            cleanIntersected();
-            intersectObjects(controller1);
-    		intersectObjects(controller2);
         }
         renderer.render(scene, camera);
         if(labelRenderer) labelRenderer.render(scene, camera);

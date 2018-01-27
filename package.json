@@ -67,7 +67,7 @@
     "satellizer": "^0.15.5",
     "shapefile": "^0.6.6",
     "snackbarjs": "^1.1.0",
-    "three": "^0.87.1",
+    "three": "^0.89",
     "ui-leaflet": "^2.0.0",
     "ui-leaflet-draw": "0.0.5",
     "ui-leaflet-layers": "^0.1.3",
