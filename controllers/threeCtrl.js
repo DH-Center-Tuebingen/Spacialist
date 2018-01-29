@@ -9,8 +9,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     var fileUrl, extension;
     var width, height;
     var mouse = new THREE.Vector2();
-    var flashlight;
-	var flashlightIntensity = 1;
+    var flashlight, hemisphereLight, directionalLight;
+	var flashlightIntensity, hemisphereIntensity, directionalIntensity;
+    flashlightIntensity = hemisphereIntensity = directionalIntensity = 1;
 	var flashlightOn = false;
     // var raycaster = new THREE.Raycaster();
     var particles = [];
@@ -116,11 +117,13 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		controller1 = new THREE.ViveController(0);
 		controller1.addEventListener('triggerdown', onGrabDown);
 		controller1.addEventListener('triggerup', onGrabUp);
+        controller1.addEventListener('thumbpadup', dimWorldLight);
+        controller1.addEventListener('axischanged', recognizeTouch);
 		scene.add(controller1);
 		controller2 = new THREE.ViveController(1);
 		controller2.addEventListener('triggerdown', onLightOn);
 		controller2.addEventListener('triggerup', onLightOff);
-		controller2.addEventListener('thumbpadup', dimLight);
+		controller2.addEventListener('thumbpadup', dimFlashLight);
 		scene.add(controller2);
 
 		// Add point light to controller2
@@ -166,8 +169,8 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         var gridHelper = new THREE.GridHelper(10, 20);
 		scene.add(gridHelper);
 
-        scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
-		var directionalLight = new THREE.DirectionalLight(0xffffff);
+        hemisphereLight = new THREE.HemisphereLight(0x808080, 0x606060)
+		directionalLight = new THREE.DirectionalLight(0xffffff);
         directionalLight.position = camera.position;
         directionalLight.castShadow = true;
 		directionalLight.shadow.camera.top = 2;
@@ -175,6 +178,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		directionalLight.shadow.camera.right = 2;
 		directionalLight.shadow.camera.left = -2;
 		directionalLight.shadow.mapSize.set( 4096, 4096 );
+        scene.add(hemisphereLight);
 		scene.add(directionalLight);
 
         group = new THREE.Group();
@@ -386,11 +390,29 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		flashlightOn = false;
     }
 
-	function dimLight(event) {
+	function dimWorldLight(event) {
+		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
+		var hem = event.axes[0];
+		var dir = event.axes[1];
+		// only update the intensity for the light with the higher value
+		// (emulate a d-pad)
+		if(Math.abs(hem) > Math.abs(dir)) {
+			hemisphereIntensity = hem + 1;
+			hemisphereLight.intensity = hemisphereIntensity;
+		} else {
+			directionalIntensity = dir + 1;
+			directionalLight.intensity = directionalIntensity;
+		}
+	}
+
+	function dimFlashLight(event) {
 		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
 		flashlightIntensity = event.axes[0] + 1;
 		if(flashlightOn) flashlight.intensity = flashlightIntensity;
 	}
+
+    function recognizeTouch(event) {
+    }
 
 	function onGrabDown(event) {
 		var controller = event.target;
