@@ -21,23 +21,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     var ts = Date.now();
 
     $scope.status = {
-        progress: 0,
-        vr: {
-            errored: false,
-            message: '',
-            button: {
-                text: 'No VR Display',
-                toggle: function() {
-                    if(sdisplay) {
-        				sdisplay.isPresenting ? sdisplay.exitPresent() : sdisplay.requestPresent([
-                            {
-                                source: renderer.domElement
-                            }
-                        ]);
-                    }
-                }
-            }
-        }
+        progress: 0
     };
     $scope.points = 0;
     $scope.measurementEnabled = false;
@@ -83,15 +67,15 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     };
 
     function loadObj(path, objFile, materials) {
-        var objLoader = new THREE.OBJLoader2();
+        var objLoader = new THREE.OBJLoader();
         if(materials) {
-            objLoader.setMaterials(materials.materials);
+            objLoader.setMaterials(materials);
         }
         objLoader.setPath(path);
         objLoader.load(objFile,
             function(object) { // onSuccess
                 object.castShadow = true;
-				object.receiveShadow = true;
+                object.receiveShadow = true;
                 group.add(object);
                 onWindowResize();
             },
@@ -99,6 +83,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 updateProgress(event);
             },
             function(event) { // onError
+                console.log(event);
             }
         );
     }
@@ -121,7 +106,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 2000);
 		camera.position.set(7, 5, 7);
         scene.add(camera);
-		
+
 		container.appendChild(renderer.domElement);
 		container.appendChild(WEBVR.createButton(renderer));
 
@@ -239,7 +224,10 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                     // load obj file with loaded materials
                     materials.preload();
                     loadObj(path, objUrl, materials);
-                }, function() {}, function() {
+                }, function(event) {
+                    updateProgress(event);
+                }, function(event) {
+                    console.log(event.target.response);
                     // onError: try to load obj without materials
                     loadObj(path, objUrl);
                 });
@@ -397,7 +385,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         flashlight.intensity = 0;
 		flashlightOn = false;
     }
-	
+
 	function dimLight(event) {
 		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
 		flashlightIntensity = event.axes[0] + 1;
