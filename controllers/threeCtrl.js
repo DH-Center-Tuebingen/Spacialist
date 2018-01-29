@@ -123,8 +123,8 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		controller2.addEventListener('thumbpadup', dimLight);
 		scene.add(controller2);
 
-		// Add spot light to controller2
-		flashlight = new THREE.SpotLight(0xffffff, 1, 20, 0.05, 1, 2);
+		// Add point light to controller2
+		flashlight = new THREE.SpotLight(0xffffff, 1, 5, 0.15, 1, 2);
 		flashlight.castShadow = true;
 		flashlight.shadow.mapSize.width = 1024;
 		flashlight.shadow.mapSize.height = 1024;
