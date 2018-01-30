@@ -1,6 +1,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.5.2 - Unreleased
+### Added
+- New supported 3D file format in file viewer (`glTF`)
+- Actions to the WebVR controllers
+  - Controller 1 (_pick_ controller) can be used to adjust the scene light (using the thumbpad)
+    - left to right = intensity of hemisphere light
+    - bottom to top = intensity of directional light (positioned at the camera)
+  - Controller 2 is now a flashlight
+    - Intensity can be adjusted using the thumbpad (left to right)
+### Changed
+### Fixed
+- Controllers in the WebVR Viewer are now visible as Vive Controllers
+
 ## 0.5.1
 ### Added
 - Only show up to first 10 rows in csv preview
@@ -63,7 +76,7 @@ All notable changes to this project will be documented in this file.
 
 ## 0.4.2
 ### Added
-- New supported filetypes
+- New supported filetypes in file viewer
   - `.pdb` files (Protein Data Bank)
   - compressed files (e.g. `.zip`, `.rar`, `.tar`)
 - Download button in the file viewer
