@@ -22,6 +22,7 @@ spacialistApp.service('fileService', ['$rootScope', 'httpPostFactory', 'httpGetF
                 case 'dae':
                 case 'obj':
                 case 'pdb':
+                case 'gltf':
                     return '3d';
                 case 'txt':
                 case 'md':

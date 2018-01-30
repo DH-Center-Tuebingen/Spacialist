@@ -2,7 +2,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     $scope.threeContainer = 'threejs-container';
     var container;
     var camera, scene, renderer, controls, animationId;
-    var sdisplay, controller1, controller2, group;
+    var controller1, controller2, group;
+    var animationMixer;
+    var animationClock = new THREE.Clock();
     var raycaster = new THREE.Raycaster();
     var intersected = [];
 	var tempMatrix = new THREE.Matrix4();
@@ -246,6 +248,34 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 var pdbLoader = new THREE.PDBLoader();
                 loadMolecule(fileUrl, pdbLoader);
                 break;
+            case 'gltf':
+                var loader = new THREE.GLTFLoader();
+                loader.load(fileUrl, function(data) {
+                    var gltf = data;
+                    var object = gltf.scene;
+
+                    object.traverse(function(node) {
+                        if(node.isMesh) {
+                            node.castShadow = true;
+                            node.receiveShadow = true;
+                        }
+                    });
+
+                    var animations = gltf.animations;
+                    if(animations && animations.length > 0) {
+                        animationMixer = new THREE.AnimationMixer(object);
+                        for(var i=0; i<animations.length; i++) {
+                            animationMixer.clipAction(animations[i]).play();
+                        }
+                    }
+
+                    group.add(object);
+                    onWindowResize();
+                }, function(event) {
+                    updateProgress(event);
+                }, function(error) {
+                    console.log(error);
+                });
         }
     }
 
@@ -468,6 +498,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 
     function animate() {
         animationId = requestAnimationFrame(animate);
+        if(animationMixer) animationMixer.update(animationClock.getDelta());
         renderer.animate(render);
     }
 
@@ -504,5 +535,6 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         scene = null;
         controls = null;
         camera = null;
+        animationMixer.stopAllAction();
     });
 }]);
