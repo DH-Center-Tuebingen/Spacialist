@@ -7,6 +7,12 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     var animationClock = new THREE.Clock();
     var raycaster = new THREE.Raycaster();
     var intersected = [];
+    var octree = new THREE.Octree({
+		undeferred: false,
+		depthMax: Infinity,
+		objectsThreshold: 8,
+		overlapPct: 0.15
+	});
 	var tempMatrix = new THREE.Matrix4();
     var fileUrl, extension;
     var width, height;
@@ -79,6 +85,11 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
             function(object) { // onSuccess
                 object.castShadow = true;
                 object.receiveShadow = true;
+                for(var i=0; i<object.children.length; i++) {
+					octree.add(object.children[i], {
+						useFaces: false
+					});
+				}
                 group.add(object);
                 onWindowResize();
             },
@@ -204,6 +215,11 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                     }
                     object.castShadow = true;
                     object.receiveShadow = true;
+					for(var i=0; i<object.children.length; i++) {
+						octree.add(object.children[i], {
+							useFaces: false
+						});
+					}
                     group.add(object);
                     onWindowResize();
                 },
@@ -268,7 +284,11 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                             animationMixer.clipAction(animations[i]).play();
                         }
                     }
-
+                    for(var i=0; i<object.children.length; i++) {
+						octree.add(object.children[i], {
+							useFaces: false
+						});
+					}
                     group.add(object);
                     onWindowResize();
                 }, function(event) {
@@ -317,6 +337,11 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 object.position.copy(position);
                 object.position.multiplyScalar(1);
                 object.scale.multiplyScalar(0.33);
+                for(var i=0; i<object.children.length; i++) {
+					octree.add(object.children[i], {
+						useFaces: false
+					});
+				}
                 group.add(object);
 
                 var atom = json.atoms[i];
@@ -350,6 +375,11 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 object.position.lerp(end, 0.5);
                 object.scale.set(0.1, 0.1, start.distanceTo(end));
                 object.lookAt(end);
+                for(var i=0; i<object.children.length; i++) {
+					octree.add(object.children[i], {
+						useFaces: false
+					});
+				}
                 group.add(object);
             }
             onWindowResize();
@@ -464,6 +494,11 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 			var object = controller.userData.selected;
 			object.matrix.premultiply(controller.matrixWorld);
 			object.matrix.decompose(object.position, object.quaternion, object.scale);
+            for(var i=0; i<object.children.length; i++) {
+				octree.add(object.children[i], {
+					useFaces: false
+				});
+			}
 			group.add(object);
 			controller.userData.selected = undefined;
 		}
@@ -473,21 +508,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		tempMatrix.identity().extractRotation(controller.matrixWorld);
 		raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
 		raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-		return raycaster.intersectObjects(group.children, true);
-	}
-
-	function intersectObjects(controller) {
-		if(controller.userData.selected !== undefined) return;
-		var line = controller.getObjectByName('line');
-		var intersections = getIntersections(controller);
-		if(intersections.length > 0) {
-			var intersection = intersections[0];
-			var object = intersection.object;
-			intersected.push(object);
-			line.scale.z = intersection.distance;
-		} else {
-			line.scale.z = 5;
-		}
+        var octreeObjects = octree.search(raycaster.ray.origin, raycaster.ray.far, true, raycaster.ray.direction);
+        return raycaster.intersectOctreeObjects(octreeObjects);
+		// return raycaster.intersectObjects(group.children, true);
 	}
 
 	function cleanIntersected() {
@@ -509,6 +532,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         }
         renderer.render(scene, camera);
         if(labelRenderer) labelRenderer.render(scene, camera);
+        octree.update();
     }
 
     $scope.$on('$destroy', function() {
@@ -535,6 +559,6 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         scene = null;
         controls = null;
         camera = null;
-        animationMixer.stopAllAction();
+        if(animationMixer) animationMixer.stopAllAction();
     });
 }]);
