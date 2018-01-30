@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.5.2 - Unreleased
+### Added
+- Layer Control to the preview map in the Geodata-Importer (GIS view)
+- A section to show files linked to all sub-contexts of a context
+### Changed
+### Fixed
+- If a geo object is linked to a context, the context's name is displayed in the GIS view
+- The GIS view now correctly reflects the visible state of a layer (as set in the layer editor)
+
 ## 0.5.1
 ### Added
 - Only show up to first 10 rows in csv preview
