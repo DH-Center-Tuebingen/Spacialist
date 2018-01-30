@@ -1,8 +1,8 @@
 {
     "context-tree.heading": "Elements",
     "context-tree.new-toplevel-context": "New Top-Level Context",
-    "modals.new-context.heading": "Neues Element anlegen",
-    "modals.new-context.desc": "Geben Sie einen Namen für das neue Element an und wählen Sie den gewünschten Typ aus der Liste aus.",
+    "modals.new-context.heading": "Create New Element",
+    "modals.new-context.desc": "Please provide a name for the new element and choose its type from the dropdown.",
     "context-form.heading": "Properties",
     "context-form.name": "Name",
     "context-form.last-modified": "Last modified",
