@@ -38,6 +38,10 @@ spacialistApp.controller('dataEditorCtrl', ['dataEditorService', 'mainService', 
         dataEditorService.addAttributeToContextTypeWindow(vm.contextType, vm.fields, vm.attributes, vm.concepts);
     };
 
+    vm.changeContextTypeRoot = function(root) {
+        dataEditorService.changeContextTypeRoot(vm.contextType.id, root);
+    };
+
     vm.onAddSubType = function(item) {
         dataEditorService.addSubContextTypeTo(vm.contextType.id, item.id);
     };

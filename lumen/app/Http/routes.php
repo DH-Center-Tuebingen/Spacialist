@@ -184,6 +184,7 @@ $app->group([
 
         $app->post('context_type', 'ContextController@addContextType');
         $app->post('context_type/{ctid:[0-9]+}/attribute', 'ContextController@addAttributeToContextType');
+        $app->post('context_type/{ctid:[0-9]+}/root', 'ContextController@SetContextTypeRoot');
         $app->post('context_type/{ctid:[0-9]+}/sub/add', 'ContextController@addSubContextTo');
         $app->post('context_type/{ctid:[0-9]+}/sub/remove', 'ContextController@removeSubContextFrom');
         $app->post('attribute', 'ContextController@addAttribute');

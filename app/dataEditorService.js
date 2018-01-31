@@ -208,6 +208,17 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     };
 
+    editor.changeContextTypeRoot = function(id, root) {
+        var formData = new FormData();
+        formData.append('is_root', root);
+
+        httpPostFactory('api/editor/context_type/' + id + '/root', formData, function(response) {
+            if(response.error) {
+                console.log(response.error);
+            }
+        });
+    };
+
     editor.addSubContextTypeTo = function(id, subContextId) {
         var formData = new FormData();
         formData.append('sub_id', subContextId);

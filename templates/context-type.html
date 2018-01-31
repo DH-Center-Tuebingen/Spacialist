@@ -16,7 +16,7 @@
                 {{ 'context-type.new.root' | translate }}:
             </label>
             <div class="col-md-9">
-                <input type="checkbox" id="root" ng-model="$ctrl.contextType.is_root" />
+                <input type="checkbox" id="root" ng-model="$ctrl.contextType.is_root" ng-change="$ctrl.changeContextTypeRoot($ctrl.contextType.is_root)" />
             </div>
         </div>
         <div class="form-group">

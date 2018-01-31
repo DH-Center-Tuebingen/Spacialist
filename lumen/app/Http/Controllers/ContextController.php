@@ -1310,6 +1310,32 @@ class ContextController extends Controller {
         ]);
     }
 
+    public function SetContextTypeRoot(Request $request, $ctid) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'is_root' => 'required|boolean_string'
+        ]);
+
+        $root = $request->get('is_root');
+        try {
+            $ct = ContextType::findOrFail($ctid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context type does not exist'
+            ]);
+        }
+        $ct->is_root = $root;
+        $ct->save();
+
+        return response()->json();
+    }
+
     public function addSubContextTo(Request $request, $ctid) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
