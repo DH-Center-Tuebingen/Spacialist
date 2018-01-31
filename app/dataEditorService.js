@@ -131,7 +131,8 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
     }
 
     function addNewContextType(label, geomtype, root, contexttypes) {
-        if(!label || !type)  return;
+        if(!label || !geomtype)  return;
+        root = root || false;
         var formData = new FormData();
         formData.append('concept_url', label.concept_url);
         formData.append('is_root', root);

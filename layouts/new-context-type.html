@@ -41,7 +41,7 @@
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.label, mc.type, mc.geomtype)" ng-disabled="!mc.label || !mc.geomtype">{{ 'create' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.label, mc.geomtype, mc.root)" ng-disabled="!mc.label || !mc.geomtype">{{ 'create' | translate }}</button>
     <button type="button" class="btn btn-danger"
       ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
 </div>
