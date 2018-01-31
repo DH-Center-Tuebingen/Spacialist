@@ -14,7 +14,7 @@
                     </div>
                 </form>
             </div>
-            <sp-tree class="col-md-12" on-click-callback="$ctrl.openNewContextModal(type, parent)" highlight="treeSearchTerm" contexts="$ctrl.contexts" concepts="$ctrl.concepts" element="$ctrl.globalContext.context" callbacks="treeCallbacks" options="treeOptions" set-context-menu="newElementContextMenu"></sp-tree>
+            <sp-tree class="col-md-12" on-click-callback="$ctrl.openNewContextModal(parent)" highlight="treeSearchTerm" contexts="$ctrl.contexts" concepts="$ctrl.concepts" element="$ctrl.globalContext.context" callbacks="treeCallbacks" options="treeOptions" set-context-menu="newElementContextMenu"></sp-tree>
         </div>
         <div ng-if="!$ctrl.user.permissions.view_concepts">
             <div ng-include="'layouts/restricted-access.html'"></div>

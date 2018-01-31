@@ -54,7 +54,7 @@ class ContextController extends Controller {
             ], 403);
         }
 
-        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type', 'thesaurus_url as uri')->orderBy('rank')->get();
+        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'is_root', 'thesaurus_url as uri')->orderBy('rank')->get();
 
         $roots = array();
         $contexts = array();
@@ -732,7 +732,7 @@ class ContextController extends Controller {
             'context' => ContextType::join('contexts',
                     'contexts.context_type_id', '=', 'context_types.id'
                 )
-                ->select('contexts.*', 'type', 'thesaurus_url as uri')
+                ->select('contexts.*', 'is_root', 'thesaurus_url as uri')
                 ->where('contexts.id', $context->id)
                 ->orderBy('rank')
                 ->first()
@@ -791,8 +791,8 @@ class ContextController extends Controller {
             $newValue->context_id = $newDuplicate->id;
             $newValue->save();
         }
-        $additionalProps = ContextType::where('id', $toDuplicate->context_type_id)->select('type', 'thesaurus_url as uri')->first();
-        $newDuplicate->type = $additionalProps->type;
+        $additionalProps = ContextType::where('id', $toDuplicate->context_type_id)->select('is_root', 'thesaurus_url as uri')->first();
+        $newDuplicate->is_root = $additionalProps->is_root;
         $newDuplicate->uri = $additionalProps->uri;
         return response()->json(['obj' => $newDuplicate]);
     }
@@ -872,7 +872,7 @@ class ContextController extends Controller {
                             $columnConcepts[$j] = $concept;
                             if($j === 1) {
                                 // TODO geomtype
-                                $contextType = self::createContextType($concept['url'], 0, 'MultiPolygon');
+                                $contextType = self::createContextType($concept['url'], true, 'MultiPolygon');
                                 $currentContextTypeId = $contextType->id;
                             }
                         }
@@ -1266,15 +1266,15 @@ class ContextController extends Controller {
 
         $this->validate($request, [
             'concept_url' => 'required|url|exists:th_concept',
-            'type' => 'required|integer|between:0,1',
+            'is_root' => 'required|boolean_string',
             'geomtype' => 'required|geom_type'
         ]);
 
         $curl = $request->get('concept_url');
-        $type = $request->get('type');
+        $is_root = $request->get('is_root');
         $geomtype = $request->get('geomtype');
 
-        $cType = self::createContextType($curl, $type, $geomtype);
+        $cType = self::createContextType($curl, $is_root, $geomtype);
 
         return response()->json([
             'contexttype' => $cType
@@ -1509,10 +1509,10 @@ class ContextController extends Controller {
 
     // STATIC FUNCTIONS
 
-    public static function createContextType($url, $type, $geomtype) {
+    public static function createContextType($url, $is_root, $geomtype) {
         $cType = new ContextType();
         $cType->thesaurus_url = $url;
-        $cType->type = $type;
+        $cType->is_root = $is_root;
         $cType->save();
 
         $layer = new AvailableLayer();

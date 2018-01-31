@@ -78,25 +78,24 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
         });
     }
 
-    vm.openNewContextModal = function(type, parent) {
+    vm.openNewContextModal = function(parent) {
         $uibModal.open({
             templateUrl: "modals/add-context.html",
             controller: ['$scope', function($scope) {
                 $scope.contexts = vm.contexts;
                 $scope.concepts = vm.concepts;
                 $scope.userConfig = vm.userConfig;
-                $scope.type = type;
                 $scope.parent = parent;
 
-                if($scope.type == 'context') {
-                    $scope.contextTypes = vm.contextTypes.filter(function(t) {
-                        return t.type === 0;
+                if(!$scope.parent) {
+                    // TODO get root context types
+                    $scope.contextTypes = vm.contextTypes.filter(function(ct) {
+                        return ct.is_root;
                     });
-                } else if($scope.type == 'find') {
-                    $scope.contextTypes = vm.contextTypes.filter(function(t) {
-                        return t.type == 1;
-                    });
+                } else {
+                    // TODO get context types where parent = $scope.parent
                 }
+
                 $scope.newContext = {
                     name: '',
                     type: ''
@@ -134,8 +133,7 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
     };
 
     $scope.treeOptions = {
-        getColorForId: mainService.getColorForId,
-        'new-context-link': 'root.spacialist.add({type: "context"})'
+        getColorForId: mainService.getColorForId
     };
 
     $scope.newElementContextMenu = [
@@ -150,21 +148,13 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
         null,
         [
             function() {
-                return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">add_circle_outline</i> ' + $translate.instant('context-menu.new-artifact');
-            },
-            function($itemScope, $event, modelValue, text, $li) {
-                vm.openNewContextModal('find', $itemScope.$modelValue.id);
-        }, function($itemScope) {
-            return vm.contexts.data[$itemScope.$modelValue.id].type === 0;
-        }],
-        [
-            function() {
                 return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">add_circle_outline</i> ' + $translate.instant('context-menu.new-context');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                vm.openNewContextModal('context', $itemScope.$modelValue.id);
+                vm.openNewContextModal($itemScope.$modelValue.id);
         }, function($itemScope) {
-            return vm.contexts.data[$itemScope.$modelValue.id].type === 0;
+            // TODO
+            return true;
         }],
         null,
         [

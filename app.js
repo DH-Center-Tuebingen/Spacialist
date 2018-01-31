@@ -250,14 +250,10 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/new-context-type.html',
             controller: function($uibModalInstance) {
-                this.contextTypeTypes = [
-                    { id: 0, label: 'context-type.type.context'},
-                    { id: 1, label: 'context-type.type.find'}
-                ];
                 this.availableGeometryTypes = availableGeometryTypes;
                 this.onSearch = searchFn;
-                this.onCreate = function(label, type, geomtype) {
-                    onCreate(label, type, geomtype, contexttypes);
+                this.onCreate = function(label, geomtype, root) {
+                    onCreate(label, geomtype, root, contexttypes);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {

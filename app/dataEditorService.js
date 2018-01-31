@@ -130,11 +130,11 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     }
 
-    function addNewContextType(label, type, geomtype, contexttypes) {
+    function addNewContextType(label, geomtype, root, contexttypes) {
         if(!label || !type)  return;
         var formData = new FormData();
         formData.append('concept_url', label.concept_url);
-        formData.append('type', type.id);
+        formData.append('is_root', root);
         formData.append('geomtype', geomtype);
         httpPostFactory('api/editor/context_type', formData, function(response) {
             if(response.error) {
@@ -186,6 +186,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
 
     editor.getContextTypes = function() {
         return httpGetPromise.getData('api/context/context_type').then(function(response) {
+            console.log(response);
             return response;
         });
     };
