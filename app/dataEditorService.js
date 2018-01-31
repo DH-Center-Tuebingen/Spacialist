@@ -186,7 +186,12 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
 
     editor.getContextTypes = function() {
         return httpGetPromise.getData('api/context/context_type').then(function(response) {
-            console.log(response);
+            return response;
+        });
+    };
+
+    editor.getSubContextTypes = function() {
+        return httpGetPromise.getData('api/context/context_type/sub').then(function(response) {
             return response;
         });
     };
@@ -200,6 +205,28 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
     editor.getGeometryTypes = function() {
         return httpGetPromise.getData('api/overlay/geometry_types').then(function(response) {
             return response;
+        });
+    };
+
+    editor.addSubContextTypeTo = function(id, subContextId) {
+        var formData = new FormData();
+        formData.append('sub_id', subContextId);
+
+        httpPostFactory('api/editor/context_type/' + id + '/sub/add', formData, function(response) {
+            if(response.error) {
+                console.log(response.error);
+            }
+        });
+    };
+
+    editor.removeSubContextTypeFrom = function(id, subContextId) {
+        var formData = new FormData();
+        formData.append('sub_id', subContextId);
+
+        httpPostFactory('api/editor/context_type/' + id + '/sub/remove', formData, function(response) {
+            if(response.error) {
+                console.log(response.error);
+            }
         });
     };
 

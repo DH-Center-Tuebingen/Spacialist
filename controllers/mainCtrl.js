@@ -88,12 +88,18 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
                 $scope.parent = parent;
 
                 if(!$scope.parent) {
-                    // TODO get root context types
                     $scope.contextTypes = vm.contextTypes.filter(function(ct) {
                         return ct.is_root;
                     });
                 } else {
-                    // TODO get context types where parent = $scope.parent
+                    var ctid = vm.contexts.data[parent].context_type_id;
+                    $scope.contextTypes = vm.contextTypes.filter(function(ct) {
+                        for(var i=0; i<vm.allowedSubContextTypes[ctid].length; i++) {
+                            var curr = vm.allowedSubContextTypes[ctid][i];
+                            if(ct.id == curr) return true;
+                        }
+                        return false;
+                    });
                 }
 
                 $scope.newContext = {
@@ -153,8 +159,8 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
             function($itemScope, $event, modelValue, text, $li) {
                 vm.openNewContextModal($itemScope.$modelValue.id);
         }, function($itemScope) {
-            // TODO
-            return true;
+            var ctid = vm.contexts.data[$itemScope.$modelValue.id].context_type_id;
+            return vm.allowedSubContextTypes[ctid] && vm.allowedSubContextTypes[ctid].length > 0;
         }],
         null,
         [
