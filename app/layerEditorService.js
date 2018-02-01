@@ -49,6 +49,8 @@ spacialistApp.service('layerEditorService', ['httpGetFactory', 'httpPostFactory'
     };
 
     editor.onDelete = function(layer, layers) {
+        if(layer.context_type_id) return;
+        if(layer.type == 'unlinked') return;
         httpDeleteFactory('api/overlay/' + layer.id, function(response) {
             if(response.error) {
                 console.log(response.error);

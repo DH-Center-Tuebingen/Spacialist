@@ -10,9 +10,13 @@ All notable changes to this project will be documented in this file.
     - bottom to top = intensity of directional light (positioned at the camera)
   - Controller 2 is now a flashlight
     - Intensity can be adjusted using the thumbpad (left to right)
+- Layer Control to the preview map in the Geodata-Importer (GIS view)
+- A section to show files linked to all sub-contexts of a context
 ### Changed
 ### Fixed
 - Controllers in the WebVR Viewer are now visible as Vive Controllers
+- If a geo object is linked to a context, the context's name is displayed in the GIS view
+- The GIS view now correctly reflects the visible state of a layer (as set in the layer editor)
 
 ## 0.5.1
 ### Added
