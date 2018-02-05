@@ -10,7 +10,7 @@ spacialistApp.controller('dataEditorCtrl', ['dataEditorService', 'mainService', 
     };
 
     vm.addNewContextType = function() {
-        dataEditorService.addNewContextTypeWindow(vm.geometryTypes, vm.contextTypes);
+        dataEditorService.addNewContextTypeWindow(vm.geometryTypes, vm.onContextTypeAdded);
     };
 
     vm.editContextType = function(e) {
@@ -21,18 +21,15 @@ spacialistApp.controller('dataEditorCtrl', ['dataEditorService', 'mainService', 
         dataEditorService.deleteContextType(e, vm.contextTypes, vm.concepts[e.thesaurus_url].label);
     };
 
-    vm.onRemoveAttrFromCt = function(attr) {
-        dataEditorService.removeAttributeFromContextType(vm.contextType, attr, vm.fields);
+    vm.onContextTypeAdded = function(ct) {
+        var r = ct.is_root;
+        ct.is_root = r == 'true' || r == '1' || r == 't';
+        vm.contextTypes.push(ct);
     };
+}]);
 
-    vm.onOrderAttrOfCt = {
-        up: function(attr) {
-            dataEditorService.moveAttributeOfContextTypeUp(attr, vm.fields);
-        },
-        down: function(attr) {
-            dataEditorService.moveAttributeOfContextTypeDown(attr, vm.fields);
-        }
-    };
+spacialistApp.controller('selectedContextTypeCtrl', ['dataEditorService', 'mainService', function(dataEditorService, mainService) {
+    var vm = this;
 
     vm.addAttributeToContextType = function() {
         dataEditorService.addAttributeToContextTypeWindow(vm.contextType, vm.fields, vm.attributes, vm.concepts);
@@ -61,5 +58,18 @@ spacialistApp.controller('dataEditorCtrl', ['dataEditorService', 'mainService', 
         dataEditorService.selectNoSubType(vm.contextType.id).then(function(response) {
             vm.selectedSubContextTypes.length = 0;
         });
+    };
+
+    vm.onRemoveAttrFromCt = function(attr) {
+        dataEditorService.removeAttributeFromContextType(vm.contextType, attr, vm.fields);
+    };
+
+    vm.onOrderAttrOfCt = {
+        up: function(attr) {
+            dataEditorService.moveAttributeOfContextTypeUp(attr, vm.fields);
+        },
+        down: function(attr) {
+            dataEditorService.moveAttributeOfContextTypeDown(attr, vm.fields);
+        }
     };
 }]);

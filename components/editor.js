@@ -23,7 +23,7 @@ spacialistApp.component('contexttypeedit', {
         fields: '<'
     },
     templateUrl: 'templates/context-type.html',
-    controller: 'dataEditorCtrl'
+    controller: 'selectedContextTypeCtrl'
 });
 
 spacialistApp.component('layer', {

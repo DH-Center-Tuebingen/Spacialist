@@ -41,7 +41,7 @@
                 </li>
             </ul>
         </div>
-        <div class="col-md-5 attribute-editor-column" ui-view>
+        <div class="col-md-5 attribute-editor-column" ui-view on-add-context-type="$ctrl.onAddContextType(contextType)">
             <!-- ui-view element for context type edit template -->
             <p class="alert alert-info" translate="data-model-editor.please-select-element">
             </p>

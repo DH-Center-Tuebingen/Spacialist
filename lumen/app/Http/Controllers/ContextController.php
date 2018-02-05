@@ -1630,6 +1630,8 @@ class ContextController extends Controller {
         $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
         $layer->save();
 
+        $cType->layer_type = $geomtype;
+
         return $cType;
     }
 

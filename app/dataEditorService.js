@@ -20,8 +20,8 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         editor.ct.attributes = getCtAttributes(c);
     };
 
-    editor.addNewContextTypeWindow = function(geometryTypes, contextTypes) {
-        modalFactory.newContextTypeModal(searchForLabel, addNewContextType, geometryTypes, contextTypes);
+    editor.addNewContextTypeWindow = function(geometryTypes, onAdd) {
+        modalFactory.newContextTypeModal(searchForLabel, addNewContextType, geometryTypes, onAdd);
     };
 
     editor.addNewAttributeWindow = function(datatypes, attributes) {
@@ -130,7 +130,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     }
 
-    function addNewContextType(label, geomtype, root, contexttypes) {
+    function addNewContextType(label, geomtype, root, onAdd) {
         if(!label || !geomtype)  return;
         root = root || false;
         var formData = new FormData();
@@ -141,7 +141,7 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
             if(response.error) {
                 return;
             }
-            contexttypes.push(response.contexttype);
+            onAdd(response.contexttype);
         });
     }
 
