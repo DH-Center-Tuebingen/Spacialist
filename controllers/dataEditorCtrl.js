@@ -49,4 +49,17 @@ spacialistApp.controller('dataEditorCtrl', ['dataEditorService', 'mainService', 
     vm.onRemoveSubType = function(item) {
         dataEditorService.removeSubContextTypeFrom(vm.contextType.id, item.id);
     };
+
+    vm.selectAllSubType = function() {
+        dataEditorService.selectAllSubType(vm.contextType.id).then(function(response) {
+            vm.selectedSubContextTypes.length = 0;
+            angular.merge(vm.selectedSubContextTypes, vm.contextTypes);
+        });
+    };
+
+    vm.selectNoSubType = function() {
+        dataEditorService.selectNoSubType(vm.contextType.id).then(function(response) {
+            vm.selectedSubContextTypes.length = 0;
+        });
+    };
 }]);

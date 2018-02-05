@@ -26,11 +26,17 @@
             <div class="col-md-9">
                 <ui-select multiple ng-model="$ctrl.selectedSubContextTypes" id="children"
                 on-select="$ctrl.onAddSubType($item)" on-remove="$ctrl.onRemoveSubType($item)" class="col-md-9">
-                  <ui-select-match placeholder="{{'context-new.type-placeholder'|translate}}">{{ $ctrl.concepts[$item.thesaurus_url].label  }}</ui-select-match>
+                  <ui-select-match placeholder="{{'context-type.new.children-placeholder'|translate}}">{{ $ctrl.concepts[$item.thesaurus_url].label  }}</ui-select-match>
                   <ui-select-choices repeat="choice in $ctrl.contextTypes | filter: $select.search">
                     <span ng-bind-html="$ctrl.concepts[choice.thesaurus_url].label | highlight: $select.search"></span>
                   </ui-select-choices>
                 </ui-select>
+                <button type="button" class="btn btn-xs btn-default" ng-click="$ctrl.selectAllSubType()">
+                    <i class="material-icons md-18">select_all</i> {{'context-type.new.children.select-all'|translate}}
+                </button>
+                <button type="button" class="btn btn-xs btn-default" ng-click="$ctrl.selectNoSubType()">
+                    <i class="material-icons md-18">clear</i> {{'context-type.new.children.select-none'|translate}}
+                </button>
             </div>
         </div>
         <form-field fields="$ctrl.fields" output="tempx" concepts="$ctrl.concepts" label-width="3" input-width="9" offset="0" deletable orderable on-delete="$ctrl.onRemoveAttrFromCt" on-order="$ctrl.onOrderAttrOfCt">

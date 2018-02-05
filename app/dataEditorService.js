@@ -242,5 +242,23 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     };
 
+    editor.selectAllSubType = function(id) {
+        return httpPostPromise.getData('api/editor/context_type/' + id + '/sub/add/all', new FormData()).then(function(response) {
+            if(response.error) {
+                console.log(response.error);
+            }
+            return response;
+        });
+    };
+
+    editor.selectNoSubType = function(id) {
+        return httpPostPromise.getData('api/editor/context_type/' + id + '/sub/remove/all', new FormData()).then(function(response) {
+            if(response.error) {
+                console.log(response.error);
+            }
+            return response;
+        });
+    };
+
     return editor;
 }]);

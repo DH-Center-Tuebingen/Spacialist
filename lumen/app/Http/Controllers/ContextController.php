@@ -1310,7 +1310,7 @@ class ContextController extends Controller {
         ]);
     }
 
-    public function SetContextTypeRoot(Request $request, $ctid) {
+    public function setContextTypeRoot(Request $request, $ctid) {
         $user = \Auth::user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response([
@@ -1370,6 +1370,42 @@ class ContextController extends Controller {
         self::removeSubContextFromContextType($ctid, $sid);
 
         return response()->json();
+    }
+
+    public function addAllSubContextsTo($ctid) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        // Remove all existing entries
+        ContextTypeRelation::where('parent_id', $ctid)->delete();
+
+        // Add back all possible relations
+        $contextTypes = ContextType::all();
+        foreach($contextTypes as $ct) {
+            $rel = new ContextTypeRelation();
+            $rel->parent_id = $ctid;
+            $rel->child_id = $ct->id;
+            $rel->save();
+        }
+
+        return response()->json([]);
+    }
+
+    public function removeAllSubContextsFrom($ctid) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        // Remove all existing entries
+        ContextTypeRelation::where('parent_id', $ctid)->delete();
+        return response()->json([]);
     }
 
     public function addAttribute(Request $request) {
