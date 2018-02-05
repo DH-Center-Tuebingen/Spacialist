@@ -133,8 +133,14 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
         toggle: function(collapsed, sourceNodeScope) {
             mainService.treeCallbacks.toggle(collapsed, sourceNodeScope, vm.contexts);
         },
+        accept: function(sourceNodeScope, destNodesScope, destIndex) {
+            mainService.treeCallbacks.accept(sourceNodeScope, destNodesScope, destIndex);
+        },
         dropped: function(event) {
             mainService.treeCallbacks.dropped(event, vm.contexts);
+        },
+        beforeDrop: function(event) {
+            mainService.treeCallbacks.beforeDrop(event, vm.contexts, vm.allowedSubContextTypes);
         }
     };
 
