@@ -25,12 +25,7 @@
                 </li>
                 <li class="list-group-item" ng-repeat="ct in $ctrl.contextTypes" ng-mouseenter="hovered=true;" ng-mouseleave="hovered=false;">
                     <a ui-sref="root.editor.data-model.edit({id: ct.id})">
-                        <span ng-if="ct.type === 0">
-                            <i class="material-icons">account_balance</i> {{ $ctrl.concepts[ct.thesaurus_url].label }} ({{'context-type.type.context'|translate}})
-                        </span>
-                        <span ng-if="ct.type == 1">
-                            <i class="material-icons">spa</i> {{ $ctrl.concepts[ct.thesaurus_url].label }} ({{'context-type.type.find'|translate}})
-                        </span>
+                        <i class="material-icons">spa</i> {{ $ctrl.concepts[ct.thesaurus_url].label }}
                     </a>
                     <span ng-show="hovered" class="is-right">
                         <a class="btn btn-default btn-fab btn-fab-minime" href="" ng-click="$ctrl.editContextType(ct)">
@@ -46,7 +41,7 @@
                 </li>
             </ul>
         </div>
-        <div class="col-md-5 attribute-editor-column" ui-view>
+        <div class="col-md-5 attribute-editor-column" ui-view on-add-context-type="$ctrl.onAddContextType(contextType)">
             <!-- ui-view element for context type edit template -->
             <p class="alert alert-info" translate="data-model-editor.please-select-element">
             </p>

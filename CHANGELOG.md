@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Data Importer
 - External Storage (e.g. (S)FTP, AWS, WebDAV)
+### Changed
+- Removed Context/Find differentiation, is now configurable
+  - All existing context-types are allowed as root-elements
+  - They can have other contexts of all existing context-types as sub-elements
+  - Configurable in Data Model Editor
 
 ## 0.5.1
 ### Added

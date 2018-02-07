@@ -5,6 +5,8 @@ spacialistApp.component('datamodel', {
         concepts: '<',
         contextTypes: '<',
         geometryTypes: '<',
+        subContextTypes: '<',
+        allowedSubContextTypes: '<',
         userConfig: '<'
     },
     templateUrl: 'data-model.html',
@@ -14,12 +16,14 @@ spacialistApp.component('datamodel', {
 spacialistApp.component('contexttypeedit', {
     bindings: {
         contextType: '<',
+        contextTypes: '<',
+        selectedSubContextTypes: '<',
         attributes: '<',
         concepts: '<',
         fields: '<'
     },
     templateUrl: 'templates/context-type.html',
-    controller: 'dataEditorCtrl'
+    controller: 'selectedContextTypeCtrl'
 });
 
 spacialistApp.component('layer', {

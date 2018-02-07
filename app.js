@@ -246,18 +246,14 @@ spacialistApp.service('modalFactory', ['$uibModal', function($uibModal) {
         });
         modalInstance.result.then(function(selectedItem) {}, function() {});
     };
-    this.newContextTypeModal = function(searchFn, onCreate, availableGeometryTypes, contexttypes) {
+    this.newContextTypeModal = function(searchFn, onCreate, availableGeometryTypes, onAdd) {
         var modalInstance = $uibModal.open({
             templateUrl: 'layouts/new-context-type.html',
             controller: function($uibModalInstance) {
-                this.contextTypeTypes = [
-                    { id: 0, label: 'context-type.type.context'},
-                    { id: 1, label: 'context-type.type.find'}
-                ];
                 this.availableGeometryTypes = availableGeometryTypes;
                 this.onSearch = searchFn;
-                this.onCreate = function(label, type, geomtype) {
-                    onCreate(label, type, geomtype, contexttypes);
+                this.onCreate = function(label, geomtype, root) {
+                    onCreate(label, geomtype, root, onAdd);
                     $uibModalInstance.dismiss('ok');
                 };
                 this.cancel = function(result) {
@@ -1288,6 +1284,20 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                     geometryTypes: function(dataEditorService) {
                         return dataEditorService.getGeometryTypes();
                     },
+                    subContextTypes: function(dataEditorService) {
+                        return dataEditorService.getSubContextTypes();
+                    },
+                    allowedSubContextTypes: function(contextTypes, subContextTypes) {
+                        var asct = {};
+                        for(var i=0; i<subContextTypes.length; i++) {
+                            var curr = subContextTypes[i];
+                            if(!asct[curr.parent_id]) {
+                                asct[curr.parent_id] = [];
+                            }
+                            asct[curr.parent_id].push(curr.child_id);
+                        }
+                        return asct;
+                    },
                     files: function(fileService) {
                         return fileService.getFiles();
                     },
@@ -1849,6 +1859,20 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         },
                         geometryTypes: function(dataEditorService) {
                             return dataEditorService.getGeometryTypes();
+                        },
+                        subContextTypes: function(dataEditorService) {
+                            return dataEditorService.getSubContextTypes();
+                        },
+                        allowedSubContextTypes: function(contextTypes, subContextTypes) {
+                            var asct = {};
+                            for(var i=0; i<subContextTypes.length; i++) {
+                                var curr = subContextTypes[i];
+                                if(!asct[curr.parent_id]) {
+                                    asct[curr.parent_id] = [];
+                                }
+                                asct[curr.parent_id].push(curr.child_id);
+                            }
+                            return asct;
                         }
                     }
                 })
@@ -1856,10 +1880,27 @@ spacialistApp.config(function($stateProvider, $urlRouterProvider, $authProvider,
                         url: '/contexttype/{id:[0-9]+}',
                         component: 'contexttypeedit',
                         resolve: {
+                            contexts: function(environmentService) {
+                                return environmentService.getContexts();
+                            },
                             contextType: function(contextTypes, $transition$) {
                                 return contextTypes.find(function(ct) {
                                     return ct.id == $transition$.params().id;
                                 });
+                            },
+                            selectedSubContextTypes: function(contexts, contextTypes, allowedSubContextTypes, $transition$) {
+                                var ctid = $transition$.params().id;
+                                if(!allowedSubContextTypes[ctid]) {
+                                    return [];
+                                }
+                                var ssct = contextTypes.filter(function(ct) {
+                                    for(var i=0; i<allowedSubContextTypes[ctid].length; i++) {
+                                        var curr = allowedSubContextTypes[ctid][i];
+                                        if(ct.id == curr) return true;
+                                    }
+                                    return false;
+                                });
+                                return ssct;
                             },
                             fields: function(contextType, mainService) {
                                 if(!contextType) return [];

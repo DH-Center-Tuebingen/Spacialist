@@ -14,6 +14,8 @@ spacialistApp.component('spacialist', {
         geodata: '<',
         contextTypes: '<',
         geometryTypes: '<',
+        subContextTypes: '<',
+        allowedSubContextTypes: '<',
         files: '<',
         availableTags: '<',
         availableSearchTerms: '<'

@@ -20,8 +20,8 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         editor.ct.attributes = getCtAttributes(c);
     };
 
-    editor.addNewContextTypeWindow = function(geometryTypes, contextTypes) {
-        modalFactory.newContextTypeModal(searchForLabel, addNewContextType, geometryTypes, contextTypes);
+    editor.addNewContextTypeWindow = function(geometryTypes, onAdd) {
+        modalFactory.newContextTypeModal(searchForLabel, addNewContextType, geometryTypes, onAdd);
     };
 
     editor.addNewAttributeWindow = function(datatypes, attributes) {
@@ -130,17 +130,18 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     }
 
-    function addNewContextType(label, type, geomtype, contexttypes) {
-        if(!label || !type)  return;
+    function addNewContextType(label, geomtype, root, onAdd) {
+        if(!label || !geomtype)  return;
+        root = root || false;
         var formData = new FormData();
         formData.append('concept_url', label.concept_url);
-        formData.append('type', type.id);
+        formData.append('is_root', root);
         formData.append('geomtype', geomtype);
         httpPostFactory('api/editor/context_type', formData, function(response) {
             if(response.error) {
                 return;
             }
-            contexttypes.push(response.contexttype);
+            onAdd(response.contexttype);
         });
     }
 
@@ -190,6 +191,12 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
         });
     };
 
+    editor.getSubContextTypes = function() {
+        return httpGetPromise.getData('api/context/context_type/sub').then(function(response) {
+            return response;
+        });
+    };
+
     editor.getAttributeTypes = function() {
         return httpGetPromise.getData('api/context/attributetypes').then(function(response) {
             return response;
@@ -198,6 +205,57 @@ spacialistApp.service('dataEditorService', ['httpGetFactory', 'httpGetPromise', 
 
     editor.getGeometryTypes = function() {
         return httpGetPromise.getData('api/overlay/geometry_types').then(function(response) {
+            return response;
+        });
+    };
+
+    editor.changeContextTypeRoot = function(id, root) {
+        var formData = new FormData();
+        formData.append('is_root', root);
+
+        httpPostFactory('api/editor/context_type/' + id + '/root', formData, function(response) {
+            if(response.error) {
+                console.log(response.error);
+            }
+        });
+    };
+
+    editor.addSubContextTypeTo = function(id, subContextId) {
+        var formData = new FormData();
+        formData.append('sub_id', subContextId);
+
+        httpPostFactory('api/editor/context_type/' + id + '/sub/add', formData, function(response) {
+            if(response.error) {
+                console.log(response.error);
+            }
+        });
+    };
+
+    editor.removeSubContextTypeFrom = function(id, subContextId) {
+        var formData = new FormData();
+        formData.append('sub_id', subContextId);
+
+        httpPostFactory('api/editor/context_type/' + id + '/sub/remove', formData, function(response) {
+            if(response.error) {
+                console.log(response.error);
+            }
+        });
+    };
+
+    editor.selectAllSubType = function(id) {
+        return httpPostPromise.getData('api/editor/context_type/' + id + '/sub/add/all', new FormData()).then(function(response) {
+            if(response.error) {
+                console.log(response.error);
+            }
+            return response;
+        });
+    };
+
+    editor.selectNoSubType = function(id) {
+        return httpPostPromise.getData('api/editor/context_type/' + id + '/sub/remove/all', new FormData()).then(function(response) {
+            if(response.error) {
+                console.log(response.error);
+            }
             return response;
         });
     };

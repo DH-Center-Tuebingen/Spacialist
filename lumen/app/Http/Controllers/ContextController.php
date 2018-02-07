@@ -8,6 +8,7 @@ use App\Role;
 use App\Geodata;
 use App\Context;
 use App\ContextType;
+use App\ContextTypeRelation;
 use App\Attribute;
 use App\AttributeValue;
 use App\ThConcept;
@@ -54,7 +55,7 @@ class ContextController extends Controller {
             ], 403);
         }
 
-        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'type', 'thesaurus_url as uri')->orderBy('rank')->get();
+        $contextEntries = ContextType::join('contexts', 'contexts.context_type_id', '=', 'context_types.id')->select('contexts.*', 'is_root', 'thesaurus_url as uri')->orderBy('rank')->get();
 
         $roots = array();
         $contexts = array();
@@ -113,6 +114,10 @@ class ContextController extends Controller {
         return ContextType::join('available_layers', 'context_type_id', '=', 'context_types.id')
             ->select('context_types.*', 'available_layers.type as layer_type')
             ->get();
+    }
+
+    public function getSubContextTypes() {
+        return ContextTypeRelation::all();
     }
 
     public function getContextData($id) {
@@ -732,7 +737,7 @@ class ContextController extends Controller {
             'context' => ContextType::join('contexts',
                     'contexts.context_type_id', '=', 'context_types.id'
                 )
-                ->select('contexts.*', 'type', 'thesaurus_url as uri')
+                ->select('contexts.*', 'is_root', 'thesaurus_url as uri')
                 ->where('contexts.id', $context->id)
                 ->orderBy('rank')
                 ->first()
@@ -791,8 +796,8 @@ class ContextController extends Controller {
             $newValue->context_id = $newDuplicate->id;
             $newValue->save();
         }
-        $additionalProps = ContextType::where('id', $toDuplicate->context_type_id)->select('type', 'thesaurus_url as uri')->first();
-        $newDuplicate->type = $additionalProps->type;
+        $additionalProps = ContextType::where('id', $toDuplicate->context_type_id)->select('is_root', 'thesaurus_url as uri')->first();
+        $newDuplicate->is_root = $additionalProps->is_root;
         $newDuplicate->uri = $additionalProps->uri;
         return response()->json(['obj' => $newDuplicate]);
     }
@@ -872,7 +877,7 @@ class ContextController extends Controller {
                             $columnConcepts[$j] = $concept;
                             if($j === 1) {
                                 // TODO geomtype
-                                $contextType = self::createContextType($concept['url'], 0, 'MultiPolygon');
+                                $contextType = self::createContextType($concept['url'], true, 'MultiPolygon');
                                 $currentContextTypeId = $contextType->id;
                             }
                         }
@@ -1266,15 +1271,15 @@ class ContextController extends Controller {
 
         $this->validate($request, [
             'concept_url' => 'required|url|exists:th_concept',
-            'type' => 'required|integer|between:0,1',
+            'is_root' => 'required|boolean_string',
             'geomtype' => 'required|geom_type'
         ]);
 
         $curl = $request->get('concept_url');
-        $type = $request->get('type');
+        $is_root = $request->get('is_root');
         $geomtype = $request->get('geomtype');
 
-        $cType = self::createContextType($curl, $type, $geomtype);
+        $cType = self::createContextType($curl, $is_root, $geomtype);
 
         return response()->json([
             'contexttype' => $cType
@@ -1283,7 +1288,7 @@ class ContextController extends Controller {
 
     public function addAttributeToContextType(Request $request, $ctid) {
         $user = \Auth::user();
-        if(!$user->can('view_concepts')) {//TODO: wrong permission
+        if(!$user->can('duplicate_edit_concepts')) {
             return response([
                 'error' => 'You do not have the permission to call this method'
             ], 403);
@@ -1303,6 +1308,104 @@ class ContextController extends Controller {
                 ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
                 ->first()
         ]);
+    }
+
+    public function setContextTypeRoot(Request $request, $ctid) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'is_root' => 'required|boolean_string'
+        ]);
+
+        $root = $request->get('is_root');
+        try {
+            $ct = ContextType::findOrFail($ctid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context type does not exist'
+            ]);
+        }
+        $ct->is_root = $root;
+        $ct->save();
+
+        return response()->json();
+    }
+
+    public function addSubContextTo(Request $request, $ctid) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'sub_id' => 'required|integer|exists:context_types,id'
+        ]);
+
+        $sid = $request->get('sub_id');
+        self::addSubContextToContextType($ctid, $sid);
+
+        return response()->json();
+    }
+
+    public function removeSubContextFrom(Request $request, $ctid) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        $this->validate($request, [
+            'sub_id' => 'required|integer|exists:context_types,id'
+        ]);
+
+        $sid = $request->get('sub_id');
+        self::removeSubContextFromContextType($ctid, $sid);
+
+        return response()->json();
+    }
+
+    public function addAllSubContextsTo($ctid) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        // Remove all existing entries
+        ContextTypeRelation::where('parent_id', $ctid)->delete();
+
+        // Add back all possible relations
+        $contextTypes = ContextType::all();
+        foreach($contextTypes as $ct) {
+            $rel = new ContextTypeRelation();
+            $rel->parent_id = $ctid;
+            $rel->child_id = $ct->id;
+            $rel->save();
+        }
+
+        return response()->json([]);
+    }
+
+    public function removeAllSubContextsFrom($ctid) {
+        $user = \Auth::user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response([
+                'error' => 'You do not have the permission to call this method'
+            ], 403);
+        }
+
+        // Remove all existing entries
+        ContextTypeRelation::where('parent_id', $ctid)->delete();
+        return response()->json([]);
     }
 
     public function addAttribute(Request $request) {
@@ -1509,10 +1612,10 @@ class ContextController extends Controller {
 
     // STATIC FUNCTIONS
 
-    public static function createContextType($url, $type, $geomtype) {
+    public static function createContextType($url, $is_root, $geomtype) {
         $cType = new ContextType();
         $cType->thesaurus_url = $url;
-        $cType->type = $type;
+        $cType->is_root = $is_root;
         $cType->save();
 
         $layer = new AvailableLayer();
@@ -1526,6 +1629,8 @@ class ContextController extends Controller {
         $layer->context_type_id = $cType->id;
         $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
         $layer->save();
+
+        $cType->layer_type = $geomtype;
 
         return $cType;
     }
@@ -1567,6 +1672,20 @@ class ContextController extends Controller {
         $ca->position = $attrsCnt + 1; // add new attribute to the end
         $ca->save();
         return $ca;
+    }
+
+    public static function addSubContextToContextType($ctid, $sid) {
+        $ctr = new ContextTypeRelation();
+        $ctr->parent_id = $ctid;
+        $ctr->child_id = $sid;
+        $ctr->save();
+    }
+
+    public static function removeSubContextFromContextType($ctid, $sid) {
+        ContextTypeRelation::where([
+            ['parent_id', $ctid],
+            ['child_id', $sid]
+        ])->delete();
     }
 
     // OTHER FUNCTIONS

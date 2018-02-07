@@ -78,25 +78,30 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
         });
     }
 
-    vm.openNewContextModal = function(type, parent) {
+    vm.openNewContextModal = function(parent) {
         $uibModal.open({
             templateUrl: "modals/add-context.html",
             controller: ['$scope', function($scope) {
                 $scope.contexts = vm.contexts;
                 $scope.concepts = vm.concepts;
                 $scope.userConfig = vm.userConfig;
-                $scope.type = type;
                 $scope.parent = parent;
 
-                if($scope.type == 'context') {
-                    $scope.contextTypes = vm.contextTypes.filter(function(t) {
-                        return t.type === 0;
+                if(!$scope.parent) {
+                    $scope.contextTypes = vm.contextTypes.filter(function(ct) {
+                        return ct.is_root;
                     });
-                } else if($scope.type == 'find') {
-                    $scope.contextTypes = vm.contextTypes.filter(function(t) {
-                        return t.type == 1;
+                } else {
+                    var ctid = vm.contexts.data[parent].context_type_id;
+                    $scope.contextTypes = vm.contextTypes.filter(function(ct) {
+                        for(var i=0; i<vm.allowedSubContextTypes[ctid].length; i++) {
+                            var curr = vm.allowedSubContextTypes[ctid][i];
+                            if(ct.id == curr) return true;
+                        }
+                        return false;
                     });
                 }
+
                 $scope.newContext = {
                     name: '',
                     type: ''
@@ -128,14 +133,19 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
         toggle: function(collapsed, sourceNodeScope) {
             mainService.treeCallbacks.toggle(collapsed, sourceNodeScope, vm.contexts);
         },
+        accept: function(sourceNodeScope, destNodesScope, destIndex) {
+            return mainService.treeCallbacks.accept(sourceNodeScope, destNodesScope, destIndex, vm.contexts, vm.allowedSubContextTypes);
+        },
         dropped: function(event) {
             mainService.treeCallbacks.dropped(event, vm.contexts);
+        },
+        beforeDrop: function(event) {
+            return mainService.treeCallbacks.beforeDrop(event, vm.contexts, vm.allowedSubContextTypes);
         }
     };
 
     $scope.treeOptions = {
-        getColorForId: mainService.getColorForId,
-        'new-context-link': 'root.spacialist.add({type: "context"})'
+        getColorForId: mainService.getColorForId
     };
 
     $scope.newElementContextMenu = [
@@ -150,21 +160,13 @@ spacialistApp.controller('mainCtrl', ['$scope', 'httpDeleteFactory', 'mainServic
         null,
         [
             function() {
-                return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">add_circle_outline</i> ' + $translate.instant('context-menu.new-artifact');
-            },
-            function($itemScope, $event, modelValue, text, $li) {
-                vm.openNewContextModal('find', $itemScope.$modelValue.id);
-        }, function($itemScope) {
-            return vm.contexts.data[$itemScope.$modelValue.id].type === 0;
-        }],
-        [
-            function() {
                 return '<i class="material-icons md-18 fa-light fa-green context-menu-icon">add_circle_outline</i> ' + $translate.instant('context-menu.new-context');
             },
             function($itemScope, $event, modelValue, text, $li) {
-                vm.openNewContextModal('context', $itemScope.$modelValue.id);
+                vm.openNewContextModal($itemScope.$modelValue.id);
         }, function($itemScope) {
-            return vm.contexts.data[$itemScope.$modelValue.id].type === 0;
+            var ctid = vm.contexts.data[$itemScope.$modelValue.id].context_type_id;
+            return vm.allowedSubContextTypes[ctid] && vm.allowedSubContextTypes[ctid].length > 0;
         }],
         null,
         [

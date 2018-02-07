@@ -3,7 +3,7 @@
 </div>
 <div class="modal-body text-center">
     <div class="col-md-12">
-        <form class="form-horizontal" role="form" ng-submit="mc.onCreate(mc.label, mc.type, mc.geomtype)">
+        <form class="form-horizontal" role="form" ng-submit="mc.onCreate(mc.label, mc.geomtype, mc.root)">
             <div class="form-group">
                 <label class="control-label col-md-3" for="type">{{'context-type.new.label'|translate}}:</label>
                 <div class="col-md-9">
@@ -15,19 +15,6 @@
                     <div ng-show="noResults && mc.label.length >= 3">
                         <i class="material-icons md-18">clear</i> No Results Found
                     </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-md-3">{{ 'context-type.new.type' | translate }}</label>
-                <div class="col-md-9">
-                    <ui-select ng-model="mc.type">
-                        <ui-select-match>
-                            <span>{{ $select.selected.label | translate }}</span>
-                        </ui-select-match>
-                        <ui-select-choices repeat="type in mc.contextTypeTypes">
-                            <span>{{ type.label | translate }}</span>
-                        </ui-select-choices>
-                    </ui-select>
                 </div>
             </div>
             <div class="form-group">
@@ -43,12 +30,18 @@
                     </ui-select>
                 </div>
             </div>
-            <button type="submit" class="btn btn-success hidden" ng-disabled="!mc.label || !mc.type || !mc.geomtype"></button>
+            <div class="form-group">
+                <label class="control-label col-md-3">{{ 'context-type.new.root' | translate }}</label>
+                <div class="col-md-9">
+                    <input type="checkbox" ng-model="mc.root" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success hidden" ng-disabled="!mc.label || !mc.geomtype"></button>
         </form>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.label, mc.type, mc.geomtype)" ng-disabled="!mc.label || !mc.type || !mc.geomtype">{{ 'create' | translate }}</button>
+    <button type="button" class="btn btn-success" ng-click="mc.onCreate(mc.label, mc.geomtype, mc.root)" ng-disabled="!mc.label || !mc.geomtype">{{ 'create' | translate }}</button>
     <button type="button" class="btn btn-danger"
       ng-click="mc.cancel()">{{ 'cancel' | translate }}</button>
 </div>

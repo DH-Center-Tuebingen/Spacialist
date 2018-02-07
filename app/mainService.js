@@ -53,6 +53,35 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
     main.treeCallbacks.toggle = function(collapsed, sourceNodeScope, contexts) {
         contexts.data[sourceNodeScope.$modelValue.id].collapsed = collapsed;
     };
+    main.treeCallbacks.accept = function(sourceNodeScope, destNodesScope, destIndex, contexts, relations) {
+        var cid = sourceNodeScope.$modelValue.id;
+        var context = contexts.data[cid];
+        // check if dragged to another context
+        if(destNodesScope.$nodeScope && destNodesScope.$nodeScope.$modelValue) {
+            var pid = destNodesScope.$nodeScope.$modelValue.id;
+            var parent = contexts.data[pid];
+            var allowedSubTypes = relations[parent.context_type_id];
+            var index = allowedSubTypes.indexOf(context.context_type_id);
+            // if index > -1 it is an allowed sub-type
+            return index > -1;
+        } else { // got dragged to root level
+            return context.is_root;
+        }
+    };
+    main.treeCallbacks.beforeDrop = function(event, contexts, relations) {
+        var elem = event.source.nodeScope.$modelValue;
+        var context = contexts.data[elem.id];
+        if(event.dest.nodesScope.$nodeScope && event.dest.nodesScope.$nodeScope.$modelValue) {
+            var parentId = event.dest.nodesScope.$nodeScope.$modelValue.id;
+            var parent = contexts.data[parentId];
+            var allowedSubTypes = relations[parent.context_type_id];
+            var index = allowedSubTypes.indexOf(context.context_type_id);
+            // if index > -1 it is an allowed sub-type
+            return index > -1;
+        } else { // got dragged to root level
+            return context.is_root;
+        }
+    };
 
     main.getVersion = function() {
         return httpGetPromise.getData('api/version').then(function(response) {

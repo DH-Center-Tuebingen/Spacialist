@@ -46,6 +46,7 @@ $app->group([
     $app->get('context_type/{id:[0-9]+}/attribute', 'ContextController@getContextTypeAttributes');
     $app->get('attribute', 'ContextController@getAttributes');
     $app->get('context_type', 'ContextController@getContextTypes');
+    $app->get('context_type/sub', 'ContextController@getSubContextTypes');
     $app->get('{id:[0-9]+}/data', 'ContextController@getContextData');
     $app->get('dropdown_options', 'ContextController@getDropdownOptions');
     $app->get('byGeodata/{id:[0-9]+}', 'ContextController@getContextByGeodata');
@@ -183,6 +184,11 @@ $app->group([
 
         $app->post('context_type', 'ContextController@addContextType');
         $app->post('context_type/{ctid:[0-9]+}/attribute', 'ContextController@addAttributeToContextType');
+        $app->post('context_type/{ctid:[0-9]+}/root', 'ContextController@setContextTypeRoot');
+        $app->post('context_type/{ctid:[0-9]+}/sub/add', 'ContextController@addSubContextTo');
+        $app->post('context_type/{ctid:[0-9]+}/sub/remove', 'ContextController@removeSubContextFrom');
+        $app->post('context_type/{ctid:[0-9]+}/sub/add/all', 'ContextController@addAllSubContextsTo');
+        $app->post('context_type/{ctid:[0-9]+}/sub/remove/all', 'ContextController@removeAllSubContextsFrom');
         $app->post('attribute', 'ContextController@addAttribute');
 
         $app->patch('context_type/{ctid:[0-9]+}', 'ContextController@editContextType');
