@@ -20,7 +20,7 @@
                     </form>
                 </div>
                 <div class="col-md-12">
-                    <example-component :contexts="{{$contexts}}"></example-component>
+                    <context-tree :contexts="{{$contexts}}"></context-tree>
                 </div>
             </div>
         </div>
