@@ -1,18 +1,26 @@
-# Created by https://www.gitignore.io/api/bower
-
-### Bower ###
-bower_components
-.bower-cache
-.bower-registry
-.bower-tmp
+# Created by https://www.gitignore.io
 
 ### NPM ###
 node_modules
 package-lock.json
 
-### Lumen ###
-lumen/composer.lock
-
 ### Plugins ###
 thesaurex
 /db
+
+## Created by Laravel
+
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+/.idea
+/.vscode
+/.vagrant
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+yarn.lock
+.env
