@@ -1,0 +1,18 @@
+@import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);body {
+  font-family: "Raleway", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #636b6f;
+}
+
+.logo {
+  height: 24px;
+  width: 24px;
+  display: inline-block !important;
+  vertical-align: middle;
+}
+
+.login-header {
+  text-align: center;
+}
+
