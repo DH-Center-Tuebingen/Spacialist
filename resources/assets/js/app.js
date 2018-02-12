@@ -1,4 +1,4 @@
-import { TreeView } from "@bosket/vue"
+import { TreeView } from '@bosket/vue';
 
 /**
  * First we will load all of this project's JavaScript dependencies which
@@ -19,6 +19,7 @@ window.Vue = require('vue');
  */
 
 Vue.component('example-component', require('./components/ExampleComponent.vue'));
+Vue.component('ol-map', require('./components/OlMap.vue'));
 Vue.component('tree-view', TreeView);
 
 const app = new Vue({

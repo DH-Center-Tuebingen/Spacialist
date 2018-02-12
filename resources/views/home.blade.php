@@ -45,6 +45,7 @@
                     </a>
                 </li>
             </ul>
+            <ol-map></ol-map>
         </div>
     </div>
 @endsection

@@ -26,7 +26,6 @@
         "axios": "^0.17",
         "babel-plugin-syntax-jsx": "^6.18.0",
         "babel-plugin-transform-vue-jsx": "^3.5.1",
-        "bootstrap-sass": "^3.3.7",
         "cross-env": "^5.1",
         "jquery": "^3.2",
         "laravel-mix": "^2.0",
@@ -39,6 +38,7 @@
         "@bosket/vue": "^0.4.2",
         "babel-helper-vue-jsx-merge-props": "^2.0.3",
         "bootstrap": "^4.0.0",
+        "ol": "^4.6.4",
         "popper.js": "^1.12.9"
     }
 }
