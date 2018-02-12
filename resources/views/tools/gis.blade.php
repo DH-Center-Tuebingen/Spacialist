@@ -11,7 +11,7 @@
             </p>
         </div>
         <div class="col-md-10">
-            <h1>BIG MAP!</h1>
+            <ol-map></ol-map>
         </div>
     </div>
 @endsection
