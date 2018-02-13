@@ -1,0 +1,69 @@
+
+/* Elements */
+.TreeView ul {
+    list-style-type: none;
+    padding-left: 1rem;
+}
+.TreeView ul > li {
+    cursor: pointer;
+    margin-left: 1rem;
+}
+.TreeView ul > li > span.item {}
+.TreeView > input[type="search"] {}
+
+/* Root list */
+.TreeView ul.depth-0 {}
+
+/* Not disabled */
+.TreeView ul li:not(.disabled) {}
+.TreeView ul li:not(.disabled) > span.item {}
+
+/* Selected */
+.TreeView ul li.selected {}
+.TreeView ul li.selected > span.item {
+    font-weight: 600;
+}
+
+/* Categories : Nodes with children */
+.TreeView ul li.category {
+    /* Remove margin from category nodes, since they have an icon added */
+    margin-left: 0;
+}
+.TreeView ul li.category > span.item {}
+/* Folded */
+.TreeView ul li.category.folded {}
+.TreeView ul li.category.folded > span.item {}
+/* Unfolded */
+.TreeView ul li.category:not(.folded) {}
+.TreeView ul li.category:not(.folded) > span.item {}
+/* Opener */
+.TreeView ul li.category > span.item > .opener {}
+.TreeView ul li.category.folded > span.item > .opener::after {
+    display: none;
+    content: "\f105";
+    font-family: "Font Awesome 5 Solid";
+}
+.TreeView ul li.category:not(.folded) > span.item > .opener::after {
+    display: none;
+    content: "\f107";
+    font-family: "Font Awesome 5 Solid";
+}
+/* Folded async */
+.TreeView li.category.async {}
+.TreeView li.category.async > span.item {}
+/* Loading async */
+.TreeView li.category.loading {}
+.TreeView li.category.loading > span.item {}
+
+/* Animations on component creation / destruction */
+.TreeViewTransition-enter {}
+.TreeViewTransition-enter-active {}
+.TreeViewTransition-leave {}
+.TreeViewTransition-leave-active {}
+
+/* Drag'n'drop */
+.TreeView ul.dragover {}
+.TreeView li.dragover {}
+.TreeView li.dragover > span.item {}
+.TreeView li.nodrop {}
+.TreeView li.nodrop > span.item {}

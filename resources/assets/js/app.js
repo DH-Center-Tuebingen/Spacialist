@@ -1,5 +1,3 @@
-import { TreeView } from '@bosket/vue';
-
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -20,8 +18,14 @@ window.Vue = require('vue');
 
 Vue.component('context-tree', require('./components/ContextTree.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
-Vue.component('tree-view', TreeView);
 
 const app = new Vue({
-    el: '#app'
+    el: '#app',
+    data: {
+        tab: 'map',
+        selectedContext: {},
+        onSelectContext: function(selection) {
+            app.$data.selectedContext = JSON.parse(JSON.stringify(selection));
+        }
+    }
 });

@@ -20,12 +20,13 @@
                     </form>
                 </div>
                 <div class="col-md-12">
-                    <context-tree :contexts="{{$contexts}}"></context-tree>
+                    <context-tree :contexts="{{$contexts}}" :selection-callback="onSelectContext"></context-tree>
                 </div>
             </div>
         </div>
         <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" >
-            Test
+            <h1 v-if="selectedContext.name">@{{ selectedContext.name }}</h1>
+            <h1 v-else>Nothing selected</h1>
         </div>
         <div class="col-md-5" id="addon-container">
             <ul class="nav nav-tabs">

@@ -30,6 +30,11 @@ class HomeController extends Controller
         //         'name' => 'Testcontext'
         //     ]
         // ];
+        foreach($var as $k => $v) {
+            if(count($v->child_contexts) === 0) {
+                unset($var[$k]->child_contexts);
+            }
+        }
         return view('home', ['contexts' => $var]);
     }
 
