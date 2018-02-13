@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
     - bottom to top = intensity of directional light (positioned at the camera)
   - Controller 2 is now a flashlight
     - Intensity can be adjusted using the thumbpad (left to right)
+- File Viewer (3D) now uses ocTree for raycasting
 - Layer Control to the preview map in the Geodata-Importer (GIS view)
 - A section to show files linked to all sub-contexts of a context
 ### Changed
