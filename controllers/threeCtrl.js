@@ -340,8 +340,8 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 object.position.copy(position);
                 object.position.multiplyScalar(1);
                 object.scale.multiplyScalar(0.33);
-                for(var i=0; i<object.children.length; i++) {
-					octree.add(object.children[i], {
+                for(var j=0; j<object.children.length; j++) {
+					octree.add(object.children[j], {
 						useFaces: false
 					});
 				}
@@ -378,8 +378,8 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
                 object.position.lerp(end, 0.5);
                 object.scale.set(0.1, 0.1, start.distanceTo(end));
                 object.lookAt(end);
-                for(var i=0; i<object.children.length; i++) {
-					octree.add(object.children[i], {
+                for(var j=0; j<object.children.length; j++) {
+					octree.add(object.children[j], {
 						useFaces: false
 					});
 				}
