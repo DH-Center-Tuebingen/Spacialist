@@ -65,6 +65,7 @@
     "popper.js": "^1.12.5",
     "proj4": "^2.4.4",
     "satellizer": "^0.15.5",
+    "screenfull": "^3.3.2",
     "shapefile": "^0.6.6",
     "snackbarjs": "^1.1.0",
     "three": "^0.89",

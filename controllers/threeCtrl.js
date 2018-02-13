@@ -124,6 +124,9 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
 		container.appendChild(renderer.domElement);
 		container.appendChild(WEBVR.createButton(renderer));
 
+        if(screenfull.enabled) {
+            window.addEventListener('keydown', toggleFullscreen, false);
+        }
 		window.addEventListener('resize', onWindowResize, false);
         renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
 		renderer.vr.enabled = true;
@@ -389,12 +392,24 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         });
     }
 
+    function toggleFullscreen(event, hack) {
+        var k = event.keyCode;
+        if(k != 70) return; // 70 = 'f' key
+        screenfull.request(renderer.domElement);
+    }
+
     function onWindowResize() {
-        width = renderer.domElement.parentElement.clientWidth;
-        height = renderer.domElement.parentElement.clientHeight;
-		camera.aspect = width/height;
-		camera.updateProjectionMatrix();
-		renderer.setSize(width, height);
+        var isFullscreen = screenfull.enabled || screenfull.isFullscreen;
+        if(isFullscreen) {
+            width = renderer.domElement.clientWidth;
+            height = renderer.domElement.clientHeight;
+        } else {
+            width = renderer.domElement.parentElement.clientWidth;
+            height = renderer.domElement.parentElement.clientHeight;
+        }
+        camera.aspect = width/height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
         if(labelRenderer) labelRenderer.setSize(width, height);
 	}
 
@@ -526,6 +541,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
     }
 
     function render() {
+        if(!renderer) return;
         if(renderer.vr && renderer.vr.enabled) {
             controller1.update();
             controller2.update();
@@ -549,6 +565,7 @@ spacialistApp.controller('threeCtrl', ['$scope', function($scope) {
         particles.length = 0;
         group = null;
         particles = null;
+		window.addEventListener('keydown', null, false);
 		window.addEventListener('resize', null, false);
         window.addEventListener('vrdisplaypresentchange', null, false);
         renderer.domElement.addEventListener('mousedown', null, false);
