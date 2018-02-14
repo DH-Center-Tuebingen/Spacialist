@@ -1,5 +1,5 @@
 <template>
-    <div id="map" class="map mt-2"></div>
+    <div id="map" class="map"></div>
 </template>
 
 <script>

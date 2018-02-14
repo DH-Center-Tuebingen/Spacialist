@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Context;
+use App\Preference;
 
 class HomeController extends Controller
 {
@@ -40,7 +41,8 @@ class HomeController extends Controller
 
     public function prefs()
     {
-        return view('settings.preferences');
+        $preferences = Preference::getPreferences();
+        return view('settings.preferences', ["preferences" => json_encode($preferences)]);
     }
 
     public function userPrefs($id)

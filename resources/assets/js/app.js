@@ -18,6 +18,7 @@ window.Vue = require('vue');
 
 Vue.component('context-tree', require('./components/ContextTree.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
+Vue.component('preferences', require('./components/Preferences.vue'))
 
 const app = new Vue({
     el: '#app',

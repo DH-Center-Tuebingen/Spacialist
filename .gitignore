@@ -9,8 +9,9 @@ thesaurex
 /db
 
 ## Created by Laravel
-
+composer.lock
 /node_modules
+/public
 /public/hot
 /public/storage
 /storage/*.key
