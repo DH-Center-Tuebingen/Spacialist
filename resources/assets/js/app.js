@@ -1,3 +1,5 @@
+  import Multiselect from 'vue-multiselect';
+
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -19,6 +21,9 @@ window.Vue = require('vue');
 Vue.component('context-tree', require('./components/ContextTree.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 Vue.component('preferences', require('./components/Preferences.vue'))
+Vue.component('users', require('./components/Users.vue'))
+Vue.component('roles', require('./components/Roles.vue'))
+Vue.component('multiselect', Multiselect);
 
 const app = new Vue({
     el: '#app',

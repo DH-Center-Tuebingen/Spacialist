@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Context;
+use App\Permission;
 use App\Preference;
+use App\Role;
+use App\User;
 
 class HomeController extends Controller
 {
@@ -53,12 +56,16 @@ class HomeController extends Controller
 
     public function users()
     {
-        return view('settings.users');
+        $users = User::with('roles')->get();
+        $roles = Role::all();
+        return view('settings.users', ['users' => $users, 'roles' => $roles]);
     }
 
     public function roles()
     {
-        return view('settings.roles');
+        $roles = Role::with('permissions')->get();
+        $perms = Permission::all();
+        return view('settings.roles', ['roles' => $roles, 'permissions' => $perms]);
     }
 
     public function dme()

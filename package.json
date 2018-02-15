@@ -39,6 +39,7 @@
         "babel-helper-vue-jsx-merge-props": "^2.0.3",
         "bootstrap": "^4.0.0",
         "ol": "^4.6.4",
-        "popper.js": "^1.12.9"
+        "popper.js": "^1.12.9",
+        "vue-multiselect": "^2.0.8"
     }
 }

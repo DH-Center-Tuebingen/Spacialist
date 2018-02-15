@@ -14,4 +14,5 @@ let mix = require('laravel-mix');
 mix.js('resources/assets/js/app.js', 'public/js')
    .sass('resources/assets/sass/app.scss', 'public/css')
    .copy('node_modules/bootstrap/dist/js/bootstrap.js', 'public/js')
-   .copy('node_modules/bootstrap/dist/css/bootstrap.min.css', 'public/css');
+   .copy('node_modules/bootstrap/dist/css/bootstrap.min.css', 'public/css')
+   .copy('node_modules/vue-multiselect/dist/vue-multiselect.min.css', 'public/css');
