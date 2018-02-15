@@ -2,7 +2,7 @@
     <table class="table table-striped table-hover">
         <thead class="thead-light">
             <tr>
-                <th>Preference {{preferences}}</th>
+                <th>Preference</th>
                 <th>Value</th>
                 <th>Allow Override?</th>
                 <th>Save</th>
@@ -14,7 +14,14 @@
                     <strong>Language</strong>
                 </td>
                 <td>
-                    <input type="text" v-model="preferences['prefs.gui-language'].value" />
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label"></label>
+                            <div class="col-md-10">
+                                <input class="form-control" type="text" v-model="preferences['prefs.gui-language'].value" />
+                            </div>
+                        </div>
+                    </form>
                 </td>
                 <td>
                     <input type="checkbox"  v-model="preferences['prefs.gui-language'].allow_override" />
@@ -30,11 +37,26 @@
                     <strong>Columns in Main View</strong>
                 </td>
                 <td>
-                    <span></span>Left-Hand Column: <input type="number" v-model="preferences['prefs.columns'].value.left" />
-                    <br />
-                    <span></span>Center Column: <input type="number" v-model="preferences['prefs.columns'].value.center" />
-                    <br />
-                    <span></span>Right-Hand Column: <input type="number" v-model="preferences['prefs.columns'].value.right" />
+                    <form>
+                        <div class="form-group row">
+                            <label for="left-column" class="col-md-2 col-form-label">Left-Hand Column:</label>
+                            <div class="col-md-10">
+                                <input class="form-control" id="left-column" type="number" v-model="preferences['prefs.columns'].value.left" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="center-column" class="col-md-2 col-form-label">Center Column:</label>
+                            <div class="col-md-10">
+                                <input class="form-control" id="left-column" type="number" v-model="preferences['prefs.columns'].value.center" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="right-column" class="col-md-2 col-form-label">Right-Hand Column:</label>
+                            <div class="col-md-10">
+                                <input class="form-control" id="left-column" type="number" v-model="preferences['prefs.columns'].value.right" />
+                            </div>
+                        </div>
+                    </form>
                 </td>
                 <td>
                     <input type="checkbox" v-model="preferences['prefs.columns'].allow_override" />
@@ -50,7 +72,16 @@
                     <strong>Show Tooltips</strong>
                 </td>
                 <td>
-                    <input type="checkbox" v-model="preferences['prefs.show-tooltips'].value" />
+                    <form>
+                        <div class="form-group row">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-10">
+                                <div class="form-check">
+                                    <input class="form-check-input" id="show-tooltips" type="checkbox" v-model="preferences['prefs.show-tooltips'].value" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </td>
                 <td>
                     <input type="checkbox" v-model="preferences['prefs.show-tooltips'].allow_override" />
@@ -66,7 +97,14 @@
                     <strong>Thesaurus-Element for Tags</strong>
                 </td>
                 <td>
-                    <input type="text" v-model="preferences['prefs.tag-root'].value" />
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label"></label>
+                            <div class="col-md-10">
+                                <input class="form-control" type="text" v-model="preferences['prefs.tag-root'].value" />
+                            </div>
+                        </div>
+                    </form>
                 </td>
                 <td>
                     <input type="checkbox" v-model="preferences['prefs.tag-root'].allow_override" />
@@ -82,11 +120,19 @@
                     <strong>Loaded Extensions</strong>
                 </td>
                 <td>
-                    <ul>
-                        <li v-for="(extension, key) in preferences['prefs.load-extensions'].value">
-                            {{key}} <input type="checkbox" :checked="extension" />
-                        </li>
-                    </ul>
+                    <form>
+                        <div class="form-group row" v-for="(extension, key) in preferences['prefs.load-extensions'].value">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-10">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" :id="'extension-'+key" :checked="extension" />
+                                    <label class="form-check-label" :for="'extension-'+key">
+                                        {{ key }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </td>
                 <td>
                     <input type="checkbox" v-model="preferences['prefs.load-extensions'].allow_override" />
@@ -102,7 +148,14 @@
                     <strong>Show Link To ThesauRex</strong>
                 </td>
                 <td>
-                    <input type="text" v-model="preferences['prefs.link-to-thesaurex'].value" />
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label"></label>
+                            <div class="col-md-10">
+                                <input class="form-control" type="text" v-model="preferences['prefs.link-to-thesaurex'].value" />
+                            </div>
+                        </div>
+                    </form>
                 </td>
                 <td>
                     <input type="checkbox" v-model="preferences['prefs.link-to-thesaurex'].allow_override" />
@@ -118,7 +171,14 @@
                     <strong>Project Name</strong>
                 </td>
                 <td>
-                    <input type="text" v-model="preferences['prefs.project-name'].value" />
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label"></label>
+                            <div class="col-md-10">
+                                <input class="form-control" type="text" v-model="preferences['prefs.project-name'].value" />
+                            </div>
+                        </div>
+                    </form>
                 </td>
                 <td>
                     <input type="checkbox" v-model="preferences['prefs.project-name'].allow_override" />
