@@ -18,12 +18,18 @@ window.Vue = require('vue');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+// Imported Components
+Vue.component('multiselect', Multiselect);
+
+// Reusable Components
 Vue.component('context-tree', require('./components/ContextTree.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
+
+// Page Components
 Vue.component('preferences', require('./components/Preferences.vue'))
+Vue.component('user-preferences', require('./components/UserPreferences.vue'))
 Vue.component('users', require('./components/Users.vue'))
 Vue.component('roles', require('./components/Roles.vue'))
-Vue.component('multiselect', Multiselect);
 
 const app = new Vue({
     el: '#app',
