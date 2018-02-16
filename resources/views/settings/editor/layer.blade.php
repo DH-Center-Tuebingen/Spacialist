@@ -4,13 +4,9 @@
     <div class="row">
         <div class="col-md-3">
             <h5>Baselayer</h5>
-            <button type="button" class="btn btn-success">
-                <i class="fas fa-fw fa-plus"></i> Add New Baselayer
-            </button>
+            <layer :data="{{ $baselayers }}"></layer>
             <h5>Overlays</h5>
-            <button type="button" class="btn btn-success">
-                <i class="fas fa-fw fa-plus"></i> Add New Overlay
-            </button>
+            <layer :data="{{ $overlays }}"></layer>
         </div>
         <div class="col-md-9">
             <h5>Properties</h5>

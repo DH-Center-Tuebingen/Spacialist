@@ -25,6 +25,7 @@ Vue.component('multiselect', Multiselect);
 // Reusable Components
 Vue.component('bibliography', require('./components/BibliographyTable.vue'));
 Vue.component('context-tree', require('./components/ContextTree.vue'));
+Vue.component('layer', require('./components/LayerList.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 
 // Page Components

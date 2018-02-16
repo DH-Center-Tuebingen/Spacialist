@@ -76,7 +76,9 @@ class HomeController extends Controller
 
     public function layer()
     {
-        return view('settings.editor.layer');
+        $baselayers = AvailableLayer::where('is_overlay', false)->get();
+        $overlays = AvailableLayer::with('context_type')->where('is_overlay', true)->get();
+        return view('settings.editor.layer', ['baselayers' => $baselayers, 'overlays' => $overlays]);
     }
 
     public function gis()
