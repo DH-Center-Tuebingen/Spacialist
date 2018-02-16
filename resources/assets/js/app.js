@@ -11,6 +11,7 @@ require('popper.js')
 require('bootstrap')
 
 window.Vue = require('vue');
+window._ = require('lodash');
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -22,6 +23,7 @@ window.Vue = require('vue');
 Vue.component('multiselect', Multiselect);
 
 // Reusable Components
+Vue.component('bibliography', require('./components/BibliographyTable.vue'));
 Vue.component('context-tree', require('./components/ContextTree.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Bibliography;
 use App\Context;
 use App\Permission;
 use App\Preference;
@@ -85,7 +86,8 @@ class HomeController extends Controller
 
     public function bibliography()
     {
-        return view('tools.bibliography');
+        $entries = Bibliography::all();
+        return view('tools.bibliography', ['entries' => $entries]);
     }
 
     public function analysis()
