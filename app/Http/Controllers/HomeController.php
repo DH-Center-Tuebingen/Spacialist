@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Attribute;
+use App\AvailableLayer;
 use App\Bibliography;
 use App\Context;
+use App\ContextType;
 use App\Permission;
 use App\Preference;
 use App\Role;
+use App\ThConcept;
 use App\User;
 
 class HomeController extends Controller
@@ -71,7 +75,9 @@ class HomeController extends Controller
 
     public function dme()
     {
-        return view('settings.editor.dme');
+        $attributes = Attribute::all();
+        $contextTypes = ContextType::all();
+        return view('settings.editor.dme', ['attributes' => $attributes, 'contextTypes' => $contextTypes]);
     }
 
     public function layer()

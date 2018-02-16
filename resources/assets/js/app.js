@@ -23,16 +23,18 @@ window._ = require('lodash');
 Vue.component('multiselect', Multiselect);
 
 // Reusable Components
+Vue.component('attributes', require('./components/AttributeList.vue'));
 Vue.component('bibliography', require('./components/BibliographyTable.vue'));
 Vue.component('context-tree', require('./components/ContextTree.vue'));
+Vue.component('context-types', require('./components/ContextTypeList.vue'));
 Vue.component('layer', require('./components/LayerList.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 
 // Page Components
 Vue.component('preferences', require('./components/Preferences.vue'))
-Vue.component('user-preferences', require('./components/UserPreferences.vue'))
-Vue.component('users', require('./components/Users.vue'))
 Vue.component('roles', require('./components/Roles.vue'))
+Vue.component('users', require('./components/Users.vue'))
+Vue.component('user-preferences', require('./components/UserPreferences.vue'))
 
 const app = new Vue({
     el: '#app',
