@@ -16,27 +16,26 @@ class Preference extends Model
 
     public static function getPreferences() {
         $prefs = Preference::orderBy('id')->get();
-        $prefObj = self::decodePreferences($prefs, false);
+        $prefObj = self::decodePreferences($prefs);
         return $prefObj;
     }
 
     public static function getUserPreferences($id) {
         $prefs = Preference::leftJoin('user_preferences as up', 'preferences.id', '=', 'up.pref_id')
-            ->select('preferences.*', 'up.pref_id', 'up.user_id', 'up.value')
+            ->select('preferences.*', 'up.pref_id', 'up.user_id')
+            ->selectRaw(\DB::raw('COALESCE(up.value, default_value) AS value'))
+            ->where('up.user_id', $id)
+            ->orWhereNull('up.user_id')
             ->orderBy('id')
             ->get();
-        $prefObj = self::decodePreferences($prefs, true);
+        $prefObj = self::decodePreferences($prefs);
         return $prefObj;
     }
 
-    private static function decodePreferences($prefs, $isUserPref) {
+    private static function decodePreferences($prefs) {
         $prefObj = [];
         foreach($prefs as $p) {
-            if(isset($p->value)) {
-                $decoded = json_decode($p->value);
-            } else {
-                $decoded = json_decode($p->default_value);
-            }
+            $decoded = json_decode($p->value);
             unset($p->default_value);
             switch($p->label) {
                 case 'prefs.gui-language':
