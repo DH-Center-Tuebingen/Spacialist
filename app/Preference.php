@@ -23,7 +23,7 @@ class Preference extends Model
     public static function getUserPreferences($id) {
         $prefs = Preference::leftJoin('user_preferences as up', 'preferences.id', '=', 'up.pref_id')
             ->select('preferences.*', 'up.pref_id', 'up.user_id')
-            ->selectRaw(\DB::raw('COALESCE(up.value, default_value) AS value'))
+            ->selectRaw(\DB::raw('COALESCE(up.value, default_value) AS default_value'))
             ->where('up.user_id', $id)
             ->orWhereNull('up.user_id')
             ->orderBy('id')
@@ -35,7 +35,7 @@ class Preference extends Model
     private static function decodePreferences($prefs) {
         $prefObj = [];
         foreach($prefs as $p) {
-            $decoded = json_decode($p->value);
+            $decoded = json_decode($p->default_value);
             unset($p->default_value);
             switch($p->label) {
                 case 'prefs.gui-language':

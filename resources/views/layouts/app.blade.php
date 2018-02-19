@@ -114,13 +114,8 @@
                                 <a class="dropdown-item" href="{{ route('layer') }}">
                                     <i class="fas fa-fw fa-sticky-note"></i> Layer Editor
                                 </a>
-                                @auth
-                                <a class="dropdown-item" href="{{ route('userprefs', ['id' => Auth::user()->id]) }}">
-                                    <i class="fas fa-fw fa-user"></i> User Preferences
-                                </a>
-                                @endauth
                                 <a class="dropdown-item" href="{{ route('prefs') }}">
-                                    <i class="fas fa-fw fa-users"></i> System Preferences
+                                    <i class="fas fa-fw fa-cog"></i> System Preferences
                                 </a>
                                 <a class="dropdown-item" href="">
                                     <i class="fas fa-fw fa-pencil-alt"></i> Toggle Edit Mode
@@ -135,7 +130,10 @@
                                 <i class="fas fa-fw fa-user"></i> {{ Auth::user()->name }}
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="user-dropdown">
-                                <a href="{{ route('logout') }}" class="dropdown-item"
+                                <a class="dropdown-item" href="{{ route('userprefs', ['id' => Auth::user()->id]) }}">
+                                    <i class="fas fa-fw fa-cog"></i> Preferences
+                                </a>
+                                <a class="dropdown-item" href="{{ route('logout') }}"
                                     onclick="event.preventDefault();
                                              document.getElementById('logout-form').submit();">
                                     <i class="fas fa-fw fa-sign-out-alt"></i> Logout
