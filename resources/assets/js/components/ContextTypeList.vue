@@ -3,7 +3,7 @@
         <ul class="ml-3 list-unstyled">
             <li v-for="d in data" class="pb-1">
                 <i class="fas fa-fw fa-leaf"></i>
-                <a href="#">{{ d.thesaurus_url }}</a>
+                <a href="#">{{ concepts[d.thesaurus_url].label }}</a>
             </li>
             <!-- <li v-if="addNew"> -->
             <li>
@@ -19,6 +19,10 @@
         props: {
             data: {
                 type: Array,
+                required: true
+            },
+            concepts: {
+                type: Object,
                 required: true
             }
         },

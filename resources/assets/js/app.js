@@ -1,4 +1,10 @@
-  import Multiselect from 'vue-multiselect';
+import Multiselect from 'vue-multiselect';
+import fontawesome from '@fortawesome/fontawesome';
+import regular from '@fortawesome/fontawesome-free-regular';
+import solid from '@fortawesome/fontawesome-free-solid';
+import brands from '@fortawesome/fontawesome-free-brands';
+
+fontawesome.library.add(solid, regular, brands);
 
 /**
  * First we will load all of this project's JavaScript dependencies which
@@ -12,6 +18,7 @@ require('bootstrap')
 
 window.Vue = require('vue');
 window._ = require('lodash');
+$ = jQuery  = window.$ = window.jQuery = require('jquery');
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

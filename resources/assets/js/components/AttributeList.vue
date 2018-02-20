@@ -31,7 +31,7 @@
                     </div>
                 </div> -->
                 <span>
-                    {{attribute.thesaurus_url}}:
+                    {{concepts[attribute.thesaurus_url].label}}:
                 </span>
                 <sup>
                     <i class="fas fa-fw fa-lg fa-dot-circle"></i>
@@ -57,10 +57,9 @@
                     <!-- TODO typeahead -->
                     <input class="form-control" type="text" :id="'attribute-'+attribute.id" placeholder="Add Context" v-model="values[attribute.id]" />
                 </div>
-                <div class="input-group" v-else-if="attribute.datatype == 'date'">
-                    <!-- TODO datepicker -->
+                <div class="input-group date" data-provide="datepicker" v-else-if="attribute.datatype == 'date'">
                     <input type="text" class="form-control" :id="'attribute-'+attribute.id" v-model="values[attribute.id]"  ng-model-options="{timezone:'utc'}"/>
-                    <div class="input-group-append">
+                    <div class="input-group-append input-group-addon">
                         <button type="button" class="btn btn-outline-secondary">
                             <i class="fas fa-fw fa-calendar-alt"></i>
                         </button>
@@ -222,7 +221,7 @@
 
 <script>
     export default {
-        props: ['attributes', 'values', 'allowEdit', 'showInfo', 'allowDelete', 'allowMetadata', 'allowOrder'],
+        props: ['attributes', 'values', 'concepts', 'allowEdit', 'showInfo', 'allowDelete', 'allowMetadata', 'allowOrder'],
         mounted() {},
         methods: {
             onEnter(id) {

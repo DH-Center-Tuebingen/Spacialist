@@ -13,6 +13,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/vue-multiselect.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/bootstrap-datepicker.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
@@ -162,6 +163,6 @@
         FontAwesomeConfig = { searchPseudoElements: true };
     </script>
     <script src="{{ asset('js/app.js') }}"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+    <script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
 </body>
 </html>
