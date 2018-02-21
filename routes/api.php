@@ -18,3 +18,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/role', 'UserController@addRole');
+Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');

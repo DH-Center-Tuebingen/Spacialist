@@ -27,6 +27,11 @@ class UserController extends Controller
 
     // DELETE
 
+    public function deleteRole($id) {
+        Role::find($id)->delete();
+        return response()->json();
+    }
+
     // OTHER FUNCTIONS
 
 }

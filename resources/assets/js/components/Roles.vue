@@ -41,7 +41,7 @@
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-fw fa-edit text-info"></i> Edit
                                 </a>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="#" v-on:click="requestDeleteRole(role.id)">
                                     <i class="fas fa-fw fa-trash text-danger"></i> Delete
                                 </a>
                             </div>
@@ -51,7 +51,7 @@
             </tbody>
         </table>
 
-        <button type="button" class="btn btn-success" v-on:click="show">
+        <button type="button" class="btn btn-success" v-on:click="showNewRoleModal">
             <i class="fas fa-fw fa-plus"></i> Add New Role
         </button>
 
@@ -59,7 +59,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="newRoleModalLabel">Add new Role</h5>
-                    <button type="button" class="close" aria-label="Close" v-on:click="hide">
+                    <button type="button" class="close" aria-label="Close" v-on:click="hideNewRoleModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -95,7 +95,29 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" v-on:click="hide">
+                    <button type="button" class="btn btn-danger" v-on:click="hideNewRoleModal">
+                        <i class="fas fa-fw fa-ban"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </modal>
+
+        <modal name="confirm-delete-role-modal" height="auto" :scrollable="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Role {{ selectedRole.name }}</h5>
+                    <button type="button" class="close" aria-label="Close" v-on:click="hideDeleteRoleModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Do you really want to delete Role <strong>{{ selectedRole.display_name }}</strong> (<i>{{ selectedRole.name }}</i>)
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" v-on:click="deleteRole(selectedRole.id)">
+                        <i class="fas fa-fw fa-check"></i> Delete
+                    </button>
+                    <button type="button" class="btn btn-danger" v-on:click="hideDeleteRoleModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>
                 </div>
@@ -110,19 +132,46 @@
         props: ['roles', 'permissions'],
         mounted() {},
         methods: {
-            show () {
+            showNewRoleModal() {
                 this.$modal.show('new-role-modal');
             },
-            hide () {
+            hideNewRoleModal() {
                 this.$modal.hide('new-role-modal');
                 this.newRole = {};
             },
-            onAddRole (newRole) {
+            onAddRole(newRole) {
                 let roles = this.roles;
                 axios.post('/api/role', newRole).then(function(response) {
                     roles.push(response.data);
                 });
-                this.hide()
+                this.hideNewRoleModal()
+            },
+            showDeleteRoleModal() {
+                this.$modal.show('confirm-delete-role-modal');
+            },
+            hideDeleteRoleModal() {
+                this.$modal.hide('confirm-delete-role-modal');
+                this.selectedRole = {};
+            },
+            requestDeleteRole(id) {
+                this.selectedRole = this.roles.find(function(r) {
+                    return r.id == id;
+                });
+                this.showDeleteRoleModal();
+            },
+            deleteRole(id) {
+                if(!id) return;
+                let roles = this.roles;
+                axios.delete('/api/role/' + id).then(function(response) {
+                    // TODO check response
+                    var index = roles.findIndex(function(r) {
+                        return r.id == id;
+                    });
+                    if(index) {
+                        roles.splice(index, 1);
+                    }
+                });
+                this.hideDeleteRoleModal()
             }
         },
         data() {
@@ -132,6 +181,7 @@
                     console.log(selection)
                 ),
                 newRole: {},
+                selectedRole: {}
             }
         },
     }
