@@ -4,6 +4,7 @@ import regular from '@fortawesome/fontawesome-free-regular';
 import solid from '@fortawesome/fontawesome-free-solid';
 import brands from '@fortawesome/fontawesome-free-brands';
 import VModal from 'vue-js-modal';
+import Axios from 'axios';
 
 fontawesome.library.add(solid, regular, brands);
 
@@ -26,10 +27,13 @@ $ = jQuery  = window.$ = window.jQuery = require('jquery');
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
+Vue.prototype.$http = Axios;
 Vue.use(VModal);
 
 // Imported Components
 Vue.component('multiselect', Multiselect);
+// Extended Components
+Vue.component('typeahead', require('./components/Typeahead.vue'));
 
 // Reusable Components
 Vue.component('attributes', require('./components/AttributeList.vue'));

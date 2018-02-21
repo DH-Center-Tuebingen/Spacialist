@@ -7,7 +7,7 @@
             <button type="button" class="btn btn-success">
                 <i class="fas fa-fw fa-plus"></i> Add Attribute
             </button>
-            <attributes :attributes="{{ $attributes }}" :values="[]" :concepts="{{ $concepts }}" :allow-edit="true" :show-info="true" :allow-delete="true" :allow-metadata="true"></attributes>
+            <attributes :attributes="{{ $attributes }}" :values="{}" :concepts="{{ $concepts }}" :allow-edit="true" :show-info="true" :allow-delete="true" :allow-metadata="false"></attributes>
         </div>
         <div class="col-md-2">
             <h4>Available Context-Types</h4>

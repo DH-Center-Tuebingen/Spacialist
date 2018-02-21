@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::get('/context/search', 'SearchController@searchContextByName');
 
 Route::post('/user', 'UserController@addUser');
 Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');

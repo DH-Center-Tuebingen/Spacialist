@@ -75,9 +75,36 @@ class HomeController extends Controller
 
     public function dme()
     {
+        $lang = 'de';
         $attributes = Attribute::all();
         $contextTypes = ContextType::all();
-        return view('settings.editor.dme', ['attributes' => $attributes, 'contextTypes' => $contextTypes]);
+        $concepts = \DB::select(\DB::raw("
+            WITH summary AS
+            (
+                SELECT th_concept.id, concept_url, is_top_concept, label, language_id, th_language.short_name,
+                ROW_NUMBER() OVER
+                (
+                    PARTITION BY th_concept.id
+                    ORDER BY th_concept.id, short_name != '$lang', concept_label_type
+                ) AS rk
+                FROM th_concept
+                JOIN th_concept_label ON th_concept_label.concept_id = th_concept.id
+                JOIN th_language ON language_id = th_language.id
+            )
+            SELECT id, concept_url, is_top_concept, label, language_id, short_name
+            FROM summary s
+            WHERE s.rk = 1"));
+
+        $conceptMap = [];
+
+        foreach ($concepts as $concept) {
+            $url = $concept->concept_url;
+            unset($concept->concept_url);
+            $conceptMap[$url] = $concept;
+        }
+        $conceptMap = json_encode($conceptMap);
+
+        return view('settings.editor.dme', ['attributes' => $attributes, 'contextTypes' => $contextTypes, 'concepts' => $conceptMap]);
     }
 
     public function layer()
