@@ -10,7 +10,7 @@
     <span ui-sref="root.spacialist.context.data({id: r.id })" ui-sref-active="selected-leaf-child" style="display: table-cell; padding-left: 4px;">
         <i class="material-icons md-18" aria-hidden="true" ng-if="contexts.data[r.id].type == 0">account_balance</i>
         <i class="material-icons md-18" aria-hidden="true" ng-if="contexts.data[r.id].type == 1">spa</i>
-        <span ng-style="options.getColorForId(contexts.data[r.id].uri)" ng-bind-html="contexts.data[r.id].name | sphighlight:highlight"></span> <span ng-if="contexts.data[r.id].uri" class="contextPrefix">{{ concepts[contexts.data[r.id].uri].label}}</span>
+        <span ng-style="options.getColorForId(contexts.data[r.id].uri)" style="padding: 0 5px; border-radius: 3px" ng-bind-html="contexts.data[r.id].name | sphighlight:highlight"></span> <span ng-if="contexts.data[r.id].uri" class="contextPrefix">{{ concepts[contexts.data[r.id].uri].label}}</span>
     </span>
 </div>
 <ul ui-tree-nodes="" ng-model="contexts.children[r.id]" ng-if="!contexts.data[r.id].collapsed">

@@ -513,7 +513,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
      */
     main.getColorForId = function(id) {
         var sat = '90%';
-        var lgt = '65%';
+        var lgt = '70%';
         var hue = 0;
         if(typeof id !== 'undefined') {
             var newId = '';
@@ -528,7 +528,7 @@ spacialistApp.service('mainService', ['httpGetFactory', 'httpGetPromise', 'httpP
             lgt
         ];
         return {
-            'color': 'hsl(' + hsl.join(',') + ')'
+            'background-color': 'hsl(' + hsl.join(',') + ')'
         };
     };
 
