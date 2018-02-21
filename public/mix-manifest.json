@@ -1,9 +1,0 @@
-{
-    "/js/app.js": "/js/app.js",
-    "/css/app.css": "/css/app.css",
-    "/js/bootstrap.js": "/js/bootstrap.js",
-    "/js/jquery.slim.min.js": "/js/jquery.slim.min.js",
-    "/js/moment-with-locales.min.js": "/js/moment-with-locales.min.js",
-    "/js/tempusdominus-bootstrap-4.min.js": "/js/tempusdominus-bootstrap-4.min.js",
-    "/css/vue-multiselect.min.css": "/css/vue-multiselect.min.css"
-}
