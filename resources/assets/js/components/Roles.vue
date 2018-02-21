@@ -111,7 +111,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    Do you really want to delete Role <strong>{{ selectedRole.display_name }}</strong> (<i>{{ selectedRole.name }}</i>)
+                    Do you really want to delete Role <strong>{{ selectedRole.display_name }}</strong> (<i>{{ selectedRole.name }}</i>)?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" v-on:click="deleteRole(selectedRole.id)">
@@ -128,6 +128,7 @@
 
 <script>
     import axios from 'axios';
+
     export default {
         props: ['roles', 'permissions'],
         mounted() {},

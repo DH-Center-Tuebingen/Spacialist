@@ -37,7 +37,7 @@
                                 <a class="dropdown-item" href="#" v-on:click="updatePassword(user.id)">
                                     <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
                                 </a>
-                                <a class="dropdown-item" href="#" v-on:click="deleteUser(user.id)">
+                                <a class="dropdown-item" href="#" v-on:click="requestDeleteUser(user.id)">
                                     <i class="fas fa-fw fa-trash text-danger"></i> Delete
                                 </a>
                             </div>
@@ -47,66 +47,129 @@
             </tbody>
         </table>
 
-        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#newUserModal">
+        <button type="button" class="btn btn-success" v-on:click="showNewUserModal">
             <i class="fas fa-fw fa-plus"></i> Add New User
         </button>
 
-        <div class="modal fade" id="newUserModal" tabindex="-1" role="dialog"   aria-labelledby="newUserModalLabel" aria-hidden="true" ref="newUserModal">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="newUserModalLabel">Add new User</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+        <modal name="new-user-modal" height="auto" :scrollable="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add new User</h5>
+                    <button type="button" class="close" aria-label="Close" v-on:click="hideNewUserModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form name="newUserForm" class="form-horizontal" role="form" v-on:submit.prevent="onAddUser(newUser)">
+                        <div class="form-group">
+                            <label class="control-label col-md-3" for="name">
+                                Username:
+                            </label>
+                            <div class="col-md-9">
+                                <input class="form-control" type="text" id="name" v-model="newUser.name" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3" for="display_name">
+                                E-Mail Address:
+                            </label>
+                            <div class="col-md-9">
+                                <input class="form-control" type="email" id="display_name" v-model="newUser.email" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3" for="description">
+                                Password:
+                            </label>
+                            <div class="col-md-9">
+                                <input class="form-control" type="password" id="description" v-model="newUser.password" required />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-fw fa-plus"></i> Add
                         </button>
-                    </div>
-                    <div class="modal-body">
-                        <form name="newUserForm" class="form-horizontal" role="form" v-on:submit.prevent="onAddUser">
-                            <div class="form-group">
-                                <label class="control-label col-md-3" for="name">
-                                    Username:
-                                </label>
-                                <div class="col-md-9">
-                                    <input class="form-control" type="text" id="name" v-model="newUser.name" required />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-md-3" for="display_name">
-                                    E-Mail Address:
-                                </label>
-                                <div class="col-md-9">
-                                    <input class="form-control" type="email" id="display_name" v-model="newUser.email" required />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-md-3" for="description">
-                                    Password:
-                                </label>
-                                <div class="col-md-9">
-                                    <input class="form-control" type="password" id="description" v-model="newUser.password" required />
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-fw fa-plus"></i> Add
-                            </button>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger"     data-dismiss="modal">
-                            <i class="fas fa-fw fa-ban"></i> Cancel
-                        </button>
-                    </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger"     v-on:click="hideNewUserModal">
+                        <i class="fas fa-fw fa-ban"></i> Cancel
+                    </button>
                 </div>
             </div>
-        </div>
+        </modal>
+
+        <modal name="confirm-delete-user-modal" height="auto" :scrollable="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete User {{ selectedUser.name }}</h5>
+                    <button type="button" class="close" aria-label="Close" v-on:click="hideDeleteUserModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Do you really want to delete User <strong>{{ selectedUser.name }}</strong> (<i>{{ selectedUser.email }}</i>)?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" v-on:click="deleteUser(selectedUser.id)">
+                        <i class="fas fa-fw fa-check"></i> Delete
+                    </button>
+                    <button type="button" class="btn btn-danger" v-on:click="hideDeleteUserModal">
+                        <i class="fas fa-fw fa-ban"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </modal>
     </div>
 </template>
 
 <script>
+    import axios from 'axios';
+
     export default {
         props: ['users', 'roles'],
         mounted() {},
         methods: {
+            showNewUserModal() {
+                this.$modal.show('new-user-modal');
+            },
+            hideNewUserModal() {
+                this.$modal.hide('new-user-modal');
+                this.newUser = {};
+            },
+            onAddUser(newUser) {
+                let users = this.users;
+                axios.post('/api/user', newUser).then(function(response) {
+                    users.push(response.data);
+                });
+                this.hideNewUserModal()
+            },
+            showDeleteUserModal() {
+                this.$modal.show('confirm-delete-user-modal');
+            },
+            hideDeleteUserModal() {
+                this.$modal.hide('confirm-delete-user-modal');
+                this.selectedUser = {};
+            },
+            requestDeleteUser(id) {
+                this.selectedUser = this.users.find(function(u) {
+                    return u.id == id;
+                });
+                this.showDeleteUserModal();
+            },
+            deleteUser(id) {
+                if(!id) return;
+                let users = this.users;
+                axios.delete('/api/user/' + id).then(function(response) {
+                    // TODO check response
+                    var index = users.findIndex(function(u) {
+                        return u.id == id;
+                    });
+                    if(index) {
+                        users.splice(index, 1);
+                    }
+                });
+                this.hideDeleteUserModal()
+            }
         },
         data() {
             return {
@@ -114,17 +177,11 @@
                 updateSelection: selection => (
                     console.log(selection)
                 ),
-                deleteUser: id => (
-                    console.log(id)
-                ),
                 updatePassword: id => (
                     console.log(id)
                 ),
                 newUser: {},
-                onAddUser: _ => {
-                    console.log("Adding user: " + this.$data.newUser.toString());
-                    console.log(this.$refs.newUserModal);
-                }
+                selectedUser: {}
             }
         },
     }
