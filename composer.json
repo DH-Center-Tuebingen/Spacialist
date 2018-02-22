@@ -9,6 +9,7 @@
         "fideloper/proxy": "~3.3",
         "laravel/framework": "5.5.*",
         "laravel/tinker": "~1.0",
+        "renanbr/bibtex-parser": "^2.0",
         "zizaco/entrust": "5.2.x-dev"
     },
     "require-dev": {

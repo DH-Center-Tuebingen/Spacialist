@@ -5,6 +5,7 @@ import solid from '@fortawesome/fontawesome-free-solid';
 import brands from '@fortawesome/fontawesome-free-brands';
 import VModal from 'vue-js-modal';
 import Axios from 'axios';
+import VueUploadComponent from 'vue-upload-component';
 
 fontawesome.library.add(solid, regular, brands);
 
@@ -32,6 +33,7 @@ Vue.use(VModal);
 
 // Imported Components
 Vue.component('multiselect', Multiselect);
+Vue.component('file-upload', VueUploadComponent);
 // Extended Components
 Vue.component('typeahead', require('./components/Typeahead.vue'));
 

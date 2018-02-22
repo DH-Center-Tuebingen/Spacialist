@@ -22,3 +22,5 @@ Route::post('/user', 'UserController@addUser');
 Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');
 Route::post('/role', 'UserController@addRole');
 Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');
+
+Route::post('/bibliography/import', 'BibliographyController@importBibtex');
