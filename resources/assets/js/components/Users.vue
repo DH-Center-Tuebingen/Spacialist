@@ -12,7 +12,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="user in users">
+                <tr v-for="user in localUsers">
                     <td>
                         {{ user.name }}
                     </td>
@@ -137,7 +137,7 @@
                 this.newUser = {};
             },
             onAddUser(newUser) {
-                let users = this.users;
+                let users = this.newUsers;
                 axios.post('/api/user', newUser).then(function(response) {
                     users.push(response.data);
                 });
@@ -151,22 +151,26 @@
                 this.selectedUser = {};
             },
             requestDeleteUser(id) {
-                this.selectedUser = this.users.find(function(u) {
+                this.selectedUser = this.localUsers.find(function(u) {
                     return u.id == id;
                 });
                 this.showDeleteUserModal();
             },
             deleteUser(id) {
                 if(!id) return;
-                let users = this.users;
+                let users;
+                var index = this.localUsers.findIndex(function(u) {
+                    return u.id == id;
+                });
+                if(index >= this.importedUsers.length) {
+                    users = this.newUsers;
+                    index = index - this.importedUsers.length;
+                } else {
+                    users = this.importedUsers;
+                }
                 axios.delete('/api/user/' + id).then(function(response) {
                     // TODO check response
-                    var index = users.findIndex(function(u) {
-                        return u.id == id;
-                    });
-                    if(index) {
-                        users.splice(index, 1);
-                    }
+                    if(index > -1) users.splice(index, 1);
                 });
                 this.hideDeleteUserModal()
             }
@@ -181,8 +185,15 @@
                     console.log(id)
                 ),
                 newUser: {},
+                newUsers: [],
+                importedUsers: this.users.slice(),
                 selectedUser: {}
             }
         },
+        computed: {
+            localUsers() {
+                return this.importedUsers.concat(this.newUsers);
+            }
+        }
     }
 </script>

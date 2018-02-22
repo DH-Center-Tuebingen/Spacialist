@@ -13,7 +13,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="role in roles">
+                <tr v-for="role in localRoles">
                     <td>
                         {{ role.name }}
                     </td>
@@ -141,7 +141,7 @@
                 this.newRole = {};
             },
             onAddRole(newRole) {
-                let roles = this.roles;
+                let roles = this.newRoles;
                 axios.post('/api/role', newRole).then(function(response) {
                     roles.push(response.data);
                 });
@@ -155,22 +155,26 @@
                 this.selectedRole = {};
             },
             requestDeleteRole(id) {
-                this.selectedRole = this.roles.find(function(r) {
+                this.selectedRole = this.localRoles.find(function(r) {
                     return r.id == id;
                 });
                 this.showDeleteRoleModal();
             },
             deleteRole(id) {
                 if(!id) return;
-                let roles = this.roles;
+                let roles;
+                var index = this.localRoles.findIndex(function(r) {
+                    return r.id == id;
+                });
+                if(index >= this.importedRoles.length) {
+                    roles = this.newRoles;
+                    index = index - this.importedRoles.length;
+                } else {
+                    roles = this.importedRoles;
+                }
                 axios.delete('/api/role/' + id).then(function(response) {
                     // TODO check response
-                    var index = roles.findIndex(function(r) {
-                        return r.id == id;
-                    });
-                    if(index) {
-                        roles.splice(index, 1);
-                    }
+                    if(index > -1) roles.splice(index, 1);
                 });
                 this.hideDeleteRoleModal()
             }
@@ -182,8 +186,15 @@
                     console.log(selection)
                 ),
                 newRole: {},
+                newRoles: [],
+                importedRoles: this.roles.slice(),
                 selectedRole: {}
             }
         },
+        computed: {
+            localRoles() {
+                return this.importedRoles.concat(this.newRoles);
+            }
+        }
     }
 </script>
