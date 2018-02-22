@@ -23,11 +23,11 @@
             </span>
         </div>
 
-        <ul class="list-group dropdown-menu" v-show="hasItems">
-            <li class="list-group-item" v-for="(item, $item) in items" :class="activeClass($item)" @mousedown="hit" @mousemove="setActive($item)">
+        <div class="dropdown-menu" style="display: flex; flex-direction: column;" v-show="hasItems">
+            <a href="#" class="dropdown-item" v-for="(item, $item) in items" :class="activeClass($item)" @mousedown="hit" @mousemove="setActive($item)">
                 <span v-text="item.name"></span>
-            </li>
-        </ul>
+            </a>
+        </div>
     </div>
 </template>
 
