@@ -6,6 +6,7 @@ import brands from '@fortawesome/fontawesome-free-brands';
 import VModal from 'vue-js-modal';
 import Axios from 'axios';
 import VueUploadComponent from 'vue-upload-component';
+import moment from 'moment';
 
 fontawesome.library.add(solid, regular, brands);
 
@@ -46,10 +47,19 @@ Vue.component('layer', require('./components/LayerList.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 
 // Page Components
-Vue.component('preferences', require('./components/Preferences.vue'))
-Vue.component('roles', require('./components/Roles.vue'))
-Vue.component('users', require('./components/Users.vue'))
-Vue.component('user-preferences', require('./components/UserPreferences.vue'))
+Vue.component('preferences', require('./components/Preferences.vue'));
+Vue.component('roles', require('./components/Roles.vue'));
+Vue.component('users', require('./components/Users.vue'));
+Vue.component('user-preferences', require('./components/UserPreferences.vue'));
+Vue.component('about-dialog', require('./components/About.vue'));
+
+// Filter
+Vue.filter('date', function(value, format) {
+    if(!format) format = 'DD.MM.YYYY hh:mm';
+    if(value) {
+        return moment.unix(Number(value)).utc().format(format);
+    }
+});
 
 const app = new Vue({
     el: '#app',
@@ -58,6 +68,11 @@ const app = new Vue({
         selectedContext: {},
         onSelectContext: function(selection) {
             app.$data.selectedContext = JSON.parse(JSON.stringify(selection));
+        }
+    },
+    methods: {
+        showAboutModal() {
+            this.$modal.show('about-modal');
         }
     }
 });

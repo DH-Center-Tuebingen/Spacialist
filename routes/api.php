@@ -16,6 +16,17 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::get('/version', function() {
+    $versionInfo = new App\VersionInfo();
+    return response()->json([
+        'full' => $versionInfo->getFullRelease(),
+        'readable' => $versionInfo->getReadableRelease(),
+        'release' => $versionInfo->getRelease(),
+        'name' => $versionInfo->getReleaseName(),
+        'time' => $versionInfo->getTime()
+    ]);
+});
+
 Route::get('/context/search', 'SearchController@searchContextByName');
 
 Route::post('/user', 'UserController@addUser');

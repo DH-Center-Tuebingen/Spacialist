@@ -121,7 +121,7 @@
                                 <a class="dropdown-item" href="">
                                     <i class="fas fa-fw fa-pencil-alt"></i> Toggle Edit Mode
                                 </a>
-                                <a class="dropdown-item" href="">
+                                <a class="dropdown-item" href="#" v-on:click="showAboutModal">
                                     <i class="fas fa-fw fa-info-circle"></i> About
                                 </a>
                             </div>
@@ -155,6 +155,7 @@
                     @yield('content')
                 </div>
             </div>
+            <about-dialog></about-dialog>
         </div>
     </div>
 
