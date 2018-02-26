@@ -14,6 +14,32 @@ class BibliographyController extends Controller
 
     // POST
 
+    public function addItem(Request $request) {
+        $this->validate($request, [
+            'type' => 'required|alpha'
+        ]);
+
+        $user = ['name' => 'Admin']; // TODO \Auth::user();
+        $bib = new Bibliography();
+
+        foreach($request->toArray() as $key => $value){
+            $bib->{$key} = $value;
+        }
+
+        $ckey = Helpers::computeCitationKey($bib->toArray());
+        if($ckey === null) {
+            return response([
+                'error' => 'Could not compute citation key.'
+            ]);
+        }
+        $bib->citekey = $ckey;
+        $bib->lasteditor = $user['name'];
+
+        $bib->save();
+
+        return response()->json($bib);
+    }
+
     public function importBibtex(Request $request) {
         $this->validate($request, [
             'file' => 'required|file'

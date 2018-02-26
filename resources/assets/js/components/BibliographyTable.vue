@@ -16,7 +16,7 @@
                 </form>
             </li>
             <li class="list-inline-item">
-                <button type="button" class="btn btn-success" id="literature-add-button">
+                <button type="button" class="btn btn-success" id="literature-add-button" @click="showNewItemModal">
                     <i class="fas fa-fw fa-plus"></i> New Bibliography Item
                 </button>
             </li>
@@ -333,10 +333,63 @@
                 </tbody>
             </table>
         </div>
+
+        <modal name="new-bibliography-item-modal" height="auto" :scrollable="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add new Item</h5>
+                    <button type="button" class="close" aria-label="Close" v-on:click="hideNewItemModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form" @submit.prevent="addBibliographyItem(newItem)">
+                        <div class="form-group">
+                            <label class="control-label col-md-3" for="type">Type:</label>
+                            <div class="col-md-9">
+                                <multiselect
+                                    v-model="newItem.type"
+                                    label="name"
+                                    :options="availableTypes"
+                                    :multiple="false"
+                                    :hideSelected="true"
+                                    :allowEmpty="false"
+                                    :closeOnSelect="true">
+                                </multiselect>
+                            </div>
+                        </div>
+                        <div class="form-group" v-for="mandatory in mandatoryFields">
+                            <label class="control-label col-md-3">{{ mandatory }}:<span style="color: red;">*</span></label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" v-model="newItem.fields[mandatory]" required/>
+                            </div>
+                        </div>
+                        <div class="form-group" v-for="optional in optionalFields">
+                            <label class="control-label col-md-3">{{ optional }}:</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" v-model="newItem.fields[optional]"/>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-fw fa-plus"></i> Add
+                        </button>
+                    </form>
+                    <h4>BibTeX-Code</h4>
+                    <span ng-bind-html="mc.fields | bibtexify:mc.selectedType"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @click="hideNewItemModal">
+                        <i class="fas fa-fw fa-ban"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </modal>
     </div>
 </template>
 
 <script>
+    import axios from 'axios';
+
     export default {
         props: {
             entries: {
@@ -362,7 +415,7 @@
                 // Wait for response
                 if(newFile && oldFile && newFile.success && !oldFile.success) {
                     console.log(newFile.response);
-                    this.uploadedEntries = this.uploadedEntries.concat(newFile.response);
+                    this.localEntries.push(newFile.response);
                 }
                 // Enable automatic upload
                 if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
@@ -370,20 +423,202 @@
                         this.$refs.upload.active = true
                     }
                 }
+            },
+            addBibliographyItem(item) {
+                if(!item.type) return;
+                if(!item.fields) return;
+                let data = {};
+                // check if all mandatory fields are set
+                for(let i=0; i<item.type.mandatoryFields.length; i++) {
+                    let k = item.type.mandatoryFields[i];
+                    if(item.fields[k] == null || item.fields[k] == '') {
+                        return;
+                    }
+                }
+                for(let k in item.fields) {
+                    data[k] = item.fields[k];
+                }
+                data.type = item.type.name;
+
+                let entries = this.localEntries;
+                let hideNewItemModal = this.hideNewItemModal;
+                axios.post('/api/bibliography', data).then(function(response) {
+                    entries.push(response.data);
+                    hideNewItemModal();
+                });
+            },
+            showNewItemModal() {
+                this.$modal.show('new-bibliography-item-modal');
+            },
+            hideNewItemModal() {
+                this.$modal.hide('new-bibliography-item-modal');
             }
         },
         data() {
             return {
+                localEntries: this.entries.slice(),
                 orderColumn: 'author',
                 orderType: 'asc',
                 query: '',
-                uploadedEntries: [],
-                files: []
+                files: [],
+                newItem: {
+                    fields: {}
+                },
+                availableTypes: [
+                    {
+                        name: 'article',
+                        id: 0,
+                        mandatoryFields: [
+                            'author', 'title', 'journal', 'year'
+                        ],
+                        optionalFields: [
+                            'volume', 'number', 'pages', 'month', 'note'
+                        ]
+                    },
+                    {
+                        name: 'book',
+                        id: 1,
+                        mandatoryFields: [
+                            'title', 'publisher', 'year'
+                        ],
+                        optionalFields: [
+                            'author', 'editor', 'volume', 'number', 'address', 'series', 'edition', 'month', 'note'
+                        ]
+                    },
+                    {
+                        name: 'incollection',
+                        id: 2,
+                        mandatoryFields: [
+                            'author', 'title', 'booktitle', 'publisher', 'year'
+                        ],
+                        optionalFields: [
+                            'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
+                        ]
+                    },
+                    {
+                        name: 'misc',
+                        id: 3,
+                        mandatoryFields: [
+                        ],
+                        optionalFields: [
+                            'author', 'title', 'howpublished', 'month', 'year', 'note'
+                        ]
+                    },
+                    {
+                        name: 'booklet',
+                        id: 4,
+                        mandatoryFields: [
+                            'title'
+                        ],
+                        optionalFields: [
+                            'author', 'howpublished', 'address', 'month', 'year', 'note'
+                        ]
+                    },
+                    {
+                        name: 'conference',
+                        id: 5,
+                        mandatoryFields: [
+                             'author', 'title', 'booktitle', 'year'
+                        ],
+                        optionalFields: [
+                            'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
+                        ]
+                    },
+                    {
+                        name: 'inbook',
+                        id: 6,
+                        mandatoryFields: [
+                            'title', 'publisher', 'year'
+                        ],
+                        optionalFields: [
+                            'author', 'editor', 'chapter', 'pages', 'volume', 'number', 'series', 'address', 'edition', 'month', 'note'
+                        ]
+                    },
+                    {
+                        name: 'inproceedings',
+                        id: 7,
+                        mandatoryFields: [
+                             'author', 'title', 'booktitle', 'year'
+                        ],
+                        optionalFields: [
+                            'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
+                        ]
+                    },
+                    {
+                        name: 'manual',
+                        id: 8,
+                        mandatoryFields: [
+                            'title'
+                        ],
+                        optionalFields: [
+                            'author', 'organization', 'address', 'edition', 'month', 'year', 'note'
+                        ]
+                    },
+                    {
+                        name: 'mastersthesis',
+                        id: 9,
+                        mandatoryFields: [
+                            'author', 'title', 'school', 'year'
+                        ],
+                        optionalFields: [
+                            'address', 'month', 'note'
+                        ]
+                    },
+                    {
+                        name: 'phdthesis',
+                        id: 10,
+                        mandatoryFields: [
+                            'author', 'title', 'school', 'year'
+                        ],
+                        optionalFields: [
+                            'address', 'month', 'note'
+                        ]
+                    },
+                    {
+                        name: 'proceedings',
+                        id: 11,
+                        mandatoryFields: [
+                            'title', 'year'
+                        ],
+                        optionalFields: [
+                            'editor', 'volume', 'number', 'series', 'address', 'month', 'organization', 'publisher', 'note'
+                        ]
+                    },
+                    {
+                        name: 'techreport',
+                        id: 12,
+                        mandatoryFields: [
+                            'author', 'title', 'institution', 'year'
+                        ],
+                        optionalFields: [
+                            'number', 'address', 'month', 'note'
+                        ]
+                    },
+                    {
+                        name: 'unpublished',
+                        id: 13,
+                        mandatoryFields: [
+                            'author', 'title', 'note'
+                        ],
+                        optionalFields: [
+                            'month', 'year'
+                        ]
+                    }
+                ]
             }
         },
         computed: {
-            localEntries: function() {
-                return this.entries.concat(this.uploadedEntries);
+            mandatoryFields: function() {
+                if(this.newItem.type) {
+                    return this.newItem.type.mandatoryFields;
+                }
+                return this.availableTypes[0].mandatoryFields;
+            },
+            optionalFields: function() {
+                if(this.newItem.type) {
+                    return this.newItem.type.optionalFields;
+                }
+                return this.availableTypes[0].optionalFields;
             },
             orderedList: function() {
                 let query = this.query.toLowerCase();

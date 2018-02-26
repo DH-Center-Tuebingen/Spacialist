@@ -14,8 +14,8 @@
         @keydown.esc="reset"
         @blur="reset"
         @input="debounce"/>
-        <div class="input-group-prepend">
-            <span class="input-group-text">
+        <div class="input-group-append">
+            <span class="input-group-text multiselect-search">
                 <i class="fas fa-spinner fa-spin" v-if="loading"></i>
                 <template v-else>
                     <i class="fas fa-fw fa-search" v-show="isEmpty"></i>
