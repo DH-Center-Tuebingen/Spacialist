@@ -62,6 +62,21 @@ Vue.filter('date', function(value, format) {
         return moment.unix(Number(value)).utc().format(format);
     }
 });
+Vue.filter('bibtexify', function(value, type) {
+    let rendered = "<pre><code>";
+    if(type) {
+        rendered += "@"+type+" {";
+        for(let k in value) {
+            if(value[k] == null || value[k] == '') continue;
+            rendered += "    <br />";
+            rendered += "    " + k + " = \"" + value[k] + "\"";
+        }
+        rendered += "<br />";
+        rendered += "}";
+    }
+    rendered += "</code></pre>";
+    return rendered;
+});
 
 const app = new Vue({
     el: '#app',

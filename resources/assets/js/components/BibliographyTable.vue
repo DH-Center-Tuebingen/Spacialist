@@ -374,8 +374,8 @@
                             <i class="fas fa-fw fa-plus"></i> Add
                         </button>
                     </form>
-                    <h4>BibTeX-Code</h4>
-                    <span ng-bind-html="mc.fields | bibtexify:mc.selectedType"></span>
+                    <h4 class="mt-3">BibTeX-Code</h4>
+                    <span v-if="newItem.type" v-html="this.$options.filters.bibtexify(newItem.fields, newItem.type.name)"></span>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" @click="hideNewItemModal">
@@ -448,6 +448,7 @@
                 });
             },
             showNewItemModal() {
+                Vue.set(this.newItem, 'type', this.availableTypes[0]);
                 this.$modal.show('new-bibliography-item-modal');
             },
             hideNewItemModal() {
