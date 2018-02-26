@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\User;
 use App\Preference;
 use App\UserPreference;
 use App\Helpers;
@@ -35,14 +34,6 @@ class PreferenceController extends Controller {
         $value = $request->get('value');
         $uid = $request->get('user_id');
         $allowOverride = $request->get('allow_override');
-
-        // Permission is required, if preference is not a user preference
-        $user = \Auth::user();
-        if((!isset($uid) && !$user->can('edit_preferences')) || (isset($uid) && !$user->can('edit_preferences') && $uid != $user['id'])) {
-            return response([
-                'error' => 'You do not have the permission to call this method'
-            ], 403);
-        }
 
         try {
             $pref = Preference::findOrFail($id);
