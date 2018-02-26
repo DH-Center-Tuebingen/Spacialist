@@ -1,14 +1,18 @@
 <template>
     <div>
         <ul class="ml-3 list-unstyled">
-            <li v-for="d in data" class="pb-1">
+            <li v-for="(d, i) in data" class="pb-1 d-flex align-items-center justify-content-between" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
                 <i class="fas fa-fw fa-leaf"></i>
-                <a href="#">{{ concepts[d.thesaurus_url].label }}</a>
+                <a class="p-2" href="#">{{ concepts[d.thesaurus_url].label }}</a>
+                <span class="ml-auto" v-if="onDelete">
+                    <button class="btn btn-danger btn-fab rounded-circle" v-show="hoverState[i]" @click="onDelete(d)">
+                        <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
+                    </button>
+                </span>
             </li>
-            <!-- <li v-if="addNew"> -->
-            <li>
+            <li v-if="onAdd">
                 <i class="fas fa-fw fa-plus"></i>
-                <a href="#" v-on:click="addNew()" class="text-secondary">New Layer...</a>
+                <a href="#" v-on:click="onAdd()" class="text-secondary">New Layer...</a>
             </li>
         </ul>
     </div>
@@ -24,12 +28,38 @@
             concepts: {
                 type: Object,
                 required: true
+            },
+            onAdd: {
+                type: Function,
+                required: false
+            },
+            onDelete: {
+                type: Function,
+                required: false
             }
         },
         mounted() {},
-        methods: {},
+        methods: {
+            onEnter(i) {
+                Vue.set(this.hovered, i, true);
+            },
+            onLeave(i) {
+                Vue.set(this.hovered, i, false);
+            },
+        },
         data() {
             return {
+                hovered: []
+            }
+        },
+        created() {
+            for(let i=0; i<this.data.length; i++) {
+                this.hovered.push(false);
+            }
+        },
+        computed: {
+            hoverState: function() {
+                return this.hovered;
             }
         }
     }

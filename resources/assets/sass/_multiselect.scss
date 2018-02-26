@@ -1,0 +1,21 @@
+.multiselect__tags {
+    border-color: $input-border-color !important;
+    border-radius: $input-border-radius !important;
+}
+
+.multiselect--active:not(.multiselect--above) .multiselect__current,
+.multiselect--active:not(.multiselect--above) .multiselect__input,
+.multiselect--active:not(.multiselect--above) .multiselect__tags {
+    border-radius: $input-border-radius !important;
+}
+
+.multiselect--above.multiselect--active .multiselect__current,
+.multiselect--above.multiselect--active .multiselect__input,
+.multiselect--above.multiselect--active .multiselect__tags {
+    border-radius: $input-border-radius !important;
+}
+
+.input-group-append > .input-group-text.multiselect-search {
+    border-top-right-radius: $input-border-radius !important;
+    border-bottom-right-radius: $input-border-radius !important;
+}

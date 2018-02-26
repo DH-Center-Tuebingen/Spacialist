@@ -36,7 +36,8 @@ Vue.use(VModal);
 Vue.component('multiselect', Multiselect);
 Vue.component('file-upload', VueUploadComponent);
 // Extended Components
-Vue.component('typeahead', require('./components/Typeahead.vue'));
+Vue.component('context-search', require('./components/ContextSearch.vue'));
+Vue.component('label-search', require('./components/LabelSearch.vue'));
 
 // Reusable Components
 Vue.component('attributes', require('./components/AttributeList.vue'));
@@ -51,6 +52,7 @@ Vue.component('preferences', require('./components/Preferences.vue'));
 Vue.component('roles', require('./components/Roles.vue'));
 Vue.component('users', require('./components/Users.vue'));
 Vue.component('user-preferences', require('./components/UserPreferences.vue'));
+Vue.component('data-model', require('./components/DataModel.vue'));
 Vue.component('about-dialog', require('./components/About.vue'));
 
 // Filter

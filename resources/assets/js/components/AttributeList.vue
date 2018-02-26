@@ -1,7 +1,7 @@
 <template>
     <div>
-        <div class="form-group row" v-for="attribute in attributes" @mouseenter="onEnter(attribute.id)" @mouseleave="onLeave(attribute.id)">
-            <label class="control-label col-md-3 d-flex justify-content-end" :for="'attribute-'+attribute.id">
+        <div class="form-group row" v-for="(attribute, i) in attributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
+            <label class="control-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id">
                 <!-- <div style="display: table; float: right;">
                     <span style="display: table-cell">
                         {{ concepts[attribute.thesaurus_url].label }}:
@@ -21,7 +21,7 @@
                             <i class="fas fa-fw fa-trash"></i>
                         </a>
                     </div>
-                    <div v-if="allowOrder">
+                    <div v-if="allowReorder">
                         <a class="btn btn-outline-secondary btn-sm p-1" href="" v-if="!$first">
                             <i class="fas fa-fw fa-sort-up"></i>
                         </a>
@@ -30,10 +30,18 @@
                         </a>
                     </div>
                 </div> -->
-                <span>
+                <div v-show="hoverState[i]">
+                    <button v-if="onEdit" class="btn btn-info btn-fab rounded-circle">
+                        <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
+                    </button>
+                    <button v-if="onDelete" class="btn btn-danger btn-fab rounded-circle">
+                        <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
+                    </button>
+                </div>
+                <span class="text-right">
                     {{concepts[attribute.thesaurus_url].label}}:
                 </span>
-                <sup v-if="allowMetadata">
+                <sup v-if="onMetadata">
                     <i class="fas fa-fw fa-lg fa-dot-circle"></i>
                 </sup>
             </label>
@@ -43,9 +51,9 @@
                 <input class="form-control" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
                 <input class="form-control" v-else-if="attribute.datatype == 'boolean'" type="checkbox" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
                 <textarea class="form-control" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"></textarea>
-                <div v-else-if="attribute.datatype == 'percentage'">
-                    <input class="form-control slider" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
-                    <span class="slider-text">{{ localValues[attribute.id] }}%</span>
+                <div v-else-if="attribute.datatype == 'percentage'" class="d-flex">
+                    <input class="form-control" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
+                    <span class="ml-3">{{ localValues[attribute.id] }}%</span>
                 </div>
                 <div v-else-if="attribute.datatype == 'geography'">
                     <input class="form-control" type="text" :id="'attribute-'+attribute.id" placeholder="Add WKT" v-model="localValues[attribute.id]" />
@@ -54,7 +62,7 @@
                     </button>
                 </div>
                 <div v-else-if="attribute.datatype == 'context'">
-                    <typeahead></typeahead>
+                    <context-search></context-search>
                 </div>
                 <div class="input-group date" data-provide="datepicker" v-else-if="attribute.datatype == 'date'">
                     <input type="text" class="form-control" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"  ng-model-options="{timezone:'utc'}"/>
@@ -237,14 +245,47 @@
 
 <script>
     export default {
-        props: ['attributes', 'values', 'concepts', 'allowEdit', 'showInfo', 'allowDelete', 'allowMetadata', 'allowOrder'],
+        props: {
+            attributes: {
+                required: true,
+                type: Array
+            },
+            values: {
+                required: true,
+                type: Object
+            },
+            concepts: {
+                required: true,
+                type: Object
+            },
+            onDelete: {
+                required: false,
+                type: Function
+            },
+            onEdit: {
+                required: false,
+                type: Function
+            },
+            onReorder: {
+                required: false,
+                type: Function
+            },
+            showInfo: { // shows parent on hover
+                required: false,
+                type: Boolean
+            },
+            onMetadata: { // Sources modal
+                required: false,
+                type: Function
+            }
+        },
         mounted() {},
         methods: {
-            onEnter(id) {
-                Vue.set(this.$data.hovered, id, true);
+            onEnter(i) {
+                Vue.set(this.hovered, i, true);
             },
-            onLeave(id) {
-                Vue.set(this.$data.hovered, id, true);
+            onLeave(i) {
+                Vue.set(this.hovered, i, false);
             },
             addListEntry(id) {
                 if(!this.localValues[id]) {
@@ -264,21 +305,23 @@
         },
         data() {
             return {
-                hovered: {},
+                hovered: [],
                 inputs: {},
                 expands: {},
                 dimensionUnits: ['nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'],
-                localValues: Object.assign({}, this.values)
+                localValues: Object.assign({}, this.values),
+                localAttributes: this.attributes.slice()
             }
         },
-        // computed: {
-        //     hovered: function() {
-        //         let hoverStates = {};
-        //         for(var i=0; i<this.attributes.length; i++) {
-        //             hoverStates[i] = true;
-        //         }
-        //         return hoverStates;
-        //     }
-        // }
+        created() {
+            for(let i=0; i<this.localAttributes.length; i++) {
+                this.hovered.push(false);
+            }
+        },
+        computed: {
+            hoverState: function() {
+                return this.hovered;
+            }
+        }
     }
 </script>

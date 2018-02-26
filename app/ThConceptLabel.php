@@ -19,4 +19,8 @@ class ThConceptLabel extends Model
         'label',
         'concept_label_type',
     ];
+
+    public function concept() {
+        return $this->belongsTo('App\ThConcept', 'concept_id');
+    }
 }

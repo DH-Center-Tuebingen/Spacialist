@@ -28,10 +28,15 @@ Route::get('/version', function() {
 });
 
 Route::get('/context/search', 'SearchController@searchContextByName');
+Route::get('/label/search', 'SearchController@searchInThesaurus');
+
+Route::get('/editor/dm/occurrence_count/{id}', 'EditorController@getOccurrenceCount')->where('id', '[0-9]+');
+Route::post('/editor/dm/context_type', 'EditorController@addContextType');
+Route::delete('/editor/dm/context_type/{id}', 'EditorController@deleteContextType')->where('id', '[0-9]+');
 
 Route::post('/user', 'UserController@addUser');
-Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');
 Route::post('/role', 'UserController@addRole');
+Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');
 Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');
 
 Route::post('/bibliography/import', 'BibliographyController@importBibtex');
