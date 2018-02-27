@@ -49,7 +49,7 @@
         },
         data () {
             return {
-                src: '/api/label/search',
+                src: '/api/search/label',
                 limit: 5,
                 minChars: 3,
                 selectFirst: false

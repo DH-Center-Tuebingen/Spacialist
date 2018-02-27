@@ -45,7 +45,7 @@
         },
         data () {
             return {
-                src: '/api/context/search',
+                src: '/api/search/context',
                 limit: 5,
                 minChars: 3,
                 selectFirst: false

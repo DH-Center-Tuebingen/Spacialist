@@ -27,8 +27,8 @@ Route::get('/version', function() {
     ]);
 });
 
-Route::get('/context/search', 'SearchController@searchContextByName');
-Route::get('/label/search', 'SearchController@searchInThesaurus');
+Route::get('/search/context', 'SearchController@searchContextByName');
+Route::get('/search/label', 'SearchController@searchInThesaurus');
 
 Route::get('/editor/dm/context_type/occurrence_count/{id}', 'EditorController@getContextTypeOccurrenceCount')->where('id', '[0-9]+');
 Route::get('/editor/dm/attribute/occurrence_count/{id}', 'EditorController@getAttributeOccurrenceCount')->where('id', '[0-9]+');
