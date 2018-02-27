@@ -176,8 +176,6 @@
 </template>
 
 <script>
-    import axios from 'axios';
-
     export default {
         props: ['attributes', 'values', 'concepts', 'contextTypes'],
         mounted() {},
@@ -196,7 +194,7 @@
                 if(attribute.parent) {
                     data.parent_id = attribute.parent.id;
                 }
-                axios.post('/api/editor/dm/attribute', data).then(function(response) {
+                this.$http.post('/api/editor/dm/attribute', data).then(function(response) {
                     attributes.push(response.data);
                     hideModal();
                 });
@@ -205,7 +203,7 @@
                 let id = attribute.id;
                 let attributes = this.localAttributes;
                 let hideModal = this.hideDeleteAttributeModal;
-                axios.delete('/api/editor/dm/attribute/' + id).then(function(response) {
+                this.$http.delete('/api/editor/dm/attribute/' + id).then(function(response) {
                     let index = attributes.findIndex(function(a) {
                         return a.id == id;
                     });
@@ -223,7 +221,7 @@
                 let data = {
                     'concept_url': url
                 };
-                axios.post('/api/editor/dm/context_type', data).then(function(response) {
+                this.$http.post('/api/editor/dm/context_type', data).then(function(response) {
                     contextTypes.push(response.data);
                     hideModal();
                 });
@@ -232,7 +230,7 @@
                 let id = contextType.id;
                 let contextTypes = this.localContextTypes;
                 let hideModal = this.hideDeleteContextTypeModal;
-                axios.delete('/api/editor/dm/context_type/' + id).then(function(response) {
+                this.$http.delete('/api/editor/dm/context_type/' + id).then(function(response) {
                     let index = contextTypes.findIndex(function(ct) {
                         return ct.id == id;
                     });
@@ -255,7 +253,7 @@
             onCreateAttribute() {
                 let aT = this.attributeTypes;
                 let modal = this.$modal;
-                axios.get('/api/editor/dm/attribute_types').then(function(response) {
+                this.$http.get('/api/editor/dm/attribute_types').then(function(response) {
                     for(let i=0; i<response.data.length; i++) {
                         aT.push(response.data[i]);
                     }
@@ -267,7 +265,7 @@
                 let setAttributeValueCount = this.setAttributeValueCount;
                 let setSelectedAttribute = this.setSelectedAttribute;
                 let modal = this.$modal;
-                axios.get('/api/editor/dm/attribute/occurrence_count/' + id).then(function(response) {
+                this.$http.get('/api/editor/dm/attribute/occurrence_count/' + id).then(function(response) {
                     setAttributeValueCount(response.data);
                     setSelectedAttribute(attribute);
                     modal.show('delete-attribute-modal');
@@ -288,7 +286,7 @@
                 let setContextCount = this.setContextCount;
                 let setSelectedContextType = this.setSelectedContextType;
                 let modal = this.$modal;
-                axios.get('/api/editor/dm/context_type/occurrence_count/' + id).then(function(response) {
+                this.$http.get('/api/editor/dm/context_type/occurrence_count/' + id).then(function(response) {
                     setContextCount(response.data);
                     setSelectedContextType(contextType);
                     modal.show('delete-context-type-modal');

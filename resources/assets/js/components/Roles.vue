@@ -127,8 +127,6 @@
 </template>
 
 <script>
-    import axios from 'axios';
-
     export default {
         props: ['roles', 'permissions'],
         mounted() {},
@@ -142,7 +140,7 @@
             },
             onAddRole(newRole) {
                 let roles = this.newRoles;
-                axios.post('/api/role', newRole).then(function(response) {
+                this.$http.post('/api/role', newRole).then(function(response) {
                     roles.push(response.data);
                 });
                 this.hideNewRoleModal()
@@ -172,7 +170,7 @@
                 } else {
                     roles = this.importedRoles;
                 }
-                axios.delete('/api/role/' + id).then(function(response) {
+                this.$http.delete('/api/role/' + id).then(function(response) {
                     // TODO check response
                     if(index > -1) roles.splice(index, 1);
                 });

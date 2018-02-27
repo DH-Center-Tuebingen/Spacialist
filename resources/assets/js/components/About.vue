@@ -49,8 +49,6 @@
 </template>
 
 <script>
-    import axios from 'axios';
-
     export default {
         mounted() {},
         methods: {
@@ -65,7 +63,7 @@
         },
         created() {
             let v = this.version;
-            axios.get('/api/version').then(function(response) {
+            this.$http.get('/api/version').then(function(response) {
                 for(var k in response.data) {
                     Vue.set(v, k, response.data[k]);
                 }

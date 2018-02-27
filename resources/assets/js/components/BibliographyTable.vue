@@ -393,8 +393,6 @@
 </template>
 
 <script>
-    import axios from 'axios';
-
     export default {
         props: {
             entries: {
@@ -447,7 +445,7 @@
 
                 let entries = this.localEntries;
                 let hideNewItemModal = this.hideNewItemModal;
-                axios.post('/api/bibliography', data).then(function(response) {
+                this.$http.post('/api/bibliography', data).then(function(response) {
                     entries.push(response.data);
                     hideNewItemModal();
                 });

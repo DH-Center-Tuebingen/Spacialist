@@ -123,8 +123,6 @@
 </template>
 
 <script>
-    import axios from 'axios';
-
     export default {
         props: ['users', 'roles'],
         mounted() {},
@@ -138,7 +136,7 @@
             },
             onAddUser(newUser) {
                 let users = this.newUsers;
-                axios.post('/api/user', newUser).then(function(response) {
+                this.$http.post('/api/user', newUser).then(function(response) {
                     users.push(response.data);
                 });
                 this.hideNewUserModal()
@@ -168,7 +166,7 @@
                 } else {
                     users = this.importedUsers;
                 }
-                axios.delete('/api/user/' + id).then(function(response) {
+                this.$http.delete('/api/user/' + id).then(function(response) {
                     // TODO check response
                     if(index > -1) users.splice(index, 1);
                 });

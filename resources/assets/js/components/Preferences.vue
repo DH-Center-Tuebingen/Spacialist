@@ -194,8 +194,6 @@
 </template>
 
 <script>
-    import axios from 'axios';
-
     export default {
         props: ['preferences'],
         mounted() {},
@@ -206,7 +204,7 @@
                 data.value = pref.value;
                 if(typeof data.value === 'object') data.value = JSON.stringify(value);
                 data.allow_override = pref.allow_override;
-                axios.patch('/api/preference/' + pref.id, data).then(function(response) {
+                this.$http.patch('/api/preference/' + pref.id, data).then(function(response) {
                     console.log(response.data);
                 });
             }
