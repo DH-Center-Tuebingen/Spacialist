@@ -9,6 +9,7 @@
         "fideloper/proxy": "~4.0",
         "laravel/framework": "5.6.*",
         "laravel/tinker": "~1.0",
+        "phaza/laravel-postgis": "^3.3",
         "renanbr/bibtex-parser": "^2.0",
         "zizaco/entrust": "5.2.x-dev"
     },

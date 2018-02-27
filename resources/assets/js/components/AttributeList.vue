@@ -34,7 +34,7 @@
                     <button v-if="onEdit" class="btn btn-info btn-fab rounded-circle">
                         <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
                     </button>
-                    <button v-if="onDelete" class="btn btn-danger btn-fab rounded-circle">
+                    <button v-if="onDelete" class="btn btn-danger btn-fab rounded-circle" @click="onDelete(attribute)">
                         <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                     </button>
                 </div>
@@ -73,10 +73,26 @@
                     </div>
                 </div>
                 <div v-else-if="attribute.datatype == 'string-mc'">
-                    <multiselect v-model="localValues[attribute.id]" :options="[]" label="name" :multiple="true" :hideSelected="true" :closeOnSelect="false"></multiselect>
+                    <multiselect
+                        label="name"
+                        v-model="localValues[attribute.id]"
+                        :allowEmpty="true"
+                        :closeOnSelect="false"
+                        :hideSelected="true"
+                        :multiple="true"
+                        :options="[]">
+                    </multiselect>
                 </div>
                 <div v-else-if="attribute.datatype == 'string-sc'">
-                    <multiselect v-model="localValues[attribute.id]" :options="[]" label="name" :multiple="false" :hideSelected="true" :allowEmpty="true" :closeOnSelect="false"></multiselect>
+                    <multiselect
+                        label="name"
+                        v-model="localValues[attribute.id]"
+                        :allowEmpty="true"
+                        :closeOnSelect="true"
+                        :hideSelected="true"
+                        :multiple="false"
+                        :options="[]">
+                    </multiselect>
                 </div>
                 <div v-else-if="attribute.datatype == 'list'">
                     <div class="input-group">

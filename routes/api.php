@@ -30,9 +30,13 @@ Route::get('/version', function() {
 Route::get('/context/search', 'SearchController@searchContextByName');
 Route::get('/label/search', 'SearchController@searchInThesaurus');
 
-Route::get('/editor/dm/occurrence_count/{id}', 'EditorController@getOccurrenceCount')->where('id', '[0-9]+');
+Route::get('/editor/dm/context_type/occurrence_count/{id}', 'EditorController@getContextTypeOccurrenceCount')->where('id', '[0-9]+');
+Route::get('/editor/dm/attribute/occurrence_count/{id}', 'EditorController@getAttributeOccurrenceCount')->where('id', '[0-9]+');
+Route::get('/editor/dm/attribute_types', 'EditorController@getAttributeTypes');
 Route::post('/editor/dm/context_type', 'EditorController@addContextType');
+Route::post('/editor/dm/attribute', 'EditorController@addAttribute');
 Route::delete('/editor/dm/context_type/{id}', 'EditorController@deleteContextType')->where('id', '[0-9]+');
+Route::delete('/editor/dm/attribute/{id}', 'EditorController@deleteAttribute')->where('id', '[0-9]+');
 
 Route::post('/user', 'UserController@addUser');
 Route::post('/role', 'UserController@addRole');
