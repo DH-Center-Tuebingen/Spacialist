@@ -75,4 +75,37 @@ class BibliographyController extends Controller
         }
         return response()->json($newEntries);
     }
+
+    public function exportBibtex() {
+        $entries = Bibliography::orderBy('author', 'asc')->get();
+        $content = '';
+        foreach($entries as $e) {
+            $content .= '@'.$e->type.'{'.$e->citekey.',';
+            $content .= "\n";
+            $attrs = $e->getAttributes();
+            foreach($attrs as $k => $a) {
+                if(!isset($a)) continue;
+                switch($k) {
+                    case 'id':
+                    case 'type':
+                    case 'created_at':
+                    case 'updated_at':
+                    case 'citekey':
+                    case 'lasteditor':
+                        break;
+                    default:
+                        $content .= '    '.$k.': {'.$a.'}';
+                        $content .= "\n";
+                        break;
+                }
+            }
+            $content .= '}';
+            $content .= "\n\n";
+        }
+        return response()->streamDownload(function() use ($content) {
+            echo $content;
+        }, 'export.bib', [
+            'Content-Type' => 'application/x-bibtex'
+        ]);
+    }
 }

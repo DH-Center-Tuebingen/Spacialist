@@ -29,10 +29,15 @@
                 :directory="false"
                 :drop="true"
                 @input-file="inputFile">
-                    <span class="btn btn-primary">
+                    <span class="btn btn-outline-primary">
                         <i class="fas fa-fw fa-download"></i> Import BibTex File
                     </span>
                 </file-upload>
+            </li>
+            <li class="list-inline-item">
+                <a type="button" class="btn btn-outline-primary" href="/api/bibliography/export">
+                    <i class="fas fa-fw fa-upload"></i> Export BibTex File
+                </a>
             </li>
         </ul>
         <div id="literature-container" class="table-responsive">

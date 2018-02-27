@@ -41,5 +41,6 @@ Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');
 
 Route::patch('/preference/{id}', 'PreferenceController@patchPreference')->where('id', '[0-9]+');
 
+Route::get('/bibliography/export', 'BibliographyController@exportBibtex');
 Route::post('/bibliography', 'BibliographyController@addItem');
 Route::post('/bibliography/import', 'BibliographyController@importBibtex');
