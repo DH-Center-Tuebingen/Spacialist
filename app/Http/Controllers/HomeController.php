@@ -56,7 +56,7 @@ class HomeController extends Controller
     public function userPrefs($id)
     {
         $userPrefs = Preference::getUserPreferences($id);
-        return view('settings.userpreferences', ['preferences' => json_encode($userPrefs)]);
+        return view('settings.userpreferences', ['preferences' => json_encode($userPrefs), 'user_id' => $id]);
     }
 
     public function users()
