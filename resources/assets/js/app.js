@@ -7,6 +7,7 @@ import VModal from 'vue-js-modal';
 import Axios from 'axios';
 import VueUploadComponent from 'vue-upload-component';
 import moment from 'moment';
+import VeeValidate from 'vee-validate';
 
 fontawesome.library.add(solid, regular, brands);
 
@@ -31,6 +32,7 @@ $ = jQuery  = window.$ = window.jQuery = require('jquery');
  */
 Vue.prototype.$http = Axios;
 Vue.use(VModal);
+Vue.use(VeeValidate);
 
 // Imported Components
 Vue.component('multiselect', Multiselect);

@@ -12,7 +12,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="user in localUsers">
+                <tr v-for="user in userList">
                     <td>
                         {{ user.name }}
                     </td>
@@ -20,7 +20,7 @@
                         {{ user.email }}
                     </td>
                     <td>
-                        <multiselect v-model="user.roles" :options="roles" label="display_name" :multiple="true" :hideSelected="true" :closeOnSelect="false" @input="updateSelection"></multiselect>
+                        <multiselect v-model="user.roles" :options="roles" label="display_name" :multiple="true" :hideSelected="true" :closeOnSelect="false" track-by="id" :name="'user'+user.id+'roles'" v-validate=""></multiselect>
                     </td>
                     <td>
                         {{ user.created_at }}
@@ -32,8 +32,14 @@
                         <div class="dropdown">
                             <span id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-fw fa-ellipsis-h"></i>
+                                <sup style="margin-left:-0.5rem;">
+                                    <i class="fas fa-fw fa-xs fa-circle text-warning" v-if="isDirty('user'+user.id+'roles')"></i>
+                                </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#" v-if="isDirty('user'+user.id+'roles')" v-on:click="onPatchUser(user.id)">
+                                    <i class="fas fa-fw fa-check text-success"></i> Save
+                                </a>
                                 <a class="dropdown-item" href="#" v-on:click="updatePassword(user.id)">
                                     <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
                                 </a>
@@ -123,6 +129,8 @@
 </template>
 
 <script>
+    import { mapFields } from 'vee-validate';
+
     export default {
         props: ['users', 'roles'],
         mounted() {},
@@ -135,11 +143,14 @@
                 this.newUser = {};
             },
             onAddUser(newUser) {
-                let users = this.newUsers;
+                let users = this.userList;
                 this.$http.post('/api/user', newUser).then(function(response) {
                     users.push(response.data);
                 });
                 this.hideNewUserModal()
+            },
+            onPatchUser(id) {
+                //TODO
             },
             showDeleteUserModal() {
                 this.$modal.show('confirm-delete-user-modal');
@@ -149,48 +160,48 @@
                 this.selectedUser = {};
             },
             requestDeleteUser(id) {
-                this.selectedUser = this.localUsers.find(function(u) {
-                    return u.id == id;
-                });
+                this.selectedUser = this.userList.find(u => u.id == id);
                 this.showDeleteUserModal();
             },
             deleteUser(id) {
                 if(!id) return;
-                let users;
-                var index = this.localUsers.findIndex(function(u) {
-                    return u.id == id;
-                });
-                if(index >= this.importedUsers.length) {
-                    users = this.newUsers;
-                    index = index - this.importedUsers.length;
-                } else {
-                    users = this.importedUsers;
-                }
+                let users = this.userList;
+                let index = this.userList.findIndex(u => u.id == id);
                 this.$http.delete('/api/user/' + id).then(function(response) {
                     // TODO check response
                     if(index > -1) users.splice(index, 1);
                 });
                 this.hideDeleteUserModal()
+            },
+            isDirty(fieldname) {
+                if(this.fields[fieldname]) {
+                    return this.fields[fieldname].dirty;
+                }
+                return false;
             }
         },
         data() {
             return {
                 userRoles: {},
-                updateSelection: selection => (
-                    console.log(selection)
-                ),
                 updatePassword: id => (
                     console.log(id)
                 ),
                 newUser: {},
-                newUsers: [],
-                importedUsers: this.users.slice(),
-                selectedUser: {}
+                selectedUser: {},
+                localUsers: this.users.slice()
             }
         },
         computed: {
-            localUsers() {
-                return this.importedUsers.concat(this.newUsers);
+            userList() {
+                return this.localUsers;
+            },
+            mapFields() {
+                let fields = {};
+                for (let i = 0; i < this.userList.length; i++){
+                    let id = this.userList[i].id;
+                    fields['user'+id+'roles'] = 'user'+id+'roles';
+                }
+                return Object.assign({}, mapFields, fields);
             }
         }
     }
