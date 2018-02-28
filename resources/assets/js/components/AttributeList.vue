@@ -53,7 +53,7 @@
                     </button>
                 </div>
                 <span class="text-right">
-                    {{concepts[attribute.thesaurus_url].label}} ({{attribute.position}}):
+                    {{concepts[attribute.thesaurus_url].label}}:
                 </span>
                 <sup v-if="onMetadata">
                     <i class="fas fa-fw fa-lg fa-dot-circle"></i>
