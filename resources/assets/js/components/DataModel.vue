@@ -6,9 +6,11 @@
                 <i class="fas fa-fw fa-plus"></i> Add Attribute
             </button>
             <attributes
+                group="attributes"
                 :attributes="localAttributes"
-                :values="values"
+                :values="{}"
                 :concepts="concepts"
+                :is-source="true"
                 :on-delete="onDeleteAttribute"
                 :show-info="true">
             </attributes>
@@ -19,19 +21,19 @@
                 :data="localContextTypes"
                 :concepts="concepts"
                 :on-add="onCreateContextType"
-                :on-delete="onDeleteContextType">
+                :on-delete="onDeleteContextType"
+                :on-select="setContextType">
             </context-types>
         </div>
         <div class="col-md-5 h-100 scroll-x-auto">
             <h4>Added Attributes</h4>
-            <button type="button" class="btn btn-success" @click="addAttributeToContextType">
-                <i class="fas fa-fw fa-plug"></i> Add Attribute to <code>Name</code>.
-            </button>
             <attributes
-                :attributes="localAttributes"
-                :values="values"
+                group="attributes"
+                :attributes="contextAttributes"
+                :values="{}"
                 :concepts="concepts"
-                :on-delete="deleteAttribute"
+                :on-add="addAttributeToContextType"
+                :on-remove="onRemoveAttributeFromContextType"
                 :on-reorder="reorderContextAttribute"
                 :show-info="true">
             </attributes>
@@ -120,23 +122,23 @@
         </modal>
 
         <modal name="delete-context-type-modal" height="auto" :scrollable="true">
-            <div class="modal-content" v-if="selectedContextType.thesaurus_url">
+            <div class="modal-content" v-if="modalSelectedContextType.thesaurus_url">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete {{ concepts[selectedContextType.thesaurus_url].label }}</h5>
+                    <h5 class="modal-title">Delete {{ concepts[modalSelectedContextType.thesaurus_url].label }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteContextTypeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to delete Context-Type <i>{{ concepts[selectedContextType.thesaurus_url].label }}</i>?
+                        Do you really want to delete Context-Type <i>{{ concepts[modalSelectedContextType.thesaurus_url].label }}</i>?
                     </p>
                     <p class="alert alert-danger">
-                        Please note: If you delete <i>{{ concepts[selectedContextType.thesaurus_url].label }}</i>, {{ contextCount }} contexts of this type are deleted as well.
+                        Please note: If you delete <i>{{ concepts[modalSelectedContextType.thesaurus_url].label }}</i>, {{ contextCount }} contexts of this type are deleted as well.
                     </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @click="deleteContextType(selectedContextType)">
+                    <button type="button" class="btn btn-danger" @click="deleteContextType(modalSelectedContextType)">
                         <i class="fas fa-fw fa-check"></i> Delete
                     </button>
                     <button type="button" class="btn btn-secondary" @click="hideDeleteContextTypeModal">
@@ -147,26 +149,53 @@
         </modal>
 
         <modal name="delete-attribute-modal" height="auto" :scrollable="true">
-            <div class="modal-content" v-if="selectedAttribute.thesaurus_url">
+            <div class="modal-content" v-if="modalSelectedAttribute.thesaurus_url">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete {{ concepts[selectedAttribute.thesaurus_url].label }}</h5>
+                    <h5 class="modal-title">Delete {{ concepts[modalSelectedAttribute.thesaurus_url].label }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteAttributeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to delete Attribute <i>{{ concepts[selectedAttribute.thesaurus_url].label }}</i>?
+                        Do you really want to delete Attribute <i>{{ concepts[modalSelectedAttribute.thesaurus_url].label }}</i>?
                     </p>
                     <p class="alert alert-danger">
-                        Please note: If you delete <i>{{ concepts[selectedAttribute.thesaurus_url].label }}</i>, {{ attributeValueCount }} values of this attribute in the contexts are deleted as well.
+                        Please note: If you delete <i>{{ concepts[modalSelectedAttribute.thesaurus_url].label }}</i>, {{ attributeValueCount }} values of this attribute in the contexts are deleted as well.
                     </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @click="deleteAttribute(selectedAttribute)">
+                    <button type="button" class="btn btn-danger" @click="deleteAttribute(modalSelectedAttribute)">
                         <i class="fas fa-fw fa-check"></i> Delete
                     </button>
                     <button type="button" class="btn btn-secondary" @click="hideDeleteAttributeModal">
+                        <i class="fas fa-fw fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </modal>
+
+        <modal name="remove-attribute-from-ct-modal" height="auto" :scrollable="true">
+            <div class="modal-content" v-if="modalSelectedAttribute.thesaurus_url">
+                <div class="modal-header">
+                    <h5 class="modal-title">Remove {{ concepts[modalSelectedAttribute.thesaurus_url].label }} from {{ concepts[modalSelectedContextType.thesaurus_url].label }}</h5>
+                    <button type="button" class="close" aria-label="Close" @click="hideRemoveAttributeModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="alert alert-info">
+                        Do you really want to remove Attribute <i>{{ concepts[modalSelectedAttribute.thesaurus_url].label }}</i> from Context-Type <i>{{ concepts[modalSelectedContextType.thesaurus_url].label }}</i>?
+                    </p>
+                    <p class="alert alert-danger">
+                        Please note: If you delete <i>{{ concepts[modalSelectedAttribute.thesaurus_url].label }}</i>, {{ attributeValueCount }} values of this attribute in the contexts of type <i>{{ concepts[modalSelectedContextType.thesaurus_url].label }}</i> are deleted as well.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @click="removeAttributeFromContextType(modalSelectedAttribute)">
+                        <i class="fas fa-fw fa-check"></i> Delete
+                    </button>
+                    <button type="button" class="btn btn-secondary" @click="hideRemoveAttributeModal">
                         <i class="fas fa-fw fa-times"></i> Cancel
                     </button>
                 </div>
@@ -240,16 +269,89 @@
                     hideModal();
                 });
             },
-            addAttributeToContextType(list, position, attribute) {
+            addAttributeToContextType(oldIndex, index) {
+                let ctid = this.contextType.id;
+                let attribute = this.localAttributes[oldIndex];
+                let attributes = this.contextAttributes;
+                let data = {};
+                data.attribute_id = attribute.id;
+                data.position = index + 1;
+                this.$http.post('/api/editor/dm/context_type/'+ctid+'/attribute', data).then(function(response) {
+                    // Add element to attribute list
+                    attributes.splice(index, 0, response.data);
+                    // Update position attribute of successors
+                    for(let i=index+1; i<attributes.length; i++) {
+                        attributes[i].position++;
+                    }
+                })
 
             },
-            removeAttributeFromContextType(list, position) {
-
+            removeAttributeFromContextType(attribute) {
+                let ctid = this.contextType.id;
+                let aid = attribute.id;
+                let attributes = this.contextAttributes;
+                let hideModal = this.hideRemoveAttributeModal;
+                this.$http.delete('/api/editor/dm/context_type/'+ctid+'/attribute/'+aid).then(function(response) {
+                    let index = attributes.findIndex(function(a) {
+                        return a.id == attribute.id;
+                    });
+                    if(index > -1) {
+                        // Remove element from attribute list
+                        attributes.splice(index, 1);
+                        // Update position attribute of successors
+                        for(let i=index; i<attributes.length; i++) {
+                            attributes[i].position--;
+                        }
+                    }
+                    hideModal();
+                });
             },
-            reorderContextAttribute(list, oldPosition, newPosition) {
-
+            reorderContextAttribute(oldIndex, index) {
+                let attributes = this.contextAttributes;
+                let attribute = attributes[oldIndex];
+                let ctid = this.contextType.id;
+                let aid = attribute.id;
+                let position = index + 1;
+                // same index, nothing to do
+                if(oldIndex == index) {
+                    return;
+                }
+                let data = {};
+                data.position = position;
+                this.$http.patch('/api/editor/dm/context_type/'+ctid+'/attribute/'+aid+'/position', data).then(function(response) {
+                    attribute.position = position;
+                    attributes.splice(oldIndex, 1);
+                    attributes.splice(index, 0, attribute);
+                    if(oldIndex < index) {
+                        for(let i=oldIndex; i<index; i++) {
+                            attributes[i].position--;
+                        }
+                    } else { // oldIndex > index
+                        for(let i=index+1; i<=oldIndex; i++) {
+                            attributes[i].position++;
+                        }
+                    }
+                });
             },
             // Modal Methods
+            onRemoveAttributeFromContextType(attribute) {
+                let setModalSelectedAttribute = this.setModalSelectedAttribute;
+                let setModalSelectedContextType = this.setModalSelectedContextType;
+                let setAttributeValueCount = this.setAttributeValueCount;
+                let contextType = this.contextType;
+                let modal = this.$modal;
+                let aid = attribute.id;
+                let ctid = contextType.id;
+                this.$http.get('/api/editor/dm/attribute/occurrence_count/'+aid+'/'+ctid).then(function(response) {
+                    setModalSelectedAttribute(attribute);
+                    setModalSelectedContextType(contextType);
+                    setAttributeValueCount(response.data);
+                    modal.show('remove-attribute-from-ct-modal');
+                });
+            },
+            hideRemoveAttributeModal() {
+                this.$modal.hide('remove-attribute-from-ct-modal');
+            },
             onCreateAttribute() {
                 let aT = this.attributeTypes;
                 let modal = this.$modal;
@@ -263,11 +365,11 @@
             onDeleteAttribute(attribute) {
                 let id = attribute.id;
                 let setAttributeValueCount = this.setAttributeValueCount;
-                let setSelectedAttribute = this.setSelectedAttribute;
+                let setModalSelectedAttribute = this.setModalSelectedAttribute;
                 let modal = this.$modal;
-                this.$http.get('/api/editor/dm/attribute/occurrence_count/' + id).then(function(response) {
+                this.$http.get('/api/editor/dm/attribute/occurrence_count/'+id).then(function(response) {
                     setAttributeValueCount(response.data);
-                    setSelectedAttribute(attribute);
+                    setModalSelectedAttribute(attribute);
                     modal.show('delete-attribute-modal');
                 });
             },
@@ -284,11 +386,11 @@
             onDeleteContextType(contextType) {
                 let id = contextType.id;
                 let setContextCount = this.setContextCount;
-                let setSelectedContextType = this.setSelectedContextType;
+                let setModalSelectedContextType = this.setModalSelectedContextType;
                 let modal = this.$modal;
                 this.$http.get('/api/editor/dm/context_type/occurrence_count/' + id).then(function(response) {
                     setContextCount(response.data);
-                    setSelectedContextType(contextType);
+                    setModalSelectedContextType(contextType);
                     modal.show('delete-context-type-modal');
                 });
             },
@@ -305,30 +407,44 @@
             newContextTypeSearchResultSelected(label) {
                 Vue.set(this.newContextType, 'label', label);
             },
+            setContextType(contextType) {
+                this.contextAttributes = [];
+                this.contextType = Object.assign({}, contextType);
+                let id = contextType.id;
+                let attrs = this.contextAttributes;
+                this.$http.get('/api/editor/context_type/'+id+'/attribute')
+                    .then(function(response) {
+                        for(let i=0; i<response.data.length; i++) {
+                            attrs.push(response.data[i]);
+                        }
+                    });
+            },
             //
             setAttributeValueCount(cnt) {
                 this.attributeValueCount = cnt;
             },
-            setSelectedAttribute(attribute) {
-                this.selectedAttribute = Object.assign({}, attribute);
+            setModalSelectedAttribute(attribute) {
+                this.modalSelectedAttribute = Object.assign({}, attribute);
             },
             setContextCount(cnt) {
                 this.contextCount = cnt;
             },
-            setSelectedContextType(contextType) {
-                this.selectedContextType = Object.assign({}, contextType);
+            setModalSelectedContextType(contextType) {
+                this.modalSelectedContextType = Object.assign({}, contextType);
             }
         },
         data() {
             return {
+                contextType: {},
+                contextAttributes: [],
                 attributeTypes: [],
                 newAttribute: {},
-                selectedAttribute: {},
+                modalSelectedAttribute: {},
                 attributeValueCount: 0,
                 localAttributes: this.attributes.slice(),
                 newContextType: {},
                 localContextTypes: this.contextTypes.slice(),
-                selectedContextType: {},
+                modalSelectedContextType: {},
                 contextCount: 0,
                 allowedTableKeys: [
                     'string', 'string-sc', 'integer', 'double', 'boolean'

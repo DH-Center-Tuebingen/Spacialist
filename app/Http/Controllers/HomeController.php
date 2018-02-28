@@ -76,7 +76,10 @@ class HomeController extends Controller
     public function dme()
     {
         $lang = 'de';
-        $attributes = Attribute::all();
+        $attributes = Attribute::whereNull('parent_id')->get();
+        foreach($attributes as $a) {
+            $a->columns = Attribute::where('parent_id', $a->id)->get();
+        }
         $contextTypes = ContextType::all();
         $concepts = \DB::select(\DB::raw("
             WITH summary AS

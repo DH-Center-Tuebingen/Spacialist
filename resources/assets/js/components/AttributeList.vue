@@ -1,6 +1,14 @@
 <template>
     <div>
-        <div class="form-group row" v-for="(attribute, i) in attributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
+        <draggable
+            v-model="localAttributes"
+            :clone="clone"
+            :move="move"
+            :options="dragOpts"
+            @add="added"
+            @end="dropped"
+            @start="dragged">
+            <div class="form-group row" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
             <label class="control-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id">
                 <!-- <div style="display: table; float: right;">
                     <span style="display: table-cell">
@@ -31,15 +39,21 @@
                     </div>
                 </div> -->
                 <div v-show="hoverState[i]">
+                    <a v-if="onReorder" href="#">
+                        <i class="fas fa-fw fa-sort text-secondary"></i>
+                    </a>
                     <button v-if="onEdit" class="btn btn-info btn-fab rounded-circle">
                         <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
+                    </button>
+                    <button v-if="onRemove" class="btn btn-danger btn-fab rounded-circle" @click="onRemove(attribute)">
+                        <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
                     </button>
                     <button v-if="onDelete" class="btn btn-danger btn-fab rounded-circle" @click="onDelete(attribute)">
                         <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                     </button>
                 </div>
                 <span class="text-right">
-                    {{concepts[attribute.thesaurus_url].label}}:
+                    {{concepts[attribute.thesaurus_url].label}} ({{attribute.position}}):
                 </span>
                 <sup v-if="onMetadata">
                     <i class="fas fa-fw fa-lg fa-dot-circle"></i>
@@ -256,10 +270,13 @@
                 <input class="form-control" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
             </div>
         </div>
+        </draggable>
     </div>
 </template>
 
 <script>
+    import draggable from 'vuedraggable';
+
     export default {
         props: {
             attributes: {
@@ -274,6 +291,15 @@
                 required: true,
                 type: Object
             },
+            isSource: {
+                required: false,
+                type: Boolean,
+                default: false
+            },
+            onAdd: {
+                required: false,
+                type: Function
+            },
             onDelete: {
                 required: false,
                 type: Function
@@ -282,9 +308,17 @@
                 required: false,
                 type: Function
             },
+            onRemove: {
+                required: false,
+                type: Function
+            },
             onReorder: {
                 required: false,
                 type: Function
+            },
+            group: { // required if onReorder is set // TODO
+                required: false,
+                type: String
             },
             showInfo: { // shows parent on hover
                 required: false,
@@ -293,7 +327,13 @@
             onMetadata: { // Sources modal
                 required: false,
                 type: Function
+            },
+            test: {
+                required: false
             }
+        },
+        components: {
+            draggable
         },
         mounted() {},
         methods: {
@@ -317,6 +357,44 @@
                     Vue.set(this.expands, id, false);
                 }
                 this.expands[id] = !this.expands[id];
+            },
+            // Vue.Draggable methods
+            clone(original) {
+                return Object.assign({}, original);
+            },
+            dragged(event) {
+                this.drag = true;
+            },
+            added(event) {
+                let oldIndex = event.oldIndex;
+                let newIndex = event.newIndex;
+                this.onAdd(oldIndex, newIndex);
+            },
+            dropped(event) {
+                this.drag = false;
+                // return here if list is source only or source of drop
+                if(this.isSource) return;
+                let tgtList = event.to;
+                let srcList = event.from;
+                let oldIndex = event.oldIndex;
+                let newIndex = event.newIndex;
+                let isNew = tgtList != srcList;
+                this.onReorder(oldIndex, newIndex);
+            },
+            move(event, originalEvent) {
+                let src = event.draggedContext.element;
+                let dst = event.relatedContext;
+                let tgtList = event.to;
+                let srcList = event.from;
+                // Move is always allowed if not source or from other list
+                if(!this.isSource && tgtList == srcList) {
+                    return true;
+                }
+                let index = dst.list.findIndex(function(e) {
+                    return src.id == e.id;
+                });
+                // move is only allowed, if dragged element is not part of the list
+                return index == -1;
             }
         },
         data() {
@@ -325,8 +403,6 @@
                 inputs: {},
                 expands: {},
                 dimensionUnits: ['nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'],
-                localValues: Object.assign({}, this.values),
-                localAttributes: this.attributes.slice()
             }
         },
         created() {
@@ -335,8 +411,48 @@
             }
         },
         computed: {
+            importedAttributes: function() {
+                return this.attributes.slice();
+            },
+            localAttributes: {
+                get: function() {
+                    return this.importedAttributes;
+                },
+                set: function(newValue) {
+                    // return newValue;
+                }
+            },
+            importedValues: function() {
+                return Object.assign({}, this.values);
+            },
+            localValues: {
+                get: function() {
+                    return this.importedValues;
+                },
+                set: function(newValue) {
+                    // return newValue;
+                }
+            },
             hoverState: function() {
                 return this.hovered;
+            },
+            dragOpts: function() {
+                let opts = {};
+                if(this.group && !this.isSource) {
+                    opts.group= {
+                        name: this.group,
+                        pull: false,
+                        put: true
+                    };
+                } else if(this.group && this.isSource) {
+                    opts.group = {
+                        name: this.group,
+                        pull: 'clone',
+                        put: false
+                    };
+                    opts.sort = false;
+                }
+                return opts;
             }
         }
     }

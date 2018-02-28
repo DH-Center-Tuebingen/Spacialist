@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 // use App\AvailableLayer;
+use \DB;
 use App\Attribute;
 use App\AttributeValue;
 use App\Context;
+use App\ContextAttribute;
 use App\ContextType;
 use App\ThConcept;
 use Illuminate\Http\Request;
@@ -19,9 +21,30 @@ class EditorController extends Controller {
         return response()->json($cnt);
     }
 
-    public function getAttributeOccurrenceCount($id) {
-        $cnt = AttributeValue::where('attribute_id', $id)->count();
+    public function getAttributeOccurrenceCount($aid, $ctid = -1) {
+        $query = AttributeValue::where('attribute_id', $aid);
+        if($ctid > -1) {
+            $query->where('context_type_id', $ctid);
+            $query->join('contexts', 'contexts.id', '=', 'context_id');
+        }
+        $cnt = $query->count();
         return response()->json($cnt);
+    }
+
+    public function getContextTypeAttributes($id) {
+        $attrs = DB::table('context_types as c')
+            ->where('c.id', $id)
+            ->whereNull('a.parent_id')
+            ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+            ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
+            ->orderBy('ca.position', 'asc')
+            ->get();
+        foreach($attrs as $a) {
+            $a->columns = Attribute::where('parent_id', $a->id)->get();
+        }
+        return response()->json(
+            $attrs
+        );
     }
 
     public function getAttributeTypes() {
@@ -161,6 +184,91 @@ class EditorController extends Controller {
         return response()->json($attr);
     }
 
+    public function addAttributeToContextType(Request $request, $ctid) {
+        $this->validate($request, [
+            'attribute_id' => 'required|integer|exists:attributes,id',
+            'position' => 'integer'
+        ]);
+
+        $aid = $request->get('attribute_id');
+        $pos = $request->get('position');
+        if(!isset($pos)) {
+            $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
+            $pos = $attrsCnt + 1; // add new attribute to the end
+        } else {
+            $successors = ContextAttribute::where('context_type_id', $ctid)
+                ->where('position', '>=', $pos)
+                ->get();
+            foreach($successors as $s) {
+                $s->position++;
+                $s->save();
+            }
+        }
+        $ca = new ContextAttribute();
+        $ca->context_type_id = $ctid;
+        $ca->attribute_id = $aid;
+        $ca->position = $pos;
+        $ca->save();
+
+        $a = Attribute::find($aid);
+        $ca->datatype = $a->datatype;
+
+        return response()->json(DB::table('context_types as c')
+                ->where('ca.id', $ca->id)
+                ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+                ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
+                ->first());
+    }
+
+    // PATCH
+
+    public function reorderAttribute(Request $request, $ctid, $aid) {
+        $this->validate($request, [
+            'position' => 'required|integer|exists:context_attributes,position'
+        ]);
+
+        $pos = $request->get('position');
+        $ca = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        if($ca === null){
+            return response()->json([
+                'error' => 'No ContextAttribute found'
+            ]);
+        }
+
+        // Same position, nothing to do
+        if($ca->position == $pos) {
+            return response()->json();
+        }
+        if($ca->position < $pos) {
+            $successors = ContextAttribute::where([
+                ['position', '>', $ca->position],
+                ['position', '<=', $pos],
+                ['context_type_id', '=', $ctid]
+            ])->get();
+            foreach($successors as $s) {
+                $s->position--;
+                $s->save();
+            }
+        } else { // $ca->position > $pos
+            $predecessors = ContextAttribute::where([
+                ['position', '<', $ca->position],
+                ['position', '>=', $pos],
+                ['context_type_id', '=', $ctid]
+            ])->get();
+            foreach($predecessors as $p) {
+                $p->position++;
+                $p->save();
+            }
+        }
+        $ca->position = $pos;
+        $ca->save();
+        return response()->json();
+    }
+
     // DELETE
 
     public function deleteContextType($id) {
@@ -169,5 +277,30 @@ class EditorController extends Controller {
 
     public function deleteAttribute($id) {
         Attribute::find($id)->delete();
+    }
+
+    public function removeAttributeFromContextType($ctid, $aid) {
+        $ca = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        if($ca === null){
+            return response()->json([
+                'error' => 'No ContextAttribute found'
+            ]);
+        }
+
+        $pos = $ca->position;
+        $ca->delete();
+
+        $successors = ContextAttribute::where([
+                ['position', '>', $pos],
+                ['context_type_id', '=', $ctid]
+            ])->get();
+        foreach($successors as $s) {
+            $s->position--;
+            $s->save();
+        }
     }
 }
