@@ -67,6 +67,27 @@ class UserController extends Controller
         return response()->json();
     }
 
+    public function setPermissions(Request $request, $id) {
+        $this->validate($request, [
+            'permissions' => 'required'
+        ]);
+
+        try {
+            $role = Role::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This role does not exist'
+            ]);
+        }
+        $role->detachPermissions($role->permissions);
+        $perms = json_decode($request->get('permissions'));
+        foreach($perms as $permId) {
+            $role->attachPermission($permId);
+        }
+
+        return response()->json();
+    }
+
     // PUT
 
     // DELETE

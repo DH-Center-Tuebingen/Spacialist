@@ -13,7 +13,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="role in localRoles">
+                <tr v-for="role in roleList">
                     <td>
                         {{ role.name }}
                     </td>
@@ -24,7 +24,17 @@
                         {{ role.description }}
                     </td>
                     <td>
-                        <multiselect v-model="role.permissions" :options="permissions" label="display_name" :multiple="true" :hideSelected="true" :closeOnSelect="false" @input="updateSelection"></multiselect>
+                        <multiselect
+                            label="display_name"
+                            track-by="id"
+                            v-model="role.permissions"
+                            v-validate=""
+                            :closeOnSelect="false"
+                            :hideSelected="true"
+                            :multiple="true"
+                            :name="'perms_'+role.id"
+                            :options="permissions">
+                        </multiselect>
                     </td>
                     <td>
                         {{ role.created_at }}
@@ -34,10 +44,16 @@
                     </td>
                     <td>
                         <div class="dropdown">
-                            <span id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-fw fa-ellipsis-h"></i>
+                                <sup class="notification-info" v-if="isDirty('perms_'+role.id)">
+                                    <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
+                                </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#" v-if="isDirty('perms_'+role.id)" @click="onPatchRole(role.id)">
+                                    <i class="fas fa-fw fa-check text-success"></i> Save
+                                </a>
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-fw fa-edit text-info"></i> Edit
                                 </a>
@@ -127,6 +143,8 @@
 </template>
 
 <script>
+    import { mapFields } from 'vee-validate';
+
     export default {
         props: ['roles', 'permissions'],
         mounted() {},
@@ -139,11 +157,27 @@
                 this.newRole = {};
             },
             onAddRole(newRole) {
-                let roles = this.newRoles;
+                let roles = this.roleList;
+                let hideModal = this.hideNewRoleModal;
                 this.$http.post('/api/role', newRole).then(function(response) {
                     roles.push(response.data);
+                    hideModal();
                 });
-                this.hideNewRoleModal()
+            },
+            onPatchRole(id) {
+                if(this.isDirty('perms_'+id)) {
+                    let setPristine = this.setPristine;
+                    let role = this.roleList.find(r => r.id == id);
+                    let permissions = [];
+                    for(let i=0; i<role.permissions.length; i++) {
+                        permissions.push(role.permissions[i].id);
+                    }
+                    let data = {};
+                    data.permissions = JSON.stringify(permissions);
+                    this.$http.patch('/api/role/'+id+'/permission', data).then(function(response) {
+                        setPristine('perms_'+id);
+                    });
+                }
             },
             showDeleteRoleModal() {
                 this.$modal.show('confirm-delete-role-modal');
@@ -153,45 +187,44 @@
                 this.selectedRole = {};
             },
             requestDeleteRole(id) {
-                this.selectedRole = this.localRoles.find(function(r) {
-                    return r.id == id;
-                });
+                this.selectedRole = this.roleList.find(r => r.id == id);
                 this.showDeleteRoleModal();
             },
             deleteRole(id) {
                 if(!id) return;
-                let roles;
-                var index = this.localRoles.findIndex(function(r) {
-                    return r.id == id;
-                });
-                if(index >= this.importedRoles.length) {
-                    roles = this.newRoles;
-                    index = index - this.importedRoles.length;
-                } else {
-                    roles = this.importedRoles;
-                }
+                let roles = this.roleList;
+                var index = this.roleList.findIndex(r => r.id == id);
+                let hideModal = this.hideDeleteRoleModal;
                 this.$http.delete('/api/role/' + id).then(function(response) {
                     // TODO check response
                     if(index > -1) roles.splice(index, 1);
+                    hideModal();
                 });
-                this.hideDeleteRoleModal()
+            },
+            isDirty(fieldname) {
+                if(this.fields[fieldname]) {
+                    return this.fields[fieldname].dirty;
+                }
+                return false;
+            },
+            setPristine(fieldname) {
+                this.$validator.flag(fieldname, {
+                    dirty: false,
+                    pristine: true
+                });
             }
         },
         data() {
             return {
                 userRoles: {},
-                updateSelection: selection => (
-                    console.log(selection)
-                ),
                 newRole: {},
-                newRoles: [],
-                importedRoles: this.roles.slice(),
-                selectedRole: {}
+                selectedRole: {},
+                localRoles: this.roles.slice()
             }
         },
         computed: {
-            localRoles() {
-                return this.importedRoles.concat(this.newRoles);
+            roleList() {
+                return this.localRoles;
             }
         }
     }
