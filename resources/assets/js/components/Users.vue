@@ -20,7 +20,17 @@
                         {{ user.email }}
                     </td>
                     <td>
-                        <multiselect v-model="user.roles" :options="roles" label="display_name" :multiple="true" :hideSelected="true" :closeOnSelect="false" track-by="id" :name="'roles_'+user.id" v-validate=""></multiselect>
+                        <multiselect
+                            label="display_name"
+                            track-by="id"
+                            v-model="user.roles"
+                            v-validate=""
+                            :closeOnSelect="false"
+                            :hideSelected="true"
+                            :multiple="true"
+                            :name="'roles_'+user.id"
+                            :options="roles">
+                        </multiselect>
                     </td>
                     <td>
                         {{ user.created_at }}
@@ -37,7 +47,7 @@
                                 </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="isDirty('roles_'+user.id)" v-on:click="onPatchUser(user.id)">
+                                <a class="dropdown-item" href="#" v-if="isDirty('roles_'+user.id)" @click="onPatchUser(user.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> Save
                                 </a>
                                 <a class="dropdown-item" href="#" v-on:click="updatePassword(user.id)">
@@ -144,10 +154,11 @@
             },
             onAddUser(newUser) {
                 let users = this.userList;
+                let hideModal = this.hideNewUserModal;
                 this.$http.post('/api/user', newUser).then(function(response) {
                     users.push(response.data);
+                    hideModal();
                 });
-                this.hideNewUserModal()
             },
             onPatchUser(id) {
                 if(this.isDirty('roles_'+id)) {
@@ -163,7 +174,6 @@
                         setPristine('roles_'+id);
                     });
                 }
-                //TODO
             },
             showDeleteUserModal() {
                 this.$modal.show('confirm-delete-user-modal');
@@ -180,11 +190,12 @@
                 if(!id) return;
                 let users = this.userList;
                 let index = this.userList.findIndex(u => u.id == id);
+                let hideModal = this.hideDeleteUserModal;
                 this.$http.delete('/api/user/' + id).then(function(response) {
                     // TODO check response
                     if(index > -1) users.splice(index, 1);
+                    hideModal();
                 });
-                this.hideDeleteUserModal()
             },
             isDirty(fieldname) {
                 if(this.fields[fieldname]) {
