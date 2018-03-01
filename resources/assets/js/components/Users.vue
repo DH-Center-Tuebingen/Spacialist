@@ -20,7 +20,7 @@
                         {{ user.email }}
                     </td>
                     <td>
-                        <multiselect v-model="user.roles" :options="roles" label="display_name" :multiple="true" :hideSelected="true" :closeOnSelect="false" track-by="id" :name="'user'+user.id+'roles'" v-validate=""></multiselect>
+                        <multiselect v-model="user.roles" :options="roles" label="display_name" :multiple="true" :hideSelected="true" :closeOnSelect="false" track-by="id" :name="'roles_'+user.id" v-validate=""></multiselect>
                     </td>
                     <td>
                         {{ user.created_at }}
@@ -30,14 +30,14 @@
                     </td>
                     <td>
                         <div class="dropdown">
-                            <span id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-fw fa-ellipsis-h"></i>
-                                <sup style="margin-left:-0.5rem;">
-                                    <i class="fas fa-fw fa-xs fa-circle text-warning" v-if="isDirty('user'+user.id+'roles')"></i>
+                                <sup class="notification-info" v-if="isDirty('roles_'+user.id)">
+                                    <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
                                 </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="isDirty('user'+user.id+'roles')" v-on:click="onPatchUser(user.id)">
+                                <a class="dropdown-item" href="#" v-if="isDirty('roles_'+user.id)" v-on:click="onPatchUser(user.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> Save
                                 </a>
                                 <a class="dropdown-item" href="#" v-on:click="updatePassword(user.id)">
@@ -150,6 +150,19 @@
                 this.hideNewUserModal()
             },
             onPatchUser(id) {
+                if(this.isDirty('roles_'+id)) {
+                    let setPristine = this.setPristine;
+                    let user = this.userList.find(u => u.id == id);
+                    let roles = [];
+                    for(let i=0; i<user.roles.length; i++) {
+                        roles.push(user.roles[i].id);
+                    }
+                    let data = {};
+                    data.roles = JSON.stringify(roles);
+                    this.$http.patch('/api/user/'+id+'/role', data).then(function(response) {
+                        setPristine('roles_'+id);
+                    });
+                }
                 //TODO
             },
             showDeleteUserModal() {
@@ -178,6 +191,12 @@
                     return this.fields[fieldname].dirty;
                 }
                 return false;
+            },
+            setPristine(fieldname) {
+                this.$validator.flag(fieldname, {
+                    dirty: false,
+                    pristine: true
+                });
             }
         },
         data() {
@@ -194,14 +213,6 @@
         computed: {
             userList() {
                 return this.localUsers;
-            },
-            mapFields() {
-                let fields = {};
-                for (let i = 0; i < this.userList.length; i++){
-                    let id = this.userList[i].id;
-                    fields['user'+id+'roles'] = 'user'+id+'roles';
-                }
-                return Object.assign({}, mapFields, fields);
             }
         }
     }

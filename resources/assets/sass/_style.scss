@@ -23,7 +23,15 @@ body {
     width: 1.8rem;
 }
 
+.notification-info {
+    margin-left: -.5rem;
+}
+
 .of-visible {
     overflow: visible !important;
+}
+
+.clickable {
+    cursor: pointer;
 }
 

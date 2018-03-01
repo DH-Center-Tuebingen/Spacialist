@@ -52,6 +52,8 @@ Route::delete('/editor/dm/context_type/{ctid}/attribute/{aid}', 'EditorControlle
 Route::post('/user', 'UserController@addUser');
 Route::post('/role', 'UserController@addRole');
 
+Route::patch('/user/{id}/role', 'UserController@setRoles');
+
 Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');
 Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');
 

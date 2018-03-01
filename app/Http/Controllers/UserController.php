@@ -46,6 +46,27 @@ class UserController extends Controller
 
     // PATCH
 
+    public function setRoles(Request $request, $id) {
+        $this->validate($request, [
+            'roles' => 'required'
+        ]);
+
+        try {
+            $user = User::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This user does not exist'
+            ]);
+        }
+        $user->detachRoles($user->roles);
+        $roles = json_decode($request->get('roles'));
+        foreach($roles as $roleId) {
+            $user->attachRole($roleId);
+        }
+
+        return response()->json();
+    }
+
     // PUT
 
     // DELETE
