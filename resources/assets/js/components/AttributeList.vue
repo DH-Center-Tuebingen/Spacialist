@@ -8,8 +8,8 @@
             @add="added"
             @end="dropped"
             @start="dragged">
-            <div class="form-group row" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
-            <label class="control-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id">
+            <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
+            <label class="control-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
                 <!-- <div style="display: table; float: right;">
                     <span style="display: table-cell">
                         {{ concepts[attribute.thesaurus_url].label }}:
@@ -39,7 +39,7 @@
                     </div>
                 </div> -->
                 <div v-show="hoverState[i]">
-                    <a v-if="onReorder" href="#">
+                    <a v-if="onReorder" href="#" class="reorder-handle">
                         <i class="fas fa-fw fa-sort text-secondary"></i>
                     </a>
                     <button v-if="onEdit" class="btn btn-info btn-fab rounded-circle">
@@ -60,18 +60,18 @@
                 </sup>
             </label>
             <div class="col-md-9">
-                <input class="form-control" v-if="attribute.datatype == 'string'" type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
-                <input class="form-control" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
-                <input class="form-control" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
-                <input class="form-control" v-else-if="attribute.datatype == 'boolean'" type="checkbox" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
-                <textarea class="form-control" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"></textarea>
+                <input class="form-control" :disabled="attribute.isDisabled" v-if="attribute.datatype == 'string'" type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
+                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
+                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
+                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'boolean'" type="checkbox" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
+                <textarea class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"></textarea>
                 <div v-else-if="attribute.datatype == 'percentage'" class="d-flex">
-                    <input class="form-control" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
+                    <input class="form-control" :disabled="attribute.isDisabled" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
                     <span class="ml-3">{{ localValues[attribute.id] }}%</span>
                 </div>
                 <div v-else-if="attribute.datatype == 'geography'">
-                    <input class="form-control" type="text" :id="'attribute-'+attribute.id" placeholder="Add WKT" v-model="localValues[attribute.id]" />
-                    <button type="button" class="btn btn-outline-secondary" style="margin-top: 10px;" ng-click="$ctrl.openGeographyPlacer(attribute.id)">
+                    <input class="form-control" :disabled="attribute.isDisabled" type="text" :id="'attribute-'+attribute.id" placeholder="Add WKT" v-model="localValues[attribute.id]" />
+                    <button type="button" class="btn btn-outline-secondary" :disabled="attribute.isDisabled" style="margin-top: 10px;" ng-click="$ctrl.openGeographyPlacer(attribute.id)">
                         <i class="fas fa-fw fa-map-marker-alt"></i> Open Map
                     </button>
                 </div>
@@ -79,7 +79,7 @@
                     <context-search></context-search>
                 </div>
                 <div class="input-group date" data-provide="datepicker" v-else-if="attribute.datatype == 'date'">
-                    <input type="text" class="form-control" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"  ng-model-options="{timezone:'utc'}"/>
+                    <input type="text" class="form-control" :disabled="attribute.isDisabled" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"  ng-model-options="{timezone:'utc'}"/>
                     <div class="input-group-append input-group-addon">
                         <button type="button" class="btn btn-outline-secondary">
                             <i class="fas fa-fw fa-calendar-alt"></i>
@@ -92,6 +92,7 @@
                         v-model="localValues[attribute.id]"
                         :allowEmpty="true"
                         :closeOnSelect="false"
+                        :disabled="attribute.isDisabled"
                         :hideSelected="true"
                         :multiple="true"
                         :options="[]">
@@ -103,6 +104,7 @@
                         v-model="localValues[attribute.id]"
                         :allowEmpty="true"
                         :closeOnSelect="true"
+                        :disabled="attribute.isDisabled"
                         :hideSelected="true"
                         :multiple="false"
                         :options="[]">
@@ -111,7 +113,7 @@
                 <div v-else-if="attribute.datatype == 'list'">
                     <div class="input-group">
                         <div class="input-group-prepend">
-                            <button type="button" class="btn btn-outline-secondary" v-on:click="toggleList(attribute.id)">
+                            <button type="button" class="btn btn-outline-secondary" :disabled="attribute.isDisabled" v-on:click="toggleList(attribute.id)">
                                 <div v-show="!expands[attribute.id]">
                                     <i class="fas fa-fw fa-caret-up"></i>
                                     <span v-if="localValues[attribute.id] && localValues[attribute.id].length">
@@ -123,7 +125,7 @@
                                 </div>
                             </button>
                         </div>
-                        <input type="text" class="form-control" v-model="inputs[attribute.id]" />
+                        <input type="text" class="form-control" :disabled="attribute.isDisabled" v-model="inputs[attribute.id]" />
                         <div class="input-group-append">
                             <button type="button" class="btn btn-success" v-on:click="addListEntry(attribute.id)">
                                 <i class="fas fa-fw fa-plus"></i>
@@ -143,7 +145,7 @@
                     epoch
                     <div class="input-group">
                         <div class="input-group-btn" uib-dropdown>
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button type="button" class="btn btn-default dropdown-toggle" :disabled="attribute.isDisabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 {{ localValues[attribute.id].startLabel }}
                             </button>
                             <ul class="dropdown-menu">
@@ -155,11 +157,11 @@
                                 </li>
                             </ul>
                         </div>
-                        <input type="number" step="1" pattern="[0-9]+" class="form-control centered" aria-label="" v-model="localValues[attribute.id].start">
+                        <input type="number" step="1" pattern="[0-9]+" class="form-control text-center" :disabled="attribute.isDisabled" aria-label="" v-model="localValues[attribute.id].start">
                         <span class="input-group-addon">-</span>
-                        <input type="number" step="1" pattern="[0-9]+" class="form-control centered" aria-label="" v-model="localValues[attribute.id].end">
+                        <input type="number" step="1" pattern="[0-9]+" class="form-control text-center" :disabled="attribute.isDisabled" aria-label="" v-model="localValues[attribute.id].end">
                         <div class="input-group-btn">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button type="button" class="btn btn-default dropdown-toggle" :disabled="attribute.isDisabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 {{ localValues[attribute.id].endLabel }}
                             </button>
                             <ul uib-dropdown-menu class="dropdown-menu">
@@ -168,21 +170,29 @@
                             </ul>
                         </div>
                     </div>
-                    <multiselect v-model="localValues[attribute.id].epoch" :options="[]" label="name" :multiple="false" :hideSelected="true" :closeOnSelect="false"></multiselect>
+                    <multiselect
+                        label="name"
+                        v-model="localValues[attribute.id].epoch"
+                        :closeOnSelect="false"
+                        :disabled="attribute.isDisabled"
+                        :hideSelected="true"
+                        :multiple="false"
+                        :options="[]">
+                    </multiselect>
                 </div>
                 <div v-else-if="attribute.datatype == 'dimension'">
                     <div class="input-group">
-                        <input type="number" class="form-control text-center" min="0" max="9999" step="0.01" v-model="localValues[attribute.id]" />
+                        <input type="number" class="form-control text-center" :disabled="attribute.isDisabled" min="0" max="9999" step="0.01" v-model="localValues[attribute.id]" />
                         <div class="input-group-append input-group-prepend">
                             <span class="input-group-text">&times;</span>
                         </div>
-                        <input type="number" class="form-control text-center" min="0" max="9999" step="0.01" v-model="localValues[attribute.id]" />
+                        <input type="number" class="form-control text-center" :disabled="attribute.isDisabled" min="0" max="9999" step="0.01" v-model="localValues[attribute.id]" />
                         <div class="input-group-append input-group-prepend">
                             <span class="input-group-text">&times;</span>
                         </div>
-                        <input type="number" class="form-control text-center" min="0" max="9999" step="0.01" v-model="localValues[attribute.id]" />
+                        <input type="number" class="form-control text-center" :disabled="attribute.isDisabled" min="0" max="9999" step="0.01" v-model="localValues[attribute.id]" />
                         <div class="input-group-append">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button"     data-toggle="dropdown" aria-haspopup="true"     aria-expanded="false">m</button>
+                            <button class="btn btn-outline-secondary dropdown-toggle" :disabled="attribute.isDisabled" type="button"     data-toggle="dropdown" aria-haspopup="true"     aria-expanded="false">m</button>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="#" v-for="unit in dimensionUnits">
                                     {{ unit }}
@@ -191,11 +201,11 @@
                         </div>
                     </div>
                     <!-- <div class="input-group">
-                        <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.width-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="localValues[attribute.id].B">
+                        <input type="number" class="form-control text-center" aria-label="" placeholder="{{'field-types.dimension.width-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="localValues[attribute.id].B">
                         <span class="input-group-addon">&times;</span>
-                        <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.height-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="localValues[attribute.id].H">
+                        <input type="number" class="form-control text-center" aria-label="" placeholder="{{'field-types.dimension.height-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="localValues[attribute.id].H">
                         <span class="input-group-addon">&times;</span>
-                        <input type="number" class="form-control centered" aria-label="" placeholder="{{'field-types.dimension.depth-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="localValues[attribute.id].T">
+                        <input type="number" class="form-control text-center" aria-label="" placeholder="{{'field-types.dimension.depth-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="localValues[attribute.id].T">
                         <div class="input-group-btn" uib-dropdown>
                             <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="readonlyInput">
                                 {{ localValues[attribute.id].unit }} <span class="caret"></span>
@@ -267,7 +277,7 @@
                         <i class="material-icons">add</i> Add Row
                     </button> -->
                 </div>
-                <input class="form-control" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
+                <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id]"/>
             </div>
         </div>
         </draggable>
@@ -451,6 +461,10 @@
                         put: false
                     };
                     opts.sort = false;
+                    opts.filter = '.disabled';
+                }
+                if(this.onReorder) {
+                    opts.handle = '.reorder-handle';
                 }
                 return opts;
             }

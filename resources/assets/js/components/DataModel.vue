@@ -412,10 +412,16 @@
                 this.contextType = Object.assign({}, contextType);
                 let id = contextType.id;
                 let attrs = this.contextAttributes;
+                let globalAttrs = this.localAttributes;
                 this.$http.get('/api/editor/context_type/'+id+'/attribute')
                     .then(function(response) {
                         for(let i=0; i<response.data.length; i++) {
                             attrs.push(response.data[i]);
+                        }
+                        for(let i=0; i<globalAttrs.length; i++) {
+                            let id = globalAttrs[i].id;
+                            let index = attrs.findIndex(a => a.id == id);
+                            globalAttrs[i].isDisabled = index > -1;
                         }
                     });
             },
