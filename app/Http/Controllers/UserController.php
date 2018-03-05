@@ -56,7 +56,7 @@ class UserController extends Controller
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This user does not exist'
-            ]);
+            ], 400);
         }
         $user->detachRoles($user->roles);
         $roles = json_decode($request->get('roles'));
@@ -64,7 +64,7 @@ class UserController extends Controller
             $user->attachRole($roleId);
         }
 
-        return response()->json();
+        return response()->json(null, 204);
     }
 
     public function setPermissions(Request $request, $id) {
@@ -77,7 +77,7 @@ class UserController extends Controller
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This role does not exist'
-            ]);
+            ], 400);
         }
         $role->detachPermissions($role->permissions);
         $perms = json_decode($request->get('permissions'));
@@ -85,7 +85,7 @@ class UserController extends Controller
             $role->attachPermission($permId);
         }
 
-        return response()->json();
+        return response()->json(null, 204);
     }
 
     // PUT
@@ -94,12 +94,12 @@ class UserController extends Controller
 
     public function deleteUser($id) {
         User::find($id)->delete();
-        return response()->json();
+        return response()->json(null, 204);
     }
 
     public function deleteRole($id) {
         Role::find($id)->delete();
-        return response()->json();
+        return response()->json(null, 204);
     }
 
     // OTHER FUNCTIONS

@@ -30,14 +30,14 @@ class BibliographyController extends Controller
         if($ckey === null) {
             return response([
                 'error' => 'Could not compute citation key.'
-            ]);
+            ], 400);
         }
         $bib->citekey = $ckey;
         $bib->lasteditor = $user['name'];
 
         $bib->save();
 
-        return response()->json($bib);
+        return response()->json($bib, 201);
     }
 
     public function importBibtex(Request $request) {
@@ -54,7 +54,7 @@ class BibliographyController extends Controller
         } catch(ParseException $e) {
             return response()->json([
                 'error' => $e->getMessage()
-            ]);
+            ], 400);
         }
         $entries = $listener->export();
         $newEntries = [];
@@ -73,7 +73,7 @@ class BibliographyController extends Controller
                 $newEntries[] = $literature;
             }
         }
-        return response()->json($newEntries);
+        return response()->json($newEntries, 201);
     }
 
     public function exportBibtex() {

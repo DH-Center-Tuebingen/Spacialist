@@ -139,7 +139,7 @@ class EditorController extends Controller {
         // $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
         // $layer->save();
 
-        return response()->json($cType);
+        return response()->json($cType, 201);
     }
 
     public function addAttribute(Request $request) {
@@ -181,7 +181,7 @@ class EditorController extends Controller {
             }
         }
 
-        return response()->json($attr);
+        return response()->json($attr, 201);
     }
 
     public function addAttributeToContextType(Request $request, $ctid) {
@@ -217,7 +217,7 @@ class EditorController extends Controller {
                 ->where('ca.id', $ca->id)
                 ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
                 ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
-                ->first());
+                ->first(), 201);
     }
 
     // PATCH
@@ -236,7 +236,7 @@ class EditorController extends Controller {
         if($ca === null){
             return response()->json([
                 'error' => 'No ContextAttribute found'
-            ]);
+            ], 400);
         }
 
         // Same position, nothing to do
@@ -266,17 +266,19 @@ class EditorController extends Controller {
         }
         $ca->position = $pos;
         $ca->save();
-        return response()->json();
+        return response()->json(null, 204);
     }
 
     // DELETE
 
     public function deleteContextType($id) {
         ContextType::find($id)->delete();
+        return response()->json(null, 204);
     }
 
     public function deleteAttribute($id) {
         Attribute::find($id)->delete();
+        return response()->json(null, 204);
     }
 
     public function removeAttributeFromContextType($ctid, $aid) {
@@ -288,7 +290,7 @@ class EditorController extends Controller {
         if($ca === null){
             return response()->json([
                 'error' => 'No ContextAttribute found'
-            ]);
+            ], 400);
         }
 
         $pos = $ca->position;
@@ -302,5 +304,6 @@ class EditorController extends Controller {
             $s->position--;
             $s->save();
         }
+        return response()->json(null, 204);
     }
 }

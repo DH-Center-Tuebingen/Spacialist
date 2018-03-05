@@ -40,7 +40,7 @@ class PreferenceController extends Controller {
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This preference does not exist'
-            ]);
+            ], 400);
         }
 
         $encodedValue = $this->encodePreference($label, $value);
@@ -67,6 +67,7 @@ class PreferenceController extends Controller {
                 }
             }
             $pref->save();
+            return response()->json(null, 204);
         }
     }
 
