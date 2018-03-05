@@ -9,6 +9,7 @@
                 group="attributes"
                 :attributes="localAttributes"
                 :values="{}"
+                :selections="{}"
                 :concepts="concepts"
                 :is-source="true"
                 :on-delete="onDeleteAttribute"
@@ -31,6 +32,7 @@
                 group="attributes"
                 :attributes="contextAttributes"
                 :values="{}"
+                :selections="contextSelections"
                 :concepts="concepts"
                 :on-add="addAttributeToContextType"
                 :on-remove="onRemoveAttributeFromContextType"
@@ -412,11 +414,14 @@
                 this.contextType = Object.assign({}, contextType);
                 let id = contextType.id;
                 let attrs = this.contextAttributes;
+                let selections = this.contextSelections;
                 let globalAttrs = this.localAttributes;
                 this.$http.get('/api/editor/context_type/'+id+'/attribute')
                     .then(function(response) {
-                        for(let i=0; i<response.data.length; i++) {
-                            attrs.push(response.data[i]);
+                        let data = response.data;
+                        selections = data.selections;
+                        for(let i=0; i<data.attributes.length; i++) {
+                            attrs.push(data.attributes[i]);
                         }
                         for(let i=0; i<globalAttrs.length; i++) {
                             let id = globalAttrs[i].id;
@@ -443,6 +448,7 @@
             return {
                 contextType: {},
                 contextAttributes: [],
+                contextSelections: {},
                 attributeTypes: [],
                 newAttribute: {},
                 modalSelectedAttribute: {},

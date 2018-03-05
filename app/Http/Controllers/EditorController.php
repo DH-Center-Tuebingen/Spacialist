@@ -32,19 +32,35 @@ class EditorController extends Controller {
     }
 
     public function getContextTypeAttributes($id) {
-        $attrs = DB::table('context_types as c')
+        $attributes = DB::table('context_types as c')
             ->where('c.id', $id)
             ->whereNull('a.parent_id')
             ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
             ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
             ->orderBy('ca.position', 'asc')
             ->get();
-        foreach($attrs as $a) {
+        $selections = [];
+        foreach($attributes as $a) {
             $a->columns = Attribute::where('parent_id', $a->id)->get();
+            switch($a->datatype) {
+                case 'string-sc':
+                case 'string-mc':
+                case 'epoch':
+                    $selections[$a->id] = ThConcept::getChildren($a->thesaurus_root_url);
+                    break;
+                default:
+                    break;
+            }
         }
-        return response()->json(
-            $attrs
-        );
+        return response()->json([
+            'attributes' => $attributes,
+            'selections' => $selections
+        ]);
+    }
+
+    public function getTopContextTypes() {
+        // TODO only return context types with is_root = true
+        return response()->json(ContextType::all());
     }
 
     public function getAttributeTypes() {

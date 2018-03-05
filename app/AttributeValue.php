@@ -19,20 +19,48 @@ class AttributeValue extends Model
         'context_id',
         'attribute_id',
         'context_val',
-        'str_val',
-        'int_val',
         'dbl_val',
         'dt_val',
+        'geography_val',
+        'int_val',
+        'json_val',
+        'str_val',
+        'thesaurus_val',
         'possibility',
         'possibility_description',
         'lasteditor',
-        'thesaurus_val',
-        'json_val'
+    ];
+
+    // TODO always hide *_val in favor of (computed) value?
+    protected $hidden = [
+        'context_val',
+        'dbl_val',
+        'dt_val',
+        'geography_val',
+        'int_val',
+        'json_val',
+        'str_val',
+        'thesaurus_val'
+    ];
+
+    protected $appends = [
+        'value'
     ];
 
     protected $postgisFields = [
         'geography_val',
     ];
+
+    public function getValueAttribute() {
+        return $this->str_val ??
+               $this->int_val ??
+               $this->dbl_val ??
+               $this->context_val ??
+               $this->thesaurus_val ??
+               $this->json_val ??
+               $this->geography_val ??
+               $this->dt_val;
+    }
 
     public function context() {
         return $this->belongsTo('App\Context');

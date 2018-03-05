@@ -2,6 +2,7 @@
 
 namespace App;
 
+use \DB;
 use Illuminate\Database\Eloquent\Model;
 
 class ThConcept extends Model
@@ -17,6 +18,27 @@ class ThConcept extends Model
         'concept_scheme',
         'lasteditor',
     ];
+
+    public static function getChildren($url) {
+        $id = self::where('concept_url', $url)->value('id');
+        if(!isset($id)) return [];
+        return DB::select("
+            WITH RECURSIVE
+            top AS (
+                SELECT br.broader_id, br.narrower_id, c.concept_url
+                FROM th_broaders br
+                JOIN th_concept as c on c.id = br.narrower_id
+                WHERE broader_id = $id
+                UNION
+                SELECT br.broader_id, br.narrower_id, c2.concept_url
+                FROM top t, th_broaders br
+                JOIN th_concept as c2 on c2.id = br.narrower_id
+                WHERE t.narrower_id = br.broader_id
+            )
+            SELECT *
+            FROM top
+        ");
+    }
 
     public function labels() {
         return $this->hasMany('App\ThConceptLabel', 'concept_id');

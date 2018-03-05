@@ -50,6 +50,7 @@ Vue.component('layer', require('./components/LayerList.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 
 // Page Components
+Vue.component('main-view', require('./components/MainView.vue'));
 Vue.component('preferences', require('./components/Preferences.vue'));
 Vue.component('roles', require('./components/Roles.vue'));
 Vue.component('users', require('./components/Users.vue'));

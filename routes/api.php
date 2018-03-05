@@ -27,6 +27,14 @@ Route::get('/version', function() {
     ]);
 });
 
+// CONTEXT
+Route::get('/context/{id}/data', 'ContextController@getData')->where('id', '[0-9]+');
+Route::get('/context/{id}/children', 'ContextController@getChildren')->where('id', '[0-9]+');
+
+Route::post('/context', 'ContextController@addEntity');
+
+Route::delete('/context/{id}', 'ContextController@deleteContext')->where('id', '[0-9]+');
+
 // SEARCH
 Route::get('/search/context', 'SearchController@searchContextByName');
 Route::get('/search/label', 'SearchController@searchInThesaurus');
@@ -35,6 +43,7 @@ Route::get('/search/label', 'SearchController@searchInThesaurus');
 Route::get('/editor/dm/context_type/occurrence_count/{id}', 'EditorController@getContextTypeOccurrenceCount')->where('id', '[0-9]+');
 Route::get('/editor/dm/attribute/occurrence_count/{aid}', 'EditorController@getAttributeOccurrenceCount')->where('aid', '[0-9]+');
 Route::get('/editor/dm/attribute/occurrence_count/{aid}/{ctid}', 'EditorController@getAttributeOccurrenceCount')->where('aid', '[0-9]+')->where('ctid', '[0-9]+');
+Route::get('/editor/dm/context_type/top', 'EditorController@getTopContextTypes');
 Route::get('/editor/dm/attribute_types', 'EditorController@getAttributeTypes');
 Route::get('/editor/context_type/{id}/attribute', 'EditorController@getContextTypeAttributes')->where('id', '[0-9]+');
 

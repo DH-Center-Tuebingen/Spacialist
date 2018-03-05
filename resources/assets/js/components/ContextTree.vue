@@ -1,6 +1,15 @@
 <template>
     <div class="container">
-        <tree-view :model="contexts" :category="category" :selection="selection" :onSelect="onSelect" :strategies="strategies" :display="display" :openerOpts="openerOpts" :css="css"></tree-view>
+        <tree-view
+            :category="category"
+            :css="css"
+            :display="display"
+            :model="roots"
+            :onSelect="onSelect"
+            :openerOpts="openerOpts"
+            :selection="selection"
+            :strategies="strategies">
+        </tree-view>
     </div>
 </template>
 
@@ -11,12 +20,29 @@
         components: {
             'tree-view': TreeView
         },
-        props: ['contexts', 'selectionCallback'],
+        props: {
+            concepts: {
+                required: false, // TODO required?
+                type: Object
+            },
+            contextTypes: {
+                required: false, // TODO required?
+                type: Object
+            },
+            roots: {
+                required: true,
+                type: Array
+            },
+            selectionCallback: {
+                required: false,
+                type: Function
+            }
+        },
         mounted() {},
         methods: {
             onSelect(newSelection) {
                 this.selection = newSelection
-                // this.selectionCallback(newSelection[0]); // TODO breaks selection
+                this.selectionCallback(newSelection[0]);
             }
         },
         data() {
@@ -33,10 +59,12 @@
                 css: {
                     opener: 'opener mr-2 text-info'
                 },
-                category: "child_contexts",
-                display: (item, inputs) => {
-                    return item.name;
-                }
+                category: "children",
+                display: (item, inputs) =>
+                    <span>
+                        {item.name}
+                        <i class="pl-2">{this.concepts[this.contextTypes[item.context_type_id].thesaurus_url].label}</i>
+                    </span>
             }
         }
     }

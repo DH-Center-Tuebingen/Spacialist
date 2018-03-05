@@ -12,7 +12,9 @@
 .TreeView > input[type="search"] {}
 
 /* Root list */
-.TreeView ul.depth-0 {}
+.TreeView ul.depth-0 {
+    margin-bottom: 0;
+}
 
 /* Not disabled */
 .TreeView ul li:not(.disabled) {}
