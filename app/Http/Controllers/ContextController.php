@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Context;
+use App\Attribute;
 use App\AttributeValue;
+use App\Context;
+use App\ThConcept;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +34,15 @@ class ContextController extends Controller {
         $attributes = AttributeValue::where('context_id', $id)->get();
         $data = [];
         foreach($attributes as $a) {
+            $datatype = Attribute::find($a->attribute_id)->datatype;
+            switch($datatype) {
+                case 'string-sc':
+                case 'string-mc':
+                    $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
+                    break;
+                default:
+                    break;
+            }
             $data[$a->attribute_id] = $a;
         }
 

@@ -90,6 +90,7 @@
                     <multiselect
                         :customLabel="translateLabel"
                         label="concept_url"
+                        track-by="id"
                         v-model="localValues[attribute.id].value"
                         :allowEmpty="true"
                         :closeOnSelect="false"
@@ -103,6 +104,7 @@
                     <multiselect
                         :customLabel="translateLabel"
                         label="concept_url"
+                        track-by="id"
                         v-model="localValues[attribute.id].value"
                         :allowEmpty="true"
                         :closeOnSelect="true"
@@ -171,6 +173,7 @@
                     </div>
                     <multiselect class="pt-2"
                         label="name"
+                        track-by="id"
                         v-model="localValues[attribute.id].value.epoch"
                         :closeOnSelect="false"
                         :disabled="attribute.isDisabled"

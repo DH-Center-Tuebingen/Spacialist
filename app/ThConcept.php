@@ -25,12 +25,12 @@ class ThConcept extends Model
         return DB::select("
             WITH RECURSIVE
             top AS (
-                SELECT br.broader_id, br.narrower_id, c.concept_url
+                SELECT br.broader_id, br.narrower_id, c.*
                 FROM th_broaders br
                 JOIN th_concept as c on c.id = br.narrower_id
                 WHERE broader_id = $id
                 UNION
-                SELECT br.broader_id, br.narrower_id, c2.concept_url
+                SELECT br.broader_id, br.narrower_id, c2.*
                 FROM top t, th_broaders br
                 JOIN th_concept as c2 on c2.id = br.narrower_id
                 WHERE t.narrower_id = br.broader_id
