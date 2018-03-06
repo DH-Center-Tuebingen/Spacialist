@@ -1,0 +1,30 @@
+.menu {
+    font-family: inherit !important;
+    box-shadow: none !important;
+    // From Bootstraps _dropdown.scss
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: $zindex-dropdown;
+    float: left;
+    min-width: $dropdown-min-width;
+    padding: $dropdown-padding-y 0 !important;
+    margin: $dropdown-spacer 0 0; // override default ul
+    font-size: $font-size-base; // Redeclare because nesting can cause inheritance issues
+    color: $body-color !important;
+    text-align: left; // Ensures proper alignment if parent has it changed (e.g., modal footer)
+    list-style: none;
+    background-color: $dropdown-bg !important;
+    background-clip: padding-box;
+    border: $dropdown-border-width solid $dropdown-border-color;
+    @include border-radius($dropdown-border-radius !important);
+    @include box-shadow($dropdown-box-shadow);
+}
+
+.menuitem {
+    padding: 0 !important;
+}
+
+.menuitem>div:not(.label) {
+    display: none !important;
+}

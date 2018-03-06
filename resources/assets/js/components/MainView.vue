@@ -24,6 +24,9 @@
                     <context-tree
                         :concepts="concepts"
                         :context-types="contextTypes"
+                        :on-context-menu-add="requestAddNewEntity"
+                        :on-context-menu-duplicate="duplicateEntity"
+                        :on-context-menu-delete="requestDeleteEntity"
                         :roots="tree"
                         :selection-callback="setSelectedElement">
                     </context-tree>
@@ -85,7 +88,7 @@
             </div>
         </div>
 
-        <modal name="add-entity-modal" height="auto" :scrollable="true" classes="of-visible">>
+        <modal name="add-entity-modal" height="auto" :scrollable="true" classes="of-visible">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add new Entity</h5>
@@ -277,6 +280,16 @@
             hideDeleteEntityModal() {
                 this.toDeleteEntity = {};
                 this.$modal.hide('delete-entity-modal');
+            },
+            duplicateEntity(entity) {
+                let duplicate = {
+                    name: entity.name,
+                    type: {
+                        id: entity.context_type_id
+                    },
+                    root_context_id: entity.root_context_id
+                };
+                this.addNewEntity(duplicate);
             },
             translateLabel(element, label) {
                 let value = element[label];

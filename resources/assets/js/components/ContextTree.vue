@@ -15,6 +15,9 @@
 
 <script>
     import { TreeView } from '@bosket/vue';
+    import * as VueMenu from '@hscmap/vue-menu';
+
+    Vue.use(VueMenu);
 
     export default {
         components: {
@@ -28,6 +31,18 @@
             contextTypes: {
                 required: false, // TODO required?
                 type: Object
+            },
+            onContextMenuAdd: {
+                required: false,
+                type: Function
+            },
+            onContextMenuDuplicate: {
+                required: false,
+                type: Function
+            },
+            onContextMenuDelete: {
+                required: false,
+                type: Function
             },
             roots: {
                 required: true,
@@ -62,8 +77,43 @@
                 category: "children",
                 display: (item, inputs) =>
                     <span>
-                        {item.name}
-                        <i class="pl-2">{this.concepts[this.contextTypes[item.context_type_id].thesaurus_url].label}</i>
+                        <hsc-menu-style-white class="d-inline-block">
+                            <hsc-menu-context-menu class="d-inline-block">
+                                {item.name}
+                                <i class="pl-2">{this.concepts[this.contextTypes[item.context_type_id].thesaurus_url].label}</i>
+                                <template slot="contextmenu">
+                                    <hsc-menu-item disabled>
+                                        <div slot="body">
+                                            <a href="#" class="dropdown-item">
+                                                {item.name}
+                                            </a>
+                                        </div>
+                                    </hsc-menu-item>
+                                    <hsc-menu-separator />
+                                    <hsc-menu-item>
+                                        <div slot="body">
+                                            <a href="#" class="dropdown-item" onClick={() => this.onContextMenuAdd(item)}>
+                                                <i class="fas fa-fw fa-plus text-success"></i> Add new Sub-Entity
+                                            </a>
+                                        </div>
+                                    </hsc-menu-item>
+                                    <hsc-menu-item>
+                                        <div slot="body">
+                                            <a href="#" class="dropdown-item" onClick={() => this.onContextMenuDuplicate(item)}>
+                                                <i class="fas fa-fw fa-copy text-info"></i> Duplicate <i>{item.name}</i>
+                                            </a>
+                                        </div>
+                                    </hsc-menu-item>
+                                    <hsc-menu-item>
+                                        <div slot="body">
+                                            <a href="#" class="dropdown-item" onClick={() => this.onContextMenuDelete(item)}>
+                                                <i class="fas fa-fw fa-trash text-danger"></i> Delete <i>{item.name}</i>
+                                            </a>
+                                        </div>
+                                    </hsc-menu-item>
+                                </template>
+                            </hsc-menu-context-menu>
+                        </hsc-menu-style-white>
                     </span>
             }
         }
