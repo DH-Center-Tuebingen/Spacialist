@@ -7,6 +7,7 @@
             :model="roots"
             :onSelect="onSelect"
             :openerOpts="openerOpts"
+            :search="search"
             :selection="selection"
             :strategies="strategies">
         </tree-view>
@@ -72,9 +73,11 @@
                     position: 'left'
                 },
                 css: {
-                    opener: 'opener mr-2 text-info'
+                    opener: 'opener mr-2 text-info',
+                    search: 'form-control'
                 },
                 category: "children",
+                search: input => item => item.name.match(new RegExp(`.*${ input }.*`, "gi")),
                 display: (item, inputs) =>
                     <span>
                         <hsc-menu-style-white class="d-inline-block">

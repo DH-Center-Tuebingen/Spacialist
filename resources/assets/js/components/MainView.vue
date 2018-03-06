@@ -12,7 +12,7 @@
                                         <i class="fas fa-search"></i>
                                     </span>
                                 </div>
-                                <input class="form-control" type="text" placeholder="Search" />
+                                <input class="form-control" type="search" placeholder="Search" />
                             </div>
                         </div>
                     </form>
