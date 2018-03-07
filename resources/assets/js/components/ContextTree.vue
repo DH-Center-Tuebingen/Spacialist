@@ -83,7 +83,9 @@
                         <hsc-menu-style-white class="d-inline-block">
                             <hsc-menu-context-menu class="d-inline-block">
                                 {item.name}
-                                <i class="pl-2">{this.concepts[this.contextTypes[item.context_type_id].thesaurus_url].label}</i>
+                                <span class="pl-2 font-italic mb-0">
+                                    {this.concepts[this.contextTypes[item.context_type_id].thesaurus_url].label}
+                                </span>
                                 <template slot="contextmenu">
                                     <hsc-menu-item disabled>
                                         <div slot="body">
