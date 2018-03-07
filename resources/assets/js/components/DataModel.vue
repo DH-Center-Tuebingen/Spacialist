@@ -8,7 +8,7 @@
             <attributes
                 group="attributes"
                 :attributes="localAttributes"
-                :values="{}"
+                :values="localAttributeValues"
                 :selections="{}"
                 :concepts="concepts"
                 :is-source="true"
@@ -31,7 +31,7 @@
             <attributes
                 group="attributes"
                 :attributes="contextAttributes"
-                :values="{}"
+                :values="contextValues"
                 :selections="contextSelections"
                 :concepts="concepts"
                 :on-add="addAttributeToContextType"
@@ -414,6 +414,7 @@
                 this.contextType = Object.assign({}, contextType);
                 let id = contextType.id;
                 let attrs = this.contextAttributes;
+                let values = this.contextValues;
                 let selections = this.contextSelections;
                 let globalAttrs = this.localAttributes;
                 this.$http.get('/api/editor/context_type/'+id+'/attribute')
@@ -422,6 +423,8 @@
                         selections = data.selections;
                         for(let i=0; i<data.attributes.length; i++) {
                             attrs.push(data.attributes[i]);
+                            // Set values for all context attributes to '', so values in <attributes> are existant
+                            Vue.set(values, data.attributes[i].id, '');
                         }
                         for(let i=0; i<globalAttrs.length; i++) {
                             let id = globalAttrs[i].id;
@@ -449,6 +452,7 @@
                 contextType: {},
                 contextAttributes: [],
                 contextSelections: {},
+                contextValues: {},
                 attributeTypes: [],
                 newAttribute: {},
                 modalSelectedAttribute: {},
@@ -466,6 +470,17 @@
                     'string-mc': 1,
                     epoch: 1
                 }
+            }
+        },
+        computed: {
+            // set values for all attributes to '', so values in <attributes> are existant
+            localAttributeValues: function() {
+                let data = {};
+                for(let i=0; i<this.localAttributes.length; i++) {
+                    let a = this.localAttributes[i];
+                    data[a.id] = '';
+                }
+                return data;
             }
         }
     }

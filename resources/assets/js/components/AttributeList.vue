@@ -80,7 +80,7 @@
                         :disabled="attribute.isDisabled"
                         :hideSelected="true"
                         :multiple="true"
-                        :options="localSelections[attribute.id]">
+                        :options="localSelections[attribute.id] || []">
                     </multiselect>
                 </div>
                 <div v-else-if="attribute.datatype == 'string-sc'">
@@ -94,7 +94,7 @@
                         :disabled="attribute.isDisabled"
                         :hideSelected="true"
                         :multiple="false"
-                        :options="localSelections[attribute.id]">
+                        :options="localSelections[attribute.id] || []">
                     </multiselect>
                 </div>
                 <div v-else-if="attribute.datatype == 'list'">
@@ -162,7 +162,7 @@
                         :disabled="attribute.isDisabled"
                         :hideSelected="true"
                         :multiple="false"
-                        :options="localSelections[attribute.id]">
+                        :options="localSelections[attribute.id] || []">
                     </multiselect>
                 </div>
                 <div v-else-if="attribute.datatype == 'dimension'">
