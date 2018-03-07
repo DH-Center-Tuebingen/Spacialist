@@ -11,13 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    $preferences = App\Preference::getPreferences();
-    $data = [
-        'preferences' => $preferences
-    ];
-    return view('welcome', $data);
-})->middleware('guest');
+Route::get('/', 'HomeController@welcome')->name('welcome');
 
 Auth::routes();
 

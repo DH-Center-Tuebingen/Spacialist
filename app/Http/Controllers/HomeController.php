@@ -79,6 +79,10 @@ class HomeController extends Controller
         return view('home', $data);
     }
 
+    public function welcome() {
+        return view('welcome');
+    }
+
     public function prefs()
     {
         $preferences = Preference::getPreferences();
