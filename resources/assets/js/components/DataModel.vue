@@ -1,6 +1,6 @@
 <template>
     <div class="row d-flex flex-row of-hidden col">
-        <div class="col-md-5 h-100 scroll-x-auto">
+        <div class="col-md-5">
             <h4>Available Attributes</h4>
             <button type="button" class="btn btn-success" @click="onCreateAttribute">
                 <i class="fas fa-fw fa-plus"></i> Add Attribute
@@ -16,7 +16,7 @@
                 :show-info="true">
             </attributes>
         </div>
-        <div class="col-md-2 h-100 scroll-x-auto">
+        <div class="col-md-2">
             <h4>Available Context-Types</h4>
             <context-types
                 :data="localContextTypes"
@@ -26,7 +26,7 @@
                 :on-select="setContextType">
             </context-types>
         </div>
-        <div class="col-md-5 h-100 scroll-x-auto">
+        <div class="col-md-5">
             <h4>Added Attributes</h4>
             <attributes
                 group="attributes"
@@ -208,7 +208,7 @@
 
 <script>
     export default {
-        props: ['attributes', 'values', 'concepts', 'contextTypes'],
+        props: ['attributes', 'concepts', 'contextTypes', 'values'],
         mounted() {},
         methods: {
             createAttribute(attribute) {

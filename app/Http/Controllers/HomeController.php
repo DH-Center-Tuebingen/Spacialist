@@ -23,9 +23,11 @@ class HomeController extends Controller
      */
     public function __construct()
     {
+        parent::__construct();
         if(!Preference::hasPublicAccess()) {
-            $this->middleware('auth');
+            $this->middleware('auth')->except('welcome');
         }
+        $this->middleware('guest')->only('welcome');
     }
 
     /**

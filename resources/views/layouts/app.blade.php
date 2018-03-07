@@ -9,7 +9,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Spacialist') }}</title>
+    <title>{{ $p['prefs.project-name'] }}</title>
 
     <!-- Styles -->
     <link href="{{ asset('css/vue-multiselect.min.css') }}" rel="stylesheet">
@@ -22,7 +22,7 @@
             <!-- Branding Image -->
             <a class="navbar-brand" href="{{ url('/home') }}">
                 <img src="{{ asset('favicon.png') }}" class="logo" alt="spacialist logo" />
-                {{ config('app.name', 'Spacialist') }}
+                {{ $p['prefs.project-name'] }}
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -82,20 +82,28 @@
                                 <a class="dropdown-item" href="{{ route('bibliography') }}">
                                     <i class="fas fa-fw fa-book"></i> Bibliography
                                 </a>
+                                @if ($p['prefs.load-extensions']->{'data-analysis'})
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{{ route('analysis') }}">
                                     <i class="far fa-fw fa-chart-bar"></i> Data Analysis <sup>(BETA)</sup>
                                 </a>
+                                @endif
+                                @if ($p['prefs.link-to-thesaurex'] || $p['prefs.load-extensions']->{'data-analysis'})
                                 <div class="dropdown-divider"></div>
                                 <h6 class="dropdown-header">
                                     External Tools <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
                                 </h6>
+                                @endif
+                                @if ($p['prefs.link-to-thesaurex'])
                                 <a class="dropdown-item" href="">
                                     <i class="fas fa-fw fa-paw"></i> ThesauRex
                                 </a>
+                                @endif
+                                @if ($p['prefs.load-extensions']->{'data-analysis'})
                                 <a class="dropdown-item" href="">
                                     <i class="fas fa-fw fa-chart-bar"></i> dbWebGen
                                 </a>
+                                @endif
                             </div>
                         </li>
                         <li class="nav-item dropdown">
@@ -149,12 +157,8 @@
                 </ul>
             </div>
         </nav>
-        <div class="container-fluid">
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    @yield('content')
-                </div>
-            </div>
+        <div class="container-fluid mt-3 mb-3">
+            @yield('content')
             <about-dialog></about-dialog>
         </div>
     </div>

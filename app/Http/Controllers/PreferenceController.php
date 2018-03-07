@@ -25,7 +25,7 @@ class PreferenceController extends Controller {
     public function patchPreference(Request $request, $id) {
         $this->validate($request, [
             'label' => 'required|string|exists:preferences,label',
-            'value' => 'string',
+            'value' => 'string|nullable',
             'user_id' => 'nullable|integer|exists:users,id',
             'allow_override' => 'nullable|boolean_string'
         ]);

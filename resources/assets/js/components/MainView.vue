@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-md-2" id="tree-container">
+        <div :class="'col-md-'+preferences['prefs.columns'].left" id="tree-container">
             <div>
                 <h3>Contexts</h3>
                 <div class="col-md-12">
@@ -36,7 +36,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-5" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" >
+        <div :class="'col-md-'+preferences['prefs.columns'].center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" >
             <div v-if="selectedContext.id">
                 <div class="d-flex align-items-center justify-content-between">
                     <h1>{{ selectedContext.name }}</h1>
@@ -49,7 +49,7 @@
                         </button>
                     </span>
                 </div>
-                <attributes v-if="isLoaded"
+                <attributes class="pt-2" v-if="isLoaded"
                     :attributes="selectedContext.attributes"
                     :concepts="concepts"
                     :on-metadata="showMetadata"
@@ -60,20 +60,20 @@
             </div>
             <h1 v-else>Nothing selected</h1>
         </div>
-        <div class="col-md-5" id="addon-container">
+        <div :class="'col-md-'+preferences['prefs.columns'].right" id="addon-container">
             <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <a class="nav-link" href="#" v-bind:class="{active: tab == 'map'}" v-on:click="tab = 'map'">
+                <li class="nav-item" v-if="preferences['prefs.load-extensions'].map">
+                    <a class="nav-link" href="#" :class="{active: tab == 'map'}" @click="tab = 'map'">
                         <i class="fas fa-fw fa-map-marker-alt"></i> Map
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" v-bind:class="{active: tab == 'files'}" v-on:click="tab = 'files'">
+                <li class="nav-item" v-if="preferences['prefs.load-extensions'].files">
+                    <a class="nav-link" href="#" :class="{active: tab == 'files'}" @click="tab = 'files'">
                         <i class="fas fa-fw fa-folder"></i> Files
                     </a>
                 </li>
                 <li class="nav-item" v-if="selectedContext.id">
-                    <a class="nav-link" href="#" v-bind:class="{active: tab == 'references'}" v-on:click="tab = 'references'">
+                    <a class="nav-link" href="#" :class="{active: tab == 'references'}" @click="tab = 'references'">
                         <i class="fas fa-fw fa-bookmark"></i> References
                     </a>
                 </li>
@@ -188,6 +188,10 @@
                 required: false, // TODO required?
                 type: Object
             },
+            preferences: {
+                required: true,
+                type: Object
+            },
             tree: {
                 required: true,
                 type: Array
@@ -203,6 +207,10 @@
                 } else {
                     this.selectedContext = Object.assign({}, element);
                     this.getContextData(element);
+                    // if all extensions are disabled, auto-load references on select
+                    if(this.tab == '') {
+                        this.tab = 'references';
+                    }
                 }
             },
             getContextData(elem) {
@@ -328,6 +336,11 @@
                 let concept = this.concepts[element[label]];
                 if(!concept) return element;
                 return concept.label;
+            },
+            getActiveTab() {
+                if(this.preferences['prefs.load-extensions'].map) return 'map';
+                if(this.preferences['prefs.load-extensions'].files) return 'files';
+                return '';
             }
         },
         data() {
@@ -335,7 +348,7 @@
                 selectedContext: {},
                 toDeleteEntity: {},
                 newEntity: {},
-                tab: 'map',
+                tab: this.getActiveTab(),
                 dataLoaded: false,
                 attributesLoaded: false
             }

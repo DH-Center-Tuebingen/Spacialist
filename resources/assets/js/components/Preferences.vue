@@ -125,7 +125,7 @@
                             <div class="col-md-2"></div>
                             <div class="col-md-10">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" :id="'extension-'+key" :checked="extension" />
+                                    <input type="checkbox" class="form-check-input" :id="'extension-'+key" v-model="localPreferences['prefs.load-extensions'].value[key]" />
                                     <label class="form-check-label" :for="'extension-'+key">
                                         {{ key }}
                                     </label>

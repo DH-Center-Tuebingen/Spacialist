@@ -38,37 +38,34 @@ class Preference extends Model
         return Helpers::parseBoolean($decodedValue->public);
     }
 
+    public static function decodePreference($label, $value) {
+        switch($label) {
+            case 'prefs.gui-language':
+                return $value->language_key;
+            case 'prefs.columns':
+                return $value;
+            case 'prefs.show-tooltips':
+                return $value->show;
+            case 'prefs.tag-root':
+                return $value->uri;
+            case 'prefs.load-extensions':
+                return $value;
+            case 'prefs.link-to-thesaurex':
+                return $value->url;
+            case 'prefs.project-name':
+                return $value->name;
+            case 'prefs.project-maintainer':
+                return $value;
+        }
+        return $value;
+    }
+
     private static function decodePreferences($prefs) {
         $prefObj = [];
         foreach($prefs as $p) {
             $decoded = json_decode($p->default_value);
             unset($p->default_value);
-            switch($p->label) {
-                case 'prefs.gui-language':
-                    $p->value = $decoded->language_key;
-                    break;
-                case 'prefs.columns':
-                    $p->value = $decoded;
-                    break;
-                case 'prefs.show-tooltips':
-                    $p->value = $decoded->show;
-                    break;
-                case 'prefs.tag-root':
-                    $p->value = $decoded->uri;
-                    break;
-                case 'prefs.load-extensions':
-                    $p->value = $decoded;
-                    break;
-                case 'prefs.link-to-thesaurex':
-                    $p->value = $decoded->url;
-                    break;
-                case 'prefs.project-name':
-                    $p->value = $decoded->name;
-                    break;
-                case 'prefs.project-maintainer':
-                    $p->value = $decoded;
-                    break;
-            }
+            $p->value = self::decodePreference($p->label, $decoded);
             $prefObj[$p->label] = $p;
         }
         return $prefObj;
