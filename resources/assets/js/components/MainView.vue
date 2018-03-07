@@ -319,9 +319,7 @@
                 if(!this.selectedContext.references) return false;
                 if(!Object.keys(this.selectedContext.references).length) return false;
                 if(!this.selectedContext.references[group]) return false;
-                console.log(Object.keys(this.selectedContext.references[group]).length);
                 let count = Object.keys(this.selectedContext.references[group]).length > 0;
-                console.log("count", count);
                 return count > 0;
             },
             translateLabel(element, label) {
@@ -347,7 +345,7 @@
                 return this.dataLoaded && this.attributesLoaded;
             },
             hasReferences: function() {
-                return Object.keys(this.selectedContext.references).length;
+                return this.selectedContext.references && Object.keys(this.selectedContext.references).length;
             }
         }
     }
