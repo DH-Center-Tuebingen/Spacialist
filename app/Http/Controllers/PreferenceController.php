@@ -100,6 +100,9 @@ class PreferenceController extends Controller {
             case 'prefs.project-name':
                 $value = json_encode(['name' => $decodedValue]);
                 break;
+            case 'prefs.project-maintainer':
+                $value = $decodedValue;
+                break;
         }
         return $value;
     }

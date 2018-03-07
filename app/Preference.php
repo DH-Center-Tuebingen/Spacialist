@@ -59,6 +59,9 @@ class Preference extends Model
                 case 'prefs.project-name':
                     $p->value = $decoded->name;
                     break;
+                case 'prefs.project-maintainer':
+                    $p->value = $decoded;
+                    break;
             }
             $prefObj[$p->label] = $p;
         }

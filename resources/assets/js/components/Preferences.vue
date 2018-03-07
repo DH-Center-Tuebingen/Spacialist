@@ -189,6 +189,49 @@
                     </button>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <strong>Project Maintainer</strong>
+                </td>
+                <td>
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label">Name:</label>
+                            <div class="col-md-10">
+                                <input class="form-control" type="text" v-model="localPreferences['prefs.project-maintainer'].value.name" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label">E-Mail-Address:</label>
+                            <div class="col-md-10">
+                                <input class="form-control" type="text" v-model="localPreferences['prefs.project-maintainer'].value.email" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label">Description:</label>
+                            <div class="col-md-10">
+                                <input class="form-control" type="text" v-model="localPreferences['prefs.project-maintainer'].value.description" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label" for="public">Public?</label>
+                            <div class="col-md-10">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="public" :checked="localPreferences['prefs.project-maintainer'].value.public" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </td>
+                <td>
+                    <input type="checkbox" v-model="localPreferences['prefs.project-maintainer'].allow_override" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.project-maintainer'])">
+                        <i class="fas fa-fw fa-check"></i>
+                    </button>
+                </td>
+            </tr>
         </tbody>
     </table>
 </template>
