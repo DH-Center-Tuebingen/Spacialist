@@ -12,7 +12,11 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $preferences = App\Preference::getPreferences();
+    $data = [
+        'preferences' => $preferences
+    ];
+    return view('welcome', $data);
 })->middleware('guest');
 
 Auth::routes();

@@ -15,13 +15,13 @@ class Preference extends Model
     ];
 
     public static function getPreferences() {
-        $prefs = Preference::orderBy('id')->get();
+        $prefs = self::orderBy('id')->get();
         $prefObj = self::decodePreferences($prefs);
         return $prefObj;
     }
 
     public static function getUserPreferences($id) {
-        $prefs = Preference::leftJoin('user_preferences as up', 'preferences.id', '=', 'up.pref_id')
+        $prefs = self::leftJoin('user_preferences as up', 'preferences.id', '=', 'up.pref_id')
             ->select('preferences.*', 'up.pref_id', 'up.user_id')
             ->selectRaw(\DB::raw('COALESCE(up.value, default_value) AS default_value'))
             ->where('up.user_id', $id)
@@ -30,6 +30,12 @@ class Preference extends Model
             ->get();
         $prefObj = self::decodePreferences($prefs);
         return $prefObj;
+    }
+
+    public static function hasPublicAccess() {
+        $value = self::where('label', 'prefs.project-maintainer')->value('default_value');
+        $decodedValue = json_decode($value);
+        return Helpers::parseBoolean($decodedValue->public);
     }
 
     private static function decodePreferences($prefs) {
