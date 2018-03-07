@@ -10,34 +10,6 @@
             @start="dragged">
             <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
             <label class="control-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
-                <!-- <div style="display: table; float: right;">
-                    <span style="display: table-cell">
-                        {{ concepts[attribute.thesaurus_url].label }}:
-                    </span>
-                    <sup ui-sref="root.spacialist.context.data.sources({aid: attribute.id})" style="display: table-cell" class="source-link">
-                        <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="(attributeSources | filter:{attribute_id:attribute.id}).length > 0 || localValues[attribute.id+'_cert'] < 100 || localValues[attribute.id+'_desc'].length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
-                    </sup>
-                </div> -->
-                <!-- <div v-if="hovered[attribute.id]" class="d-flex">
-                    <div v-if="allowEdit" style="">
-                        <a class="btn btn-outline-info btn-sm p-1" href="">
-                            <i class="fas fa-fw fa-edit"></i>
-                        </a>
-                    </div>
-                    <div v-if="allowDelete">
-                        <a class="btn btn-outline-danger btn-sm p-1" href="">
-                            <i class="fas fa-fw fa-trash"></i>
-                        </a>
-                    </div>
-                    <div v-if="allowReorder">
-                        <a class="btn btn-outline-secondary btn-sm p-1" href="" v-if="!$first">
-                            <i class="fas fa-fw fa-sort-up"></i>
-                        </a>
-                        <a class="btn btn-outline-secondary btn-sm p-1" href="" v-if="!$last">
-                            <i class="fas fa-fw fa-sort-down"></i>
-                        </a>
-                    </div>
-                </div> -->
                 <div v-show="hoverState[i]">
                     <a v-if="onReorder" href="#" class="reorder-handle">
                         <i class="fas fa-fw fa-sort text-secondary"></i>
@@ -56,7 +28,18 @@
                     {{concepts[attribute.thesaurus_url].label}}:
                 </span>
                 <sup v-if="onMetadata">
-                    <i class="fas fa-fw fa-lg fa-dot-circle"></i>
+                    <span class="fa-layers fa-fw">
+                        <i class="fas fa-lg fa-dot-circle"></i>
+                        <i v-if="metadataAddon(attribute.thesaurus_url)" class="fa-inverse fas fa-circle text-success" data-fa-transform="shrink-5 down-6 right-6"></i>
+                    </span>
+                    <!-- <div style="display: table; float: right;">
+                        <span style="display: table-cell">
+                            {{ concepts[attribute.thesaurus_url].label }}:
+                        </span>
+                        <sup ui-sref="root.spacialist.context.data.sources({aid: attribute.id})" style="display: table-cell" class="source-link">
+                            <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="(attributeSources | filter:{attribute_id:attribute.id}).length > 0 || localValues[attribute.id+'_cert'] < 100 || localValues[attribute.id+'_desc'].length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
+                        </sup>
+                    </div> -->
                 </sup>
             </label>
             <div class="col-md-9">
@@ -295,22 +278,23 @@
                 required: true,
                 type: Array
             },
-            values: {
-                required: true,
-                type: Object
-            },
             concepts: {
                 required: true,
                 type: Object
             },
-            selections: {
-                required: true,
-                type: Object
+            group: { // required if onReorder is set // TODO
+                required: false,
+                type: String
             },
             isSource: {
                 required: false,
                 type: Boolean,
                 default: false
+            },
+            metadataAddon: {
+                required: false,
+                type: Function,
+                default: () => false
             },
             onAdd: {
                 required: false,
@@ -324,6 +308,10 @@
                 required: false,
                 type: Function
             },
+            onMetadata: { // Sources modal
+                required: false,
+                type: Function
+            },
             onRemove: {
                 required: false,
                 type: Function
@@ -332,20 +320,17 @@
                 required: false,
                 type: Function
             },
-            group: { // required if onReorder is set // TODO
-                required: false,
-                type: String
+            selections: {
+                required: true,
+                type: Object
             },
             showInfo: { // shows parent on hover
                 required: false,
                 type: Boolean
             },
-            onMetadata: { // Sources modal
-                required: false,
-                type: Function
-            },
-            test: {
-                required: false
+            values: {
+                required: true,
+                type: Object
             }
         },
         components: {

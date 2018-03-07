@@ -30,6 +30,7 @@ Route::get('/version', function() {
 // CONTEXT
 Route::get('/context/{id}/data', 'ContextController@getData')->where('id', '[0-9]+');
 Route::get('/context/{id}/children', 'ContextController@getChildren')->where('id', '[0-9]+');
+Route::get('/context/{id}/references', 'ReferenceController@getByContext')->where('id', '[0-9]+');
 
 Route::post('/context', 'ContextController@addEntity');
 

@@ -51,10 +51,11 @@
                 </div>
                 <attributes v-if="isLoaded"
                     :attributes="selectedContext.attributes"
-                    :values="selectedContext.data"
-                    :selections="selectedContext.selections"
                     :concepts="concepts"
-                    :onMetadata="showMetadata">
+                    :on-metadata="showMetadata"
+                    :metadata-addon="hasReferenceGroup"
+                    :selections="selectedContext.selections"
+                    :values="selectedContext.data">
                 </attributes>
             </div>
             <h1 v-else>Nothing selected</h1>
@@ -71,7 +72,7 @@
                         <i class="fas fa-fw fa-folder"></i> Files
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" v-if="selectedContext.id">
                     <a class="nav-link" href="#" v-bind:class="{active: tab == 'references'}" v-on:click="tab = 'references'">
                         <i class="fas fa-fw fa-bookmark"></i> References
                     </a>
@@ -83,7 +84,23 @@
                     <h2>Files loaded</h2>
                 </div>
                 <div v-if="tab == 'references'">
-                    <h2>References loaded</h2>
+                    <p class="alert alert-info" v-if="!hasReferences">
+                        No references found.
+                    </p>
+                    <div v-if="hasReferences" v-for="(referenceGroup, key) in selectedContext.references">
+                        <h5><a href="#">{{ concepts[key].label }}</a></h5>
+                        <div class="list-group">
+                            <a class="list-group-item list-group-item-action" v-for="reference in referenceGroup">
+                                <h6>{{ reference.bibliography.title }}</h6>
+                                <p class="mb-0">
+                                    {{ reference.bibliography.author }} <span class="text-lightgray">{{ reference.bibliography.year}}</span>
+                                </p>
+                                <p class="font-weight-light font-italic mb-0">
+                                    {{ reference.description }}
+                                </p>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -216,6 +233,13 @@
                     }
                     Vue.set(ctx, 'selections', data.selections);
                     Vue.set(vm, 'attributesLoaded', true);
+                    return vm.$http.get('/api/context/'+cid+'/references');
+                }).then(function(response) {
+                    let data = response.data;
+                    if(data instanceof Array) {
+                        data = {};
+                    }
+                    Vue.set(ctx, 'references', data);
                 });
             },
             showMetadata() {
@@ -291,6 +315,15 @@
                 };
                 this.addNewEntity(duplicate);
             },
+            hasReferenceGroup: function(group) {
+                if(!this.selectedContext.references) return false;
+                if(!Object.keys(this.selectedContext.references).length) return false;
+                if(!this.selectedContext.references[group]) return false;
+                console.log(Object.keys(this.selectedContext.references[group]).length);
+                let count = Object.keys(this.selectedContext.references[group]).length > 0;
+                console.log("count", count);
+                return count > 0;
+            },
             translateLabel(element, label) {
                 let value = element[label];
                 if(!value) return element;
@@ -312,6 +345,9 @@
         computed: {
             isLoaded: function() {
                 return this.dataLoaded && this.attributesLoaded;
+            },
+            hasReferences: function() {
+                return Object.keys(this.selectedContext.references).length;
             }
         }
     }
