@@ -217,7 +217,7 @@
                             <label class="col-md-2 col-form-label" for="public">Public?</label>
                             <div class="col-md-10">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="public" :checked="localPreferences['prefs.project-maintainer'].value.public" />
+                                    <input type="checkbox" class="form-check-input" id="public" v-model="localPreferences['prefs.project-maintainer'].value.public" />
                                 </div>
                             </div>
                         </div>
@@ -245,7 +245,7 @@
                 let data = {};
                 data.label = pref.label;
                 data.value = pref.value;
-                if(typeof data.value === 'object') data.value = JSON.stringify(value);
+                if(typeof data.value === 'object') data.value = JSON.stringify(data.value);
                 data.allow_override = pref.allow_override;
                 this.$http.patch('/api/preference/' + pref.id, data).then(function(response) {
                     console.log(response.data);
