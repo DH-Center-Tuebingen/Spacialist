@@ -13,10 +13,9 @@ let mix = require('laravel-mix');
 
 mix.js('resources/assets/js/app.js', 'public/js')
    .sass('resources/assets/sass/app.scss', 'public/css')
-   .copy('node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js', 'public/js')
    .copy('node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css', 'public/css')
-   .copy('node_modules/bootstrap/dist/js/bootstrap.js', 'public/js')
    .copy('node_modules/vue-multiselect/dist/vue-multiselect.min.css', 'public/css')
    .autoload({
        jquery: ['$']
-   });
+   })
+   .extract(['jquery', 'vue', 'bootstrap', '@fortawesome/fontawesome', '@fortawesome/fontawesome-free-brands', '@fortawesome/fontawesome-free-regular', '@fortawesome/fontawesome-free-solid', '@bosket/core', '@bosket/tools', '@bosket/vue', 'axios', 'lodash', 'bootstrap-datepicker', 'debounce', 'moment', 'popper.js', 'vee-validate', 'ol']);

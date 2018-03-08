@@ -167,7 +167,8 @@
     <script>
         FontAwesomeConfig = { searchPseudoElements: true };
     </script>
+    <script src="{{ asset('js/manifest.js') }}"></script>
+    <script src="{{ asset('js/vendor.js') }}"></script>
     <script src="{{ asset('js/app.js') }}"></script>
-    <script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
 </body>
 </html>
