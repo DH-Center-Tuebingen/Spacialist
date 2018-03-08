@@ -27,6 +27,31 @@ body {
     margin-left: -.5rem;
 }
 
+.card-hover {
+    transition: .5s ease;
+}
+
+.card-hover-overlay {
+    border-radius: $card-border-radius !important;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    position: absolute;
+    transition: .5s ease;
+}
+
+.card:hover .card-hover {
+    opacity: .25;
+}
+
+.card:hover .card-hover-overlay {
+    opacity: .5;
+}
+
 .text-lightgray {
     color: lightgray;
 }
