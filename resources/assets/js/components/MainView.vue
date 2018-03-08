@@ -62,28 +62,22 @@
         </div>
         <div :class="'col-md-'+preferences['prefs.columns'].right" id="addon-container">
             <ul class="nav nav-tabs">
-                <li class="nav-item" v-if="preferences['prefs.load-extensions'].map">
-                    <a class="nav-link" href="#" :class="{active: tab == 'map'}" @click="tab = 'map'">
-                        <i class="fas fa-fw fa-map-marker-alt"></i> Map
+                <li class="nav-item" v-for="plugin in plugins.tab">
+                    <a class="nav-link" href="#" :class="{active: tab == plugin.key}" @click="setActivePlugin(plugin)">
+                        <i class="fas fa-fw" :class="plugin.icon"></i> {{ plugin.label }}
                     </a>
                 </li>
-                <li class="nav-item" v-if="preferences['prefs.load-extensions'].files">
-                    <a class="nav-link" href="#" :class="{active: tab == 'files'}" @click="tab = 'files'">
-                        <i class="fas fa-fw fa-folder"></i> Files
-                    </a>
-                </li>
-                <li class="nav-item" v-if="selectedContext.id">
-                    <a class="nav-link" href="#" :class="{active: tab == 'references'}" @click="tab = 'references'">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" :class="{active: tab == 'references', disabled: !selectedContext.id}" @click="setActiveTab('references')">
                         <i class="fas fa-fw fa-bookmark"></i> References
                     </a>
                 </li>
             </ul>
             <div class="mt-2">
-                <ol-map v-if="tab == 'map'"></ol-map>
-                <div v-if="tab == 'files'">
-                    <h2>Files loaded</h2>
-                </div>
-                <div v-if="tab == 'references'">
+                <keep-alive>
+                    <component :is="activePlugin"></component>
+                </keep-alive>
+                <div v-show="tab == 'references'">
                     <p class="alert alert-info" v-if="!hasReferences">
                         No references found.
                     </p>
@@ -211,7 +205,19 @@
                     if(this.tab == '') {
                         this.tab = 'references';
                     }
+                    this.$requestHooks(this.selectedContext);
                 }
+            },
+            setActiveTab: function(tab) {
+                if(tab == 'references') {
+                    if(!this.selectedContext.id) return;
+                    this.activePlugin = '';
+                }
+                this.tab = tab;
+            },
+            setActivePlugin: function(plugin) {
+                this.setActiveTab(plugin.key);
+                this.activePlugin = plugin.tag;
             },
             getContextData(elem) {
                 let ctx = this.selectedContext;
@@ -336,11 +342,6 @@
                 let concept = this.concepts[element[label]];
                 if(!concept) return element;
                 return concept.label;
-            },
-            getActiveTab() {
-                if(this.preferences['prefs.load-extensions'].map) return 'map';
-                if(this.preferences['prefs.load-extensions'].files) return 'files';
-                return '';
             }
         },
         data() {
@@ -348,10 +349,15 @@
                 selectedContext: {},
                 toDeleteEntity: {},
                 newEntity: {},
-                tab: this.getActiveTab(),
                 dataLoaded: false,
-                attributesLoaded: false
+                defaultKey: undefined,
+                attributesLoaded: false,
+                plugins: {},
+                activePlugin: ''
             }
+        },
+        created() {
+            this.$getSpacialistPlugins('plugins');
         },
         computed: {
             isLoaded: function() {
@@ -359,6 +365,20 @@
             },
             hasReferences: function() {
                 return this.selectedContext.references && Object.keys(this.selectedContext.references).length;
+            },
+            tab: {
+                get() {
+                    if(this.defaultKey) return this.defaultKey;
+                    else if(this.plugins.tab && this.plugins.tab[0]) {
+                        this.activePlugin = this.plugins.tab[0].tag;
+                        return this.plugins.tab[0].key;
+                    } else {
+                        return '';
+                    }
+                },
+                set(newValue) {
+                    this.defaultKey = newValue;
+                }
             }
         }
     }

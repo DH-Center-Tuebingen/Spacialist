@@ -17,7 +17,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div id="app">
+    <div id="app" preferences="{{json_encode($p)}}">
         <nav class="navbar navbar-dark bg-dark navbar-static-top navbar-expand-lg">
             <!-- Branding Image -->
             <a class="navbar-brand" href="{{ url('/home') }}">
@@ -76,8 +76,8 @@
                                 <i class="fas fa-fw fa-cogs"></i> Tools
                             </a>
                             <div class="dropdown-menu" aria-labelledby="tools-navbar">
-                                <a class="dropdown-item" href="{{ route('gis') }}">
-                                    <i class="fas fa-fw fa-globe"></i> GIS
+                                <a class="dropdown-item" v-for="plugin in plugins.tools" :href="plugin.href">
+                                    <i class="fas fa-fw" :class="plugin.icon"></i> @{{ plugin.label }}
                                 </a>
                                 <a class="dropdown-item" href="{{ route('bibliography') }}">
                                     <i class="fas fa-fw fa-book"></i> Bibliography
@@ -120,11 +120,11 @@
                                 <a class="dropdown-item" href="{{ route('dme') }}">
                                     <i class="fas fa-fw fa-sitemap"></i> Data Model Editor
                                 </a>
-                                <a class="dropdown-item" href="{{ route('layer') }}">
-                                    <i class="fas fa-fw fa-sticky-note"></i> Layer Editor
-                                </a>
                                 <a class="dropdown-item" href="{{ route('prefs') }}">
                                     <i class="fas fa-fw fa-cog"></i> System Preferences
+                                </a>
+                                <a class="dropdown-item" v-for="plugin in plugins.settings" :href="plugin.href">
+                                    <i class="fas fa-fw" :class="plugin.icon"></i> @{{ plugin.label }}
                                 </a>
                                 <a class="dropdown-item" href="">
                                     <i class="fas fa-fw fa-pencil-alt"></i> Toggle Edit Mode

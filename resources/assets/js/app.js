@@ -8,6 +8,7 @@ import Axios from 'axios';
 import VueUploadComponent from 'vue-upload-component';
 import moment from 'moment';
 import VeeValidate from 'vee-validate';
+import SpacialistPluginSystem from './plugin.js';
 
 fontawesome.library.add(solid, regular, brands);
 
@@ -33,6 +34,7 @@ $ = jQuery  = window.$ = window.jQuery = require('jquery');
 Vue.prototype.$http = Axios;
 Vue.use(VModal);
 Vue.use(VeeValidate);
+Vue.use(SpacialistPluginSystem);
 
 // Imported Components
 Vue.component('multiselect', Multiselect);
@@ -83,12 +85,29 @@ Vue.filter('bibtexify', function(value, type) {
 
 const app = new Vue({
     el: '#app',
+    mounted: function() {
+        this.preferences = JSON.parse(this.$el.attributes.preferences.value);
+        let extensions = this.preferences['prefs.load-extensions'];
+        for(let k in extensions) {
+            if(!extensions[k] || (k != 'map' && k != 'files')) {
+                console.log("Skipping plugin " + k);
+                continue;
+            }
+            let name = k;
+            let nameExt = name + '.js';
+            System.import('./plugins/' + nameExt).then(function(data) {
+                Vue.use(data.default);
+            });
+        }
+        this.$getSpacialistPlugins('plugins');
+    },
     data: {
-        tab: 'map',
         selectedContext: {},
         onSelectContext: function(selection) {
-            app.$data.selectedContext = JSON.parse(JSON.stringify(selection));
-        }
+            app.$data.selectedContext = Object.assign({}, selection);
+        },
+        preferences: {},
+        plugins: {}
     },
     methods: {
         showAboutModal() {
