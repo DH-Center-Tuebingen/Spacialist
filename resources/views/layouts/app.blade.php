@@ -14,6 +14,7 @@
     <!-- Styles -->
     <link href="{{ asset('css/vue-multiselect.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap-datepicker.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/highlightjs.css') }}" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>

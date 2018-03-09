@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Bibliography;
+use Illuminate\Support\Facades\Storage;
 
 class Helpers {
     public static function computeCitationKey($l) {
@@ -40,5 +41,13 @@ class Helpers {
     public static function parseBoolean($str) {
         $acceptable = [true, 1, '1', 'true', 'TRUE'];
         return in_array($str, $acceptable, true);
+    }
+
+    public static function getFullFilePath($filename) {
+        return Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $filename);
+    }
+
+    public static function getStorageFilePath($filename) {
+        return Storage::url(env('SP_FILE_PATH') .'/'. $filename);
     }
 }

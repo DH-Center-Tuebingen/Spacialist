@@ -76,3 +76,8 @@ Route::get('/bibliography/export', 'BibliographyController@exportBibtex');
 
 Route::post('/bibliography', 'BibliographyController@addItem');
 Route::post('/bibliography/import', 'BibliographyController@importBibtex');
+
+// EXTENSIONS
+
+// FILE
+Route::get('/file', 'FileController@getFiles');

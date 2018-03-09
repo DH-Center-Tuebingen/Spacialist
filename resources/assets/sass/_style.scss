@@ -56,6 +56,14 @@ body {
     color: lightgray;
 }
 
+.text-gray {
+    color: gray;
+}
+
+.text-wrap {
+    white-space: pre-wrap;
+}
+
 .reorder-handle {
     cursor: grab;
 }

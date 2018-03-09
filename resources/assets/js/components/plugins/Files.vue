@@ -1,46 +1,55 @@
 <template>
-    <div class="row">
-        <div class="col-sm-6 col-md-4 mb-3" v-for="file in files">
+    <div>
+        Displaying {{pagination.from}}-{{pagination.to}} of {{pagination.total}} files
+        <div class="row">
+            <div class="col-sm-6 col-md-4 mb-3" v-for="file in files">
             <div class="card text-center" @click="showFileModal(file)">
                 <div class="card-hover">
-                    <img class="card-img" src="" style="width: 300px; height: 200px;">
+                    <img class="card-img" v-if="file.category == 'image'" :src="file.url" style="height: 200px;">
+                    <div class="card-img" v-else style="width: 100%; height: 200px;"></div>
                     <div class="card-img-overlay">
                         <h4 class="card-title">{{file.name}}</h4>
                         <div class="card-text pt-4">
-                            <div v-if="file.type == 'XML'">
+                            <div v-if="file.category == 'xml'">
                                 <i class="fas fa-fw fa-file-code fa-5x"></i>
                             </div>
-                            <div v-else-if="file.type == 'ZIP'">
+                            <div v-if="file.category == 'html'">
+                                <i
+                                class="fab fa-fw fa-html5 fa-5x"
+                                data-fa-transform="shrink-9 down-2"
+                                data-fa-mask="fas fa-fw fa-file"></i>
+                            </div>
+                            <div v-else-if="file.category == 'archive'">
                                 <i class="fas fa-fw fa-file-archive fa-5x"></i>
                             </div>
-                            <div v-else-if="file.type == 'PDF'">
+                            <div v-else-if="file.category == 'pdf'">
                                 <i class="fas fa-fw fa-file-pdf fa-5x"></i>
                             </div>
-                            <div v-else-if="file.type == 'Audio'">
+                            <div v-else-if="file.category == 'audio'">
                                 <i class="fas fa-fw fa-file-audio fa-5x"></i>
                             </div>
-                            <div v-else-if="file.type == 'Video'">
+                            <div v-else-if="file.category == 'video'">
                                 <i class="fas fa-fw fa-file-video fa-5x"></i>
                             </div>
-                            <div v-else-if="file.type == 'Spread'">
+                            <div v-else-if="file.category == 'spreadsheet'">
                                 <i class="fas fa-fw fa-file-excel fa-5x"></i>
                             </div>
-                            <div v-else-if="file.type == 'Doc'">
+                            <div v-else-if="file.category == 'document'">
                                 <i class="fas fa-fw fa-file-word fa-5x"></i>
                             </div>
-                            <div v-else-if="file.type == 'Pres'">
+                            <div v-else-if="file.category == 'presentation'">
                                 <i class="fas fa-fw fa-file-powerpoint fa-5x"></i>
                             </div>
-                            <div v-else-if="file.type == '3D'">
+                            <div v-else-if="file.category == '3d'">
                                 <i
                                 class="fas fa-fw fa-cubes fa-5x"
                                 data-fa-transform="shrink-9 down-2"
                                 data-fa-mask="fas fa-fw fa-file"></i>
                             </div>
-                            <div v-else-if="file.type == 'Text'">
+                            <div v-else-if="file.category == 'text'">
                                 <i class="fas fa-fw fa-file-alt fa-5x"></i>
                             </div>
-                            <div v-else>
+                            <div v-else-if="file.category == 'undefined'">
                                 <i
                                 class="fas fa-fw fa-question fa-5x"
                                 data-fa-transform="shrink-9 down-2"
@@ -56,8 +65,9 @@
                 </div>
             </div>
         </div>
+        </div>
 
-        <modal name="file-modal" height="auto" :scrollable="true">
+        <modal name="file-modal" width="80%" height="auto" :scrollable="true">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ selectedFile.name }} - Details</h5>
@@ -65,7 +75,187 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body text-center">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <component :is="fileCategoryComponent" :file="selectedFile"></component>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="nav nav-tabs nav-fill">
+                                <li class="nav-item">
+                                    <a class="nav-link" :class="{active: modalTab == 'properties'}" @click="modalTab = 'properties'">
+                                        <i class="fas fa-fw fa-sliders-h"></i> Properties
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" :class="{active: modalTab == 'links'}" @click="modalTab = 'links'">
+                                        <i class="fas fa-fw fa-link"></i> Links
+                                    </a>
+                                </li>
+                                <li class="nav-item" v-if="selectedFile.exif">
+                                    <a class="nav-link" :class="{active: modalTab == 'exif'}" @click="modalTab = 'exif'">
+                                        <i class="fas fa-fw fa-camera"></i> Exif
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="ml-4 mr-4" v-show="modalTab == 'properties'">
+                                <h5 class="mt-3">Properties</h5>
+                                <table class="table table-striped table-hover table-sm mb-0">
+                                    <tbody>
+                                        <tr v-for="p in fileProperties">
+                                            <td class="text-left font-weight-bold">
+                                                {{p}}
+                                            </td>
+                                            <td class="text-right text-gray">
+                                                {{selectedFile[p]}}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <h5 class="mt-3">File Properties</h5>
+                                <table class="table table-striped table-hover table-sm mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-left font-weight-bold">
+                                                Created
+                                            </td>
+                                            <td class="text-right text-gray">
+                                                {{selectedFile.created|date}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-left font-weight-bold">
+                                                Last Modified
+                                            </td>
+                                            <td class="text-right text-gray">
+                                                {{selectedFile.modified|date}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-left font-weight-bold">
+                                                File size
+                                            </td>
+                                            <td class="text-right text-gray">
+                                                {{selectedFile.size|bytes}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                            </td>
+                                            <td class="text-right font-weight-bold">
+                                                <a :href="selectedFile.url" :download="selectedFile.name" target="_blank">
+                                                    <i class="fas fa-fw fa-download text-gray"></i>
+                                                    Download
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <h5 class="mt-3">Tags</h5>
+                            </div>
+                            <div v-show="modalTab == 'links'">
+                                <ul class="list-group mt-3 ml-4 mr-4">
+                                    <li class="list-group-item" v-for="link in selectedFile.contexts">
+                                        {{link.name}}
+                                    </li>
+                                </ul>
+                            </div>
+                            <div v-show="modalTab == 'exif'">
+                                <p class="alert alert-info" v-if="!selectedFile.exif">
+                                </p>
+                                <table class="table table-striped" v-else>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-fw fa-camera"></i>
+                                            </td>
+                                            <td>
+                                                {{ selectedFile.exif.Model }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <i class="far fa-fw fa-circle"></i>
+                                            </td>
+                                            <td>
+                                                {{ selectedFile.exif.Exif.FNumber }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-fw fa-circle"></i>
+                                            </td>
+                                            <td>
+                                                <span>
+                                                    {{ selectedFile.exif.Exif.FocalLength }} <span v-if="selectedFile.exif.MakMakerNotes">({{    selectedFile.exif.MakerNotes.LensModel }})</span>
+                                                </span>
+                                                <span v-if="selectedFile.exif.MakerNotes" style="display: block;font-size: 90%;color: gray;">
+                                                    {{     selectedFile.exif.MakerNotes.LensType }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-fw fa-stopwatch"></i>
+                                            </td>
+                                            <td>
+                                                {{ selectedFile.exif.Exif.ExposureTime }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-fw fa-plus"></i>
+                                            </td>
+                                            <td>
+                                                {{ selectedFile.exif.Exif.ISOSpeedRatings }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <!-- EXIF.Flash is hex, trailing 0 means no flash -->
+                                                <i class="fas fa-fw fa-bolt"></i>
+                                            </td>
+                                            <td>
+                                                {{ selectedFile.exif.Exif.Flash }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-fw fa-clock"></i>
+                                            </td>
+                                            <td>
+                                                {{ selectedFile.exif.Exif.DateTimeOriginal }}
+                                            </td>
+                                        </tr>
+                                        <tr v-if="selectedFile.exif.Makernotes">
+                                            <td>
+                                                <i class="fas fa-fw fa-sun"></i>
+                                            </td>
+                                            <td>
+                                                {{ selectedFile.exif.MakerNotes.WhiteBalanceSetting }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-fw fa-copyright"></i>
+                                            </td>
+                                            <td>
+                                                {{ selectedFile.exif.Copyright }}
+                                            </td>
+                                        </tr>
+                                        <tr v-if="selectedFile.exif.Makernotes">
+                                            <td>
+                                                <i class="fas fa-fw fa-microchip"></i>
+                                            </td>
+                                            <td>
+                                                {{ selectedFile.exif.MakerNotes.FirmwareVersion }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary"     v-on:click="hideFileModal">
@@ -78,13 +268,75 @@
 </template>
 
 <script>
+    import VueHighlightJS from 'vue-highlightjs';
+
+    Vue.use(VueHighlightJS);
+
+    Vue.component('file-image', require('./FileImage.vue'));
+    Vue.component('file-audio', require('./FileAudio.vue'));
+    Vue.component('file-video', require('./FileVideo.vue'));
+    Vue.component('file-pdf', require('./FilePdf.vue'));
+    Vue.component('file-xml', require('./FileXml.vue'));
+    Vue.component('file-3d', require('./File3d.vue'));
+    Vue.component('file-archive', require('./FileArchive.vue'));
+    Vue.component('file-text', require('./FileText.vue'));
+    Vue.component('file-undefined', require('./FileUndefined.vue'));
+
     export default {
         mounted() {
             console.log("Files Plugin mounted");
+            this.getNextFiles();
         },
         methods: {
+            getNextFiles() {
+                let vm = this;
+                let url = '/api';
+                if(!Object.keys(vm.pagination).length) {
+                    url += '/file?page=1';
+                } else {
+                    url += vm.pagination.next_page_url;
+                }
+                vm.$http.get(url).then(function(response) {
+                    let resp = response.data;
+                    console.log(resp);
+                    console.log(resp.data);
+                    vm.files = resp.data.slice();
+                    delete resp.data;
+                    Vue.set(vm, 'pagination', resp);
+                });
+            },
             showFileModal(file) {
                 this.selectedFile = Object.assign({}, file);
+                switch(file.category) {
+                    case 'image':
+                        this.fileCategoryComponent = 'file-image';
+                        break;
+                    case 'audio':
+                        this.fileCategoryComponent = 'file-audio';
+                        break;
+                    case 'video':
+                        this.fileCategoryComponent = 'file-video';
+                        break;
+                    case 'pdf':
+                        this.fileCategoryComponent = 'file-pdf';
+                        break;
+                    case 'xml':
+                    case 'html':
+                        this.fileCategoryComponent = 'file-xml';
+                        break;
+                    case '3d':
+                        this.fileCategoryComponent = 'file-3d';
+                        break;
+                    case 'archive':
+                        this.fileCategoryComponent = 'file-archive';
+                        break;
+                    case 'text':
+                        this.fileCategoryComponent = 'file-text';
+                        break;
+                    default:
+                        this.fileCategoryComponent = 'file-undefined';
+                        break;
+                }
                 this.$modal.show('file-modal');
             },
             hideFileModal() {
@@ -94,51 +346,13 @@
         data() {
             return {
                 selectedFile: {},
-                files: [
-                    {
-                        name: 'file1.xml',
-                        type: 'XML'
-                    },
-                    {
-                        name: 'file1.jpg',
-                        type: 'Image'
-                    },
-                    {
-                        name: 'file1.dae',
-                        type: '3D'
-                    },
-                    {
-                        name: 'file1.txt',
-                        type: 'Text'
-                    },
-                    {
-                        name: 'file1.zip',
-                        type: 'ZIP'
-                    },
-                    {
-                        name: 'file1.pdf',
-                        type: 'PDF'
-                    },
-                    {
-                        name: 'file1.mp3',
-                        type: 'Audio'
-                    },
-                    {
-                        name: 'file1.avi',
-                        type: 'Video'
-                    },
-                    {
-                        name: 'file1.xlsx',
-                        type: 'Spread'
-                    },
-                    {
-                        name: 'file1.doc',
-                        type: 'Doc'
-                    },
-                    {
-                        name: 'file1.odp',
-                        type: 'Pres'
-                    },
+                pagination: {},
+                files: [],
+                fileCategoryComponent: '',
+                modalTab: 'properties',
+                fileProperties: [
+                    'copyright',
+                    'description'
                 ]
             }
         }

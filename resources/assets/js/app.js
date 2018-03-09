@@ -67,6 +67,24 @@ Vue.filter('date', function(value, format) {
         return moment.unix(Number(value)).utc().format(format);
     }
 });
+Vue.filter('bytes', function(value, precision) {
+    if(!value) return value;
+    precision = precision || 2;
+
+    let units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    let bytes = parseFloat(value);
+
+    let unitIndex;
+    if(!isFinite(value) || isNaN(bytes)) {
+        unitIndex = 0;
+    } else {
+        unitIndex = Math.floor(Math.log(bytes) / Math.log(1024));
+    }
+
+    let unit = units[unitIndex];
+    let sizeInUnit = bytes / Math.pow(1024, unitIndex);
+    return sizeInUnit.toFixed(precision) +  ' ' + unit;
+});
 Vue.filter('bibtexify', function(value, type) {
     let rendered = "<pre><code>";
     if(type) {
