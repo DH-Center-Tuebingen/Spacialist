@@ -81,3 +81,5 @@ Route::post('/bibliography/import', 'BibliographyController@importBibtex');
 
 // FILE
 Route::get('/file', 'FileController@getFiles');
+Route::get('/file/{id}/archive/list', 'FileController@getArchiveFileList')->where('id', '[0-9]+');
+Route::get('/file/{id}/archive/download', 'FileController@downloadArchivedFile')->where('id', '[0-9]+');

@@ -66,19 +66,33 @@ class File extends Model
         return $files;
     }
 
-    public function getZipContent() {
-        $path = '.' . Helpers::getStorageFilePath($this->name);
+    public function getArchiveFileList() {
+        if(!$this->isArchive()) return [];
+        $path = Helpers::getStorageFilePath($this->name);
         $archive = UnifiedArchive::open($path);
-        return $this->getFileTreeFromZip($archive->getFileNames(), $archive);
+        $fileList = $this->getContainingFiles($archive->getFileNames(), $archive);
+
+        return self::convertFileListToArray($fileList);
     }
 
-    public function getZipFileContent($filepath) {
-        $path = '.' . Helpers::getStorageFilePath($this->name);
+    public function getArchivedFileContent($filepath) {
+        $path = Helpers::getStorageFilePath($this->name);
         $archive = UnifiedArchive::open($path);
         return base64_encode($archive->getFileContent($filepath));
     }
 
-    private function getFileTreeFromZip($files, $archive, $prefix = '') {
+    private static function convertFileListToArray($fileList) {
+        $newList = array_values($fileList);
+        foreach($newList as $k => $entry) {
+            if(isset($entry->children)) {
+                $entry->children = self::convertFileListToArray($entry->children);
+                $newList[$k] = $entry;
+            }
+        }
+        return $newList;
+    }
+
+    private function getContainingFiles($files, $archive, $prefix = '') {
         $tree = [];
         $subfolders = [];
         $folders = [];
@@ -108,7 +122,7 @@ class File extends Model
             $tree[$file] = $data;
         }
         foreach($folders as $fkey => $subfiles) {
-            $tree[$fkey]->children = $this->getFileTreeFromZip($subfiles, $archive, $prefix.$fkey);
+            $tree[$fkey]->children = $this->getContainingFiles($subfiles, $archive, $prefix.$fkey);
         }
         return $tree;
     }

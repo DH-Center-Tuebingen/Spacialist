@@ -26,7 +26,7 @@ class FileController extends Controller
         return response()->json($files);
     }
 
-    public function getZipContent($id) {
+    public function getArchiveFileList($id) {
         try {
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -34,12 +34,18 @@ class FileController extends Controller
                 'error' => 'This file does not exist'
             ], 400);
         }
-        $content = $file->getZipContent();
+        $content = $file->getArchiveFileList();
         return response()->json($content);
 
     }
 
-    public function downloadInnerZipFile($id, $filepath) {
+    public function downloadArchivedFile(Request $request, $id) {
+        $this->validate($request, [
+            'p' => 'required|string'
+        ]);
+
+        $filepath = $request->get('p');
+
         try {
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -47,7 +53,7 @@ class FileController extends Controller
                 'error' => 'This file does not exist'
             ]);
         }
-        $content = $file->getZipFileContent($filepath);
+        $content = $file->getArchivedFileContent($filepath);
         return response($content);
     }
 
