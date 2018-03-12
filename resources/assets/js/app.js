@@ -42,6 +42,7 @@ Vue.component('file-upload', VueUploadComponent);
 // Extended Components
 Vue.component('context-search', require('./components/ContextSearch.vue'));
 Vue.component('label-search', require('./components/LabelSearch.vue'));
+Vue.component('csv-table', require('./components/CsvTable.vue'));
 
 // Reusable Components
 Vue.component('attributes', require('./components/AttributeList.vue'));

@@ -120,7 +120,7 @@
                                                 Created
                                             </td>
                                             <td class="text-right text-gray">
-                                                {{selectedFile.created|date}}
+                                                {{selectedFile.created_unix|date}}
                                             </td>
                                         </tr>
                                         <tr>
@@ -128,7 +128,7 @@
                                                 Last Modified
                                             </td>
                                             <td class="text-right text-gray">
-                                                {{selectedFile.modified|date}}
+                                                {{selectedFile.modified_unix|date}}
                                             </td>
                                         </tr>
                                         <tr>

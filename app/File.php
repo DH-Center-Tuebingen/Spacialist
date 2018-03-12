@@ -56,11 +56,11 @@ class File extends Model
             try {
                 Storage::get($file->name);
                 $file->size = Storage::size($file->name);
-                $file->modified = Storage::lastModified($file->name);
+                $file->modified_unix = Storage::lastModified($file->name);
             } catch(FileNotFoundException $e) {
             }
 
-            $file->created = strtotime($file->created);
+            $file->created_unix = strtotime($file->created);
         }
 
         return $files;
