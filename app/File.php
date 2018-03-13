@@ -171,7 +171,7 @@ class File extends Model
     }
 
     public static function get3d() {
-        $mimeTypes = [];
+        $mimeTypes = ['model/vnd.collada+xml', 'model/gltf-binary', 'model/gltf+json', 'chemical/x-pdb'];
         $extensions = ['.dae', '.obj', '.pdb', '.gltf'];
         return self::getCategory($mimeTypes, $extensions);
     }
@@ -298,12 +298,11 @@ class File extends Model
         $mimeTypes = ['application/xhtml+xml', 'text/html'];
         $extensions = ['.htm', '.html', '.shtml', '.xhtml'];
         $is = in_array($this->mime_type, $mimeTypes);
-        if(!$is) {
-            foreach($extensions as $ext) {
-                if(ends_with($this->name, $ext)) {
-                    $is = true;
-                    break;
-                }
+        if($is) return true;
+        foreach($extensions as $ext) {
+            if(ends_with($this->name, $ext)) {
+                $is = true;
+                break;
             }
         }
         return $is;
@@ -311,7 +310,10 @@ class File extends Model
 
     public function is3d() {
         $is = false;
+        $mimeTypes = ['model/vnd.collada+xml', 'model/gltf-binary', 'model/gltf+json'];
         $extensions = ['.dae', '.obj', '.pdb', '.gltf'];
+        $is = in_array($this->mime_type, $mimeTypes);
+        if($is) return true;
         foreach($extensions as $ext) {
             if(ends_with($this->name, $ext)) {
                 $is = true;
@@ -325,12 +327,11 @@ class File extends Model
         $mimeTypes = ['application/gzip', 'application/zip', 'application/x-gtar', 'application/x-tar', 'application/x-ustar', 'application/x-rar-compressed', 'application/x-bzip', 'application/x-bzip2', 'application/x-7z-compressed', 'application/x-compress'];
         $extensions = ['.zip', '.gz', '.gtar', '.tar', '.tgz', '.ustar', '.rar', '.bz', '.bz2', '.xz', '.7z', '.z'];
         $is = in_array($this->mime_type, $mimeTypes);
-        if(!$is) {
-            foreach($extensions as $ext) {
-                if(ends_with($this->name, $ext)) {
-                    $is = true;
-                    break;
-                }
+        if($is) return true;
+        foreach($extensions as $ext) {
+            if(ends_with($this->name, $ext)) {
+                $is = true;
+                break;
             }
         }
         return $is;
@@ -340,15 +341,13 @@ class File extends Model
         $mimeTypes = ['application/javascript', 'application/json', 'application/x-latex', 'application/x-tex', 'text/comma-separated-values', 'text/csv'];
         $extensions = ['.txt', '.md', '.markdown', '.mkd', '.csv', '.json', '.css', '.htm', '.html', '.shtml', '.js', '.rtx', '.rtf', '.tsv', '.xml'];
         $is = starts_with($this->mime_type, 'text/');
-        if(!$is) {
-            $is = in_array($this->mime_type, $mimeTypes);
-        }
-        if(!$is) {
-            foreach($extensions as $ext) {
-                if(ends_with($this->name, $ext)) {
-                    $is = true;
-                    break;
-                }
+        if($is) return true;
+        $is = in_array($this->mime_type, $mimeTypes);
+        if($is) return true;
+        foreach($extensions as $ext) {
+            if(ends_with($this->name, $ext)) {
+                $is = true;
+                break;
             }
         }
         return $is;
