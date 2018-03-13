@@ -44,7 +44,7 @@ class File extends Model
     private $imageMime = 'image/';
 
     public static function getPaginate($page) {
-        $files = self::with(['contexts'])->paginate(35);
+        $files = self::with(['contexts'])->paginate();
         $files->withPath('/file');
 
         foreach($files as &$file) {

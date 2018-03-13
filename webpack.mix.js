@@ -19,4 +19,4 @@ mix.js('resources/assets/js/app.js', 'public/js')
    .autoload({
        jquery: ['$']
    })
-   .extract(['jquery', 'bootstrap', '@fortawesome/fontawesome', '@fortawesome/fontawesome-free-brands', '@fortawesome/fontawesome-free-regular', '@fortawesome/fontawesome-free-solid', '@bosket/core', '@bosket/tools', '@bosket/vue', 'axios', 'lodash', 'vue', '@hscmap/vue-menu', 'bootstrap-datepicker', 'debounce', 'moment', 'ol', 'popper.js', 'screenfull', 'three', 'vee-validate', 'vue-highlightjs', 'vue-js-modal', 'vue-markdown', 'vue-multiselect', 'vue-pdf', 'vue-typeahead', 'vue-upload-component', 'vuedraggable']);
+   .extract(['jquery', 'bootstrap', '@fortawesome/fontawesome', '@fortawesome/fontawesome-free-brands', '@fortawesome/fontawesome-free-regular', '@fortawesome/fontawesome-free-solid', '@bosket/core', '@bosket/tools', '@bosket/vue', 'axios', 'lodash', 'vue', '@hscmap/vue-menu', 'bootstrap-datepicker', 'debounce', 'moment', 'ol', 'popper.js', 'screenfull', 'vee-validate', 'vue-highlightjs', 'vue-js-modal', 'vue-markdown', 'vue-multiselect', 'vue-pdf', 'vue-typeahead', 'vue-upload-component', 'vuedraggable']);
