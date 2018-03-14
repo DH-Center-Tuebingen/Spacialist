@@ -72,7 +72,7 @@
                         <div class="card-img-overlay">
                             <h4 class="card-title">Load {{fileState.toLoad}} more</h4>
                             <div class="card-text pt-4">
-                                <i class="fas fa-fw fa-sync fa-5x"></i>
+                                <i class="fas fa-fw fa-sync fa-3x" :class="{'fa-spin': fetchingFiles}"></i>
                             </div>
                         </div>
                     </div>
