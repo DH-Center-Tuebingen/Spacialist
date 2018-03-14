@@ -50,4 +50,8 @@ class Helpers {
     public static function getStorageFilePath($filename) {
         return Storage::url(env('SP_FILE_PATH') .'/'. $filename);
     }
+
+    public static function exifDataExists($exif, $rootKey, $dataKey) {
+        return array_key_exists($rootKey, $exif) && array_key_exists($dataKey, $exif[$rootKey]);
+    }
 }

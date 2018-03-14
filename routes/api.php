@@ -85,3 +85,5 @@ Route::get('/file/unlinked', 'FileController@getUnlinkedFiles');
 Route::get('/file/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
 Route::get('/file/{id}/archive/list', 'FileController@getArchiveFileList')->where('id', '[0-9]+');
 Route::get('/file/{id}/archive/download', 'FileController@downloadArchivedFile')->where('id', '[0-9]+');
+
+Route::post('/file', 'FileController@uploadFile');

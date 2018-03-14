@@ -1,7 +1,5 @@
 <template>
-    <div v-show="activeComp == 'linked'">
-        <file-list :api-url="fileApi" :on-click="onClick"></file-list>
-    </div>
+    <file-list :api-url="fileApi" :on-click="onClick"></file-list>
 </template>
 
 <script>
@@ -10,10 +8,6 @@
             onClick: {
                 required: true,
                 type: Function
-            },
-            activeComp: {
-                required: true,
-                type: String
             },
             context: {
                 required: true,

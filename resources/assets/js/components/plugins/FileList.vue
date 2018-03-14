@@ -1,7 +1,7 @@
 <template>
     <div>
         Displaying {{fileState.from}}-{{fileState.to}} of {{fileState.total}} files
-        <div class="row" infinite-scroll-disabled="fetchingFiles" v-infinite-scroll="getNextFiles">
+        <div class="row" infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk">
             <div class="col-sm-6 col-md-4 mb-3" v-for="file in files">
                 <div class="card text-center" @click="onClick(file)">
                     <div class="card-hover">
@@ -72,7 +72,7 @@
                         <div class="card-img-overlay">
                             <h4 class="card-title">Load {{fileState.toLoad}} more</h4>
                             <div class="card-text pt-4">
-                                <i class="fas fa-fw fa-sync fa-3x" :class="{'fa-spin': fetchingFiles}"></i>
+                                <i class="fas fa-fw fa-sync fa-3x" :class="{'fa-spin': isFetching}"></i>
                             </div>
                         </div>
                     </div>
@@ -90,72 +90,33 @@
             infiniteScroll
         },
         props: {
-            apiUrl: {
+            files: {
                 required: true,
-                type: String
-            },
-            apiPrefix: {
-                required: false,
-                type: String,
-                default: '/api'
-            },
-            apiPageParam: {
-                required: false,
-                type: String,
-                default: 'page'
+                type: Array
             },
             onClick: {
                 required: true,
                 type: Function
+            },
+            onLoadChunk: {
+                required: true,
+                type: Function
+            },
+            fileState: {
+                required: true,
+                type: Object
+            },
+            isFetching: {
+                required: true,
+                type: Boolean
             }
         },
         mounted() {
         },
         methods: {
-            getNextFiles() {
-                let vm = this;
-                vm.fetchingFiles = true;
-                if(vm.pagination.current_page && vm.pagination.current_page == vm.pagination.last_page) {
-                    return;
-                }
-                let firstCall;
-                let url = this.apiPrefix;
-                if(!Object.keys(vm.pagination).length) {
-                    url += this.apiUrl;
-                    firstCall = true;
-                } else {
-                    url += vm.pagination.next_page_url;
-                    firstCall = false;
-                }
-                vm.$http.get(url).then(function(response) {
-                    let resp = response.data;
-                    for(let i=0; i<resp.data.length; i++) {
-                        vm.files.push(resp.data[i]);
-                    }
-                    delete resp.data;
-                    Vue.set(vm, 'pagination', resp);
-                    if(firstCall) {
-                        vm.fileState.from = resp.from;
-                    }
-                    vm.fileState.to = resp.to;
-                    vm.fileState.total = resp.total;
-                    let toLoad = Math.min(resp.per_page, resp.total-resp.to);
-                    vm.fileState.toLoad = toLoad;
-                    vm.fetchingFiles = false;
-                });
-            }
         },
         data() {
             return {
-                pagination: {},
-                files: [],
-                fetchingFiles: false,
-                fileState: {
-                    from: 0,
-                    to: 0,
-                    total: undefined,
-                    toLoad: 0
-                }
             }
         }
     }

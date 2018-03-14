@@ -1,11 +1,11 @@
 <template>
     <div>
-        <div class="d-flex justify-content-around align-items-center">
+        <div class="d-flex justify-content-around align-items-center mb-2">
             <button style="button" class="btn btn-outline-secondary" :class="{disabled: !context.id}" @click="setAction('linked')">
                 <i class="fas fa-fw fa-link"></i> Linked Files
             </button>
             <button style="button" class="btn btn-outline-secondary" @click="setAction('unlinked')">
-                <i class="fas fa-fw fa-unlink"></i> Unlinke
+                <i class="fas fa-fw fa-unlink"></i> Unlinked
             </button>
             <button style="button" class="btn btn-outline-secondary" @click="setAction('all')">
                 <i class="fas fa-fw fa-copy"></i> All Files
@@ -19,7 +19,49 @@
             <component :is="selectedActionComponent" :on-click="showFileModal" :active-comp="selectedTopAction" :context="context"></component>
         </keep-alive>
         <div v-if="isAction('upload')">
-            <h2>Upload</h2>
+            <file-upload class="w-100"
+                post-action="/api/file"
+                ref="upload"
+                v-model="uploadFiles"
+                :multiple="true"
+                :directory="false"
+                :drop="true"
+                @input-file="inputFile">
+                    <div class="text-center rounded text-light bg-dark px-2 py-5">
+                        <h3>Drop Zone</h3>
+                        <p>
+                            Please drop files here or click on this item.
+                        </p>
+                    </div>
+            </file-upload>
+            <ul class="list-group list-group-flush">
+                <transition-group name="fade">
+                    <li class="list-group-item" v-for="file in uploadFiles" :key="file.id" v-if="!file.success">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span>{{file.name}}</span>
+                                <span class="text-lightgray" v-if="!file.error">
+                                    {{file.size|bytes}} - {{file.speed|bytes}}/s
+                                </span>
+                            </div>
+                            <button v-show="file.active" type="button" class="btn btn-outline-danger" @click.prevent="abortFileUpload(file)">
+                                <i class="fas fa-fw fa-times"></i> Abort
+                            </button>
+                            <a href="#" v-show="file.error" @click="abortFileUpload(file)">
+                                <i class="fas fa-fw fa-times"></i> Clear
+                            </a>
+                        </div>
+                        <div class="progress" style="height: 2px;" v-if="!file.error">
+                            <div class="progress-bar" role="progressbar" :style="{width: file.progress+'%'}" :aria-valuenow="file.progress" aria-valuemin="0" aria-valuemax="100">
+                                <span class="sr-only">{{file.progress}}</span>
+                            </div>
+                        </div>
+                        <p class="alert alert-danger" v-if="file.error">
+                            Error while uploading your file.
+                        </p>
+                    </li>
+                </transition-group>
+            </ul>
         </div>
 
         <modal name="file-modal" width="80%" height="auto" :scrollable="true">
@@ -270,6 +312,31 @@
             isAction(id) {
                 return this.selectedTopAction == id;
             },
+            abortFileUpload(file) {
+                this.$refs.upload.remove(file);
+            },
+            inputFile(newFile, oldFile) {
+                // Wait for response
+                if(newFile && oldFile && newFile.success && !oldFile.success) {
+                    this.filesUploaded++;
+                }
+                if(newFile && oldFile && newFile.error && !oldFile.error) {
+                    this.filesErrored++;
+                }
+                // Enable automatic upload
+                if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
+                    if(!this.$refs.upload.active) {
+                        this.$refs.upload.active = true
+                    }
+                }
+                if(this.filesUploaded + this.filesErrored == this.uploadFiles.length) {
+                    if(this.filesUploaded > 0) {
+                        this.$emit('fileUpdateNeeded');
+                        this.filesUploaded = 0;
+                        this.filesErrored = 0;
+                    }
+                }
+            },
             showFileModal(file) {
                 this.selectedFile = Object.assign({}, file);
                 switch(file.category) {
@@ -313,6 +380,9 @@
                 selectedTopAction: 'unlinked',
                 selectedActionComponent: 'file-unlinked',
                 fileApi: '/file/unlinked',
+                uploadFiles: [],
+                filesUploaded: 0,
+                filesErrored: 0,
                 selectedFile: {},
                 fileCategoryComponent: '',
                 modalTab: 'properties',

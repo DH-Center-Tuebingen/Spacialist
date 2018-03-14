@@ -82,6 +82,124 @@ class File extends Model
         return $files;
     }
 
+    public static function createFromUpload($input) {
+
+        $filename = $input->getClientOriginalName();
+        $filehandle = fopen($input->getRealPath(), 'r');
+        Storage::put(
+            $filename,
+            $filehandle
+        );
+        fclose($filehandle);
+
+        $mimeType = $input->getMimeType();
+        $fileUrl = Helpers::getStorageFilePath($filename);
+        $lastModified = date('Y-m-d H:i:s', filemtime($fileUrl));
+
+        $file = new File();
+        $file->modified = $lastModified;
+        $file->lasteditor = 'Admin'; // TODO
+        $file->mime_type = $mimeType;
+        $file->name = $filename;
+        $file->created = $lastModified;
+
+        $file->save();
+
+        if($file->isImage()) {
+            $THUMB_SUFFIX = "_thumb";
+            $THUMB_WIDTH = 256;
+            $EXP_SUFFIX = ".jpg";
+            $EXP_FORMAT = "jpg";
+            $nameNoExt = pathinfo($filename, PATHINFO_FILENAME);
+            $thumbFilename = $nameNoExt . $THUMB_SUFFIX . $EXP_SUFFIX;
+
+            $imageInfo = getimagesize($fileUrl);
+            $width = $imageInfo[0];
+            $height = $imageInfo[1];
+            $mime = $imageInfo[2];//$imageInfo['mime'];
+            if($width > $THUMB_WIDTH) {
+                switch($mime) {
+                    case IMAGETYPE_JPEG:
+                        $image = imagecreatefromjpeg($fileUrl);
+                        break;
+                    case IMAGETYPE_PNG:
+                        $image = imagecreatefrompng($fileUrl);
+                        break;
+                    case IMAGETYPE_GIF:
+                        $image = imagecreatefromgif($fileUrl);
+                        break;
+                    default:
+                        // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
+                        $im = new Imagick($fileUrl);
+                        $fileUrl = Helpers::getStorageFilePath($nameNoExt . $EXP_SUFFIX);
+                        $im->setImageFormat($EXP_FORMAT);
+                        $im->writeImage($fileUrl);
+                        $im->clear();
+                        $im->destroy();
+                        $image = imagecreatefromjpeg($fileUrl);
+                }
+                $scaled = imagescale($image, $THUMB_WIDTH);
+                ob_start();
+                imagejpeg($scaled);
+                $image = ob_get_clean();
+                Storage::put(
+                    $thumbFilename,
+                    $image
+                );
+            } else {
+                Storage::copy($filename, $thumbFilename);
+            }
+            $file->thumb = $thumbFilename;
+            $file->photographer_id = 1;
+
+            if($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM) {
+                $exif = @exif_read_data($fileUrl, 'ANY_TAG', true);
+                if($exif !== false) {
+                    if(Helpers::exifDataExists($exif, 'IFD0', 'Make')) {
+                        $make = $exif['IFD0']['Make'];
+                    }
+                    if(Helpers::exifDataExists($exif, 'IFD0', 'Model')) {
+                        $model = $exif['IFD0']['Model'];
+                    } else {
+                        $model = '';
+                    }
+                    if(isset($make)) {
+                        $model = $model . " ($make)";
+                    }
+                    $file->cameraname = $model;
+
+                    if(Helpers::exifDataExists($exif, 'IFD0', 'Orientation')) {
+                        $orientation = $exif['IFD0']['Orientation'];
+                    } else {
+                        $orientation = 0;
+                    }
+                    $file->orientation = $orientation;
+
+                    if(Helpers::exifDataExists($exif, 'IFD0', 'Copyright')) {
+                        $copyright = $exif['IFD0']['Copyright'];
+                    } else {
+                        $copyright = '';
+                    }
+                    $file->copyright = $copyright;
+
+                    if(Helpers::exifDataExists($exif, 'IFD0', 'ImageDescription')) {
+                        $description = $exif['IFD0']['ImageDescription'];
+                    } else {
+                        $description = '';
+                    }
+                    $file->description = $description;
+
+                    if(Helpers::exifDataExists($exif, 'EXIF', 'DateTimeOriginal')) {
+                        $dateOrig = strtotime($exif['EXIF']['DateTimeOriginal']);
+                        $dateOrig = date('Y-m-d H:i:s', $dateOrig);
+                        $file->created = $dateOrig;
+                    }
+                }
+            }
+            $file->save();
+        }
+    }
+
     public function setFileInfo() {
         $this->url = Helpers::getFullFilePath($this->name);
         if($this->isImage()) {
