@@ -43,27 +43,59 @@ class File extends Model
 
     private $imageMime = 'image/';
 
-    public static function getPaginate($page) {
+    public static function getAllPaginate($page) {
         $files = self::with(['contexts'])->paginate();
         $files->withPath('/file');
 
         foreach($files as &$file) {
-            $file->url = Helpers::getFullFilePath($file->name);
-            if($file->isImage()) {
-                $file->thumb_url = Helpers::getFullFilePath($file->thumb);
-            }
-
-            try {
-                Storage::get($file->name);
-                $file->size = Storage::size($file->name);
-                $file->modified_unix = Storage::lastModified($file->name);
-            } catch(FileNotFoundException $e) {
-            }
-
-            $file->created_unix = strtotime($file->created);
+            $file->setFileInfo();
         }
 
         return $files;
+    }
+
+    public static function getUnlinkedPaginate($page) {
+        $files = self::with(['contexts'])
+            ->doesntHave('contexts')
+            ->paginate();
+        $files->withPath('/file/unlinked');
+
+        foreach($files as &$file) {
+            $file->setFileInfo();
+        }
+
+        return $files;
+    }
+
+    public static function getLinkedPaginate($cid, $page) {
+        $files = self::with(['contexts'])
+            ->whereHas('contexts', function($query) use($cid) {
+                $query->where('context_id', $cid);
+            })
+            ->paginate();
+        $files->withPath('/file/linked/'.$cid);
+
+        foreach($files as &$file) {
+            $file->setFileInfo();
+        }
+
+        return $files;
+    }
+
+    public function setFileInfo() {
+        $this->url = Helpers::getFullFilePath($this->name);
+        if($this->isImage()) {
+            $this->thumb_url = Helpers::getFullFilePath($this->thumb);
+        }
+
+        try {
+            Storage::get($this->name);
+            $this->size = Storage::size($this->name);
+            $this->modified_unix = Storage::lastModified($this->name);
+        } catch(FileNotFoundException $e) {
+        }
+
+        $this->created_unix = strtotime($this->created);
     }
 
     public function getArchiveFileList() {

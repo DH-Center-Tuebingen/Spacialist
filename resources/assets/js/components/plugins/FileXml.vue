@@ -12,7 +12,12 @@
 </template>
 
 <script>
+    import VueHighlightJS from 'vue-highlightjs';
+
     export default {
+        components: {
+            VueHighlightJS
+        },
         props: {
             file: {
                 required: true,

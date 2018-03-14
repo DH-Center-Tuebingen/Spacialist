@@ -75,7 +75,7 @@
             </ul>
             <div class="mt-2">
                 <keep-alive>
-                    <component :is="activePlugin"></component>
+                    <component :is="activePlugin" :context="selectedContext"></component>
                 </keep-alive>
                 <div v-show="tab == 'references'">
                     <p class="alert alert-info" v-if="!hasReferences">

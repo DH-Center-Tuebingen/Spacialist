@@ -58,6 +58,9 @@
 
 <script>
     import VueMarkdown from 'vue-markdown';
+    import VueHighlightJS from 'vue-highlightjs';
+
+    Vue.use(VueHighlightJS);
 
     export default {
         components: {

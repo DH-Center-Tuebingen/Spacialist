@@ -22,7 +22,17 @@ class FileController extends Controller
     // GET
 
     public function getFiles($page = 1) {
-        $files = File::getPaginate($page);
+        $files = File::getAllPaginate($page);
+        return response()->json($files);
+    }
+
+    public function getUnlinkedFiles($page = 1) {
+        $files = File::getUnlinkedPaginate($page);
+        return response()->json($files);
+    }
+
+    public function getLinkedFiles($cid, $page = 1) {
+        $files = File::getLinkedPaginate($cid, $page);
         return response()->json($files);
     }
 

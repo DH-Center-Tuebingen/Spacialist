@@ -1,83 +1,25 @@
 <template>
     <div>
-        Displaying {{fileState.from}}-{{fileState.to}} of {{fileState.total}} files
-        <div class="row" v-infinite-scroll="getNextFiles" infinite-scroll-disabled="fetchingFiles">
-            <div class="col-sm-6 col-md-4 mb-3" v-for="file in files">
-                <div class="card text-center" @click="showFileModal(file)">
-                    <div class="card-hover">
-                        <img class="card-img" v-if="file.category == 'image'" :src="file.url" style="height: 200px;">
-                        <div class="card-img" v-else style="width: 100%; height: 200px;"></div>
-                        <div class="card-img-overlay">
-                            <h4 class="card-title">{{file.name}}</h4>
-                            <div class="card-text pt-4">
-                                <div v-if="file.category == 'xml'">
-                                    <i class="fas fa-fw fa-file-code fa-5x"></i>
-                                </div>
-                                <div v-if="file.category == 'html'">
-                                    <i
-                                    class="fab fa-fw fa-html5 fa-5x"
-                                    data-fa-transform="shrink-9 down-2"
-                                    data-fa-mask="fas fa-fw fa-file"></i>
-                                </div>
-                                <div v-else-if="file.category == 'archive'">
-                                    <i class="fas fa-fw fa-file-archive fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'pdf'">
-                                    <i class="fas fa-fw fa-file-pdf fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'audio'">
-                                    <i class="fas fa-fw fa-file-audio fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'video'">
-                                    <i class="fas fa-fw fa-file-video fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'spreadsheet'">
-                                    <i class="fas fa-fw fa-file-excel fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'document'">
-                                    <i class="fas fa-fw fa-file-word fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'presentation'">
-                                    <i class="fas fa-fw fa-file-powerpoint fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == '3d'">
-                                    <i
-                                    class="fas fa-fw fa-cubes fa-5x"
-                                    data-fa-transform="shrink-9 down-2"
-                                    data-fa-mask="fas fa-fw fa-file"></i>
-                                </div>
-                                <div v-else-if="file.category == 'text'">
-                                    <i class="fas fa-fw fa-file-alt fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'undefined'">
-                                    <i
-                                    class="fas fa-fw fa-question fa-5x"
-                                    data-fa-transform="shrink-9 down-2"
-                                    data-fa-mask="fas fa-fw fa-file"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-hover-overlay bg-info">
-                        <div class="text-white">
-                            <i class="fas fa-fw fa-binoculars fa-5x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-4 mb-3" v-if="fileState.toLoad">
-                <div class="card text-center">
-                    <div class="card-hover">
-                        <div class="card-img" style="width: 100%; height: 200px;"></div>
-                        <div class="card-img-overlay">
-                            <h4 class="card-title">Load {{fileState.toLoad}} more</h4>
-                            <div class="card-text pt-4">
-                                <i class="fas fa-fw fa-sync fa-3x" :class="{'fa-spin': fetchingFiles}"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="d-flex justify-content-around align-items-center">
+            <button style="button" class="btn btn-outline-secondary" :class="{disabled: !context.id}" @click="setAction('linked')">
+                <i class="fas fa-fw fa-link"></i> Linked Files
+            </button>
+            <button style="button" class="btn btn-outline-secondary" @click="setAction('unlinked')">
+                <i class="fas fa-fw fa-unlink"></i> Unlinke
+            </button>
+            <button style="button" class="btn btn-outline-secondary" @click="setAction('all')">
+                <i class="fas fa-fw fa-copy"></i> All Files
+            </button>
+            <button style="button" class="btn btn-outline-secondary" @click="setAction('upload')">
+                <i class="fas fa-fw fa-upload"></i> Upload Files
+            </button>
+        </div>
+
+        <keep-alive>
+            <component :is="selectedActionComponent" :on-click="showFileModal" :active-comp="selectedTopAction" :context="context"></component>
+        </keep-alive>
+        <div v-if="isAction('upload')">
+            <h2>Upload</h2>
         </div>
 
         <modal name="file-modal" width="80%" height="auto" :scrollable="true">
@@ -281,8 +223,10 @@
 </template>
 
 <script>
-    import VueHighlightJS from 'vue-highlightjs';
-    import infiniteScroll from 'vue-infinite-scroll';
+    Vue.component('file-list', require('./FileList.vue'));
+    Vue.component('file-linked', require('./LinkedFiles.vue'));
+    Vue.component('file-unlinked', require('./UnlinkedFiles.vue'));
+    Vue.component('file-all', require('./AllFiles.vue'));
 
     Vue.component('file-image', require('./FileImage.vue'));
     Vue.component('file-audio', require('./FileAudio.vue'));
@@ -295,46 +239,36 @@
     Vue.component('file-undefined', require('./FileUndefined.vue'));
 
     export default {
-        components: {
-            VueHighlightJS
-        },
-        directives: {
-            infiniteScroll
+        props: {
+            context: {
+                required: false,
+                type: Object,
+                default: {}
+            }
         },
         mounted() {
         },
         methods: {
-            getNextFiles() {
-                let vm = this;
-                vm.fetchingFiles = true;
-                if(vm.pagination.current_page && vm.pagination.current_page == vm.pagination.last_page) {
-                    return;
+            setAction(id) {
+                // disable linked tab if no context is selected
+                if(id == 'linked' && !this.context.id) return;
+                switch(id) {
+                    case 'linked':
+                        this.selectedActionComponent = 'file-linked';
+                        break;
+                    case 'unlinked':
+                        this.selectedActionComponent = 'file-unlinked';
+                        break;
+                    case 'all':
+                        this.selectedActionComponent = 'file-all';
+                        break;
+                    default:
+                        this.selectedActionComponent = '';
                 }
-                let firstCall;
-                let url = '/api';
-                if(!Object.keys(vm.pagination).length) {
-                    url += '/file?page=1';
-                    firstCall = true;
-                } else {
-                    url += vm.pagination.next_page_url;
-                    firstCall = false;
-                }
-                vm.$http.get(url).then(function(response) {
-                    let resp = response.data;
-                    for(let i=0; i<resp.data.length; i++) {
-                        vm.files.push(resp.data[i]);
-                    }
-                    delete resp.data;
-                    Vue.set(vm, 'pagination', resp);
-                    if(firstCall) {
-                        vm.fileState.from = resp.from;
-                    }
-                    vm.fileState.to = resp.to;
-                    vm.fileState.total = resp.total;
-                    let toLoad = Math.min(resp.per_page, resp.total-resp.to);
-                    vm.fileState.toLoad = toLoad;
-                    vm.fetchingFiles = false;
-                });
+                this.selectedTopAction = id;
+            },
+            isAction(id) {
+                return this.selectedTopAction == id;
             },
             showFileModal(file) {
                 this.selectedFile = Object.assign({}, file);
@@ -376,17 +310,11 @@
         },
         data() {
             return {
+                selectedTopAction: 'unlinked',
+                selectedActionComponent: 'file-unlinked',
+                fileApi: '/file/unlinked',
                 selectedFile: {},
-                pagination: {},
-                files: [],
                 fileCategoryComponent: '',
-                fetchingFiles: false,
-                fileState: {
-                    from: 0,
-                    to: 0,
-                    total: undefined,
-                    toLoad: 0
-                },
                 modalTab: 'properties',
                 fileProperties: [
                     'copyright',
