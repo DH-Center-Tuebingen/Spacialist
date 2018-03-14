@@ -27,7 +27,7 @@
                         :on-context-menu-add="requestAddNewEntity"
                         :on-context-menu-duplicate="duplicateEntity"
                         :on-context-menu-delete="requestDeleteEntity"
-                        :roots="tree"
+                        :roots="roots"
                         :selection-callback="setSelectedElement">
                     </context-tree>
                     <button type="button" class="btn btn-sm btn-outline-success ml-3 mt-2" @click="requestAddNewEntity">
@@ -186,7 +186,7 @@
                 required: true,
                 type: Object
             },
-            tree: {
+            roots: {
                 required: true,
                 type: Array
             }

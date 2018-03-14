@@ -61,6 +61,10 @@ class ContextController extends Controller {
         return response()->json($children);
     }
 
+    public function getEntitiesByParent($id) {
+        return Context::getEntitiesByParent($id);
+    }
+
     // POST
 
     public function addEntity(Request $request) {

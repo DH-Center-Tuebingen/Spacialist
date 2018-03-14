@@ -69,7 +69,7 @@ class HomeController extends Controller
         }
         $conceptMap = json_encode($conceptMap);
 
-        $roots = \DB::table('get_json_tree')->select('get_tree AS tree')->value('tree');
+        $roots = Context::getEntitiesByParent();
 
         $data = [
             'concepts' => $conceptMap,

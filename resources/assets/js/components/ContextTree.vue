@@ -4,7 +4,7 @@
             :category="category"
             :css="css"
             :display="display"
-            :model="roots"
+            :model="tree"
             :onSelect="onSelect"
             :openerOpts="openerOpts"
             :search="search"
@@ -19,6 +19,23 @@
     import * as VueMenu from '@hscmap/vue-menu';
 
     Vue.use(VueMenu);
+
+    class Node {
+        constructor(data) {
+            Object.assign(this, data)
+            if(this.children_count > 0) {
+                this.children = () => this.fetchChildren(this.id)
+            }
+        }
+
+        fetchChildren(id) {
+            return $http.get('/api/context/byParent/'+id)
+            .then(response => {
+                const result = response.data.map(n => new Node(n));
+                return result;
+            });
+        }
+    }
 
     export default {
         components: {
@@ -54,8 +71,13 @@
                 type: Function
             }
         },
-        mounted() {},
+        mounted() {
+            this.init()
+        },
         methods: {
+            init() {
+                this.tree = this.roots.map(n => new Node(n))
+            },
             onSelect(newSelection) {
                 this.selection = newSelection
                 this.selectionCallback(newSelection[0]);
@@ -63,6 +85,7 @@
         },
         data() {
             return {
+                tree: [],
                 selection: [],
                 strategies: {
                     selection: ["single"],
@@ -85,6 +108,9 @@
                                 {item.name}
                                 <span class="pl-2 font-italic mb-0">
                                     {this.concepts[this.contextTypes[item.context_type_id].thesaurus_url].label}
+                                </span>
+                                <span class="pl-2">
+                                    {item.children_count > 0 ? `(${item.children_count})` : ""}
                                 </span>
                                 <template slot="contextmenu">
                                     <hsc-menu-item disabled>
