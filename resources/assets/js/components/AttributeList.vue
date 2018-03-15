@@ -24,22 +24,25 @@
                         <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                     </button>
                 </div>
-                <span class="text-right">
+                <span class="text-right col">
                     {{concepts[attribute.thesaurus_url].label}}:
                 </span>
-                <sup v-if="onMetadata">
-                    <span class="fa-layers fa-fw">
-                        <i class="fas fa-lg fa-dot-circle"></i>
-                        <i v-if="metadataAddon(attribute.thesaurus_url)" class="fa-inverse fas fa-circle text-success" data-fa-transform="shrink-5 down-6 right-6"></i>
-                    </span>
-                    <!-- <div style="display: table; float: right;">
-                        <span style="display: table-cell">
-                            {{ concepts[attribute.thesaurus_url].label }}:
+                <sup class="clickable" v-if="onMetadata">
+                    <span>
+                        <i class="fas fa-fw fa-exclamation"
+                        :class="{
+                            'text-danger': localValues[attribute.id].possibility <= 25,
+                            'text-warning': localValues[attribute.id].possibility <= 50,
+                            'text-info': localValues[attribute.id].possibility <= 75,
+                            'text-success': localValues[attribute.id].possibility > 75 || (!localValues[attribute.id].possibility && localValues[attribute.id].possibility !== 0)
+                            }"></i>
                         </span>
-                        <sup ui-sref="root.spacialist.context.data.sources({aid: attribute.id})" style="display: table-cell" class="source-link">
-                            <i class="material-icons md-18" aria-hidden="true" ng-if="!readonlyInput">stars</i><i ng-if="(attributeSources | filter:{attribute_id:attribute.id}).length > 0 || localValues[attribute.id+'_cert'] < 100 || localValues[attribute.id+'_desc'].length > 0" class="material-icons md-18 material-addon fa-limegreen">fiber_manual_record</i>
-                        </sup>
-                    </div> -->
+                        <span v-if="localValues[attribute.id].possibility_description">
+                            <i class="fas fa-fw fa-comment"></i>
+                        </span>
+                        <span v-if="metadataAddon(attribute.thesaurus_url)">
+                            <i class="fas fa-fw fa-bookmark"></i>
+                        </span>
                 </sup>
             </label>
             <div class="col-md-9">
@@ -339,7 +342,7 @@
         mounted() {},
         methods: {
             onEnter(i) {
-                Vue.set(this.hovered, i, true);
+                Vue.set(this.hovered, i, this.hoverEnabled);
             },
             onLeave(i) {
                 Vue.set(this.hovered, i, false);
@@ -476,6 +479,9 @@
                     opts.handle = '.reorder-handle';
                 }
                 return opts;
+            },
+            hoverEnabled: function() {
+                return this.onReorder || this.onEdit  || this.onRemove || this.onDelete;
             }
         }
     }
