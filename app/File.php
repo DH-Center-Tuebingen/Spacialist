@@ -339,6 +339,24 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions, $mimeWildcards);
     }
 
+    public static function getDocuments() {
+        $mimeTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.oasis.opendocument.text'];
+        $extensions = ['.doc', '.docx', '.odt'];
+        return self::getCategory($mimeTypes, $extensions);
+    }
+
+    public static function getSpreadsheets() {
+        $mimeTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/x-latex', 'application/x-tex'];
+        $extensions = ['.xls', '.xlsx', '.ods'];
+        return self::getCategory($mimeTypes, $extensions);
+    }
+
+    public static function getPresentations() {
+        $mimeTypes = ['application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.oasis.opendocument.presentation'];
+        $extensions = ['.ppt', '.pptx', '.odp'];
+        return self::getCategory($mimeTypes, $extensions);
+    }
+
     public function getCategoryAttribute() {
         if($this->isImage()) return 'image';
         if($this->isAudio()) return 'audio';
@@ -349,7 +367,34 @@ class File extends Model
         if($this->is3d()) return '3d';
         if($this->isArchive()) return 'archive';
         if($this->isText()) return 'text';
+        if($this->isDocument()) return 'document';
+        if($this->isSpreadsheet()) return 'spreadsheet';
+        if($this->isPresentation()) return 'presentation';
         return 'undefined';
+    }
+
+    public function asHtml() {
+        if(!$this->isDocument() && !$this->isSpreadsheet() && !$this->isPresentation()) {
+            return [
+                'error' => 'HTML not supported for file type ' . $this->mime_type
+            ];
+        }
+        $tempFile = tempnam(sys_get_temp_dir(), 'Spacialist_html_');
+
+        if($this->isDocument()) {
+            $phpWord = \PhpOffice\PhpWord\IOFactory::load(Helpers::getStorageFilePath($this->name));
+            $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
+            $writer->save($tempFile);
+        } else if($this->isSpreadsheet()) {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load(Helpers::getStorageFilePath($this->name));
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Html($spreadsheet);
+            $writer->save($tempFile);
+        } else  if($this->isPresentation()) {
+            return ['error' => 'Presentations not yet supported!'];
+        }
+        $content = file_get_contents($tempFile);
+        unlink($tempFile);
+        return $content;
     }
 
     public function getExifAttribute() {
@@ -492,6 +537,48 @@ class File extends Model
         $extensions = ['.txt', '.md', '.markdown', '.mkd', '.csv', '.json', '.css', '.htm', '.html', '.shtml', '.js', '.rtx', '.rtf', '.tsv', '.xml'];
         $is = starts_with($this->mime_type, 'text/');
         if($is) return true;
+        $is = in_array($this->mime_type, $mimeTypes);
+        if($is) return true;
+        foreach($extensions as $ext) {
+            if(ends_with($this->name, $ext)) {
+                $is = true;
+                break;
+            }
+        }
+        return $is;
+    }
+
+    public function isDocument() {
+        $mimeTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.oasis.opendocument.text'];
+        $extensions = ['.doc', '.docx', '.odt'];
+        $is = in_array($this->mime_type, $mimeTypes);
+        if($is) return true;
+        foreach($extensions as $ext) {
+            if(ends_with($this->name, $ext)) {
+                $is = true;
+                break;
+            }
+        }
+        return $is;
+    }
+
+    public function isSpreadsheet() {
+        $mimeTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/x-latex', 'application/x-tex'];
+        $extensions = ['.xls', '.xlsx', '.ods'];
+        $is = in_array($this->mime_type, $mimeTypes);
+        if($is) return true;
+        foreach($extensions as $ext) {
+            if(ends_with($this->name, $ext)) {
+                $is = true;
+                break;
+            }
+        }
+        return $is;
+    }
+
+    public function isPresentation() {
+        $mimeTypes = ['application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.oasis.opendocument.presentation'];
+        $extensions = ['.ppt', '.pptx', '.odp'];
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {

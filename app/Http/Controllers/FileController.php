@@ -67,6 +67,18 @@ class FileController extends Controller
         return response($content);
     }
 
+    public function getAsHtml($id) {
+        try {
+            $file = File::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This file does not exist'
+            ]);
+        }
+        $content = $file->asHtml();
+        return response()->json($content);
+    }
+
     // POST
 
     public function uploadFile(Request $request) {

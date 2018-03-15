@@ -11,6 +11,9 @@
         "laravel/tinker": "~1.0",
         "lsolesen/pel": "^0.9.6",
         "phaza/laravel-postgis": "^3.3",
+        "phpoffice/phppresentation": "^0.9.0",
+        "phpoffice/phpspreadsheet": "^1.2",
+        "phpoffice/phpword": "^0.14.0",
         "renanbr/bibtex-parser": "^2.0",
         "wapmorgan/unified-archive": "^0.0.10",
         "zizaco/entrust": "5.2.x-dev"
