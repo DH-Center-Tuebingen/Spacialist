@@ -41,7 +41,13 @@
                 let vm = this;
                 let id = vm.file.id;
                 this.$http.get('/api/file/'+id+'/as_html').then(function(response) {
-                    vm.htmlContent = response.data;
+                    let data;
+                    if(typeof response.data == 'object') {
+                        data = JSON.stringify(response.data, null, 4);
+                    } else {
+                        data = response.data;
+                    }
+                    vm.htmlContent = data;
                     vm.htmlLoaded = true;
                 });
             }

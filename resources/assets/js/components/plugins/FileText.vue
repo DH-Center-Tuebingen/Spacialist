@@ -1,6 +1,6 @@
 <template>
-    <div class="modal-content-80 of-hidden text-left">
-        <div class="text-center">
+    <div class="modal-content-80-fix d-flex flex-column justify-content-start align-items-center">
+        <div>
             <button class="btn btn-outline-secondary" @click="toggleEditMode()">
                 <i class="fas fa-fw fa-edit"></i> Toggle Edit mode
             </button>
@@ -14,12 +14,12 @@
                 <i class="fas fa-fw fa-exchange-alt"></i> Toggle Markdown-Rendering
             </button>
         </div>
-        <div class="d-flex mt-2">
+        <div class="d-flex mt-2 h-100">
             <div class="col px-1" v-if="editMode">
                 <textarea class="w-100 h-100 p-2" v-model="content"></textarea>
             </div>
             <div class="col px-1">
-                <pre v-show="!csv.render && !markdown.render" v-highlightjs="content" class="mb-0"><code class="text-wrap" :class="{nohighlight: disableHighlighting}"></code></pre>
+                <pre class="mb-0 h-100" v-show="!csv.render && !markdown.render" v-highlightjs="content"><code class="text-wrap" :class="{nohighlight: disableHighlighting}"></code></pre>
                 <div class="mt-2" v-if="isCsv && csv.render">
                     <form class="form-inline">
                         <div class="form-group mx-2">
@@ -93,7 +93,13 @@
             setFileContent() {
                 let vm = this;
                 vm.$http.get(vm.file.url).then(function(response) {
-                    vm.content = response.data;
+                    let data;
+                    if(typeof response.data == 'object') {
+                        data = JSON.stringify(response.data, null, 4);
+                    } else {
+                        data = response.data;
+                    }
+                    vm.content = data;
                 });
             }
         },
