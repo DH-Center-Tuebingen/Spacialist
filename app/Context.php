@@ -33,6 +33,16 @@ class Context extends Model
         // 'geodata_id'        => 'integer|exists:geodata,id'
     ];
 
+    public static function getEntitiesByParent($id = null) {
+        $entities = self::withCount(['child_contexts as children_count']);
+        if(!isset($id)) {
+            $entities->whereNull('root_context_id');
+        } else {
+            $entities->where('root_context_id', $id);
+        }
+        return $entities->get();
+    }
+
     public function child_contexts() {
         return $this->hasMany('App\Context', 'root_context_id');
     }

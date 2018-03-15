@@ -5,6 +5,6 @@
         :concepts="{{$concepts}}"
         :context-types="{{$contextTypes}}"
         :preferences="{{json_encode($p)}}"
-        :tree="{{$roots}}">
+        :roots="{{$roots}}">
     </main-view>
 @endsection
