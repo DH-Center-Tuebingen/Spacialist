@@ -124,8 +124,8 @@
             },
             isMarkdown: function() {
                 switch(this.file.mime_type) {
-                    case 'text/comma-separated-values':
-                    case 'text/csv':
+                    case 'text/x-markdown':
+                    case 'text/markdown':
                         return true;
                 }
                 let extensions = ['.md', '.mkd', '.markdown'];
