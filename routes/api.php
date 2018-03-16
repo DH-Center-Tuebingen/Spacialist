@@ -87,5 +87,11 @@ Route::get('/file/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', 
 Route::get('/file/{id}/archive/list', 'FileController@getArchiveFileList')->where('id', '[0-9]+');
 Route::get('/file/{id}/archive/download', 'FileController@downloadArchivedFile')->where('id', '[0-9]+');
 Route::get('/file/{id}/as_html', 'FileController@getAsHtml')->where('id', '[0-9]+');
+Route::get('/file/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
 
 Route::post('/file', 'FileController@uploadFile');
+
+Route::put('/file/{id}/link', 'FileController@linkToEntity')->where('id', '[0-9]+');
+
+Route::delete('/file/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
+Route::delete('/file/{fid}/link/{cid}', 'FileController@unlinkEntity')->where('fid', '[0-9]+')->where('cid', '[0-9]+');

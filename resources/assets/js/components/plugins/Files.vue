@@ -14,10 +14,15 @@
                 <i class="fas fa-fw fa-upload"></i> Upload Files
             </button>
         </div>
-
-        <keep-alive>
-            <component :is="selectedActionComponent" :on-click="showFileModal" :active-comp="selectedTopAction" :context="context"></component>
-        </keep-alive>
+        <div v-show="isAction('linked')">
+            <file-list :files="linkedFiles.files" :on-click="showFileModal" :on-load-chunk="linkedFiles.loadChunk" :file-state="linkedFiles.fileState" :is-fetching="linkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
+        </div>
+        <div v-show="isAction('unlinked')">
+            <file-list :files="unlinkedFiles.files" :on-click="showFileModal" :on-load-chunk="unlinkedFiles.loadChunk" :file-state="unlinkedFiles.fileState" :is-fetching="unlinkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
+        </div>
+        <div v-show="isAction('all')">
+            <file-list :files="allFiles.files" :on-click="showFileModal" :on-load-chunk="allFiles.loadChunk" :file-state="allFiles.fileState" :is-fetching="allFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
+        </div>
         <div v-if="isAction('upload')">
             <file-upload class="w-100"
                 post-action="/api/file"
@@ -68,7 +73,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ selectedFile.name }} - Details</h5>
-                    <button type="button" class="close" aria-label="Close" v-on:click="hideFileModal">
+                    <button type="button" class="close" aria-label="Close" @click="hideFileModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -255,7 +260,58 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary"     v-on:click="hideFileModal">
+                    <button type="button" class="btn btn-outline-secondary"     @click="hideFileModal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </modal>
+
+        <modal name="delete-file-modal" width="80%" height="auto" :scrollable="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete {{ contextMenuFile.name }}</h5>
+                    <button type="button" class="close" aria-label="Close" @click="hideDeleteFileModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="alert alert-info">
+                        Do you really want to delete <i>{{ contextMenuFile.name }}</i>?
+                    </p>
+                    <p class="alert alert-danger">
+                        Please note: If you delete <i>{{ contextMenuFile.name }}</i>, {{ linkCount }} links to entities will be deleted as well.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @click="deleteFile(contextMenuFile)">
+                        <i class="fas fa-fw fa-check"></i> Delete
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary"     @click="hideDeleteFileModal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </modal>
+
+        <modal name="unlink-file-modal" width="80%" height="auto" :scrollable="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Unlink {{ contextMenuFile.name }}</h5>
+                    <button type="button" class="close" aria-label="Close" @click="hideUnlinkFileModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="alert alert-info">
+                        Do you really want to unlink <i>{{ contextMenuFile.name }}</i> from <i>{{ contextMenuContext.name }}</i>?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @click="unlinkFile(contextMenuFile, contextMenuContext)">
+                        <i class="fas fa-fw fa-check"></i> Unlink
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary"     @click="hideUnlinkFileModal">
                         Close
                     </button>
                 </div>
@@ -266,9 +322,6 @@
 
 <script>
     Vue.component('file-list', require('./FileList.vue'));
-    Vue.component('file-linked', require('./LinkedFiles.vue'));
-    Vue.component('file-unlinked', require('./UnlinkedFiles.vue'));
-    Vue.component('file-all', require('./AllFiles.vue'));
 
     Vue.component('file-image', require('./FileImage.vue'));
     Vue.component('file-audio', require('./FileAudio.vue'));
@@ -286,6 +339,11 @@
                 required: false,
                 type: Object,
                 default: {}
+            },
+            contextDataLoaded: {
+                required: false,
+                type: Boolean,
+                default: false
             }
         },
         mounted() {
@@ -293,20 +351,7 @@
         methods: {
             setAction(id) {
                 // disable linked tab if no context is selected
-                if(id == 'linked' && !this.context.id) return;
-                switch(id) {
-                    case 'linked':
-                        this.selectedActionComponent = 'file-linked';
-                        break;
-                    case 'unlinked':
-                        this.selectedActionComponent = 'file-unlinked';
-                        break;
-                    case 'all':
-                        this.selectedActionComponent = 'file-all';
-                        break;
-                    default:
-                        this.selectedActionComponent = '';
-                }
+                if(id == 'linked' && !this.localContext.id) return;
                 this.selectedTopAction = id;
             },
             isAction(id) {
@@ -331,11 +376,197 @@
                 }
                 if(this.filesUploaded + this.filesErrored == this.uploadFiles.length) {
                     if(this.filesUploaded > 0) {
-                        this.$emit('fileUpdateNeeded');
+                        this.onFilesUploaded(this.unlinkedFiles);
+                        this.onFilesUploaded(this.allFiles);
                         this.filesUploaded = 0;
                         this.filesErrored = 0;
                     }
                 }
+            },
+            resetFiles(fileType) {
+                let arr = this[fileType];
+                arr.files = [];
+                arr.fileState = {};
+                arr.fetchingFiles = false;
+                arr.pagination = {};
+            },
+            getNextFiles(fileType) {
+                console.log("Starting to load files for " + fileType);
+                if(fileType == 'linkedFiles' && !this.context.id) {
+                    return;
+                }
+                let arr = this[fileType];
+                arr.fetchingFiles = true;
+                if(arr.pagination.current_page && arr.pagination.current_page == arr.pagination.last_page) {
+                    return;
+                }
+                console.log("Actually load files for " + fileType);
+                let firstCall;
+                let url = arr.apiPrefix;
+                if(!Object.keys(arr.pagination).length) {
+                    url += arr.apiUrl;
+                    firstCall = true;
+                } else {
+                    url += arr.pagination.next_page_url;
+                    firstCall = false;
+                }
+                this.getPage(url, arr, firstCall);
+            },
+            getPage(pageUrl, filesObj, isFirstCall) {
+                let vm = this;
+                this.$http.get(pageUrl).then(function(response) {
+                    let resp = response.data;
+                    for(let i=0; i<resp.data.length; i++) {
+                        filesObj.files.push(resp.data[i]);
+                    }
+                    delete resp.data;
+                    Vue.set(filesObj, 'pagination', resp);
+                    filesObj.fetchingFiles = false;
+                    vm.updateFileState(filesObj);
+                });
+            },
+            updateFileState(filesObj) {
+                filesObj.fileState.from = filesObj.pagination.from ? 1 : 0,
+                filesObj.fileState.to = filesObj.pagination.to,
+                filesObj.fileState.total = filesObj.pagination.total,
+                filesObj.fileState.toLoad = Math.min(
+                    filesObj.pagination.per_page,
+                    filesObj.pagination.total-filesObj.pagination.to
+                )
+            },
+            onFilesUploaded(filesObj) {
+                // if we never fetched files, wait for user to load
+                if(!filesObj.pagination.current_page) {
+                    return;
+                }
+                let url = filesObj.apiPrefix;
+                if(filesObj.pagination.to == filesObj.pagination.total) {
+                    url += filesObj.pagination.next_page_url;
+                } else {
+                    // remove current page files and reload them
+                    url += filesObj.apiUrl + '?' + filesObj.apiPageParam + '=' + filesObj.pagination.current_page;
+                    let index = filesObj.pagination.from - 1;
+                    let howmany = (filesObj.pagination.to - filesObj.pagination.from) + 1;
+                    filesObj.files.splice(index, howmany);
+                }
+                vm.updateFileState(filesObj);
+                vm.getPage(url, filesObj);
+            },
+            onFileDeleted(file, filesObj) {
+                // if we never fetched files, wait for user to load
+                if(!filesObj.pagination.current_page) {
+                    return;
+                }
+                let index = filesObj.files.findIndex(f => f.id == file.id);
+                // if the file was not in this tab, return
+                if(index == -1) return;
+                filesObj.pagination.total--;
+                filesObj.pagination.to--;
+                filesObj.files.splice(index, 1);
+                // check if we deleted with only 1 element on last page
+                if(filesObj.pagination.from > filesObj.pagination.total) {
+                    // if so, set next page url to this page, because we decreased our current page
+                    filesObj.pagination.next_page_url = filesObj.apiUrl + '?' + filesObj.apiPageParam + '=' + filesObj.pagination.current_page;
+                }
+                this.updateFileState(filesObj);
+            },
+            onFileLinked(file, filesObj) {
+                // if we never fetched files, wait for user to load
+                if(!filesObj.pagination.current_page) {
+                    return;
+                }
+                filesObj.files.push(file);
+                filesObj.pagination.total++;
+                filesObj.pagination.to++;
+                let count = (filesObj.pagination.to - filesObj.pagination.from) + 1;
+                // check if the push created a new (local) page
+                if(count > filesObj.pagination.per_page) {
+                    filesObj.pagination.current_page++;
+                    // check if the push created a new (db) page
+                    if(filesObj.pagination.total % filesObj.pagination.per_page == 1) {
+                        filesObj.pagination.last_page++;
+                        filesObj.pagination.last_page_url = filesObj.apiUrl + '?' + filesObj.apiPageParam + '=' + filesObj.pagination.last_page;
+                    }
+                    filesObj.pagination.next_page_url = filesObj.apiUrl + '?' + filesObj.apiPageParam + '=' + filesObj.pagination.current_page;
+                }
+                this.updateFileState(filesObj);
+            },
+            onFileUnlinked(file, filesObj, linkCount) {
+                // if we never fetched files, wait for user to load
+                if(!vm.pagination.current_page) {
+                    return;
+                }
+                // if there are still links, do not add to unlinked files
+                if(typeof linkCount != 'undefined' && linkCount > 0) {
+                    return;
+                }
+                let index = vm.files.findIndex(f => f.id == file.id);
+                // if the file was not in this tab, return
+                if(index == -1) return;
+                vm.pagination.total--;
+                vm.pagination.to--;
+                vm.files.splice(index, 1);
+                // check if we deleted with only 1 element on last page
+                if(vm.pagination.from > vm.pagination.total) {
+                    // if so, set next page url to this page, because we decreased our current page
+                    vm.pagination.next_page_url = vm.apiUrl + '?' + vm.apiPageParam + '=' + vm.pagination.current_page;
+                }
+            },
+            requestDeleteFile(file) {
+                this.contextMenuFile = Object.assign({}, file);
+                this.$modal.show('delete-file-modal');
+            },
+            deleteFile(file) {
+                let vm = this;
+                let id = file.id;
+                vm.$http.delete('/api/file/'+id).then(function(response) {
+                    vm.onFileDeleted(file, vm.linkedFiles);
+                    vm.onFileDeleted(file, vm.unlinkedFiles);
+                    vm.onFileDeleted(file, vm.allFiles);
+                    vm.hideDeleteFileModal();
+                });
+            },
+            hideDeleteFileModal() {
+                this.$modal.hide('delete-file-modal');
+                this.contextMenuFile = {};
+            },
+            requestUnlinkFile(file, context) {
+                let vm = this;
+                let id = file.id;
+                vm.contextMenuFile = Object.assign({}, file);
+                vm.contextMenuContext = Object.assign({}, context);
+                vm.$http.get('/api/file/'+id+'/link_count').then(function(response) {
+                    vm.linkCount = response.data;
+                    vm.$modal.show('unlink-file-modal');
+                });
+            },
+            unlinkFile(file, context) {
+                let vm = this;
+                let id = file.id;
+                let cid = context.id;
+                vm.$http.delete('/api/file/'+id+'/link/'+cid).then(function(response) {
+                    vm.linkCount--;
+                    vm.onFileDeleted(file, vm.linkedFiles);
+                    vm.onFileUnlinked(file, vm.unlinkedFiles, vm.linkCount);
+                    vm.hideUnlinkFileModal();
+                });
+            },
+            hideUnlinkFileModal() {
+                this.$modal.hide('unlink-file-modal');
+                this.contextMenuFile = {};
+                this.contextMenuContext = {};
+                this.linkCount = 0;
+            },
+            linkFile(file, context) {
+                let vm = this;
+                let id = file.id;
+                let data = {
+                    'context_id': context.id
+                };
+                vm.$http.put('/api/file/'+id+'/link', data).then(function(response) {
+                    vm.onFileLinked(file, vm.linkedFiles);
+                    vm.onFileDeleted(file, vm.unlinkedFiles);
+                });
             },
             showFileModal(file) {
                 this.selectedFile = Object.assign({}, file);
@@ -373,23 +604,103 @@
             },
             hideFileModal() {
                 this.$modal.hide('file-modal');
+                this.selectedFile = {};
             }
         },
         data() {
             return {
                 selectedTopAction: 'unlinked',
-                selectedActionComponent: 'file-unlinked',
-                fileApi: '/file/unlinked',
                 uploadFiles: [],
                 filesUploaded: 0,
                 filesErrored: 0,
+                linkedFiles: {
+                    files: [],
+                    fileState: {},
+                    fetchingFiles: false,
+                    pagination: {},
+                    apiPrefix: '/api',
+                    apiUrl: '/file/linked',
+                    apiPageParam: 'page',
+                    loadChunk: () => this.getNextFiles('linkedFiles')
+                },
+                unlinkedFiles: {
+                    files: [],
+                    fileState: {},
+                    fetchingFiles: false,
+                    pagination: {},
+                    apiPrefix: '/api',
+                    apiUrl: '/file/unlinked',
+                    apiPageParam: 'page',
+                    loadChunk: () => this.getNextFiles('unlinkedFiles')
+                },
+                allFiles: {
+                    files: [],
+                    fileState: {},
+                    fetchingFiles: false,
+                    pagination: {},
+                    apiPrefix: '/api',
+                    apiUrl: '/file',
+                    apiPageParam: 'page',
+                    loadChunk: () => this.getNextFiles('allFiles')
+                },
                 selectedFile: {},
+                contextMenuFile: {},
+                contextMenuContext: {},
+                linkCount: 0,
                 fileCategoryComponent: '',
                 modalTab: 'properties',
                 fileProperties: [
                     'copyright',
                     'description'
                 ]
+            }
+        },
+        computed: {
+            localContext: function() {
+                return Object.assign({}, this.context);
+            },
+            contextMenu: function() {
+                let vm = this;
+                let menu = [];
+                if(vm.context.id) {
+                    if(vm.isAction('linked')) {
+                        menu.push({
+                            label: 'Unlink from ' + vm.context.name,
+                            iconClasses: 'fas fa-fw fa-unlink text-info',
+                            iconContent: '',
+                            callback: function(file) {
+                                vm.requestUnlinkFile(file, vm.context);
+                            }
+                        });
+                    } else {
+                        menu.push({
+                            label: 'Link to ' + vm.context.name,
+                            iconClasses: 'fas fa-fw fa-link text-success',
+                            iconContent: '',
+                            callback: function(file) {
+                                vm.linkFile(file, vm.context);
+                            }
+                        });
+                    }
+                }
+                menu.push({
+                    label: 'Delete',
+                    iconClasses: 'fas fa-fw fa-trash text-danger',
+                    iconContent: '',
+                    callback: function(file) {
+                        vm.requestDeleteFile(file);
+                    }
+                });
+                return menu;
+            }
+        },
+        watch: {
+            contextDataLoaded: function(newContextDataLoaded, oldContextDataLoaded) {
+                if(newContextDataLoaded) {
+                    this.linkedFiles.apiUrl = '/file/linked/' + this.context.id;
+                    this.resetFiles('linkedFiles');
+                    this.getNextFiles('linkedFiles');
+                }
             }
         }
     }

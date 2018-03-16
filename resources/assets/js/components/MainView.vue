@@ -49,7 +49,7 @@
                         </button>
                     </span>
                 </div>
-                <attributes class="pt-2" v-if="isLoaded"
+                <attributes class="pt-2" v-if="dataLoaded"
                     :attributes="selectedContext.attributes"
                     :concepts="concepts"
                     :on-metadata="showMetadata"
@@ -75,7 +75,7 @@
             </ul>
             <div class="mt-2">
                 <keep-alive>
-                    <component :is="activePlugin" :context="selectedContext"></component>
+                    <component :is="activePlugin" :context="selectedContext" :context-data-loaded="dataLoaded"></component>
                 </keep-alive>
                 <div v-show="tab == 'references'">
                     <p class="alert alert-info" v-if="!hasReferences">
@@ -220,17 +220,17 @@
                 this.activePlugin = plugin.tag;
             },
             getContextData(elem) {
-                let ctx = this.selectedContext;
+                let vm = this;
+                let ctx = vm.selectedContext;
                 let cid = elem.id;
                 let ctid = elem.context_type_id;
-                let vm = this;
+                vm.dataLoaded = false;
                 vm.$http.get('/api/context/'+cid+'/data').then(function(response) {
                     // if result is empty, php returns [] instead of {}
                     if(response.data instanceof Array) {
                         response.data = {};
                     }
                     Vue.set(ctx, 'data', response.data);
-                    Vue.set(vm, 'dataLoaded', true);
                     return vm.$http.get('/api/editor/context_type/'+ctid+'/attribute');
                 }).then(function(response) {
                     let data = response.data;
@@ -246,7 +246,6 @@
                         data.selections = {};
                     }
                     Vue.set(ctx, 'selections', data.selections);
-                    Vue.set(vm, 'attributesLoaded', true);
                     return vm.$http.get('/api/context/'+cid+'/references');
                 }).then(function(response) {
                     let data = response.data;
@@ -254,6 +253,7 @@
                         data = {};
                     }
                     Vue.set(ctx, 'references', data);
+                    Vue.set(vm, 'dataLoaded', true);
                 });
             },
             showMetadata() {
@@ -351,7 +351,6 @@
                 newEntity: {},
                 dataLoaded: false,
                 defaultKey: undefined,
-                attributesLoaded: false,
                 plugins: {},
                 activePlugin: ''
             }
@@ -360,9 +359,6 @@
             this.$getSpacialistPlugins('plugins');
         },
         computed: {
-            isLoaded: function() {
-                return this.dataLoaded && this.attributesLoaded;
-            },
             hasReferences: function() {
                 return this.selectedContext.references && Object.keys(this.selectedContext.references).length;
             },

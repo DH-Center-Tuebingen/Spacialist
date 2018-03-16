@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\ContextFile;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -200,6 +201,20 @@ class File extends Model
         }
     }
 
+    public function link($eid) {
+        $link = new ContextFile();
+        $link->photo_id = $this->id;
+        $link->context_id = $eid;
+        $link->lasteditor = 'Admin'; // TODO
+        $link->save();
+    }
+
+    public function unlink($eid) {
+        $link = ContextFile::where('context_id', $eid)
+            ->where('photo_id', $this->id)
+            ->delete();
+    }
+
     public function setFileInfo() {
         $this->url = Helpers::getFullFilePath($this->name);
         if($this->isImage()) {
@@ -277,6 +292,15 @@ class File extends Model
         return $tree;
     }
 
+    public function deleteFile() {
+        $url = Helpers::getStorageFilePath($this->name);
+        Storage::delete($url);
+        if(isset($this->thumb)) {
+            $thumbUrl = Helpers::getStorageFilePath($this->thumb);
+            Storage::delete($thumbUrl);
+        }
+        $this->delete();
+    }
 
     public static function getCategory($mimes, $extensions, $mimeWildcards = null) {
         $query = self::WhereIn('mime_type', $mimes);
@@ -395,6 +419,10 @@ class File extends Model
         $content = file_get_contents($tempFile);
         unlink($tempFile);
         return $content;
+    }
+
+    public function linkCount() {
+        return ContextFile::where('photo_id', $this->id)->count();
     }
 
     public function getExifAttribute() {
