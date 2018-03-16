@@ -76,9 +76,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newUserForm" class="form-horizontal" role="form" v-on:submit.prevent="onAddUser(newUser)">
+                    <form name="newUserForm" role="form" v-on:submit.prevent="onAddUser(newUser)">
                         <div class="form-group">
-                            <label class="control-label col-md-3" for="name">
+                            <label class="col-form-label col-md-3" for="name">
                                 Username:
                             </label>
                             <div class="col-md-9">
@@ -86,7 +86,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-md-3" for="display_name">
+                            <label class="col-form-label col-md-3" for="display_name">
                                 E-Mail Address:
                             </label>
                             <div class="col-md-9">
@@ -94,7 +94,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-md-3" for="description">
+                            <label class="col-form-label col-md-3" for="description">
                                 Password:
                             </label>
                             <div class="col-md-9">

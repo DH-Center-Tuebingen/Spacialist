@@ -348,9 +348,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form class="form-horizontal" role="form" @submit.prevent="addBibliographyItem(newItem)">
+                    <form role="form" @submit.prevent="addBibliographyItem(newItem)">
                         <div class="form-group">
-                            <label class="control-label col-md-3" for="type">Type:</label>
+                            <label class="col-form-label col-md-3" for="type">Type:</label>
                             <div class="col-md-9">
                                 <multiselect
                                     v-model="newItem.type"
@@ -364,13 +364,13 @@
                             </div>
                         </div>
                         <div class="form-group" v-for="mandatory in mandatoryFields">
-                            <label class="control-label col-md-3">{{ mandatory }}:<span style="color: red;">*</span></label>
+                            <label class="col-form-label col-md-3">{{ mandatory }}:<span style="color: red;">*</span></label>
                             <div class="col-md-9">
                                 <input type="text" class="form-control" v-model="newItem.fields[mandatory]" required/>
                             </div>
                         </div>
                         <div class="form-group" v-for="optional in optionalFields">
-                            <label class="control-label col-md-3">{{ optional }}:</label>
+                            <label class="col-form-label col-md-3">{{ optional }}:</label>
                             <div class="col-md-9">
                                 <input type="text" class="form-control" v-model="newItem.fields[optional]"/>
                             </div>

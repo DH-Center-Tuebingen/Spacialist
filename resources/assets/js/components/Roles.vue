@@ -80,9 +80,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newRoleForm" class="form-horizontal" role="form" v-on:submit.prevent="onAddRole(newRole)">
+                    <form name="newRoleForm" role="form" v-on:submit.prevent="onAddRole(newRole)">
                         <div class="form-group">
-                            <label class="control-label col-md-3" for="name">
+                            <label class="col-form-label col-md-3" for="name">
                                 Role Name:
                             </label>
                             <div class="col-md-9">
@@ -90,7 +90,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-md-3" for="display_name">
+                            <label class="col-form-label col-md-3" for="display_name">
                                 Display Name:
                             </label>
                             <div class="col-md-9">
@@ -98,7 +98,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-md-3" for="description">
+                            <label class="col-form-label col-md-3" for="description">
                                 Role Description:
                             </label>
                             <div class="col-md-9">

@@ -108,9 +108,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newEntityForm" class="form-horizontal" role="form" v-on:submit.prevent="addNewEntity(newEntity)">
+                    <form name="newEntityForm" role="form" v-on:submit.prevent="addNewEntity(newEntity)">
                         <div class="form-group row">
-                            <label class="control-label col-md-3" for="name">
+                            <label class="col-form-label col-md-3" for="name">
                                 Name:
                             </label>
                             <div class="col-md-9">
@@ -118,7 +118,7 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="control-label col-md-3" for="type">
+                            <label class="col-form-label col-md-3" for="type">
                                 Type:
                             </label>
                             <multiselect class="col-md-9" style="box-sizing: border-box;"
