@@ -1,13 +1,26 @@
 <template>
-    <div>
-        <button class="btn btn-outline-secondary" @click="toggleCodeHighlighting()">
-            <i class="fas fa-fw fa-underline"></i> Toggle Highlighting
-        </button>
-        <button class="btn btn-outline-secondary" v-if="isHtml" @click="toggleHtmlRendering()">
-            <i class="fab fa-fw fa-html5"></i> Toggle HTML-Rendering
-        </button>
-        <iframe v-if="enableHtml" :src="file.url" class="mt-2 border-0 d-block w-100 modal-content-80"></iframe>
-        <pre v-highlightjs="content" class="text-left modal-content-80 mb-0 mt-2" v-else><code class="text-wrap" :class="{nohighlight: disableHighlighting}"></code></pre>
+    <div class="modal-content-80-fix d-flex flex-column justify-content-start align-items-center">
+        <div>
+            <button class="btn btn-outline-secondary" @click="toggleEditMode()">
+                <i class="fas fa-fw fa-edit"></i> Toggle Edit mode
+            </button>
+            <button class="btn btn-outline-secondary" v-show="!renderHtml" @click="toggleCodeHighlighting()">
+                <i class="fas fa-fw fa-underline"></i> Toggle Highlighting
+            </button>
+            <button class="btn btn-outline-secondary" v-if="isHtml" @click="toggleHtmlRendering()">
+                <i class="fab fa-fw fa-html5"></i> Toggle HTML-Rendering
+            </button>
+        </div>
+        <div class="d-flex mt-2 w-100 h-100">
+            <div class="col px-1" v-if="editMode">
+                <textarea class="w-100 h-100 p-2" v-model="content"></textarea>
+            </div>
+            <div class="col px-1">
+                <pre class="mb-0 h-100" v-highlightjs="content" v-if="!renderHtml"><code class="text-wrap" :class="{nohighlight: disableHighlighting}"></code></pre>
+                <iframe v-else :srcdoc="content" class="border-0 h-100 w-100"></iframe>
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -31,8 +44,11 @@
             toggleCodeHighlighting() {
                 this.disableHighlighting = !this.disableHighlighting;
             },
+            toggleEditMode() {
+                this.editMode = !this.editMode;
+            },
             toggleHtmlRendering() {
-                this.enableHtml = !this.enableHtml;
+                this.renderHtml = !this.renderHtml;
             },
             setFileContent() {
                 let vm = this;
@@ -44,8 +60,9 @@
         data() {
             return {
                 disableHighlighting: false,
-                enableHtml: false,
-                content: ''
+                renderHtml: false,
+                content: '',
+                editMode: false
             }
         },
         computed: {
