@@ -9,7 +9,7 @@
             @end="dropped"
             @start="dragged">
             <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
-            <label class="control-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
+            <label class="col-form-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
                 <div v-show="hoverState[i]">
                     <a v-if="onReorder" href="#" class="reorder-handle">
                         <i class="fas fa-fw fa-sort text-secondary"></i>
