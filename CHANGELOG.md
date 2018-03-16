@@ -1,6 +1,31 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.6 - Unreleased (Federsee)
+This version is a complete rewrite using Laravel and Vue.js. Please refer to the INSTALL.md for migration and new setup information.
+### Added
+- File Viewer
+  - Simple Office Documents Viewer (as HTML-Text)
+  - Edit Mode for text and XML files
+  - Rendering of HTML files
+- Added Welcome Page
+  - Maintainer (Name and E-Mail-Address), Project Description and Access (Public/Private) can be configured in settings
+- BibTeX export
+### Changed
+- Moved from Lumen (5.3) to Laravel (5.6)
+- Moved from AngularJS (1.5) to Vue.js (2.5)
+- Moved from Bootstrap 3.3 to 4.0
+- Switched from Material Design back to original Bootstrap
+- Switched from Material Icons to new FontAwesome 5
+- Moved Plugin-like parts to real Plugins
+- Certainty Modal now has 3 icons to view information without opening the modal
+  - !-Icon: Always displayed. Color based on certainty level
+  - Comment-Icon: Displayed if there is a comment
+  - Bookmark-Icon: Displayed if there is at least one reference
+- User/Role Management bundle several actions (Save, Edit, Delete, ...) in single dropdown (...-menu)
+- Adding/Reorder attributes in Context-Type tab in Data-Model-Editor is now done using Drag&Drop.
+### Fixed
+
 ## 0.5.1
 ### Added
 - Only show up to first 10 rows in csv preview
