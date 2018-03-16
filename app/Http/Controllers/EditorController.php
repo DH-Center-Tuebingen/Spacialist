@@ -9,6 +9,7 @@ use App\AttributeValue;
 use App\Context;
 use App\ContextAttribute;
 use App\ContextType;
+use App\Helpers;
 use App\ThConcept;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -29,6 +30,17 @@ class EditorController extends Controller {
         }
         $cnt = $query->count();
         return response()->json($cnt);
+    }
+
+    public function getContextType($id) {
+        try {
+            $contextType = ContextType::with('sub_context_types')->findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context-type does not exist'
+            ], 400);
+        }
+        return response()->json($contextType);
     }
 
     public function getContextTypeAttributes($id) {
@@ -133,14 +145,16 @@ class EditorController extends Controller {
     public function addContextType(Request $request) {
         $this->validate($request, [
             'concept_url' => 'required|url|exists:th_concept',
+            'is_root' => 'required|boolean_string'
             // 'geomtype' => 'required|geom_type'
         ]);
 
         $curl = $request->get('concept_url');
+        $is_root = Helpers::parseBoolean($request->get('is_root'));
         // $geomtype = $request->get('geomtype');
         $cType = new ContextType();
         $cType->thesaurus_url = $curl;
-        $cType->type = 0;
+        $cType->is_root = $is_root;
         $cType->save();
 
         // $layer = new AvailableLayer();
@@ -156,6 +170,24 @@ class EditorController extends Controller {
         // $layer->save();
 
         return response()->json($cType, 201);
+    }
+
+    public function setRelationInfo(Request $request, $id) {
+        $this->validate($request, [
+            'is_root' => 'boolean_string',
+            'sub_context_types' => 'array'
+        ]);
+        try {
+            $contextType = ContextType::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context-type does not exist'
+            ], 400);
+        }
+        $is_root = $request->get('is_root');
+        $subs = $request->get('sub_context_types');
+        $contextType->setRelationInfo($is_root, $subs);
+        return response()->json(null, 204);
     }
 
     public function addAttribute(Request $request) {

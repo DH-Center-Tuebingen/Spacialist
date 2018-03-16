@@ -116,7 +116,7 @@ class HomeController extends Controller
         foreach($attributes as $a) {
             $a->columns = Attribute::where('parent_id', $a->id)->get();
         }
-        $contextTypes = ContextType::all();
+        $contextTypes = ContextType::with('sub_context_types')->get();
         $concepts = \DB::select(\DB::raw("
             WITH summary AS
             (

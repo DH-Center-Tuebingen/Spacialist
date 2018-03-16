@@ -27,6 +27,48 @@
             </context-types>
         </div>
         <div class="col-md-5">
+            <h4>Properties</h4>
+            <form role="form" v-on:submit.prevent="updateContextType" v-if="contextAttributes.length">
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3 text-right">Top-Level Context-Type</label>
+                    <div class="col-md-9">
+                        <input type="checkbox" v-model="contextType.is_root" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3 text-right">Allowed Sub Context-Types</label>
+                    <div class="col-md-9">
+                        <multiselect
+                            label="thesaurus_url"
+                            track-by="id"
+                            v-model="contextType.sub_context_types"
+                            :allowEmpty="true"
+                            :closeOnSelect="false"
+                            :customLabel="translateLabel"
+                            :hideSelected="true"
+                            :multiple="true"
+                            :options="minimalContextTypes">
+                        </multiselect>
+                        <div class="pt-2">
+                            <button type="button" class="btn btn-outline-success mr-2" @click="addAllContextTypes">
+                                <i class="fas fa-fw fa-tasks"></i> Select all
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" @click="removeAllContextTypes">
+                                <i class="fas fa-fw fa-times"></i> Deselect all
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3"></label>
+                    <div class="col-md-9">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-fw fa-save"></i> Save
+                        </button>
+                    </div>
+                </div>
+                <hr />
+            </form>
             <h4>Added Attributes</h4>
             <attributes
                 group="attributes"
@@ -50,9 +92,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newContextTypeForm" class="form-horizontal" role="form" v-on:submit.prevent="createContextType(newContextType)">
+                    <form name="newContextTypeForm" role="form" v-on:submit.prevent="createContextType(newContextType)">
                         <div class="form-group">
-                            <label class="control-label col-md-3" for="name">
+                            <label class="col-form-label col-md-3" for="name">
                                 Label:
                             </label>
                             <div class="col-md-9">
@@ -60,6 +102,12 @@
                                     :on-select="newContextTypeSearchResultSelected"
                                 ></label-search>
                             </div>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="isRoot" v-model="newContextType.is_root" />
+                            <label class="form-check-label" for="isRoot">
+                                Top-Level Context-Type?
+                            </label>
                         </div>
                         <button type="submit" class="btn btn-success">
                             <i class="fas fa-fw fa-plus"></i> Add
@@ -83,9 +131,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newContextTypeForm" class="form-horizontal" role="form" v-on:submit.prevent="createAttribute(newAttribute)">
+                    <form name="newContextTypeForm" role="form" v-on:submit.prevent="createAttribute(newAttribute)">
                         <div class="form-group">
-                            <label class="control-label col-md-3">
+                            <label class="col-form-label col-md-3">
                                 Label:
                             </label>
                             <div class="col-md-9">
@@ -95,7 +143,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-md-3">
+                            <label class="col-form-label col-md-3">
                                 Type:
                             </label>
                             <div class="col-md-9">
@@ -250,7 +298,8 @@
                 let hideModal = this.hideNewContextTypeModal;
                 let url = contextType.label.concept.concept_url;
                 let data = {
-                    'concept_url': url
+                    'concept_url': url,
+                    'is_root': contextType.is_root || false
                 };
                 this.$http.post('/api/editor/dm/context_type', data).then(function(response) {
                     contextTypes.push(response.data);
@@ -269,6 +318,24 @@
                         contextTypes.splice(index, 1);
                     }
                     hideModal();
+                });
+            },
+            addAllContextTypes() {
+                this.contextType.sub_context_types = [];
+                this.contextType.sub_context_types = this.minimalContextTypes.slice();
+            },
+            removeAllContextTypes() {
+                this.contextType.sub_context_types = [];
+            },
+            updateContextType() {
+                if(!this.contextType.id) return;
+                let id = this.contextType.id;
+                let data = {
+                    'is_root': this.contextType.is_root,
+                    'sub_context_types': this.contextType.sub_context_types.map(t => t.id)
+                };
+                console.log(data.sub_context_types);
+                this.$http.post('/api/editor/dm/'+id+'/relation', data).then(function(response) {
                 });
             },
             addAttributeToContextType(oldIndex, index) {
@@ -410,28 +477,32 @@
                 Vue.set(this.newContextType, 'label', label);
             },
             setContextType(contextType) {
-                this.contextAttributes = [];
-                this.contextType = Object.assign({}, contextType);
+                let vm = this;
+                vm.contextAttributes = [];
+                vm.contextType = Object.assign({}, contextType);
                 let id = contextType.id;
-                let attrs = this.contextAttributes;
-                let values = this.contextValues;
-                let selections = this.contextSelections;
-                let globalAttrs = this.localAttributes;
-                this.$http.get('/api/editor/context_type/'+id+'/attribute')
+                vm.$http.get('/api/editor/context_type/'+id+'/attribute')
                     .then(function(response) {
                         let data = response.data;
-                        selections = data.selections;
+                        vm.contextSelections = data.selections;
                         for(let i=0; i<data.attributes.length; i++) {
-                            attrs.push(data.attributes[i]);
+                            vm.contextAttributes.push(data.attributes[i]);
                             // Set values for all context attributes to '', so values in <attributes> are existant
-                            Vue.set(values, data.attributes[i].id, '');
+                            Vue.set(vm.contextValues, data.attributes[i].id, '');
                         }
-                        for(let i=0; i<globalAttrs.length; i++) {
-                            let id = globalAttrs[i].id;
-                            let index = attrs.findIndex(a => a.id == id);
-                            globalAttrs[i].isDisabled = index > -1;
+                        for(let i=0; i<vm.localAttributes.length; i++) {
+                            let id = vm.localAttributes[i].id;
+                            let index = vm.contextAttributes.findIndex(a => a.id == id);
+                            vm.localAttributes[i].isDisabled = index > -1;
                         }
                     });
+            },
+            translateLabel(element, label) {
+                let value = element[label];
+                if(!value) return element;
+                let concept = this.concepts[element[label]];
+                if(!concept) return element;
+                return concept.label;
             },
             //
             setAttributeValueCount(cnt) {
@@ -481,6 +552,12 @@
                     data[a.id] = '';
                 }
                 return data;
+            },
+            minimalContextTypes: function() {
+                return this.localContextTypes.map(ct => ({
+                    id: ct.id,
+                    thesaurus_url: ct.thesaurus_url
+                }));
             }
         }
     }
