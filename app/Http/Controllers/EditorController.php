@@ -194,7 +194,7 @@ class EditorController extends Controller {
         $this->validate($request, [
             'label_id' => 'required|integer|exists:th_concept,id',
             'datatype' => 'required|string',
-            'parent_id' => 'nullable|integer|exists:th_concept,id',
+            'root_id' => 'nullable|integer|exists:th_concept,id',
             'columns' => 'nullable|json'
         ]);
 
@@ -204,8 +204,8 @@ class EditorController extends Controller {
         $attr = new Attribute();
         $attr->thesaurus_url = $curl;
         $attr->datatype = $datatype;
-        if($request->has('parent_id')) {
-            $pid = $request->get('parent_id');
+        if($request->has('root_id')) {
+            $pid = $request->get('root_id');
             $purl = ThConcept::find($pid)->concept_url;
             $attr->thesaurus_root_url = $purl;
         }
@@ -219,12 +219,12 @@ class EditorController extends Controller {
                 $childAttr = new Attribute();
                 $childAttr->thesaurus_url = $curl;
                 $childAttr->datatype = $col->datatype;
-                if(isset($col->parent_id)) {
-                    $pid = $col->parent_id;
+                if(isset($col->root_id)) {
+                    $pid = $col->root_id;
                     $purl = ThConcept::find($pid)->concept_url;
                     $childAttr->thesaurus_root_url = $purl;
                 }
-                $childAttr->parent_id = $attr->id;
+                $childAttr->root_id = $attr->id;
                 $childAttr->save();
             }
         }

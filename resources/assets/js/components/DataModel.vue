@@ -138,7 +138,7 @@
                             </label>
                             <div class="col-md-9">
                                 <label-search
-                                    :on-select="newAttributeSearchResultSelected"
+                                    :on-select="setAttributeLabel"
                                 ></label-search>
                             </div>
                         </div>
@@ -150,7 +150,7 @@
                                 <multiselect
                                     label="datatype"
                                     v-model="newAttribute.type"
-                                    :allowEmpty="true"
+                                    :allowEmpty="false"
                                     :closeOnSelect="true"
                                     :hideSelected="true"
                                     :multiple="false"
@@ -158,7 +158,17 @@
                                 </multiselect>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success">
+                        <div class="form-group" v-show="needsRootElement">
+                            <label class="col-form-label col-md-3">
+                                Root Element:
+                            </label>
+                            <div class="col-md-9">
+                                <label-search
+                                    :on-select="setAttributeRoot"
+                                ></label-search>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success" :disabled="!validated">
                             <i class="fas fa-fw fa-plus"></i> Add
                         </button>
                     </form>
@@ -260,8 +270,7 @@
         mounted() {},
         methods: {
             createAttribute(attribute) {
-                if(!attribute.label) return;
-                if(!attribute.type) return;
+                if(!this.validated) return;
                 let attributes = this.localAttributes;
                 let hideModal = this.hideNewAttributeModal;
                 let data = {};
@@ -270,8 +279,8 @@
                 if(data.datatype == 'table') {
                     data.columns = JSON.stringify(attribute.columns);
                 }
-                if(attribute.parent) {
-                    data.parent_id = attribute.parent.id;
+                if(this.needsRootElement) {
+                    data.root_id = attribute.root.id;
                 }
                 this.$http.post('/api/editor/dm/attribute', data).then(function(response) {
                     attributes.push(response.data);
@@ -470,8 +479,11 @@
                 this.$modal.hide('delete-context-type-modal');
                 this.contextCount = 0;
             },
-            newAttributeSearchResultSelected(label) {
+            setAttributeLabel(label) {
                 Vue.set(this.newAttribute, 'label', label);
+            },
+            setAttributeRoot(label) {
+                Vue.set(this.newAttribute, 'root', label);
             },
             newContextTypeSearchResultSelected(label) {
                 Vue.set(this.newContextType, 'label', label);
@@ -535,12 +547,7 @@
                 contextCount: 0,
                 allowedTableKeys: [
                     'string', 'string-sc', 'integer', 'double', 'boolean'
-                ],
-                hasParent: {
-                    'string-sc': 1,
-                    'string-mc': 1,
-                    epoch: 1
-                }
+                ]
             }
         },
         computed: {
@@ -558,6 +565,29 @@
                     id: ct.id,
                     thesaurus_url: ct.thesaurus_url
                 }));
+            },
+            needsRootElement: function() {
+                return this.newAttribute.type &&
+                    (
+                        this.newAttribute.type.datatype == 'string-sc' ||
+                        this.newAttribute.type.datatype == 'string-mc' ||
+                        this.newAttribute.type.datatype == 'epoch'
+                    );
+            },
+            validated: function() {
+                let isValid = this.newAttribute.label &&
+                    this.newAttribute.type &&
+                    this.newAttribute.label.id > 0 &&
+                    this.newAttribute.type.datatype.length > 0 &&
+                    (
+                        !this.needsRootElement ||
+                        (
+                            this.needsRootElement &&
+                            this.newAttribute.root &&
+                            this.newAttribute.root.id > 0
+                        )
+                    );
+                return isValid;
             }
         }
     }
