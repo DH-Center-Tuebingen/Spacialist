@@ -2,7 +2,7 @@
     <div>
         <div class="d-flex justify-content-around align-items-center mb-2">
             <button style="button" class="btn btn-outline-secondary" :class="{disabled: !context.id}" @click="setAction('linked')">
-                <i class="fas fa-fw fa-link"></i> Linked Files
+                <i class="fas fa-fw fa-link"></i> Linked Files <span class="badge badge-primary" v-show="context.id">{{linkedFiles.files.length}}</span>
             </button>
             <button style="button" class="btn btn-outline-secondary" @click="setAction('unlinked')">
                 <i class="fas fa-fw fa-unlink"></i> Unlinked
@@ -391,7 +391,6 @@
                 arr.pagination = {};
             },
             getNextFiles(fileType) {
-                console.log("Starting to load files for " + fileType);
                 if(fileType == 'linkedFiles' && !this.context.id) {
                     return;
                 }
@@ -400,7 +399,6 @@
                 if(arr.pagination.current_page && arr.pagination.current_page == arr.pagination.last_page) {
                     return;
                 }
-                console.log("Actually load files for " + fileType);
                 let firstCall;
                 let url = arr.apiPrefix;
                 if(!Object.keys(arr.pagination).length) {
