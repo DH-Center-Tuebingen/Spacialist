@@ -4,16 +4,16 @@
             <i class="fas fa-fw fa-times" v-show="isDirty" @click="reset"></i>
         </div> -->
         <input type="text"
-            class="form-control"
-            :placeholder="placeholder"
             autocomplete="off"
+            class="form-control"
             v-model="query"
+            :placeholder="placeholder"
+            @blur="closeSelect"
+            @input="debounce"
             @keydown.down="down"
-            @keydown.up="up"
             @keydown.enter="hit"
             @keydown.esc="reset"
-            @blur="reset"
-            @input="debounce"/>
+            @keydown.up="up"/>
         <div class="input-group-append">
             <span class="input-group-text multiselect-search">
                 <i class="fas fa-spinner fa-spin" v-if="loading"></i>
@@ -62,9 +62,13 @@
         },
         methods: {
             onHit(item) {
-                console.log(item);
                 this.query = item.label;
                 this.onSelect(item);
+                this.closeSelect();
+            },
+            closeSelect() {
+                this.items = [];
+                this.loading = false;
             }
         }
     }
