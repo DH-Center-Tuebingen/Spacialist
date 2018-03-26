@@ -153,6 +153,34 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                <div class="mt-3 text-right">
+                                    <file-upload
+                                        v-show="!replaceFiles.length"
+                                        ref="replace"
+                                        v-model="replaceFiles"
+                                        :directory="false"
+                                        :drop="true"
+                                        :multiple="false"
+                                        :post-action="replaceFileUrl"
+                                        @input-file="onReplaceFileSet">
+                                            <span class="btn btn-outline-secondary">
+                                                <i class="fas fa-fw fa-retweet"></i> Replace File
+                                            </span>
+                                    </file-upload>
+                                    <div class="d-flex justify-content-between align-items-center" v-if="replaceFiles.length">
+                                        <span>
+                                            Do you want to replace {{selectedFile.name}} ({{selectedFile.size | bytes}}) with {{replaceFiles[0].name}} ({{replaceFiles[0].size | bytes}})?
+                                        </span>
+                                        <div class="d-flex">
+                                            <button type="button" class="btn btn-outline-success" @click="doReplaceFile">
+                                                Replace
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger ml-2" @click="cancelReplaceFile">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                                 <h5 class="mt-3">Tags</h5>
                             </div>
                             <div v-show="modalTab == 'links'">
@@ -381,6 +409,22 @@
                         this.filesUploaded = 0;
                         this.filesErrored = 0;
                     }
+                }
+            },
+            doReplaceFile() {
+                this.$refs.replace.active = true;
+            },
+            cancelReplaceFile() {
+                this.$refs.replace.active = false;
+                this.replaceFiles = [];
+            },
+            onReplaceFileSet(newFile, oldFile) {
+                // Wait for response
+                if(newFile && oldFile && newFile.success && !oldFile.success) {
+                    console.log(newFile.response);
+                    Vue.set(this, 'selectedFile', newFile.response);
+                    this.replaceFiles = [];
+                    this.$refs.replace.active = false;
                 }
             },
             resetFiles(fileType) {
@@ -638,6 +682,7 @@
                     loadChunk: () => this.getNextFiles('allFiles')
                 },
                 selectedFile: {},
+                replaceFiles: [],
                 contextMenuFile: {},
                 contextMenuContext: {},
                 linkCount: 0,

@@ -7,6 +7,7 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
 - File Viewer
   - Simple Office Documents Viewer (as HTML-Text)
   - Edit Mode for text and XML files
+  - Replace single files
   - Rendering of HTML files
 - Added Welcome Page
   - Maintainer (Name and E-Mail-Address), Project Description and Access (Public/Private) can be configured in settings
