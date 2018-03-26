@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.6 - Unreleased (Federsee)
-This version is a complete rewrite using Laravel and Vue.js. Please refer to the INSTALL.md for migration and new setup information.
+This version is a complete rewrite using Laravel and Vue.js. Please refer to the [INSTALL.md](INSTALL.md) for migration and new setup information.
 ### Added
 - File Viewer
   - Simple Office Documents Viewer (as HTML-Text)

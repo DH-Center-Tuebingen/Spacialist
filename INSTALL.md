@@ -27,6 +27,11 @@ Beside these packages we use a couple of packages you have to install on your ow
 - Laravel (PHP-Framework), currently included in the Spacialist repository, so no need to install.
 - [GeoServer](http://geoserver.org/) for hosting your own geo maps
 
+## Migration from < 0.6 (Lumen- and Angular-based releases)
+There are no additional database migrations steps required. Laravel's migration command should take care of database changes. **But** we recommend to update to the latest pre-0.6 release before switching to 0.6+.
+However, since we switched to a different code base, you have to get the new dependencies (see _Download Dependencies_ in [Package Installation](INSTALL.md#package-installation)).
+You should also check for changes in [Proxy Setup](INSTALL.md#proxy-setup) and [Configure Laravel](INSTALL.md#configure-laravel).
+
 ## Setup
 ### Package Installation
 
@@ -154,7 +159,7 @@ PUSHER_APP_KEY=
 PUSHER_APP_SECRET=
 ```
 
-#### Protected Files (Deprecated?)
+#### Protected Files (Local driver only)
 Your uploaded files are stored in a public folder. To increase security it is recommended to define a random path in your `.env` file. The matching key is `SP_FILE_PATH`. You also have to create the path on your system (Do not actually create the last part of the path, you have to create it as a softlink later).
 
 **Example:**
