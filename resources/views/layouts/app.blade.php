@@ -19,7 +19,7 @@
 </head>
 <body>
     <div id="app" preferences="{{json_encode($p)}}">
-        <nav class="navbar navbar-dark bg-dark navbar-static-top navbar-expand-lg">
+        <nav class="navbar navbar-dark bg-dark sticky-top navbar-expand-lg">
             <!-- Branding Image -->
             <a class="navbar-brand" href="{{ url('/home') }}">
                 <img src="{{ asset('favicon.png') }}" class="logo" alt="spacialist logo" />
