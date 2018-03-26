@@ -85,6 +85,12 @@ class File extends Model
 
     public static function createFromUpload($input) {
         $filename = $input->getClientOriginalName();
+        $ext = $input->getClientOriginalExtension();
+        $baseFilename = substr($filename, 0, strlen($filename)-strlen($ext));
+        $cnt = 1;
+        while(File::where('name', $filename)->count() > 0) {
+            $filename = "$baseFilename$cnt.$ext";
+        }
         $filehandle = fopen($input->getRealPath(), 'r');
         Storage::put(
             $filename,
