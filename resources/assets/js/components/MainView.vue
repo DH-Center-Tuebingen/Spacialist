@@ -18,7 +18,7 @@
                     </form>
                 </div>
                 <div class="col-md-12">
-                    <button type="button" class="btn btn-sm btn-outline-success ml-3 mb-2" @click="requestAddNewEntity">
+                    <button type="button" class="btn btn-sm btn-outline-success ml-3 mb-2" @click="requestAddNewEntity()">
                         <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
                     </button>
                     <context-tree
@@ -30,7 +30,7 @@
                         :roots="roots"
                         :selection-callback="setSelectedElement">
                     </context-tree>
-                    <button type="button" class="btn btn-sm btn-outline-success ml-3 mt-2" @click="requestAddNewEntity">
+                    <button type="button" class="btn btn-sm btn-outline-success ml-3 mt-2" @click="requestAddNewEntity()">
                         <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
                     </button>
                 </div>
@@ -277,17 +277,22 @@
                 });
             },
             requestAddNewEntity(parent) {
-                let modal = this.$modal;
-                let entity = this.newEntity;
-                this.$http.get('/api/editor/dm/context_type/top').then(function(response) {
+                let vm = this;
+                let url;
+                if(parent) {
+                    url = '/api/editor/dm/context_type/parent/' + parent.id;
+                } else {
+                    url = '/api/editor/dm/context_type/top';
+                }
+                vm.$http.get(url).then(function(response) {
                     let selection = response.data;
-                    Vue.set(entity, 'name', '');
-                    Vue.set(entity, 'type', selection.length == 1 ? selection[0] : {});
-                    Vue.set(entity, 'selection', selection);
+                    Vue.set(vm.newEntity, 'name', '');
+                    Vue.set(vm.newEntity, 'type', selection.length == 1 ? selection[0] : null);
+                    Vue.set(vm.newEntity, 'selection', selection);
                     if(parent) {
-                        Vue.set(entity, 'root_context_id', parent.id);
+                        Vue.set(vm.newEntity, 'root_context_id', parent.id);
                     }
-                    modal.show('add-entity-modal');
+                    vm.$modal.show('add-entity-modal');
                 });
             },
             hideNewEntityModal() {

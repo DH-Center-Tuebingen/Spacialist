@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Attribute;
 use App\AttributeValue;
 use App\Context;
+use App\ContextType;
+use App\ContextTypeRelation;
 use App\ThConcept;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -70,10 +72,30 @@ class ContextController extends Controller {
     public function addEntity(Request $request) {
         $this->validate($request, Context::rules);
 
+        $isChild = $request->has('root_context_id');
+        $rcid = $request->get('root_context_id');
+
+        if($isChild) {
+            $parentCtid = Context::find($rcid)->context_type_id;
+            $relation = ContextTypeRelation::where('parent_id', $parentCtid)
+                ->where('child_id', $request->get('context_type_id'))->get();
+            if(!isset($relation)) {
+                return response()->json([
+                    'error' => 'This type is not an allowed sub-type.'
+                ], 400);
+            }
+        } else {
+            if(!ContextType::find($request->get('context_type_id'))->is_root) {
+                return response()->json([
+                    'error' => 'This type is not an allowed root-type.'
+                ], 400);
+            }
+        }
+
         $context = new Context();
         $rank;
-        if($request->has('root_context_id')) {
-            $rank = Context::where('root_context_id', '=', $request->get('root_context_id'))->max('rank') + 1;
+        if($isChild) {
+            $rank = Context::where('root_context_id', '=', $rcid)->max('rank') + 1;
         } else {
             $rank = Context::whereNull('root_context_id')->max('rank') + 1;
         }

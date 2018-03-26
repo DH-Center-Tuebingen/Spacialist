@@ -9,6 +9,7 @@ use App\AttributeValue;
 use App\Context;
 use App\ContextAttribute;
 use App\ContextType;
+use App\ContextTypeRelation;
 use App\Helpers;
 use App\ThConcept;
 use Illuminate\Http\Request;
@@ -71,8 +72,22 @@ class EditorController extends Controller {
     }
 
     public function getTopContextTypes() {
-        // TODO only return context types with is_root = true
-        return response()->json(ContextType::all());
+        $contextTypes = ContextType::where('is_root', true)->get();
+        return response()->json($contextTypes);
+    }
+
+    public function getContextTypesByParent($cid) {
+        try {
+            $parentContext = Context::findOrFail($cid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context-type does not exist'
+            ], 400);
+        }
+        $id = $parentContext->context_type_id;
+        $relations = ContextTypeRelation::where('parent_id', $id)->pluck('child_id')->toArray();
+        $contextTypes = ContextType::find($relations);
+        return response()->json($contextTypes);
     }
 
     public function getAttributeTypes() {
