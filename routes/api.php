@@ -93,6 +93,8 @@ Route::get('/file/{id}/as_html', 'FileController@getAsHtml')->where('id', '[0-9]
 Route::get('/file/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
 
 Route::post('/file', 'FileController@uploadFile');
+// Should be patch, but file upload is not allowed as patch
+Route::post('/file/{id}/patch', 'FileController@patchContent')->where('id', '[0-9]+');
 
 Route::put('/file/{id}/link', 'FileController@linkToEntity')->where('id', '[0-9]+');
 

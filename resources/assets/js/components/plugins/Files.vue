@@ -403,14 +403,12 @@
                 let url = arr.apiPrefix;
                 if(!Object.keys(arr.pagination).length) {
                     url += arr.apiUrl;
-                    firstCall = true;
                 } else {
                     url += arr.pagination.next_page_url;
-                    firstCall = false;
                 }
-                this.getPage(url, arr, firstCall);
+                this.getPage(url, arr);
             },
-            getPage(pageUrl, filesObj, isFirstCall) {
+            getPage(pageUrl, filesObj) {
                 let vm = this;
                 this.$http.get(pageUrl).then(function(response) {
                     let resp = response.data;
@@ -438,17 +436,15 @@
                     return;
                 }
                 let url = filesObj.apiPrefix;
-                if(filesObj.pagination.to == filesObj.pagination.total) {
-                    url += filesObj.pagination.next_page_url;
-                } else {
+                url += filesObj.apiUrl + '?' + filesObj.apiPageParam + '=' + filesObj.pagination.current_page;
+                if(filesObj.pagination.to < filesObj.pagination.total) {
                     // remove current page files and reload them
-                    url += filesObj.apiUrl + '?' + filesObj.apiPageParam + '=' + filesObj.pagination.current_page;
                     let index = filesObj.pagination.from - 1;
                     let howmany = (filesObj.pagination.to - filesObj.pagination.from) + 1;
                     filesObj.files.splice(index, howmany);
                 }
-                vm.updateFileState(filesObj);
-                vm.getPage(url, filesObj);
+                this.updateFileState(filesObj);
+                this.getPage(url, filesObj);
             },
             onFileDeleted(file, filesObj) {
                 // if we never fetched files, wait for user to load

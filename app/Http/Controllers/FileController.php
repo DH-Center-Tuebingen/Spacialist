@@ -102,6 +102,24 @@ class FileController extends Controller
         return response()->json($newFile);
     }
 
+    public function patchContent(Request $request, $id) {
+        $this->validate($request, [
+            'file' => 'required|file'
+        ]);
+
+        try {
+            $file = File::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This file does not exist'
+            ], 400);
+        }
+
+        $file->setContent($request->file('file'));
+
+        return response()->json($file);
+    }
+
     // PUT
 
     public function linkToEntity(Request $request, $id) {

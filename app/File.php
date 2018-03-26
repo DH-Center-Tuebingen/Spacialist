@@ -84,7 +84,6 @@ class File extends Model
     }
 
     public static function createFromUpload($input) {
-
         $filename = $input->getClientOriginalName();
         $filehandle = fopen($input->getRealPath(), 'r');
         Storage::put(
@@ -199,6 +198,20 @@ class File extends Model
             }
             $file->save();
         }
+    }
+
+    public function setContent($fileObject) {
+        $filehandle = fopen($fileObject->getRealPath(), 'r');
+        Storage::put(
+            $this->name,
+            $filehandle
+        );
+        fclose($filehandle);
+        $fileUrl = Helpers::getStorageFilePath($this->name);
+        $lastModified = date('Y-m-d H:i:s', filemtime($fileUrl));
+
+        $this->modified = $lastModified;
+        $this->save();
     }
 
     public function link($eid) {
