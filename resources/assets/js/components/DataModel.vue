@@ -28,7 +28,7 @@
         </div>
         <div class="col-md-5">
             <h4>Properties</h4>
-            <form role="form" v-on:submit.prevent="updateContextType" v-if="contextAttributes.length">
+            <form role="form" v-on:submit.prevent="updateContextType" v-if="contextType.id">
                 <div class="form-group row">
                     <label class="col-form-label col-md-3 text-right">Top-Level Context-Type</label>
                     <div class="col-md-9">
