@@ -496,6 +496,10 @@
                 vm.$http.get('/api/editor/context_type/'+id+'/attribute')
                     .then(function(response) {
                         let data = response.data;
+                        // if result is empty, php returns [] instead of {}
+                        if(data.selections instanceof Array) {
+                            data.selections = {};
+                        }
                         vm.contextSelections = data.selections;
                         for(let i=0; i<data.attributes.length; i++) {
                             vm.contextAttributes.push(data.attributes[i]);
