@@ -61,6 +61,15 @@ class EditorController extends Controller {
                 case 'epoch':
                     $selections[$a->id] = ThConcept::getChildren($a->thesaurus_root_url);
                     break;
+                case 'table':
+                    // Only string-sc is allowed in tables
+                    $columns = Attribute::where('parent_id', $a->id)
+                        ->where('datatype', 'string-sc')
+                        ->get();
+                    foreach($columns as $c) {
+                        $selections[$c->id] = ThConcept::getChildren($c->thesaurus_root_url);
+                    }
+                    break;
                 default:
                     break;
             }

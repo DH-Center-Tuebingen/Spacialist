@@ -52,6 +52,7 @@
                 <attributes class="pt-2" v-if="dataLoaded"
                     :attributes="selectedContext.attributes"
                     :concepts="concepts"
+                    :disable-drag="true"
                     :on-metadata="showMetadata"
                     :metadata-addon="hasReferenceGroup"
                     :selections="selectedContext.selections"
@@ -124,6 +125,7 @@
                             <multiselect class="col-md-9" style="box-sizing: border-box;"
                                 :customLabel="translateLabel"
                                 label="thesaurus_url"
+                                track-by="id"
                                 v-model="newEntity.type"
                                 :allowEmpty="false"
                                 :closeOnSelect="true"
@@ -221,7 +223,6 @@
             },
             getContextData(elem) {
                 let vm = this;
-                let ctx = vm.selectedContext;
                 let cid = elem.id;
                 let ctid = elem.context_type_id;
                 vm.dataLoaded = false;
@@ -230,29 +231,30 @@
                     if(response.data instanceof Array) {
                         response.data = {};
                     }
-                    Vue.set(ctx, 'data', response.data);
+                    Vue.set(vm.selectedContext, 'data', response.data);
                     return vm.$http.get('/api/editor/context_type/'+ctid+'/attribute');
                 }).then(function(response) {
+                    vm.selectedContext.attributes = [];
                     let data = response.data;
-                    Vue.set(ctx, 'attributes', data.attributes);
                     for(let i=0; i<data.attributes.length; i++) {
                         let aid = data.attributes[i].id;
-                        if(!ctx.data[aid]) {
-                            Vue.set(ctx.data, aid, {});
+                        if(!vm.selectedContext.data[aid]) {
+                            Vue.set(vm.selectedContext.data, aid, {});
                         }
+                        vm.selectedContext.attributes.push(data.attributes[i]);
                     }
                     // if result is empty, php returns [] instead of {}
                     if(data.selections instanceof Array) {
                         data.selections = {};
                     }
-                    Vue.set(ctx, 'selections', data.selections);
+                    Vue.set(vm.selectedContext, 'selections', data.selections);
                     return vm.$http.get('/api/context/'+cid+'/references');
                 }).then(function(response) {
                     let data = response.data;
                     if(data instanceof Array) {
                         data = {};
                     }
-                    Vue.set(ctx, 'references', data);
+                    Vue.set(vm.selectedContext, 'references', data);
                     Vue.set(vm, 'dataLoaded', true);
                 });
             },
@@ -268,12 +270,10 @@
                 if(entity.root_context_id) data.root_context_id = entity.root_context_id;
                 if(entity.geodata_id) data.geodata_id = entity.geodata_id;
 
-                let tree = this.tree;
-                let hideModal = this.hideNewEntityModal;
-
-                this.$http.post('/api/context', data).then(function(response) {
-                    tree.push(response.data);
-                    hideModal();
+                let vm = this;
+                vm.$http.post('/api/context', data).then(function(response) {
+                    vm.tree.push(response.data);
+                    vm.hideNewEntityModal();
                 });
             },
             requestAddNewEntity(parent) {
@@ -303,17 +303,15 @@
                 console.log("TODO");
             },
             deleteEntity(entity) {
-                let selectedEntity = this.selectedContext;
-                let setSelectedElement = this.setSelectedElement;
+                let vm = this;
                 let id = entity.id;
-                let hideModal = this.hideDeleteEntityModal;
                 this.$http.delete('/api/context/'+id).then(function(response) {
                     // if deleted entity is currently selected entity...
-                    if(entity == selectedEntity) {
+                    if(entity == vm.selectedContext) {
                         // ...unset it
-                        setSelectedElement(undefined);
+                        vm.setSelectedElement(undefined);
                     }
-                    hideModal();
+                    vm.hideDeleteEntityModal();
                 });
             },
             requestDeleteEntity(entity) {

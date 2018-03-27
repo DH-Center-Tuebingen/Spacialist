@@ -35,6 +35,7 @@ class ContextController extends Controller {
 
         $attributes = AttributeValue::where('context_id', $id)->get();
         $data = [];
+        $values = [];
         foreach($attributes as $a) {
             $datatype = Attribute::find($a->attribute_id)->datatype;
             switch($datatype) {
@@ -45,7 +46,33 @@ class ContextController extends Controller {
                 default:
                     break;
             }
+            $value = $a->str_val ??
+                $a->int_val ??
+                $a->dbl_val ??
+                $a->context_val ??
+                $a->thesaurus_val ??
+                json_decode($a->json_val) ??
+                $a->geography_val ??
+                $a->dt_val;
+
+            switch($datatype) {
+                case 'string-mc':
+                case 'list':
+                case 'table':
+                    if(!isset($data[$a->attribute_id])) {
+                        $values[$a->attribute_id] = [$value];
+                    } else {
+                        $values[$a->attribute_id][] = $value;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            $a->value = $value;
             $data[$a->attribute_id] = $a;
+        }
+        foreach($values as $k => $v) {
+            $data[$k]->value = $v;
         }
 
         return response()->json($data);

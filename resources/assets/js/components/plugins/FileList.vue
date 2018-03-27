@@ -10,7 +10,7 @@
                                 <img class="card-img" v-if="file.category == 'image'" :src="file.url" style="height: 200px;">
                                 <div class="card-img" v-else style="width: 100%; height: 200px;"></div>
                                 <div class="card-img-overlay">
-                                    <h4 class="card-title">{{file.name}}</h4>
+                                    <h4 class="card-title text-truncate">{{file.name}}</h4>
                                     <div class="card-text pt-4">
                                         <div v-if="file.category == 'xml'">
                                             <i class="fas fa-fw fa-file-code fa-5x"></i>

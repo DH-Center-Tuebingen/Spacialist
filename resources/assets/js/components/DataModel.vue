@@ -149,6 +149,7 @@
                             <div class="col-md-9">
                                 <multiselect
                                     label="datatype"
+                                    track-by="id"
                                     v-model="newAttribute.type"
                                     :allowEmpty="false"
                                     :closeOnSelect="true"

@@ -74,12 +74,12 @@
                 </div>
                 <div v-else-if="attribute.datatype == 'string-mc'">
                     <multiselect
-                        :customLabel="translateLabel"
                         label="concept_url"
                         track-by="id"
                         v-model="localValues[attribute.id].value"
                         :allowEmpty="true"
                         :closeOnSelect="false"
+                        :customLabel="translateLabel"
                         :disabled="attribute.isDisabled"
                         :hideSelected="true"
                         :multiple="true"
@@ -88,12 +88,12 @@
                 </div>
                 <div v-else-if="attribute.datatype == 'string-sc'">
                     <multiselect
-                        :customLabel="translateLabel"
                         label="concept_url"
                         track-by="id"
                         v-model="localValues[attribute.id].value"
                         :allowEmpty="true"
                         :closeOnSelect="true"
+                        :customLabel="translateLabel"
                         :disabled="attribute.isDisabled"
                         :hideSelected="true"
                         :multiple="false"
@@ -188,82 +188,76 @@
                             </div>
                         </div>
                     </div>
-                    <!-- <div class="input-group">
-                        <input type="number" class="form-control text-center" aria-label="" placeholder="{{'field-types.dimension.width-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="localValues[attribute.id].value.B">
-                        <span class="input-group-addon">&times;</span>
-                        <input type="number" class="form-control text-center" aria-label="" placeholder="{{'field-types.dimension.height-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="localValues[attribute.id].value.H">
-                        <span class="input-group-addon">&times;</span>
-                        <input type="number" class="form-control text-center" aria-label="" placeholder="{{'field-types.dimension.depth-placeholder'|translate}}" min="0" max="9999" step="0.01" ng-model="localValues[attribute.id].value.T">
-                        <div class="input-group-btn" uib-dropdown>
-                            <button type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="readonlyInput">
-                                {{ localValues[attribute.id].value.unit }} <span class="caret"></span>
-                            </button>
-                            <ul uib-dropdown-menu class="dropdown-menu">
-                                <li ng-repeat="unit in dimensionUnits"><a href="" ng-click="localValues[attribute.id].value.unit = unit">{{ unit }}</a></li>
-                            </ul>
-                        </div>
-                    </div> -->
                 </div>
                 <div v-else-if="attribute.datatype == 'table'">
-                    table
-                    <!-- <table class="table table-striped table-hovered" ng-init="tableCol = {}">
-                        <tr>
-                            <th ng-repeat="c in attribute.columns">
-                                {{ concepts[c.thesaurus_url].label }}
-                            </th>
-                            <th>
-                                Delete
-                            </th>
-                        </tr>
-                        <tr ng-repeat="row in localValues[attribute.id].value track by $index">
-                            <td ng-repeat="col in row track by $index">
-                                <ng-switch on="col.datatype">
-                                    <input class="form-control" v-else-if="attribute.datatype == 'string'" type="text" ng-model="col.value"/>
-                                    <input class="form-control" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" ng-model="col.value"/>
-                                    <input class="form-control" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" ng-model="col.value"/>
-                                    <input class="form-control" v-else-if="attribute.datatype == 'boolean'" type="checkbox" ng-model="col.value"/>
-                                    <div v-else-if="attribute.datatype == 'string-sc'">
-                                        <ui-select ng-disabled="readonlyInput" ng-model="col.value">
-                                            <ui-select-match allow-clear="true">
-                                                {{ concepts[$select.selected.concept_url].label }}
-                                            </ui-select-match>
-                                            <ui-select-choices repeat="choice in menus[c.id] | filter: $select.search">
-                                                <span ng-bind-html="concepts[choice.concept_url].label | highlight: $select.search"></span>
-                                            </ui-select-choices>
-                                        </ui-select>
+                    <table class="table table-striped table-hovered table-sm">
+                        <thead class="thead-light">
+                            <tr>
+                                <th v-for="columnNames in attribute.columns">
+                                    {{ concepts[columnNames.thesaurus_url].label }}
+                                </th>
+                                <th>
+                                    Delete
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(row, $index) in localValues[attribute.id].value">
+                                <td v-for="col in row">
+                                    <input class="form-control" v-if="col.datatype == 'string'" type="text" v-model="col.value"/>
+                                    <input class="form-control" v-else-if="col.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="col.value"/>
+                                    <input class="form-control" v-else-if="col.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="col.value"/>
+                                    <input class="form-control" v-else-if="col.datatype == 'boolean'" type="checkbox" v-model="col.value"/>
+                                    <div v-else-if="col.datatype == 'string-sc'">
+                                        <multiselect
+                                            label="concept_url"
+                                            track-by="id"
+                                            v-model="col.value"
+                                            :allowEmpty="true"
+                                            :closeOnSelect="true"
+                                            :customLabel="translateLabel"
+                                            :disabled="attribute.isDisabled"
+                                            :hideSelected="true"
+                                            :multiple="false"
+                                            :options="localSelections[col.attribute_id] || []">
+                                        </multiselect>
                                     </div>
-                                </ng-switch>
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-danger btn-xs" ng-click="deleteTableRow(attribute.id, $index, $ctrl.editContext.form)">
-                                    <i class="material-icons">delete</i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td ng-repeat="c in attribute.columns">
-                                <ng-switch on="c.datatype">
-                                    <input class="form-control" v-else-if="attribute.datatype == 'string'" type="text" ng-model="tableCol[c.id]"/>
-                                    <input class="form-control" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" ng-model="tableCol[c.id]"/>
-                                    <input class="form-control" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" ng-model="tableCol[c.id]"/>
-                                    <input class="form-control" v-else-if="attribute.datatype == 'boolean'" type="checkbox" ng-model="tableCol[c.id]"/>
-                                    <div v-else-if="attribute.datatype == 'string-sc'">
-                                        <ui-select ng-disabled="readonlyInput" ng-model="tableCol[c.id]">
-                                            <ui-select-match allow-clear="true">
-                                                {{ concepts[$select.selected.concept_url].label }}
-                                            </ui-select-match>
-                                            <ui-select-choices repeat="choice in menus[c.id] | filter: $select.search">
-                                                <span ng-bind-html="concepts[choice.concept_url].label | highlight: $select.search"></span>
-                                            </ui-select-choices>
-                                        </ui-select>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-xs" @click="deleteTableRow(attribute.id, $index)">
+                                        <i class="fas fa-fw fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td v-for="columnNames in attribute.columns">
+                                    <input class="form-control" v-if="columnNames.datatype == 'string'" type="text" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                    <input class="form-control" v-else-if="columnNames.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                    <input class="form-control" v-else-if="columnNames.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                    <input class="form-control" v-else-if="columnNames.datatype == 'boolean'" type="checkbox" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                    <div v-else-if="columnNames.datatype == 'string-sc'">
+                                        <multiselect
+                                            label="concept_url"
+                                            track-by="id"
+                                            v-model="newTableCols[attribute.id][columnNames.id]"
+                                            :allowEmpty="true"
+                                            :closeOnSelect="true"
+                                            :customLabel="translateLabel"
+                                            :disabled="attribute.isDisabled"
+                                            :hideSelected="true"
+                                            :multiple="false"
+                                            :options="localSelections[columnNames.id] || []">
+                                        </multiselect>
                                     </div>
-                                </ng-switch>
-                            </td>
-                        </tr>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-success btn-xs" @click="addTableRow(attribute.id, newTableCols[attribute.id], attribute.columns)">
+                                        <i class="fas fa-fw fa-plus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
                     </table>
-                    <button type="button" class="btn btn-success" ng-click="addTableRow(attribute.id, attribute.columns, tableCol, $ctrl.editContext.form)">
-                        <i class="material-icons">add</i> Add Row
-                    </button> -->
                 </div>
                 <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"/>
             </div>
@@ -284,6 +278,11 @@
             concepts: {
                 required: true,
                 type: Object
+            },
+            disableDrag: {
+                required: false,
+                type: Boolean,
+                default: false
             },
             group: { // required if onReorder is set // TODO
                 required: false,
@@ -361,6 +360,28 @@
                     Vue.set(this.expands, id, false);
                 }
                 this.expands[id] = !this.expands[id];
+            },
+            addTableRow(aid, row, columns) {
+                if(!this.localValues[aid].value) {
+                    this.localValues[aid].value = [];
+                }
+                let cpy = Object.assign({}, row);
+                let addRow = {};
+                columns.forEach((c, i) => {
+                    let newColumn = {};
+                    newColumn.datatype = c.datatype;
+                    newColumn.attribute_id = c.id;
+                    newColumn.value = cpy[c.id];
+                    addRow[i] = newColumn;
+                });
+                this.localValues[aid].value.push(addRow);
+                // Reset inputs
+                for(let k in row) delete row[k];
+                // TODO set form dirty
+            },
+            deleteTableRow(aid, index) {
+                this.localValues[aid].value.splice(index, 1);
+                // TODO set form dirty
             },
             translateLabel(element, label) {
                 let value = element[label];
@@ -455,11 +476,24 @@
                     // return newValue;
                 }
             },
+            newTableCols: function() {
+                let cols = {};
+                this.localAttributes.forEach((attribute) => {
+                    if(attribute.datatype == 'table') {
+                        cols[attribute.id] = {};
+                    }
+                });
+                return cols;
+            },
             hoverState: function() {
                 return this.hovered;
             },
             dragOpts: function() {
                 let opts = {};
+                if(this.disableDrag) {
+                    opts.disabled = true;
+                    return opts;
+                }
                 if(this.group && !this.isSource) {
                     opts.group= {
                         name: this.group,

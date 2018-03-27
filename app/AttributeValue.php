@@ -43,24 +43,9 @@ class AttributeValue extends Model
         'thesaurus_val'
     ];
 
-    protected $appends = [
-        'value'
-    ];
-
     protected $postgisFields = [
         'geography_val',
     ];
-
-    public function getValueAttribute() {
-        return $this->str_val ??
-               $this->int_val ??
-               $this->dbl_val ??
-               $this->context_val ??
-               $this->thesaurus_val ??
-               $this->json_val ??
-               $this->geography_val ??
-               $this->dt_val;
-    }
 
     public function context() {
         return $this->belongsTo('App\Context');

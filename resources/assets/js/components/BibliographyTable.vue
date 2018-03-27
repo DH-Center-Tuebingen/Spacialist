@@ -355,6 +355,7 @@
                                 <multiselect
                                     v-model="newItem.type"
                                     label="name"
+                                    track-by="id"
                                     :options="availableTypes"
                                     :multiple="false"
                                     :hideSelected="true"
