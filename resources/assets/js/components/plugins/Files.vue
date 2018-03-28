@@ -80,7 +80,7 @@
                 <div class="modal-body text-center">
                     <div class="row">
                         <div class="col-md-6">
-                            <component :is="fileCategoryComponent" :file="selectedFile"></component>
+                            <component id="file-container" :is="fileCategoryComponent" :file="selectedFile"></component>
                         </div>
                         <div class="col-md-6">
                             <ul class="nav nav-tabs nav-fill">
@@ -349,6 +349,8 @@
 </template>
 
 <script>
+    import * as screenfull from 'screenfull';
+
     Vue.component('file-list', require('./FileList.vue'));
 
     Vue.component('file-image', require('./FileImage.vue'));
@@ -375,8 +377,18 @@
             }
         },
         mounted() {
+            if(screenfull.enabled) {
+                window.addEventListener('keydown', this.toggleFullscreen, false);
+            }
         },
         methods: {
+            toggleFullscreen: function(event) {
+                let elem = document.getElementById('file-container');
+                if(!elem) return;
+                let k = event.keyCode;
+                if(k != 70) return; // 70 = 'f' key
+                screenfull.toggle(elem);
+            },
             setAction(id) {
                 // disable linked tab if no context is selected
                 if(id == 'linked' && !this.localContext.id) return;

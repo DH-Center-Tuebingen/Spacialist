@@ -13,7 +13,6 @@
 </template>
 
 <script>
-    import * as screenfull from 'screenfull';
     import {
         AmbientLight,
         AnimationMixer,
@@ -166,9 +165,6 @@
                 this.octree.update();
             },
             initEventListeners: function() {
-                if(screenfull.enabled) {
-                    window.addEventListener('keydown', this.toggleFullscreen, false);
-                }
                 window.addEventListener('resize', this.onWindowResize, false);
                 this.renderer.domElement.addEventListener('mousedown', this.onMouseDown, false);
             },
@@ -465,23 +461,12 @@
                 });
             },
             //EventListeners
-            toggleFullscreen: function(event) {
-                let k = event.keyCode;
-                if(k != 70) return; // 70 = 'f' key
-                screenfull.request(this.renderer.domElement);
-            },
             onMouseDown: function() {
 
             },
             onWindowResize: function() {
-                let isFullscreen = screenfull.enabled || screenfull.isFullscreen;
-                if(isFullscreen) {
-                    this.containerWidth = this.renderer.domElement.clientWidth;
-                    this.containerHeight = this.renderer.domElement.clientHeight;
-                } else {
-                    this.containerWidth = this.renderer.domElement.parentElement.clientWidth;
-                    this.containerHeight = this.renderer.domElement.parentElement.clientHeight;
-                }
+                this.containerWidth = this.renderer.domElement.parentElement.clientWidth;
+                this.containerHeight = this.renderer.domElement.parentElement.clientHeight;
                 this.camera.aspect = this.containerWidth/this.containerHeight;
                 this.camera.updateProjectionMatrix();
                 this.renderer.setSize(this.containerWidth, this.containerHeight);
