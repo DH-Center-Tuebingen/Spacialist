@@ -11,6 +11,7 @@ The following packages you should be able to install from your package manager:
   - mbstring
   - gd
   - xml
+  - zip
 - libapache2-mod-php (on Unix systems)
 - [composer](https://getcomposer.org)
 - PostGIS (`>= 2.0`)
