@@ -1,15 +1,16 @@
 # Installation
-We recommend a recent unix/linux-based OS. Please check if your desired OS meets the following requirements. If not, we recommend debian (8.5 aka _jessie_ or later) or Ubuntu (16.04 LTS aka _Xenial Xerus_ or later). For Giza and later PHP 7.0+ is required. Note: Installation on Windows 10 with PHP 5.6 was also successfully tested, but you will need to adjust the commands in these instructions by yourself to your local Windows version equivalents.
+We recommend a recent unix/linux-based OS. Please check if your desired OS meets the following requirements. If not, we recommend debian (8.5 aka _jessie_ or later) or Ubuntu (16.04 LTS aka _Xenial Xerus_ or later). For Giza and later at least PHP 7.1.3 is required. Note: Installation on Windows 10 with PHP 5.6 was also successfully tested, but you will need to adjust the commands in these instructions by yourself to your local Windows version equivalents.
 
 ## Requirements
 The following packages you should be able to install from your package manager:
 - git
 - Apache (or any other web server-software, e.g. nginx)
-- PHP (`>= 7.0.0`) with the following extensions installed and enabled:
+- PHP (`>= 7.1.3`) with the following extensions installed and enabled:
   - Imagick
   - memcached (on Windows this will not work -- see later)
   - mbstring
   - gd
+  - xml
 - libapache2-mod-php (on Unix systems)
 - [composer](https://getcomposer.org)
 - PostGIS (`>= 2.0`)
