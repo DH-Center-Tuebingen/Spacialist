@@ -349,15 +349,17 @@
                 });
             },
             addAttributeToContextType(oldIndex, index) {
-                let ctid = this.contextType.id;
-                let attribute = this.localAttributes[oldIndex];
-                let attributes = this.contextAttributes;
+                const vm = this;
+                let ctid = vm.contextType.id;
+                let attribute = vm.localAttributes[oldIndex];
+                let attributes = vm.contextAttributes;
                 let data = {};
                 data.attribute_id = attribute.id;
                 data.position = index + 1;
-                this.$http.post('/api/editor/dm/context_type/'+ctid+'/attribute', data).then(function(response) {
+                vm.$http.post('/api/editor/dm/context_type/'+ctid+'/attribute', data).then(function(response) {
                     // Add element to attribute list
                     attributes.splice(index, 0, response.data);
+                    Vue.set(vm.contextValues, response.data.id, '');
                     // Update position attribute of successors
                     for(let i=index+1; i<attributes.length; i++) {
                         attributes[i].position++;
