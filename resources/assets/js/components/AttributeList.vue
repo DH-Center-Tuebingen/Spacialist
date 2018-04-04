@@ -46,26 +46,27 @@
                 </sup>
             </label>
             <div class="col-md-9">
-                <input class="form-control" :disabled="attribute.isDisabled" v-if="attribute.datatype == 'string'" type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"/>
-                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"/>
-                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"/>
-                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'boolean'" type="checkbox" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"/>
-                <textarea class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"></textarea>
+                <input class="form-control" :disabled="attribute.isDisabled" v-if="attribute.datatype == 'string'" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
+                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
+                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
+                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'boolean'" type="checkbox" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
+                <textarea class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"></textarea>
                 <div v-else-if="attribute.datatype == 'percentage'" class="d-flex">
-                    <input class="form-control" :disabled="attribute.isDisabled" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"/>
+                    <input class="form-control" :disabled="attribute.isDisabled" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
                     <span class="ml-3">{{ localValues[attribute.id].value }}%</span>
                 </div>
                 <div v-else-if="attribute.datatype == 'geography'">
-                    <input class="form-control" :disabled="attribute.isDisabled" type="text" :id="'attribute-'+attribute.id" placeholder="Add WKT" v-model="localValues[attribute.id].value" />
+                    <input class="form-control" :disabled="attribute.isDisabled" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" placeholder="Add WKT" v-model="localValues[attribute.id].value" />
                     <button type="button" class="btn btn-outline-secondary" :disabled="attribute.isDisabled" style="margin-top: 10px;" ng-click="$ctrl.openGeographyPlacer(attribute.id)">
                         <i class="fas fa-fw fa-map-marker-alt"></i> Open Map
                     </button>
                 </div>
+                <!-- TODO: dirty checking -->
                 <div v-else-if="attribute.datatype == 'context'">
                     <context-search></context-search>
                 </div>
                 <div class="input-group date" data-provide="datepicker" v-else-if="attribute.datatype == 'date'">
-                    <input type="text" class="form-control" :disabled="attribute.isDisabled" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  ng-model-options="{timezone:'utc'}"/>
+                    <input type="text" class="form-control" :disabled="attribute.isDisabled" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"  ng-model-options="{timezone:'utc'}"/>
                     <div class="input-group-append input-group-addon">
                         <button type="button" class="btn btn-outline-secondary">
                             <i class="fas fa-fw fa-calendar-alt"></i>
@@ -83,7 +84,9 @@
                         :disabled="attribute.isDisabled"
                         :hideSelected="true"
                         :multiple="true"
-                        :options="localSelections[attribute.id] || []">
+                        :options="localSelections[attribute.id] || []"
+                        :name="'attribute-'+attribute.id"
+                        v-validate="">
                     </multiselect>
                 </div>
                 <div v-else-if="attribute.datatype == 'string-sc'">
@@ -97,9 +100,12 @@
                         :disabled="attribute.isDisabled"
                         :hideSelected="true"
                         :multiple="false"
-                        :options="localSelections[attribute.id] || []">
+                        :options="localSelections[attribute.id] || []"
+                        :name="'attribute-'+attribute.id"
+                        v-validate="">
                     </multiselect>
                 </div>
+                <!-- TODO: validation/dirty checking -->
                 <div v-else-if="attribute.datatype == 'list'">
                     <div class="input-group">
                         <div class="input-group-prepend">
@@ -131,6 +137,7 @@
                         </li>
                     </ol>
                 </div>
+                <!-- TODO: validation/dirty checking -->
                 <div v-else-if="attribute.datatype == 'epoch' && localValues[attribute.id].value">
                     <div class="input-group">
                         <div class="input-group-prepend" uib-dropdown>
@@ -168,6 +175,7 @@
                         :options="localSelections[attribute.id] || []">
                     </multiselect>
                 </div>
+                <!-- TODO: validation/dirty checking -->
                 <div v-else-if="attribute.datatype == 'dimension'">
                     <div class="input-group">
                         <input type="number" class="form-control text-center" :disabled="attribute.isDisabled" min="0" max="9999" step="0.01" v-model="localValues[attribute.id].value" />
@@ -189,6 +197,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- TODO: validation/dirty checking -->
                 <div v-else-if="attribute.datatype == 'table'">
                     <table class="table table-striped table-hovered table-sm">
                         <thead class="thead-light">
@@ -259,7 +268,7 @@
                         </tbody>
                     </table>
                 </div>
-                <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"/>
+                <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  :name="'attribute-'+attribute.id" v-validate=""/>
             </div>
         </div>
         </draggable>
@@ -268,6 +277,7 @@
 
 <script>
     import draggable from 'vuedraggable';
+    import { mapFields } from 'vee-validate';
 
     export default {
         props: {
@@ -338,6 +348,7 @@
         components: {
             draggable
         },
+        inject: ['$validator'],
         mounted() {},
         methods: {
             onEnter(i) {
@@ -427,6 +438,12 @@
                 });
                 // move is only allowed, if dragged element is not part of the list
                 return index == -1;
+            },
+            isDirty(fieldname) {
+                if(this.fields[fieldname]) {
+                    return this.fields[fieldname].dirty;
+                }
+                return false;
             }
         },
         data() {

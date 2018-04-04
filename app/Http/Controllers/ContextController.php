@@ -137,6 +137,12 @@ class ContextController extends Controller {
         return response()->json($context, 201);
     }
 
+    // PATCH
+
+    public function patchAttributes($id, Request $request) {
+        //TODO
+    }
+
     // DELETE
 
     public function deleteContext($id) {

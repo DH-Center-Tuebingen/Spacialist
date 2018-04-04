@@ -35,6 +35,8 @@ Route::get('/context/byParent/{id}', 'ContextController@getEntitiesByParent')->w
 
 Route::post('/context', 'ContextController@addEntity');
 
+Route::patch('/context/{id}/attributes', 'ContextController@patchAttributes');
+
 Route::delete('/context/{id}', 'ContextController@deleteContext')->where('id', '[0-9]+');
 
 // SEARCH

@@ -41,7 +41,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <h1>{{ selectedContext.name }}</h1>
                     <span>
-                        <button type="button" class="btn btn-success" @click="saveEntity(selectedContext)">
+                        <button type="button" class="btn btn-success" :disabled="isFormDirty" @click="saveEntity(selectedContext)">
                             <i class="fas fa-fw fa-save"></i> Save
                         </button>
                         <button type="button" class="btn btn-danger" @click="requestDeleteEntity(selectedContext)">
@@ -174,6 +174,8 @@
 </template>
 
 <script>
+    import { mapFields } from 'vee-validate';
+
     export default {
         props: {
             concepts: {
@@ -300,7 +302,42 @@
                 this.$modal.hide('add-entity-modal');
             },
             saveEntity(entity) {
-                console.log("TODO");
+                let cid = entity.id;
+                var patches = [];
+                for(let f in this.fields) {
+                    if(this.fields.hasOwnProperty(f) && f.startsWith('attribute-')) {
+                        if(this.fields[f].dirty) {
+                            let aid = Number(f.replace(/^attribute-/, ''));
+                            let data = entity.data[aid];
+                            var patch = {};
+                            patch.params = {};
+                            patch.params.aid = aid;
+                            patch.params.cid = cid;
+                            if(data.id) {
+                                // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
+                                patch.params.id = data.id;
+                                if(data.value && data.value != '') {
+                                    // value is set, therefore it is a replace
+                                    patch.op = "replace";
+                                    patch.value = data.value;
+                                } else {
+                                    // value is empty, therefore it is a remove
+                                    patch.op = "remove";
+                                }
+                            } else {
+                                // there has been no entry in the database before, therefore it is an add operation
+                                if(data.value && data.value != '') {
+                                    patch.op = "add";
+                                    patch.value = data.value;
+                                }
+                            }
+                            patches.push(patch);
+                        }
+                    }
+                }
+                //TODO
+                console.log('TODO: make api call here');
+                // this.$http.patch('/api/context/'+cid+'/attributes', data);
             },
             deleteEntity(entity) {
                 let vm = this;
@@ -378,6 +415,9 @@
                 set(newValue) {
                     this.defaultKey = newValue;
                 }
+            },
+            isFormDirty: function() {
+                return !Object.keys(this.fields).some(key => this.fields[key].dirty);
             }
         }
     }
