@@ -13,11 +13,60 @@ let mix = require('laravel-mix');
 
 mix.js('resources/assets/js/app.js', 'public/js')
    .sass('resources/assets/sass/app.scss', 'public/css')
-   .copy('node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css', 'public/css')
-   .copy('node_modules/vue-multiselect/dist/vue-multiselect.min.css', 'public/css')
-   .copy('node_modules/highlight.js/styles/github.css', 'public/css/highlightjs.css')
+   .copy(
+       'node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css',
+       'public/css'
+   )
+   .copy(
+       'node_modules/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderWebWorker.min.js',
+       'public/js/cornerstoneWADOImageLoaderWebWorker.min.js'
+   )
+   .copy(
+       'node_modules/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderCodecs.min.js',
+       'public/js/cornerstoneWADOImageLoaderCodecs.min.js'
+   )
+   .copy(
+       'node_modules/highlight.js/styles/github.css',
+       'public/css/highlightjs.css'
+   )
+   .copy(
+       'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
+       'public/css'
+   )
    .autoload({
        jquery: ['$'],
        axios: ['$http']
    })
-   .extract(['jquery', 'bootstrap', '@fortawesome/fontawesome', '@fortawesome/fontawesome-free-brands', '@fortawesome/fontawesome-free-regular', '@fortawesome/fontawesome-free-solid', '@bosket/core', '@bosket/tools', '@bosket/vue', 'axios', 'lodash', 'vue', '@hscmap/vue-menu', 'bootstrap-datepicker', 'debounce', 'moment', 'ol', 'popper.js', 'screenfull', 'vee-validate', 'vue-highlightjs', 'vue-js-modal', 'vue-markdown', 'vue-multiselect', 'vue-pdf', 'vue-typeahead', 'vue-upload-component', 'vuedraggable']);
+   .extract([
+       '@bosket/core',
+       '@bosket/tools',
+       '@bosket/vue',
+       '@fortawesome/fontawesome',
+       '@fortawesome/fontawesome-free-brands',
+       '@fortawesome/fontawesome-free-regular', '@fortawesome/fontawesome-free-solid',
+       '@hscmap/vue-menu',
+       'axios',
+       'bootstrap',
+       'bootstrap-datepicker',
+       'cornerstone-core',
+       'cornerstone-math',
+       'cornerstone-tools',
+       'cornerstone-wado-image-loader',
+       'debounce',
+       'jquery',
+       'lodash',
+       'moment',
+       'ol',
+       'popper.js',
+       'screenfull',
+       'vue',
+       'vuedraggable',
+       'vue-highlightjs',
+       'vue-js-modal',
+       'vue-markdown',
+       'vue-multiselect',
+       'vue-pdf',
+       'vue-typeahead',
+       'vue-upload-component',
+       'vee-validate'
+   ]);

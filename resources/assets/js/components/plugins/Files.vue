@@ -359,6 +359,7 @@
     Vue.component('file-pdf', require('./FilePdf.vue'));
     Vue.component('file-xml', require('./FileXml.vue'));
     Vue.component('file-3d', require('./File3d.vue'));
+    Vue.component('file-dicom', require('./FileDicom.vue'));
     Vue.component('file-archive', require('./FileArchive.vue'));
     Vue.component('file-text', require('./FileText.vue'));
     Vue.component('file-undefined', require('./FileUndefined.vue'));
@@ -639,6 +640,9 @@
                         break;
                     case '3d':
                         this.fileCategoryComponent = 'file-3d';
+                        break;
+                    case 'dicom':
+                        this.fileCategoryComponent = 'file-dicom';
                         break;
                     case 'archive':
                         this.fileCategoryComponent = 'file-archive';

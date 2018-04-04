@@ -371,6 +371,12 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions);
     }
 
+    public static function getDicom() {
+        $mimeTypes = ['application/dicom', 'application/dicom+xml'];
+        $extensions = ['.dcm', '.dicom'];
+        return self::getCategory($mimeTypes, $extensions);
+    }
+
     public static function getArchives() {
         $mimeTypes = ['application/gzip', 'application/zip', 'application/x-gtar', 'application/x-tar', 'application/x-ustar', 'application/x-rar-compressed', 'application/x-bzip', 'application/x-bzip2', 'application/x-7z-compressed', 'application/x-compress'];
         $extensions = ['.zip', '.gz', '.gtar', '.tar', '.tgz', '.ustar', '.rar', '.bz', '.bz2', '.xz', '.7z', '.z'];
@@ -410,6 +416,7 @@ class File extends Model
         if($this->isXml()) return 'xml';
         if($this->isHtml()) return 'html';
         if($this->is3d()) return '3d';
+        if($this->isDicom()) return 'dicom';
         if($this->isArchive()) return 'archive';
         if($this->isText()) return 'text';
         if($this->isDocument()) return 'document';
@@ -556,6 +563,21 @@ class File extends Model
         $is = false;
         $mimeTypes = ['model/vnd.collada+xml', 'model/gltf-binary', 'model/gltf+json'];
         $extensions = ['.dae', '.obj', '.pdb', '.gltf'];
+        $is = in_array($this->mime_type, $mimeTypes);
+        if($is) return true;
+        foreach($extensions as $ext) {
+            if(ends_with($this->name, $ext)) {
+                $is = true;
+                break;
+            }
+        }
+        return $is;
+    }
+
+    public function isDicom() {
+        $is = false;
+        $mimeTypes = ['application/dicom', 'application/dicom+xml'];
+        $extensions = ['.dcm', '.dicom'];
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {

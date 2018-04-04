@@ -48,6 +48,9 @@
                                             data-fa-transform="shrink-9 down-2"
                                             data-fa-mask="fas fa-fw fa-file"></i>
                                         </div>
+                                        <div v-else-if="file.category == 'dicom'">
+                                            <i class="fas fa-fw fa-file-medical-alt fa-5x"></i>
+                                        </div>
                                         <div v-else-if="file.category == 'text'">
                                             <i class="fas fa-fw fa-file-alt fa-5x"></i>
                                         </div>
