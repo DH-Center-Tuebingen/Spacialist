@@ -41,14 +41,10 @@
 /* Opener */
 .TreeView ul li.category > span.item > .opener {}
 .TreeView ul li.category.folded > span.item > .opener::after {
-    display: none;
-    content: "\f105";
-    font-family: "Font Awesome 5 Solid";
+    content: '+';
 }
 .TreeView ul li.category:not(.folded) > span.item > .opener::after {
-    display: none;
-    content: "\f107";
-    font-family: "Font Awesome 5 Solid";
+    content: '-';
 }
 /* Folded async */
 .TreeView li.category.async {}
