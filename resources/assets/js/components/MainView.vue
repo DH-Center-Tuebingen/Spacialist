@@ -4,20 +4,6 @@
             <div>
                 <h3>Contexts</h3>
                 <div class="col-md-12">
-                    <form>
-                        <div class="form-group row">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-search"></i>
-                                    </span>
-                                </div>
-                                <input class="form-control" type="search" placeholder="Search" />
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-md-12">
                     <button type="button" class="btn btn-sm btn-outline-success ml-3 mb-2" @click="requestAddNewEntity()">
                         <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
                     </button>
