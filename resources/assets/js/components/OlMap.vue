@@ -1,33 +1,451 @@
 <template>
-    <div id="map" class="map"></div>
+    <div class="d-flex flex-column justify-content-between">
+        <div>
+            <button type="button" class="btn btn-xs" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" @click="toggleDrawType('Point')">
+                <i class="fas fa-fw fa-map-marker-alt"></i>
+            </button>
+            <button type="button" class="btn btn-xs" :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}" @click="toggleDrawType('LineString')">
+                <i class="fas fa-fw fa-road"></i>
+            </button>
+            <button type="button" class="btn btn-xs" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" @click="toggleDrawType('Polygon')">
+                <i class="fas fa-fw fa-object-ungroup"></i>
+            </button>
+            <button type="button" class="btn btn-xs btn-outline-info" v-show="interactionMode != 'modify'" @click="setInteractionMode('modify')">
+                <i class="fas fa-fw fa-edit"></i>
+            </button>
+            <button type="button" class="btn btn-xs btn-outline-success" v-show="interactionMode == 'modify'" @click="updateFeatures">
+                <i class="fas fa-fw fa-check"></i>
+            </button>
+            <button type="button" class="btn btn-xs btn-outline-danger" v-show="interactionMode == 'modify'" @click="cancelUpdateFeatures">
+                <i class="fas fa-fw fa-times"></i>
+            </button>
+            <button type="button" class="btn btn-xs btn-outline-danger" v-show="interactionMode != 'delete'" @click="setInteractionMode('delete')">
+                <i class="fas fa-fw fa-trash"></i>
+            </button>
+            <button type="button" class="btn btn-xs btn-outline-success" v-show="interactionMode == 'delete'" @click="deleteFeatures">
+                <i class="fas fa-fw fa-check"></i>
+            </button>
+            <button type="button" class="btn btn-xs btn-outline-danger" v-show="interactionMode == 'delete'" @click="cancelDeleteFeatures">
+                <i class="fas fa-fw fa-times"></i>
+            </button>
+        </div>
+        <div class="mt-2 col px-0">
+            <div id="map" class="map w-100 h-100"></div>
+        </div>
+    </div>
 </template>
 
 <script>
     import 'ol/ol.css';
-    import Map from 'ol/map';
-    import View from 'ol/view';
-    import TileLayer from 'ol/layer/tile';
-    import OSM from 'ol/source/osm';
     import control from 'ol/control';
+    import Feature from 'ol/feature';
+    import Graticule from 'ol/graticule';
+    import interaction from 'ol/interaction';
+    import Map from 'ol/map';
+    import proj from 'ol/proj';
+    import View from 'ol/view';
+
+    import FullScreen from 'ol/control/fullscreen';
+    import Rotate from 'ol/control/rotate';
+
+    import condition from 'ol/events/condition';
+
+    import WKT from 'ol/format/wkt';
+    import GeoJSON from 'ol/format/geojson';
+
+    import DragRotate from 'ol/interaction/dragrotate';
+    import DragZoom from 'ol/interaction/dragzoom';
+    import Draw from 'ol/interaction/draw';
+    import Modify from 'ol/interaction/modify';
+    import PinchRotate from 'ol/interaction/pinchrotate';
+    import PinchZoom from 'ol/interaction/pinchzoom';
+    import Select from 'ol/interaction/select';
+    import Snap from 'ol/interaction/snap';
+
+    import TileLayer from 'ol/layer/tile';
+    import VectorLayer from 'ol/layer/vector';
+
+    import OSM from 'ol/source/osm';
+    import Vector from 'ol/source/vector';
+
+    import Circle from 'ol/style/circle';
+    import Fill from 'ol/style/fill';
+    import Stroke from 'ol/style/stroke';
+    import Style from 'ol/style/style';
 
     export default {
+        props: {
+            reset: {
+                required: false,
+                type: Boolean,
+                default: false
+            },
+            initWkt: {
+                required: false,
+                type: Array,
+                default: _ => []
+            },
+            initGeojson: {
+                required: false,
+                type: Array,
+                default: _ => []
+            },
+            onDeleteend: {
+                required: false,
+                type: Function,
+                default: features => features
+            },
+            onDrawend: {
+                required: false,
+                type: Function,
+                default: feature => feature
+            },
+            onModifyend: {
+                required: false,
+                type: Function,
+                default: features => features
+            }
+        },
         mounted() {
+            let vm = this;
+            if(vm.initWkt.length && vm.initGeojson.length) {
+                console.error('init-wkt and init-geojson provided. They are not allowed at once.');
+                return;
+            }
             // wait for DOM to be rendered
-            this.$nextTick(function() {
-                new Map({
-                    controls: control.defaults(),
+            vm.$nextTick(function() {
+                vm.vector = new VectorLayer({
+                    source: new Vector({
+                        wrapX: false
+                    }),
+                    style: new Style({
+                        fill: new Fill({
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        }),
+                        stroke: new Stroke({
+                            color: '#ffcc33',
+                            width: 2
+                        }),
+                        image: new Circle({
+                            radius: 7,
+                            fill: new Fill({
+                                color: '#ffcc33'
+                            })
+                        })
+                    })
+                });
+                let source = vm.vector.getSource();
+                if(vm.initWkt.length) {
+                    vm.initWkt.forEach(wkt => {
+                        let geom = vm.wktFormat.readGeometry(wkt);
+                        source.addFeature(new Feature({geometry: geom}));
+                    });
+                    vm.extent = vm.vector.getSource().getExtent();
+                } else if(vm.initGeojson.length) {
+                    source.addFeatures(vm.geoJsonFormat.readFeatures(vm.initGeojson));
+                    vm.extent = vm.vector.getSource().getExtent();
+                }
+
+                vm.draw = {
+                    init: function() {
+                        vm.map.addInteraction(this.Point);
+                        this.Point.setActive(false);
+                        vm.map.addInteraction(this.LineString);
+                        this.LineString.setActive(false);
+                        vm.map.addInteraction(this.Polygon);
+                        this.Polygon.setActive(false);
+                    },
+                    Point: new Draw({
+                        source: vm.vector.getSource(),
+                        type: 'Point'
+                    }),
+                    LineString: new Draw({
+                        source: vm.vector.getSource(),
+                        type: 'LineString'
+                    }),
+                    Polygon: new Draw({
+                        source: vm.vector.getSource(),
+                        type: 'Polygon'
+                    }),
+                    getActive: function() {
+                        return this.activeType ? this[this.activeType].getActive() : false;
+                    },
+                    setActive: function(active, type) {
+                        if(active) {
+                            this.activeType && this[this.activeType].setActive(false);
+                            this[type].setActive(true, type);
+                            this.activeType = type;
+                        } else {
+                            this.activeType && this[this.activeType].setActive(false);
+                            this.activeType = null;
+                        }
+                    }
+                };
+                vm.modify = {
+                    init: function() {
+                        this.select = new Select({
+                            hitTolerance: 5,
+                            toggleCondition: condition.never,
+                            wrapX: false
+                        });
+                        vm.map.addInteraction(this.select);
+
+                        this.modify = new Modify({
+                            features: this.select.getFeatures(),
+                            wrapX: false
+                        });
+                        vm.map.addInteraction(this.modify);
+
+                        this.modifiedFeatures = {};
+                        this.setEvents();
+                        this.modifyActive = false;
+                        this.originalFeatures = [];
+                        this.selectedFeature = undefined;
+                    },
+                    setEvents: function() {
+                        let selectedFeatures = this.select.getFeatures();
+
+                        this.select.on('change:active', function(event) {
+                            selectedFeatures.forEach(selectedFeatures.remove, selectedFeatures);
+                        }, this);
+                        this.select.on('select', function(event) {
+                            // config allows only one selected feature
+                            if(event.selected.length) {
+                                this.selectedFeature = event.selected[0];
+                            } else {
+                                this.selectedFeature = undefined;
+                            }
+                        }, this);
+                        this.modify.on('change:active', function(event) {
+                            this.modifyActive = !event.oldValue;
+                            if(this.modifyActive) {
+                                let source = vm.vector.getSource()
+                                let features = source.getFeatures();
+                                features.forEach(feature => {
+                                    this.originalFeatures.push(feature.clone());
+                                });
+                            } else {
+                                this.modifiedFeatures = {};
+                            }
+                        }, this);
+                        this.modify.on('modifyend', function(event) {
+                            let newFeature = event.features.getArray()[0];
+                            this.modifiedFeatures[newFeature.ol_uid] = newFeature;
+                        }, this);
+                    },
+                    setActive: function(active, cancelled) {
+                        this.select.setActive(active);
+                        this.modify.setActive(active);
+                        if(!active) {
+                            if(cancelled && this.originalFeatures.length) {
+                                // If modify was cancelled, reset features to state before modify start
+                                let source = vm.vector.getSource();
+                                source.clear();
+                                source.addFeatures(this.originalFeatures);
+                            }
+                            this.originalFeatures = [];
+                        }
+                    },
+                    getModifiedFeatures: function() {
+                        // return list of cloned features
+                        let features = [];
+                        for(let k in this.modifiedFeatures) {
+                            features.push(this.modifiedFeatures[k].clone());
+                        }
+                        return features;
+                    }
+                };
+                vm.delete = {
+                    init: function() {
+                        this.select = new Select({
+                            hitTolerance: 5,
+                            toggleCondition: condition.never,
+                            wrapX: false
+                        });
+                        vm.map.addInteraction(this.select);
+
+                        this.setEvents();
+                        this.deletedFeatures = [];
+                    },
+                    setEvents: function() {
+                        this.select.on('select', function(event) {
+                            // config allows only one selected feature
+                            if(event.selected.length) {
+                                let feature = event.selected[0];
+                                this.deletedFeatures.push(feature);
+                                let source = vm.vector.getSource();
+                                source.removeFeature(feature);
+                            }
+                        }, this);
+                    },
+                    setActive: function(active, cancelled) {
+                        this.select.setActive(active);
+                        if(!active) {
+                            if(cancelled && this.deletedFeatures.length) {
+                                // If delete was cancelled, readd deleted features
+                                let source = vm.vector.getSource();
+                                source.addFeatures(this.deletedFeatures);
+                            }
+                            this.deletedFeatures = [];
+                        }
+                    },
+                    getDeletedFeatures: function() {
+                        // return list of cloned features
+                        let features = [];
+                        this.deletedFeatures.forEach(feature => {
+                            features.push(feature.clone());
+                        });
+                        return features;
+                    }
+                };
+
+                vm.map = new Map({
+                    controls: control.defaults().extend([
+                        new FullScreen(),
+                        new Rotate()
+                    ]),
+                    interactions: interaction.defaults().extend([
+                        new DragRotate({
+                            condition: condition.platformModifierKeyOnly
+                        }),
+                        new DragZoom({
+                            condition: condition.shiftKeyOnly
+                        }),
+                        new PinchRotate(),
+                        new PinchZoom(),
+                    ]),
                     layers: [
                         new TileLayer({
-                            source: new OSM()
-                        })
+                            source: new OSM({
+                                wrapX: false
+                            })
+                        }),
+                        vm.vector
                     ],
                     target: 'map',
                     view: new View({
                         center: [0, 0],
+                        extent: proj.transformExtent([-180, -90, 180, 90], 'EPSG:4326', 'EPSG:3857'),
                         zoom: 2
                     })
                 });
+                if(vm.extent.length) {
+                    vm.map.getView().fit(vm.extent);
+                }
+
+                vm.draw.init();
+                vm.modify.init();
+                vm.delete.init();
+                vm.draw.setActive(false);
+                vm.modify.setActive(false);
+                vm.delete.setActive(false);
+
+                vm.snap = new Snap({
+                    source: vm.vector.getSource()
+                });
+                vm.map.addInteraction(vm.snap);
+
+                vm.options.graticule = new Graticule({
+                    showLabels: true,
+                    strokeStyle: new Stroke({
+                        color: 'rgba(0, 0, 0, 0.75)',
+                        width: 2,
+                        lineDash: [0.5, 4]
+                    })
+                });
+                vm.options.graticule.setMap(vm.map);
+
+                // Event Listeners
+                vm.draw.Point.on('drawend', function(event) {
+                    vm.drawFeature(event.feature);
+                }, vm);
+                vm.draw.LineString.on('drawend', function(event) {
+                    vm.drawFeature(event.feature);
+                }, vm);
+                vm.draw.Polygon.on('drawend', function(event) {
+                    vm.drawFeature(event.feature);
+                }, vm);
             });
+        },
+        methods: {
+            toggleDrawType(type) {
+                let oldType = this.drawType;
+                this.drawType = type;
+                if(this.interactionMode != 'draw') {
+                    this.setInteractionMode('draw', true);
+                } else if(oldType == type) {
+                    this.setInteractionMode('');
+                }
+                this.draw.getActive() && this.draw.setActive(true, this.drawType);
+            },
+            setInteractionMode(mode, cancelled) {
+                let oldMode = this.interactionMode;
+                this.interactionMode = mode;
+                if(mode == 'draw') {
+                    this.draw.setActive(true, this.drawType);
+                    this.modify.setActive(false, cancelled);
+                    this.delete.setActive(false, cancelled);
+                } else if(mode == 'modify') {
+                    this.drawType = '';
+                    this.draw.setActive(false);
+                    this.modify.setActive(true);
+                    this.delete.setActive(false, oldMode == 'delete');
+                } else if(mode == 'delete') {
+                    this.drawType = '';
+                    this.draw.setActive(false);
+                    this.modify.setActive(false, oldMode == 'modify');
+                    this.delete.setActive(true);
+                } else {
+                    this.drawType = '';
+                    this.interactionMode = '';
+                    this.draw.setActive(false);
+                    this.delete.setActive(false, cancelled);
+                    this.modify.setActive(false, cancelled);
+                }
+            },
+            drawFeature(feature) {
+                if(this.reset) {
+                    let source = this.vector.getSource();
+                    if(source.getFeatures().length) {
+                        source.clear();
+                    }
+                }
+                this.onDrawend(feature, this.wktFormat.writeFeature(feature));
+            },
+            updateFeatures() {
+                const features = this.modify.getModifiedFeatures();
+                let wktFeatures = features.map(f => this.wktFormat.writeFeature(f), this);
+                this.onModifyend(features, wktFeatures);
+                this.setInteractionMode('');
+            },
+            cancelUpdateFeatures() {
+                this.setInteractionMode('', true);
+            },
+            deleteFeatures() {
+                const features = this.delete.getDeletedFeatures();
+                let wktFeatures = features.map(f => this.wktFormat.writeFeature(f), this);
+                this.onDeleteend(features, wktFeatures);
+                this.setInteractionMode('');
+            },
+            cancelDeleteFeatures() {
+                this.setInteractionMode('', true);
+            }
+        },
+        data() {
+            return {
+                drawType: '',
+                interactionMode: '',
+                map: {},
+                vector: {},
+                modify: {},
+                draw: {},
+                delete: {},
+                snap: {},
+                options: {},
+                extent: [],
+                wktFormat: new WKT(),
+                geoJsonFormat: new GeoJSON()
+            }
         }
     }
 </script>
