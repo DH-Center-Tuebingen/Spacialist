@@ -17,6 +17,7 @@
 <script>
     import { TreeView } from '@bosket/vue';
     import * as VueMenu from '@hscmap/vue-menu';
+    import { transliterate as tr, slugify } from 'transliteration';
 
     Vue.use(VueMenu);
 
@@ -100,7 +101,10 @@
                     search: 'form-control'
                 },
                 category: "children",
-                search: input => item => item.name.match(new RegExp(`.*${ input }.*`, "gi")),
+                search: input => {
+                    input = tr(input);
+                    return item => tr(item.name).match(new RegExp(`.*${ input }.*`, "gi"))
+                },
                 display: (item, inputs) =>
                     <span>
                         <hsc-menu-style-white class="d-inline-block">
