@@ -1,37 +1,52 @@
 <template>
     <div class="d-flex flex-column modal-content-80-fix">
-        <div class="d-flex flex-row">
-            <div id="dicom-image" style="width: 512px; height: 512px;" oncontextmenu="return false;">
+        <div class="d-flex flex-row col pl-0">
+            <div id="dicom-image" class="col pl-0" style="max-width: 50%;" oncontextmenu="return false;">
             </div>
-            <div class="text-left ml-3">
-                <h4>Controls</h4>
-                <dl class="alert alert-info">
-                    <dt>
-                        Zoom
-                    </dt>
-                    <dd>
-                        Use <kbd><kbd>Right Click</kbd> + <kbd>Drag</kbd></kbd> up/down to zoom out/in.
-                    </dd>
-                    <dt>
-                        Move
-                    </dt>
-                    <dd>
-                        Use <kbd><kbd>Middle Click</kbd> + <kbd>Drag</kbd></kbd> to move the image.
-                    </dd>
-                    <dt>
-                        VOI (Values of Interest)
-                    </dt>
-                    <dd>
-                        Use <kbd><kbd>Left Click</kbd> + <kbd>Drag</kbd></kbd> to change window width (up/down) and window center (left/right).
-                    </dd>
-                </dl>
-                <h4>Metadata</h4>
-                <input type="search" placeholder="Search metadata tag..." />
-                <ul>
-                    <li v-for="(data, name) in metadata">
-                        <strong>{{name}}</strong>: {{data}}
-                    </li>
-                </ul>
+            <div class="text-left col d-flex flex-column">
+                <div id="dicom-controls">
+                    <h4>Controls</h4>
+                    <dl class="alert alert-info">
+                        <dt>
+                            Zoom
+                        </dt>
+                        <dd>
+                            Use <kbd><kbd>Right Click</kbd> + <kbd>Drag</kbd></kbd> up/down to zoom out/in.
+                        </dd>
+                        <dt>
+                            Move
+                        </dt>
+                        <dd>
+                            Use <kbd><kbd>Middle Click</kbd> + <kbd>Drag</kbd></kbd> to move the image.
+                        </dd>
+                        <dt>
+                            VOI (Values of Interest)
+                        </dt>
+                        <dd>
+                            Use <kbd><kbd>Left Click</kbd> + <kbd>Drag</kbd></kbd> to change window width (up/down) and window center (left/right).
+                        </dd>
+                    </dl>
+                </div>
+                <div id="dicom-metadata" class="col scroll-y-auto">
+                    <h4>Metadata</h4>
+                    <form>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input type="search" class="form-control" placeholder="Search metadata tag..." v-model="metadataQuery"/>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-fw fa-search" aria-hidden="true"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <ul>
+                        <li v-for="(data, name) in filteredMetadata">
+                            <strong>{{name}}</strong>: {{data}}
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="d-flex justify-content-between">
@@ -207,10 +222,26 @@
                 ww: 0,
                 wc: 0,
                 zoom: 100,
-                metadata: {}
+                metadata: {},
+                metadataQuery: ''
             }
         },
         computed: {
+            filteredMetadata() {
+                if(!this.metadataQuery.length) return this.metadata;
+
+                let filtered = {};
+                let lk, lv;
+                const q = this.metadataQuery.toLowerCase();
+                for(let k in this.metadata) {
+                    lk = k.toLowerCase();
+                    lv = this.metadata[k].toString().toLowerCase();
+                    if(lk.includes(q) || lv.includes(q)) {
+                        filtered[k] = this.metadata[k];
+                    }
+                }
+                return filtered;
+            }
         }
     }
 </script>
