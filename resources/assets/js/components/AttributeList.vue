@@ -57,7 +57,7 @@
                 </div>
                 <div v-else-if="attribute.datatype == 'geography'">
                     <input class="form-control" :disabled="attribute.isDisabled" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" placeholder="Add WKT" v-model="localValues[attribute.id].value" />
-                    <button type="button" class="btn btn-outline-secondary" :disabled="attribute.isDisabled" style="margin-top: 10px;" ng-click="$ctrl.openGeographyPlacer(attribute.id)">
+                    <button type="button" class="btn btn-outline-secondary mt-2" :disabled="attribute.isDisabled" @click="openGeographyModal(attribute.id)">
                         <i class="fas fa-fw fa-map-marker-alt"></i> Open Map
                     </button>
                 </div>
@@ -272,6 +272,36 @@
             </div>
         </div>
         </draggable>
+        <modal :name="'geography-place-modal-'+uniqueId" width="80%" height="80%">
+            <div class="modal-content h-100">
+                <div class="modal-header">
+                    <h5 class="modal-title">Set Geolocation</h5>
+                    <button type="button" class="close" aria-label="Close" @click="hideGeographyModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body d-flex flex-column">
+                    <ol-map class="h-100"
+                        :reset="true"
+                        :init-wkt="initialGeoValues"
+                        :on-deleteend="onGeoFeaturesDeleted"
+                        :on-drawend="onGeoFeatureAdded"
+                        :on-modifyend="onGeoFeaturesUpdated">
+                    </ol-map>
+                    <div class="mt-2">
+                        WKT: <pre class="m-0"><code>{{ newGeoValue }}</code></pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-success"     @click="setGeography">
+                        Set
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary"     @click="hideGeographyModal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </modal>
     </div>
 </template>
 
@@ -394,6 +424,49 @@
                 this.localValues[aid].value.splice(index, 1);
                 // TODO set form dirty
             },
+            openGeographyModal(aid) {
+                this.currentGeoValue = this.newGeoValue = this.localValues[aid].value;
+                if(this.currentGeoValue) {
+                    this.initialGeoValues = [
+                        this.currentGeoValue
+                    ];
+                } else {
+                    this.initialGeoValues = [];
+                }
+                this.selectedAttribute = aid;
+                this.$modal.show('geography-place-modal-'+this.uniqueId);
+            },
+            hideGeographyModal() {
+                this.$modal.hide('geography-place-modal-'+this.uniqueId);
+            },
+            onGeoFeaturesDeleted(features, wkt) {
+                // We only have one possible feature.
+                // Thus, if at least one gets deleted,
+                // we reset newGeoValue
+                if(wkt.length) {
+                    this.newGeoValue = '';
+                }
+            },
+            onGeoFeatureAdded(feature, wkt) {
+                this.newGeoValue = wkt;
+            },
+            onGeoFeaturesUpdated(features, wkt) {
+                // We only have one possible feature.
+                // Thus, if at least one is modified,
+                // it has to be our current and we update it
+                if(wkt.length) {
+                    this.newGeoValue = wkt[0];
+                }
+            },
+            setGeography() {
+                if(!!this.localValues[this.selectedAttribute]) {
+                    this.localValues[this.selectedAttribute].value = this.newGeoValue;
+                }
+                this.hideGeographyModal();
+                this.currentGeoValue = undefined;
+                this.newGeoValue = undefined;
+                this.selectedAttribute = -1;
+            },
             translateLabel(element, label) {
                 let value = element[label];
                 if(!value) return element;
@@ -452,6 +525,11 @@
                 inputs: {},
                 expands: {},
                 dimensionUnits: ['nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'],
+                uniqueId: Math.random().toString(36),
+                selectedAttribute: -1,
+                initialGeoValues: [],
+                currentGeoValue: '',
+                newGeoValue: ''
             }
         },
         created() {
