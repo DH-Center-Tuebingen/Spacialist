@@ -9,6 +9,7 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - Edit Mode for text and XML files
   - Replace single files
   - Rendering of HTML files
+  - DICOM Support
 - Added Welcome Page
   - Maintainer (Name and E-Mail-Address), Project Description and Access (Public/Private) can be configured in settings
 - BibTeX export
@@ -25,6 +26,8 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - Bookmark-Icon: Displayed if there is at least one reference
 - User/Role Management bundle several actions (Save, Edit, Delete, ...) in single dropdown (...-menu)
 - Adding/Reorder attributes in Context-Type tab in Data-Model-Editor is now done using Drag&Drop.
+- File Viewer now loads files as chunk (15)
+- Tree View now loads root elements only. Sub-elements are loaded on request
 ### Fixed
 
 ## 0.5.1
