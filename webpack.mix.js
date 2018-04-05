@@ -52,6 +52,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'cornerstone-math',
        'cornerstone-tools',
        'cornerstone-wado-image-loader',
+       'd3-dsv',
        'debounce',
        'jquery',
        'lodash',
@@ -59,14 +60,17 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'ol',
        'popper.js',
        'screenfull',
+       'threejs-full-es6',
+       'transliteration',
+       'vee-validate',
        'vue',
-       'vuedraggable',
        'vue-highlightjs',
+       'vue-infinite-scroll',
        'vue-js-modal',
        'vue-markdown',
        'vue-multiselect',
        'vue-pdf',
        'vue-typeahead',
        'vue-upload-component',
-       'vee-validate'
+       'vuedraggable'
    ]);
