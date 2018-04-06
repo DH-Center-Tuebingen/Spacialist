@@ -1,7 +1,9 @@
 <template>
     <div class="d-flex flex-column modal-content-80-fix">
         <div class="d-flex flex-row col pl-0">
-            <div id="dicom-image" class="col pl-0" style="max-width: 50%;" oncontextmenu="return false;">
+            <div id="dicom-wrapper" class="col pl-0">
+                <div id="dicom-image" class="h-100" oncontextmenu="return false;">
+                </div>
             </div>
             <div class="text-left col d-flex flex-column">
                 <div id="dicom-controls">
@@ -49,10 +51,13 @@
                 </div>
             </div>
         </div>
-        <div class="d-flex justify-content-between">
+        <div class="d-flex justify-content-between mt-2">
             <span>
                 Zoom: {{ zoom }}%
             </span>
+            <button type="button" class="btn btn-outline-secondary" @click="saveAsImage">
+                Save Image
+            </button>
             <span>
                 WW/WC: {{ ww }}/{{ wc }}
             </span>
@@ -92,7 +97,9 @@
         mounted() {
             this.$nextTick(function() {
                 this.elem = document.getElementById('dicom-image');
-                cornerstone.enable(this.elem);
+                cornerstone.enable(this.elem, {
+                    renderer: 'webgl'
+                });
 
                 this.elem.addEventListener('cornerstoneimagerendered', this.onImageRendered);
 
@@ -125,6 +132,11 @@
                 this.ww = Math.round(eventData.viewport.voi.windowWidth);
                 this.wc = Math.round(eventData.viewport.voi.windowCenter);
                 this.zoom = parseInt(eventData.viewport.scale*100);
+            },
+            saveAsImage() {
+                // saveAs returns png, thus replace file extension with png
+                const filename = this.file.name.substr(0, this.file.name.lastIndexOf('.')) + '.png';
+                cornerstoneTools.saveAs(this.elem, filename);
             },
             parseMetadata(metadata) {
                 const elems = metadata.elements;
