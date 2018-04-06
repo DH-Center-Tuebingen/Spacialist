@@ -145,7 +145,7 @@
                                 quo
                             </td>
                             <td>
-                                <i class="fas fa-fw fa-leaf"></i> a
+                                <i class="fas fa-fw fa-seedling"></i> a
                             </td>
                             <td>
                                 <ul>
@@ -186,7 +186,7 @@
                                 a
                             </td>
                             <td>
-                                <i class="fas fa-fw fa-leaf"></i> aut
+                                <i class="fas fa-fw fa-seedling"></i> aut
                             </td>
                             <td>
                             </td>
@@ -216,7 +216,7 @@
                                 qui
                             </td>
                             <td>
-                                <i class="fas fa-fw fa-leaf"></i> id
+                                <i class="fas fa-fw fa-seedling"></i> id
                             </td>
                             <td>
                                 <ul>
