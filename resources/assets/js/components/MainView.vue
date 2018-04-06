@@ -60,7 +60,7 @@
                     </a>
                 </li>
             </ul>
-            <div class="mt-2">
+            <div class="mt-2 h-100">
                 <keep-alive>
                     <component :is="activePlugin" :context="selectedContext" :context-data-loaded="dataLoaded"></component>
                 </keep-alive>

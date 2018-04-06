@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column justify-content-between">
+    <div class="d-flex flex-column justify-content-between h-100">
         <div>
             <button type="button" class="btn btn-xs" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" @click="toggleDrawType('Point')">
                 <i class="fas fa-fw fa-map-marker-alt"></i>
@@ -130,6 +130,10 @@
                             radius: 7,
                             fill: new Fill({
                                 color: '#ffcc33'
+                            }),
+                            stroke: new Stroke({
+                                color: 'rgba(0, 0, 0, 0.2)',
+                                width: 2
                             })
                         })
                     })
@@ -137,12 +141,15 @@
                 let source = vm.vector.getSource();
                 if(vm.initWkt.length) {
                     vm.initWkt.forEach(wkt => {
-                        let geom = vm.wktFormat.readGeometry(wkt);
+                        const geom = vm.wktFormat.readGeometry(wkt);
                         source.addFeature(new Feature({geometry: geom}));
                     });
                     vm.extent = vm.vector.getSource().getExtent();
                 } else if(vm.initGeojson.length) {
-                    source.addFeatures(vm.geoJsonFormat.readFeatures(vm.initGeojson));
+                    vm.initGeojson.forEach(geojson => {
+                        const feature = vm.geoJsonFormat.readFeature(geojson);
+                        source.addFeature(feature);
+                    });
                     vm.extent = vm.vector.getSource().getExtent();
                 }
 
@@ -325,7 +332,9 @@
                     target: 'map',
                     view: new View({
                         center: [0, 0],
-                        extent: proj.transformExtent([-180, -90, 180, 90], 'EPSG:4326', 'EPSG:3857'),
+                        projection: 'EPSG:4326',
+                        extent: [-180, -90, 180, 90],
+                        // extent: proj.transformExtent([-180, -90, 180, 90], 'EPSG:4326', 'EPSG:3857'),
                         zoom: 2
                     })
                 });
