@@ -102,3 +102,6 @@ Route::put('/file/{id}/link', 'FileController@linkToEntity')->where('id', '[0-9]
 
 Route::delete('/file/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');
 Route::delete('/file/{fid}/link/{cid}', 'FileController@unlinkEntity')->where('fid', '[0-9]+')->where('cid', '[0-9]+');
+
+// MAP
+Route::get('/map', 'MapController@getData');
