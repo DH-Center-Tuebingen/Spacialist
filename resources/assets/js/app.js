@@ -62,6 +62,8 @@ Vue.component('data-model', require('./components/DataModel.vue'));
 Vue.component('layer-editor', require('./components/LayerEditor.vue'));
 Vue.component('about-dialog', require('./components/About.vue'));
 
+Vue.component('gis', require('./components/plugins/Gis.vue')); // TODO
+
 // Filter
 Vue.filter('date', function(value, format) {
     if(!format) format = 'DD.MM.YYYY hh:mm';
