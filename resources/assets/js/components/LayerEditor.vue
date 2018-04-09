@@ -190,7 +190,7 @@
                     is_overlay: false
                 };
                 vm.$http.post('/api/map/layer', data).then(function(response) {
-                    this.baselayer.push(response.data);
+                    vm.baselayer.push(response.data);
                 });
             },
             onAddNewOverlay() {
@@ -200,7 +200,7 @@
                     is_overlay: true
                 };
                 vm.$http.post('/api/map/layer', data).then(function(response) {
-                    this.overlays.push(response.data);
+                    vm.overlays.push(response.data);
                 });
             },
             onLayerSelect(layer) {
