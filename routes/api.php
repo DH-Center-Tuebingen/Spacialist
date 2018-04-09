@@ -107,7 +107,9 @@ Route::delete('/file/{fid}/link/{cid}', 'FileController@unlinkEntity')->where('f
 Route::get('/map', 'MapController@getData');
 
 Route::post('/map', 'MapController@addGeometry');
+Route::post('/map/layer', 'MapController@addLayer');
 
 Route::patch('/map/{id}', 'MapController@updateGeometry')->where('id', '[0-9]+');
+Route::patch('/map/layer/{id}', 'MapController@updateLayer')->where('id', '[0-9]+');
 
 Route::delete('/map/{id}', 'MapController@delete')->where('id', '[0-9]+');

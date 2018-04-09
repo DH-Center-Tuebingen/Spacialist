@@ -59,6 +59,7 @@ Vue.component('roles', require('./components/Roles.vue'));
 Vue.component('users', require('./components/Users.vue'));
 Vue.component('user-preferences', require('./components/UserPreferences.vue'));
 Vue.component('data-model', require('./components/DataModel.vue'));
+Vue.component('layer-editor', require('./components/LayerEditor.vue'));
 Vue.component('about-dialog', require('./components/About.vue'));
 
 // Filter
