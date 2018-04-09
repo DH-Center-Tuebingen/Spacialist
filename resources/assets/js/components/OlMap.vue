@@ -51,6 +51,7 @@
 
     import FullScreen from 'ol/control/fullscreen';
     import Rotate from 'ol/control/rotate';
+    import ScaleLine from 'ol/control/scaleline';
 
     import condition from 'ol/events/condition';
 
@@ -305,7 +306,8 @@
                 vm.map = new Map({
                     controls: control.defaults().extend([
                         new FullScreen(),
-                        new Rotate()
+                        new Rotate(),
+                        new ScaleLine()
                     ]),
                     interactions: interaction.defaults().extend([
                         new DragRotate({
