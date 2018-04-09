@@ -1,6 +1,6 @@
 <template>
-    <div class="row">
-        <div :class="'col-md-'+preferences['prefs.columns'].left" id="tree-container">
+    <div class="row h-100 of-hidden">
+        <div :class="'col-md-'+preferences['prefs.columns'].left" id="tree-container" class="h-100 scroll-y-auto">
             <div>
                 <h3>Contexts</h3>
                 <div class="col-md-12">
@@ -22,7 +22,7 @@
                 </div>
             </div>
         </div>
-        <div :class="'col-md-'+preferences['prefs.columns'].center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" >
+        <div :class="'col-md-'+preferences['prefs.columns'].center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100 scroll-y-auto">
             <div v-if="selectedContext.id">
                 <div class="d-flex align-items-center justify-content-between">
                     <h1>{{ selectedContext.name }}</h1>
@@ -47,7 +47,7 @@
             </div>
             <h1 v-else>Nothing selected</h1>
         </div>
-        <div :class="'col-md-'+preferences['prefs.columns'].right" id="addon-container">
+        <div :class="'col-md-'+preferences['prefs.columns'].right" id="addon-container" class="d-flex flex-column">
             <ul class="nav nav-tabs">
                 <li class="nav-item" v-for="plugin in plugins.tab">
                     <a class="nav-link" href="#" :class="{active: tab == plugin.key}" @click="setActivePlugin(plugin)">
@@ -60,7 +60,7 @@
                     </a>
                 </li>
             </ul>
-            <div class="mt-2 h-100">
+            <div class="mt-2 col">
                 <keep-alive>
                     <component :is="activePlugin" :context="selectedContext" :context-data-loaded="dataLoaded"></component>
                 </keep-alive>

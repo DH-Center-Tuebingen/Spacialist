@@ -26,7 +26,7 @@ const SpacialistPluginMap = {
         Vue.prototype.$registerSpacialistPlugin({
             label: 'prefs.extension.gis-view',
             icon: 'fa-globe',
-            href: '/gis'
+            href: '/tool/gis'
         }, 'tools');
     }
 };
