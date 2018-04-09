@@ -18,7 +18,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div id="app" preferences="{{json_encode($p)}}">
+    <div id="app" class="d-flex flex-column" preferences="{{json_encode($p)}}">
         <nav class="navbar navbar-dark bg-dark sticky-top navbar-expand-lg">
             <!-- Branding Image -->
             <a class="navbar-brand" href="{{ url('/home') }}">
@@ -158,7 +158,7 @@
                 </ul>
             </div>
         </nav>
-        <div class="container-fluid mt-3 mb-3">
+        <div class="container-fluid mt-3 mb-3 col">
             @yield('content')
             <about-dialog></about-dialog>
         </div>
