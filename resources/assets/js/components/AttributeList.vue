@@ -282,11 +282,11 @@
                 </div>
                 <div class="modal-body d-flex flex-column">
                     <ol-map class="h-100"
-                        :reset="true"
                         :init-wkt="initialGeoValues"
                         :on-deleteend="onGeoFeaturesDeleted"
                         :on-drawend="onGeoFeatureAdded"
-                        :on-modifyend="onGeoFeaturesUpdated">
+                        :on-modifyend="onGeoFeaturesUpdated"
+                        :reset="true">
                     </ol-map>
                     <div class="mt-2">
                         WKT: <pre class="m-0"><code>{{ newGeoValue }}</code></pre>

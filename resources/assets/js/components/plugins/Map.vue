@@ -1,8 +1,11 @@
 <template>
     <div class="h-100" v-if="dataInitialized">
         <ol-map
-            :reset="false"
-            :init-geojson="geojson">
+            :init-geojson="geojson"
+            :on-deleteend="deleteFeatures"
+            :on-drawend="addFeature"
+            :on-modifyend="updateFeatures"
+            :reset="false">
         </ol-map>
     </div>
     <div v-else>
@@ -11,6 +14,8 @@
 </template>
 
 <script>
+    import GeoJSON from 'ol/format/geojson';
+
     export default {
         mounted() {
             this.initData();
@@ -21,19 +26,96 @@
                 vm.dataInitialized = false;
                 vm.$http.get('/api/map').then(function(response) {
                     const mapData = response.data;
-                    let geom;
-                    for(let k in mapData.geodata) {
-                        geom = mapData.geodata[k].geom;
-                        vm.geojson.push(geom);
+                    vm.layers = mapData.layers;
+                    vm.contextTypes = mapData.contextTypes;
+                    vm.contexts = mapData.contexts;
+                    vm.geodata = mapData.geodata;
+                    for(let k in vm.geodata) {
+                        const curr = vm.geodata[k];
+                        let geo = {
+                            geom: curr.geom,
+                            props: vm.getProperties(curr)
+                        };
+                        vm.geojson.push(geo);
                     }
                     vm.dataInitialized = true;
+                });
+            },
+            getProperties(geodata) {
+                const vm = this;
+                let props = {
+                    id: geodata.id,
+                    entity: geodata.context
+                };
+                let layer;
+                if(geodata.context) {
+                    layer = vm.getLayer(geodata.context.context_type_id);
+                } else {
+                    layer = vm.getUnlinkedLayer();
+                }
+                if(layer) {
+                    props.color = layer.color;
+                }
+                return props;
+            },
+            getLayer(ctid) {
+                for(let k in this.layers) {
+                    if(this.layers[k].context_type_id == ctid) {
+                        return this.layers[k];
+                    }
+                }
+                return;
+            },
+            getUnlinkedLayer() {
+                for(let k in this.layers) {
+                    if(this.layers[k].type == 'unlinked') {
+                        return this.layers[k];
+                    }
+                }
+                return;
+            },
+            deleteFeatures(features, wkt) {
+                const vm = this;
+                features.forEach(f => {
+                    vm.$http.delete(`/api/map/${f.getProperties().id}`);
+                });
+            },
+            addFeature(feature, wkt) {
+                const vm = this;
+                const collection = vm.geoJsonFormat.writeFeatures([feature]);
+                const srid = 4326;
+                const data = {
+                    collection: collection,
+                    srid: srid
+                };
+                vm.$http.post('/api/map', data).then(function(response) {
+                    if(response.data.length) {
+                        const geodata = response.data[0];
+                        // TODO update feature
+                        // feature.setProperties(vm.getProperties(geodata));
+                    }
+                });
+            },
+            updateFeatures(features, wkt) {
+                const vm = this;
+                features.forEach(f => {
+                    let data = {
+                        feature: vm.geoJsonFormat.writeFeature(f),
+                        srid: 4326
+                    };
+                    vm.$http.patch(`/api/map/${f.getProperties().id}`, data);
                 });
             }
         },
         data() {
             return {
                 dataInitialized: false,
-                geojson: []
+                layers:{},
+                contextTypes: {},
+                contexts: {},
+                geodata: {},
+                geojson: [],
+                geoJsonFormat: new GeoJSON()
             }
         }
     }

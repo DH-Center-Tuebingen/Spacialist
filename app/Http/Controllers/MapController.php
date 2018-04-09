@@ -43,8 +43,47 @@ class MapController extends Controller
 
     // POST
 
+    public function addGeometry(Request $request) {
+        $this->validate($request, [
+            'collection' => 'required|json',
+            'srid' => 'required|integer'
+        ]);
+
+        $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'));
+        return response()->json($objs);
+    }
+
     // PUT
+
+    // PATCH
+
+    public function updateGeometry($id, Request $request) {
+        $this->validate($request, [
+            'feature' => 'required|json',
+            'srid' => 'required|integer'
+        ]);
+
+        try {
+            $geodata = Geodata::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This geodata does not exist'
+            ]);
+        }
+        $geodata->updateGeometry(json_decode($request->get('feature')), $request->get('srid'));
+    }
 
     // DELETE
 
+    public function delete($id) {
+        try {
+            $geodata = Geodata::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This geodata does not exist'
+            ]);
+        }
+        $geodata->delete();
+        return response()->json(null, 204);
+    }
 }

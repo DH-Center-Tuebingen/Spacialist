@@ -31,6 +31,7 @@
         </div>
         <div class="mt-2 col px-0">
             <div id="map" class="map w-100 h-100"></div>
+            <div id="popup"></div>
         </div>
     </div>
 </template>
@@ -38,10 +39,13 @@
 <script>
     import 'ol/ol.css';
     import control from 'ol/control';
+    import Coordinate from 'ol/coordinate';
+    import extent from 'ol/extent';
     import Feature from 'ol/feature';
     import Graticule from 'ol/graticule';
     import interaction from 'ol/interaction';
     import Map from 'ol/map';
+    import Overlay from 'ol/overlay';
     import proj from 'ol/proj';
     import View from 'ol/view';
 
@@ -118,25 +122,7 @@
                     source: new Vector({
                         wrapX: false
                     }),
-                    style: new Style({
-                        fill: new Fill({
-                            color: 'rgba(255, 255, 255, 0.2)'
-                        }),
-                        stroke: new Stroke({
-                            color: '#ffcc33',
-                            width: 2
-                        }),
-                        image: new Circle({
-                            radius: 7,
-                            fill: new Fill({
-                                color: '#ffcc33'
-                            }),
-                            stroke: new Stroke({
-                                color: 'rgba(0, 0, 0, 0.2)',
-                                width: 2
-                            })
-                        })
-                    })
+                    style: vm.createStyle()
                 });
                 let source = vm.vector.getSource();
                 if(vm.initWkt.length) {
@@ -147,7 +133,11 @@
                     vm.extent = vm.vector.getSource().getExtent();
                 } else if(vm.initGeojson.length) {
                     vm.initGeojson.forEach(geojson => {
-                        const feature = vm.geoJsonFormat.readFeature(geojson);
+                        let feature = vm.geoJsonFormat.readFeature(geojson.geom);
+                        feature.setProperties(geojson.props);
+                        if(geojson.props.color) {
+                            feature.setStyle(vm.createStyle(geojson.props.color));
+                        }
                         source.addFeature(feature);
                     });
                     vm.extent = vm.vector.getSource().getExtent();
@@ -240,6 +230,9 @@
                             this.modifiedFeatures[newFeature.ol_uid] = newFeature;
                         }, this);
                     },
+                    getActive: function() {
+                        return this.select.getActive() || this.modify.getActive();
+                    },
                     setActive: function(active, cancelled) {
                         this.select.setActive(active);
                         this.modify.setActive(active);
@@ -284,6 +277,9 @@
                                 source.removeFeature(feature);
                             }
                         }, this);
+                    },
+                    getActive: function() {
+                        return this.select.getActive();
                     },
                     setActive: function(active, cancelled) {
                         this.select.setActive(active);
@@ -341,6 +337,48 @@
                 if(vm.extent.length) {
                     vm.map.getView().fit(vm.extent);
                 }
+
+                vm.overlay = new Overlay({
+                    element: document.getElementById('popup')
+                });
+                vm.map.addOverlay(vm.overlay);
+
+                vm.map.on('click', function(e) {
+                    const element = vm.overlay.getElement();
+                    $(element).popover('dispose');
+                    // if one mode is active, do not open popup
+                    if(vm.draw.getActive() || vm.modify.getActive() || vm.delete.getActive()) {
+                        return;
+                    }
+                    let features = vm.map.getFeaturesAtPixel(e.pixel);
+                    if(features) {
+                        let feature = features[0];
+                        let geometry = feature.getGeometry();
+                        let props = feature.getProperties();
+                        let coords = extent.getCenter(geometry.getExtent());
+                        vm.overlay.setPosition(coords);
+                        let transformGeom = geometry.clone().transform('EPSG:4326', 'EPSG:3857');
+                        const coordHtml = vm.geometryToList(transformGeom);
+                        const content = `<dl>
+                        <dt>Type</dt>
+                        <dd>${transformGeom.getType()}</dd>
+                        <dt>Coordinates</dt>
+                        <dd>${coordHtml}</dd>
+                        </dl>`;
+
+                        vm.selectedFeature.id = props.id;
+                        $(element).popover({
+                            placement: 'top',
+                            animation: true,
+                            html: true,
+                            content: content,
+                            title: `Geometry #${vm.selectedFeature.id}`
+                        });
+                        $(element).popover('show');
+                    } else {
+                        vm.selectedFeature = {};
+                    }
+                });
 
                 vm.draw.init();
                 vm.modify.init();
@@ -412,6 +450,29 @@
                     this.modify.setActive(false, cancelled);
                 }
             },
+            createStyle(color) {
+                const defaultColor = '#ffcc33';
+                const activeColor = color || defaultColor;
+                return new Style({
+                    fill: new Fill({
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    }),
+                    stroke: new Stroke({
+                        color: color || activeColor,
+                        width: 2
+                    }),
+                    image: new Circle({
+                        radius: 7,
+                        fill: new Fill({
+                            color: color || activeColor
+                        }),
+                        stroke: new Stroke({
+                            color: 'rgba(0, 0, 0, 0.2)',
+                            width: 2
+                        })
+                    })
+                })
+            },
             drawFeature(feature) {
                 if(this.reset) {
                     let source = this.vector.getSource();
@@ -438,6 +499,43 @@
             },
             cancelDeleteFeatures() {
                 this.setInteractionMode('', true);
+            },
+            geometryToList(g) {
+                let coordHtml = '<ul class="list-group list-group-flush">';
+                const coords = g.getCoordinates();
+                switch(g.getType()) {
+                    case 'Point':
+                        coordHtml += this.coordinateToListElement(coords)
+                        break;
+                    case 'LineString':
+                    case 'MultiPoint':
+                        coords.forEach(c => {
+                            coordHtml += this.coordinateToListElement(c);
+                        });
+                        break;
+                    case 'Polygon':
+                    case 'MultiLineString':
+                        coords.forEach(cg => {
+                            cg.forEach(c => {
+                                coordHtml += this.coordinateToListElement(c);
+                            });
+                        });
+                        break;
+                    case 'MultiPolygon':
+                        coords.forEach(cg => {
+                            cg.forEach(cg2 => {
+                                cg2.forEach(c => {
+                                    coordHtml += this.coordinateToListElement(c);
+                                });
+                            });
+                        });
+                        break;
+                }
+                coordHtml += '</ul>';
+                return coordHtml;
+            },
+            coordinateToListElement(c) {
+                return '<li class="list-group-item pl-0">'+Coordinate.toStringXY(c, 4)+'</li>';
             }
         },
         data() {
@@ -445,6 +543,7 @@
                 drawType: '',
                 interactionMode: '',
                 map: {},
+                overlay: {},
                 vector: {},
                 modify: {},
                 draw: {},
@@ -452,6 +551,7 @@
                 snap: {},
                 options: {},
                 extent: [],
+                selectedFeature: {},
                 wktFormat: new WKT(),
                 geoJsonFormat: new GeoJSON()
             }
