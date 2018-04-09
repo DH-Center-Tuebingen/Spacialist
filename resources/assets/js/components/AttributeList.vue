@@ -109,7 +109,7 @@
                 <div v-else-if="attribute.datatype == 'list'">
                     <div class="input-group">
                         <div class="input-group-prepend">
-                            <button type="button" class="btn btn-outline-secondary" :disabled="attribute.isDisabled" v-on:click="toggleList(attribute.id)">
+                            <button type="button" class="btn btn-outline-secondary" :disabled="attribute.isDisabled" @click="toggleList(attribute.id)">
                                 <div v-show="!expands[attribute.id]">
                                     <i class="fas fa-fw fa-caret-up"></i>
                                     <span v-if="localValues[attribute.id].value && localValues[attribute.id].value.length">
@@ -123,7 +123,7 @@
                         </div>
                         <input type="text" class="form-control" :disabled="attribute.isDisabled" v-model="inputs[attribute.id]" />
                         <div class="input-group-append">
-                            <button type="button" class="btn btn-success" v-on:click="addListEntry(attribute.id)">
+                            <button type="button" class="btn btn-success" @click="addListEntry(attribute.id)">
                                 <i class="fas fa-fw fa-plus"></i>
                             </button>
                         </div>
@@ -388,13 +388,13 @@
                 Vue.set(this.hovered, i, false);
             },
             addListEntry(id) {
-                if(!this.localValues[id]) {
-                    Vue.set(this.localValues, id, []);
+                if(!this.localValues[id].value) {
+                    this.localValues[id].value = [];
                 }
-                this.localValues[id].push(this.inputs[id]);
+                this.localValues[id].value.push(this.inputs[id]);
             },
             removeListEntry(id, index) {
-                this.localValues[id].splice(index, 1);
+                this.localValues[id].value.splice(index, 1);
             },
             toggleList(id) {
                 if(!this.expands[id] && this.expands !== false) {
