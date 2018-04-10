@@ -50,6 +50,7 @@
     import View from 'ol/view';
 
     import FullScreen from 'ol/control/fullscreen';
+    import OverviewMap from 'ol/control/overviewmap';
     import Rotate from 'ol/control/rotate';
     import ScaleLine from 'ol/control/scaleline';
 
@@ -306,6 +307,7 @@
                 vm.map = new Map({
                     controls: control.defaults().extend([
                         new FullScreen(),
+                        new OverviewMap(),
                         new Rotate(),
                         new ScaleLine()
                     ]),
