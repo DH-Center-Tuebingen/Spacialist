@@ -354,7 +354,9 @@
                     if(vm.draw.getActive() || vm.modify.getActive() || vm.delete.getActive()) {
                         return;
                     }
-                    let features = vm.map.getFeaturesAtPixel(e.pixel);
+                    let features = vm.map.getFeaturesAtPixel(e.pixel, {
+                        hitTolerance: 5
+                    });
                     if(features) {
                         let feature = features[0];
                         let geometry = feature.getGeometry();
