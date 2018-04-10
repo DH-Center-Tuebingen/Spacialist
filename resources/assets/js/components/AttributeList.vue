@@ -27,7 +27,7 @@
                 <span class="text-right col">
                     {{concepts[attribute.thesaurus_url].label}}:
                 </span>
-                <sup class="clickable" v-if="onMetadata">
+                <sup class="clickable" v-if="onMetadata" @click="onMetadata(attribute)">
                     <span>
                         <i class="fas fa-fw fa-exclamation"
                         :class="{

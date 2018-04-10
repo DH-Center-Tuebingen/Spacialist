@@ -156,6 +156,123 @@
                 </div>
             </div>
         </modal>
+
+        <modal name="entity-references-modal" width="50%" :scrollable="true" :draggable="true" :resizable="true">
+            <div class="modal-content h-100">
+                <div class="modal-header">
+                    <h5 class="modal-title">References</h5>
+                    <button type="button" class="close" aria-label="Close" @click="hideEntityReferenceModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body col col-md-8 offset-md-2 scroll-y-auto" v-if="referenceModal.active">
+                    <h4>Certainty</h4>
+                    <div class="progress" @click="setCertainty">
+                        <div class="progress-bar" role="progressbar" :class="{'bg-danger': referenceModal.attributeValue.possibility <= 25, 'bg-warning': referenceModal.attributeValue.possibility <= 50, 'bg-info': referenceModal.attributeValue.possibility <= 75, 'bg-success': referenceModal.attributeValue.possibility > 75}" :aria-valuenow="referenceModal.attributeValue.possibility" aria-valuemin="0" aria-valuemax="100" :style="{width: referenceModal.attributeValue.possibility+'%'}">
+                            <span class="sr-only">
+                                {{ referenceModal.attributeValue.possibility }}% certainty
+                            </span>
+                            {{ referenceModal.attributeValue.possibility }}%
+                        </div>
+                    </div>
+                    <form role="form" class="mt-2" @submit.prevent="updateCertainty">
+                        <div class="form-group">
+                            <textarea class="form-control" v-model="referenceModal.attributeValue.possibility_description" placeholder="Certainty Comment"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="fas fa-fw fa-save"></i> Update Certainty
+                            </button>
+                        </div>
+                    </form>
+                    <h4 class="mt-3">References</h4>
+                    <table class="table table-hover">
+                        <tbody>
+                            <tr v-for="reference in referenceModal.references">
+                                <td class="text-left py-2">
+                                    <h6>{{ reference.bibliography.title }}</h6>
+                                    <p class="mb-0">
+                                        {{ reference.bibliography.author }} <span class="text-lightgray">{{ reference.bibliography.year}}</span>
+                                    </p>
+                                </td>
+                                <td class="text-right py-2">
+                                    <p class="font-weight-light font-italic mb-0" v-if="referenceModal.editReference.id != reference.id">
+                                        {{ reference.description }}
+                                    </p>
+                                    <div class="d-flex" v-else>
+                                        <input type="text" class="form-control mr-1" v-model="referenceModal.editReference.description" />
+                                        <button type="button" class="btn btn-outline-success mr-1" @click="updateReference(referenceModal.editReference)">
+                                            <i class="fas fa-fw fa-check"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" @click="cancelEditReference">
+                                            <i class="fas fa-fw fa-times"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-fw fa-ellipsis-h"></i>
+                                        </span>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item" href="#" @click="enableEditReference(reference)">
+                                                <i class="fas fa-fw fa-edit text-info"></i> Edit
+                                            </a>
+                                            <a class="dropdown-item" href="#" @click="deleteReference(reference)">
+                                                <i class="fas fa-fw fa-trash text-danger"></i> Delete
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <h5>Add new Reference</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <multiselect
+                                label="title"
+                                track-by="id"
+                                v-model="referenceModal.newItem.bibliography"
+                                :closeOnSelect="true"
+                                :hideSelected="true"
+                                :multiple="false"
+                                :options="bibliography">
+                                <template slot="singleLabel" slot-scope="props">
+                                    <span class="option__desc">
+                                        <span class="option__title">
+                                            {{ props.option.title }}
+                                        </span>
+                                    </span>
+                                </template>
+                                <template slot="option" slot-scope="props">
+                                    <div class="option__desc">
+                                        <span class="option__title d-block">
+                                            {{ props.option.title }}
+                                        </span>
+                                        <span class="option__small">
+                                            {{ props.option.author }}
+                                            <span class="text-lightgray">{{ props.option.year}}</span>
+                                        </span>
+                                    </div>
+                                </template>
+                            </multiselect>
+                        </div>
+                        <div class="col-md-6">
+                            <textarea class="form-control" v-model="referenceModal.newItem.description" placeholder="Reference Comment"></textarea>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline-success col-md-12 mt-2" :disabled="addReferenceDisabled" @click="addReference(referenceModal.newItem)">
+                        <i class="fas fa-fw fa-plus"></i> Add Reference
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="hideEntityReferenceModal">
+                        <i class="fas fa-fw fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </modal>
     </div>
 </template>
 
@@ -164,6 +281,11 @@
 
     export default {
         props: {
+            bibliography: {
+                required: false,
+                type: Array,
+                default: []
+            },
             concepts: {
                 required: false, // TODO required?
                 type: Object
@@ -236,7 +358,7 @@
                         data.selections = {};
                     }
                     Vue.set(vm.selectedContext, 'selections', data.selections);
-                    return vm.$http.get('/api/context/'+cid+'/references');
+                    return vm.$http.get('/api/context/'+cid+'/reference');
                 }).then(function(response) {
                     let data = response.data;
                     if(data instanceof Array) {
@@ -246,8 +368,105 @@
                     Vue.set(vm, 'dataLoaded', true);
                 });
             },
-            showMetadata() {
-
+            showMetadata(attribute) {
+                Vue.set(this.referenceModal, 'attribute', Object.assign({}, attribute));
+                Vue.set(this.referenceModal, 'attributeValue', Object.assign({}, this.selectedContext.data[attribute.id]));
+                Vue.set(this.referenceModal, 'references', this.selectedContext.references[attribute.thesaurus_url].slice());
+                Vue.set(this.referenceModal, 'active', true);
+                Vue.set(this.referenceModal, 'editReference', {});
+                Vue.set(this.referenceModal, 'newItem', {bibliography: {}, description: ''});
+                this.$modal.show('entity-references-modal');
+            },
+            hideEntityReferenceModal() {
+                this.referenceModal = {};
+                this.$modal.hide('entity-references-modal');
+            },
+            setCertainty(event) {
+                const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
+                const clickPos = event.layerX; // in px
+                const currentValue = this.referenceModal.attributeValue.possibility;
+                let value = parseInt(clickPos/maxSize*100);
+                const diff = Math.abs(value-currentValue);
+                if(diff < 10) {
+                    if(value > currentValue) {
+                        value = parseInt((value+10)/10)*10;
+                    } else {
+                        value = parseInt(value/10)*10;
+                    }
+                } else {
+                    value = parseInt((value+5)/10)*10;
+                }
+                Vue.set(this.referenceModal.attributeValue, 'possibility', value);
+            },
+            updateCertainty() {
+                const vm = this;
+                const cid = vm.selectedContext.id;
+                const aid = vm.referenceModal.attribute.id;
+                const oldData = vm.selectedContext.data[aid];
+                const newData = vm.referenceModal.attributeValue;
+                if(newData.possibility == oldData.possibility && newData.possibility_description == oldData.possibility_description) {
+                    return;
+                }
+                const data = {
+                    certainty: newData.possibility,
+                    certainty_description: newData.possibility_description
+                };
+                vm.$http.patch(`/api/context/${cid}/attribute/${aid}`, data).then(function(response) {
+                    oldData.possibility = newData.possibility;
+                    oldData.possibility_description = newData.possibility_description;
+                });
+            },
+            addReference(item) {
+                const vm = this;
+                const cid = vm.selectedContext.id;
+                const aid = vm.referenceModal.attribute.id;
+                if(this.addReferenceDisabled) {
+                    return;
+                }
+                const data = {
+                    bibliography_id: item.bibliography.id,
+                    description: item.description
+                };
+                vm.$http.post(`/api/context/${cid}/reference/${aid}`, data).then(function(response) {
+                    let refs = vm.selectedContext.references[vm.referenceModal.attribute.thesaurus_url];
+                    refs.push(response.data);
+                    Vue.set(vm.referenceModal, 'references', refs.slice());
+                });
+            },
+            deleteReference(reference) {
+                const vm = this;
+                const id = reference.id;
+                vm.$http.delete(`/api/reference/${id}`).then(function(response) {
+                    let refs = vm.selectedContext.references[vm.referenceModal.attribute.thesaurus_url];
+                    const index = refs.findIndex(r => r.id == reference.id);
+                    if(index > -1) {
+                        refs.splice(index, 1);
+                        Vue.set(vm.referenceModal, 'references', refs.slice());
+                    }
+                });
+            },
+            enableEditReference(reference) {
+                Vue.set(this.referenceModal, 'editReference', Object.assign({}, reference));
+            },
+            cancelEditReference() {
+                Vue.set(this.referenceModal, 'editReference', {});
+            },
+            updateReference(referenceClone) {
+                const vm = this;
+                const id = referenceClone.id;
+                let refs = vm.selectedContext.references[vm.referenceModal.attribute.thesaurus_url];
+                let ref = refs.find(r => r.id == referenceClone.id);
+                if(ref.description == referenceClone.description) {
+                    return;
+                }
+                const data = {
+                    description: referenceClone.description
+                };
+                vm.$http.patch(`/api/reference/${id}`, data).then(function(response) {
+                    ref.description = referenceClone.description;
+                    Vue.set(vm.referenceModal, 'references', refs.slice());
+                    vm.cancelEditReference();
+                });
             },
             addNewEntity(entity) {
                 if(!entity.name) return;
@@ -374,6 +593,7 @@
             return {
                 selectedContext: {},
                 toDeleteEntity: {},
+                referenceModal: {},
                 newEntity: {},
                 dataLoaded: false,
                 defaultKey: undefined,
@@ -385,6 +605,9 @@
             this.$getSpacialistPlugins('plugins');
         },
         computed: {
+            addReferenceDisabled: function() {
+                return !this.referenceModal.newItem.bibliography.id || this.referenceModal.newItem.description.length == 0;
+            },
             hasReferences: function() {
                 return this.selectedContext.references && Object.keys(this.selectedContext.references).length;
             },

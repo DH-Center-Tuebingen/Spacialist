@@ -20,6 +20,39 @@ class Reference extends Model
         'lasteditor',
     ];
 
+    const rules = [
+        'bibliography_id' => 'required|integer|exists:literature,id',
+        'description' => 'string|nullable'
+    ];
+
+    const patchRules = [
+        'description' => 'string|nullable'
+    ];
+
+    public static function add($values) {
+        $reference = new self();
+        foreach($values as $k => $v) {
+            // TODO remove after table/column renaming
+            if($k == 'bibliography_id') {
+                $reference->literature_id = $v;
+            } else {
+                $reference->{$k} = $v;
+            }
+        }
+        $reference->lasteditor = 'Admin'; // TODO
+        $reference->save();
+        $reference->bibliography; // Retrieve bibliography relation
+
+        return $reference;
+    }
+
+    public function patch($values) {
+        foreach($values as $k => $v) {
+            $this->{$k} = $v;
+        }
+        $this->save();
+    }
+
     public function context() {
         return $this->belongsTo('App\Context');
     }

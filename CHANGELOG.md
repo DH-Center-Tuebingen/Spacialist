@@ -12,6 +12,8 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - DICOM Support
 - Added Welcome Page
   - Maintainer (Name and E-Mail-Address), Project Description and Access (Public/Private) can be configured in settings
+- Reference Modal
+  - Options (Edit/Delete) to reference list
 - BibTeX export
 ### Changed
 - Moved from Lumen (5.3) to Laravel (5.6)

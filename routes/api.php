@@ -30,14 +30,18 @@ Route::get('/version', function() {
 // CONTEXT
 Route::get('/context/{id}/data', 'ContextController@getData')->where('id', '[0-9]+');
 Route::get('/context/{id}/children', 'ContextController@getChildren')->where('id', '[0-9]+');
-Route::get('/context/{id}/references', 'ReferenceController@getByContext')->where('id', '[0-9]+');
+Route::get('/context/{id}/reference', 'ReferenceController@getByContext')->where('id', '[0-9]+');
 Route::get('/context/byParent/{id}', 'ContextController@getEntitiesByParent')->where('id', '[0-9]+');
 
 Route::post('/context', 'ContextController@addEntity');
+Route::post('/context/{id}/reference/{aid}', 'ReferenceController@addReference')->where('id', '[0-9]+')->where('aid', '[0-9]+');
 
-Route::patch('/context/{id}/attributes', 'ContextController@patchAttributes');
+Route::patch('/context/{id}/attributes', 'ContextController@patchAttributes')->where('id', '[0-9]+');
+Route::patch('/context/{id}/attribute/{aid}', 'ContextController@patchAttribute')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+Route::patch('/reference/{id}', 'ReferenceController@patchReference')->where('id', '[0-9]+');
 
 Route::delete('/context/{id}', 'ContextController@deleteContext')->where('id', '[0-9]+');
+Route::delete('/reference/{id}', 'ReferenceController@delete')->where('id', '[0-9]+');
 
 // SEARCH
 Route::get('/search/context', 'SearchController@searchContextByName');

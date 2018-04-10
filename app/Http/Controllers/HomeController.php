@@ -71,7 +71,10 @@ class HomeController extends Controller
 
         $roots = Context::getEntitiesByParent();
 
+        $bibliography = Bibliography::all();
+
         $data = [
+            'bibliography' => $bibliography,
             'concepts' => $conceptMap,
             'contextTypes' => $contextTypeMap,
             'roots' => $roots

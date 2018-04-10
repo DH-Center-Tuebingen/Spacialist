@@ -143,6 +143,35 @@ class ContextController extends Controller {
         //TODO
     }
 
+    public function patchAttribute($id, $aid, Request $request) {
+        $this->validate($request, AttributeValue::patchRules);
+
+        try {
+            $context = Context::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ], 400);
+        }
+        try {
+            $attribute = Attribute::findOrFail($aid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This attribute does not exist'
+            ], 400);
+        }
+
+        $attrs = AttributeValue::where('context_id', $id)
+            ->where('attribute_id', $aid)
+            ->get();
+        $values = $request->only(array_keys(AttributeValue::patchRules));
+        foreach($attrs as $a) {
+            $a->patch($values);
+        }
+
+        return response()->json(null, 204);
+    }
+
     // DELETE
 
     public function deleteContext($id) {
