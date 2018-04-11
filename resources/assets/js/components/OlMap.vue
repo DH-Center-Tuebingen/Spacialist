@@ -68,6 +68,7 @@
     import Select from 'ol/interaction/select';
     import Snap from 'ol/interaction/snap';
 
+    import Group from 'ol/layer/group';
     import TileLayer from 'ol/layer/tile';
     import VectorLayer from 'ol/layer/vector';
 
@@ -78,6 +79,9 @@
     import Fill from 'ol/style/fill';
     import Stroke from 'ol/style/stroke';
     import Style from 'ol/style/style';
+
+    import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
+    import '../../sass/ol-ext-layerswitcher.scss';
 
     export default {
         props: {
@@ -121,6 +125,11 @@
             // wait for DOM to be rendered
             vm.$nextTick(function() {
                 vm.vector = new VectorLayer({
+                    baseLayer: false,
+                    displayInLayerSwitcher: true,
+                    title: 'All Entities',
+                    visible: true,
+                    layer: 'entity',
                     source: new Vector({
                         wrapX: false
                     }),
@@ -304,9 +313,39 @@
                     }
                 };
 
+                let baselayers = new Group({
+                    title: 'Base Layers',
+                    openInLayerSwitcher: true,
+                    layers: [
+                        new TileLayer({
+                            title: 'OpenStreetMap',
+                            baseLayer: true,
+                            displayInLayerSwitcher: true,
+                            visible: true,
+                            layer: 'osm',
+                            source: new OSM({
+                                wrapX: false
+                            })
+                        }),
+                    ]
+                });
+                let overlays = new Group({
+                    title: 'Overlays',
+                    openInLayerSwitcher: true,
+                    layers: []
+                });
+                let entityLayers = new Group({
+                    title: 'Entity Layers',
+                    openInLayerSwitcher: true,
+                    layers: [
+                        vm.vector
+                    ]
+                });
+
                 vm.map = new Map({
                     controls: control.defaults().extend([
                         new FullScreen(),
+                        new LayerSwitcher(),
                         new OverviewMap(),
                         new Rotate(),
                         new ScaleLine()
@@ -321,14 +360,7 @@
                         new PinchRotate(),
                         new PinchZoom(),
                     ]),
-                    layers: [
-                        new TileLayer({
-                            source: new OSM({
-                                wrapX: false
-                            })
-                        }),
-                        vm.vector
-                    ],
+                    layers: [baselayers, overlays, entityLayers],
                     target: 'map',
                     view: new View({
                         center: [0, 0],

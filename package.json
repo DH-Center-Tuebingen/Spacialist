@@ -51,6 +51,7 @@
         "debounce": "^1.1.0",
         "moment": "^2.20.1",
         "ol": "^4.6.4",
+        "ol-ext": "^2.0.1",
         "popper.js": "^1.12.9",
         "screenfull": "^3.3.2",
         "threejs-full-es6": "^5.0.2",
