@@ -162,6 +162,7 @@
             @yield('content')
             <about-dialog></about-dialog>
         </div>
+        <notifications group="spacialist" position="bottom left" class="m-2" />
     </div>
 
     <!-- Scripts -->

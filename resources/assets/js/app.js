@@ -8,6 +8,7 @@ import Axios from 'axios';
 import VueUploadComponent from 'vue-upload-component';
 import moment from 'moment';
 import VeeValidate from 'vee-validate';
+import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
 
 fontawesome.library.add(solid, regular, brands);
@@ -34,6 +35,7 @@ $ = jQuery  = window.$ = window.jQuery = require('jquery');
 Vue.prototype.$http = Axios;
 Vue.use(VModal);
 Vue.use(VeeValidate);
+Vue.use(Notifications);
 Vue.use(SpacialistPluginSystem);
 
 // Imported Components
@@ -104,6 +106,18 @@ Vue.filter('bibtexify', function(value, type) {
     rendered += "</code></pre>";
     return rendered;
 });
+
+Vue.prototype.$showToast = function(title, text, type, duration) {
+    type = type || 'info'; // success, info, warn, error
+    duration = duration || 2000;
+    this.$notify({
+        group: 'spacialist',
+        title: title,
+        text: text,
+        type: type,
+        duration: duration
+    });
+};
 
 const app = new Vue({
     el: '#app',
