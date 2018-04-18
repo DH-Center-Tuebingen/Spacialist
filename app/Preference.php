@@ -32,6 +32,19 @@ class Preference extends Model
         return $prefObj;
     }
 
+    public static function getUserPreference($uid, $label) {
+        $pref = self::leftJoin('user_preferences as up', 'preferences.id', '=', 'up.pref_id')
+            ->select('preferences.*')
+            ->selectRaw(\DB::raw('COALESCE(up.value, default_value) AS default_value'))
+            ->where('label', $label)
+            ->where('up.user_id', $uid)
+            ->orWhereNull('up.user_id')
+            ->first();
+        $pref->value = self::decodePreference($pref->label, json_decode($pref->default_value));
+        unset($pref->default_value);
+        return $pref;
+    }
+
     public static function hasPublicAccess() {
         $value = self::where('label', 'prefs.project-maintainer')->value('default_value');
         $decodedValue = json_decode($value);

@@ -30,6 +30,12 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    public function getLanguage() {
+        $langObj = Preference::getUserPreference($this->id, 'prefs.gui-language');
+        if(isset($langObj)) return $langObj->value;
+        return 'en';
+    }
+
     public function preferences() {
         return $this->hasMany('App\UserPreference');
     }
