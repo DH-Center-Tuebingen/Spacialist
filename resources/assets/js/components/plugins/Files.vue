@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="d-flex flex-column h-100">
         <div class="d-flex justify-content-around align-items-center mb-2">
             <button style="button" class="btn btn-outline-secondary" :class="{disabled: !context.id}" @click="setAction('linked')">
                 <i class="fas fa-fw fa-link"></i> Linked Files <span class="badge badge-primary" v-show="context.id">{{linkedFiles.files.length}}</span>
@@ -14,13 +14,13 @@
                 <i class="fas fa-fw fa-upload"></i> Upload Files
             </button>
         </div>
-        <div v-show="isAction('linked')">
+        <div class="col" v-show="isAction('linked')">
             <file-list :files="linkedFiles.files" :on-click="showFileModal" :on-load-chunk="linkedFiles.loadChunk" :file-state="linkedFiles.fileState" :is-fetching="linkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
         </div>
-        <div v-show="isAction('unlinked')">
+        <div class="col" v-show="isAction('unlinked')">
             <file-list :files="unlinkedFiles.files" :on-click="showFileModal" :on-load-chunk="unlinkedFiles.loadChunk" :file-state="unlinkedFiles.fileState" :is-fetching="unlinkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
         </div>
-        <div v-show="isAction('all')">
+        <div class="col" v-show="isAction('all')">
             <file-list :files="allFiles.files" :on-click="showFileModal" :on-load-chunk="allFiles.loadChunk" :file-state="allFiles.fileState" :is-fetching="allFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
         </div>
         <div v-if="isAction('upload')">

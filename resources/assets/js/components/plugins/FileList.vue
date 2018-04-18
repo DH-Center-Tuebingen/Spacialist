@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <div class="h-100 d-flex flex-column">
         Displaying {{fileState.from}}-{{fileState.to}} of {{fileState.total}} files
-        <div class="row" infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk">
+        <div class="row col px-0 scroll-y-auto" infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk">
             <div class="col-sm-6 col-md-4 mb-3" v-for="file in files">
                 <hsc-menu-style-white class="d-inline-block w-100">
                     <hsc-menu-context-menu class="d-inline-block w-100">
