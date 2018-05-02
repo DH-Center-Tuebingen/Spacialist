@@ -47,9 +47,9 @@
         Vector3,
         ViveController,
         WebGLRenderer,
-    } from 'threejs-full-es6';
-    import {SpotLight} from 'threejs-full-es6/sources/lights/SpotLight.js';
-    import {WebVR} from 'threejs-full-es6/sources/vr/WebVR.js';
+    } from 'three-full';
+    import {SpotLight} from 'three-full/sources/lights/SpotLight.js';
+    import {WebVR} from 'three-full/sources/vr/WebVR.js';
 
     export default {
         props: {

@@ -60,7 +60,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'ol',
        'popper.js',
        'screenfull',
-       'threejs-full-es6',
+       'three-full',
        'transliteration',
        'vee-validate',
        'vue',
