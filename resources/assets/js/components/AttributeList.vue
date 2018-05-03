@@ -213,12 +213,13 @@
                         <tbody>
                             <tr v-for="(row, $index) in localValues[attribute.id].value">
                                 <td v-for="col in row">
-                                    <input class="form-control" v-if="col.datatype == 'string'" type="text" v-model="col.value"/>
-                                    <input class="form-control" v-else-if="col.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="col.value"/>
-                                    <input class="form-control" v-else-if="col.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="col.value"/>
-                                    <input class="form-control" v-else-if="col.datatype == 'boolean'" type="checkbox" v-model="col.value"/>
+                                    <input class="form-control form-control-sm" v-if="col.datatype == 'string'" type="text" v-model="col.value"/>
+                                    <input class="form-control form-control-sm" v-else-if="col.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="col.value"/>
+                                    <input class="form-control form-control-sm" v-else-if="col.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="col.value"/>
+                                    <input class="form-control form-control-sm" v-else-if="col.datatype == 'boolean'" type="checkbox" v-model="col.value"/>
                                     <div v-else-if="col.datatype == 'string-sc'">
                                         <multiselect
+                                            class="multiselect-sm"
                                             label="concept_url"
                                             track-by="id"
                                             v-model="col.value"
@@ -233,19 +234,20 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <button type="button" class="btn btn-danger btn-xs" @click="deleteTableRow(attribute.id, $index)">
+                                    <button type="button" class="btn btn-danger btn-sm" @click="deleteTableRow(attribute.id, $index)">
                                         <i class="fas fa-fw fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
                             <tr>
                                 <td v-for="columnNames in attribute.columns">
-                                    <input class="form-control" v-if="columnNames.datatype == 'string'" type="text" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                    <input class="form-control" v-else-if="columnNames.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                    <input class="form-control" v-else-if="columnNames.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                    <input class="form-control" v-else-if="columnNames.datatype == 'boolean'" type="checkbox" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                    <input class="form-control form-control-sm" v-if="columnNames.datatype == 'string'" type="text" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                    <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                    <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                    <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'boolean'" type="checkbox" v-model="newTableCols[attribute.id][columnNames.id]"/>
                                     <div v-else-if="columnNames.datatype == 'string-sc'">
                                         <multiselect
+                                            class="multiselect-sm"
                                             label="concept_url"
                                             track-by="id"
                                             v-model="newTableCols[attribute.id][columnNames.id]"
@@ -260,7 +262,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <button type="button" class="btn btn-success btn-xs" @click="addTableRow(attribute.id, newTableCols[attribute.id], attribute.columns)">
+                                    <button type="button" class="btn btn-success btn-sm" @click="addTableRow(attribute.id, newTableCols[attribute.id], attribute.columns)">
                                         <i class="fas fa-fw fa-plus"></i>
                                     </button>
                                 </td>
