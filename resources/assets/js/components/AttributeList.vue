@@ -270,6 +270,31 @@
                         </tbody>
                     </table>
                 </div>
+                <div v-else-if="attribute.datatype == 'sql'">
+                    <div v-if="isArray(localValues[attribute.id].value)">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hovered table-sm">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th v-for="(columnNames, index) in localValues[attribute.id].value[0]">
+                                            {{ getConceptLabel(index) }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(row, $index) in localValues[attribute.id].value">
+                                        <td v-for="column in row">
+                                            {{ getConceptLabel(column) }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div v-else>
+                        {{ localValues[attribute.id].value }}
+                    </div>
+                </div>
                 <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  :name="'attribute-'+attribute.id" v-validate=""/>
             </div>
         </div>
@@ -469,11 +494,15 @@
                 this.newGeoValue = undefined;
                 this.selectedAttribute = -1;
             },
-            translateLabel(element, label) {
-                let value = element[label];
+            translateLabel(element, prop) {
+                const value = element[prop];
                 if(!value) return element;
-                let concept = this.concepts[element[label]];
-                if(!concept) return element;
+                return this.getConceptLabel(value);
+            },
+            getConceptLabel(url)  {
+                if(!url) return url;
+                const concept = this.concepts[url];
+                if(!concept) return url;
                 return concept.label;
             },
             // Vue.Draggable methods
@@ -513,6 +542,9 @@
                 });
                 // move is only allowed, if dragged element is not part of the list
                 return index == -1;
+            },
+            isArray(arr) {
+                return Array.isArray(arr);
             },
             isDirty(fieldname) {
                 if(this.fields[fieldname]) {

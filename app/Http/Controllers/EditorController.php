@@ -160,6 +160,10 @@ class EditorController extends Controller {
             [
                 'datatype' => 'table',
                 'description' => 'attribute.table.desc'
+            ],
+            [
+                'datatype' => 'sql',
+                'description' => 'attribute.sql.desc'
             ]
         ]);
     }
@@ -219,7 +223,8 @@ class EditorController extends Controller {
             'label_id' => 'required|integer|exists:th_concept,id',
             'datatype' => 'required|string',
             'root_id' => 'nullable|integer|exists:th_concept,id',
-            'columns' => 'nullable|json'
+            'columns' => 'nullable|json',
+            'text' => 'string'
         ]);
 
         $lid = $request->get('label_id');
@@ -232,6 +237,9 @@ class EditorController extends Controller {
             $pid = $request->get('root_id');
             $purl = ThConcept::find($pid)->concept_url;
             $attr->thesaurus_root_url = $purl;
+        }
+        if($request->has('text')) {
+            $attr->text = $request->get('text');
         }
         $attr->save();
 

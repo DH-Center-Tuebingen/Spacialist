@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Attribute;
 use App\AttributeValue;
 use App\Context;
+use App\ContextAttribute;
 use App\ContextType;
 use App\ContextTypeRelation;
 use App\ThConcept;
@@ -26,7 +27,7 @@ class ContextController extends Controller {
 
     public function getData($id) {
         try {
-            Context::findOrFail($id);
+            $context = Context::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This context does not exist'
@@ -73,6 +74,36 @@ class ContextController extends Controller {
         }
         foreach($values as $k => $v) {
             $data[$k]->value = $v;
+        }
+
+        $sqls = ContextAttribute::join('attributes', 'attributes.id', '=', 'attribute_id')
+            ->where('context_type_id', $context->context_type_id)
+            ->where('datatype', 'sql')
+            ->get();
+        foreach($sqls as $sql) {
+            // if entity_id is referenced several times
+            // add an incrementing counter, so the
+            // references are unique (required by PDO)
+            $cnt = substr_count($sql->text, ':entity_id');
+            if($cnt > 1) {
+                $safes = [];
+                for($i=0; $i<$cnt; $i++) {
+                    $safes[':entity_id_'.$i] = $id;
+                }
+                $i = 0;
+                $text = preg_replace_callback('/:entity_id/', function($matches) use (&$i) {
+                    return $matches[0].'_'.$i++;
+                }, $sql->text);
+            } else {
+                $text = $sql->text;
+                $safes = [
+                    ':entity_id' => $id
+                ];
+            }
+            $raw = \DB::raw($text);
+            $data[$sql->attribute_id] = [
+                'value' => \DB::select($text, $safes)
+            ];
         }
 
         return response()->json($data);

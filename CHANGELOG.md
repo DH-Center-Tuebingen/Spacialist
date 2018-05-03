@@ -15,6 +15,10 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
 - Reference Modal
   - Options (Edit/Delete) to reference list
 - BibTeX export
+- SQL Attribute Type
+  - Rendered as Table
+  - Supports translations (Use `concept_url` as header/content)
+  - Supports `:entity_id` as placeholder for current selected entity
 ### Changed
 - Moved from Lumen (5.3) to Laravel (5.6)
 - Moved from AngularJS (1.5) to Vue.js (2.5)

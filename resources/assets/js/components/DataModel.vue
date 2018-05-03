@@ -1,11 +1,12 @@
 <template>
-    <div class="row d-flex flex-row of-hidden col">
-        <div class="col-md-5">
+    <div class="row d-flex flex-row of-hidden col h-100">
+        <div class="col-md-5 h-100 d-flex flex-column">
             <h4>Available Attributes</h4>
-            <button type="button" class="btn btn-success" @click="onCreateAttribute">
+            <button type="button" class="btn btn-success mb-2" @click="onCreateAttribute">
                 <i class="fas fa-fw fa-plus"></i> Add Attribute
             </button>
             <attributes
+                class="col scroll-y-auto"
                 group="attributes"
                 :attributes="localAttributes"
                 :values="localAttributeValues"
@@ -26,7 +27,7 @@
                 :on-select="setContextType">
             </context-types>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-5 h-100 d-flex flex-column">
             <h4>Properties</h4>
             <form role="form" v-on:submit.prevent="updateContextType" v-if="contextType.id">
                 <div class="form-group row">
@@ -71,6 +72,7 @@
             </form>
             <h4>Added Attributes</h4>
             <attributes
+                class="col scroll-y-auto"
                 group="attributes"
                 :attributes="contextAttributes"
                 :values="contextValues"
@@ -167,6 +169,14 @@
                                 <label-search
                                     :on-select="setAttributeRoot"
                                 ></label-search>
+                            </div>
+                        </div>
+                        <div class="form-group" v-show="needsTextElement">
+                            <label class="col-form-label col-md-3">
+                                Content:
+                            </label>
+                            <div class="col-md-9">
+                                <textarea class="form-control" v-model="newAttribute.textContent"></textarea>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-success" :disabled="!validated">
@@ -282,6 +292,9 @@
                 }
                 if(this.needsRootElement) {
                     data.root_id = attribute.root.id;
+                }
+                if(this.needsTextElement) {
+                    data.text = attribute.textContent;
                 }
                 this.$http.post('/api/editor/dm/attribute', data).then(function(response) {
                     attributes.push(response.data);
@@ -581,6 +594,12 @@
                         this.newAttribute.type.datatype == 'epoch'
                     );
             },
+            needsTextElement: function() {
+                return this.newAttribute.type &&
+                    (
+                        this.newAttribute.type.datatype == 'sql'
+                    );
+            },
             validated: function() {
                 let isValid = this.newAttribute.label &&
                     this.newAttribute.type &&
@@ -592,6 +611,13 @@
                             this.needsRootElement &&
                             this.newAttribute.root &&
                             this.newAttribute.root.id > 0
+                        )
+                    ) &&
+                    (
+                        !this.needsTextElement ||
+                        (
+                            this.needsTextElement &&
+                            this.newAttribute.textContent.length > 0
                         )
                     );
                 return isValid;
