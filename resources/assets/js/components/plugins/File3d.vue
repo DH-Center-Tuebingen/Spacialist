@@ -33,6 +33,7 @@
         IcosahedronBufferGeometry,
         Line,
         Loader,
+        Matrix4,
         Mesh,
         MeshPhongMaterial,
         MTLLoader,
@@ -42,6 +43,7 @@
         PCFSoftShadowMap,
         PDBLoader,
         PerspectiveCamera,
+        Raycaster,
         Scene,
         TextureLoader,
         Vector3,
@@ -185,14 +187,19 @@
                 this.controls = new OrbitControls(this.camera, this.renderer.domElement);
             },
             initViveEventListeners: function() {
+                const vm = this;
                 // Vive Events
-        		this.grabController.addEventListener('triggerdown', this.onGrabDown);
-        		this.grabController.addEventListener('triggerup', this.onGrabUp);
-                this.grabController.addEventListener('thumbpadup', this.dimWorldLight);
+        		vm.grabController.addEventListener('triggerdown', vm.onGrabDown);
+        		vm.grabController.addEventListener('triggerup', vm.onGrabUp);
+                vm.grabController.addEventListener('thumbpadup', vm.dimWorldLight);
                 // this.grabController.addEventListener('axischanged', this.recognizeTouch);
-        		this.flashlightController.addEventListener('triggerdown', this.onLightOn);
-        		this.flashlightController.addEventListener('triggerup', this.onLightOff);
-        		this.flashlightController.addEventListener('thumbpadup', this.dimFlashLight);
+        		vm.flashlightController.addEventListener('triggerdown', vm.onLightOn);
+        		vm.flashlightController.addEventListener('triggerup', vm.onLightOff);
+        		vm.flashlightController.addEventListener('thumbpadup', vm.dimFlashLight);
+
+                window.addEventListener('vrdisplaypresentchange', function(event) {
+                    vm.renderer.vr.enabled = event.display.isPresenting;
+                }, false);
             },
             initViveControls: function() {
                 let vm = this;
@@ -460,6 +467,14 @@
                     vm.updateProgress(event);
                 });
             },
+            getIntersections: function(controller) {
+        		this.tempMatrix.identity().extractRotation(controller.matrixWorld);
+        		this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+        		this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
+                const octreeObjects = this.octree.search(this.raycaster.ray.origin, this.raycaster.ray.far, true, this.raycaster.ray.direction);
+                return this.raycaster.intersectOctreeObjects(octreeObjects);
+        		// return this.raycaster.intersectObjects(group.children, true);
+        	},
             //EventListeners
             onMouseDown: function() {
 
@@ -475,23 +490,60 @@
                 }
             },
             // Vive EventListeners
-            onGrabDown: function() {
-
+            onGrabDown: function(event) {
+        		let controller = event.target;
+        		const intersections = this.getIntersections(controller);
+        		if(intersections.length) {
+        			const intersection = intersections[0];
+        			this.tempMatrix.getInverse(controller.matrixWorld);
+        			let object = intersection.object;
+        			object.matrix.premultiply(this.tempMatrix);
+        			object.matrix.decompose(object.position, object.quaternion, object.scale);
+        			controller.add(object);
+        			controller.userData.selected = object;
+        		}
             },
-            onGrabUp: function() {
-
+            onGrabUp: function(event) {
+        		let controller = event.target;
+        		if(controller.userData.selected !== undefined) {
+        			let object = controller.userData.selected;
+        			object.matrix.premultiply(controller.matrixWorld);
+        			object.matrix.decompose(object.position, object.quaternion, object.scale);
+                    for(let i=0; i<object.children.length; i++) {
+        				this.octree.add(object.children[i], {
+        					useFaces: false
+        				});
+        			}
+        			this.group.add(object);
+        			controller.userData.selected = undefined;
+        		}
             },
-            onLightOn: function() {
-
+            onLightOn: function(event) {
+        		this.flashlight.intensity = this.flashlightIntensity;
+        		this.flashlightOn = true;
             },
-            onLightOff: function() {
-
+            onLightOff: function(event) {
+                this.flashlight.intensity = 0;
+        		this.flashlightOn = false;
             },
-            dimFlashLight: function() {
-
+            dimFlashLight: function(event) {
+        		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
+        		this.flashlightIntensity = event.axes[0] + 1;
+        		if(this.flashlightOn) this.flashlight.intensity = this.flashlightIntensity;
             },
-            dimWorldLight: function() {
-
+            dimWorldLight: function(event) {
+        		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
+        		const hem = event.axes[0];
+        		const dir = event.axes[1];
+        		// only update the intensity for the light with the higher value
+        		// (emulate a d-pad)
+        		if(Math.abs(hem) > Math.abs(dir)) {
+        			this.hemisphereIntensity = hem + 1;
+        			this.hemisphereLight.intensity = this.hemisphereIntensity;
+        		} else {
+        			this.directionalIntensity = dir + 1;
+        			this.directionalLight.intensity = this.directionalIntensity;
+        		}
             },
             updateProgress: function(event) {
                 if(event.lengthComputable) {
@@ -521,12 +573,18 @@
             		objectsThreshold: 8,
             		overlapPct: 0.15
             	}),
+                raycaster: new Raycaster(),
                 renderer: {},
                 scene: {},
+	            tempMatrix: new Matrix4(),
                 // controllers
                 grabController: new ViveController(0),
                 flashlightController: new ViveController(1),
                 flashlight: {},
+                flashlightOn: false,
+                flashlightIntensity: 1,
+                hemisphereIntensity: 1,
+                directionalIntensity: 1
             }
         }
     }

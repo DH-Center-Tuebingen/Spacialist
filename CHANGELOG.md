@@ -35,6 +35,7 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
 - File Viewer now loads files as chunk (15)
 - Tree View now loads root elements only. Sub-elements are loaded on request
 ### Fixed
+- 3D-File-Viewer: Mouse Controls now work even if WebVR is available (but not active)
 
 ## 0.5.1
 ### Added
