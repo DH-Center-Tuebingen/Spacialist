@@ -60,7 +60,7 @@ class Context extends Model
     }
 
     public function literatures() {
-        return $this->belongsToMany('App\Literature', 'sources')->withPivot('description', 'attribute_id');
+        return $this->belongsToMany('App\Bibliography', 'sources', 'context_id', 'literature_id')->withPivot('description', 'attribute_id');
     }
 
     public function attributes() {
