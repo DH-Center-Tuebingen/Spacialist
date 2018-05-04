@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Preference;
+use App\ThConcept;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -19,6 +20,10 @@ class Controller extends BaseController
         foreach($preferences as $p) {
             $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
         }
+
+        $concepts = json_encode(ThConcept::getMap());
+
         View::share('p', $preferenceValues);
+        View::share('concepts', $concepts);
   }
 }

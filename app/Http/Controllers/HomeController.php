@@ -11,7 +11,6 @@ use App\ContextType;
 use App\Permission;
 use App\Preference;
 use App\Role;
-use App\ThConcept;
 use App\User;
 
 class HomeController extends Controller
@@ -44,38 +43,12 @@ class HomeController extends Controller
         }
         $contextTypeMap = json_encode($contextTypeMap);
 
-        $lang = 'de';
-        $concepts = \DB::select(\DB::raw("
-            WITH summary AS
-            (
-                SELECT th_concept.id, concept_url, is_top_concept, label, language_id, th_language.short_name,
-                ROW_NUMBER() OVER
-                (
-                    PARTITION BY th_concept.id
-                    ORDER BY th_concept.id, short_name != '$lang', concept_label_type
-                ) AS rk
-                FROM th_concept
-                JOIN th_concept_label ON th_concept_label.concept_id = th_concept.id
-                JOIN th_language ON language_id = th_language.id
-            )
-            SELECT id, concept_url, is_top_concept, label, language_id, short_name
-            FROM summary s
-            WHERE s.rk = 1"));
-        $conceptMap = [];
-        foreach($concepts as $concept) {
-            $url = $concept->concept_url;
-            unset($concept->concept_url);
-            $conceptMap[$url] = $concept;
-        }
-        $conceptMap = json_encode($conceptMap);
-
         $roots = Context::getEntitiesByParent();
 
         $bibliography = Bibliography::all();
 
         $data = [
             'bibliography' => $bibliography,
-            'concepts' => $conceptMap,
             'contextTypes' => $contextTypeMap,
             'roots' => $roots
         ];
@@ -120,18 +93,15 @@ class HomeController extends Controller
         }
         $contextTypes = ContextType::with('sub_context_types')->get();
 
-        $conceptMap = json_encode(ThConcept::getMap());
-
-        return view('settings.editor.dme', ['attributes' => $attributes, 'contextTypes' => $contextTypes, 'concepts' => $conceptMap]);
+        return view('settings.editor.dme', ['attributes' => $attributes, 'contextTypes' => $contextTypes]);
     }
 
     public function layer()
     {
         $baselayers = AvailableLayer::where('is_overlay', false)->get();
         $overlays = AvailableLayer::with('context_type')->where('is_overlay', true)->get();
-        $conceptMap = json_encode(ThConcept::getMap());
 
-        return view('settings.editor.layer', ['baselayers' => $baselayers, 'overlays' => $overlays, 'concepts' => $conceptMap]);
+        return view('settings.editor.layer', ['baselayers' => $baselayers, 'overlays' => $overlays]);
     }
 
     public function gis()
@@ -142,31 +112,6 @@ class HomeController extends Controller
             $contextTypeMap[$contextType->id] = $contextType;
         }
         $contextTypeMap = json_encode($contextTypeMap);
-
-        $lang = 'de';
-        $concepts = \DB::select(\DB::raw("
-            WITH summary AS
-            (
-                SELECT th_concept.id, concept_url, is_top_concept, label, language_id, th_language.short_name,
-                ROW_NUMBER() OVER
-                (
-                    PARTITION BY th_concept.id
-                    ORDER BY th_concept.id, short_name != '$lang', concept_label_type
-                ) AS rk
-                FROM th_concept
-                JOIN th_concept_label ON th_concept_label.concept_id = th_concept.id
-                JOIN th_language ON language_id = th_language.id
-            )
-            SELECT id, concept_url, is_top_concept, label, language_id, short_name
-            FROM summary s
-            WHERE s.rk = 1"));
-        $conceptMap = [];
-        foreach($concepts as $concept) {
-            $url = $concept->concept_url;
-            unset($concept->concept_url);
-            $conceptMap[$url] = $concept;
-        }
-        $conceptMap = json_encode($conceptMap);
 
         $contextLayers = AvailableLayer::with(['context_type'])
             ->whereNotNull('context_type_id')
@@ -183,7 +128,6 @@ class HomeController extends Controller
         $contextLayers = json_encode($contextLayers);
 
         $data = [
-            'concepts' => $conceptMap,
             'contextTypes' => $contextTypeMap,
             'contextLayers' => $contextLayers
         ];
