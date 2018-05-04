@@ -52,6 +52,17 @@ class AttributeValue extends Model
         'certainty_description' => 'string|nullable'
     ];
 
+    public function getValue() {
+        return $this->str_val ??
+               $this->int_val ??
+               $this->dbl_val ??
+               $this->context_val ??
+               $this->thesaurus_val ??
+               json_decode($this->json_val) ??
+               $this->geography_val ??
+               $this->dt_val;
+    }
+
     public function patch($values) {
         foreach($values as $k => $v) {
             if($k == 'certainty') {

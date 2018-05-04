@@ -47,14 +47,7 @@ class ContextController extends Controller {
                 default:
                     break;
             }
-            $value = $a->str_val ??
-                $a->int_val ??
-                $a->dbl_val ??
-                $a->context_val ??
-                $a->thesaurus_val ??
-                json_decode($a->json_val) ??
-                $a->geography_val ??
-                $a->dt_val;
+            $value = $a->getValue();
 
             switch($datatype) {
                 case 'string-mc':
