@@ -117,3 +117,6 @@ Route::patch('/map/{id}', 'MapController@updateGeometry')->where('id', '[0-9]+')
 Route::patch('/map/layer/{id}', 'MapController@updateLayer')->where('id', '[0-9]+');
 
 Route::delete('/map/{id}', 'MapController@delete')->where('id', '[0-9]+');
+
+// ANALYSIS
+Route::post('analysis/filter', 'AnalysisController@applyFilterQuery');

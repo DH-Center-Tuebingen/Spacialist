@@ -65,6 +65,8 @@ Vue.component('layer-editor', require('./components/LayerEditor.vue'));
 Vue.component('about-dialog', require('./components/About.vue'));
 
 Vue.component('gis', require('./components/plugins/Gis.vue')); // TODO
+Vue.component('data-analysis', require('./components/plugins/DataAnalysis.vue'));
+
 
 // Filter
 Vue.filter('date', function(value, format) {

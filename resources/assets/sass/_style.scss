@@ -31,6 +31,14 @@ body, #app {
     width: 1.8rem;
 }
 
+.btn-toggle {
+    position: absolute;
+    left: 0;
+    top: -15px;
+    margin: .25rem;
+    z-index: 1;
+}
+
 .notification-info {
     margin-left: -.5rem;
 }
@@ -70,6 +78,11 @@ body, #app {
 
 .text-wrap {
     white-space: pre-wrap;
+}
+
+.table-cell-250 td, .table-cell-250 ul {
+    max-height: 250px;
+    overflow-y: auto;
 }
 
 .reorder-handle {

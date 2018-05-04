@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Bibliography;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class Helpers {
@@ -53,5 +54,20 @@ class Helpers {
 
     public static function exifDataExists($exif, $rootKey, $dataKey) {
         return array_key_exists($rootKey, $exif) && array_key_exists($dataKey, $exif[$rootKey]);
+    }
+
+    public static function getColumnNames($table) {
+        switch($table) {
+            case 'attributes':
+                return \DB::table('information_schema.columns')
+                    ->select('column_name')
+                    ->where('table_name', $table)
+                    ->where('table_schema', 'public')
+                    ->get()
+                    ->pluck('column_name');
+            default:
+                return Schema::getColumnListing($table);
+
+        }
     }
 }
