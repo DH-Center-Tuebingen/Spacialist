@@ -369,9 +369,10 @@
                 });
             },
             showMetadata(attribute) {
+                const refs = this.selectedContext.references[attribute.thesaurus_url];
                 Vue.set(this.referenceModal, 'attribute', Object.assign({}, attribute));
                 Vue.set(this.referenceModal, 'attributeValue', Object.assign({}, this.selectedContext.data[attribute.id]));
-                Vue.set(this.referenceModal, 'references', this.selectedContext.references[attribute.thesaurus_url].slice());
+                Vue.set(this.referenceModal, 'references', refs ? refs.slice() : []);
                 Vue.set(this.referenceModal, 'active', true);
                 Vue.set(this.referenceModal, 'editReference', {});
                 Vue.set(this.referenceModal, 'newItem', {bibliography: {}, description: ''});
