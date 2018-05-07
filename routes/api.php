@@ -56,6 +56,8 @@ Route::get('/editor/dm/context_type/parent/{cid}', 'EditorController@getContextT
 Route::get('/editor/dm/attribute_types', 'EditorController@getAttributeTypes');
 Route::get('/editor/context_type/{id}', 'EditorController@getContextType')->where('id', '[0-9]+');
 Route::get('/editor/context_type/{id}/attribute', 'EditorController@getContextTypeAttributes')->where('id', '[0-9]+');
+Route::get('/editor/attribute/{id}/selection', 'EditorController@getAttributeSelection')->where('id', '[0-9]+');
+Route::get('/editor/dm/context_type/{ctid}/attribute/{aid}/dependency', 'EditorController@getDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
 
 Route::post('/editor/dm/context_type', 'EditorController@addContextType');
 Route::post('/editor/dm/{id}/relation', 'EditorController@setRelationInfo')->where('id', '[0-9]+');
@@ -63,6 +65,7 @@ Route::post('/editor/dm/attribute', 'EditorController@addAttribute');
 Route::post('/editor/dm/context_type/{ctid}/attribute', 'EditorController@addAttributeToContextType')->where('ctid', '[0-9]+');
 
 Route::patch('/editor/dm/context_type/{ctid}/attribute/{aid}/position', 'EditorController@reorderAttribute')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+Route::patch('/editor/dm/context_type/{ctid}/attribute/{aid}/dependency', 'EditorController@patchDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
 
 Route::delete('/editor/dm/context_type/{id}', 'EditorController@deleteContextType')->where('id', '[0-9]+');
 Route::delete('/editor/dm/attribute/{id}', 'EditorController@deleteAttribute')->where('id', '[0-9]+');

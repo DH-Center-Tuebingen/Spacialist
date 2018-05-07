@@ -54,6 +54,7 @@ class EditorController extends Controller {
             ->get();
         $selections = [];
         foreach($attributes as $a) {
+            $a->depends_on = json_decode($a->depends_on);
             $a->columns = Attribute::where('parent_id', $a->id)->get();
             switch($a->datatype) {
                 case 'string-sc':
@@ -78,6 +79,39 @@ class EditorController extends Controller {
             'attributes' => $attributes,
             'selections' => $selections
         ]);
+    }
+
+    public function getAttributeSelection($id) {
+        try {
+            $attribute = Attribute::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This attribute does not exist'
+            ], 400);
+        }
+
+        $attribute->columns = Attribute::where('parent_id', $attribute->id)->get();
+        $selection = [];
+        switch($attribute->datatype) {
+            case 'string-sc':
+            case 'string-mc':
+            case 'epoch':
+                $selection = ThConcept::getChildren($attribute->thesaurus_root_url);
+                break;
+            case 'table':
+                // Only string-sc is allowed in tables
+                $columns = Attribute::where('parent_id', $attribute->id)
+                    ->where('datatype', 'string-sc')
+                    ->get();
+                foreach($columns as $c) {
+                    $selection = ThConcept::getChildren($c->thesaurus_root_url);
+                }
+                break;
+            default:
+                break;
+        }
+
+        return response()->json(array_values($selection));
     }
 
     public function getTopContextTypes() {
@@ -346,6 +380,57 @@ class EditorController extends Controller {
         }
         $ca->position = $pos;
         $ca->save();
+        return response()->json(null, 204);
+    }
+
+    public function patchDependency(Request $request, $ctid, $aid) {
+        $this->validate($request, [
+            'd_attribute' => 'required|nullable|integer|exists:context_attributes,attribute_id',
+            'd_operator' => 'required|nullable|in:<,>,=',
+            'd_value' => 'required|nullable'
+        ]);
+
+        $contextAttribute = ContextAttribute::where([
+            ['attribute_id', '=', $aid],
+            ['context_type_id', '=', $ctid]
+        ])->first();
+
+        if($contextAttribute === null){
+            return response()->json([
+                'error' => 'Context Attribute not found'
+            ], 400);
+        }
+
+        $dAttribute = $request->get('d_attribute');
+        $dOperator = $request->get('d_operator');
+        $dValue = $request->get('d_value');
+
+        if(
+            !(
+                isset($dAttribute) &&
+                isset($dOperator) &&
+                isset($dValue)
+            ) &&
+            !(
+                !isset($dAttribute) &&
+                !isset($dOperator) &&
+                !isset($dValue)
+            )
+        ) {
+            return response()->json([
+                'error' => 'Please provide either all dependency fields or none'
+            ], 400);
+        }
+
+        $dependsOn = [
+            $dAttribute => [
+                'operator' => $dOperator,
+                'value' => $dValue
+            ]
+        ];
+
+        $contextAttribute->depends_on = json_encode($dependsOn);
+        $contextAttribute->save();
         return response()->json(null, 204);
     }
 

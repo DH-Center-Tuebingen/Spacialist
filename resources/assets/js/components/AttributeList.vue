@@ -14,7 +14,7 @@
                     <a v-if="onReorder" href="#" class="reorder-handle">
                         <i class="fas fa-fw fa-sort text-secondary"></i>
                     </a>
-                    <button v-if="onEdit" class="btn btn-info btn-fab rounded-circle">
+                    <button v-if="onEdit" class="btn btn-info btn-fab rounded-circle" @click="onEdit(attribute)">
                         <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
                     </button>
                     <button v-if="onRemove" class="btn btn-danger btn-fab rounded-circle" @click="onRemove(attribute)">
