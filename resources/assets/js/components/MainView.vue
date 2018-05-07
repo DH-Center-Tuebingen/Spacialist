@@ -349,7 +349,14 @@
                     for(let i=0; i<data.attributes.length; i++) {
                         let aid = data.attributes[i].id;
                         if(!vm.selectedContext.data[aid]) {
-                            Vue.set(vm.selectedContext.data, aid, {});
+                            let val = {};
+                            switch(data.attributes[i].datatype) {
+                                case 'dimension':
+                                case 'epoch':
+                                    val.value = {};
+                                    break;
+                            }
+                            Vue.set(vm.selectedContext.data, aid, val);
                         }
                         vm.selectedContext.attributes.push(data.attributes[i]);
                     }
@@ -541,9 +548,7 @@
                         }
                     }
                 }
-                //TODO
-                console.log('TODO: make api call here');
-                // this.$http.patch('/api/context/'+cid+'/attributes', data);
+                this.$http.patch('/api/context/'+cid+'/attributes', patches);
             },
             deleteEntity(entity) {
                 let vm = this;

@@ -164,7 +164,76 @@ class ContextController extends Controller {
     // PATCH
 
     public function patchAttributes($id, Request $request) {
-        //TODO
+        foreach($request->request as $pid => $patch) {
+            $op = $patch['op'];
+            $value = $patch['value'];
+            $aid = $patch['params']['aid'];
+            $attr = Attribute::find($aid);
+            switch($op) {
+                case 'remove':
+                    $attrval = AttributeValue::where([
+                        ['context_id', '=', $id],
+                        ['attribute_id', '=', $aid]
+                    ])->first();
+                    $attrval->delete();
+                    return response()->json(null, 204);
+                case 'add':
+                    $attrval = new AttributeValue;
+                    $attrval->context_id = $id;
+                    $attrval->attribute_id = $aid;
+                    break;
+                case 'replace':
+                    $attrval = AttributeValue::where([
+                        ['context_id', '=', $id],
+                        ['attribute_id', '=', $aid]
+                    ])->first();
+                    break;
+                default:
+                    return response()->json([
+                        'error' => 'Unknown operation'
+                    ], 400);
+            }
+            \Log::info($attr->datatype);
+            switch($attr->datatype) {
+                # for primitive types: just save them to the db
+                case 'stringf':
+                case 'string':
+                    $attrval->str_val = $value;
+                    break;
+                case 'double':
+                    $attrval->dbl_val = $value;
+                    break;
+                case 'boolean':
+                case 'percentage':
+                case 'integer':
+                    $attrval->int_val = $value;
+                    break;
+                case 'date':
+                    $attrval->dt_val = $value;
+                    break;
+                case 'string-sc':
+                case 'string-mc':
+                    $thesaurus_url = $value[0]['concept_url'];
+                    $attrval->thesaurus_val = $thesaurus_url;
+                    break;
+                case 'epoch':
+                    //TODO
+                case 'dimension':
+                    //TODO
+                case 'list':
+                    //TODO
+                case 'table':
+                    //TODO
+                    $attrval->json_val = json_encode($value);
+                    break;
+
+                    // 'datatype' => 'geography', TODO
+                    // 'datatype' => 'context', TODO
+
+            }
+            $attrval->lasteditor = 'Admin'; // TODO
+            $attrval->save();
+        }
     }
 
     public function patchAttribute($id, $aid, Request $request) {

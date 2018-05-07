@@ -177,25 +177,7 @@
                 </div>
                 <!-- TODO: validation/dirty checking -->
                 <div v-else-if="attribute.datatype == 'dimension'">
-                    <div class="input-group">
-                        <input type="number" class="form-control text-center" :disabled="attribute.isDisabled" min="0" max="9999" step="0.01" v-model="localValues[attribute.id].value" />
-                        <div class="input-group-append input-group-prepend">
-                            <span class="input-group-text">&times;</span>
-                        </div>
-                        <input type="number" class="form-control text-center" :disabled="attribute.isDisabled" min="0" max="9999" step="0.01" v-model="localValues[attribute.id].value" />
-                        <div class="input-group-append input-group-prepend">
-                            <span class="input-group-text">&times;</span>
-                        </div>
-                        <input type="number" class="form-control text-center" :disabled="attribute.isDisabled" min="0" max="9999" step="0.01" v-model="localValues[attribute.id].value" />
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary dropdown-toggle" :disabled="attribute.isDisabled" type="button"     data-toggle="dropdown" aria-haspopup="true"     aria-expanded="false">m</button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="#" v-for="unit in dimensionUnits">
-                                    {{ unit }}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => localValues[attribute.id].value[field] = value" v-validate=""/>
                 </div>
                 <!-- TODO: validation/dirty checking -->
                 <div v-else-if="attribute.datatype == 'table'">
@@ -335,6 +317,7 @@
 <script>
     import draggable from 'vuedraggable';
     import { mapFields } from 'vee-validate';
+    Vue.component('dimension', require('./Dimension.vue'));
 
     export default {
         props: {
@@ -558,7 +541,6 @@
                 hovered: [],
                 inputs: {},
                 expands: {},
-                dimensionUnits: ['nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'],
                 uniqueId: Math.random().toString(36),
                 selectedAttribute: -1,
                 initialGeoValues: [],
