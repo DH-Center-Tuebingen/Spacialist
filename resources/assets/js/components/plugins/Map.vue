@@ -17,6 +17,12 @@
     import GeoJSON from 'ol/format/geojson';
 
     export default {
+        props: {
+            concepts: {
+                type: Object,
+                required: true
+            }
+        },
         mounted() {
             this.initData();
         },
@@ -50,8 +56,15 @@
                 let layer;
                 if(geodata.context) {
                     layer = vm.getLayer(geodata.context.context_type_id);
+                    props.layer_id = layer.context_type_id;
+                    const ct = vm.getContextType(geodata.context);
+                    if(ct) {
+                        props.layer_name = vm.$translateConcept(vm.concepts, ct.thesaurus_url);
+                    }
                 } else {
                     layer = vm.getUnlinkedLayer();
+                    props.layer_id = layer.id;
+                    props.layer_name = 'Unlinked';
                 }
                 if(layer) {
                     props.color = layer.color;
@@ -73,6 +86,10 @@
                     }
                 }
                 return;
+            },
+            getContextType(context) {
+                if(!context) return;
+                return this.contextTypes[context.context_type_id];
             },
             deleteFeatures(features, wkt) {
                 const vm = this;
