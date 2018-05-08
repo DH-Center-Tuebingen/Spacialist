@@ -31,7 +31,7 @@
         </div>
         <div class="mt-2 col px-0">
             <div id="map" class="map w-100 h-100"></div>
-            <div id="popup"></div>
+            <div id="popup" :data-title="overlayTitle" :data-content="overlayContent" data-placement="top" data-animation="true" data-html="true"></div>
             <div id="hover-popup" class="tooltip"></div>
         </div>
     </div>
@@ -115,6 +115,10 @@
                 required: false,
                 type: Function,
                 default: features => features
+            },
+            selectedEntity: {
+                type: Object,
+                required: false
             }
         },
         mounted() {
@@ -451,6 +455,7 @@
                 vm.map.on('click', function(e) {
                     const element = vm.overlay.getElement();
                     $(element).popover('dispose');
+                    vm.selectedFeature = {};
                     // if one mode is active, do not open popup
                     if(vm.draw.getActive() || vm.modify.getActive() || vm.delete.getActive()) {
                         return;
@@ -461,28 +466,8 @@
                         let props = feature.getProperties();
                         let coords = extent.getCenter(geometry.getExtent());
                         vm.overlay.setPosition(coords);
-                        let transformGeom = geometry.clone().transform('EPSG:4326', 'EPSG:3857');
-                        const coordHtml = vm.geometryToList(transformGeom);
-                        const content = `<dl>
-                        <dt>Type</dt>
-                        <dd>${transformGeom.getType()}</dd>
-                        <dt>Coordinates</dt>
-                        <dd>${coordHtml}</dd>
-                        </dl>`;
 
-                        vm.selectedFeature.id = props.id;
-                        const geomName = `Geometry #${vm.selectedFeature.id}`;
-                        const title = props.entity ?
-                            `${geomName} (${props.entity.name})` :
-                            geomName;
-                        $(element).popover({
-                            placement: 'top',
-                            animation: true,
-                            html: true,
-                            content: content,
-                            title: title
-                        });
-                        $(element).popover('show');
+                        vm.selectedFeature = feature;
                     } else {
                         vm.selectedFeature = {};
                     }
@@ -632,7 +617,7 @@
                 this.setInteractionMode('', true);
             },
             geometryToList(g) {
-                let coordHtml = '<ul class="list-group list-group-flush">';
+                let coordHtml = '<ul class="list-unstyled mb-0 pl-3 coordinate-list">';
                 const coords = g.getCoordinates();
                 switch(g.getType()) {
                     case 'Point':
@@ -666,7 +651,61 @@
                 return coordHtml;
             },
             coordinateToListElement(c) {
-                return '<li class="list-group-item pl-0">'+Coordinate.toStringXY(c, 4)+'</li>';
+                return '<li class="py-1">'+Coordinate.toStringXY(c, 4)+'</li>';
+            },
+            updatePopup(f) {
+                const vm = this;
+                if(!f.getId) return;
+                const props = f.getProperties();
+                const geometry = f.getGeometry();
+                const geomName = `Geometry #${props.id}`;
+                let linkState;
+
+                if(props.entity) {
+                    vm.overlayTitle = `${geomName} (${props.entity.name})`;
+                    linkState =
+                        `<button type="button" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-fw fa-unlink"></i> Unlink from ${props.entity.name}
+                        </button>`;
+                } else {
+                    vm.overlayTitle = geomName;
+                    if(vm.selectedEntity.id) {
+                        if(vm.selectedEntity.geodata_id) {
+                            linkState =
+                                `<p class="alert alert-info px-2 py-1 mb-0">
+                                    Entity already linked.
+                                </p>`;
+                        } else {
+                            linkState =
+                                `<button type="button" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-fw fa-link"></i> Link to ${vm.selectedEntity.name}
+                                </button>`;
+                        }
+                    } else {
+                        linkState =
+                            `<p class="alert alert-info px-2 py-1 mb-0">
+                                No entity selected. To link this object to an entity, please select an unlinked entity in the tree first
+                            </p>`;
+                    }
+                }
+
+                const transformGeom = geometry.clone().transform('EPSG:4326', 'EPSG:3857');
+                const coordHtml = vm.geometryToList(transformGeom);
+                vm.overlayContent =
+                    `<dl class="mb-0">
+                        <dt>Type</dt>
+                        <dd>${transformGeom.getType()}</dd>
+                        <dt>Coordinates</dt>
+                        <dd>${coordHtml}</dd>
+                        <dt>Link</dt>
+                        <dd>${linkState}</dd>
+                    </dl>`;
+
+                const element = vm.overlay.getElement();
+                // Wait for variables to be updated
+                vm.$nextTick(function() {
+                    $(element).popover('show');
+                });
             }
         },
         data() {
@@ -680,6 +719,8 @@
                 entityLayers: [],
                 vector: {}, // TODO replace
                 overlay: {},
+                overlayTitle: '',
+                overlayContent: '',
                 hoverPopup: {},
                 lastHoveredFeature: {},
                 modify: {},
@@ -691,6 +732,14 @@
                 selectedFeature: {},
                 wktFormat: new WKT(),
                 geoJsonFormat: new GeoJSON()
+            }
+        },
+        watch: {
+            selectedFeature: function(newFeature, oldFeature) {
+                this.updatePopup(this.selectedFeature);
+            },
+            selectedEntity: function(newEntity, oldEntity) {
+                this.updatePopup(this.selectedFeature);
             }
         }
     }

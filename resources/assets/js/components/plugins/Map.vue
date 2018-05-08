@@ -5,7 +5,8 @@
             :on-deleteend="deleteFeatures"
             :on-drawend="addFeature"
             :on-modifyend="updateFeatures"
-            :reset="false">
+            :reset="false"
+            :selected-entity="context">
         </ol-map>
     </div>
     <div v-else>
@@ -19,6 +20,10 @@
     export default {
         props: {
             concepts: {
+                type: Object,
+                required: true
+            },
+            context: {
                 type: Object,
                 required: true
             }
