@@ -32,6 +32,7 @@
         <div class="mt-2 col px-0">
             <div id="map" class="map w-100 h-100"></div>
             <div id="popup"></div>
+            <div id="hover-popup" class="tooltip"></div>
         </div>
     </div>
 </template>
@@ -406,7 +407,46 @@
                 vm.overlay = new Overlay({
                     element: document.getElementById('popup')
                 });
+                vm.hoverPopup = new Overlay({
+                    element: document.getElementById('hover-popup'),
+                    offset: [8, 0] // it's a kind of magic!
+                });
                 vm.map.addOverlay(vm.overlay);
+                vm.map.addOverlay(vm.hoverPopup);
+
+                vm.map.on('pointermove', function(e) {
+                    if(e.dragging) return;
+
+                    const element = vm.hoverPopup.getElement();
+                    const feature = vm.getFeatureForEvent(e);
+                    if(feature != vm.lastHoveredFeature) {
+                        $(element).tooltip('dispose');
+                        // Reset lastHoveredFeature if no feature selected
+                        if(!feature) vm.lastHoveredFeature = null;
+                    } else {
+                        // same feature, no update needed
+                        return;
+                    }
+                    if(feature) {
+                        vm.lastHoveredFeature = feature;
+                        let geometry = feature.getGeometry();
+                        let props = feature.getProperties();
+                        let coords = extent.getCenter(geometry.getExtent());
+                        vm.hoverPopup.setPosition(coords);
+
+                        const geomName = `Geometry #${props.id}`;
+                        const title = props.entity ?
+                            `${geomName} (${props.entity.name})` :
+                            geomName;
+                        $(element).tooltip({
+                            placement: 'bottom',
+                            animation: true,
+                            html: true,
+                            title: title
+                        });
+                        $(element).tooltip('show');
+                    }
+                })
 
                 vm.map.on('click', function(e) {
                     const element = vm.overlay.getElement();
@@ -415,11 +455,8 @@
                     if(vm.draw.getActive() || vm.modify.getActive() || vm.delete.getActive()) {
                         return;
                     }
-                    let features = vm.map.getFeaturesAtPixel(e.pixel, {
-                        hitTolerance: 5
-                    });
-                    if(features) {
-                        let feature = features[0];
+                    const feature = vm.getFeatureForEvent(e);
+                    if(feature) {
                         let geometry = feature.getGeometry();
                         let props = feature.getProperties();
                         let coords = extent.getCenter(geometry.getExtent());
@@ -434,12 +471,16 @@
                         </dl>`;
 
                         vm.selectedFeature.id = props.id;
+                        const geomName = `Geometry #${vm.selectedFeature.id}`;
+                        const title = props.entity ?
+                            `${geomName} (${props.entity.name})` :
+                            geomName;
                         $(element).popover({
                             placement: 'top',
                             animation: true,
                             html: true,
                             content: content,
-                            title: `Geometry #${vm.selectedFeature.id}`
+                            title: title
                         });
                         $(element).popover('show');
                     } else {
@@ -497,6 +538,13 @@
                     }
                 });
                 return entityExtent;
+            },
+            getFeatureForEvent(e) {
+                const features = this.map.getFeaturesAtPixel(e.pixel, {
+                    hitTolerance: 5
+                });
+                if(features) return features[0];
+                return;
             },
             toggleDrawType(type) {
                 let oldType = this.drawType;
@@ -632,6 +680,8 @@
                 entityLayers: [],
                 vector: {}, // TODO replace
                 overlay: {},
+                hoverPopup: {},
+                lastHoveredFeature: {},
                 modify: {},
                 draw: {},
                 delete: {},
