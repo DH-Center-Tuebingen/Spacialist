@@ -121,6 +121,13 @@ Vue.prototype.$showToast = function(title, text, type, duration) {
     });
 };
 
+Vue.prototype.$translateConcept = function(concepts, url) {
+    if(!url) return url;
+    if(!concepts) return url;
+    if(!concepts[url]) return url;
+    return concepts[url].label;
+}
+
 const app = new Vue({
     el: '#app',
     mounted: function() {

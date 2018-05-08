@@ -127,31 +127,61 @@
                 vm.vector = new VectorLayer({
                     baseLayer: false,
                     displayInLayerSwitcher: true,
-                    title: 'All Entities',
+                    title: 'Draw Layer',
                     visible: true,
-                    layer: 'entity',
+                    layer: 'draw',
                     source: new Vector({
                         wrapX: false
                     }),
                     style: vm.createStyle()
                 });
-                let source = vm.vector.getSource();
                 if(vm.initWkt.length) {
+                    // TODO Support several layers for WKT
+                    let layer = new VectorLayer({
+                        baseLayer: false,
+                        displayInLayerSwitcher: true,
+                        title: 'All Entities',
+                        visible: true,
+                        layer: 'entity',
+                        source: new Vector({
+                            wrapX: false
+                        }),
+                        style: vm.createStyle()
+                    });
+                    vm.entityLayers.push(layer);
+                    let source = layer.getSource();
                     vm.initWkt.forEach(wkt => {
                         const geom = vm.wktFormat.readGeometry(wkt);
                         source.addFeature(new Feature({geometry: geom}));
                     });
-                    vm.extent = vm.vector.getSource().getExtent();
                 } else if(vm.initGeojson.length) {
+                    let geojsonLayers = {};
                     vm.initGeojson.forEach(geojson => {
                         let feature = vm.geoJsonFormat.readFeature(geojson.geom);
                         feature.setProperties(geojson.props);
                         if(geojson.props.color) {
                             feature.setStyle(vm.createStyle(geojson.props.color));
                         }
+                        const layerId = geojson.props.layer_id;
+                        if(!geojsonLayers[layerId]) {
+                            geojsonLayers[layerId] = new VectorLayer({
+                                baseLayer: false,
+                                displayInLayerSwitcher: true,
+                                title: geojson.props.layer_name,
+                                visible: true,
+                                layer: 'entity',
+                                source: new Vector({
+                                    wrapX: false
+                                }),
+                                style: vm.createStyle()
+                            });
+                        }
+                        let source = geojsonLayers[layerId].getSource();
                         source.addFeature(feature);
                     });
-                    vm.extent = vm.vector.getSource().getExtent();
+                    for(let k in geojsonLayers) {
+                        vm.entityLayers.push(geojsonLayers[k]);
+                    }
                 }
 
                 vm.draw = {
@@ -313,7 +343,7 @@
                     }
                 };
 
-                let baselayers = new Group({
+                vm.baselayersGroup = new Group({
                     title: 'Base Layers',
                     openInLayerSwitcher: true,
                     layers: [
@@ -329,18 +359,17 @@
                         }),
                     ]
                 });
-                let overlays = new Group({
+                vm.overlaysGroup = new Group({
                     title: 'Overlays',
                     openInLayerSwitcher: true,
                     layers: []
                 });
-                let entityLayers = new Group({
+                vm.entityLayersGroup = new Group({
                     title: 'Entity Layers',
                     openInLayerSwitcher: true,
-                    layers: [
-                        vm.vector
-                    ]
+                    layers: vm.entityLayers
                 });
+                vm.extent = vm.getEntityExtent();
 
                 vm.map = new Map({
                     controls: control.defaults().extend([
@@ -360,7 +389,7 @@
                         new PinchRotate(),
                         new PinchZoom(),
                     ]),
-                    layers: [baselayers, overlays, entityLayers],
+                    layers: [vm.baselayersGroup, vm.overlaysGroup, vm.entityLayersGroup],
                     target: 'map',
                     view: new View({
                         center: [0, 0],
@@ -453,6 +482,22 @@
             });
         },
         methods: {
+            getEntityExtent() {
+                const layers = this.entityLayersGroup.getLayers();
+                let entityExtent;
+                layers.forEach(l => {
+                    const source = l.getSource();
+                    if(source) {
+                        const sourceExtent = source.getExtent();
+                        if(!entityExtent) {
+                            entityExtent = sourceExtent;
+                        } else {
+                            entityExtent = extent.extend(entityExtent, sourceExtent);
+                        }
+                    }
+                });
+                return entityExtent;
+            },
             toggleDrawType(type) {
                 let oldType = this.drawType;
                 this.drawType = type;
@@ -581,8 +626,12 @@
                 drawType: '',
                 interactionMode: '',
                 map: {},
+                baselayersGroup: {},
+                overlaysGroup: {},
+                entityLayersGroup: {},
+                entityLayers: [],
+                vector: {}, // TODO replace
                 overlay: {},
-                vector: {},
                 modify: {},
                 draw: {},
                 delete: {},
