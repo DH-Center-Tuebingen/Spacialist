@@ -31,7 +31,7 @@
         </div>
         <div class="mt-2 col px-0">
             <div id="map" class="map w-100 h-100"></div>
-            <div id="popup" :data-title="overlayTitle" :data-content="overlayContent" data-placement="top" data-animation="true" data-html="true"></div>
+            <div id="popup"></div>
             <div id="hover-popup" class="tooltip"></div>
         </div>
     </div>
@@ -450,7 +450,18 @@
                         });
                         $(element).tooltip('show');
                     }
-                })
+                });
+
+                // Update popover position on map render (e.g. pan, zoom)
+                vm.map.on('postrender', function(e) {
+                    if(!vm.overlay) return;
+                    const element = vm.overlay.getElement();
+                    let popover = $(element).data('bs.popover');
+                    if(!popover) return;
+                    let popper = popover._popper;
+                    if(!popper) return;
+                    popper.scheduleUpdate();
+                });
 
                 vm.map.on('click', function(e) {
                     const element = vm.overlay.getElement();
@@ -706,9 +717,17 @@
                         <dd>${linkState}</dd>
                     </dl>`;
 
-                const element = vm.overlay.getElement();
                 // Wait for variables to be updated
                 vm.$nextTick(function() {
+                    const element = vm.overlay.getElement();
+                    $(element).popover({
+                        'placement': 'top',
+                        'animation': true,
+                        'html': true,
+                        'container': '#map',
+                        'title': vm.overlayTitle,
+                        'content': vm.overlayContent
+                    });
                     $(element).popover('show');
                 });
             }
