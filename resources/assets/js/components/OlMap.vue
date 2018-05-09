@@ -1,31 +1,31 @@
 <template>
     <div class="d-flex flex-column justify-content-between h-100">
         <div>
-            <button type="button" class="btn btn-xs" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" @click="toggleDrawType('Point')">
+            <button type="button" class="btn btn-sm" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" @click="toggleDrawType('Point')">
                 <i class="fas fa-fw fa-map-marker-alt"></i>
             </button>
-            <button type="button" class="btn btn-xs" :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}" @click="toggleDrawType('LineString')">
+            <button type="button" class="btn btn-sm" :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}" @click="toggleDrawType('LineString')">
                 <i class="fas fa-fw fa-road"></i>
             </button>
-            <button type="button" class="btn btn-xs" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" @click="toggleDrawType('Polygon')">
+            <button type="button" class="btn btn-sm" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" @click="toggleDrawType('Polygon')">
                 <i class="fas fa-fw fa-object-ungroup"></i>
             </button>
-            <button type="button" class="btn btn-xs btn-outline-info" v-show="interactionMode != 'modify'" @click="setInteractionMode('modify')">
+            <button type="button" class="btn btn-sm btn-outline-info" v-show="interactionMode != 'modify'" @click="setInteractionMode('modify')">
                 <i class="fas fa-fw fa-edit"></i>
             </button>
-            <button type="button" class="btn btn-xs btn-outline-success" v-show="interactionMode == 'modify'" @click="updateFeatures">
+            <button type="button" class="btn btn-sm btn-outline-success" v-show="interactionMode == 'modify'" @click="updateFeatures">
                 <i class="fas fa-fw fa-check"></i>
             </button>
-            <button type="button" class="btn btn-xs btn-outline-danger" v-show="interactionMode == 'modify'" @click="cancelUpdateFeatures">
+            <button type="button" class="btn btn-sm btn-outline-danger" v-show="interactionMode == 'modify'" @click="cancelUpdateFeatures">
                 <i class="fas fa-fw fa-times"></i>
             </button>
-            <button type="button" class="btn btn-xs btn-outline-danger" v-show="interactionMode != 'delete'" @click="setInteractionMode('delete')">
+            <button type="button" class="btn btn-sm btn-outline-danger" v-show="interactionMode != 'delete'" @click="setInteractionMode('delete')">
                 <i class="fas fa-fw fa-trash"></i>
             </button>
-            <button type="button" class="btn btn-xs btn-outline-success" v-show="interactionMode == 'delete'" @click="deleteFeatures">
+            <button type="button" class="btn btn-sm btn-outline-success" v-show="interactionMode == 'delete'" @click="deleteFeatures">
                 <i class="fas fa-fw fa-check"></i>
             </button>
-            <button type="button" class="btn btn-xs btn-outline-danger" v-show="interactionMode == 'delete'" @click="cancelDeleteFeatures">
+            <button type="button" class="btn btn-sm btn-outline-danger" v-show="interactionMode == 'delete'" @click="cancelDeleteFeatures">
                 <i class="fas fa-fw fa-times"></i>
             </button>
         </div>
