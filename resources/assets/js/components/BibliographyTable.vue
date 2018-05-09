@@ -356,11 +356,11 @@
                                     v-model="newItem.type"
                                     label="name"
                                     track-by="id"
-                                    :options="availableTypes"
-                                    :multiple="false"
-                                    :hideSelected="true"
                                     :allowEmpty="false"
-                                    :closeOnSelect="true">
+                                    :closeOnSelect="true"
+                                    :hideSelected="true"
+                                    :multiple="false"
+                                    :options="availableTypes">
                                 </multiselect>
                             </div>
                         </div>
