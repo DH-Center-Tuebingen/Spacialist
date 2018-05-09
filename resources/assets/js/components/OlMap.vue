@@ -433,9 +433,9 @@
                     }
                     if(feature) {
                         vm.lastHoveredFeature = feature;
-                        let geometry = feature.getGeometry();
-                        let props = feature.getProperties();
-                        let coords = extent.getCenter(geometry.getExtent());
+                        const geometry = feature.getGeometry();
+                        const props = feature.getProperties();
+                        const coords = extent.getCenter(geometry.getExtent());
                         vm.hoverPopup.setPosition(coords);
 
                         const geomName = `Geometry #${props.id}`;
@@ -462,9 +462,9 @@
                     }
                     const feature = vm.getFeatureForEvent(e);
                     if(feature) {
-                        let geometry = feature.getGeometry();
-                        let props = feature.getProperties();
-                        let coords = extent.getCenter(geometry.getExtent());
+                        const geometry = feature.getGeometry();
+                        const props = feature.getProperties();
+                        const coords = extent.getCenter(geometry.getExtent());
                         vm.overlay.setPosition(coords);
 
                         vm.selectedFeature = feature;
@@ -616,7 +616,12 @@
             cancelDeleteFeatures() {
                 this.setInteractionMode('', true);
             },
+            link(feature, entity) {
+            },
+            unlink(feature, entity) {
+            },
             geometryToList(g) {
+                if(!g) return 'ul class="list-unstyled mb-0 pl-3 coordinate-list"></ul>';
                 let coordHtml = '<ul class="list-unstyled mb-0 pl-3 coordinate-list">';
                 const coords = g.getCoordinates();
                 switch(g.getType()) {
