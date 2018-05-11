@@ -724,7 +724,7 @@
                         'placement': 'top',
                         'animation': true,
                         'html': true,
-                        'container': '#map'
+                        'container': vm.viewport || '#map'
                     });
                     $(element).popover('show');
                 });
@@ -754,6 +754,19 @@
                 selectedFeature: {},
                 wktFormat: new WKT(),
                 geoJsonFormat: new GeoJSON()
+            }
+        },
+        computed: {
+            viewport: function() {
+                if(!this.map) return;
+                const target = this.map.getTarget();
+                if(!target) return;
+                const container = document.getElementById(target);
+                if(!container) return;
+                const viewports = container.getElementsByClassName('ol-viewport');
+                if(!viewports) return;
+                if(!viewports.length) return;
+                return viewports[0];
             }
         },
         watch: {
