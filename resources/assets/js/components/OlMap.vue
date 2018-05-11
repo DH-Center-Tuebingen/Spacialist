@@ -31,7 +31,7 @@
         </div>
         <div class="mt-2 col px-0">
             <div id="map" class="map w-100 h-100"></div>
-            <div id="popup"></div>
+            <div id="popup" :data-title="overlayTitle" :data-content="overlayContent"></div>
             <div id="hover-popup" class="tooltip"></div>
         </div>
     </div>
@@ -724,9 +724,7 @@
                         'placement': 'top',
                         'animation': true,
                         'html': true,
-                        'container': '#map',
-                        'title': vm.overlayTitle,
-                        'content': vm.overlayContent
+                        'container': '#map'
                     });
                     $(element).popover('show');
                 });
