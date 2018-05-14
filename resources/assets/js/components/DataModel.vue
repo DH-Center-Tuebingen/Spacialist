@@ -873,6 +873,7 @@
                         !this.needsTextElement ||
                         (
                             this.needsTextElement &&
+                            this.newAttribute.textContent &&
                             this.newAttribute.textContent.length > 0
                         )
                     );

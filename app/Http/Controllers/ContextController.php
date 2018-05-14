@@ -94,8 +94,21 @@ class ContextController extends Controller {
                 ];
             }
             $raw = \DB::raw($text);
+            $sqlValue = \DB::select($text, $safes);
+            // Check if only one result exists
+            if(count($sqlValue) === 1) {
+                // Get all column indices (keys) using the first row
+                $valueKeys = array_keys(get_object_vars($sqlValue[0]));
+                // Check if also only one key/column exists
+                if(count($valueKeys) === 1) {
+                    // If only one row and one column exist,
+                    // return plain value instead of array
+                    $firstKey = $valueKeys[0];
+                    $sqlValue = $sqlValue[0]->{$firstKey};
+                }
+            }
             $data[$sql->attribute_id] = [
-                'value' => \DB::select($text, $safes)
+                'value' => $sqlValue
             ];
         }
 
