@@ -1,18 +1,18 @@
 <template>
     <div class="input-group">
-        <input type="number" class="form-control text-center" min="0" max="9999" step="0.01" @input="onInput('B', $event.target.value)"/>
+        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('B', $event.target.value)" v-model="B"/>
         <div class="input-group-append input-group-prepend">
             <span class="input-group-text">&times;</span>
         </div>
-        <input type="number" class="form-control text-center" min="0" max="9999" step="0.01" @input="onInput('H', $event.target.value)"/>
+        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('H', $event.target.value)" v-model="H"/>
         <div class="input-group-append input-group-prepend">
             <span class="input-group-text">&times;</span>
         </div>
-        <input type="number" class="form-control text-center" min="0" max="9999" step="0.01" @input="onInput('T', $event.target.value)"/>
+        <input type="number" class="form-control text-center" :disabled="disabled" min="0" max="9999" step="0.01" @input="onInput('T', $event.target.value)" v-model="T"/>
         <div class="input-group-append">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button"     data-toggle="dropdown" aria-haspopup="true"     aria-expanded="false"></button>
+            <button class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" type="button" data-toggle="dropdown" aria-haspopup="true"     aria-expanded="false">{{unit}}</button>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="#" v-for="unit in dimensionUnits">
+                <a class="dropdown-item" href="#" v-for="unit in dimensionUnits" @click="setUnit(unit)">
                     {{ unit }}
                 </a>
             </div>
@@ -21,7 +21,6 @@
 </template>
 
 <script>
-//TODO: dimension units are not saved, load initial values from database
     export default {
         $_veeValidate: {
             // value getter
@@ -36,8 +35,11 @@
         props: {
             name: String,
             value: {
-                type: null,
-                default: null
+                type: Object,
+                default: _ => new Object(),
+            },
+            disabled: {
+                type: Boolean,
             },
             onChange: {
                 type: Function,
@@ -51,11 +53,19 @@
             onInput(field, value) {
                 this.$emit('input', value);
                 this.onChange(field, value);
+            },
+            setUnit(unit) {
+                this.onInput('unit', unit);
+                this.unit = unit;
             }
         },
         data () {
             return {
                 dimensionUnits: ['nm', 'µm', 'mm', 'cm', 'dm', 'm', 'km'],
+                B: this.value.B,
+                H: this.value.H,
+                T: this.value.T,
+                unit: this.value.unit
             }
         }
     }

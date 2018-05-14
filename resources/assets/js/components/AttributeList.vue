@@ -107,77 +107,13 @@
                 </div>
                 <!-- TODO: validation/dirty checking -->
                 <div v-else-if="attribute.datatype == 'list'">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <button type="button" class="btn btn-outline-secondary" :disabled="attribute.isDisabled" @click="toggleList(attribute.id)">
-                                <div v-show="!expands[attribute.id]">
-                                    <i class="fas fa-fw fa-caret-up"></i>
-                                    <span v-if="localValues[attribute.id].value && localValues[attribute.id].value.length">
-                                        ({{localValues[attribute.id].value.length}})
-                                    </span>
-                                </div>
-                                <div v-show="expands[attribute.id]">
-                                    <i class="fas fa-fw fa-caret-down"></i>
-                                </div>
-                            </button>
-                        </div>
-                        <input type="text" class="form-control" :disabled="attribute.isDisabled" v-model="inputs[attribute.id]" />
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-success" @click="addListEntry(attribute.id)">
-                                <i class="fas fa-fw fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <ol class="mt-2" v-if="expands[attribute.id] && localValues[attribute.id].value && localValues[attribute.id].value.length">
-                        <li v-for="(l, i) in localValues[attribute.id].value">
-                            {{ l }}
-                            <a href="#" class="text-danger" v-on:click="removeListEntry(attribute.id, i)">
-                                <i class="fas fa-fw fa-trash"></i>
-                            </a>
-                        </li>
-                    </ol>
+                    <list :entries="localValues[attribute.id].value" :disabled="attribute.isDisabled" :on-change="value => onChange(null, value, attribute.id)" :name="'attribute-'+attribute.id" v-validate="" />
                 </div>
-                <!-- TODO: validation/dirty checking -->
-                <div v-else-if="attribute.datatype == 'epoch' && localValues[attribute.id].value">
-                    <div class="input-group">
-                        <div class="input-group-prepend" uib-dropdown>
-                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="attribute.isDisabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                {{ localValues[attribute.id].value.startLabel }}
-                            </button>
-                            <ul class="dropdown-menu">
-                                <a class="dropdown-item" href="">BC</a>
-                                <a class="dropdown-item" href="">AD</a>
-                            </ul>
-                        </div>
-                        <input type="number" step="1" pattern="[0-9]+" class="form-control text-center" :disabled="attribute.isDisabled" aria-label="" v-model="localValues[attribute.id].value.start">
-                        <div class="input-group-prepend input-group-append">
-                            <span class="input-group-text">-</span>
-                        </div>
-                        <input type="number" step="1" pattern="[0-9]+" class="form-control text-center" :disabled="attribute.isDisabled" aria-label="" v-model="localValues[attribute.id].value.end">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="attribute.isDisabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                {{ localValues[attribute.id].value.endLabel }}
-                            </button>
-                            <ul uib-dropdown-menu class="dropdown-menu">
-                                <a class="dropdown-item" href="">BC</a>
-                                <a class="dropdown-item" href="">AD</a>
-                            </ul>
-                        </div>
-                    </div>
-                    <multiselect class="pt-2"
-                        label="name"
-                        track-by="id"
-                        v-model="localValues[attribute.id].value.epoch"
-                        :closeOnSelect="false"
-                        :disabled="attribute.isDisabled"
-                        :hideSelected="true"
-                        :multiple="false"
-                        :options="localSelections[attribute.id] || []">
-                    </multiselect>
+                <div v-else-if="attribute.datatype == 'epoch'">
+                    <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :concepts="concepts" :epochs="localSelections[attribute.id]" :disabled="attribute.isDisabled" v-validate=""/>
                 </div>
-                <!-- TODO: validation/dirty checking -->
                 <div v-else-if="attribute.datatype == 'dimension'">
-                    <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => localValues[attribute.id].value[field] = value" v-validate=""/>
+                    <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled" v-validate=""/>
                 </div>
                 <!-- TODO: validation/dirty checking -->
                 <div v-else-if="attribute.datatype == 'table'">
@@ -318,6 +254,8 @@
     import draggable from 'vuedraggable';
     import { mapFields } from 'vee-validate';
     Vue.component('dimension', require('./Dimension.vue'));
+    Vue.component('epoch', require('./Epoch.vue'));
+    Vue.component('list', require('./List.vue'));
 
     export default {
         props: {
@@ -397,20 +335,15 @@
             onLeave(i) {
                 Vue.set(this.hovered, i, false);
             },
-            addListEntry(id) {
-                if(!this.localValues[id].value) {
-                    this.localValues[id].value = [];
+            onChange(field, value, aid) {
+                if (this.localValues[aid].value){
+                    if (!field) {
+                        this.localValues[aid].value = [];
+                        value.forEach(v => this.localValues[aid].value.push(v));
+                    } else {
+                        this.localValues[aid].value[field] = value;
+                    }
                 }
-                this.localValues[id].value.push(this.inputs[id]);
-            },
-            removeListEntry(id, index) {
-                this.localValues[id].value.splice(index, 1);
-            },
-            toggleList(id) {
-                if(!this.expands[id] && this.expands !== false) {
-                    Vue.set(this.expands, id, false);
-                }
-                this.expands[id] = !this.expands[id];
             },
             addTableRow(aid, row, columns) {
                 if(!this.localValues[aid].value) {
@@ -539,8 +472,6 @@
         data() {
             return {
                 hovered: [],
-                inputs: {},
-                expands: {},
                 uniqueId: Math.random().toString(36),
                 selectedAttribute: -1,
                 initialGeoValues: [],

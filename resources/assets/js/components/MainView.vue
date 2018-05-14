@@ -355,6 +355,9 @@
                                 case 'epoch':
                                     val.value = {};
                                     break;
+                                case 'list':
+                                    val.value = [];
+                                    break;
                             }
                             Vue.set(vm.selectedContext.data, aid, val);
                         }
@@ -515,10 +518,11 @@
                 this.$modal.hide('add-entity-modal');
             },
             saveEntity(entity) {
+                const vm = this;
                 let cid = entity.id;
                 var patches = [];
-                for(let f in this.fields) {
-                    if(this.fields.hasOwnProperty(f) && f.startsWith('attribute-')) {
+                for(let f in vm.fields) {
+                    if(vm.fields.hasOwnProperty(f) && f.startsWith('attribute-')) {
                         if(this.fields[f].dirty) {
                             let aid = Number(f.replace(/^attribute-/, ''));
                             let data = entity.data[aid];
@@ -548,7 +552,9 @@
                         }
                     }
                 }
-                this.$http.patch('/api/context/'+cid+'/attributes', patches);
+                vm.$http.patch('/api/context/'+cid+'/attributes', patches).then(function(response) {
+                    vm.resetFlags();
+                });
             },
             deleteEntity(entity) {
                 let vm = this;
@@ -593,6 +599,11 @@
                 let concept = this.concepts[element[label]];
                 if(!concept) return element;
                 return concept.label;
+            },
+            resetFlags() {
+                this.$validator.fields.items.forEach(field => {
+                    field.reset();
+                });
             }
         },
         data() {

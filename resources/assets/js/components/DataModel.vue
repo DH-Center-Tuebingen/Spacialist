@@ -381,7 +381,7 @@
                     data.columns = JSON.stringify(attribute.columns);
                 }
                 if(this.needsRootElement) {
-                    data.root_id = attribute.root.id;
+                    data.root_id = attribute.root.concept.id;
                 }
                 if(this.needsTextElement) {
                     data.text = attribute.textContent;
@@ -567,6 +567,8 @@
                 });
             },
             hideNewAttributeModal() {
+                this.newAttribute = {};
+                this.attributeTypes = [];
                 this.$modal.hide('new-attribute-modal');
             },
             hideDeleteAttributeModal() {

@@ -41,7 +41,6 @@ class ContextController extends Controller {
             $datatype = Attribute::find($a->attribute_id)->datatype;
             switch($datatype) {
                 case 'string-sc':
-                case 'string-mc':
                     $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
                     break;
                 default:
@@ -50,8 +49,6 @@ class ContextController extends Controller {
             $value = $a->getValue();
 
             switch($datatype) {
-                case 'string-mc':
-                case 'list':
                 case 'table':
                     if(!isset($data[$a->attribute_id])) {
                         $values[$a->attribute_id] = [$value];
@@ -179,7 +176,6 @@ class ContextController extends Controller {
     public function patchAttributes($id, Request $request) {
         foreach($request->request as $pid => $patch) {
             $op = $patch['op'];
-            $value = $patch['value'];
             $aid = $patch['params']['aid'];
             $attr = Attribute::find($aid);
             switch($op) {
@@ -191,11 +187,13 @@ class ContextController extends Controller {
                     $attrval->delete();
                     return response()->json(null, 204);
                 case 'add':
-                    $attrval = new AttributeValue;
+                    $value = $patch['value'];
+                    $attrval = new AttributeValue();
                     $attrval->context_id = $id;
                     $attrval->attribute_id = $aid;
                     break;
                 case 'replace':
+                    $value = $patch['value'];
                     $attrval = AttributeValue::where([
                         ['context_id', '=', $id],
                         ['attribute_id', '=', $aid]
@@ -206,7 +204,6 @@ class ContextController extends Controller {
                         'error' => 'Unknown operation'
                     ], 400);
             }
-            \Log::info($attr->datatype);
             switch($attr->datatype) {
                 # for primitive types: just save them to the db
                 case 'stringf':
@@ -225,14 +222,21 @@ class ContextController extends Controller {
                     $attrval->dt_val = $value;
                     break;
                 case 'string-sc':
-                case 'string-mc':
-                    $thesaurus_url = $value[0]['concept_url'];
+                    $thesaurus_url = $value['concept_url'];
                     $attrval->thesaurus_val = $thesaurus_url;
                     break;
+                case 'string-mc':
+                    $thesaurus_urls = [];
+                    foreach($value as $val) {
+                        $thesaurus_urls[] = [
+                            "concept_url" => $val['concept_url'],
+                            "id" => $val['id']
+                        ];
+                    }
+                    $attrval->json_val = json_encode($thesaurus_urls);
+                    break;
                 case 'epoch':
-                    //TODO
                 case 'dimension':
-                    //TODO
                 case 'list':
                     //TODO
                 case 'table':
