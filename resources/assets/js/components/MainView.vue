@@ -1,25 +1,24 @@
 <template>
     <div class="row h-100 of-hidden">
-        <div :class="'col-md-'+preferences['prefs.columns'].left" id="tree-container" class="h-100 scroll-y-auto">
-            <div>
-                <h3>Contexts</h3>
-                <div class="col-md-12">
-                    <button type="button" class="btn btn-sm btn-outline-success ml-3 mb-2" @click="requestAddNewEntity()">
-                        <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
-                    </button>
-                    <context-tree
-                        :concepts="concepts"
-                        :context-types="contextTypes"
-                        :on-context-menu-add="requestAddNewEntity"
-                        :on-context-menu-duplicate="duplicateEntity"
-                        :on-context-menu-delete="requestDeleteEntity"
-                        :roots="roots"
-                        :selection-callback="setSelectedElement">
-                    </context-tree>
-                    <button type="button" class="btn btn-sm btn-outline-success ml-3 mt-2" @click="requestAddNewEntity()">
-                        <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
-                    </button>
-                </div>
+        <div :class="'col-md-'+preferences['prefs.columns'].left" id="tree-container" class="d-flex flex-column h-100">
+            <h3>Contexts</h3>
+            <div class="d-flex flex-column h-100 col">
+                <button type="button" class="btn btn-sm btn-outline-success ml-3 mb-2" @click="requestAddNewEntity()">
+                    <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
+                </button>
+                <context-tree
+                    class="col scroll-y-auto"
+                    :concepts="concepts"
+                    :context-types="contextTypes"
+                    :on-context-menu-add="requestAddNewEntity"
+                    :on-context-menu-duplicate="duplicateEntity"
+                    :on-context-menu-delete="requestDeleteEntity"
+                    :roots="roots"
+                    :selection-callback="setSelectedElement">
+                </context-tree>
+                <button type="button" class="btn btn-sm btn-outline-success ml-3 mt-2" @click="requestAddNewEntity()">
+                    <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
+                </button>
             </div>
         </div>
         <div :class="'col-md-'+preferences['prefs.columns'].center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100 scroll-y-auto">

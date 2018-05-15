@@ -3,10 +3,12 @@
 .TreeView ul {
     list-style-type: none;
     padding-left: 1rem;
+    overflow: auto;
 }
 .TreeView ul > li {
     cursor: pointer;
     margin-left: 1rem;
+    white-space: nowrap;
 }
 .TreeView ul > li > span.item {}
 .TreeView > input[type="search"] {}
