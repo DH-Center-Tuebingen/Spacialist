@@ -53,8 +53,19 @@ class EditorController extends Controller {
             ->orderBy('ca.position', 'asc')
             ->get();
         $selections = [];
+        $dependencies = [];
         foreach($attributes as $a) {
-            $a->depends_on = json_decode($a->depends_on);
+            if(isset($a->depends_on)) {
+                $dependsOn = json_decode($a->depends_on);
+                foreach($dependsOn as $depAttr => $dep) {
+                    if(!isset($dependencies[$depAttr])) {
+                        $dependencies[$depAttr] = [];
+                    }
+                    $dep->dependant = $a->id;
+                    $dependencies[$depAttr][] = $dep;
+                }
+            }
+            unset($a->depends_on);
             $a->columns = Attribute::where('parent_id', $a->id)->get();
             switch($a->datatype) {
                 case 'string-sc':
@@ -77,7 +88,8 @@ class EditorController extends Controller {
         }
         return response()->json([
             'attributes' => $attributes,
-            'selections' => $selections
+            'selections' => $selections,
+            'dependencies' => $dependencies
         ]);
     }
 

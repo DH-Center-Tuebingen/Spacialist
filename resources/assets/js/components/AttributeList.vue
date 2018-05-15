@@ -8,214 +8,214 @@
             @add="added"
             @end="dropped"
             @start="dragged">
-            <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
-            <label class="col-form-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
-                <div v-show="hoverState[i]">
-                    <a v-if="onReorder" href="#" class="reorder-handle">
-                        <i class="fas fa-fw fa-sort text-secondary"></i>
-                    </a>
-                    <button v-if="onEdit" class="btn btn-info btn-fab rounded-circle" @click="onEdit(attribute)">
-                        <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
-                    </button>
-                    <button v-if="onRemove" class="btn btn-danger btn-fab rounded-circle" @click="onRemove(attribute)">
-                        <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
-                    </button>
-                    <button v-if="onDelete" class="btn btn-danger btn-fab rounded-circle" @click="onDelete(attribute)">
-                        <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
-                    </button>
-                </div>
-                <span class="text-right col">
-                    {{concepts[attribute.thesaurus_url].label}}:
-                </span>
-                <sup class="clickable" v-if="onMetadata" @click="onMetadata(attribute)">
-                    <span>
-                        <i class="fas fa-fw fa-exclamation"
-                        :class="{
-                            'text-danger': localValues[attribute.id].possibility <= 25,
-                            'text-warning': localValues[attribute.id].possibility <= 50,
-                            'text-info': localValues[attribute.id].possibility <= 75,
-                            'text-success': localValues[attribute.id].possibility > 75 || (!localValues[attribute.id].possibility && localValues[attribute.id].possibility !== 0)
-                            }"></i>
-                        </span>
-                        <span v-if="localValues[attribute.id].possibility_description">
-                            <i class="fas fa-fw fa-comment"></i>
-                        </span>
-                        <span v-if="metadataAddon(attribute.thesaurus_url)">
-                            <i class="fas fa-fw fa-bookmark"></i>
-                        </span>
-                </sup>
-            </label>
-            <div class="col-md-9">
-                <input class="form-control" :disabled="attribute.isDisabled" v-if="attribute.datatype == 'string'" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
-                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
-                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
-                <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'boolean'" type="checkbox" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
-                <textarea class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"></textarea>
-                <div v-else-if="attribute.datatype == 'percentage'" class="d-flex">
-                    <input class="custom-range" :disabled="attribute.isDisabled" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
-                    <span class="ml-3">{{ localValues[attribute.id].value }}%</span>
-                </div>
-                <div v-else-if="attribute.datatype == 'geography'">
-                    <input class="form-control" :disabled="attribute.isDisabled" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" placeholder="Add WKT" v-model="localValues[attribute.id].value" />
-                    <button type="button" class="btn btn-outline-secondary mt-2" :disabled="attribute.isDisabled" @click="openGeographyModal(attribute.id)">
-                        <i class="fas fa-fw fa-map-marker-alt"></i> Open Map
-                    </button>
-                </div>
-                <!-- TODO: dirty checking -->
-                <div v-else-if="attribute.datatype == 'context'">
-                    <context-search></context-search>
-                </div>
-                <div class="input-group date" data-provide="datepicker" v-else-if="attribute.datatype == 'date'">
-                    <input type="text" class="form-control" :disabled="attribute.isDisabled" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"  ng-model-options="{timezone:'utc'}"/>
-                    <div class="input-group-append input-group-addon">
-                        <button type="button" class="btn btn-outline-secondary">
-                            <i class="fas fa-fw fa-calendar-alt"></i>
+            <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" v-show="!hiddenByDependency[attribute.id]">
+                <label class="col-form-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
+                    <div v-show="hoverState[i]">
+                        <a v-if="onReorder" href="#" class="reorder-handle">
+                            <i class="fas fa-fw fa-sort text-secondary"></i>
+                        </a>
+                        <button v-if="onEdit" class="btn btn-info btn-fab rounded-circle" @click="onEdit(attribute)">
+                            <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
+                        </button>
+                        <button v-if="onRemove" class="btn btn-danger btn-fab rounded-circle" @click="onRemove(attribute)">
+                            <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
+                        </button>
+                        <button v-if="onDelete" class="btn btn-danger btn-fab rounded-circle" @click="onDelete(attribute)">
+                            <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                         </button>
                     </div>
-                </div>
-                <div v-else-if="attribute.datatype == 'string-mc'">
-                    <multiselect
-                        label="concept_url"
-                        track-by="id"
-                        v-model="localValues[attribute.id].value"
-                        :allowEmpty="true"
-                        :closeOnSelect="false"
-                        :customLabel="translateLabel"
-                        :disabled="attribute.isDisabled"
-                        :hideSelected="true"
-                        :multiple="true"
-                        :options="localSelections[attribute.id] || []"
-                        :name="'attribute-'+attribute.id"
-                        v-validate="">
-                    </multiselect>
-                </div>
-                <div v-else-if="attribute.datatype == 'string-sc'">
-                    <multiselect
-                        label="concept_url"
-                        track-by="id"
-                        v-model="localValues[attribute.id].value"
-                        :allowEmpty="true"
-                        :closeOnSelect="true"
-                        :customLabel="translateLabel"
-                        :disabled="attribute.isDisabled"
-                        :hideSelected="true"
-                        :multiple="false"
-                        :options="localSelections[attribute.id] || []"
-                        :name="'attribute-'+attribute.id"
-                        v-validate="">
-                    </multiselect>
-                </div>
-                <!-- TODO: validation/dirty checking -->
-                <div v-else-if="attribute.datatype == 'list'">
-                    <list :entries="localValues[attribute.id].value" :disabled="attribute.isDisabled" :on-change="value => onChange(null, value, attribute.id)" :name="'attribute-'+attribute.id" v-validate="" />
-                </div>
-                <div v-else-if="attribute.datatype == 'epoch'">
-                    <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :concepts="concepts" :epochs="localSelections[attribute.id]" :disabled="attribute.isDisabled" v-validate=""/>
-                </div>
-                <div v-else-if="attribute.datatype == 'dimension'">
-                    <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled" v-validate=""/>
-                </div>
-                <!-- TODO: validation/dirty checking -->
-                <div v-else-if="attribute.datatype == 'table'">
-                    <table class="table table-striped table-hovered table-sm">
-                        <thead class="thead-light">
-                            <tr>
-                                <th v-for="columnNames in attribute.columns">
-                                    {{ concepts[columnNames.thesaurus_url].label }}
-                                </th>
-                                <th>
-                                    Delete
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(row, $index) in localValues[attribute.id].value">
-                                <td v-for="col in row">
-                                    <input class="form-control form-control-sm" v-if="col.datatype == 'string'" type="text" v-model="col.value"/>
-                                    <input class="form-control form-control-sm" v-else-if="col.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="col.value"/>
-                                    <input class="form-control form-control-sm" v-else-if="col.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="col.value"/>
-                                    <input class="form-control form-control-sm" v-else-if="col.datatype == 'boolean'" type="checkbox" v-model="col.value"/>
-                                    <div v-else-if="col.datatype == 'string-sc'">
-                                        <multiselect
-                                            class="multiselect-sm"
-                                            label="concept_url"
-                                            track-by="id"
-                                            v-model="col.value"
-                                            :allowEmpty="true"
-                                            :closeOnSelect="true"
-                                            :customLabel="translateLabel"
-                                            :disabled="attribute.isDisabled"
-                                            :hideSelected="true"
-                                            :multiple="false"
-                                            :options="localSelections[col.attribute_id] || []">
-                                        </multiselect>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-danger btn-sm" @click="deleteTableRow(attribute.id, $index)">
-                                        <i class="fas fa-fw fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td v-for="columnNames in attribute.columns">
-                                    <input class="form-control form-control-sm" v-if="columnNames.datatype == 'string'" type="text" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                    <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                    <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                    <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'boolean'" type="checkbox" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                    <div v-else-if="columnNames.datatype == 'string-sc'">
-                                        <multiselect
-                                            class="multiselect-sm"
-                                            label="concept_url"
-                                            track-by="id"
-                                            v-model="newTableCols[attribute.id][columnNames.id]"
-                                            :allowEmpty="true"
-                                            :closeOnSelect="true"
-                                            :customLabel="translateLabel"
-                                            :disabled="attribute.isDisabled"
-                                            :hideSelected="true"
-                                            :multiple="false"
-                                            :options="localSelections[columnNames.id] || []">
-                                        </multiselect>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-success btn-sm" @click="addTableRow(attribute.id, newTableCols[attribute.id], attribute.columns)">
-                                        <i class="fas fa-fw fa-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div v-else-if="attribute.datatype == 'sql'">
-                    <div v-if="isArray(localValues[attribute.id].value)">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hovered table-sm">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th v-for="(columnNames, index) in localValues[attribute.id].value[0]">
-                                            {{ getConceptLabel(index) }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(row, $index) in localValues[attribute.id].value">
-                                        <td v-for="column in row">
-                                            {{ getConceptLabel(column) }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <span class="text-right col">
+                        {{concepts[attribute.thesaurus_url].label}}:
+                    </span>
+                    <sup class="clickable" v-if="onMetadata" @click="onMetadata(attribute)">
+                        <span>
+                            <i class="fas fa-fw fa-exclamation"
+                            :class="{
+                                'text-danger': localValues[attribute.id].possibility <= 25,
+                                'text-warning': localValues[attribute.id].possibility <= 50,
+                                'text-info': localValues[attribute.id].possibility <= 75,
+                                'text-success': localValues[attribute.id].possibility > 75 || (!localValues[attribute.id].possibility && localValues[attribute.id].possibility !== 0)
+                                }"></i>
+                            </span>
+                            <span v-if="localValues[attribute.id].possibility_description">
+                                <i class="fas fa-fw fa-comment"></i>
+                            </span>
+                            <span v-if="metadataAddon(attribute.thesaurus_url)">
+                                <i class="fas fa-fw fa-bookmark"></i>
+                            </span>
+                    </sup>
+                </label>
+                <div class="col-md-9">
+                    <input class="form-control" :disabled="attribute.isDisabled" v-if="attribute.datatype == 'string'" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)"/>
+                    <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
+                    <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
+                    <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'boolean'" type="checkbox" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
+                    <textarea class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"></textarea>
+                    <div v-else-if="attribute.datatype == 'percentage'" class="d-flex">
+                        <input class="custom-range" :disabled="attribute.isDisabled" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"/>
+                        <span class="ml-3">{{ localValues[attribute.id].value }}%</span>
+                    </div>
+                    <div v-else-if="attribute.datatype == 'geography'">
+                        <input class="form-control" :disabled="attribute.isDisabled" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" placeholder="Add WKT" v-model="localValues[attribute.id].value" />
+                        <button type="button" class="btn btn-outline-secondary mt-2" :disabled="attribute.isDisabled" @click="openGeographyModal(attribute.id)">
+                            <i class="fas fa-fw fa-map-marker-alt"></i> Open Map
+                        </button>
+                    </div>
+                    <!-- TODO: dirty checking -->
+                    <div v-else-if="attribute.datatype == 'context'">
+                        <context-search></context-search>
+                    </div>
+                    <div class="input-group date" data-provide="datepicker" v-else-if="attribute.datatype == 'date'">
+                        <input type="text" class="form-control" :disabled="attribute.isDisabled" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"  ng-model-options="{timezone:'utc'}"/>
+                        <div class="input-group-append input-group-addon">
+                            <button type="button" class="btn btn-outline-secondary">
+                                <i class="fas fa-fw fa-calendar-alt"></i>
+                            </button>
                         </div>
                     </div>
-                    <div v-else>
-                        {{ localValues[attribute.id].value }}
+                    <div v-else-if="attribute.datatype == 'string-mc'">
+                        <multiselect
+                            label="concept_url"
+                            track-by="id"
+                            v-model="localValues[attribute.id].value"
+                            :allowEmpty="true"
+                            :closeOnSelect="false"
+                            :customLabel="translateLabel"
+                            :disabled="attribute.isDisabled"
+                            :hideSelected="true"
+                            :multiple="true"
+                            :options="localSelections[attribute.id] || []"
+                            :name="'attribute-'+attribute.id"
+                            v-validate="">
+                        </multiselect>
                     </div>
+                    <div v-else-if="attribute.datatype == 'string-sc'">
+                        <multiselect
+                            label="concept_url"
+                            track-by="id"
+                            v-model="localValues[attribute.id].value"
+                            :allowEmpty="true"
+                            :closeOnSelect="true"
+                            :customLabel="translateLabel"
+                            :disabled="attribute.isDisabled"
+                            :hideSelected="true"
+                            :multiple="false"
+                            :options="localSelections[attribute.id] || []"
+                            :name="'attribute-'+attribute.id"
+                            v-validate="">
+                        </multiselect>
+                    </div>
+                    <!-- TODO: validation/dirty checking -->
+                    <div v-else-if="attribute.datatype == 'list'">
+                        <list :entries="localValues[attribute.id].value" :disabled="attribute.isDisabled" :on-change="value => onChange(null, value, attribute.id)" :name="'attribute-'+attribute.id" v-validate="" />
+                    </div>
+                    <div v-else-if="attribute.datatype == 'epoch'">
+                        <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :concepts="concepts" :epochs="localSelections[attribute.id]" :disabled="attribute.isDisabled" v-validate=""/>
+                    </div>
+                    <div v-else-if="attribute.datatype == 'dimension'">
+                        <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled" v-validate=""/>
+                    </div>
+                    <!-- TODO: validation/dirty checking -->
+                    <div v-else-if="attribute.datatype == 'table'">
+                        <table class="table table-striped table-hovered table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th v-for="columnNames in attribute.columns">
+                                        {{ concepts[columnNames.thesaurus_url].label }}
+                                    </th>
+                                    <th>
+                                        Delete
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(row, $index) in localValues[attribute.id].value">
+                                    <td v-for="col in row">
+                                        <input class="form-control form-control-sm" v-if="col.datatype == 'string'" type="text" v-model="col.value"/>
+                                        <input class="form-control form-control-sm" v-else-if="col.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="col.value"/>
+                                        <input class="form-control form-control-sm" v-else-if="col.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="col.value"/>
+                                        <input class="form-control form-control-sm" v-else-if="col.datatype == 'boolean'" type="checkbox" v-model="col.value"/>
+                                        <div v-else-if="col.datatype == 'string-sc'">
+                                            <multiselect
+                                                class="multiselect-sm"
+                                                label="concept_url"
+                                                track-by="id"
+                                                v-model="col.value"
+                                                :allowEmpty="true"
+                                                :closeOnSelect="true"
+                                                :customLabel="translateLabel"
+                                                :disabled="attribute.isDisabled"
+                                                :hideSelected="true"
+                                                :multiple="false"
+                                                :options="localSelections[col.attribute_id] || []">
+                                            </multiselect>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm" @click="deleteTableRow(attribute.id, $index)">
+                                            <i class="fas fa-fw fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td v-for="columnNames in attribute.columns">
+                                        <input class="form-control form-control-sm" v-if="columnNames.datatype == 'string'" type="text" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                        <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                        <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                        <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'boolean'" type="checkbox" v-model="newTableCols[attribute.id][columnNames.id]"/>
+                                        <div v-else-if="columnNames.datatype == 'string-sc'">
+                                            <multiselect
+                                                class="multiselect-sm"
+                                                label="concept_url"
+                                                track-by="id"
+                                                v-model="newTableCols[attribute.id][columnNames.id]"
+                                                :allowEmpty="true"
+                                                :closeOnSelect="true"
+                                                :customLabel="translateLabel"
+                                                :disabled="attribute.isDisabled"
+                                                :hideSelected="true"
+                                                :multiple="false"
+                                                :options="localSelections[columnNames.id] || []">
+                                            </multiselect>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-success btn-sm" @click="addTableRow(attribute.id, newTableCols[attribute.id], attribute.columns)">
+                                            <i class="fas fa-fw fa-plus"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div v-else-if="attribute.datatype == 'sql'">
+                        <div v-if="isArray(localValues[attribute.id].value)">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hovered table-sm">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th v-for="(columnNames, index) in localValues[attribute.id].value[0]">
+                                                {{ getConceptLabel(index) }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, $index) in localValues[attribute.id].value">
+                                            <td v-for="column in row">
+                                                {{ getConceptLabel(column) }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div v-else>
+                            {{ localValues[attribute.id].value }}
+                        </div>
+                    </div>
+                    <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  :name="'attribute-'+attribute.id" v-validate="" @blur="checkDependency(attribute.id)"/>
                 </div>
-                <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  :name="'attribute-'+attribute.id" v-validate=""/>
             </div>
-        </div>
         </draggable>
         <modal :name="'geography-place-modal-'+uniqueId" width="80%" height="80%">
             <div class="modal-content h-100">
@@ -266,6 +266,11 @@
             concepts: {
                 required: true,
                 type: Object
+            },
+            dependencies: {
+                required: false,
+                type: Object,
+                default: _ => new Object()
             },
             disableDrag: {
                 required: false,
@@ -362,6 +367,31 @@
                 // Reset inputs
                 for(let k in row) delete row[k];
                 // TODO set form dirty
+            },
+            checkDependency(aid) {
+                if(!this.dependencies) return;
+                if(!this.dependencies[aid]) return;
+                let hides = {};
+                const deps = this.dependencies[aid];
+                deps.forEach(d => {
+                    // return = continue in forEach
+                    if(hides[d.dependant]) return;
+                    hides[d.dependant] = this.evalDependency(this.localValues[aid].value, d.operator, d.value);
+                });
+                for(let k in hides) {
+                    this.hiddenByDependency[k] = hides[k];
+                }
+            },
+            evalDependency(attrValue, operator, depValue) {
+                switch(operator) {
+                    case '<':
+                        return attrValue < depValue;
+                    case '>':
+                        return attrValue > depValue;
+                    case '=':
+                        return attrValue == depValue;
+                }
+                return false;
             },
             deleteTableRow(aid, index) {
                 this.localValues[aid].value.splice(index, 1);
@@ -471,6 +501,7 @@
         },
         data() {
             return {
+                hiddenByDependency: {},
                 hovered: [],
                 uniqueId: Math.random().toString(36),
                 selectedAttribute: -1,

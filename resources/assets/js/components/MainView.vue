@@ -38,6 +38,7 @@
                 <attributes class="pt-2" v-if="dataLoaded"
                     :attributes="selectedContext.attributes"
                     :concepts="concepts"
+                    :dependencies="selectedContext.dependencies"
                     :disable-drag="true"
                     :on-metadata="showMetadata"
                     :metadata-addon="hasReferenceGroup"
@@ -369,7 +370,11 @@
                     if(data.selections instanceof Array) {
                         data.selections = {};
                     }
+                    if(data.dependencies instanceof Array) {
+                        data.dependencies = {};
+                    }
                     Vue.set(vm.selectedContext, 'selections', data.selections);
+                    Vue.set(vm.selectedContext, 'dependencies', data.dependencies);
                     return vm.$http.get('/api/context/'+cid+'/reference');
                 }).then(function(response) {
                     let data = response.data;
