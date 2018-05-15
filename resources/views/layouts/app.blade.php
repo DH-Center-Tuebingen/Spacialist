@@ -96,12 +96,12 @@
                                 </h6>
                                 @endif
                                 @if ($p['prefs.link-to-thesaurex'])
-                                <a class="dropdown-item" href="">
+                                <a class="dropdown-item" href="{{$p['prefs.link-to-thesaurex']}}">
                                     <i class="fas fa-fw fa-paw"></i> ThesauRex
                                 </a>
                                 @endif
                                 @if ($p['prefs.load-extensions']->{'data-analysis'})
-                                <a class="dropdown-item" href="">
+                                <a class="dropdown-item" href="/db">
                                     <i class="fas fa-fw fa-chart-bar"></i> dbWebGen
                                 </a>
                                 @endif
