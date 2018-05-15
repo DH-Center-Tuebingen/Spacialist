@@ -348,7 +348,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form role="form" @submit.prevent="addBibliographyItem(newItem)">
+                    <form role="form" id="newBibliographyItemForm" name="newBibliographyItemForm" @submit.prevent="addBibliographyItem(newItem)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="type">Type:</label>
                             <div class="col-md-9">
@@ -376,14 +376,14 @@
                                 <input type="text" class="form-control" v-model="newItem.fields[optional]"/>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-fw fa-plus"></i> Add
-                        </button>
                     </form>
                     <h4 class="mt-3">BibTeX-Code</h4>
                     <span v-if="newItem.type" v-html="this.$options.filters.bibtexify(newItem.fields, newItem.type.name)"></span>
                 </div>
                 <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" form="newBibliographyItemForm">
+                        <i class="fas fa-fw fa-plus"></i> Add
+                    </button>
                     <button type="button" class="btn btn-danger" @click="hideNewItemModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>

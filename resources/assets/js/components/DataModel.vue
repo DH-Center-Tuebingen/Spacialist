@@ -95,7 +95,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newContextTypeForm" role="form" v-on:submit.prevent="createContextType(newContextType)">
+                    <form name="newContextTypeForm" id="newContextTypeForm" role="form" v-on:submit.prevent="createContextType(newContextType)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
                                 Label:
@@ -112,12 +112,12 @@
                                 Top-Level Context-Type?
                             </label>
                         </div>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-fw fa-plus"></i> Add
-                        </button>
                     </form>
                 </div>
                 <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" form="newContextTypeForm">
+                        <i class="fas fa-fw fa-plus"></i> Add
+                    </button>
                     <button type="button" class="btn btn-danger" @click="hideNewContextTypeModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>
@@ -134,7 +134,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newContextTypeForm" role="form" v-on:submit.prevent="createAttribute(newAttribute)">
+                    <form id="newAttributeForm" name="newAttributeForm" role="form" v-on:submit.prevent="createAttribute(newAttribute)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3">
                                 Label:
@@ -180,12 +180,12 @@
                                 <textarea class="form-control" v-model="newAttribute.textContent"></textarea>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success" :disabled="!validated">
-                            <i class="fas fa-fw fa-plus"></i> Add
-                        </button>
                     </form>
                 </div>
                 <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" form="newAttributeForm" :disabled="!validated">
+                        <i class="fas fa-fw fa-plus"></i> Add
+                    </button>
                     <button type="button" class="btn btn-danger" @click="hideNewAttributeModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>

@@ -80,7 +80,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newRoleForm" role="form" v-on:submit.prevent="onAddRole(newRole)">
+                    <form id="newRoleForm" name="newRoleForm" role="form" v-on:submit.prevent="onAddRole(newRole)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
                                 Role Name:
@@ -105,12 +105,12 @@
                                 <input class="form-control" type="text" id="description" v-model="newRole.description" required />
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-fw fa-plus"></i> Add
-                        </button>
                     </form>
                 </div>
                 <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" form="newRoleForm">
+                        <i class="fas fa-fw fa-plus"></i> Add
+                    </button>
                     <button type="button" class="btn btn-danger" v-on:click="hideNewRoleModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>

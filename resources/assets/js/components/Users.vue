@@ -76,7 +76,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newUserForm" role="form" v-on:submit.prevent="onAddUser(newUser)">
+                    <form id="newUserForm" name="newUserForm" role="form" v-on:submit.prevent="onAddUser(newUser)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
                                 Username:
@@ -101,12 +101,12 @@
                                 <input class="form-control" type="password" id="description" v-model="newUser.password" required />
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-fw fa-plus"></i> Add
-                        </button>
                     </form>
                 </div>
                 <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" form="newUserForm">
+                        <i class="fas fa-fw fa-plus"></i> Add
+                    </button>
                     <button type="button" class="btn btn-danger"     v-on:click="hideNewUserModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>

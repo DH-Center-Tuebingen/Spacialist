@@ -95,7 +95,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newEntityForm" role="form" v-on:submit.prevent="addNewEntity(newEntity)">
+                    <form id="newEntityForm" name="newEntityForm" role="form" v-on:submit.prevent="addNewEntity(newEntity)">
                         <div class="form-group row">
                             <label class="col-form-label col-md-3" for="name">
                                 Name:
@@ -120,12 +120,12 @@
                                 :options="newEntity.selection">
                             </multiselect>
                         </div>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-fw fa-plus"></i> Add
-                        </button>
                     </form>
                 </div>
                 <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" form="newEntityForm">
+                        <i class="fas fa-fw fa-plus"></i> Add
+                    </button>
                     <button type="button" class="btn btn-secondary" @click="hideNewEntityModal">
                         <i class="fas fa-fw fa-times"></i> Cancel
                     </button>
@@ -228,43 +228,45 @@
                         </tbody>
                     </table>
                     <h5>Add new Reference</h5>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <multiselect
-                                label="title"
-                                track-by="id"
-                                v-model="referenceModal.newItem.bibliography"
-                                :closeOnSelect="true"
-                                :hideSelected="true"
-                                :multiple="false"
-                                :options="bibliography">
-                                <template slot="singleLabel" slot-scope="props">
-                                    <span class="option__desc">
-                                        <span class="option__title">
-                                            {{ props.option.title }}
+                    <form role="form" @submit.prevent="addReference(referenceModal.newItem)">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <multiselect
+                                    label="title"
+                                    track-by="id"
+                                    v-model="referenceModal.newItem.bibliography"
+                                    :closeOnSelect="true"
+                                    :hideSelected="true"
+                                    :multiple="false"
+                                    :options="bibliography">
+                                    <template slot="singleLabel" slot-scope="props">
+                                        <span class="option__desc">
+                                            <span class="option__title">
+                                                {{ props.option.title }}
+                                            </span>
                                         </span>
-                                    </span>
-                                </template>
-                                <template slot="option" slot-scope="props">
-                                    <div class="option__desc">
-                                        <span class="option__title d-block">
-                                            {{ props.option.title }}
-                                        </span>
-                                        <span class="option__small">
-                                            {{ props.option.author }}
-                                            <span class="text-lightgray">{{ props.option.year}}</span>
-                                        </span>
-                                    </div>
-                                </template>
-                            </multiselect>
+                                    </template>
+                                    <template slot="option" slot-scope="props">
+                                        <div class="option__desc">
+                                            <span class="option__title d-block">
+                                                {{ props.option.title }}
+                                            </span>
+                                            <span class="option__small">
+                                                {{ props.option.author }}
+                                                <span class="text-lightgray">{{ props.option.year}}</span>
+                                            </span>
+                                        </div>
+                                    </template>
+                                </multiselect>
+                            </div>
+                            <div class="col-md-6">
+                                <textarea class="form-control" v-model="referenceModal.newItem.description" placeholder="Reference Comment"></textarea>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <textarea class="form-control" v-model="referenceModal.newItem.description" placeholder="Reference Comment"></textarea>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-outline-success col-md-12 mt-2" :disabled="addReferenceDisabled" @click="addReference(referenceModal.newItem)">
-                        <i class="fas fa-fw fa-plus"></i> Add Reference
-                    </button>
+                        <button type="submit" class="btn btn-outline-success col-md-12 mt-2" :disabled="addReferenceDisabled">
+                            <i class="fas fa-fw fa-plus"></i> Add Reference
+                        </button>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @click="hideEntityReferenceModal">
