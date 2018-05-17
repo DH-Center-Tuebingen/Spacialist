@@ -27,6 +27,118 @@ class AnalysisController extends Controller {
 
     // GET
 
+    public function export($type = 'csv', Request $request) {
+        // TODO validate
+        $origin = $request->input('origin');
+        $filters = $request->input('filters', []);
+        $columns = $request->input('columns', []);
+        $orders = $request->input('orders', []);
+        $limit = $request->input('limit', []);
+        $splits = $request->input('splits', []);
+        $simple = Helpers::parseBoolean($request->input('simple', false));
+        $distinct = Helpers::parseBoolean($request->input('distinct', false));
+        $page = $request->input('page');
+        $result = $this->requestToQuery($origin, $filters, $columns, $orders, $limit, $splits, $simple, $distinct, $page);
+        switch($type) {
+            case 'csv':
+                $suffix = '.csv';
+                break;
+            case 'json':
+                $suffix = '.json';
+                break;
+            default:
+                return response()->json([
+                    'error' => "The type $type is not supported."
+                ]);
+        }
+        $dt = date('dmYHis');
+        $tmpFile = '/tmp/export-'.$dt.$suffix;
+        $handle = fopen($tmpFile, 'w');
+        $firstRow = true;
+        $exceptions = [];
+        if($simple) {
+            switch($origin) {
+                case 'attribute_values':
+                    $exceptions = [
+                        'attribute',
+                        'context',
+                        'context_val',
+                        'thesaurus_val'
+                    ];
+                    break;
+                case 'contexts':
+                    $exceptions = [
+                        'child_contexts',
+                        'context_type',
+                        'geodata',
+                        'root_context',
+                        'literatures',
+                        'attributes',
+                        'files'
+                    ];
+                case 'files':
+                    $exceptions = [
+                        'contexts',
+                        // 'tags'
+                    ];
+                    break;
+                case 'geodata':
+                    $exceptions = [
+                        'context'
+                    ];
+                    break;
+                case 'literature':
+                    $exceptions = [
+                        'contexts'
+                    ];
+                    break;
+            }
+        }
+        $splitIndex = 0;
+        $content;
+        switch($type) {
+            case 'csv':
+                $i=0;
+                foreach($result['page']->items() as $row) {
+                    $i++;
+                    $curr = [];
+                    $header = [];
+                    foreach($row->getAttributes() as $k => $a) {
+                        // TODO skip ambiguous attributes for now
+                        if(in_array($k, $exceptions)) continue;
+                        if($firstRow) {
+                            $header[] = $k;
+                        }
+                        $curr[] = $a;
+                    }
+                    if(isset($result['splits'])) {
+                        foreach($result['splits'] as $k => $s) {
+                            if($firstRow) {
+                                $header[] = $k;
+                            }
+                            $curr[] = $s['values'][$splitIndex];
+                        }
+                    }
+                    if($firstRow) {
+                        fputcsv($handle, $header);
+                        $firstRow = false;
+                    }
+                    fputcsv($handle, $curr);
+                    $splitIndex++;
+                }
+                // get raw parsed content
+                $content = file_get_contents($tmpFile);
+                break;
+            case 'json':
+                $content = json_encode($result['page']->items(), JSON_PRETTY_PRINT);
+                break;
+        }
+        // delete tmp file
+        fclose($handle);
+        unlink($tmpFile);
+        return response(base64_encode($content));
+    }
+
     // POST
     public function applyFilterQuery(Request $request, $page = 1) {
         // TODO validate

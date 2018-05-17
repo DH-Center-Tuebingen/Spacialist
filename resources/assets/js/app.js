@@ -121,6 +121,22 @@ Vue.prototype.$showToast = function(title, text, type, duration) {
     });
 };
 
+Vue.prototype.$createDownloadLink = function(content, filename, base64) {
+    base64 = base64 || false;
+    var link = document.createElement("a");
+    let url;
+    if(base64) {
+        url = `data:;base64,${content}`;
+    } else {
+        url = window.URL.createObjectURL(new Blob([content]));
+    }
+    // link.setAttribute("href", 'data:;base64,' + raw);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+}
+
 Vue.prototype.$translateConcept = function(concepts, url) {
     if(!url) return url;
     if(!concepts) return url;

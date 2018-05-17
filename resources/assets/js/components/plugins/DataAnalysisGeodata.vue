@@ -1,5 +1,5 @@
 <template>
-    <div class="table-responsive mt-1">
+    <div class="table-responsive">
         <table class="table table-striped table-hover table-bordered table-sm table-cell-250">
             <thead class="thead-light sticky-top">
                 <tr>

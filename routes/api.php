@@ -122,4 +122,7 @@ Route::patch('/map/layer/{id}', 'MapController@updateLayer')->where('id', '[0-9]
 Route::delete('/map/{id}', 'MapController@delete')->where('id', '[0-9]+');
 
 // ANALYSIS
+Route::post('analysis/export', 'AnalysisController@export');
+Route::post('analysis/export/{type}', 'AnalysisController@export');
+
 Route::post('analysis/filter', 'AnalysisController@applyFilterQuery');

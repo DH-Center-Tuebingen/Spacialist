@@ -89,53 +89,112 @@
                 <p class="text-secondary">
                     {{page.from}}-{{page.to}} / {{page.total}}
                 </p>
-                <ul class="pagination" v-show="!expertMode">
-                    <li class="page-item" :class="{'disabled': page.current_page == 1}">
-                        <a href="#" class="page-link" aria-label="First Page" @click="applyFilter(page.first_page_url)">
-                            <i class="fas fa-fw fa-angle-double-left" aria-hidden="true"></i>
-                            <i class="sr-only">First Page</i>
-                        </a>
-                    </li>
-                    <li class="page-item" :class="{'disabled': page.current_page == 1}">
-                        <a href="#" class="page-link" @click="applyFilter(page.prev_page_url)">
-                            <i class="fas fa-fw fa-arrow-left"></i> Previous {{previousResultCount}} results
-                        </a>
-                    </li>
-                    <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
-                        <a href="#" class="page-link" @click="applyFilter(page.next_page_url)">
-                            Next {{nextResultCount}} results <i class="fas fa-fw fa-arrow-right"></i>
-                        </a>
-                    </li>
-                        <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
-                            <a href="#" class="page-link" aria-label="Last Page" @click="applyFilter(page.last_page_url)">
-                                <i class="fas fa-fw fa-angle-double-right" aria-hidden="true"></i>
-                                <i class="sr-only">Last Page</i>
-                            </a>
-                        </li>
-                </ul>
                 <ul class="nav nav-tabs">
                     <li class="nav-item" v-show="expertMode">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="#" :class="{'active': activeResultTab == 'raw'}" @click="activeResultTab = 'raw'">
                             <i class="fas fa-fw fa-list-ul"></i> Raw
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="#" :class="{'active': activeResultTab == 'simple'}" @click="activeResultTab = 'simple'">
                             <i class="fas fa-fw fa-puzzle-piece"></i> Query Builder
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="#" :class="{'active': activeResultTab == 'visualization'}" @click="activeResultTab = 'visualization'">
                             <i class="fas fa-fw fa-chart-line"></i> Visualization
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="#" :class="{'active': activeResultTab == 'export'}" @click="activeResultTab = 'export'">
                             <i class="fas fa-fw fa-download"></i> Export
                         </a>
                     </li>
                 </ul>
-                <component :is="origin.name"></component>
+                <div v-show="activeResultTab == 'simple' && !expertMode">
+                    <ul class="pagination my-2" v-show="!expertMode">
+                        <li class="page-item" :class="{'disabled': page.current_page == 1}">
+                            <a href="#" class="page-link" aria-label="First Page" @click="applyFilter(page.first_page_url)">
+                                <i class="fas fa-fw fa-angle-double-left" aria-hidden="true"></i>
+                                <i class="sr-only">First Page</i>
+                            </a>
+                        </li>
+                        <li class="page-item" :class="{'disabled': page.current_page == 1}">
+                            <a href="#" class="page-link" @click="applyFilter(page.prev_page_url)">
+                                <i class="fas fa-fw fa-arrow-left"></i> Previous {{previousResultCount}} results
+                            </a>
+                        </li>
+                        <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
+                            <a href="#" class="page-link" @click="applyFilter(page.next_page_url)">
+                                Next {{nextResultCount}} results <i class="fas fa-fw fa-arrow-right"></i>
+                            </a>
+                        </li>
+                            <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
+                                <a href="#" class="page-link" aria-label="Last Page" @click="applyFilter(page.last_page_url)">
+                                    <i class="fas fa-fw fa-angle-double-right" aria-hidden="true"></i>
+                                    <i class="sr-only">Last Page</i>
+                                </a>
+                            </li>
+                    </ul>
+                    <component :is="origin.name"></component>
+                </div>
+                <div v-show="activeResultTab == 'raw' && expertMode">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-bordered table-sm table-cell-250">
+                            <thead class="thead-light sticky-top">
+                                <tr>
+                                    <th v-for="(k, col) in results[0]">
+                                        {{ k }}
+                                        <a href="">
+                                            <i class="fas fa-fw fa-sort-up" @click="addOrder(k, 'desc')"></i>
+                                        </a>
+                                        <a href="">
+                                            <i class="fas fa-fw fa-sort-down" @click="addOrder(k, 'asc')"></i>
+                                        </a>
+                                        <a href="">
+                                            <i class="fas fa-fw fa-search"></i>
+                                        </a>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="r in results">
+                                    <td v-for="(k, col) in results[0]">
+                                        {{ r[k] }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div v-show="activeResultTab == 'visualization'">
+                    Visualization
+                </div>
+                <div v-show="activeResultTab == 'export'">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default" @click="exportRows('csv', true)">
+                            Export
+                        </button>
+                        <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#" @click="exportRows('csv', true)">
+                                As CSV (All {{page.total}} entries)
+                            </a>
+                            <a class="dropdown-item" href="#" @click="exportRows('json', true)">
+                                As JSON (All {{page.total}} entries)
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" @click="exportRows('csv', false)">
+                                As CSV (Entry {{page.from}}-{{page.to}})
+                            </a>
+                            <a class="dropdown-item" href="#" @click="exportRows('json', false)">
+                                As JSON (Entry {{page.from}}-{{page.to}})
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -183,19 +242,7 @@
                     vm.filters = [];
                     vm.columns = [];
                 }
-                let data = {
-                    filters: vm.filters,
-                    origin: vm.origin.name,
-                    columns: vm.columns,
-                    orders: vm.orders,
-                    limit: vm.limit,
-                    simple: !vm.expertMode
-                };
-                if(vm.expertMode) {
-                    data.distinct = vm.distinct;
-                } else {
-                    data.splits = vm.splits;
-                }
+                const data = vm.setupFormData();
                 vm.$http.post(url, data).then(function(response) {
                     const data = response.data.page.data.slice();
                     delete response.data.page.data;
@@ -324,6 +371,43 @@
                     return results;
                 }
             },
+            exportRows(type, all) {
+                const vm = this;
+                type = type || 'csv';
+                // exporting all rows is default
+                if(all !== false) {
+                    all = true;
+                }
+                let data = vm.setupFormData();
+                if(all) {
+                    data.limit.from = 1;
+                    data.limit.amount = vm.page.total;
+                    data.page = 1;
+                } else {
+                    data.page = vm.page.current_page;
+                }
+                vm.$http.post(`/api/analysis/export/${type}`, data).then(function(response) {
+                    const filename = `${vm.origin.label}.${type}`;
+                    vm.$createDownloadLink(response.data, filename, true);
+                });
+            },
+            setupFormData() {
+                const vm = this;
+                let data = {
+                    filters: vm.filters,
+                    origin: vm.origin.name,
+                    columns: vm.columns,
+                    orders: vm.orders,
+                    limit: vm.limit,
+                    simple: !vm.expertMode
+                };
+                if(vm.expertMode) {
+                    data.distinct = vm.distinct;
+                } else {
+                    data.splits = vm.splits;
+                }
+                return data;
+            },
             getConceptLabel(url)  {
                 if(!url) return url;
                 const concept = this.concepts[url];
@@ -333,6 +417,7 @@
         },
         data() {
             return {
+                activeResultTab: '',
                 results: [],
                 combinedResults: [],
                 splitResults: {},
