@@ -89,7 +89,7 @@
                 <p class="text-secondary">
                     {{page.from}}-{{page.to}} / {{page.total}}
                 </p>
-                <ul class="nav nav-tabs">
+                <ul class="nav nav-tabs mb-2">
                     <li class="nav-item" v-show="expertMode">
                         <a class="nav-link" href="#" :class="{'active': activeResultTab == 'raw'}" @click="activeResultTab = 'raw'">
                             <i class="fas fa-fw fa-list-ul"></i> Raw
@@ -112,7 +112,7 @@
                     </li>
                 </ul>
                 <div v-show="activeResultTab == 'simple' && !expertMode">
-                    <ul class="pagination my-2" v-show="!expertMode">
+                    <ul class="pagination mb-2" v-show="!expertMode">
                         <li class="page-item" :class="{'disabled': page.current_page == 1}">
                             <a href="#" class="page-link" aria-label="First Page" @click="applyFilter(page.first_page_url)">
                                 <i class="fas fa-fw fa-angle-double-left" aria-hidden="true"></i>
@@ -171,6 +171,13 @@
                     Visualization
                 </div>
                 <div v-show="activeResultTab == 'export'">
+                    <p class="alert alert-info">
+                        Supported export formats are
+                        <ul class="mb-0">
+                            <li>CSV</li>
+                            <li>JSON</li>
+                        </ul>
+                    </p>
                     <div class="btn-group">
                         <button type="button" class="btn btn-default" @click="exportRows('csv', true)">
                             Export
@@ -180,17 +187,17 @@
                         </button>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="#" @click="exportRows('csv', true)">
-                                As CSV (All {{page.total}} entries)
+                                As CSV (All: {{page.total}} entries)
                             </a>
                             <a class="dropdown-item" href="#" @click="exportRows('json', true)">
-                                As JSON (All {{page.total}} entries)
+                                As JSON (All: {{page.total}} entries)
                             </a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#" @click="exportRows('csv', false)">
-                                As CSV (Entry {{page.from}}-{{page.to}})
+                                As CSV (Current Selection: {{page.from}}-{{page.to}})
                             </a>
                             <a class="dropdown-item" href="#" @click="exportRows('json', false)">
-                                As JSON (Entry {{page.from}}-{{page.to}})
+                                As JSON (Current Selection: {{page.from}}-{{page.to}})
                             </a>
                         </div>
                     </div>
