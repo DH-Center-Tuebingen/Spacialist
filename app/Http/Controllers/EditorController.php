@@ -61,7 +61,6 @@ class EditorController extends Controller {
                     if(!isset($dependencies[$depAttr])) {
                         $dependencies[$depAttr] = [];
                     }
-                    $dep->dependant = $a->id;
                     $dependencies[$depAttr][] = $dep;
                 }
             }
@@ -437,7 +436,8 @@ class EditorController extends Controller {
         $dependsOn = [
             $dAttribute => [
                 'operator' => $dOperator,
-                'value' => $dValue
+                'value' => $dValue,
+                'dependant' => $aid
             ]
         ];
 
