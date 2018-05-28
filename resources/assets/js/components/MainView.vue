@@ -357,6 +357,7 @@
                                 case 'epoch':
                                     val.value = {};
                                     break;
+                                case 'table':
                                 case 'list':
                                     val.value = [];
                                     break;

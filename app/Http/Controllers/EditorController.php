@@ -65,7 +65,6 @@ class EditorController extends Controller {
                 }
             }
             unset($a->depends_on);
-            $a->columns = Attribute::where('parent_id', $a->id)->get();
             switch($a->datatype) {
                 case 'string-sc':
                 case 'string-mc':
@@ -73,6 +72,7 @@ class EditorController extends Controller {
                     $selections[$a->id] = ThConcept::getChildren($a->thesaurus_root_url);
                     break;
                 case 'table':
+                    $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
                     // Only string-sc is allowed in tables
                     $columns = Attribute::where('parent_id', $a->id)
                         ->where('datatype', 'string-sc')

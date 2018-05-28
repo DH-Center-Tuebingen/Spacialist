@@ -47,18 +47,6 @@ class ContextController extends Controller {
                     break;
             }
             $value = $a->getValue();
-
-            switch($datatype) {
-                case 'table':
-                    if(!isset($data[$a->attribute_id])) {
-                        $values[$a->attribute_id] = [$value];
-                    } else {
-                        $values[$a->attribute_id][] = $value;
-                    }
-                    break;
-                default:
-                    break;
-            }
             $a->value = $value;
             $data[$a->attribute_id] = $a;
         }

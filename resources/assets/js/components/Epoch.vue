@@ -92,13 +92,7 @@
             translateLabel(element, prop) {
                 const value = element[prop];
                 if(!value) return element;
-                return this.getConceptLabel(value);
-            },
-            getConceptLabel(url)  {
-                if(!url) return url;
-                const concept = this.concepts[url];
-                if(!concept) return url;
-                return concept.label;
+                return this.$translateConcept(this.concepts, value);
             },
         },
         data () {

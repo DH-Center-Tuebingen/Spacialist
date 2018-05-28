@@ -105,7 +105,6 @@
                             v-validate="">
                         </multiselect>
                     </div>
-                    <!-- TODO: validation/dirty checking -->
                     <div v-else-if="attribute.datatype == 'list'">
                         <list :entries="localValues[attribute.id].value" :disabled="attribute.isDisabled" :on-change="value => onChange(null, value, attribute.id)" :name="'attribute-'+attribute.id" v-validate="" />
                     </div>
@@ -115,78 +114,8 @@
                     <div v-else-if="attribute.datatype == 'dimension'">
                         <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
-                    <!-- TODO: validation/dirty checking -->
                     <div v-else-if="attribute.datatype == 'table'">
-                        <table class="table table-striped table-hovered table-sm">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th v-for="columnNames in attribute.columns">
-                                        {{ concepts[columnNames.thesaurus_url].label }}
-                                    </th>
-                                    <th>
-                                        Delete
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(row, $index) in localValues[attribute.id].value">
-                                    <td v-for="col in row">
-                                        <input class="form-control form-control-sm" v-if="col.datatype == 'string'" type="text" v-model="col.value"/>
-                                        <input class="form-control form-control-sm" v-else-if="col.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="col.value"/>
-                                        <input class="form-control form-control-sm" v-else-if="col.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="col.value"/>
-                                        <input class="form-control form-control-sm" v-else-if="col.datatype == 'boolean'" type="checkbox" v-model="col.value"/>
-                                        <div v-else-if="col.datatype == 'string-sc'">
-                                            <multiselect
-                                                class="multiselect-sm"
-                                                label="concept_url"
-                                                track-by="id"
-                                                v-model="col.value"
-                                                :allowEmpty="true"
-                                                :closeOnSelect="true"
-                                                :customLabel="translateLabel"
-                                                :disabled="attribute.isDisabled"
-                                                :hideSelected="true"
-                                                :multiple="false"
-                                                :options="localSelections[col.attribute_id] || []">
-                                            </multiselect>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-danger btn-sm" @click="deleteTableRow(attribute.id, $index)">
-                                            <i class="fas fa-fw fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td v-for="columnNames in attribute.columns">
-                                        <input class="form-control form-control-sm" v-if="columnNames.datatype == 'string'" type="text" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                        <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                        <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'integer'" type="number" step="1" placeholder="0" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                        <input class="form-control form-control-sm" v-else-if="columnNames.datatype == 'boolean'" type="checkbox" v-model="newTableCols[attribute.id][columnNames.id]"/>
-                                        <div v-else-if="columnNames.datatype == 'string-sc'">
-                                            <multiselect
-                                                class="multiselect-sm"
-                                                label="concept_url"
-                                                track-by="id"
-                                                v-model="newTableCols[attribute.id][columnNames.id]"
-                                                :allowEmpty="true"
-                                                :closeOnSelect="true"
-                                                :customLabel="translateLabel"
-                                                :disabled="attribute.isDisabled"
-                                                :hideSelected="true"
-                                                :multiple="false"
-                                                :options="localSelections[columnNames.id] || []">
-                                            </multiselect>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-success btn-sm" @click="addTableRow(attribute.id, newTableCols[attribute.id], attribute.columns)">
-                                            <i class="fas fa-fw fa-plus"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <tabular :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :concepts="concepts" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
                     <div v-else-if="attribute.datatype == 'sql'">
                         <div v-if="isArray(localValues[attribute.id].value)">
@@ -256,6 +185,7 @@
     Vue.component('dimension', require('./Dimension.vue'));
     Vue.component('epoch', require('./Epoch.vue'));
     Vue.component('list', require('./List.vue'));
+    Vue.component('tabular', require('./Tabular.vue'))
 
     export default {
         props: {
@@ -342,31 +272,13 @@
             },
             onChange(field, value, aid) {
                 if (this.localValues[aid].value){
-                    if (!field) {
+                    if (field == null) {
                         this.localValues[aid].value = [];
                         value.forEach(v => this.localValues[aid].value.push(v));
                     } else {
                         this.localValues[aid].value[field] = value;
                     }
                 }
-            },
-            addTableRow(aid, row, columns) {
-                if(!this.localValues[aid].value) {
-                    this.localValues[aid].value = [];
-                }
-                let cpy = Object.assign({}, row);
-                let addRow = {};
-                columns.forEach((c, i) => {
-                    let newColumn = {};
-                    newColumn.datatype = c.datatype;
-                    newColumn.attribute_id = c.id;
-                    newColumn.value = cpy[c.id];
-                    addRow[i] = newColumn;
-                });
-                this.localValues[aid].value.push(addRow);
-                // Reset inputs
-                for(let k in row) delete row[k];
-                // TODO set form dirty
             },
             checkDependency(aid) {
                 if(!this.dependencies) return;
@@ -392,10 +304,6 @@
                         return attrValue == depValue;
                 }
                 return false;
-            },
-            deleteTableRow(aid, index) {
-                this.localValues[aid].value.splice(index, 1);
-                // TODO set form dirty
             },
             openGeographyModal(aid) {
                 this.currentGeoValue = this.newGeoValue = this.localValues[aid].value;
@@ -548,15 +456,6 @@
                 set function(newValue) {
                     // return newValue;
                 }
-            },
-            newTableCols: function() {
-                let cols = {};
-                this.localAttributes.forEach((attribute) => {
-                    if(attribute.datatype == 'table') {
-                        cols[attribute.id] = {};
-                    }
-                });
-                return cols;
             },
             hoverState: function() {
                 return this.hovered;
