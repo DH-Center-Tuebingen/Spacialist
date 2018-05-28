@@ -1,6 +1,7 @@
 <template>
     <div class="h-100" v-if="dataInitialized">
         <ol-map
+            :epsg="epsg"
             :init-geojson="geojson"
             :on-deleteend="deleteFeatures"
             :on-drawend="addFeature"
@@ -26,6 +27,10 @@
             context: {
                 type: Object,
                 required: true
+            },
+            preferences: {
+                type: Object,
+                required: true
             }
         },
         mounted() {
@@ -34,6 +39,7 @@
         methods: {
             initData() {
                 const vm = this;
+                vm.epsg = vm.preferences['prefs.map-projection'];
                 vm.dataInitialized = false;
                 vm.$http.get('/api/map').then(function(response) {
                     const mapData = response.data;
@@ -132,6 +138,7 @@
         data() {
             return {
                 dataInitialized: false,
+                epsg: {},
                 layers:{},
                 contextTypes: {},
                 contexts: {},

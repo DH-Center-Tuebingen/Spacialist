@@ -377,6 +377,11 @@
                 default: false
             }
         },
+        activated() {
+            if(this.contextDataLoaded) {
+                this.linkedFilesChanged();
+            }
+        },
         mounted() {
             if(screenfull.enabled) {
                 window.addEventListener('keydown', this.toggleFullscreen, false);
@@ -389,6 +394,12 @@
                 let k = event.keyCode;
                 if(k != 70) return; // 70 = 'f' key
                 screenfull.toggle(elem);
+            },
+            linkedFilesChanged() {
+                if(!this.context.id) return;
+                this.linkedFiles.apiUrl = '/file/linked/' + this.context.id;
+                this.resetFiles('linkedFiles');
+                this.getNextFiles('linkedFiles');
             },
             setAction(id) {
                 // disable linked tab if no context is selected
@@ -456,7 +467,6 @@
                 if(arr.pagination.current_page && arr.pagination.current_page == arr.pagination.last_page) {
                     return;
                 }
-                let firstCall;
                 let url = arr.apiPrefix;
                 if(!Object.keys(arr.pagination).length) {
                     url += arr.apiUrl;
@@ -752,9 +762,7 @@
         watch: {
             contextDataLoaded: function(newContextDataLoaded, oldContextDataLoaded) {
                 if(newContextDataLoaded) {
-                    this.linkedFiles.apiUrl = '/file/linked/' + this.context.id;
-                    this.resetFiles('linkedFiles');
-                    this.getNextFiles('linkedFiles');
+                    this.linkedFilesChanged();
                 }
             }
         }

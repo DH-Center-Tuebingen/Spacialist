@@ -69,6 +69,14 @@ class Preference extends Model
                 return $value->name;
             case 'prefs.project-maintainer':
                 return $value;
+            case 'prefs.map-projection':
+                $proj4 = \DB::table('spatial_ref_sys')
+                    ->where('auth_srid', $value->epsg)
+                    ->value('proj4text');
+                return [
+                    'epsg' => $value->epsg,
+                    'proj4' => $proj4
+                ];
         }
         return $value;
     }

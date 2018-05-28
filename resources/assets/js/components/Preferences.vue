@@ -232,6 +232,29 @@
                     </button>
                 </td>
             </tr>
+            <tr v-if="localPreferences['prefs.load-extensions'].value.map">
+                <td>
+                    <strong>Map Projection</strong>
+                </td>
+                <td>
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label">EPSG-Code:</label>
+                            <div class="col-md-10">
+                                <input class="form-control" type="text" v-model="localPreferences['prefs.map-projection'].value.epsg" />
+                            </div>
+                        </div>
+                    </form>
+                </td>
+                <td>
+                    <input type="checkbox" v-model="localPreferences['prefs.map-projection'].allow_override" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.map-projection'])">
+                        <i class="fas fa-fw fa-check"></i>
+                    </button>
+                </td>
+            </tr>
         </tbody>
     </table>
 </template>
