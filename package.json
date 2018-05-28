@@ -53,6 +53,7 @@
         "ol": "^4.6.4",
         "ol-ext": "^2.0.1",
         "popper.js": "^1.14.3",
+        "proj4": "^2.4.4",
         "screenfull": "^3.3.2",
         "three-full": "^6.0.0",
         "transliteration": "^1.6.2",

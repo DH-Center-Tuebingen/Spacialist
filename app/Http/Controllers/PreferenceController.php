@@ -103,6 +103,9 @@ class PreferenceController extends Controller {
             case 'prefs.project-maintainer':
                 $value = $decodedValue;
                 break;
+            case 'prefs.map-projection':
+                $value = $decodedValue;
+                break;
         }
         return $value;
     }

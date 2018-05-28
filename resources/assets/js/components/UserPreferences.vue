@@ -167,6 +167,26 @@
                     </button>
                 </td>
             </tr>
+            <tr v-if="localPreferences['prefs.load-extensions'].value.map">
+                <td>
+                    <strong>Map Projection</strong>
+                </td>
+                <td>
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label">EPSG-Code:</label>
+                            <div class="col-md-10">
+                                <input type="text" :readonly="!localPreferences['prefs.map-projection'].allow_override" :class="[localPreferences['prefs.map-projection'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.map-projection'].value.epsg" />
+                            </div>
+                        </div>
+                    </form>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.map-projection'])" :disabled="!localPreferences['prefs.map-projection'].allow_override">
+                        <i class="fas fa-fw fa-check"></i>
+                    </button>
+                </td>
+            </tr>
         </tbody>
     </table>
 </template>

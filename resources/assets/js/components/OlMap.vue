@@ -81,6 +81,8 @@
     import Stroke from 'ol/style/stroke';
     import Style from 'ol/style/style';
 
+    import proj4 from 'proj4';
+
     import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
     import '../../sass/ol-ext-layerswitcher.scss';
 
@@ -100,6 +102,10 @@
                 required: false,
                 type: Array,
                 default: _ => []
+            },
+            epsg: {
+                required: false,
+                type: Object
             },
             onDeleteend: {
                 required: false,
@@ -122,7 +128,11 @@
             }
         },
         mounted() {
-            let vm = this;
+            const vm = this;
+
+            proj.setProj4(proj4);
+            vm.initMapProjection();
+
             if(vm.initWkt.length && vm.initGeojson.length) {
                 console.error('init-wkt and init-geojson provided. They are not allowed at once.');
                 return;
@@ -156,13 +166,17 @@
                     vm.entityLayers.push(layer);
                     let source = layer.getSource();
                     vm.initWkt.forEach(wkt => {
-                        const geom = vm.wktFormat.readGeometry(wkt);
+                        const geom = vm.wktFormat.readGeometry(wkt, {
+                            featureProjection: 'EPSG:3857'
+                        });
                         source.addFeature(new Feature({geometry: geom}));
                     });
                 } else if(vm.initGeojson.length) {
                     let geojsonLayers = {};
                     vm.initGeojson.forEach(geojson => {
-                        let feature = vm.geoJsonFormat.readFeature(geojson.geom);
+                        let feature = vm.geoJsonFormat.readFeature(geojson.geom, {
+                            featureProjection: 'EPSG:3857'
+                        });
                         feature.setProperties(geojson.props);
                         if(geojson.props.color) {
                             feature.setStyle(vm.createStyle(geojson.props.color));
@@ -398,9 +412,7 @@
                     target: 'map',
                     view: new View({
                         center: [0, 0],
-                        projection: 'EPSG:4326',
-                        extent: [-180, -90, 180, 90],
-                        // extent: proj.transformExtent([-180, -90, 180, 90], 'EPSG:4326', 'EPSG:3857'),
+                        projection: 'EPSG:3857',
                         zoom: 2
                     })
                 });
@@ -519,6 +531,17 @@
             });
         },
         methods: {
+            initMapProjection() {
+                const vm = this;
+
+                if(!vm.epsg) {
+                    return;
+                }
+                const name = `EPSG:${vm.epsg.epsg}`;
+                proj4.defs(name, vm.epsg.proj4);
+                const projection = proj.get(name);
+                proj.addProjection(projection);
+            },
             getEntityExtent() {
                 const layers = this.entityLayersGroup.getLayers();
                 let entityExtent;
@@ -631,25 +654,25 @@
             },
             unlink(feature, entity) {
             },
-            geometryToList(g) {
-                if(!g) return 'ul class="list-unstyled mb-0 pl-3 coordinate-list"></ul>';
-                let coordHtml = '<ul class="list-unstyled mb-0 pl-3 coordinate-list">';
+            geometryToTable(g) {
+                if(!g) return '<table class="table table-striped table-borderless table-sm"></table>';
+                let coordHtml = '<table class="table table-striped table-borderless table-sm"><tbody>';
                 const coords = g.getCoordinates();
                 switch(g.getType()) {
                     case 'Point':
-                        coordHtml += this.coordinateToListElement(coords)
+                        coordHtml += this.coordinateToTableRow(coords)
                         break;
                     case 'LineString':
                     case 'MultiPoint':
                         coords.forEach(c => {
-                            coordHtml += this.coordinateToListElement(c);
+                            coordHtml += this.coordinateToTableRow(c);
                         });
                         break;
                     case 'Polygon':
                     case 'MultiLineString':
                         coords.forEach(cg => {
                             cg.forEach(c => {
-                                coordHtml += this.coordinateToListElement(c);
+                                coordHtml += this.coordinateToTableRow(c);
                             });
                         });
                         break;
@@ -657,17 +680,23 @@
                         coords.forEach(cg => {
                             cg.forEach(cg2 => {
                                 cg2.forEach(c => {
-                                    coordHtml += this.coordinateToListElement(c);
+                                    coordHtml += this.coordinateToTableRow(c);
                                 });
                             });
                         });
                         break;
                 }
-                coordHtml += '</ul>';
+                coordHtml += '</tbody></table>';
                 return coordHtml;
             },
-            coordinateToListElement(c) {
-                return '<li class="py-1">'+Coordinate.toStringXY(c, 4)+'</li>';
+            coordinateToTableRow(c) {
+                if(!c[0] || !c[1]) return;
+                const transCoord = proj.transform(c, 'EPSG:3857', `EPSG:${this.epsg.epsg}`);
+                const row = `<tr>
+                    <td class="text-left">${transCoord[0].toFixed(4)}</td>
+                    <td class="text-right">${transCoord[1].toFixed(4)}</td>
+                </tr>`;
+                return row;
             },
             updatePopup(f) {
                 const vm = this;
@@ -705,13 +734,12 @@
                     }
                 }
 
-                const transformGeom = geometry.clone().transform('EPSG:4326', 'EPSG:3857');
-                const coordHtml = vm.geometryToList(transformGeom);
+                const coordHtml = vm.geometryToTable(geometry);
                 vm.overlayContent =
                     `<dl class="mb-0">
                         <dt>Type</dt>
-                        <dd>${transformGeom.getType()}</dd>
-                        <dt>Coordinates</dt>
+                        <dd>${geometry.getType()}</dd>
+                        <dt>Coordinates EPSG:${this.epsg.epsg}</dt>
                         <dd>${coordHtml}</dd>
                         <dt>Link</dt>
                         <dd>${linkState}</dd>
