@@ -24,7 +24,7 @@
         <ol class="mt-2" v-if="expanded && entries.length">
             <li v-for="(l, i) in entries">
                 {{ l }}
-                <a href="#" class="text-danger" v-on:click="removeListEntry(i)">
+                <a href="#" class="text-danger" @click="removeListEntry(i)">
                     <i class="fas fa-fw fa-trash"></i>
                 </a>
             </li>

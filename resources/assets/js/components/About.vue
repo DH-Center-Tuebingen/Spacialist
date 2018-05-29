@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">About Spacialist</h5>
-                <button type="button" class="close" aria-label="Close" v-on:click="hideAboutModal">
+                <button type="button" class="close" aria-label="Close" @click="hideAboutModal">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -40,7 +40,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary"     v-on:click="hideAboutModal">
+                <button type="button" class="btn btn-outline-secondary"     @click="hideAboutModal">
                     Close
                 </button>
             </div>

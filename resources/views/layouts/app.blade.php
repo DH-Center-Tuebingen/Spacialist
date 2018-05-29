@@ -130,7 +130,7 @@
                                 <a class="dropdown-item" href="">
                                     <i class="fas fa-fw fa-pencil-alt"></i> Toggle Edit Mode
                                 </a>
-                                <a class="dropdown-item" href="#" v-on:click="showAboutModal">
+                                <a class="dropdown-item" href="#" @click="showAboutModal">
                                     <i class="fas fa-fw fa-info-circle"></i> About
                                 </a>
                             </div>

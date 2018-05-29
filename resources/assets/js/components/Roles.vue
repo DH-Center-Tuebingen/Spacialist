@@ -57,7 +57,7 @@
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-fw fa-edit text-info"></i> Edit
                                 </a>
-                                <a class="dropdown-item" href="#" v-on:click="requestDeleteRole(role.id)">
+                                <a class="dropdown-item" href="#" @click="requestDeleteRole(role.id)">
                                     <i class="fas fa-fw fa-trash text-danger"></i> Delete
                                 </a>
                             </div>
@@ -67,7 +67,7 @@
             </tbody>
         </table>
 
-        <button type="button" class="btn btn-success" v-on:click="showNewRoleModal">
+        <button type="button" class="btn btn-success" @click="showNewRoleModal">
             <i class="fas fa-fw fa-plus"></i> Add New Role
         </button>
 
@@ -75,7 +75,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="newRoleModalLabel">Add new Role</h5>
-                    <button type="button" class="close" aria-label="Close" v-on:click="hideNewRoleModal">
+                    <button type="button" class="close" aria-label="Close" @click="hideNewRoleModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -111,7 +111,7 @@
                     <button type="submit" class="btn btn-success" form="newRoleForm">
                         <i class="fas fa-fw fa-plus"></i> Add
                     </button>
-                    <button type="button" class="btn btn-danger" v-on:click="hideNewRoleModal">
+                    <button type="button" class="btn btn-danger" @click="hideNewRoleModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>
                 </div>
@@ -122,7 +122,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Delete Role {{ selectedRole.name }}</h5>
-                    <button type="button" class="close" aria-label="Close" v-on:click="hideDeleteRoleModal">
+                    <button type="button" class="close" aria-label="Close" @click="hideDeleteRoleModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -130,10 +130,10 @@
                     Do you really want to delete Role <strong>{{ selectedRole.display_name }}</strong> (<i>{{ selectedRole.name }}</i>)?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" v-on:click="deleteRole(selectedRole.id)">
+                    <button type="button" class="btn btn-success" @click="deleteRole(selectedRole.id)">
                         <i class="fas fa-fw fa-check"></i> Delete
                     </button>
-                    <button type="button" class="btn btn-danger" v-on:click="hideDeleteRoleModal">
+                    <button type="button" class="btn btn-danger" @click="hideDeleteRoleModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>
                 </div>

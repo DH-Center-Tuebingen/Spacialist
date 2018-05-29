@@ -45,7 +45,7 @@
                 <thead class="thead-light">
                     <tr>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('type')">
+                            <a href="#" @click="setOrderColumn('type')">
                                 Type
                                 <span v-show="orderColumn == 'type'">
                                     <span v-show="orderType == 'asc'">
@@ -58,7 +58,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('citekey')">
+                            <a href="#" @click="setOrderColumn('citekey')">
                                 Citation Key
                                 <span v-show="orderColumn == 'citekey'">
                                     <span v-show="orderType == 'asc'">
@@ -71,7 +71,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('author')">
+                            <a href="#" @click="setOrderColumn('author')">
                                 Author
                                 <span v-show="orderColumn == 'author'">
                                     <span v-show="orderType == 'asc'">
@@ -84,7 +84,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('editor')">
+                            <a href="#" @click="setOrderColumn('editor')">
                                 Editor
                                 <span v-show="orderColumn == 'editor'">
                                     <span v-show="orderType == 'asc'">
@@ -97,7 +97,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('title')">
+                            <a href="#" @click="setOrderColumn('title')">
                                 Title
                                 <span v-show="orderColumn == 'title'">
                                     <span v-show="orderType == 'asc'">
@@ -110,7 +110,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('journal')">
+                            <a href="#" @click="setOrderColumn('journal')">
                                 Journal
                                 <span v-show="orderColumn == 'journal'">
                                     <span v-show="orderType == 'asc'">
@@ -123,7 +123,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('year')">
+                            <a href="#" @click="setOrderColumn('year')">
                                 Year
                                 <span v-show="orderColumn == 'year'">
                                     <span v-show="orderType == 'asc'">
@@ -157,7 +157,7 @@
                             literature.bibtex.series
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('booktitle')">
+                            <a href="#" @click="setOrderColumn('booktitle')">
                                 Book Title
                                 <span v-show="orderColumn == 'booktitle'">
                                     <span v-show="orderType == 'asc'">
@@ -170,7 +170,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('publisher')">
+                            <a href="#" @click="setOrderColumn('publisher')">
                                 Publisher
                                 <span v-show="orderColumn == 'publisher'">
                                     <span v-show="orderType == 'asc'">
@@ -183,7 +183,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('address')">
+                            <a href="#" @click="setOrderColumn('address')">
                                 Address
                                 <span v-show="orderColumn == 'address'">
                                     <span v-show="orderType == 'asc'">
@@ -205,7 +205,7 @@
                             literature.updated-at
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('misc')">
+                            <a href="#" @click="setOrderColumn('misc')">
                                 misc
                                 <span v-show="orderColumn == 'misc'">
                                     <span v-show="orderType == 'asc'">
@@ -218,7 +218,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="#" v-on:click="setOrderColumn('howpublished')">
+                            <a href="#" @click="setOrderColumn('howpublished')">
                                 howpublished
                                 <span v-show="orderColumn == 'howpublished'">
                                     <span v-show="orderType == 'asc'">
@@ -343,7 +343,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add new Item</h5>
-                    <button type="button" class="close" aria-label="Close" v-on:click="hideNewItemModal">
+                    <button type="button" class="close" aria-label="Close" @click="hideNewItemModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>

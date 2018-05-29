@@ -50,10 +50,10 @@
                                 <a class="dropdown-item" href="#" v-if="isDirty('roles_'+user.id)" @click="onPatchUser(user.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> Save
                                 </a>
-                                <a class="dropdown-item" href="#" v-on:click="updatePassword(user.id)">
+                                <a class="dropdown-item" href="#" @click="updatePassword(user.id)">
                                     <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
                                 </a>
-                                <a class="dropdown-item" href="#" v-on:click="requestDeleteUser(user.id)">
+                                <a class="dropdown-item" href="#" @click="requestDeleteUser(user.id)">
                                     <i class="fas fa-fw fa-trash text-danger"></i> Delete
                                 </a>
                             </div>
@@ -63,7 +63,7 @@
             </tbody>
         </table>
 
-        <button type="button" class="btn btn-success" v-on:click="showNewUserModal">
+        <button type="button" class="btn btn-success" @click="showNewUserModal">
             <i class="fas fa-fw fa-plus"></i> Add New User
         </button>
 
@@ -71,7 +71,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add new User</h5>
-                    <button type="button" class="close" aria-label="Close" v-on:click="hideNewUserModal">
+                    <button type="button" class="close" aria-label="Close" @click="hideNewUserModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -107,7 +107,7 @@
                     <button type="submit" class="btn btn-success" form="newUserForm">
                         <i class="fas fa-fw fa-plus"></i> Add
                     </button>
-                    <button type="button" class="btn btn-danger"     v-on:click="hideNewUserModal">
+                    <button type="button" class="btn btn-danger"     @click="hideNewUserModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>
                 </div>
@@ -118,7 +118,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Delete User {{ selectedUser.name }}</h5>
-                    <button type="button" class="close" aria-label="Close" v-on:click="hideDeleteUserModal">
+                    <button type="button" class="close" aria-label="Close" @click="hideDeleteUserModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -126,10 +126,10 @@
                     Do you really want to delete User <strong>{{ selectedUser.name }}</strong> (<i>{{ selectedUser.email }}</i>)?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" v-on:click="deleteUser(selectedUser.id)">
+                    <button type="button" class="btn btn-success" @click="deleteUser(selectedUser.id)">
                         <i class="fas fa-fw fa-check"></i> Delete
                     </button>
-                    <button type="button" class="btn btn-danger" v-on:click="hideDeleteUserModal">
+                    <button type="button" class="btn btn-danger" @click="hideDeleteUserModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>
                 </div>

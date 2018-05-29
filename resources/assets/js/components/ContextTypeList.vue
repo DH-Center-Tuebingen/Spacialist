@@ -14,7 +14,7 @@
             </li>
             <li v-if="onAdd">
                 <i class="fas fa-fw fa-plus"></i>
-                <a href="#" v-on:click="onAdd()" class="text-secondary">New Context-Type...</a>
+                <a href="#" @click="onAdd()" class="text-secondary">New Context-Type...</a>
             </li>
         </ul>
     </div>
