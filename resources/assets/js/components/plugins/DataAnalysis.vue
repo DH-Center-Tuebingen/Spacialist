@@ -111,7 +111,7 @@
                         </a>
                     </li>
                 </ul>
-                <div v-show="activeResultTab == 'simple' && !expertMode">
+                <div v-show="activeResultTab == 'simple' && !expertMode" class="col px-0 d-flex flex-column">
                     <ul class="pagination mb-2" v-show="!expertMode">
                         <li class="page-item" :class="{'disabled': page.current_page == 1}">
                             <a href="#" class="page-link" aria-label="First Page" @click="applyFilter(page.first_page_url)">
@@ -292,9 +292,10 @@
                             for(let i=0; i<data.length; i++) {
                                 vm.combinedResults.push(data[i]);
                             }
-                            for(let k in vm.page.splits) {
-                                vm.splitResults[k] = vm.page.splits[k].values;
-                                vm.splitType[k] = vm.page.splits[k].type;
+                            const splits = response.data.splits;
+                            for(let k in splits) {
+                                vm.splitResults[k] = splits[k].values;
+                                vm.splitType[k] = splits[k].type;
                             }
                         }
                         vm.activeResultTab = vm.expertMode ? 'raw' : 'simple';
@@ -321,6 +322,10 @@
                 if(this.instantFilter) {
                     this.applyFilter();
                 }
+            },
+            removeSpilt(index) {
+                this.splits.splice(index, 1);
+                this.applyFilter();
             },
             datatypeSupportsSplit(datatype) {
                 switch(datatype) {
@@ -416,10 +421,7 @@
                 return data;
             },
             getConceptLabel(url)  {
-                if(!url) return url;
-                const concept = this.concepts[url];
-                if(!concept) return url;
-                return concept.label;
+                return this.$translateConcept(this.concepts, url);
             }
         },
         data() {

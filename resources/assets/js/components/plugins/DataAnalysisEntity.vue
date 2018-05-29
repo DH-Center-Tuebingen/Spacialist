@@ -21,9 +21,9 @@
                             <i class="fas fa-fw fa-search"></i>
                         </a>
                     </th>
-                    <th v-for="(value, k) in $parent.splitResults">
-                        {{ k }}
-                        <a href="#">
+                    <th v-for="(value, k, index) in $parent.splitResults">
+                        {{ $parent.getConceptLabel(k) }}
+                        <a href="#" @click="$parent.removeSpilt(index)">
                             <i class="fas fa-fw fa-trash text-danger"></i>
                         </a>
                     </th>
@@ -78,7 +78,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="res in $parent.combinedResults">
+                <tr v-for="(res, resIndex) in $parent.combinedResults">
                     <td>
                         {{ res.name }}
                     </td>
@@ -89,11 +89,22 @@
                         <ul>
                             <li v-for="attr in res.attributes">
                                 {{ $parent.getConceptLabel(attr.thesaurus_url) }}
-                                <a v-if="$parent.datatypeSupportsSplit(attr.datatype)" href="" @click="$parent.addSplit('attributes', 'id', attr.id, attr.thesaurus_url)">
+                                <a v-if="$parent.datatypeSupportsSplit(attr.datatype)" href="#" @click="$parent.addSplit('attributes', 'id', attr.id, attr.thesaurus_url)">
                                     <i class="fas fa-fw fa-share-square"></i>
                                 </a>
                             </li>
                         </ul>
+                    </td>
+                    <td v-for="(value, k) in $parent.splitResults">
+                        <span v-if="$parent.splitType[k] == 'string-sc'">
+                            {{ $parent.getConceptLabel(value[resIndex]) }}
+                        </span>
+                        <span v-else-if="$parent.splitType[k] == 'geography'">
+                            {{ value[resIndex] }}
+                        </span>
+                        <span v-else>
+                            {{ value[resIndex] }}
+                        </span>
                     </td>
                     <td v-show="$parent.showAmbiguous">
                         <div v-if="res.geodata">

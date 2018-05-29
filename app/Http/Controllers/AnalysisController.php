@@ -225,13 +225,13 @@ class AnalysisController extends Controller {
         foreach($splits as $s) {
             $curr = [];
             foreach($rows as $row) {
-                $rel = $row->{$s->relation};
+                $rel = $row->{$s['relation']};
                 $value = null;
                 // check if $rel is a collection
                 if(is_a($rel, 'Illuminate\Database\Eloquent\Collection')) {
                     // if so, loop over all items
                     foreach($rel->all() as $r) {
-                        if($r->{$s->column} == $s->value) {
+                        if($r->{$s['column']} == $s['value']) {
                             $value = null;
                             if(isset($r->pivot->str_val)) {
                                 $value = $r->pivot->str_val;
@@ -254,7 +254,7 @@ class AnalysisController extends Controller {
                     }
                     // otherwise, should be object
                 } else if(is_object($rel)) {
-                    if($rel->{$s->column} == $s->value) {
+                    if($rel->{$s['column']} == $s['value']) {
                         $value = null;
                         if(isset($rel->pivot->str_val)) {
                             $value = $rel->pivot->str_val;
@@ -279,7 +279,7 @@ class AnalysisController extends Controller {
                 }
                 $curr[] = $value;
             }
-            $relName = "$s->name";
+            $relName = $s['name'];
             $keys = array_keys($splitArray);
             if(!empty($keys)) {
                 $hits = 0;
