@@ -1,33 +1,43 @@
 <template>
     <div class="d-flex flex-column justify-content-between h-100">
-        <div>
-            <button type="button" class="btn btn-sm" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" @click="toggleDrawType('Point')">
-                <i class="fas fa-fw fa-map-marker-alt"></i>
-            </button>
-            <button type="button" class="btn btn-sm" :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}" @click="toggleDrawType('LineString')">
-                <i class="fas fa-fw fa-road"></i>
-            </button>
-            <button type="button" class="btn btn-sm" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" @click="toggleDrawType('Polygon')">
-                <i class="fas fa-fw fa-object-ungroup"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-info" v-show="interactionMode != 'modify'" @click="setInteractionMode('modify')">
-                <i class="fas fa-fw fa-edit"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-success" v-show="interactionMode == 'modify'" @click="updateFeatures">
-                <i class="fas fa-fw fa-check"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-danger" v-show="interactionMode == 'modify'" @click="cancelUpdateFeatures">
-                <i class="fas fa-fw fa-times"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-danger" v-show="interactionMode != 'delete'" @click="setInteractionMode('delete')">
-                <i class="fas fa-fw fa-trash"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-success" v-show="interactionMode == 'delete'" @click="deleteFeatures">
-                <i class="fas fa-fw fa-check"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-danger" v-show="interactionMode == 'delete'" @click="cancelDeleteFeatures">
-                <i class="fas fa-fw fa-times"></i>
-            </button>
+        <div class="d-flex flex-row justify-content-between">
+            <div>
+                <button type="button" class="btn btn-sm" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" @click="toggleDrawType('Point')">
+                    <i class="fas fa-fw fa-map-marker-alt"></i>
+                </button>
+                <button type="button" class="btn btn-sm" :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}" @click="toggleDrawType('LineString')">
+                    <i class="fas fa-fw fa-road"></i>
+                </button>
+                <button type="button" class="btn btn-sm" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" @click="toggleDrawType('Polygon')">
+                    <i class="fas fa-fw fa-object-ungroup"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-info" v-show="interactionMode != 'modify'" @click="setInteractionMode('modify')">
+                    <i class="fas fa-fw fa-edit"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-success" v-show="interactionMode == 'modify'" @click="updateFeatures">
+                    <i class="fas fa-fw fa-check"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" v-show="interactionMode == 'modify'" @click="cancelUpdateFeatures">
+                    <i class="fas fa-fw fa-times"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" v-show="interactionMode != 'delete'" @click="setInteractionMode('delete')">
+                    <i class="fas fa-fw fa-trash"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-success" v-show="interactionMode == 'delete'" @click="deleteFeatures">
+                    <i class="fas fa-fw fa-check"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" v-show="interactionMode == 'delete'" @click="cancelDeleteFeatures">
+                    <i class="fas fa-fw fa-times"></i>
+                </button>
+            </div>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-primary" v-show="linkPossible" @click="link(selectedFeature, selectedEntity)">
+                    <i class="fas fa-fw fa-link"></i> Link to {{ selectedEntity.name }}
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" v-show="unlinkPossible" @click="unlink(selectedFeature, linkedEntity)">
+                    <i class="fas fa-fw fa-unlink"></i> <span v-if="linkedEntity">Unlink from {{ linkedEntity.name }}</span>
+                </button>
+            </div>
         </div>
         <div class="mt-2 col px-0">
             <div id="map" class="map w-100 h-100"></div>
@@ -651,8 +661,28 @@
                 this.setInteractionMode('', true);
             },
             link(feature, entity) {
+                const vm = this;
+                if(!vm.linkPossible) return;
+                const props = feature.getProperties();
+                const gid = props.id;
+                const eid = entity.id;
+                vm.$http.post(`/api/map/link/${gid}/${eid}`, {}).then(function(response) {
+                    feature.setProperties({
+                        entity: Object.assign({}, entity)
+                    });
+                });
             },
             unlink(feature, entity) {
+                const vm = this;
+                if(!vm.unlinkPossible) return;
+                const props = feature.getProperties();
+                const gid = props.id;
+                const eid = entity.id;
+                vm.$http.delete(`/api/map/link/${gid}/${eid}`, {}).then(function(response) {
+                    feature.setProperties({
+                        entity: {}
+                    });
+                });
             },
             geometryToTable(g) {
                 if(!g) return '<table class="table table-striped table-borderless table-sm"></table>';
@@ -704,34 +734,11 @@
                 const props = f.getProperties();
                 const geometry = f.getGeometry();
                 const geomName = `Geometry #${props.id}`;
-                let linkState;
 
                 if(props.entity) {
                     vm.overlayTitle = `${geomName} (${props.entity.name})`;
-                    linkState =
-                        `<button type="button" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-fw fa-unlink"></i> Unlink from ${props.entity.name}
-                        </button>`;
                 } else {
                     vm.overlayTitle = geomName;
-                    if(vm.selectedEntity.id) {
-                        if(vm.selectedEntity.geodata_id) {
-                            linkState =
-                                `<p class="alert alert-info px-2 py-1 mb-0">
-                                    Entity already linked.
-                                </p>`;
-                        } else {
-                            linkState =
-                                `<button type="button" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-fw fa-link"></i> Link to ${vm.selectedEntity.name}
-                                </button>`;
-                        }
-                    } else {
-                        linkState =
-                            `<p class="alert alert-info px-2 py-1 mb-0">
-                                No entity selected. To link this object to an entity, please select an unlinked entity in the tree first
-                            </p>`;
-                    }
                 }
 
                 const coordHtml = vm.geometryToTable(geometry);
@@ -739,10 +746,8 @@
                     `<dl class="mb-0">
                         <dt>Type</dt>
                         <dd>${geometry.getType()}</dd>
-                        <dt>Coordinates EPSG:${this.epsg.epsg}</dt>
+                        <dt>Coordinates in EPSG:${this.epsg.epsg}</dt>
                         <dd>${coordHtml}</dd>
-                        <dt>Link</dt>
-                        <dd>${linkState}</dd>
                     </dl>`;
 
                 // Wait for variables to be updated
@@ -795,6 +800,36 @@
                 if(!viewports) return;
                 if(!viewports.length) return;
                 return viewports[0];
+            },
+            unlinkPossible: function() {
+                const vm = this;
+                if(!vm.selectedFeature.getProperties) {
+                    return false;
+                }
+                const props = vm.selectedFeature.getProperties();
+                return props.entity && !!props.entity.id;
+            },
+            linkPossible: function() {
+                const vm = this;
+                if(!vm.selectedFeature.getProperties) return false;
+                const props = vm.selectedFeature.getProperties();
+                if(props.entity && !!props.entity.id) return false;
+                if(vm.selectedEntity.id) {
+                    if(vm.selectedEntity.geodata_id) {
+                        // already linked
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            linkedEntity: function() {
+                const vm = this;
+                if(!vm.selectedFeature) return;
+                if(!vm.selectedFeature.getProperties) return;
+                const props = vm.selectedFeature.getProperties();
+                return props.entity;
             }
         },
         watch: {

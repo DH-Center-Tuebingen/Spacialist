@@ -115,11 +115,13 @@ Route::get('/map', 'MapController@getData');
 
 Route::post('/map', 'MapController@addGeometry');
 Route::post('/map/layer', 'MapController@addLayer');
+Route::post('/map/link/{gid}/{eid}', 'MapController@link')->where('gid', '[0-9]+')->where('eid', '[0-9]+');
 
 Route::patch('/map/{id}', 'MapController@updateGeometry')->where('id', '[0-9]+');
 Route::patch('/map/layer/{id}', 'MapController@updateLayer')->where('id', '[0-9]+');
 
 Route::delete('/map/{id}', 'MapController@delete')->where('id', '[0-9]+');
+Route::delete('/map/link/{gid}/{eid}', 'MapController@unlink')->where('gid', '[0-9]+')->where('eid', '[0-9]+');
 
 // ANALYSIS
 Route::post('analysis/export', 'AnalysisController@export');

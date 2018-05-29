@@ -6,6 +6,12 @@ use App\AvailableLayer;
 use App\Context;
 use App\ContextType;
 use App\Geodata;
+use Phaza\LaravelPostgis\Geometries\Point;
+use Phaza\LaravelPostgis\Geometries\LineString;
+use Phaza\LaravelPostgis\Geometries\Polygon;
+use Phaza\LaravelPostgis\Geometries\MultiPoint;
+use Phaza\LaravelPostgis\Geometries\MultiLineString;
+use Phaza\LaravelPostgis\Geometries\MultiPolygon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
@@ -72,6 +78,59 @@ class MapController extends Controller
         return response()->json($layer);
     }
 
+    public function link(Request $request, $gid, $eid) {
+        try {
+            $geodata = Geodata::findOrFail($gid);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This geodata does not exist'
+            ], 400);
+        }
+        try {
+            $entity = Context::findOrFail($eid);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This entity does not exist'
+            ], 400);
+        }
+
+        if(isset($entity->geodata_id)) {
+            return response()->json([
+                'error' => 'This entity is already linked to a geo object'
+            ], 400);
+        }
+
+        try {
+            $layer = AvailableLayer::where('context_type_id', $entity->context_type_id)->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Entity layer not found'
+            ], 400);
+        }
+
+        if($layer->type != 'all') {
+            $typeMatched = false;
+            if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && ends_with($layer->type, 'Polygon')) {
+                $typeMatched = true;
+            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && ends_with($layer->type, 'Linestring')) {
+                $typeMatched = true;
+            } else if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && ends_with($layer->type, 'Point')) {
+                $typeMatched = true;
+            }
+            if(!$typeMatched) {
+                $geoType = get_class($geodata->geom);
+                return response()->json([
+                    'error' => "Layer type ('$layer->type') does not match type of geo object ('$geoType')"
+                ], 400);
+            }
+        }
+
+        $entity->geodata_id = $gid;
+        $entity->save();
+
+        return response()->json(null, 204);
+    }
+
     // PUT
 
     // PATCH
@@ -87,7 +146,7 @@ class MapController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This geodata does not exist'
-            ]);
+            ], 400);
         }
         $geodata->updateGeometry(json_decode($request->get('feature')), $request->get('srid'));
     }
@@ -99,7 +158,7 @@ class MapController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This layer does not exist'
-            ]);
+            ], 400);
         }
 
         // If updated baselayer's visibility is set to true, set all other base layer's visibility to false
@@ -131,9 +190,38 @@ class MapController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This geodata does not exist'
-            ]);
+            ], 400);
         }
         $geodata->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function unlink(Request $request, $gid, $eid) {
+        try {
+            Geodata::findOrFail($gid);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This geodata does not exist'
+            ], 400);
+        }
+        try {
+            $entity = Context::findOrFail($eid);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This entity does not exist'
+            ], 400);
+        }
+
+        if($entity->geodata_id != $gid) {
+            return response()->json([
+                'error' => 'The entity is not linked to the provided geo object'
+            ], 400);
+        }
+
+        $entity->geodata_id = NULL;
+        $entity->save();
+
         return response()->json(null, 204);
     }
 }
