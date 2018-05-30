@@ -21,8 +21,8 @@
                 </button>
             </div>
         </div>
-        <div :class="'col-md-'+preferences['prefs.columns'].center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100 scroll-y-auto">
-            <div v-if="selectedContext.id">
+        <div :class="'col-md-'+preferences['prefs.columns'].center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100">
+            <div v-if="selectedContext.id" class="h-100 d-flex flex-column">
                 <div class="d-flex align-items-center justify-content-between">
                     <h1>{{ selectedContext.name }}</h1>
                     <span>
@@ -34,7 +34,7 @@
                         </button>
                     </span>
                 </div>
-                <attributes class="pt-2" v-if="dataLoaded"
+                <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="dataLoaded"
                     :attributes="selectedContext.attributes"
                     :concepts="concepts"
                     :dependencies="selectedContext.dependencies"

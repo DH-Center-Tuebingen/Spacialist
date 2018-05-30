@@ -113,6 +113,10 @@ body, #app {
     overflow: hidden;
 }
 
+.scroll-x-hidden {
+    overflow-x: hidden;
+}
+
 .scroll-x-auto {
     overflow-x: auto;
 }
