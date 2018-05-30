@@ -111,32 +111,34 @@
                         </a>
                     </li>
                 </ul>
-                <div v-show="activeResultTab == 'simple' && !expertMode" class="col px-0 d-flex flex-column">
-                    <ul class="pagination mb-2" v-show="!expertMode">
-                        <li class="page-item" :class="{'disabled': page.current_page == 1}">
-                            <a href="#" class="page-link" aria-label="First Page" @click="applyFilter(page.first_page_url)">
-                                <i class="fas fa-fw fa-angle-double-left" aria-hidden="true"></i>
-                                <i class="sr-only">First Page</i>
-                            </a>
-                        </li>
-                        <li class="page-item" :class="{'disabled': page.current_page == 1}">
-                            <a href="#" class="page-link" @click="applyFilter(page.prev_page_url)">
-                                <i class="fas fa-fw fa-arrow-left"></i> Previous {{previousResultCount}} results
-                            </a>
-                        </li>
-                        <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
-                            <a href="#" class="page-link" @click="applyFilter(page.next_page_url)">
-                                Next {{nextResultCount}} results <i class="fas fa-fw fa-arrow-right"></i>
-                            </a>
-                        </li>
+                <div v-show="activeResultTab == 'simple' && !expertMode" class="col px-0">
+                    <div class="d-flex flex-column h-100">
+                        <ul class="pagination mb-2" v-show="!expertMode">
+                            <li class="page-item" :class="{'disabled': page.current_page == 1}">
+                                <a href="#" class="page-link" aria-label="First Page" @click="applyFilter(page.first_page_url)">
+                                    <i class="fas fa-fw fa-angle-double-left" aria-hidden="true"></i>
+                                    <i class="sr-only">First Page</i>
+                                </a>
+                            </li>
+                            <li class="page-item" :class="{'disabled': page.current_page == 1}">
+                                <a href="#" class="page-link" aria-label="Previous Page" @click="applyFilter(page.prev_page_url)">
+                                    <i class="fas fa-fw fa-arrow-left"></i> Previous {{previousResultCount}} results
+                                </a>
+                            </li>
+                            <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
+                                <a href="#" class="page-link" aria-label="Next Page" @click="applyFilter(page.next_page_url)">
+                                    Next {{nextResultCount}} results <i class="fas fa-fw fa-arrow-right"></i>
+                                </a>
+                            </li>
                             <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
                                 <a href="#" class="page-link" aria-label="Last Page" @click="applyFilter(page.last_page_url)">
                                     <i class="fas fa-fw fa-angle-double-right" aria-hidden="true"></i>
                                     <i class="sr-only">Last Page</i>
                                 </a>
                             </li>
-                    </ul>
-                    <component :is="origin.name"></component>
+                        </ul>
+                        <component :is="origin.name"></component>
+                    </div>
                 </div>
                 <div v-show="activeResultTab == 'raw' && expertMode">
                     <div class="table-responsive">
@@ -175,7 +177,9 @@
                         Supported export formats are
                         <ul class="mb-0">
                             <li>CSV</li>
+                            <li>XLSX</li>
                             <li>JSON</li>
+                            <li>PDF</li>
                         </ul>
                     </p>
                     <div class="btn-group">
@@ -189,15 +193,27 @@
                             <a class="dropdown-item" href="#" @click="exportRows('csv', true)">
                                 As CSV (All: {{page.total}} entries)
                             </a>
+                            <a class="dropdown-item" href="#" @click="exportRows('xlsx', true)">
+                                As XLSX (All: {{page.total}} entries)
+                            </a>
                             <a class="dropdown-item" href="#" @click="exportRows('json', true)">
                                 As JSON (All: {{page.total}} entries)
+                            </a>
+                            <a class="dropdown-item" href="#" @click="exportRows('pdf', true)">
+                                As PDF (All: {{page.total}} entries)
                             </a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#" @click="exportRows('csv', false)">
                                 As CSV (Current Selection: {{page.from}}-{{page.to}})
                             </a>
+                            <a class="dropdown-item" href="#" @click="exportRows('xlsx', false)">
+                                As XLSX (Current Selection: {{page.from}}-{{page.to}})
+                            </a>
                             <a class="dropdown-item" href="#" @click="exportRows('json', false)">
                                 As JSON (Current Selection: {{page.from}}-{{page.to}})
+                            </a>
+                            <a class="dropdown-item" href="#" @click="exportRows('pdf', false)">
+                                As PDF (Current Selection: {{page.from}}-{{page.to}})
                             </a>
                         </div>
                     </div>

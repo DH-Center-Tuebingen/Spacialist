@@ -15,6 +15,7 @@
         "phpoffice/phpspreadsheet": "^1.2",
         "phpoffice/phpword": "^0.14.0",
         "renanbr/bibtex-parser": "^2.0",
+        "tecnickcom/tcpdf": "^6.2",
         "wapmorgan/unified-archive": "^0.0.10",
         "zizaco/entrust": "5.2.x-dev"
     },

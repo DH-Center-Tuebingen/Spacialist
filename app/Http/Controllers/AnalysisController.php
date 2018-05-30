@@ -41,10 +41,12 @@ class AnalysisController extends Controller {
         $result = $this->requestToQuery($origin, $filters, $columns, $orders, $limit, $splits, $simple, $distinct, $page);
         switch($type) {
             case 'csv':
-                $suffix = '.csv';
+            case 'xlsx':
+            case 'pdf':
+                $suffix = 'csv';
                 break;
             case 'json':
-                $suffix = '.json';
+                $suffix = 'json';
                 break;
             default:
                 return response()->json([
@@ -52,7 +54,7 @@ class AnalysisController extends Controller {
                 ]);
         }
         $dt = date('dmYHis');
-        $tmpFile = '/tmp/export-'.$dt.$suffix;
+        $tmpFile = "/tmp/export-$dt.$suffix";
         $handle = fopen($tmpFile, 'w');
         $firstRow = true;
         $exceptions = [];
@@ -98,6 +100,8 @@ class AnalysisController extends Controller {
         $content;
         switch($type) {
             case 'csv':
+            case 'xlsx':
+            case 'pdf':
                 $i=0;
                 foreach($result['page']->items() as $row) {
                     $i++;
@@ -132,6 +136,19 @@ class AnalysisController extends Controller {
             case 'json':
                 $content = json_encode($result['page']->items(), JSON_PRETTY_PRINT);
                 break;
+        }
+        if($type == 'xlsx' || $type == 'pdf') {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
+            $spreadsheet = $reader->load($tmpFile);
+            $outFile = "/tmp/export-$dt.$type";
+            if($type == 'xlsx') {
+                $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            } else if($type == 'pdf') {
+                $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Tcpdf');
+            }
+            $writer->save($outFile);
+            $content = file_get_contents($outFile);
+            unlink($outFile);
         }
         // delete tmp file
         fclose($handle);
