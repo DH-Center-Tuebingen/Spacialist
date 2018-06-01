@@ -11,15 +11,30 @@
             :selection="selection"
             :strategies="strategies">
         </tree-view>
+
+        <vue-context ref="contextMenu" class="context-menu-wrapper">
+            <ul class="list-group list-group-vue-context" slot-scope="itemScope" v-if="itemScope.data">
+                <li class="list-group-item list-group-item-vue-context disabled">
+                    {{ itemScope.data.item.name }}
+                </li>
+                <li class="list-group-item list-group-item-vue-context" @click="onContextMenuAdd(itemScope.data.item)">
+                    <i class="fas fa-fw fa-plus text-success"></i> Add new Sub-Entity
+                </li>
+                <li class="list-group-item list-group-item-vue-context" @click="onContextMenuDuplicate(itemScope.data.item)">
+                    <i class="fas fa-fw fa-copy text-info"></i> Duplicate <i>{{ itemScope.data.item.name }}</i>
+                </li>
+                <li class="list-group-item list-group-item-vue-context" @click="onContextMenuDelete(itemScope.data.item)">
+                    <i class="fas fa-fw fa-trash text-danger"></i> Delete <i>{{ itemScope.data.item.name }}</i>
+                </li>
+            </ul>
+        </vue-context>
     </div>
 </template>
 
 <script>
     import { TreeView } from '@bosket/vue';
-    import * as VueMenu from '@hscmap/vue-menu';
+    import { VueContext } from 'vue-context';
     import { transliterate as tr, slugify } from 'transliteration';
-
-    Vue.use(VueMenu);
 
     class Node {
         constructor(data) {
@@ -40,7 +55,8 @@
 
     export default {
         components: {
-            'tree-view': TreeView
+            'tree-view': TreeView,
+            VueContext
         },
         props: {
             concepts: {
@@ -82,6 +98,10 @@
             onSelect(newSelection) {
                 this.selection = newSelection
                 this.selectionCallback(newSelection[0]);
+            },
+            openContextMenu(e, item) {
+                this.$refs.contextMenu.open(e, { item: item });
+                e.preventDefault();
             }
         },
         data() {
@@ -106,49 +126,14 @@
                     return item => tr(item.name).match(new RegExp(`.*${ input }.*`, "gi"))
                 },
                 display: (item, inputs) =>
-                    <span>
-                        <hsc-menu-style-white class="d-inline-block">
-                            <hsc-menu-context-menu class="d-inline-block">
-                                {item.name}
-                                <span class="pl-2 font-italic mb-0">
-                                    {this.concepts[this.contextTypes[item.context_type_id].thesaurus_url].label}
-                                </span>
-                                <span class="pl-2">
-                                    {item.children_count > 0 ? `(${item.children_count})` : ""}
-                                </span>
-                                <template slot="contextmenu">
-                                    <hsc-menu-item disabled>
-                                        <div slot="body">
-                                            <a href="#" class="dropdown-item">
-                                                {item.name}
-                                            </a>
-                                        </div>
-                                    </hsc-menu-item>
-                                    <hsc-menu-separator />
-                                    <hsc-menu-item>
-                                        <div slot="body">
-                                            <a href="#" class="dropdown-item" onClick={() => this.onContextMenuAdd(item)}>
-                                                <i class="fas fa-fw fa-plus text-success"></i> Add new Sub-Entity
-                                            </a>
-                                        </div>
-                                    </hsc-menu-item>
-                                    <hsc-menu-item>
-                                        <div slot="body">
-                                            <a href="#" class="dropdown-item" onClick={() => this.onContextMenuDuplicate(item)}>
-                                                <i class="fas fa-fw fa-copy text-info"></i> Duplicate <i>{item.name}</i>
-                                            </a>
-                                        </div>
-                                    </hsc-menu-item>
-                                    <hsc-menu-item>
-                                        <div slot="body">
-                                            <a href="#" class="dropdown-item" onClick={() => this.onContextMenuDelete(item)}>
-                                                <i class="fas fa-fw fa-trash text-danger"></i> Delete <i>{item.name}</i>
-                                            </a>
-                                        </div>
-                                    </hsc-menu-item>
-                                </template>
-                            </hsc-menu-context-menu>
-                        </hsc-menu-style-white>
+                    <span onContextmenu={($event) => this.openContextMenu($event, item)}>
+                        {item.name}
+                        <span class="pl-2 font-italic mb-0">
+                            {this.concepts[this.contextTypes[item.context_type_id].thesaurus_url].label}
+                        </span>
+                        <span class="pl-2">
+                            {item.children_count > 0 ? `(${item.children_count})` : ""}
+                        </span>
                     </span>
             }
         }

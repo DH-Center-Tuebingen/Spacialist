@@ -1,30 +1,28 @@
-.menu {
-    font-family: inherit !important;
+.context-menu-wrapper {
+    background: none !important;
+    border: none !important;
     box-shadow: none !important;
-    // From Bootstraps _dropdown.scss
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: $zindex-dropdown;
-    float: left;
-    min-width: $dropdown-min-width;
-    padding: $dropdown-padding-y 0 !important;
-    margin: $dropdown-spacer 0 0; // override default ul
-    font-size: $font-size-base; // Redeclare because nesting can cause inheritance issues
-    color: $body-color !important;
-    text-align: left; // Ensures proper alignment if parent has it changed (e.g., modal footer)
-    list-style: none;
-    background-color: $dropdown-bg !important;
-    background-clip: padding-box;
-    border: $dropdown-border-width solid $dropdown-border-color;
-    @include border-radius($dropdown-border-radius !important);
-    @include box-shadow($dropdown-box-shadow);
 }
 
-.menuitem {
-    padding: 0 !important;
+.list-group-vue-context {
+    font-size: $font-size-base !important;
+    font-weight: $font-weight-normal !important;
 }
 
-.menuitem>div:not(.label) {
-    display: none !important;
+.list-group-item-vue-context {
+    padding: $dropdown-padding-y $dropdown-item-padding-x !important;
+    &:not(:first-child) {
+        border-top: none !important;
+    }
+    &:not(:last-child) {
+        border-bottom: none !important;
+    }
+
+    &:first-child {
+        margin-top: 0 !important;
+    }
+
+    &:last-child {
+        margin-bottom: 0 !important;
+    }
 }
