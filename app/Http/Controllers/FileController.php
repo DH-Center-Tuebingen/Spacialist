@@ -21,21 +21,6 @@ class FileController extends Controller
 
     // GET
 
-    public function getFiles($page = 1) {
-        $files = File::getAllPaginate($page);
-        return response()->json($files);
-    }
-
-    public function getUnlinkedFiles($page = 1) {
-        $files = File::getUnlinkedPaginate($page);
-        return response()->json($files);
-    }
-
-    public function getLinkedFiles($cid, $page = 1) {
-        $files = File::getLinkedPaginate($cid, $page);
-        return response()->json($files);
-    }
-
     public function getArchiveFileList($id) {
         try {
             $file = File::findOrFail($id);
@@ -90,7 +75,46 @@ class FileController extends Controller
         return response()->json($file->linkCount());
     }
 
+    public function getCategories() {
+        return response()->json(File::getCategories());
+    }
+
+    public function getCameraNames() {
+        $cameras = File::distinct()
+            ->orderBy('cameraname', 'asc')
+            ->whereNotNull('cameraname')
+            ->pluck('cameraname');
+        $cameras[] = 'Null';
+        return response()->json($cameras);
+    }
+
+    public function getDates() {
+        $dates = File::distinct()
+            ->select(\DB::raw("DATE(created) AS created_date"))
+            ->orderBy('created_date', 'asc')
+            ->pluck('created_date');
+        return response()->json($dates);
+    }
+
     // POST
+
+    public function getFiles(Request $request, $page = 1) {
+        $filters = $request->input('filters', []);
+        $files = File::getAllPaginate($page, $filters);
+        return response()->json($files);
+    }
+
+    public function getUnlinkedFiles(Request $request, $page = 1) {
+        $filters = $request->input('filters', []);
+        $files = File::getUnlinkedPaginate($page, $filters);
+        return response()->json($files);
+    }
+
+    public function getLinkedFiles(Request $request, $cid, $page = 1) {
+        $filters = $request->input('filters', []);
+        $files = File::getLinkedPaginate($cid, $page, $filters);
+        return response()->json($files);
+    }
 
     public function uploadFile(Request $request) {
         $this->validate($request, [

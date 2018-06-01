@@ -93,15 +93,20 @@ Route::post('/bibliography/import', 'BibliographyController@importBibtex');
 // EXTENSIONS
 
 // FILE
-Route::get('/file', 'FileController@getFiles');
-Route::get('/file/unlinked', 'FileController@getUnlinkedFiles');
-Route::get('/file/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
 Route::get('/file/{id}/archive/list', 'FileController@getArchiveFileList')->where('id', '[0-9]+');
 Route::get('/file/{id}/archive/download', 'FileController@downloadArchivedFile')->where('id', '[0-9]+');
 Route::get('/file/{id}/as_html', 'FileController@getAsHtml')->where('id', '[0-9]+');
 Route::get('/file/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
+// Filters
+Route::get('/file/filter/category', 'FileController@getCategories');
+Route::get('/file/filter/camera', 'FileController@getCameraNames');
+Route::get('/file/filter/date', 'FileController@getDates');
 
-Route::post('/file', 'FileController@uploadFile');
+
+Route::post('/file', 'FileController@getFiles');
+Route::post('/file/unlinked', 'FileController@getUnlinkedFiles');
+Route::post('/file/linked/{cid}', 'FileController@getLinkedFiles')->where('cid', '[0-9]+');
+Route::post('/file/new', 'FileController@uploadFile');
 // Should be patch, but file upload is not allowed as patch
 Route::post('/file/{id}/patch', 'FileController@patchContent')->where('id', '[0-9]+');
 

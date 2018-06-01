@@ -44,8 +44,41 @@ class File extends Model
 
     private $imageMime = 'image/';
 
-    public static function getAllPaginate($page) {
-        $files = self::with(['contexts'])->orderBy('id', 'asc')->paginate();
+    public static function applyFilters($builder, $filters) {
+        if(isset($filters['strategy'])) {
+            $strategy = $filters['strategy'];
+            unset($filters['strategy']);
+        }
+        foreach($filters as $col => $fs) {
+            switch($col) {
+                case 'categories':
+                    foreach($fs as $f) {
+                        // TODO
+                    }
+                    break;
+                case 'cameras':
+                    $builder->where(function($query) use($fs) {
+                        foreach($fs as $f) {
+                            $query->orWhere('cameraname', $f);
+                        }
+                    });
+                    break;
+                case 'dates':
+                    $builder->where(function($query) use($fs) {
+                        foreach($fs as $f) {
+                            $query->orWhereDate('created', $f);
+                        }
+                    });
+                    break;
+            }
+        }
+        return $builder;
+    }
+
+    public static function getAllPaginate($page, $filters) {
+        $files = self::with(['contexts'])
+            ->orderBy('id', 'asc');
+        $files = self::applyFilters($files, $filters)->paginate();
         $files->withPath('/file');
 
         foreach($files as &$file) {
@@ -55,10 +88,11 @@ class File extends Model
         return $files;
     }
 
-    public static function getUnlinkedPaginate($page) {
+    public static function getUnlinkedPaginate($page, $filters) {
         $files = self::with(['contexts'])
-            ->doesntHave('contexts')
-            ->paginate();
+            ->orderBy('id', 'asc')
+            ->doesntHave('contexts');
+        $files = self::applyFilters($files, $filters)->paginate();
         $files->withPath('/file/unlinked');
 
         foreach($files as &$file) {
@@ -68,12 +102,16 @@ class File extends Model
         return $files;
     }
 
-    public static function getLinkedPaginate($cid, $page) {
+    public static function getLinkedPaginate($cid, $page, $filters) {
         $files = self::with(['contexts'])
-            ->whereHas('contexts', function($query) use($cid) {
+            ->whereHas('contexts', function($query) use($cid, $filters) {
                 $query->where('context_id', $cid);
+                if(isset($filters['sub_entities'])) {
+                    $query->orWhere('root_context_id', $cid);
+                }
             })
-            ->paginate();
+            ->orderBy('id', 'asc');
+        $files = self::applyFilters($files, $filters)->paginate();
         $files->withPath('/file/linked/'.$cid);
 
         foreach($files as &$file) {
@@ -423,6 +461,24 @@ class File extends Model
         if($this->isSpreadsheet()) return 'spreadsheet';
         if($this->isPresentation()) return 'presentation';
         return 'undefined';
+    }
+
+    public static function getCategories() {
+        return [
+            ['key' => 'image', 'label' => 'Image'],
+            ['key' => 'audio', 'label' => 'Audio File'],
+            ['key' => 'video', 'label' => 'Video File'],
+            ['key' => 'pdf', 'label' => 'PDF'],
+            ['key' => 'xml', 'label' => 'XML'],
+            ['key' => 'html', 'label' => 'HTML'],
+            ['key' => '3d', 'label' => '3D File'],
+            ['key' => 'dicom', 'label' => 'DICOM File'],
+            ['key' => 'archive', 'label' => 'Archive'],
+            ['key' => 'text', 'label' => 'Text File'],
+            ['key' => 'document', 'label' => 'Office Documents'],
+            ['key' => 'spreadsheet', 'label' => 'Spreadsheets'],
+            ['key' => 'presentation', 'label' => 'Presentation Files'],
+        ];
     }
 
     public function asHtml() {

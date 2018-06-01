@@ -1,5 +1,78 @@
 <template>
     <div class="d-flex flex-column h-100">
+        <div v-if="selectedTopAction != 'upload'">
+            <h5 class="clickable" @click="toggleFilters">Filter Rules
+                <small>
+                    <span v-show="!showFilters">
+                        <i class="fas fa-fw fa-angle-down"></i>
+                    </span>
+                    <span v-show="showFilters">
+                        <i class="fas fa-fw fa-angle-up"></i>
+                    </span>
+                </small>
+            </h5>
+            <div class="mb-2" v-show="showFilters">
+                <form v-on:submit.prevent="applyFilters(selectedTopAction)">
+                    <!-- <div class="form-check">
+                        <input type="radio" name="filter-matching" id="match-all-filters" class="form-check-input" value="all" v-model="filterMatching[selectedTopAction]" />
+                        <label class="form-check-label" for="match-all-filters">
+                            Match all filters
+                        </label>
+                        <input type="radio" name="filter-matching" id="match-any-filters" class="form-check-input" value="any" v-model="filterMatching[selectedTopAction]" />
+                        <label class="form-check-label" for="match-any-filters">
+                            Match any filters
+                        </label>
+                    </div> -->
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="name">
+                            Filetype:
+                        </label>
+                        <div class="col-md-9">
+                            <multiselect
+                                label="label"
+                                track-by="key"
+                                v-model="filterTypes[selectedTopAction]"
+                                :closeOnSelect="false"
+                                :hideSelected="true"
+                                :multiple="true"
+                                :options="filterTypeList">
+                            </multiselect>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="name">
+                            Camera:
+                        </label>
+                        <div class="col-md-9">
+                            <multiselect
+                                v-model="filterCameras[selectedTopAction]"
+                                :closeOnSelect="false"
+                                :hideSelected="true"
+                                :multiple="true"
+                                :options="filterCameraList">
+                            </multiselect>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="name">
+                            Date:
+                        </label>
+                        <div class="col-md-9">
+                            <multiselect
+                                v-model="filterDates[selectedTopAction]"
+                                :closeOnSelect="false"
+                                :hideSelected="true"
+                                :multiple="true"
+                                :options="filterDateList">
+                            </multiselect>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-outline-success">
+                        Apply Filter
+                    </button>
+                </form>
+            </div>
+        </div>
         <div class="d-flex justify-content-around align-items-center mb-2">
             <button style="button" class="btn btn-outline-secondary" :class="{disabled: !context.id}" @click="setAction('linked')">
                 <i class="fas fa-fw fa-link"></i> Linked Files <span class="badge badge-primary" v-show="context.id">{{linkedFiles.files.length}}</span>
@@ -15,6 +88,14 @@
             </button>
         </div>
         <div class="col" v-show="isAction('linked')">
+            <form>
+                <div class="form-check">
+                    <input type="checkbox" id="sub-entities-check" class="form-check-input" v-model="includeSubEntities" @change="applyFilters('linked')"/>
+                    <label class="form-check-label" for="sub-entities-check">
+                        Include Files of Sub-Entities
+                    </label>
+                </div>
+            </form>
             <file-list :files="linkedFiles.files" :on-click="showFileModal" :on-load-chunk="linkedFiles.loadChunk" :file-state="linkedFiles.fileState" :is-fetching="linkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
         </div>
         <div class="col" v-show="isAction('unlinked')">
@@ -25,7 +106,7 @@
         </div>
         <div v-if="isAction('upload')">
             <file-upload class="w-100"
-                post-action="/api/file"
+                post-action="/api/file/new"
                 ref="upload"
                 v-model="uploadFiles"
                 :multiple="true"
@@ -386,8 +467,54 @@
             if(screenfull.enabled) {
                 window.addEventListener('keydown', this.toggleFullscreen, false);
             }
+            this.initFilters();
         },
         methods: {
+            initFilters() {
+                const vm = this;
+                vm.$http.get('/api/file/filter/category').then(function(response) {
+                    vm.filterTypeList = [];
+                    vm.filterTypeList = response.data;
+                });
+                vm.$http.get('/api/file/filter/camera').then(function(response) {
+                    vm.filterCameraList = [];
+                    vm.filterCameraList = response.data;
+                });
+                vm.$http.get('/api/file/filter/date').then(function(response) {
+                    vm.filterDateList = [];
+                    vm.filterDateList = response.data;
+                });
+            },
+            toggleFilters() {
+                this.showFilters = !this.showFilters;
+            },
+            applyFilters(action) {
+                const vm = this;
+                let fileType;
+                switch(action) {
+                    case 'linked':
+                        fileType = 'linkedFiles';
+                        break;
+                    case 'unlinked':
+                        fileType = 'unlinkedFiles';
+                        break;
+                    case 'all':
+                        fileType = 'allFiles';
+                        break;
+                }
+                let filters = {
+                    categories: vm.filterTypes[action],
+                    cameras: vm.filterCameras[action],
+                    dates: vm.filterDates[action],
+                    // strategy: vm.filterMatching[action]
+                };
+                if(action == 'linked') {
+                    filters.sub_entities = vm.includeSubEntities;
+                }
+                vm.resetFiles(fileType);
+                vm.getNextFiles(fileType, filters);
+
+            },
             toggleFullscreen: function(event) {
                 let elem = document.getElementById('file-container');
                 if(!elem) return;
@@ -458,7 +585,7 @@
                 arr.fetchingFiles = false;
                 arr.pagination = {};
             },
-            getNextFiles(fileType) {
+            getNextFiles(fileType, filters) {
                 if(fileType == 'linkedFiles' && !this.context.id) {
                     return;
                 }
@@ -468,16 +595,21 @@
                     return;
                 }
                 let url = arr.apiPrefix;
+                // Check if we did not get any page yet
                 if(!Object.keys(arr.pagination).length) {
                     url += arr.apiUrl;
                 } else {
                     url += arr.pagination.next_page_url;
                 }
-                this.getPage(url, arr);
+                this.getPage(url, arr, filters);
             },
-            getPage(pageUrl, filesObj) {
-                let vm = this;
-                this.$http.get(pageUrl).then(function(response) {
+            getPage(pageUrl, filesObj, filters) {
+                const vm = this;
+                let data = {};
+                if(filters) {
+                    data.filters = filters;
+                }
+                this.$http.post(pageUrl, data).then(function(response) {
                     let resp = response.data;
                     for(let i=0; i<resp.data.length; i++) {
                         filesObj.files.push(resp.data[i]);
@@ -673,6 +805,12 @@
         },
         data() {
             return {
+                showFilters: false,
+                filterRules: {
+                    type: {},
+                    camera: '',
+                    date: ''
+                },
                 selectedTopAction: 'unlinked',
                 uploadFiles: [],
                 filesUploaded: 0,
@@ -717,12 +855,40 @@
                 fileProperties: [
                     'copyright',
                     'description'
-                ]
+                ],
+                includeSubEntities: false,
+                filterTypeList: [],
+                filterCameraList: [],
+                filterDateList: [],
+                filterTypes: {
+                    linked: [],
+                    unlinked: [],
+                    all: []
+                },
+                filterCameras: {
+                    linked: [],
+                    unlinked: [],
+                    all: []
+                },
+                filterDates: {
+                    linked: [],
+                    unlinked: [],
+                    all: []
+                },
+                // filterMatching: {
+                //     linked: 'any',
+                //     unlinked: 'any',
+                //     all: 'any'
+                // }
             }
         },
         computed: {
             localContext: function() {
                 return Object.assign({}, this.context);
+            },
+            replaceFileUrl: function() {
+                if(!this.selectedFile.id) return '';
+                return '/api/file/'+this.selectedFile.id+'/patch';
             },
             contextMenu: function() {
                 let vm = this;
@@ -730,7 +896,7 @@
                 if(vm.context.id) {
                     if(vm.isAction('linked')) {
                         menu.push({
-                            label: 'Unlink from ' + vm.context.name,
+                            label: `Unlink from ${vm.context.name}`,
                             iconClasses: 'fas fa-fw fa-unlink text-info',
                             iconContent: '',
                             callback: function(file) {
@@ -739,7 +905,7 @@
                         });
                     } else {
                         menu.push({
-                            label: 'Link to ' + vm.context.name,
+                            label: `Link to ${vm.context.name}`,
                             iconClasses: 'fas fa-fw fa-link text-success',
                             iconContent: '',
                             callback: function(file) {
