@@ -36,7 +36,6 @@ class ContextController extends Controller {
 
         $attributes = AttributeValue::where('context_id', $id)->get();
         $data = [];
-        $values = [];
         foreach($attributes as $a) {
             $datatype = Attribute::find($a->attribute_id)->datatype;
             switch($datatype) {
@@ -49,9 +48,6 @@ class ContextController extends Controller {
             $value = $a->getValue();
             $a->value = $value;
             $data[$a->attribute_id] = $a;
-        }
-        foreach($values as $k => $v) {
-            $data[$k]->value = $v;
         }
 
         $sqls = ContextAttribute::join('attributes', 'attributes.id', '=', 'attribute_id')
@@ -226,9 +222,7 @@ class ContextController extends Controller {
                 case 'epoch':
                 case 'dimension':
                 case 'list':
-                    //TODO
                 case 'table':
-                    //TODO
                     $attrval->json_val = json_encode($value);
                     break;
 
