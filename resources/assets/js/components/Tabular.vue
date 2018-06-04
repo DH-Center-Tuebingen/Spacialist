@@ -94,6 +94,9 @@
                 type: Object,
                 default: _ => new Object(),
             },
+            localSelections: {
+                type: Object,
+            },
             attribute: {
                 type: Object,
             },

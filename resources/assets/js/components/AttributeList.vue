@@ -124,7 +124,7 @@
                         <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
                     <div v-else-if="attribute.datatype == 'table'">
-                        <tabular :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :concepts="concepts" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""/>
+                        <tabular :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :concepts="concepts" :localSelections="localSelections" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
                     <div v-else-if="attribute.datatype == 'sql'">
                         <div v-if="isArray(localValues[attribute.id].value)">
