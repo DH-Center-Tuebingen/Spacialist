@@ -369,6 +369,14 @@
                                     break;
                             }
                             Vue.set(vm.selectedContext.data, aid, val);
+                        } else {
+                            const val = vm.selectedContext.data[aid].value;
+                            switch(data.attributes[i].datatype) {
+                                case 'date':
+                                    const dtVal = new Date(val);
+                                    vm.selectedContext.data[aid].value = dtVal;
+                                    break;
+                            }
                         }
                         vm.selectedContext.attributes.push(data.attributes[i]);
                     }

@@ -14,10 +14,6 @@ let mix = require('laravel-mix');
 mix.js('resources/assets/js/app.js', 'public/js')
    .sass('resources/assets/sass/app.scss', 'public/css')
    .copy(
-       'node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css',
-       'public/css'
-   )
-   .copy(
        'node_modules/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderWebWorker.min.js',
        'public/js/cornerstoneWADOImageLoaderWebWorker.min.js'
    )
@@ -46,7 +42,6 @@ mix.js('resources/assets/js/app.js', 'public/js')
        '@fortawesome/fontawesome-free-regular', '@fortawesome/fontawesome-free-solid',
        'axios',
        'bootstrap',
-       'bootstrap-datepicker',
        'cornerstone-core',
        'cornerstone-math',
        'cornerstone-tools',
@@ -62,6 +57,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'screenfull',
        'three-full',
        'transliteration',
+       'v-calendar',
        'vee-validate',
        'vue',
        'vue-context',

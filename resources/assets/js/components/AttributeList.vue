@@ -65,14 +65,23 @@
                     <div v-else-if="attribute.datatype == 'context'">
                         <context-search></context-search>
                     </div>
-                    <div class="input-group date" data-provide="datepicker" v-else-if="attribute.datatype == 'date'">
-                        <input type="text" class="form-control" :disabled="attribute.isDisabled" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value"  ng-model-options="{timezone:'utc'}" @blur="checkDependency(attribute.id)" />
-                        <div class="input-group-append input-group-addon">
-                            <button type="button" class="btn btn-outline-secondary">
-                                <i class="fas fa-fw fa-calendar-alt"></i>
-                            </button>
+                    <v-date-picker
+                        mode="single"
+                        v-else-if="attribute.datatype == 'date'"
+                        v-model="localValues[attribute.id].value"
+                        v-validate=""
+                        :max-date="new Date()"
+                        :name="'attribute-'+attribute.id"
+                        @input="updateDatepicker(attribute.id, 'attribute-'+attribute.id)">
+                        <div class="input-group date" slot-scope="{ inputValue, updateValue }">
+                            <input type="text" class="form-control" :disabled="attribute.isDisabled" :id="'attribute-'+attribute.id" :value="inputValue" @input="updateValue($event.target.value, { formatInput: false, hidePopover: false })" @change="updateValue($event.target.value, { formatInput: true, hidePopover: false }) "/>
+                            <div class="input-group-append input-group-addon">
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="fas fa-fw fa-calendar-alt"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </v-date-picker>
                     <div v-else-if="attribute.datatype == 'string-mc'">
                         <multiselect
                             label="concept_url"
@@ -280,6 +289,20 @@
                     }
                 }
             },
+            updateDatepicker(aid, fieldname) {
+                const vm = this;
+                vm.correctTimezone(aid);
+                vm.fields[fieldname].dirty = true;
+                vm.checkDependency(aid);
+            },
+            correctTimezone(aid) {
+                const vm = this;
+                const dtVal = vm.localValues[aid].value;
+                const offset = dtVal.getTimezoneOffset() * (-1);
+                let ms = Date.parse(dtVal.toUTCString());
+                ms += (offset * 60 * 1000);
+                vm.localValues[aid].value = new Date(ms);
+            },
             checkDependency(aid) {
                 if(!this.dependencies) return;
                 if(!this.dependencies[aid]) return;
@@ -399,12 +422,6 @@
             },
             isArray(arr) {
                 return Array.isArray(arr);
-            },
-            isDirty(fieldname) {
-                if(this.fields[fieldname]) {
-                    return this.fields[fieldname].dirty;
-                }
-                return false;
             }
         },
         data() {

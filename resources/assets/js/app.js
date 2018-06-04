@@ -7,6 +7,7 @@ import VModal from 'vue-js-modal';
 import Axios from 'axios';
 import VueUploadComponent from 'vue-upload-component';
 import moment from 'moment';
+import VCalendar from 'v-calendar';
 import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
@@ -34,6 +35,10 @@ $ = jQuery  = window.$ = window.jQuery = require('jquery');
  */
 Vue.prototype.$http = Axios;
 Vue.use(VModal);
+Vue.use(VCalendar, {
+    firstDayOfWeek: 2,
+    popoverVisibility: 'focus'
+});
 Vue.use(VeeValidate);
 Vue.use(Notifications);
 Vue.use(SpacialistPluginSystem);
