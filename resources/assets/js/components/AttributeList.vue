@@ -176,7 +176,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-success"     @click="setGeography">
+                    <button type="button" class="btn btn-outline-success"     @click="setGeography('attribute-'+selectedAttribute)">
                         Set
                     </button>
                     <button type="button" class="btn btn-outline-secondary"     @click="hideGeographyModal">
@@ -362,9 +362,10 @@
                     this.newGeoValue = wkt[0];
                 }
             },
-            setGeography() {
+            setGeography(fieldname) {
                 if(!!this.localValues[this.selectedAttribute]) {
                     this.localValues[this.selectedAttribute].value = this.newGeoValue;
+                    this.fields[fieldname].dirty = true;
                 }
                 this.hideGeographyModal();
                 this.currentGeoValue = undefined;

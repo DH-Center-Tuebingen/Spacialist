@@ -192,6 +192,7 @@ class ContextController extends Controller {
                 # for primitive types: just save them to the db
                 case 'stringf':
                 case 'string':
+                case 'geography':
                     $attrval->str_val = $value;
                     break;
                 case 'double':
@@ -225,10 +226,7 @@ class ContextController extends Controller {
                 case 'table':
                     $attrval->json_val = json_encode($value);
                     break;
-
-                    // 'datatype' => 'geography', TODO
                     // 'datatype' => 'context', TODO
-
             }
             $attrval->lasteditor = 'Admin'; // TODO
             $attrval->save();
