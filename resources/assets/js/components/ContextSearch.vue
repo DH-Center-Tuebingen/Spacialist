@@ -15,10 +15,13 @@
         @keydown.esc="reset"
         @keydown.up="up"/>
         <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="clearItem">
+                <i class="fas fa-fw fa-times"></i>
+            </button>
             <span class="input-group-text multiselect-search">
                 <i class="fas fa-spinner fa-spin" v-if="loading"></i>
                 <template v-else>
-                    <i class="fas fa-fw fa-search" v-show="isEmpty"></i>
+                    <i class="fas fa-fw fa-search"></i>
                 </template>
             </span>
         </div>
@@ -41,6 +44,14 @@
             placeholder: {
                 type: String,
                 default: 'Search...'
+            },
+            onSelect: {
+                type: Function,
+                required: false
+            },
+            value: {
+                type: String,
+                required: false
             }
         },
         data () {
@@ -51,6 +62,9 @@
                 selectFirst: false
             }
         },
+        mounted() {
+            this.query = this.value;
+        },
         computed: {
             debounce () {
                 return debounce(this.update, 250)
@@ -58,8 +72,12 @@
         },
         methods: {
             onHit(item) {
-                this.query = item;
+                this.query = item ? item.name : undefined;
+                this.onSelect(item);
                 this.closeSelect();
+            },
+            clearItem() {
+                this.onHit();
             },
             closeSelect() {
                 this.items = [];

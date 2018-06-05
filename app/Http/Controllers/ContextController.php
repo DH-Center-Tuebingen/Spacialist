@@ -42,6 +42,9 @@ class ContextController extends Controller {
                 case 'string-sc':
                     $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
                     break;
+                case 'context':
+                    $a->name = Context::find($a->context_val)->name;
+                    break;
                 default:
                     break;
             }
@@ -226,7 +229,8 @@ class ContextController extends Controller {
                 case 'table':
                     $attrval->json_val = json_encode($value);
                     break;
-                    // 'datatype' => 'context', TODO
+                case 'context':
+                    $attrval->context_val = $value;
             }
             $attrval->lasteditor = 'Admin'; // TODO
             $attrval->save();

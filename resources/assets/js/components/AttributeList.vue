@@ -63,7 +63,13 @@
                     </div>
                     <!-- TODO: dirty checking -->
                     <div v-else-if="attribute.datatype == 'context'">
-                        <context-search></context-search>
+                        <context-search
+                            v-validate=""
+                            :id="'attribute-'+attribute.id"
+                            :name="'attribute-'+attribute.id"
+                            :on-select="selection => setContextSearchResult(selection, attribute.id)"
+                            :value="localValues[attribute.id].name">
+                        </context-search>
                     </div>
                     <v-date-picker
                         mode="single"
@@ -302,6 +308,14 @@
                 let ms = Date.parse(dtVal.toUTCString());
                 ms += (offset * 60 * 1000);
                 vm.localValues[aid].value = new Date(ms);
+            },
+            setContextSearchResult(result, aid) {
+                if(result) {
+                    this.localValues[aid].value = result.id;
+                } else {
+                    this.localValues[aid].value = undefined;
+                }
+                this.fields[`attribute-${aid}`].dirty = true;
             },
             checkDependency(aid) {
                 if(!this.dependencies) return;
