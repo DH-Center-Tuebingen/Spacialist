@@ -134,7 +134,8 @@
             },
             selectedEntity: {
                 type: Object,
-                required: false
+                required: false,
+                default: _ => new Object()
             }
         },
         mounted() {
@@ -442,6 +443,7 @@
 
                 vm.map.on('pointermove', function(e) {
                     if(e.dragging) return;
+                    if(vm.draw.getActive()) return;
 
                     const element = vm.hoverPopup.getElement();
                     const feature = vm.getFeatureForEvent(e);
@@ -566,6 +568,10 @@
                         }
                     }
                 });
+                if(!entityExtent) {
+                    // EPSG:3857 bounds (taken from epsg.io/3857)
+                    entityExtent = [-20026376.39, -20048966.10, 20026376.39, 20048966.10];
+                }
                 return entityExtent;
             },
             getFeatureForEvent(e) {
