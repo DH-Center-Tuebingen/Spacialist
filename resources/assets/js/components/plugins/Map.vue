@@ -111,7 +111,7 @@
             addFeature(feature, wkt) {
                 const vm = this;
                 const collection = vm.geoJsonFormat.writeFeatures([feature]);
-                const srid = 4326;
+                const srid = 3857;
                 const data = {
                     collection: collection,
                     srid: srid
@@ -129,7 +129,7 @@
                 features.forEach(f => {
                     let data = {
                         feature: vm.geoJsonFormat.writeFeature(f),
-                        srid: 4326
+                        srid: 3857
                     };
                     vm.$http.patch(`/api/map/${f.getProperties().id}`, data);
                 });
