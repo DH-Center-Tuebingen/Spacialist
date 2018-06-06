@@ -74,23 +74,23 @@
             </div>
         </div>
         <div class="d-flex justify-content-around align-items-center mb-2">
-            <button style="button" class="btn btn-outline-secondary" :class="{disabled: !context.id}" @click="setAction('linked')">
+            <button style="button" class="btn btn-outline-secondary" :class="{disabled: !context.id}" @click="setAction('linkedFiles')">
                 <i class="fas fa-fw fa-link"></i> Linked Files <span class="badge badge-primary" v-show="context.id">{{linkedFiles.files.length}}</span>
             </button>
-            <button style="button" class="btn btn-outline-secondary" @click="setAction('unlinked')">
+            <button style="button" class="btn btn-outline-secondary" @click="setAction('unlinkedFiles')">
                 <i class="fas fa-fw fa-unlink"></i> Unlinked
             </button>
-            <button style="button" class="btn btn-outline-secondary" @click="setAction('all')">
+            <button style="button" class="btn btn-outline-secondary" @click="setAction('allFiles')">
                 <i class="fas fa-fw fa-copy"></i> All Files
             </button>
             <button style="button" class="btn btn-outline-secondary" @click="setAction('upload')">
                 <i class="fas fa-fw fa-upload"></i> Upload Files
             </button>
         </div>
-        <div class="col" v-show="isAction('linked')">
+        <div class="col" v-show="isAction('linkedFiles')">
             <form>
                 <div class="form-check">
-                    <input type="checkbox" id="sub-entities-check" class="form-check-input" v-model="includeSubEntities" @change="applyFilters('linked')"/>
+                    <input type="checkbox" id="sub-entities-check" class="form-check-input" v-model="includeSubEntities" @change="applyFilters('linkedFiles')"/>
                     <label class="form-check-label" for="sub-entities-check">
                         Include Files of Sub-Entities
                     </label>
@@ -98,10 +98,10 @@
             </form>
             <file-list :files="linkedFiles.files" :on-click="showFileModal" :on-load-chunk="linkedFiles.loadChunk" :file-state="linkedFiles.fileState" :is-fetching="linkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
         </div>
-        <div class="col" v-show="isAction('unlinked')">
+        <div class="col" v-show="isAction('unlinkedFiles')">
             <file-list :files="unlinkedFiles.files" :on-click="showFileModal" :on-load-chunk="unlinkedFiles.loadChunk" :file-state="unlinkedFiles.fileState" :is-fetching="unlinkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
         </div>
-        <div class="col" v-show="isAction('all')">
+        <div class="col" v-show="isAction('allFiles')">
             <file-list :files="allFiles.files" :on-click="showFileModal" :on-load-chunk="allFiles.loadChunk" :file-state="allFiles.fileState" :is-fetching="allFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
         </div>
         <div v-if="isAction('upload')">
@@ -490,29 +490,17 @@
             },
             applyFilters(action) {
                 const vm = this;
-                let fileType;
-                switch(action) {
-                    case 'linked':
-                        fileType = 'linkedFiles';
-                        break;
-                    case 'unlinked':
-                        fileType = 'unlinkedFiles';
-                        break;
-                    case 'all':
-                        fileType = 'allFiles';
-                        break;
-                }
                 let filters = {
                     categories: vm.filterTypes[action],
                     cameras: vm.filterCameras[action],
                     dates: vm.filterDates[action],
                     // strategy: vm.filterMatching[action]
                 };
-                if(action == 'linked') {
+                if(action == 'linkedFiles') {
                     filters.sub_entities = vm.includeSubEntities;
                 }
-                vm.resetFiles(fileType);
-                vm.getNextFiles(fileType, filters);
+                vm.resetFiles(action);
+                vm.getNextFiles(action, filters);
 
             },
             toggleFullscreen: function(event) {
@@ -530,8 +518,12 @@
             },
             setAction(id) {
                 // disable linked tab if no context is selected
-                if(id == 'linked' && !this.localContext.id) return;
+                if(id == 'linkedFiles' && !this.localContext.id) return;
                 this.selectedTopAction = id;
+                // If it is the first time the action is set, load images
+                if(!Object.keys(this[id].pagination).length) {
+                    this.getNextFiles(id);
+                }
             },
             isAction(id) {
                 return this.selectedTopAction == id;
@@ -811,7 +803,7 @@
                     camera: '',
                     date: ''
                 },
-                selectedTopAction: 'unlinked',
+                selectedTopAction: 'unlinkedFiles',
                 uploadFiles: [],
                 filesUploaded: 0,
                 filesErrored: 0,
@@ -824,7 +816,7 @@
                     apiUrl: '/file/linked',
                     apiPageParam: 'page',
                     loadChunk: () => {
-                        if(this.selectedTopAction != 'linked') return;
+                        if(this.selectedTopAction != 'linkedFiles') return;
                         this.getNextFiles('linkedFiles');
                     }
                 },
@@ -837,7 +829,7 @@
                     apiUrl: '/file/unlinked',
                     apiPageParam: 'page',
                     loadChunk: () => {
-                        if(this.selectedTopAction != 'unlinked') return;
+                        if(this.selectedTopAction != 'unlinkedFiles') return;
                         this.getNextFiles('unlinkedFiles');
                     }
                 },
@@ -850,7 +842,7 @@
                     apiUrl: '/file',
                     apiPageParam: 'page',
                     loadChunk: () => {
-                        if(this.selectedTopAction != 'all') return;
+                        if(this.selectedTopAction != 'allFiles') return;
                         this.getNextFiles('allFiles');
                     }
                 },
@@ -870,24 +862,24 @@
                 filterCameraList: [],
                 filterDateList: [],
                 filterTypes: {
-                    linked: [],
-                    unlinked: [],
-                    all: []
+                    linkedFiles: [],
+                    unlinkedFiles: [],
+                    allFiles: []
                 },
                 filterCameras: {
-                    linked: [],
-                    unlinked: [],
-                    all: []
+                    linkedFiles: [],
+                    unlinkedFiles: [],
+                    allFiles: []
                 },
                 filterDates: {
-                    linked: [],
-                    unlinked: [],
-                    all: []
+                    linkedFiles: [],
+                    unlinkedFiles: [],
+                    allFiles: []
                 },
                 // filterMatching: {
-                //     linked: 'any',
-                //     unlinked: 'any',
-                //     all: 'any'
+                //     linkedFiles: 'any',
+                //     unlinkedFiles: 'any',
+                //     allFiles: 'any'
                 // }
             }
         },
@@ -903,7 +895,7 @@
                 let vm = this;
                 let menu = [];
                 if(vm.context.id) {
-                    if(vm.isAction('linked')) {
+                    if(vm.isAction('linkedFiles')) {
                         menu.push({
                             label: `Unlink from ${vm.context.name}`,
                             iconClasses: 'fas fa-fw fa-unlink text-info',
