@@ -441,24 +441,27 @@
                 this.contextType.sub_context_types = [];
             },
             updateContextType() {
-                if(!this.contextType.id) return;
-                let id = this.contextType.id;
-                let data = {
-                    'is_root': this.contextType.is_root,
-                    'sub_context_types': this.contextType.sub_context_types.map(t => t.id)
+                const vm = this;
+                if(!vm.contextType.id) return;
+                const id = vm.contextType.id;
+                const data = {
+                    'is_root': vm.contextType.is_root,
+                    'sub_context_types': vm.contextType.sub_context_types.map(t => t.id)
                 };
-                this.$http.post('/api/editor/dm/'+id+'/relation', data).then(function(response) {
+                vm.$http.post('/api/editor/dm/'+id+'/relation', data).then(function(response) {
+                    const name = vm.$translateConcept(vm.concepts, vm.contextType.thesaurus_url);
+                    vm.$showToast('Entity-Type updated', `${name} successfully updated.`, 'success');
                 });
             },
             addAttributeToContextType(oldIndex, index) {
                 const vm = this;
-                let ctid = vm.contextType.id;
-                let attribute = vm.localAttributes[oldIndex];
+                const ctid = vm.contextType.id;
+                const attribute = vm.localAttributes[oldIndex];
                 let attributes = vm.contextAttributes;
                 let data = {};
                 data.attribute_id = attribute.id;
                 data.position = index + 1;
-                vm.$http.post('/api/editor/dm/context_type/'+ctid+'/attribute', data).then(function(response) {
+                vm.$http.post(`/api/editor/dm/context_type/${ctid}/attribute`, data).then(function(response) {
                     // Add element to attribute list
                     attributes.splice(index, 0, response.data);
                     Vue.set(vm.contextValues, response.data.id, '');
@@ -466,6 +469,9 @@
                     for(let i=index+1; i<attributes.length; i++) {
                         attributes[i].position++;
                     }
+                    const attrName = vm.$translateConcept(vm.concepts, response.data.thesaurus_url);
+                    const etName = vm.$translateConcept(vm.concepts, vm.contextType.thesaurus_url);
+                    vm.$showToast('Attribute added', `${attrName} successfully added to ${etName}.`, 'success');
                 })
 
             },

@@ -446,6 +446,8 @@
                 vm.$http.patch(`/api/context/${cid}/attribute/${aid}`, data).then(function(response) {
                     oldData.possibility = newData.possibility;
                     oldData.possibility_description = newData.possibility_description;
+                    const attributeName = vm.$translateConcept(vm.concepts, vm.referenceModal.attribute.thesaurus_url);
+                    vm.$showToast('Certainty updated', `Certainty of ${attributeName} successfully set to ${newData.possibility}% (${newData.possibility_description}).`, 'success');
                 });
             },
             addReference(item) {
@@ -509,9 +511,9 @@
                 if(entity.root_context_id) data.root_context_id = entity.root_context_id;
                 if(entity.geodata_id) data.geodata_id = entity.geodata_id;
 
-                let vm = this;
+                const vm = this;
                 vm.$http.post('/api/context', data).then(function(response) {
-                    vm.tree.push(response.data);
+                    vm.roots.push(response.data);
                     vm.hideNewEntityModal();
                 });
             },
@@ -575,6 +577,7 @@
                 }
                 vm.$http.patch('/api/context/'+cid+'/attributes', patches).then(function(response) {
                     vm.resetFlags();
+                    vm.$showToast('Entity updated', `Data of ${entity.name} successfully updated.`, 'success');
                 });
             },
             deleteEntity(entity) {
@@ -586,6 +589,7 @@
                         // ...unset it
                         vm.setSelectedElement(undefined);
                     }
+                    vm.$showToast('Entity deleted', `${entity.name} successfully deleted.`, 'success');
                     vm.hideDeleteEntityModal();
                 });
             },

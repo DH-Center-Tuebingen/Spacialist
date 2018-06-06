@@ -678,23 +678,23 @@
             },
             onFileUnlinked(file, filesObj, linkCount) {
                 // if we never fetched files, wait for user to load
-                if(!vm.pagination.current_page) {
+                if(!filesObj.pagination.current_page) {
                     return;
                 }
                 // if there are still links, do not add to unlinked files
                 if(typeof linkCount != 'undefined' && linkCount > 0) {
                     return;
                 }
-                let index = vm.files.findIndex(f => f.id == file.id);
+                let index = filesObj.files.findIndex(f => f.id == file.id);
                 // if the file was not in this tab, return
                 if(index == -1) return;
-                vm.pagination.total--;
-                vm.pagination.to--;
-                vm.files.splice(index, 1);
+                filesObj.pagination.total--;
+                filesObj.pagination.to--;
+                filesObj.files.splice(index, 1);
                 // check if we deleted with only 1 element on last page
-                if(vm.pagination.from > vm.pagination.total) {
+                if(filesObj.pagination.from > filesObj.pagination.total) {
                     // if so, set next page url to this page, because we decreased our current page
-                    vm.pagination.next_page_url = vm.apiUrl + '?' + vm.apiPageParam + '=' + vm.pagination.current_page;
+                    filesObj.pagination.next_page_url = filesObj.apiUrl + '?' + filesObj.apiPageParam + '=' + filesObj.pagination.current_page;
                 }
             },
             requestDeleteFile(file) {
@@ -709,6 +709,7 @@
                     vm.onFileDeleted(file, vm.unlinkedFiles);
                     vm.onFileDeleted(file, vm.allFiles);
                     vm.hideDeleteFileModal();
+                    vm.$showToast('File deleted', `${file.name} successfully deleted.`, 'success');
                 });
             },
             hideDeleteFileModal() {
@@ -726,7 +727,7 @@
                 });
             },
             unlinkFile(file, context) {
-                let vm = this;
+                const vm = this;
                 let id = file.id;
                 let cid = context.id;
                 vm.$http.delete('/api/file/'+id+'/link/'+cid).then(function(response) {
@@ -734,6 +735,7 @@
                     vm.onFileDeleted(file, vm.linkedFiles);
                     vm.onFileUnlinked(file, vm.unlinkedFiles, vm.linkCount);
                     vm.hideUnlinkFileModal();
+                    vm.$showToast('File unlinked', `${file.name} successfully unlinked from ${context.name}.`, 'success');
                 });
             },
             hideUnlinkFileModal() {
@@ -751,6 +753,7 @@
                 vm.$http.put('/api/file/'+id+'/link', data).then(function(response) {
                     vm.onFileLinked(file, vm.linkedFiles);
                     vm.onFileDeleted(file, vm.unlinkedFiles);
+                    vm.$showToast('File linked', `${file.name} successfully linked to ${context.name}.`, 'success');
                 });
             },
             showFileModal(file) {

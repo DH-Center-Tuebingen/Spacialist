@@ -165,17 +165,19 @@
                 });
             },
             onPatchRole(id) {
-                if(this.isDirty('perms_'+id)) {
-                    let setPristine = this.setPristine;
-                    let role = this.roleList.find(r => r.id == id);
+                const vm = this;
+                if(vm.isDirty(`perms_${id}`)) {
+                    let role = vm.roleList.find(r => r.id == id);
                     let permissions = [];
                     for(let i=0; i<role.permissions.length; i++) {
                         permissions.push(role.permissions[i].id);
                     }
-                    let data = {};
-                    data.permissions = JSON.stringify(permissions);
-                    this.$http.patch('/api/role/'+id+'/permission', data).then(function(response) {
-                        setPristine('perms_'+id);
+                    const data = {
+                        permissions: JSON.stringify(permissions)
+                    };
+                    vm.$http.patch(`/api/role/${id}/permission`, data).then(function(response) {
+                        vm.setPristine(`perms_${id}`);
+                        vm.$showToast('Role updated', `${role.display_name} successfully updated.`, 'success');
                     });
                 }
             },

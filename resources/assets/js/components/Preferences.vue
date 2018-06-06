@@ -265,13 +265,15 @@
         mounted() {},
         methods: {
             savePreference(pref) {
+                const vm = this;
                 let data = {};
                 data.label = pref.label;
                 data.value = pref.value;
                 if(typeof data.value === 'object') data.value = JSON.stringify(data.value);
                 data.allow_override = pref.allow_override;
-                this.$http.patch('/api/preference/' + pref.id, data).then(function(response) {
-                    console.log(response.data);
+                vm.$http.patch(`/api/preference/${pref.id}`, data).then(function(response) {
+                    const label = pref.label; // TODO translation
+                    vm.$showToast('Preference updated', `${label} successfully updated.`, 'success');
                 });
             }
         },
