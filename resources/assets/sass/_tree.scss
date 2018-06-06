@@ -64,6 +64,8 @@
 /* Drag'n'drop */
 .TreeView ul.dragover {}
 .TreeView li.dragover {}
-.TreeView li.dragover > span.item {}
+.TreeView li.dragover > span.item {
+    background-color: lightgray;
+}
 .TreeView li.nodrop {}
 .TreeView li.nodrop > span.item {}

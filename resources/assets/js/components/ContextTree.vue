@@ -4,6 +4,7 @@
             :category="category"
             :css="css"
             :display="display"
+            :dragndrop="dragndrop"
             :model="tree"
             :onSelect="onSelect"
             :openerOpts="openerOpts"
@@ -33,21 +34,23 @@
 
 <script>
     import { TreeView } from '@bosket/vue';
+    import { dragndrop } from "@bosket/core";
+    import { array } from '@bosket/tools';
     import { VueContext } from 'vue-context';
     import { transliterate as tr, slugify } from 'transliteration';
 
     class Node {
         constructor(data) {
-            Object.assign(this, data)
+            Object.assign(this, data);
             if(this.children_count > 0) {
-                this.children = () => this.fetchChildren(this.id)
+                this.children = () => this.fetchChildren(this.id);
             }
         }
 
         fetchChildren(id) {
             return $http.get('/api/context/byParent/'+id)
             .then(response => {
-                const result = response.data.map(n => new Node(n));
+                const result = response.data.map(n => new Node({...n, parent: this}));
                 return result;
             });
         }
@@ -89,11 +92,11 @@
             }
         },
         mounted() {
-            this.init()
+            this.init();
         },
         methods: {
             init() {
-                this.tree = this.roots.map(n => new Node(n))
+                this.tree = this.roots.map(n => new Node(n));
             },
             onSelect(newSelection) {
                 this.selection = newSelection
@@ -108,6 +111,84 @@
             return {
                 tree: [],
                 selection: [],
+                dragndrop: {
+                    ...dragndrop.selection(() => this.tree, m => this.tree = m),
+                    over: (target, event, inputs) => {
+                        // TODO open on hover
+                    },
+                    drop: (target, event, inputs) => {
+                        const vm = this;
+                        const dragElem = inputs.selection[0];
+                        let children;
+                        let parentId;
+                        let oldParentId;
+                        if(target.children /*&& !folded*/) {
+                            children = target.children;
+                            parentId = target.id;
+                        } else if(target.parent) {
+                            children = target.parent.children;
+                            parentId = target.parent.id;
+                        } else {
+                            children = vm.tree;
+                        }
+                        if(dragElem.parent) {
+                            oldParentId = dragElem.parent.id;
+                        }
+
+                        const newIndex = children.indexOf(target) + 1;
+                        const oldIndex = dragElem.rank - 1;
+
+                        // Check if element was moved (different parent OR different index)
+                        if(
+                            (
+                                (!parentId && !oldParentId) ||
+                                parentId == oldParentId
+                            ) &&
+                                newIndex == oldIndex
+                            ) return;
+
+                        let data = {
+                            rank: newIndex + 1
+                        };
+                        if(parentId) {
+                            data.parent_id = parentId;
+                        }
+
+                        vm.$http.patch(`/api/context/${dragElem.id}/rank`, data).then(function(response) {
+                            let oldChildren;
+                            if(parentId != oldParentId) {
+                                if(oldParentId) {
+                                    oldChildren = dragElem.parent.children;
+                                } else {
+                                    oldChildren = vm.tree;
+                                }
+                                for(let i=oldIndex; i<oldChildren.length; i++) {
+                                    oldChildren[i].rank--;
+                                }
+                                for(let i=newIndex; i<children.length; i++) {
+                                    children[i].rank++;
+                                }
+                            } else {
+                                if(newIndex < oldIndex) {
+                                    for(let i=newIndex; i<oldIndex; i++) {
+                                        children[i].rank++;
+                                    }
+                                } else {
+                                    for(let i=oldIndex; i<newIndex; i++) {
+                                        children[i].rank--;
+                                    }
+                                }
+                            }
+
+                            dragElem.rank = newIndex + 1;
+                            children.splice(newIndex, 0, dragElem);
+                            const index = oldChildren.findIndex(c => c.id == dragElem.id);
+                            if(index > -1) {
+                                oldChildren.splice(index, 1);
+                            }
+                        });
+                    }
+                },
                 strategies: {
                     selection: ["single"],
                     click: ["select"],

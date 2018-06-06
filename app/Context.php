@@ -40,7 +40,45 @@ class Context extends Model
         } else {
             $entities->where('root_context_id', $id);
         }
-        return $entities->get();
+        return $entities->orderBy('rank')->get();
+    }
+
+    public static function patchRanks($rank, $id, $parent = null) {
+        $context = Context::find($id);
+
+        $hasParent = isset($parent);
+        $oldRank = $context->rank;
+        $context->rank = $rank;
+        $context->lasteditor = 'Admin';
+
+        $query;
+        if(isset($context->root_context_id)) {
+            $query = self::where('root_context_id', $context->root_context_id);
+        } else {
+            $query = self::whereNull('root_context_id');
+        }
+        $oldContexts = $query->where('rank', '>', $oldRank)->get();
+
+        foreach($oldContexts as $oc) {
+            $oc->rank--;
+            $oc->save();
+        }
+
+        $query = null;
+        if($hasParent) {
+            $context->root_context_id = $parent;
+            $query = self::where('root_context_id', $parent);
+        } else {
+            $query = self::whereNull('root_context_id');
+        }
+        $newContexts = $query->where('rank', '>=', $rank)->get();
+
+        foreach($newContexts as $nc) {
+            $nc->rank++;
+            $nc->save();
+        }
+
+        $context->save();
     }
 
     public function child_contexts() {

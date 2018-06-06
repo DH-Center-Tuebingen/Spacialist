@@ -266,6 +266,26 @@ class ContextController extends Controller {
         return response()->json(null, 204);
     }
 
+    public function patchRank(Request $request, $id) {
+        $this->validate($request, [
+            'rank' => 'required|integer',
+            'parent_id' => 'nullable|integer|exists:contexts,id',
+        ]);
+
+        try {
+            $context = Context::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ], 400);
+        }
+
+        $rank = $request->get('rank');
+        $parent_id = $request->get('parent_id');
+        Context::patchRanks($rank, $id, $parent_id);
+        return response()->json(null, 204);
+    }
+
     // DELETE
 
     public function deleteContext($id) {

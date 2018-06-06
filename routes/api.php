@@ -38,6 +38,7 @@ Route::post('/context/{id}/reference/{aid}', 'ReferenceController@addReference')
 
 Route::patch('/context/{id}/attributes', 'ContextController@patchAttributes')->where('id', '[0-9]+');
 Route::patch('/context/{id}/attribute/{aid}', 'ContextController@patchAttribute')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+Route::patch('/context/{id}/rank', 'ContextController@patchRank')->where('id', '[0-9]+');
 Route::patch('/reference/{id}', 'ReferenceController@patchReference')->where('id', '[0-9]+');
 
 Route::delete('/context/{id}', 'ContextController@deleteContext')->where('id', '[0-9]+');
