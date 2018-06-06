@@ -1,6 +1,7 @@
 <template>
     <div>
         <draggable
+            style="min-height: 1px;"
             v-model="localAttributes"
             :clone="clone"
             :move="move"
