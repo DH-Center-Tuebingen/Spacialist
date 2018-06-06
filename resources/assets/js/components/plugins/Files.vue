@@ -823,7 +823,10 @@
                     apiPrefix: '/api',
                     apiUrl: '/file/linked',
                     apiPageParam: 'page',
-                    loadChunk: () => this.getNextFiles('linkedFiles')
+                    loadChunk: () => {
+                        if(this.selectedTopAction != 'linked') return;
+                        this.getNextFiles('linkedFiles');
+                    }
                 },
                 unlinkedFiles: {
                     files: [],
@@ -833,7 +836,10 @@
                     apiPrefix: '/api',
                     apiUrl: '/file/unlinked',
                     apiPageParam: 'page',
-                    loadChunk: () => this.getNextFiles('unlinkedFiles')
+                    loadChunk: () => {
+                        if(this.selectedTopAction != 'unlinked') return;
+                        this.getNextFiles('unlinkedFiles');
+                    }
                 },
                 allFiles: {
                     files: [],
@@ -843,7 +849,10 @@
                     apiPrefix: '/api',
                     apiUrl: '/file',
                     apiPageParam: 'page',
-                    loadChunk: () => this.getNextFiles('allFiles')
+                    loadChunk: () => {
+                        if(this.selectedTopAction != 'all') return;
+                        this.getNextFiles('allFiles');
+                    }
                 },
                 selectedFile: {},
                 replaceFiles: [],
