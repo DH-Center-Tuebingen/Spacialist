@@ -1,23 +1,21 @@
 <template>
-    <div>
-        <ul class="ml-3 list-unstyled">
-            <li v-for="(d, i) in data" class="pb-1 d-flex align-items-center justify-content-between" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
-                <i class="fas fa-fw fa-seedling"></i>
-                <a class="p-2" href="#" :class="{ 'font-weight-bold': d.id == selectedElement.id }" @click="select(d)">
-                    {{ concepts[d.thesaurus_url].label }}
-                </a>
-                <span class="ml-auto" v-if="onDelete">
-                    <button class="btn btn-danger btn-fab rounded-circle" v-show="hoverState[i]" @click="onDelete(d)">
-                        <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
-                    </button>
-                </span>
-            </li>
-            <li v-if="onAdd">
-                <i class="fas fa-fw fa-plus"></i>
-                <a href="#" @click="onAdd()" class="text-secondary">New Context-Type...</a>
-            </li>
-        </ul>
-    </div>
+    <ul class="ml-3 list-unstyled mb-0">
+        <li v-for="(d, i) in data" class="pb-1 d-flex align-items-center justify-content-between" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
+            <i class="fas fa-fw fa-seedling"></i>
+            <a class="p-2" href="#" :class="{ 'font-weight-bold': d.id == selectedElement.id }" @click="select(d)">
+                {{ concepts[d.thesaurus_url].label }}
+            </a>
+            <span class="ml-auto" v-if="onDelete">
+                <button class="btn btn-danger btn-fab rounded-circle" v-show="hoverState[i]" @click="onDelete(d)">
+                    <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
+                </button>
+            </span>
+        </li>
+        <li v-if="onAdd">
+            <i class="fas fa-fw fa-plus"></i>
+            <a href="#" @click="onAdd()" class="text-secondary">New Context-Type...</a>
+        </li>
+    </ul>
 </template>
 
 <script>

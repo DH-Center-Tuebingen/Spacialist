@@ -17,9 +17,10 @@
                 :show-info="true">
             </attributes>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-2 d-flex flex-column">
             <h4>Available Context-Types</h4>
             <context-types
+                class="col px-0 h-100 scroll-y-auto"
                 :data="localContextTypes"
                 :concepts="concepts"
                 :on-add="onCreateContextType"
