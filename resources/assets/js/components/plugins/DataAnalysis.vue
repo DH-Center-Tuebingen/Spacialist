@@ -137,7 +137,7 @@
                                 </a>
                             </li>
                         </ul>
-                        <component :is="origin.name"></component>
+                        <component :is="pluginPrefix+origin.name"></component>
                     </div>
                 </div>
                 <div v-show="activeResultTab == 'raw' && expertMode">
@@ -224,11 +224,11 @@
 </template>
 
 <script>
-    Vue.component('attribute_values', require('./DataAnalysisAttributes.vue'));
-    Vue.component('contexts', require('./DataAnalysisEntity.vue'));
-    Vue.component('files', require('./DataAnalysisFiles.vue'));
-    Vue.component('geodata', require('./DataAnalysisGeodata.vue'));
-    Vue.component('bibliography', require('./DataAnalysisBibliography.vue'));
+    Vue.component('da-attribute_values', require('./DataAnalysisAttributes.vue'));
+    Vue.component('da-contexts', require('./DataAnalysisEntity.vue'));
+    Vue.component('da-files', require('./DataAnalysisFiles.vue'));
+    Vue.component('da-geodata', require('./DataAnalysisGeodata.vue'));
+    Vue.component('da-bibliography', require('./DataAnalysisBibliography.vue'));
 
     export default {
         props: {
@@ -442,6 +442,7 @@
         },
         data() {
             return {
+                pluginPrefix: 'da-',
                 activeResultTab: '',
                 results: [],
                 combinedResults: [],

@@ -87,9 +87,14 @@ Route::patch('/preference/{id}', 'PreferenceController@patchPreference')->where(
 
 // BIBLIOGRAPHY
 Route::get('/bibliography/export', 'BibliographyController@exportBibtex');
+Route::get('/bibliography/{id}/ref_count', 'BibliographyController@getReferenceCount')->where('id', '[0-9]+');
 
 Route::post('/bibliography', 'BibliographyController@addItem');
 Route::post('/bibliography/import', 'BibliographyController@importBibtex');
+
+Route::patch('/bibliography/{id}', 'BibliographyController@updateItem')->where('id', '[0-9]+');
+
+Route::delete('/bibliography/{id}', 'BibliographyController@deleteItem')->where('id', '[0-9]+');
 
 // EXTENSIONS
 

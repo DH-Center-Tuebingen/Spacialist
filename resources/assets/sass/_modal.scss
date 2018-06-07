@@ -16,3 +16,7 @@
 	text-shadow: -1px 1px 1px rgb(0,0,0);
 	margin-left: 25px;
 }
+
+.v--modal-overlay {
+    z-index: $zindex-sticky + 1 !important;
+}

@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <ul class="list-inline">
+    <div class="h-100 d-flex flex-column">
+        <ul class="list-inline mb-2">
             <li class="list-inline-item">
                 <form class="form-inline" id="literature-search-form">
                     <div class="form-group">
@@ -40,11 +40,11 @@
                 </a>
             </li>
         </ul>
-        <div id="literature-container" class="table-responsive">
-            <table class="table table-striped table-hover" id="literature-table">
-                <thead class="thead-light">
+        <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover">
+                <thead class="thead-light sticky-top">
                     <tr>
-                        <td>
+                        <th>
                             <a href="#" @click="setOrderColumn('type')">
                                 Type
                                 <span v-show="orderColumn == 'type'">
@@ -56,8 +56,8 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('citekey')">
                                 Citation Key
                                 <span v-show="orderColumn == 'citekey'">
@@ -69,8 +69,8 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('author')">
                                 Author
                                 <span v-show="orderColumn == 'author'">
@@ -82,8 +82,8 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('editor')">
                                 Editor
                                 <span v-show="orderColumn == 'editor'">
@@ -95,8 +95,8 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('title')">
                                 Title
                                 <span v-show="orderColumn == 'title'">
@@ -108,8 +108,8 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('journal')">
                                 Journal
                                 <span v-show="orderColumn == 'journal'">
@@ -121,8 +121,8 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('year')">
                                 Year
                                 <span v-show="orderColumn == 'year'">
@@ -134,29 +134,29 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.month
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.pages
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.volume
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.number
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.chapter
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.edition
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.series
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('booktitle')">
                                 Book Title
                                 <span v-show="orderColumn == 'booktitle'">
@@ -168,8 +168,8 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('publisher')">
                                 Publisher
                                 <span v-show="orderColumn == 'publisher'">
@@ -181,8 +181,8 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('address')">
                                 Address
                                 <span v-show="orderColumn == 'address'">
@@ -194,17 +194,17 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.note
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.created-at
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.updated-at
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('misc')">
                                 misc
                                 <span v-show="orderColumn == 'misc'">
@@ -216,8 +216,8 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('howpublished')">
                                 howpublished
                                 <span v-show="orderColumn == 'howpublished'">
@@ -229,22 +229,19 @@
                                     </span>
                                 </span>
                             </a>
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.institution
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.organization
-                        </td>
-                        <td>
+                        </th>
+                        <th>
                             literature.bibtex.school
-                        </td>
-                        <td>
-                            literature.delete
-                        </td>
-                        <td>
-                            literature.edit
-                        </td>
+                        </th>
+                        <th>
+                            literature.options
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -325,14 +322,19 @@
                             {{ entry.school }}
                         </td>
                         <td>
-                            <button type="button" class="btn btn-outline-danger">
-                                <i class="fas fa-fw fa-trash"></i>
-                            </button>
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-outline-info">
-                                <i class="fas fa-fw fa-edit"></i>
-                            </button>
+                            <div class="dropdown">
+                                <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                                </span>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="#" @click="editEntry(entry)">
+                                        <i class="fas fa-fw fa-edit text-info"></i> Edit
+                                    </a>
+                                    <a class="dropdown-item" href="#" @click="requestDeleteEntry(entry)">
+                                        <i class="fas fa-fw fa-trash text-danger"></i> Delete
+                                    </a>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -342,7 +344,8 @@
         <modal name="new-bibliography-item-modal" height="auto" :scrollable="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add new Item</h5>
+                    <h5 class="modal-title" v-if="newItem.id">Edit Item</h5>
+                    <h5 class="modal-title" v-else>Add new Item</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideNewItemModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -381,10 +384,40 @@
                     <span v-if="newItem.type" v-html="this.$options.filters.bibtexify(newItem.fields, newItem.type.name)"></span>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" form="newBibliographyItemForm">
+                    <button type="submit" class="btn btn-success" form="newBibliographyItemForm" v-if="newItem.id">
+                        <i class="fas fa-fw fa-save"></i> Update
+                    </button>
+                    <button type="submit" class="btn btn-success" form="newBibliographyItemForm" v-else>
                         <i class="fas fa-fw fa-plus"></i> Add
                     </button>
                     <button type="button" class="btn btn-danger" @click="hideNewItemModal">
+                        <i class="fas fa-fw fa-ban"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </modal>
+
+        <modal name="delete-bibliography-item-modal" height="auto" :scrollable="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Entry</h5>
+                    <button type="button" class="close" aria-label="Close" @click="hideDeleteEntryModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="alert alert-info">
+                        Do you really want to delete <i>{{ deleteItem.title }}</i> by {{ deleteItem.author }}?
+                    </p>
+                    <p class="alert alert-danger">
+                        Please note: If you delete it, {{ deleteItem.count }} references to this item are deleted as well.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger" @click="deleteEntry(deleteItem)">
+                        <i class="fas fa-fw fa-trash"></i> Delete
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" @click="hideDeleteEntryModal">
                         <i class="fas fa-fw fa-ban"></i> Cancel
                     </button>
                 </div>
@@ -418,7 +451,6 @@
             inputFile(newFile, oldFile) {
                 // Wait for response
                 if(newFile && oldFile && newFile.success && !oldFile.success) {
-                    console.log(newFile.response);
                     this.localEntries.push(newFile.response);
                 }
                 // Enable automatic upload
@@ -431,6 +463,7 @@
             addBibliographyItem(item) {
                 if(!item.type) return;
                 if(!item.fields) return;
+                const vm = this;
                 let data = {};
                 // check if all mandatory fields are set
                 for(let i=0; i<item.type.mandatoryFields.length; i++) {
@@ -444,14 +477,61 @@
                 }
                 data.type = item.type.name;
 
-                let entries = this.localEntries;
-                let hideNewItemModal = this.hideNewItemModal;
-                this.$http.post('/api/bibliography', data).then(function(response) {
-                    entries.push(response.data);
-                    hideNewItemModal();
+                if(item.id) {
+                    vm.$http.patch(`/api/bibliography/${item.id}`, data).then(function(response) {
+                        let entry = vm.localEntries.find(e => e.id == item.id);
+                        for(let k in item.fields) {
+                            entry[k] = item.fields[k];
+                        }
+                        vm.hideNewItemModal();
+                    });
+                } else {
+                    vm.$http.post('/api/bibliography', data).then(function(response) {
+                        vm.localEntries.push(response.data);
+                        vm.hideNewItemModal();
+                    });
+                }
+            },
+            editEntry(entry) {
+                const type = this.availableTypes.find(t => t.name == entry.type);
+                if(!type) return;
+                let fields = {};
+                for(let k in entry) {
+                    if(type.mandatoryFields.includes(k) || type.optionalFields.includes(k)) {
+                        fields[k] = entry[k];
+                    }
+                }
+                Vue.set(this.newItem, 'fields', fields);
+                Vue.set(this.newItem, 'type', type);
+                Vue.set(this.newItem, 'id', entry.id);
+                this.$modal.show('new-bibliography-item-modal');
+            },
+            deleteEntry(entry) {
+                const vm = this;
+                vm.$http.delete(`/api/bibliography/${entry.id}`).then(function(response) {
+                    const index = vm.localEntries.findIndex(e => e.id == entry.id);
+                    if(index > -1) {
+                        vm.localEntries.splice(index, 1);
+                    }
+                    vm.hideDeleteEntryModal();
                 });
             },
+            requestDeleteEntry(entry) {
+                const vm = this;
+                vm.$http.get(`/api/bibliography/${entry.id}/ref_count`).then(function(response) {
+                    vm.deleteItem = Object.assign({}, entry);
+                    vm.deleteItem.count = response.data;
+                    vm.$modal.show('delete-bibliography-item-modal');
+                });
+            },
+            hideDeleteEntryModal() {
+                this.deleteItem = {};
+                this.$modal.hide('delete-bibliography-item-modal');
+            },
             showNewItemModal() {
+                this.newItem = {
+                    fields: {}
+                };
                 Vue.set(this.newItem, 'type', this.availableTypes[0]);
                 this.$modal.show('new-bibliography-item-modal');
             },
@@ -469,6 +549,7 @@
                 newItem: {
                     fields: {}
                 },
+                deleteItem: {},
                 availableTypes: [
                     {
                         name: 'article',

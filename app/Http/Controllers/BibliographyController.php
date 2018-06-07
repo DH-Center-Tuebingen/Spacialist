@@ -12,69 +12,7 @@ use RenanBr\BibTexParser\Parser;
 class BibliographyController extends Controller
 {
 
-    // POST
-
-    public function addItem(Request $request) {
-        $this->validate($request, [
-            'type' => 'required|alpha'
-        ]);
-
-        $user = ['name' => 'Admin']; // TODO \Auth::user();
-        $bib = new Bibliography();
-
-        foreach($request->toArray() as $key => $value){
-            $bib->{$key} = $value;
-        }
-
-        $ckey = Helpers::computeCitationKey($bib->toArray());
-        if($ckey === null) {
-            return response([
-                'error' => 'Could not compute citation key.'
-            ], 400);
-        }
-        $bib->citekey = $ckey;
-        $bib->lasteditor = $user['name'];
-
-        $bib->save();
-
-        return response()->json($bib, 201);
-    }
-
-    public function importBibtex(Request $request) {
-        $this->validate($request, [
-            'file' => 'required|file'
-        ]);
-
-        $file = $request->file('file');
-        $listener = new Listener();
-        $parser = new Parser();
-        $parser->addListener($listener);
-        try {
-            $parser->parseFile($file->getRealPath());
-        } catch(ParseException $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 400);
-        }
-        $entries = $listener->export();
-        $newEntries = [];
-        foreach($entries as $entry) {
-            $ckey = $entry['citation-key'];
-            $insArray = array_intersect_key($entry, Bibliography::patchRules);
-            // set citation key if none is present
-            if($ckey == null || $ckey == '') {
-                $ckey = Helpers::computeCitationKey($insArray);
-            }
-            $literature = Bibliography::updateOrCreate(
-                ['citekey' => $ckey],
-                $insArray
-            );
-            if($literature->wasRecentlyCreated) {
-                $newEntries[] = $literature;
-            }
-        }
-        return response()->json($newEntries, 201);
-    }
+    // GET
 
     public function exportBibtex() {
         $entries = Bibliography::orderBy('author', 'asc')->get();
@@ -107,5 +45,102 @@ class BibliographyController extends Controller
         }, 'export.bib', [
             'Content-Type' => 'application/x-bibtex'
         ]);
+    }
+
+    public function getReferenceCount($id) {
+        try {
+            $bib = Bibliography::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This bibliography item does not exist'
+            ], 400);
+        }
+        $count = $bib->referenceCount();
+        return response()->json($count);
+    }
+
+    // POST
+
+    public function addItem(Request $request) {
+        $this->validate($request, [
+            'type' => 'required|alpha'
+        ]);
+
+        $bib = new Bibliography();
+        $bib->fieldsFromRequest($request);
+
+        return response()->json($bib, 201);
+    }
+
+    public function importBibtex(Request $request) {
+        $this->validate($request, [
+            'file' => 'required|file'
+        ]);
+
+        $file = $request->file('file');
+        $listener = new Listener();
+        $parser = new Parser();
+        $parser->addListener($listener);
+        try {
+            $parser->parseFile($file->getRealPath());
+        } catch(ParseException $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 400);
+        }
+        $entries = $listener->export();
+        $newEntries = [];
+        foreach($entries as $entry) {
+            $ckey = $entry['citation-key'];
+            $insArray = array_intersect_key($entry, Bibliography::patchRules);
+            // set citation key if none is present
+            if($ckey == null || $ckey == '') {
+                $ckey = Bibliography::computeCitationKey($insArray);
+            }
+            $literature = Bibliography::updateOrCreate(
+                ['citekey' => $ckey],
+                $insArray
+            );
+            if($literature->wasRecentlyCreated) {
+                $newEntries[] = $literature;
+            }
+        }
+        return response()->json($newEntries, 201);
+    }
+
+    // PATCH
+
+    public function updateItem(Request $request, $id) {
+        $this->validate($request, [
+            'type' => 'required|alpha'
+        ]);
+
+        try {
+            $bib = Bibliography::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This bibliography item does not exist'
+            ], 400);
+        }
+
+        $bib->fieldsFromRequest($request);
+
+        return response()->json(null, 204);
+    }
+
+    // DELETE
+
+    public function deleteItem($id) {
+        try {
+            $bib = Bibliography::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This bibliography item does not exist'
+            ], 400);
+        }
+
+        $bib->delete();
+
+        return response()->json(null, 204);
     }
 }
