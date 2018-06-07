@@ -1,7 +1,7 @@
 <template>
     <div class="table-responsive">
         <table class="table table-striped table-hover">
-            <thead class="thead-light">
+            <thead class="thead-light sticky-top">
                 <tr>
                     <th v-for="header in rows.header">
                         {{ header }}
