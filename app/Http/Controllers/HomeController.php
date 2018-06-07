@@ -36,11 +36,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $contextTypes = ContextType::all();
-        $contextTypeMap = [];
-        foreach($contextTypes as $contextType) {
-            $contextTypeMap[$contextType->id] = $contextType;
-        }
+        $contextTypes = ContextType::with('sub_context_types')->get();
+        $contextTypeMap = $contextTypes->getDictionary();
         $contextTypeMap = json_encode($contextTypeMap);
 
         $roots = Context::getEntitiesByParent();

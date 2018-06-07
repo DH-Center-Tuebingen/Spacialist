@@ -116,13 +116,36 @@
                     over: (target, event, inputs) => {
                         // TODO open on hover
                     },
+                    // Returns true if element is guarded (drop not allowed)
+                    guard: (target, event, inputs) => {
+                        const vm = this;
+                        const dragElem = inputs.selection[0];
+                        const dragContextType = vm.contextTypes[dragElem.context_type_id];
+                        const dropContextType = vm.contextTypes[target.context_type_id];
+                        // If currently dragged element is not allowed as root
+                        // and dragged on element is a root element (no parent)
+                        // do not allow drop
+                        if(!dragContextType.is_root && (!target.parent /*&& folded*/)) {
+                            return true;
+                        }
+
+                        // Check if currently dragged context type is allowed
+                        // as subtype of current drop target
+                        const index = dropContextType.sub_context_types.findIndex(ct => ct.id == dragElem.context_type_id);
+                        if(index == -1) {
+                            return true;
+                        }
+
+                        // In any other cases allow drop
+                        return false;
+                    },
                     drop: (target, event, inputs) => {
                         const vm = this;
                         const dragElem = inputs.selection[0];
                         let children;
                         let parentId;
                         let oldParentId;
-                        if(target.children /*&& !folded*/) {
+                        if(target.children /*&& !folded*/) { // TODO
                             children = target.children;
                             parentId = target.id;
                         } else if(target.parent) {
@@ -135,20 +158,18 @@
                             oldParentId = dragElem.parent.id;
                         }
 
-                        const newIndex = children.indexOf(target) + 1;
+                        let newIndex = children.indexOf(target) + 1;
                         const oldIndex = dragElem.rank - 1;
 
                         // Check if element was moved (different parent OR different index)
-                        if(
-                            (
-                                (!parentId && !oldParentId) ||
-                                parentId == oldParentId
-                            ) &&
-                                newIndex == oldIndex
-                            ) return;
+                        if((!parentId && !oldParentId) || parentId == oldParentId) {
+                            if(newIndex == oldIndex) return;
+                            if(oldIndex < newIndex) newIndex--;
+                        }
 
+                        let rank = newIndex + 1;
                         let data = {
-                            rank: newIndex + 1
+                            rank: rank
                         };
                         if(parentId) {
                             data.parent_id = parentId;
@@ -169,6 +190,7 @@
                                     children[i].rank++;
                                 }
                             } else {
+                                oldChildren = children;
                                 if(newIndex < oldIndex) {
                                     for(let i=newIndex; i<oldIndex; i++) {
                                         children[i].rank++;
@@ -180,12 +202,12 @@
                                 }
                             }
 
-                            dragElem.rank = newIndex + 1;
-                            children.splice(newIndex, 0, dragElem);
                             const index = oldChildren.findIndex(c => c.id == dragElem.id);
                             if(index > -1) {
                                 oldChildren.splice(index, 1);
                             }
+                            dragElem.rank = newIndex + 1;
+                            children.splice(newIndex, 0, dragElem);
                         });
                     }
                 },

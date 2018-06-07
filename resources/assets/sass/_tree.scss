@@ -65,7 +65,14 @@
 .TreeView ul.dragover {}
 .TreeView li.dragover {}
 .TreeView li.dragover > span.item {
-    background-color: lightgray;
+    background-color: $info !important;
+    color: $gray-100 !important;
 }
-.TreeView li.nodrop {}
-.TreeView li.nodrop > span.item {}
+.TreeView li.nodrop {
+    cursor: no-drop !important;
+}
+.TreeView li.nodrop > span.item {
+    opacity: .65 !important;
+    background-color: $red !important;
+    color: $black !important;
+}
