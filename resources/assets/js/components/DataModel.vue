@@ -372,66 +372,98 @@
         mounted() {},
         methods: {
             createAttribute(attribute) {
-                if(!this.validated) return;
-                let attributes = this.localAttributes;
-                let hideModal = this.hideNewAttributeModal;
+                const vm = this;
+                if(!vm.validated) return;
                 let data = {};
                 data.label_id = attribute.label.concept.id;
                 data.datatype = attribute.type.datatype;
                 if(data.datatype == 'table') {
                     data.columns = JSON.stringify(attribute.columns);
                 }
-                if(this.needsRootElement) {
+                if(vm.needsRootElement) {
                     data.root_id = attribute.root.concept.id;
                 }
-                if(this.needsTextElement) {
+                if(vm.needsTextElement) {
                     data.text = attribute.textContent;
                 }
-                this.$http.post('/api/editor/dm/attribute', data).then(function(response) {
-                    attributes.push(response.data);
-                    hideModal();
+                vm.$http.post('/api/editor/dm/attribute', data).then(function(response) {
+                    vm.localAttributes.push(response.data);
+                    vm.hideNewAttributeModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             deleteAttribute(attribute) {
-                let id = attribute.id;
-                let attributes = this.localAttributes;
-                let hideModal = this.hideDeleteAttributeModal;
-                this.$http.delete('/api/editor/dm/attribute/' + id).then(function(response) {
-                    let index = attributes.findIndex(function(a) {
+                const vm = this;
+                const id = attribute.id;
+                vm.$http.delete(`/api/editor/dm/attribute/${id}`).then(function(response) {
+                    let index = vm.localAttributes.findIndex(function(a) {
                         return a.id == id;
                     });
                     if(index) {
-                        attributes.splice(index, 1);
+                        vm.localAttributes.splice(index, 1);
                     }
-                    hideModal();
+                    vm.hideDeleteAttributeModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             createContextType(contextType) {
+                const vm = this;
                 if(!contextType.label) return;
-                let contextTypes = this.localContextTypes;
-                let hideModal = this.hideNewContextTypeModal;
-                let url = contextType.label.concept.concept_url;
+                const url = contextType.label.concept.concept_url;
                 let data = {
                     'concept_url': url,
                     'is_root': contextType.is_root || false
                 };
-                this.$http.post('/api/editor/dm/context_type', data).then(function(response) {
-                    contextTypes.push(response.data);
-                    hideModal();
+                vm.$http.post('/api/editor/dm/context_type', data).then(function(response) {
+                    vm.localContextTypes.push(response.data);
+                    vm.hideNewContextTypeModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             deleteContextType(contextType) {
-                let id = contextType.id;
-                let contextTypes = this.localContextTypes;
-                let hideModal = this.hideDeleteContextTypeModal;
-                this.$http.delete('/api/editor/dm/context_type/' + id).then(function(response) {
-                    let index = contextTypes.findIndex(function(ct) {
+                const vm = this;
+                const id = contextType.id;
+                vm.$http.delete('/api/editor/dm/context_type/' + id).then(function(response) {
+                    const index = vm.localContextTypes.findIndex(function(ct) {
                         return ct.id == id;
                     });
                     if(index) {
-                        contextTypes.splice(index, 1);
+                        vm.localContextTypes.splice(index, 1);
                     }
-                    hideModal();
+                    vm.hideDeleteContextTypeModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             addAllContextTypes() {
@@ -452,6 +484,15 @@
                 vm.$http.post('/api/editor/dm/'+id+'/relation', data).then(function(response) {
                     const name = vm.$translateConcept(vm.concepts, vm.contextType.thesaurus_url);
                     vm.$showToast('Entity-Type updated', `${name} successfully updated.`, 'success');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             addAttributeToContextType(oldIndex, index) {
@@ -473,7 +514,16 @@
                     const attrName = vm.$translateConcept(vm.concepts, response.data.thesaurus_url);
                     const etName = vm.$translateConcept(vm.concepts, vm.contextType.thesaurus_url);
                     vm.$showToast('Attribute added', `${attrName} successfully added to ${etName}.`, 'success');
-                })
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
+                });
 
             },
             editContextAttribute(attribute, options) {
@@ -488,6 +538,15 @@
                 data.d_value = vm.getDependencyValue(options.value, options.attribute.datatype);
                 vm.$http.patch(`/api/editor/dm/context_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
 
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             removeAttributeFromContextType(attribute) {
@@ -507,12 +566,21 @@
                         }
                     }
                     vm.hideRemoveAttributeModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             reorderContextAttribute(oldIndex, index) {
-                let attributes = this.contextAttributes;
-                let attribute = attributes[oldIndex];
-                let ctid = this.contextType.id;
+                const vm = this;
+                let attribute = vm.contextAttributes[oldIndex];
+                const ctid = vm.contextType.id;
                 let aid = attribute.id;
                 let position = index + 1;
                 // same index, nothing to do
@@ -521,18 +589,27 @@
                 }
                 let data = {};
                 data.position = position;
-                this.$http.patch('/api/editor/dm/context_type/'+ctid+'/attribute/'+aid+'/position', data).then(function(response) {
+                vm.$http.patch(`/api/editor/dm/context_type/${ctid}/attribute/${aid}/position`, data).then(function(response) {
                     attribute.position = position;
-                    attributes.splice(oldIndex, 1);
-                    attributes.splice(index, 0, attribute);
+                    vm.contextAttributes.splice(oldIndex, 1);
+                    vm.contextAttributes.splice(index, 0, attribute);
                     if(oldIndex < index) {
                         for(let i=oldIndex; i<index; i++) {
-                            attributes[i].position--;
+                            vm.contextAttributes[i].position--;
                         }
                     } else { // oldIndex > index
                         for(let i=index+1; i<=oldIndex; i++) {
-                            attributes[i].position++;
+                            vm.contextAttributes[i].position++;
                         }
+                    }
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
                     }
                 });
             },
@@ -541,12 +618,21 @@
                 const vm = this;
                 const aid = attribute.id;
                 const ctid = vm.contextType.id;
-                this.$http.get('/api/editor/dm/attribute/occurrence_count/'+aid+'/'+ctid).then(function(response) {
+                vm.$http.get(`/api/editor/dm/attribute/occurrence_count/${aid}/${ctid}`).then(function(response) {
                     vm.setModalSelectedAttribute(attribute);
                     vm.setModalSelectedContextType(vm.contextType);
                     vm.setAttributeValueCount(response.data);
                     vm.openedModal = 'remove-attribute-from-ct-modal';
                     vm.$modal.show('remove-attribute-from-ct-modal');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             hideRemoveAttributeModal() {
@@ -554,13 +640,21 @@
                 this.openedModal = '';
             },
             onCreateAttribute() {
-                let aT = this.attributeTypes;
-                let modal = this.$modal;
-                this.$http.get('/api/editor/dm/attribute_types').then(function(response) {
+                const vm = this;
+                vm.$http.get('/api/editor/dm/attribute_types').then(function(response) {
                     for(let i=0; i<response.data.length; i++) {
-                        aT.push(response.data[i]);
+                        vm.attributeTypes.push(response.data[i]);
                     }
-                    modal.show('new-attribute-modal');
+                    vm.$modal.show('new-attribute-modal');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             onDeleteAttribute(attribute) {
@@ -571,6 +665,15 @@
                     vm.setModalSelectedAttribute(attribute);
                     vm.openedModal = 'delete-attribute-modal';
                     vm.$modal.show('delete-attribute-modal');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             hideNewAttributeModal() {
@@ -618,6 +721,15 @@
                                 for(let i=0; i<selections.length; i++) {
                                     vm.depends.values.push(selections[i]);
                                 }
+                            }
+                        }).catch(function(error) {
+                            if(error.response) {
+                                const r = error.response;
+                                vm.$showErrorModal(r.data, r.status, r.headers);
+                            } else if(error.request) {
+                                vm.$showErrorModal(error.request);
+                            } else {
+                                vm.$showErrorModal(error.message);
                             }
                         });
                         break;
@@ -669,11 +781,20 @@
             onDeleteContextType(contextType) {
                 const vm = this;
                 const id = contextType.id;
-                this.$http.get('/api/editor/dm/context_type/occurrence_count/' + id).then(function(response) {
+                vm.$http.get('/api/editor/dm/context_type/occurrence_count/' + id).then(function(response) {
                     vm.setContextCount(response.data);
                     vm.setModalSelectedContextType(contextType);
                     vm.openedModal = 'delete-context-type-modal';
                     vm.$modal.show('delete-context-type-modal');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             hideNewContextTypeModal() {
@@ -694,7 +815,7 @@
                 Vue.set(this.newContextType, 'label', label);
             },
             setContextType(contextType) {
-                let vm = this;
+                const vm = this;
                 vm.contextAttributes = [];
                 vm.contextType = Object.assign({}, contextType);
                 let id = contextType.id;
@@ -715,6 +836,15 @@
                             let id = vm.localAttributes[i].id;
                             let index = vm.contextAttributes.findIndex(a => a.id == id);
                             vm.localAttributes[i].isDisabled = index > -1;
+                        }
+                    }).catch(function(error) {
+                        if(error.response) {
+                            const r = error.response;
+                            vm.$showErrorModal(r.data, r.status, r.headers);
+                        } else if(error.request) {
+                            vm.$showErrorModal(error.request);
+                        } else {
+                            vm.$showErrorModal(error.message);
                         }
                     });
             },

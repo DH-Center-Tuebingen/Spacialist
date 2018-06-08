@@ -38,9 +38,9 @@
         },
         methods: {
             loadAsHtml: function() {
-                let vm = this;
-                let id = vm.file.id;
-                this.$http.get('/api/file/'+id+'/as_html').then(function(response) {
+                const vm = this;
+                const id = vm.file.id;
+                vm.$http.get(`/api/file/${id}/as_html`).then(function(response) {
                     let data;
                     if(typeof response.data == 'object') {
                         data = JSON.stringify(response.data, null, 4);
@@ -49,6 +49,15 @@
                     }
                     vm.htmlContent = data;
                     vm.htmlLoaded = true;
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             }
         },

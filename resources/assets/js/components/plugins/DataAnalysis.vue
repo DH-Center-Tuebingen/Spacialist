@@ -320,6 +320,15 @@
                     vm.visualizationResults = [];
                     vm.visualizationColumns = vm.getAvailableColumns();
                     vm.visualizationResults = vm.getResults();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             addSplit(relation, column, value, name) {
@@ -417,6 +426,15 @@
                 vm.$http.post(`/api/analysis/export/${type}`, data).then(function(response) {
                     const filename = `${vm.origin.label}.${type}`;
                     vm.$createDownloadLink(response.data, filename, true);
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             setupFormData() {

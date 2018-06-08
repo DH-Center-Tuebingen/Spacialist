@@ -340,17 +340,17 @@
                 this.activePlugin = plugin.tag;
             },
             getContextData(elem) {
-                let vm = this;
-                let cid = elem.id;
-                let ctid = elem.context_type_id;
+                const vm = this;
+                const cid = elem.id;
+                const ctid = elem.context_type_id;
                 vm.dataLoaded = false;
-                vm.$http.get('/api/context/'+cid+'/data').then(function(response) {
+                vm.$http.get(`/api/context/${cid}/data`).then(function(response) {
                     // if result is empty, php returns [] instead of {}
                     if(response.data instanceof Array) {
                         response.data = {};
                     }
                     Vue.set(vm.selectedContext, 'data', response.data);
-                    return vm.$http.get('/api/editor/context_type/'+ctid+'/attribute');
+                    return vm.$http.get(`/api/editor/context_type/${ctid}/attribute`);
                 }).then(function(response) {
                     vm.selectedContext.attributes = [];
                     let data = response.data;
@@ -389,7 +389,7 @@
                     }
                     Vue.set(vm.selectedContext, 'selections', data.selections);
                     Vue.set(vm.selectedContext, 'dependencies', data.dependencies);
-                    return vm.$http.get('/api/context/'+cid+'/reference');
+                    return vm.$http.get(`/api/context/${cid}/reference`);
                 }).then(function(response) {
                     let data = response.data;
                     if(data instanceof Array) {
@@ -397,6 +397,20 @@
                     }
                     Vue.set(vm.selectedContext, 'references', data);
                     Vue.set(vm, 'dataLoaded', true);
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        const req = {
+                            status: r.status,
+                            url: r.config.url,
+                            method: r.config.method.toUpperCase()
+                        };
+                        vm.$showErrorModal(r.data, r.headers, req);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             showMetadata(attribute) {
@@ -448,6 +462,15 @@
                     oldData.possibility_description = newData.possibility_description;
                     const attributeName = vm.$translateConcept(vm.concepts, vm.referenceModal.attribute.thesaurus_url);
                     vm.$showToast('Certainty updated', `Certainty of ${attributeName} successfully set to ${newData.possibility}% (${newData.possibility_description}).`, 'success');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             addReference(item) {
@@ -465,6 +488,15 @@
                     let refs = vm.selectedContext.references[vm.referenceModal.attribute.thesaurus_url];
                     refs.push(response.data);
                     Vue.set(vm.referenceModal, 'references', refs.slice());
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             deleteReference(reference) {
@@ -476,6 +508,15 @@
                     if(index > -1) {
                         refs.splice(index, 1);
                         Vue.set(vm.referenceModal, 'references', refs.slice());
+                    }
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
                     }
                 });
             },
@@ -500,6 +541,15 @@
                     ref.description = referenceClone.description;
                     Vue.set(vm.referenceModal, 'references', refs.slice());
                     vm.cancelEditReference();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             addEntityDisabled(entity) {
@@ -517,10 +567,19 @@
                 vm.$http.post('/api/context', data).then(function(response) {
                     vm.roots.push(response.data);
                     vm.hideNewEntityModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             requestAddNewEntity(parent) {
-                let vm = this;
+                const vm = this;
                 let url;
                 if(parent) {
                     url = '/api/editor/dm/context_type/parent/' + parent.id;
@@ -536,6 +595,15 @@
                         Vue.set(vm.newEntity, 'root_context_id', parent.id);
                     }
                     vm.$modal.show('add-entity-modal');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             hideNewEntityModal() {
@@ -580,12 +648,21 @@
                 vm.$http.patch('/api/context/'+cid+'/attributes', patches).then(function(response) {
                     vm.resetFlags();
                     vm.$showToast('Entity updated', `Data of ${entity.name} successfully updated.`, 'success');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             deleteEntity(entity) {
-                let vm = this;
-                let id = entity.id;
-                this.$http.delete('/api/context/'+id).then(function(response) {
+                const vm = this;
+                const id = entity.id;
+                vm.$http.delete(`/api/context/${id}`).then(function(response) {
                     // if deleted entity is currently selected entity...
                     if(entity == vm.selectedContext) {
                         // ...unset it
@@ -593,6 +670,15 @@
                     }
                     vm.$showToast('Entity deleted', `${entity.name} successfully deleted.`, 'success');
                     vm.hideDeleteEntityModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             requestDeleteEntity(entity) {

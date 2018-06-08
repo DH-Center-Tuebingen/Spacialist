@@ -34,13 +34,22 @@
         },
         methods: {
             setArchiveFileList() {
-                let vm = this;
-                let id = vm.file.id;
-                let url = '/api/file/'+id+'/archive/list';
+                const vm = this;
+                const id = vm.file.id;
+                const url = `/api/file/${id}/archive/list`;
                 vm.fileList = [];
                 vm.$http.get(url).then(function(response) {
                     for(let i=0; i<response.data.length; i++) {
                         vm.fileList.push(response.data[i]);
+                    }
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
                     }
                 });
             },
@@ -48,17 +57,21 @@
                 let selectedFile = newSelection[0];
                 // Download of folders is not supported
                 if(selectedFile.is_directory) return;
-                let vm = this;
-                let id = vm.file.id;
-                let p = selectedFile.filename;
-                let url = '/api/file/'+id+'/archive/download?p='+p;
+                const vm = this;
+                const id = vm.file.id;
+                const p = selectedFile.filename;
+                const url = '/api/file/'+id+'/archive/download?p='+p;
                 vm.$http.get(url).then(function(response) {
-                    // TODO move to helper function
-                    let link = document.createElement("a");
-                    link.setAttribute("href", 'data:;base64,' + response.data);
-                    link.setAttribute("download", selectedFile.clean_filename);
-                    document.body.appendChild(link);
-                    link.click();
+                    vm.$createDownloadLink(response.data, selectedFile.clean_filename, true);
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             }
         },
@@ -77,7 +90,7 @@
                 },
                 css: {
                     opener: 'opener mr-2 text-info',
-                    item: 'item d-flex'
+                    item: 'item d-flex w-100'
                 },
                 category: "children",
                 display: (item, inputs) =>

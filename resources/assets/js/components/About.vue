@@ -62,10 +62,10 @@
             }
         },
         created() {
-            let v = this.version;
-            this.$http.get('/api/version').then(function(response) {
+            const vm = this;
+            vm.$http.get('/api/version').then(function(response) {
                 for(var k in response.data) {
-                    Vue.set(v, k, response.data[k]);
+                    Vue.set(vm.version, k, response.data[k]);
                 }
             });
         }

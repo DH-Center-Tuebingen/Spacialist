@@ -475,14 +475,41 @@
                 vm.$http.get('/api/file/filter/category').then(function(response) {
                     vm.filterTypeList = [];
                     vm.filterTypeList = response.data;
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
                 vm.$http.get('/api/file/filter/camera').then(function(response) {
                     vm.filterCameraList = [];
                     vm.filterCameraList = response.data;
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
                 vm.$http.get('/api/file/filter/date').then(function(response) {
                     vm.filterDateList = [];
                     vm.filterDateList = response.data;
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             toggleFilters() {
@@ -615,6 +642,15 @@
                     Vue.set(filesObj, 'pagination', resp);
                     filesObj.fetchingFiles = false;
                     vm.updateFileState(filesObj);
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             updateFileState(filesObj) {
@@ -707,7 +743,7 @@
                 this.$modal.show('delete-file-modal');
             },
             deleteFile(file) {
-                let vm = this;
+                const vm = this;
                 let id = file.id;
                 vm.$http.delete('/api/file/'+id).then(function(response) {
                     vm.onFileDeleted(file, vm.linkedFiles);
@@ -715,6 +751,15 @@
                     vm.onFileDeleted(file, vm.allFiles);
                     vm.hideDeleteFileModal();
                     vm.$showToast('File deleted', `${file.name} successfully deleted.`, 'success');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             hideDeleteFileModal() {
@@ -722,25 +767,43 @@
                 this.contextMenuFile = {};
             },
             requestUnlinkFile(file, context) {
-                let vm = this;
-                let id = file.id;
+                const vm = this;
+                const id = file.id;
                 vm.contextMenuFile = Object.assign({}, file);
                 vm.contextMenuContext = Object.assign({}, context);
-                vm.$http.get('/api/file/'+id+'/link_count').then(function(response) {
+                vm.$http.get(`/api/file/${id}/link_count`).then(function(response) {
                     vm.linkCount = response.data;
                     vm.$modal.show('unlink-file-modal');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             unlinkFile(file, context) {
                 const vm = this;
-                let id = file.id;
-                let cid = context.id;
-                vm.$http.delete('/api/file/'+id+'/link/'+cid).then(function(response) {
+                const id = file.id;
+                const cid = context.id;
+                vm.$http.delete(`/api/file/${id}/link/${cid}`).then(function(response) {
                     vm.linkCount--;
                     vm.onFileDeleted(file, vm.linkedFiles);
                     vm.onFileUnlinked(file, vm.unlinkedFiles, vm.linkCount);
                     vm.hideUnlinkFileModal();
                     vm.$showToast('File unlinked', `${file.name} successfully unlinked from ${context.name}.`, 'success');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             hideUnlinkFileModal() {
@@ -750,15 +813,24 @@
                 this.linkCount = 0;
             },
             linkFile(file, context) {
-                let vm = this;
+                const vm = this;
                 let id = file.id;
                 let data = {
                     'context_id': context.id
                 };
-                vm.$http.put('/api/file/'+id+'/link', data).then(function(response) {
+                vm.$http.put(`/api/file/${id}/link`, data).then(function(response) {
                     vm.onFileLinked(file, vm.linkedFiles);
                     vm.onFileDeleted(file, vm.unlinkedFiles);
                     vm.$showToast('File linked', `${file.name} successfully linked to ${context.name}.`, 'success');
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             showFileModal(file) {
@@ -900,7 +972,7 @@
                 return '/api/file/'+this.selectedFile.id+'/patch';
             },
             contextMenu: function() {
-                let vm = this;
+                const vm = this;
                 let menu = [];
                 if(vm.context.id) {
                     if(vm.isAction('linkedFiles')) {

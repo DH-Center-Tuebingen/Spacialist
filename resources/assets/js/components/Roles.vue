@@ -157,11 +157,19 @@
                 this.newRole = {};
             },
             onAddRole(newRole) {
-                let roles = this.roleList;
-                let hideModal = this.hideNewRoleModal;
-                this.$http.post('/api/role', newRole).then(function(response) {
-                    roles.push(response.data);
-                    hideModal();
+                const vm = this;
+                vm.$http.post('/api/role', newRole).then(function(response) {
+                    vm.roleList.push(response.data);
+                    vm.hideNewRoleModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             onPatchRole(id) {
@@ -178,6 +186,15 @@
                     vm.$http.patch(`/api/role/${id}/permission`, data).then(function(response) {
                         vm.setPristine(`perms_${id}`);
                         vm.$showToast('Role updated', `${role.display_name} successfully updated.`, 'success');
+                    }).catch(function(error) {
+                        if(error.response) {
+                            const r = error.response;
+                            vm.$showErrorModal(r.data, r.status, r.headers);
+                        } else if(error.request) {
+                            vm.$showErrorModal(error.request);
+                        } else {
+                            vm.$showErrorModal(error.message);
+                        }
                     });
                 }
             },
@@ -193,14 +210,21 @@
                 this.showDeleteRoleModal();
             },
             deleteRole(id) {
+                const vm = this;
                 if(!id) return;
-                let roles = this.roleList;
-                var index = this.roleList.findIndex(r => r.id == id);
-                let hideModal = this.hideDeleteRoleModal;
-                this.$http.delete('/api/role/' + id).then(function(response) {
-                    // TODO check response
-                    if(index > -1) roles.splice(index, 1);
-                    hideModal();
+                vm.$http.delete(`/api/role/${id}`).then(function(response) {
+                    const index = vm.roleList.findIndex(r => r.id == id);
+                    if(index > -1) vm.roleList.splice(index, 1);
+                    vm.hideDeleteRoleModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             isDirty(fieldname) {

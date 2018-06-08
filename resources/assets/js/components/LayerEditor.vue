@@ -191,6 +191,15 @@
                 };
                 vm.$http.post('/api/map/layer', data).then(function(response) {
                     vm.baselayer.push(response.data);
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             onAddNewOverlay() {
@@ -201,6 +210,15 @@
                 };
                 vm.$http.post('/api/map/layer', data).then(function(response) {
                     vm.overlays.push(response.data);
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             onLayerSelect(layer) {
@@ -231,6 +249,15 @@
                         // TODO update visible state of former active base layer
                     }
                     // TODO update layer props
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             isPropUpdated(oldValue, newValue) {

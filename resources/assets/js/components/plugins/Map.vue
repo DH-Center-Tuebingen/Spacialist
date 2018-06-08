@@ -56,6 +56,15 @@
                         vm.geojson.push(geo);
                     }
                     vm.dataInitialized = true;
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             getProperties(geodata) {
@@ -105,7 +114,18 @@
             deleteFeatures(features, wkt) {
                 const vm = this;
                 features.forEach(f => {
-                    vm.$http.delete(`/api/map/${f.getProperties().id}`);
+                    vm.$http.delete(`/api/map/${f.getProperties().id}`).then(function(response) {
+
+                    }).catch(function(error) {
+                        if(error.response) {
+                            const r = error.response;
+                            vm.$showErrorModal(r.data, r.status, r.headers);
+                        } else if(error.request) {
+                            vm.$showErrorModal(error.request);
+                        } else {
+                            vm.$showErrorModal(error.message);
+                        }
+                    });
                 });
             },
             addFeature(feature, wkt) {
@@ -122,6 +142,15 @@
                         // TODO update feature
                         // feature.setProperties(vm.getProperties(geodata));
                     }
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             updateFeatures(features, wkt) {
@@ -131,7 +160,18 @@
                         feature: vm.geoJsonFormat.writeFeature(f),
                         srid: 3857
                     };
-                    vm.$http.patch(`/api/map/${f.getProperties().id}`, data);
+                    vm.$http.patch(`/api/map/${f.getProperties().id}`, data).then(function(response) {
+
+                    }).catch(function(error) {
+                        if(error.response) {
+                            const r = error.response;
+                            vm.$showErrorModal(r.data, r.status, r.headers);
+                        } else if(error.request) {
+                            vm.$showErrorModal(error.request);
+                        } else {
+                            vm.$showErrorModal(error.message);
+                        }
+                    });
                 });
             }
         },

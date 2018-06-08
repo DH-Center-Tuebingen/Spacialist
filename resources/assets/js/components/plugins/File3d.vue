@@ -202,7 +202,7 @@
                 }, false);
             },
             initViveControls: function() {
-                let vm = this;
+                const vm = this;
                 // TODO only init if VR enabled?
                 this.initViveEventListeners();
                 let ctrlLoader = new OBJLoader();
@@ -249,7 +249,7 @@
             },
             // Loaders
             loadCollada: function(file) {
-                let vm = this;
+                const vm = this;
                 let loader = new ColladaLoader();
                 loader.load(file.url, function(collada) {
                     let object = collada.scene;
@@ -282,7 +282,7 @@
                 });
             },
             loadGltf: function(file) {
-                let vm = this;
+                const vm = this;
                 let loader = new GLTFLoader();
                 loader.load(file.url, function(data) {
                     let gltf = data;
@@ -315,7 +315,7 @@
                 });
             },
             loadObj: function(file) {
-                let vm = this;
+                const vm = this;
                 let url = file.url;
                 let sep = url.lastIndexOf('/')+1;
                 let path = url.substr(0, sep);
@@ -341,7 +341,7 @@
                 });
             },
             loadObjModel: function(path, filename, materials) {
-                let vm = this;
+                const vm = this;
                 let objLoader = new OBJLoader();
                 if(materials) {
                     objLoader.setMaterials(materials);
@@ -368,7 +368,7 @@
                 );
             },
             loadProteinDb: function(file) {
-                let vm = this;
+                const vm = this;
                 let labelRenderer = new CSS2DRenderer();
                 labelRenderer.setSize(this.containerWidth, this.containerHeight);
 				labelRenderer.domElement.style.position = 'absolute';
@@ -378,7 +378,7 @@
                 this.loadMolecules(file.url);
             },
             loadMolecules: function(url) {
-                let vm = this;
+                const vm = this;
                 while(this.group.children.length > 0) {
                     let object = this.group.children[0];
                     object.parent.remove(object);

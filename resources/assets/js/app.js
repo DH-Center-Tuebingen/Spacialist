@@ -68,6 +68,7 @@ Vue.component('user-preferences', require('./components/UserPreferences.vue'));
 Vue.component('data-model', require('./components/DataModel.vue'));
 Vue.component('layer-editor', require('./components/LayerEditor.vue'));
 Vue.component('about-dialog', require('./components/About.vue'));
+Vue.component('error-modal', require('./components/Error.vue'));
 
 Vue.component('gis', require('./components/plugins/Gis.vue')); // TODO
 Vue.component('data-analysis', require('./components/plugins/DataAnalysis.vue'));
@@ -124,6 +125,10 @@ Vue.prototype.$showToast = function(title, text, type, duration) {
         type: type,
         duration: duration
     });
+};
+
+Vue.prototype.$showErrorModal = function(errorMsg, headers, request) {
+    this.$modal.show('error-modal', {msg: errorMsg, headers: headers, request: request});
 };
 
 Vue.prototype.$createDownloadLink = function(content, filename, base64) {

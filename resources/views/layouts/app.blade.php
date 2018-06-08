@@ -160,6 +160,7 @@
         <div class="container-fluid mt-3 mb-3 col">
             @yield('content')
             <about-dialog></about-dialog>
+            <error-modal></error-modal>
         </div>
         <notifications group="spacialist" position="bottom left" class="m-2" />
     </div>

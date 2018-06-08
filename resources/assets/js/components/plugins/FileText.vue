@@ -94,7 +94,7 @@
                 this.markdown.render = !this.markdown.render;
             },
             setFileContent() {
-                let vm = this;
+                const vm = this;
                 vm.$http.get(vm.file.url).then(function(response) {
                     let data;
                     if(typeof response.data == 'object') {
@@ -103,10 +103,19 @@
                         data = response.data;
                     }
                     vm.content = data;
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             updateFile(file, content) {
-                let vm = this;
+                const vm = this;
                 let id = file.id;
                 let blob = new Blob([content], {type: file.mime_type});
                 let data = new FormData();
@@ -116,6 +125,15 @@
                 }).then(function(response) {
                     Vue.set(vm.file, 'modified', response.data.modified);
                     vm.setPristine();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             setPristine() {

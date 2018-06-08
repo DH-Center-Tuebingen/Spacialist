@@ -153,11 +153,19 @@
                 this.newUser = {};
             },
             onAddUser(newUser) {
-                let users = this.userList;
-                let hideModal = this.hideNewUserModal;
-                this.$http.post('/api/user', newUser).then(function(response) {
-                    users.push(response.data);
-                    hideModal();
+                const vm = this;
+                vm.$http.post('/api/user', newUser).then(function(response) {
+                    vm.userList.push(response.data);
+                    vm.hideNewUserModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             onPatchUser(id) {
@@ -174,6 +182,15 @@
                     vm.$http.patch(`/api/user/${id}/role`, data).then(function(response) {
                         vm.setPristine(`roles_${id}`);
                         vm.$showToast('User updated', `${user.name} successfully updated.`, 'success');
+                    }).catch(function(error) {
+                        if(error.response) {
+                            const r = error.response;
+                            vm.$showErrorModal(r.data, r.status, r.headers);
+                        } else if(error.request) {
+                            vm.$showErrorModal(error.request);
+                        } else {
+                            vm.$showErrorModal(error.message);
+                        }
                     });
                 }
             },
@@ -189,14 +206,21 @@
                 this.showDeleteUserModal();
             },
             deleteUser(id) {
+                const vm = this;
                 if(!id) return;
-                let users = this.userList;
-                let index = this.userList.findIndex(u => u.id == id);
-                let hideModal = this.hideDeleteUserModal;
-                this.$http.delete('/api/user/' + id).then(function(response) {
-                    // TODO check response
-                    if(index > -1) users.splice(index, 1);
-                    hideModal();
+                vm.$http.delete(`/api/user/${id}`).then(function(response) {
+                    const index = vm.userList.findIndex(u => u.id == id);
+                    if(index > -1) vm.userList.splice(index, 1);
+                    vm.hideDeleteUserModal();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
                 });
             },
             isDirty(fieldname) {
