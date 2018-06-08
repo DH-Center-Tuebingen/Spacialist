@@ -490,8 +490,15 @@
             },
             applyFilters(action) {
                 const vm = this;
+                const filters = vm.getFilters(action);
+                vm.resetFiles(action);
+                vm.getNextFiles(action, filters);
+
+            },
+            getFilters(action) {
+                const vm = this;
                 let filters = {
-                    categories: vm.filterTypes[action],
+                    categories: vm.filterTypes[action].map(f => f.key),
                     cameras: vm.filterCameras[action],
                     dates: vm.filterDates[action],
                     // strategy: vm.filterMatching[action]
@@ -499,9 +506,7 @@
                 if(action == 'linkedFiles') {
                     filters.sub_entities = vm.includeSubEntities;
                 }
-                vm.resetFiles(action);
-                vm.getNextFiles(action, filters);
-
+                return filters;
             },
             toggleFullscreen: function(event) {
                 let elem = document.getElementById('file-container');
@@ -514,7 +519,7 @@
                 if(!this.context.id) return;
                 this.linkedFiles.apiUrl = '/file/linked/' + this.context.id;
                 this.resetFiles('linkedFiles');
-                this.getNextFiles('linkedFiles');
+                this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
             },
             setAction(id) {
                 // disable linked tab if no context is selected
@@ -820,7 +825,7 @@
                     apiPageParam: 'page',
                     loadChunk: () => {
                         if(this.selectedTopAction != 'linkedFiles') return;
-                        this.getNextFiles('linkedFiles');
+                        this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
                     }
                 },
                 unlinkedFiles: {
@@ -833,7 +838,7 @@
                     apiPageParam: 'page',
                     loadChunk: () => {
                         if(this.selectedTopAction != 'unlinkedFiles') return;
-                        this.getNextFiles('unlinkedFiles');
+                        this.getNextFiles('unlinkedFiles', this.getFilters('unlinkedFiles'));
                     }
                 },
                 allFiles: {
@@ -846,7 +851,7 @@
                     apiPageParam: 'page',
                     loadChunk: () => {
                         if(this.selectedTopAction != 'allFiles') return;
-                        this.getNextFiles('allFiles');
+                        this.getNextFiles('allFiles', this.getFilters('allFiles'));
                     }
                 },
                 selectedFile: {},
