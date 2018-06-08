@@ -129,7 +129,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" form="newEntityForm">
+                    <button type="submit" class="btn btn-success" :disabled="addEntityDisabled(newEntity)" form="newEntityForm">
                         <i class="fas fa-fw fa-plus"></i> Add
                     </button>
                     <button type="button" class="btn btn-secondary" @click="hideNewEntityModal">
@@ -502,16 +502,18 @@
                     vm.cancelEditReference();
                 });
             },
+            addEntityDisabled(entity) {
+                return !entity.name || !entity.type;
+            },
             addNewEntity(entity) {
-                if(!entity.name) return;
-                if(!entity.type) return;
+                const vm = this;
+                if(vm.addEntityDisabled(entity)) return;
                 let data = {};
                 data.name = entity.name;
                 data.context_type_id = entity.type.id;
                 if(entity.root_context_id) data.root_context_id = entity.root_context_id;
                 if(entity.geodata_id) data.geodata_id = entity.geodata_id;
 
-                const vm = this;
                 vm.$http.post('/api/context', data).then(function(response) {
                     vm.roots.push(response.data);
                     vm.hideNewEntityModal();
