@@ -230,7 +230,7 @@
                 },
                 display: (item, inputs) =>
                     <span onContextmenu={($event) => this.openContextMenu($event, item)}>
-                        {item.name}
+                        <span>{item.name}</span>
                         <span class="pl-2 font-italic mb-0">
                             {this.concepts[this.contextTypes[item.context_type_id].thesaurus_url].label}
                         </span>
