@@ -11,6 +11,7 @@
     margin-left: 1rem;
     white-space: nowrap;
     display: flex;
+    flex-direction: column;
 }
 .TreeView ul > li > span.item {
     white-space: nowrap;
