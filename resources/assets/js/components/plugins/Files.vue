@@ -1,5 +1,27 @@
 <template>
     <div class="d-flex flex-column h-100">
+        <ul class="nav nav-pills nav-fill mb-2">
+            <li class="nav-item">
+                <a class="nav-link" href="#" :class="{active: isAction('linkedFiles'), disabled: !context.id}" @click="setAction('linkedFiles')">
+                    <i class="fas fa-fw fa-link"></i> Linked Files <span class="badge" :class="[isAction('linkedFiles') ? 'badge-secondary' : 'badge-primary']" v-show="context.id">{{linkedFiles.files.length}}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" :class="{active: isAction('unlinkedFiles')}" @click="setAction('unlinkedFiles')">
+                    <i class="fas fa-fw fa-unlink"></i> Unlinked Files
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" :class="{active: isAction('allFiles')}" @click="setAction('allFiles')">
+                    <i class="fas fa-fw fa-copy"></i> All Files
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" :class="{active: isAction('upload')}" @click="setAction('upload')">
+                    <i class="fas fa-fw fa-upload"></i> Upload Files
+                </a>
+            </li>
+        </ul>
         <div v-if="selectedTopAction != 'upload'">
             <h5 class="clickable" @click="toggleFilters">Filter Rules
                 <small>
@@ -73,21 +95,7 @@
                 </form>
             </div>
         </div>
-        <div class="d-flex justify-content-around align-items-center mb-2">
-            <button style="button" class="btn btn-outline-secondary" :class="{disabled: !context.id}" @click="setAction('linkedFiles')">
-                <i class="fas fa-fw fa-link"></i> Linked Files <span class="badge badge-primary" v-show="context.id">{{linkedFiles.files.length}}</span>
-            </button>
-            <button style="button" class="btn btn-outline-secondary" @click="setAction('unlinkedFiles')">
-                <i class="fas fa-fw fa-unlink"></i> Unlinked
-            </button>
-            <button style="button" class="btn btn-outline-secondary" @click="setAction('allFiles')">
-                <i class="fas fa-fw fa-copy"></i> All Files
-            </button>
-            <button style="button" class="btn btn-outline-secondary" @click="setAction('upload')">
-                <i class="fas fa-fw fa-upload"></i> Upload Files
-            </button>
-        </div>
-        <div class="col" v-show="isAction('linkedFiles')">
+        <div class="col px-0" v-show="isAction('linkedFiles')">
             <form>
                 <div class="form-check">
                     <input type="checkbox" id="sub-entities-check" class="form-check-input" v-model="includeSubEntities" @change="applyFilters('linkedFiles')"/>
@@ -98,10 +106,10 @@
             </form>
             <file-list :files="linkedFiles.files" :on-click="showFileModal" :on-load-chunk="linkedFiles.loadChunk" :file-state="linkedFiles.fileState" :is-fetching="linkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
         </div>
-        <div class="col" v-show="isAction('unlinkedFiles')">
+        <div class="col px-0" v-show="isAction('unlinkedFiles')">
             <file-list :files="unlinkedFiles.files" :on-click="showFileModal" :on-load-chunk="unlinkedFiles.loadChunk" :file-state="unlinkedFiles.fileState" :is-fetching="unlinkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
         </div>
-        <div class="col" v-show="isAction('allFiles')">
+        <div class="col px-0" v-show="isAction('allFiles')">
             <file-list :files="allFiles.files" :on-click="showFileModal" :on-load-chunk="allFiles.loadChunk" :file-state="allFiles.fileState" :is-fetching="allFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
         </div>
         <div v-if="isAction('upload')">
@@ -553,7 +561,7 @@
                 if(id == 'linkedFiles' && !this.localContext.id) return;
                 this.selectedTopAction = id;
                 // If it is the first time the action is set, load images
-                if(!Object.keys(this[id].pagination).length) {
+                if(this[id] && !Object.keys(this[id].pagination).length) {
                     this.getNextFiles(id);
                 }
             },

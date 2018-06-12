@@ -60,7 +60,7 @@
                     </a>
                 </li>
             </ul>
-            <div class="mt-2 col">
+            <div class="mt-2 col px-0">
                 <keep-alive>
                     <component
                         :concepts="concepts"
