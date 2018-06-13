@@ -74,8 +74,10 @@
                     <p class="alert alert-info" v-if="!hasReferences">
                         No references found.
                     </p>
-                    <div v-if="hasReferences" v-for="(referenceGroup, key) in selectedContext.references">
-                        <h5><a href="#">{{ concepts[key].label }}</a></h5>
+                    <div v-else v-for="(referenceGroup, key) in selectedContext.references" class="mb-2">
+                        <h5 class="mb-1">
+                            <a href="#" @click="showMetadataForReferenceGroup(referenceGroup)">{{ concepts[key].label }}</a>
+                        </h5>
                         <div class="list-group">
                             <a class="list-group-item list-group-item-action" v-for="reference in referenceGroup">
                                 <blockquote class="blockquote mb-0">
@@ -415,6 +417,14 @@
                     }
                 });
             },
+            showMetadataForReferenceGroup(referenceGroup) {
+                if(!referenceGroup) return;
+                if(!this.selectedContext) return;
+                const aid = referenceGroup[0].attribute_id;
+                const attribute = this.selectedContext.attributes.find(a => a.id == aid);
+                if(!attribute) return;
+                this.showMetadata(attribute);
+            },
             showMetadata(attribute) {
                 const refs = this.selectedContext.references[attribute.thesaurus_url];
                 Vue.set(this.referenceModal, 'attribute', Object.assign({}, attribute));
@@ -487,7 +497,11 @@
                     description: item.description
                 };
                 vm.$http.post(`/api/context/${cid}/reference/${aid}`, data).then(function(response) {
-                    let refs = vm.selectedContext.references[vm.referenceModal.attribute.thesaurus_url];
+                    const refUrl = vm.referenceModal.attribute.thesaurus_url;
+                    let refs = vm.selectedContext.references[refUrl];
+                    if(!refs) {
+                        refs = vm.selectedContext.references[refUrl] = [];
+                    }
                     refs.push(response.data);
                     Vue.set(vm.referenceModal, 'references', refs.slice());
                 }).catch(function(error) {
