@@ -131,12 +131,13 @@ Vue.prototype.$showErrorModal = function(errorMsg, headers, request) {
     this.$modal.show('error-modal', {msg: errorMsg, headers: headers, request: request});
 };
 
-Vue.prototype.$createDownloadLink = function(content, filename, base64) {
+Vue.prototype.$createDownloadLink = function(content, filename, base64, contentType) {
     base64 = base64 || false;
     var link = document.createElement("a");
     let url;
     if(base64) {
-        url = `data:;base64,${content}`;
+        contentType = contentType || 'text/plain';
+        url = `data:${contentType};base64,${content}`;
     } else {
         url = window.URL.createObjectURL(new Blob([content]));
     }

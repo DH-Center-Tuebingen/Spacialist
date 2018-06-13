@@ -41,6 +41,7 @@ class AnalysisController extends Controller {
         $result = $this->requestToQuery($origin, $filters, $columns, $orders, $limit, $splits, $simple, $distinct, $page);
         switch($type) {
             case 'csv':
+            // XLSX and PDF files are created from a temporary CSV file
             case 'xlsx':
             case 'pdf':
                 $suffix = 'csv';
@@ -153,7 +154,23 @@ class AnalysisController extends Controller {
         // delete tmp file
         fclose($handle);
         unlink($tmpFile);
-        return response(base64_encode($content));
+
+        // Set correct mime type
+        switch($type) {
+            case 'csv':
+                $contentType = 'text/csv';
+                break;
+            case 'json':
+                $contentType = 'application/json';
+                break;
+            case 'pdf':
+                $contentType = 'application/pdf';
+                break;
+            case 'xlsx':
+                $contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                break;
+        }
+        return response(base64_encode($content))->header('Content-Type', $contentType);
     }
 
     // POST

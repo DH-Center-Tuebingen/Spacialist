@@ -425,7 +425,7 @@
                 }
                 vm.$http.post(`/api/analysis/export/${type}`, data).then(function(response) {
                     const filename = `${vm.origin.label}.${type}`;
-                    vm.$createDownloadLink(response.data, filename, true);
+                    vm.$createDownloadLink(response.data, filename, true, response.headers['content-type']);
                 }).catch(function(error) {
                     if(error.response) {
                         const r = error.response;
