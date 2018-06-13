@@ -16,23 +16,21 @@ class VersionInfo {
     private $time;
 
     function __construct() {
-        $dir = dirname(__FILE__);
-        $fullpath = "$dir/" . self::$file;
-        if(file_exists($fullpath)) {
-            $content = explode("\n", file_get_contents($fullpath));
+        exec('git describe --tags', $tag, $exitcode);
+        exec('git log -1 --format=%at', $ts, $exitcodeTs);
+        if($exitcode === 0 && $exitcodeTs === 0) {
+            $content = [
+                $tag[0], $ts[0]
+            ];
         } else {
-            exec('git describe --tags', $tag, $exitcode);
-            exec('git log -1 --format=%at', $ts, $exitcodeTs);
-            if($exitcode === 0 && $exitcodeTs === 0) {
-                $content = [
-                    $tag[0], $ts[0]
-                ];
-            } else {
-                $content = [
-                    'v0.0.0-unreleased-1-gNOHASH',
-                    time()
-                ];
-            }
+            $this->major = 'x';
+            $this->minor = 'y';
+            $this->patch = 'z';
+            $this->release = 'vx.y.z';
+            $this->releaseName = 'Unreleased';
+            $this->releaseHash = 'NO HASH';
+            $this->time = time();
+            return;
         }
         $parts = explode('-', $content[0]);
         $this->release = $parts[0];
