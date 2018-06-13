@@ -3,7 +3,7 @@
         <ul class="nav nav-pills nav-fill mb-2">
             <li class="nav-item">
                 <a class="nav-link" href="#" :class="{active: isAction('linkedFiles'), disabled: !context.id}" @click="setAction('linkedFiles')">
-                    <i class="fas fa-fw fa-link"></i> Linked Files <span class="badge" :class="[isAction('linkedFiles') ? 'badge-secondary' : 'badge-primary']" v-show="context.id">{{linkedFiles.files.length}}</span>
+                    <i class="fas fa-fw fa-link"></i> Linked Files <span class="badge" :class="[isAction('linkedFiles') ? 'badge-light' : 'badge-primary']" v-show="context.id">{{linkedFiles.files.length}}</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -134,7 +134,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
                                 <span>{{file.name}}</span>
-                                <span class="text-lightgray" v-if="!file.error">
+                                <span class="text-muted font-weight-light" v-if="!file.error">
                                     {{file.size|bytes}} - {{file.speed|bytes}}/s
                                 </span>
                             </div>
@@ -197,7 +197,7 @@
                                             <td class="text-left font-weight-bold">
                                                 {{p}}
                                             </td>
-                                            <td class="text-right text-gray">
+                                            <td class="text-right text-muted">
                                                 {{selectedFile[p]}}
                                             </td>
                                         </tr>
@@ -210,7 +210,7 @@
                                             <td class="text-left font-weight-bold">
                                                 Created
                                             </td>
-                                            <td class="text-right text-gray">
+                                            <td class="text-right text-muted">
                                                 {{selectedFile.created_unix|date}}
                                             </td>
                                         </tr>
@@ -218,7 +218,7 @@
                                             <td class="text-left font-weight-bold">
                                                 Last Modified
                                             </td>
-                                            <td class="text-right text-gray">
+                                            <td class="text-right text-muted">
                                                 {{selectedFile.modified_unix|date}}
                                             </td>
                                         </tr>
@@ -226,7 +226,7 @@
                                             <td class="text-left font-weight-bold">
                                                 File size
                                             </td>
-                                            <td class="text-right text-gray">
+                                            <td class="text-right text-muted">
                                                 {{selectedFile.size|bytes}}
                                             </td>
                                         </tr>
@@ -235,7 +235,7 @@
                                             </td>
                                             <td class="text-right font-weight-bold">
                                                 <a :href="selectedFile.url" :download="selectedFile.name" target="_blank">
-                                                    <i class="fas fa-fw fa-download text-gray"></i>
+                                                    <i class="fas fa-fw fa-download text-muted"></i>
                                                     Download
                                                 </a>
                                             </td>

@@ -99,7 +99,7 @@
                             {item.is_directory ? <i class="fas fa-fw fa-folder"></i> : <i class="fas fa-fw fa-file"></i>}
                             <span class="ml-1">{item.clean_filename}</span>
                         </span>
-                        {!item.is_directory ? <span class="text-gray ml-auto">{this.$options.filters.bytes(item.compressed_size)}/{this.$options.filters.bytes(item.uncompressed_size)}</span> : <span></span>}
+                        {!item.is_directory ? <span class="text-secondary ml-auto">{this.$options.filters.bytes(item.compressed_size)}/{this.$options.filters.bytes(item.uncompressed_size)}</span> : <span></span>}
                     </span>
             }
         }

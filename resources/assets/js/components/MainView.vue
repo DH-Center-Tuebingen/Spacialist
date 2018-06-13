@@ -78,13 +78,16 @@
                         <h5><a href="#">{{ concepts[key].label }}</a></h5>
                         <div class="list-group">
                             <a class="list-group-item list-group-item-action" v-for="reference in referenceGroup">
-                                <h6>{{ reference.bibliography.title }}</h6>
-                                <p class="mb-0">
-                                    {{ reference.bibliography.author }} <span class="text-lightgray">{{ reference.bibliography.year}}</span>
-                                </p>
-                                <p class="font-weight-light font-italic mb-0">
-                                    {{ reference.description }}
-                                </p>
+                                <blockquote class="blockquote mb-0">
+                                    <p class="mb-0">
+                                        {{ reference.description }}
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        {{ reference.bibliography.author }} in <cite :title="reference.bibliography.title">
+                                            {{ reference.bibliography.title }} ,{{ reference.bibliography.year }}
+                                        </cite>
+                                    </footer>
+                                </blockquote>
                             </a>
                         </div>
                     </div>
@@ -198,7 +201,7 @@
                                 <td class="text-left py-2">
                                     <h6>{{ reference.bibliography.title }}</h6>
                                     <p class="mb-0">
-                                        {{ reference.bibliography.author }} <span class="text-lightgray">{{ reference.bibliography.year}}</span>
+                                        {{ reference.bibliography.author }}, <span class="text-muted font-weight-light">{{ reference.bibliography.year}}</span>
                                     </p>
                                 </td>
                                 <td class="text-right py-2">
@@ -258,8 +261,7 @@
                                                 {{ props.option.title }}
                                             </span>
                                             <span class="option__small">
-                                                {{ props.option.author }}
-                                                <span class="text-lightgray">{{ props.option.year}}</span>
+                                                {{ props.option.author }}, <span class="text-muted font-weight-light">{{ props.option.year}}</span>
                                             </span>
                                         </div>
                                     </template>
