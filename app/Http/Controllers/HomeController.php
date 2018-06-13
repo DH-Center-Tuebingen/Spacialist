@@ -36,7 +36,9 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $contextTypes = ContextType::with('sub_context_types')->get();
+        $contextTypes = ContextType::with('sub_context_types')
+            ->orderBy('id')
+            ->get();
         $contextTypeMap = $contextTypes->getDictionary();
         $contextTypeMap = json_encode($contextTypeMap);
 
@@ -88,7 +90,9 @@ class HomeController extends Controller
         foreach($attributes as $a) {
             $a->columns = Attribute::where('parent_id', $a->id)->get();
         }
-        $contextTypes = ContextType::with('sub_context_types')->get();
+        $contextTypes = ContextType::with('sub_context_types')
+            ->orderBy('id')
+            ->get();
 
         return view('settings.editor.dme', ['attributes' => $attributes, 'contextTypes' => $contextTypes]);
     }

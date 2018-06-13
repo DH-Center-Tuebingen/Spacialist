@@ -94,6 +94,7 @@
                             label="concept_url"
                             track-by="id"
                             v-model="localValues[attribute.id].value"
+                            v-validate=""
                             :allowEmpty="true"
                             :closeOnSelect="false"
                             :customLabel="translateLabel"
@@ -102,7 +103,7 @@
                             :multiple="true"
                             :options="localSelections[attribute.id] || []"
                             :name="'attribute-'+attribute.id"
-                            v-validate="">
+                            @input="(value, id) => checkDependency(attribute.id)">
                         </multiselect>
                     </div>
                     <div v-else-if="attribute.datatype == 'string-sc'">
@@ -110,6 +111,7 @@
                             label="concept_url"
                             track-by="id"
                             v-model="localValues[attribute.id].value"
+                            v-validate=""
                             :allowEmpty="true"
                             :closeOnSelect="true"
                             :customLabel="translateLabel"
@@ -118,7 +120,7 @@
                             :multiple="false"
                             :options="localSelections[attribute.id] || []"
                             :name="'attribute-'+attribute.id"
-                            v-validate="">
+                            @input="(value, id) => checkDependency(attribute.id)">
                         </multiselect>
                     </div>
                     <div v-else-if="attribute.datatype == 'list'">
@@ -287,14 +289,15 @@
                 Vue.set(this.hovered, i, false);
             },
             onChange(field, value, aid) {
-                if (this.localValues[aid].value){
-                    if (field == null) {
+                if(this.localValues[aid].value){
+                    if(field == null) {
                         this.localValues[aid].value = [];
                         value.forEach(v => this.localValues[aid].value.push(v));
                     } else {
                         this.localValues[aid].value[field] = value;
                     }
                 }
+                this.checkDependency(aid);
             },
             updateDatepicker(aid, fieldname) {
                 const vm = this;
@@ -317,6 +320,7 @@
                     this.localValues[aid].value = undefined;
                 }
                 this.fields[`attribute-${aid}`].dirty = true;
+                this.checkDependency(aid);
             },
             checkDependency(aid) {
                 if(!this.dependencies) return;
@@ -326,20 +330,43 @@
                 deps.forEach(d => {
                     // return = continue in forEach
                     if(hides[d.dependant]) return;
-                    hides[d.dependant] = this.evalDependency(this.localValues[aid].value, d.operator, d.value);
+                    hides[d.dependant] = this.evalDependency(this.localValues[aid], d.operator, d.value);
                 });
                 for(let k in hides) {
                     this.hiddenByDependency[k] = hides[k];
                 }
             },
             evalDependency(attrValue, operator, depValue) {
-                switch(operator) {
+                const attr = this.localAttributes.find(function(a) {
+                    return a.id == attrValue.attribute_id;
+                });
+                if(!attr) return false;
+                switch(attr.datatype) {
+                    case 'string-mc':
+                        for(let i=0; i<attrValue.value.length; i++) {
+                            const v = attrValue.value[i];
+                            if(this.evalEquation(v.concept_url, depValue, operator)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                        break;
+                    case 'string-sc':
+                        return this.evalEquation(attrValue.value.concept_url, depValue, operator);
+                        break;
+                    default:
+                        return this.evalEquation(attrValue.value, depValue, operator);
+                        break;
+                }
+            },
+            evalEquation(a, b, op) {
+                switch(op) {
                     case '<':
-                        return attrValue < depValue;
+                        return a < b;
                     case '>':
-                        return attrValue > depValue;
+                        return a > b;
                     case '=':
-                        return attrValue == depValue;
+                        return a == b;
                 }
                 return false;
             },

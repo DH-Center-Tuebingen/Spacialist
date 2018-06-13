@@ -278,22 +278,22 @@
                                     :options="dependencyOperators">
                                 </multiselect>
                                 <div v-if="selectedDependency.attribute && selectedDependency.attribute.id">
-                                    <input type="checkbox" v-if="dependencyType == 'boolean'" v-model="selectedDependency.value" />
-                                    <input type="number" step="1" v-if="dependencyType == 'integer'" v-model="selectedDependency.value" />
-                                    <input type="number" step="0.01" v-if="dependencyType == 'double'" v-model="selectedDependency.value" />
-                                    <input type="text" v-if="dependencyType == 'string'" v-model="selectedDependency.value" />
+                                    <input type="checkbox" class="form-check-input" v-if="dependencyType == 'boolean'" v-model="selectedDependency.value" />
+                                    <input type="number" class="form-control" step="1" v-else-if="dependencyType == 'integer'" v-model="selectedDependency.value" />
+                                    <input type="number" class="form-control" step="0.01" v-else-if="dependencyType == 'double'" v-model="selectedDependency.value" />
                                     <multiselect
-                                    label="concept_url"
-                                    track-by="id"
-                                    v-if="dependencyType == 'select'"
-                                    v-model="selectedDependency.value"
-                                    :allowEmpty="true"
-                                    :closeOnSelect="true"
-                                    :customLabel="translateLabel"
-                                    :hideSelected="false"
-                                    :multiple="false"
-                                    :options="depends.values">
-                                </multiselect>
+                                        label="concept_url"
+                                        track-by="id"
+                                        v-else-if="dependencyType == 'select'"
+                                        v-model="selectedDependency.value"
+                                        :allowEmpty="true"
+                                        :closeOnSelect="true"
+                                        :customLabel="translateLabel"
+                                        :hideSelected="false"
+                                        :multiple="false"
+                                        :options="depends.values">
+                                    </multiselect>
+                                    <input type="text" class="form-control" v-else v-model="selectedDependency.value" />
                                 </div>
                             </div>
                         </div>
@@ -692,8 +692,20 @@
                 vm.depends.attributes = vm.contextAttributes.filter(function(a) {
                     return a.id != attribute.id;
                 });
+                let attrDependency = {};
+                for(let k in vm.contextDependencies) {
+                    const attrDeps = vm.contextDependencies[k];
+                    const dep = attrDeps.find(function(ad) {
+                        return ad.dependant == attribute.id;
+                    });
+                    if(dep) {
+                        attrDependency[k] = dep;
+                    }
+                }
                 vm.setModalSelectedAttribute(attribute);
-                vm.setSelectedDependency(attribute.depends_on);
+                if(Object.keys(attrDependency).length) {
+                    vm.setSelectedDependency(attrDependency);
+                }
                 vm.openedModal = 'edit-context-attribute-modal';
                 vm.$modal.show('edit-context-attribute-modal');
             },
@@ -827,6 +839,7 @@
                             data.selections = {};
                         }
                         vm.contextSelections = data.selections;
+                        vm.contextDependencies = data.dependencies;
                         for(let i=0; i<data.attributes.length; i++) {
                             vm.contextAttributes.push(data.attributes[i]);
                             // Set values for all context attributes to '', so values in <attributes> are existant
@@ -874,6 +887,7 @@
                 contextType: {},
                 contextAttributes: [],
                 contextSelections: {},
+                contextDependencies: {},
                 contextValues: {},
                 attributeTypes: [],
                 newAttribute: {},
