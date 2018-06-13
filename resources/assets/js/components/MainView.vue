@@ -1,7 +1,7 @@
 <template>
     <div class="row h-100 of-hidden">
         <div :class="'col-md-'+preferences['prefs.columns'].left" id="tree-container" class="d-flex flex-column h-100">
-            <h3>Contexts</h3>
+            <h3>Entities <small class="badge badge-secondary font-weight-light align-middle font-size-50">{{topLevelCount}} Top-Level Entities</small></h3>
             <div class="d-flex flex-column h-100 col px-0">
                 <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="requestAddNewEntity()">
                     <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
@@ -742,6 +742,9 @@
             },
             hasReferences: function() {
                 return this.selectedContext.references && Object.keys(this.selectedContext.references).length;
+            },
+            topLevelCount: function() {
+                return this.roots.length || 0;
             },
             tab: {
                 get() {
