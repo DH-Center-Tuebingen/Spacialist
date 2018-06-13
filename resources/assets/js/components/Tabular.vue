@@ -28,7 +28,7 @@
                             :disabled="disabled"
                             :hideSelected="true"
                             :multiple="false"
-                            :options="localSelections[col.attribute_id] || []"
+                            :options="selections[col.attribute_id] || []"
                             @input="onInput($index, $event.target.value)">
                         </multiselect>
                     </div>
@@ -57,7 +57,7 @@
                             :disabled="disabled"
                             :hideSelected="true"
                             :multiple="false"
-                            :options="localSelections[column.id] || []"
+                            :options="selections[column.id] || []"
                            >
                         </multiselect>
                     </div>
@@ -94,7 +94,7 @@
                 type: Object,
                 default: _ => new Object(),
             },
-            localSelections: {
+            selections: {
                 type: Object,
             },
             attribute: {
