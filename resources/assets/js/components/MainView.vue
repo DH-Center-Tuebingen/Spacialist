@@ -2,12 +2,12 @@
     <div class="row h-100 of-hidden">
         <div :class="'col-md-'+preferences['prefs.columns'].left" id="tree-container" class="d-flex flex-column h-100">
             <h3>Contexts</h3>
-            <div class="d-flex flex-column h-100 col">
-                <button type="button" class="btn btn-sm btn-outline-success ml-3 mb-2" @click="requestAddNewEntity()">
+            <div class="d-flex flex-column h-100 col px-0">
+                <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="requestAddNewEntity()">
                     <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
                 </button>
                 <context-tree
-                    class="col scroll-y-auto"
+                    class="col px-0 scroll-y-auto"
                     :concepts="concepts"
                     :context-types="contextTypes"
                     :on-context-menu-add="requestAddNewEntity"
@@ -16,7 +16,7 @@
                     :roots="roots"
                     :selection-callback="setSelectedElement">
                 </context-tree>
-                <button type="button" class="btn btn-sm btn-outline-success ml-3 mt-2" @click="requestAddNewEntity()">
+                <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="requestAddNewEntity()">
                     <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
                 </button>
             </div>
