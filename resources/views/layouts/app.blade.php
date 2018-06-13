@@ -31,11 +31,6 @@
                 <!-- Left Side Of Navbar -->
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="">
-                            Built with <i class="fab fa-fw fa-laravel"></i> & <i class="fab fa-fw fa-vuejs"></i>!
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <form class="form-inline mr-auto">
                             <div class="form-group">
                                 <div class="input-group">

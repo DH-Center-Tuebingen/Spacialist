@@ -30,13 +30,18 @@
                         {{ version.full }}
                     </dd>
                 </dl>
-                <div class="text-center">
-                    <a href="https://www.facebook.com/esciencecenter" target="_blank">
-                        <i class="fab fa-facebook-square fa-2x text-primary"></i>
-                    </a>
-                    <a href="https://github.com/eScienceCenter/Spacialist" target="_blank">
-                        <i class="fab fa-github fa-2x text-dark"></i>
-                    </a>
+                <div class="d-flex flex-row justify-content-between">
+                    <span>
+                        Built with <i class="fab fa-fw fa-laravel"></i> & <i class="fab fa-fw fa-vuejs"></i>!
+                    </span>
+                    <div>
+                        <a href="https://www.facebook.com/esciencecenter" target="_blank">
+                            <i class="fab fa-facebook-square fa-2x text-primary"></i>
+                        </a>
+                        <a href="https://github.com/eScienceCenter/Spacialist" target="_blank">
+                            <i class="fab fa-github fa-2x text-dark"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
