@@ -116,6 +116,8 @@ Route::post('/file/new', 'FileController@uploadFile');
 // Should be patch, but file upload is not allowed as patch
 Route::post('/file/{id}/patch', 'FileController@patchContent')->where('id', '[0-9]+');
 
+Route::patch('/file/{id}/property', 'FileController@patchProperty')->where('id', '[0-9]+');
+
 Route::put('/file/{id}/link', 'FileController@linkToEntity')->where('id', '[0-9]+');
 
 Route::delete('/file/{id}', 'FileController@deleteFile')->where('id', '[0-9]+');

@@ -194,12 +194,35 @@
                                 <h5 class="mt-3">Properties</h5>
                                 <table class="table table-striped table-hover table-sm mb-0">
                                     <tbody>
-                                        <tr v-for="p in fileProperties">
+                                        <tr v-for="p in fileProperties" class="d-flex justify-content-between">
                                             <td class="text-left font-weight-bold">
                                                 {{p}}
                                             </td>
-                                            <td class="text-right text-muted">
-                                                {{selectedFile[p]}}
+                                            <td class="col text-right">
+                                                <span class="text-muted" v-if="editingProperty.key != p">
+                                                    {{selectedFile[p]}}
+                                                </span>
+                                                <div class="d-flex" v-else>
+                                                    <input type="text" class="form-control mr-1" v-model="selectedFile[p]" />
+                                                    <button type="button" class="btn btn-sm btn-outline-success mr-1" @click="updateProperty()">
+                                                        <i class="fas fa-fw fa-check"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" @click="cancelPropertyEditing()">
+                                                        <i class="fas fa-fw fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-fw fa-ellipsis-h"></i>
+                                                    </span>
+                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item" href="#" @click="enablePropertyEditing(p)">
+                                                            <i class="fas fa-fw fa-edit text-info"></i> Edit
+                                                        </a>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -847,6 +870,40 @@
                     }
                 });
             },
+            enablePropertyEditing(property) {
+                const vm = this;
+                vm.editingProperty.key = property;
+                vm.editingProperty.value = vm.selectedFile[property];
+            },
+            updateProperty() {
+                const vm = this;
+                const p = vm.editingProperty;
+                const id = vm.selectedFile.id;
+                let data = {};
+                data[p.key] = vm.selectedFile[p.key];
+                vm.$http.patch(`/api/file/${id}/property`, data).then(function(response) {
+                    vm.resetEditingProperty();
+                }).catch(function(error) {
+                    if(error.response) {
+                        const r = error.response;
+                        vm.$showErrorModal(r.data, r.status, r.headers);
+                    } else if(error.request) {
+                        vm.$showErrorModal(error.request);
+                    } else {
+                        vm.$showErrorModal(error.message);
+                    }
+                });
+            },
+            cancelPropertyEditing() {
+                const vm = this;
+                const p = vm.editingProperty;
+                vm.selectedFile[p.key] = p.value;
+                vm.resetEditingProperty();
+            },
+            resetEditingProperty() {
+                this.editingProperty.key = '';
+                this.editingProperty.value = '';
+            },
             showFileModal(file) {
                 this.selectedFile = Object.assign({}, file);
                 switch(file.category) {
@@ -939,6 +996,10 @@
                         if(this.selectedTopAction != 'allFiles') return;
                         this.getNextFiles('allFiles', this.getFilters('allFiles'));
                     }
+                },
+                editingProperty: {
+                    key: '',
+                    value: ''
                 },
                 selectedFile: {},
                 replaceFiles: [],

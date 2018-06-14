@@ -145,6 +145,30 @@ class FileController extends Controller
         return response()->json($file);
     }
 
+    // PATCH
+
+    public function patchProperty(Request $request, $id) {
+        $this->validate($request, [
+            'copyright' => 'string',
+            'description' => 'string'
+        ]);
+
+        try {
+            $file = File::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This file does not exist'
+            ], 400);
+        }
+
+        foreach($request->only(['copyright', 'description']) as $key => $value) {
+            $file->{$key} = $value;
+        }
+
+        $file->save();
+        return response()->json(null, 204);
+    }
+
     // PUT
 
     public function linkToEntity(Request $request, $id) {
