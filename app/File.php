@@ -52,48 +52,52 @@ class File extends Model
         foreach($filters as $col => $fs) {
             switch($col) {
                 case 'categories':
+                    // first category has to be added as AND,
+                    // all other categories as OR
+                    $or = false;
                     foreach($fs as $f) {
                         switch($f) {
                             case 'image':
-                                self::addImages($builder);
+                                $builder = self::addImages($builder, $or);
                                 break;
                             case 'audio':
-                                self::addAudio($builder);
+                                $builder = self::addAudio($builder, $or);
                                 break;
                             case 'video':
-                                self::addVideo($builder);
+                                $builder = self::addVideo($builder, $or);
                                 break;
                             case 'pdf':
-                                self::addPdfs($builder);
+                                $builder = self::addPdfs($builder, $or);
                                 break;
                             case 'xml':
-                                self::addXmls($builder);
+                                $builder = self::addXmls($builder, $or);
                                 break;
                             case 'html':
-                                self::addHtmls($builder);
+                                $builder = self::addHtmls($builder, $or);
                                 break;
                             case '3d':
-                                self::add3d($builder);
+                                $builder = self::add3d($builder, $or);
                                 break;
                             case 'dicom':
-                                self::addDicom($builder);
+                                $builder = self::addDicom($builder, $or);
                                 break;
                             case 'archive':
-                                self::addArchives($builder);
+                                $builder = self::addArchives($builder, $or);
                                 break;
                             case 'text':
-                                self::addTexts($builder);
+                                $builder = self::addTexts($builder, $or);
                                 break;
                             case 'document':
-                                self::addDocuments($builder);
+                                $builder = self::addDocuments($builder, $or);
                                 break;
                             case 'spreadsheet':
-                                self::addSpreadsheets($builder);
+                                $builder = self::addSpreadsheets($builder, $or);
                                 break;
                             case 'presentation':
-                                self::addPresentations($builder);
+                                $builder = self::addPresentations($builder, $or);
                                 break;
                         }
+                        $or = true;
                     }
                     break;
                 case 'cameras':
@@ -401,11 +405,12 @@ class File extends Model
         $this->delete();
     }
 
-    public static function getCategory($mimes, $extensions, $mimeWildcards = null, $query = null) {
+    public static function getCategory($mimes, $extensions, $mimeWildcards = null, $query = null, $or = false) {
         if(!isset($query)) {
             $query = self::WhereIn('mime_type', $mimes);
         } else {
-            $query->whereIn('mime_type', $mimes);
+            if($or) $query->orWhereIn('mime_type', $mimes);
+            else $query->whereIn('mime_type', $mimes);
         }
         if(isset($mimeWildcards)) {
             foreach($mimeWildcards as $mime) {
@@ -423,32 +428,32 @@ class File extends Model
         return self::getCategory([], [], ['image/'])->get();
     }
 
-    public static function addImages($query) {
-        return self::getCategory([], [], ['image/'], $query);
+    public static function addImages($query, $or) {
+        return self::getCategory([], [], ['image/'], $query, $or);
     }
 
     public static function getAudio() {
         return self::getCategory([], [], ['audio/'])->get();
     }
 
-    public static function addAudio($query) {
-        return self::getCategory([], [], ['audio/'], $query);
+    public static function addAudio($query, $or) {
+        return self::getCategory([], [], ['audio/'], $query, $or);
     }
 
     public static function getVideo() {
         return self::getCategory([], [], ['video/'])->get();
     }
 
-    public static function addVideo($query) {
-        return self::getCategory([], [], ['video/'], $query);
+    public static function addVideo($query, $or) {
+        return self::getCategory([], [], ['video/'], $query, $or);
     }
 
     public static function getPdfs() {
         return self::getCategory(['application/pdf'], ['.pdf'])->get();
     }
 
-    public static function addPdfs($query) {
-        return self::getCategory(['application/pdf'], ['.pdf'], null, $query);
+    public static function addPdfs($query, $or) {
+        return self::getCategory(['application/pdf'], ['.pdf'], null, $query, $or);
     }
 
     public static function getXmls() {
@@ -457,10 +462,10 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions)->get();
     }
 
-    public static function addXmls($query) {
+    public static function addXmls($query, $or) {
         $mimeTypes = ['application/xml', 'text/xml', 'text/xml-external-parsed-entity'];
         $extensions = ['.xml'];
-        return self::getCategory($mimeTypes, $extensions, null, $query);
+        return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
     public static function getHtmls() {
@@ -469,10 +474,10 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions)->get();
     }
 
-    public static function addHtmls($query) {
+    public static function addHtmls($query, $or) {
         $mimeTypes = ['application/xhtml+xml', 'text/html'];
         $extensions = ['.htm', '.html', '.shtml', '.xhtml'];
-        return self::getCategory($mimeTypes, $extensions, null, $query);
+        return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
     public static function get3d() {
@@ -481,10 +486,10 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions)->get();
     }
 
-    public static function add3d($query) {
+    public static function add3d($query, $or) {
         $mimeTypes = ['model/vnd.collada+xml', 'model/gltf-binary', 'model/gltf+json', 'chemical/x-pdb'];
         $extensions = ['.dae', '.obj', '.pdb', '.gltf'];
-        return self::getCategory($mimeTypes, $extensions, null, $query);
+        return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
     public static function getDicom() {
@@ -493,10 +498,10 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions)->get();
     }
 
-    public static function addDicom($query) {
+    public static function addDicom($query, $or) {
         $mimeTypes = ['application/dicom', 'application/dicom+xml'];
         $extensions = ['.dcm', '.dicom'];
-        return self::getCategory($mimeTypes, $extensions, null, $query);
+        return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
     public static function getArchives() {
@@ -505,10 +510,10 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions)->get();
     }
 
-    public static function addArchives($query) {
+    public static function addArchives($query, $or) {
         $mimeTypes = ['application/gzip', 'application/zip', 'application/x-gtar', 'application/x-tar', 'application/x-ustar', 'application/x-rar-compressed', 'application/x-bzip', 'application/x-bzip2', 'application/x-7z-compressed', 'application/x-compress'];
         $extensions = ['.zip', '.gz', '.gtar', '.tar', '.tgz', '.ustar', '.rar', '.bz', '.bz2', '.xz', '.7z', '.z'];
-        return self::getCategory($mimeTypes, $extensions, null, $query);
+        return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
     public static function getTexts() {
@@ -518,11 +523,11 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions, $mimeWildcards)->get();
     }
 
-    public static function addTexts($query) {
+    public static function addTexts($query, $or) {
         $mimeTypes = ['application/javascript', 'application/json', 'application/x-latex', 'application/x-tex'];
         $mimeWildcards = ['text/'];
         $extensions = ['.txt', '.md', '.markdown', '.mkd', '.csv', '.json', '.css', '.htm', '.html', '.shtml', '.js', '.rtx', '.rtf', '.tsv', '.xml'];
-        return self::getCategory($mimeTypes, $extensions, null, $query);
+        return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
     public static function getDocuments() {
@@ -531,10 +536,10 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions)->get();
     }
 
-    public static function addDocuments($query) {
+    public static function addDocuments($query, $or) {
         $mimeTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.oasis.opendocument.text'];
         $extensions = ['.doc', '.docx', '.odt'];
-        return self::getCategory($mimeTypes, $extensions, null, $query);
+        return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
     public static function getSpreadsheets() {
@@ -543,10 +548,10 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions)->get();
     }
 
-    public static function addSpreadsheets($query) {
+    public static function addSpreadsheets($query, $or) {
         $mimeTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/x-latex', 'application/x-tex'];
         $extensions = ['.xls', '.xlsx', '.ods'];
-        return self::getCategory($mimeTypes, $extensions, null, $query);
+        return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
     public static function getPresentations() {
@@ -555,10 +560,10 @@ class File extends Model
         return self::getCategory($mimeTypes, $extensions)->get();
     }
 
-    public static function addPresentations($query) {
+    public static function addPresentations($query, $or) {
         $mimeTypes = ['application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.oasis.opendocument.presentation'];
         $extensions = ['.ppt', '.pptx', '.odp'];
-        return self::getCategory($mimeTypes, $extensions, null, $query);
+        return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
     public function getCategoryAttribute() {
