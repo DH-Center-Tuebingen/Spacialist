@@ -110,11 +110,12 @@ class MapController extends Controller
 
         if($layer->type != 'all') {
             $typeMatched = false;
-            if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && ends_with($layer->type, 'Polygon')) {
+            $upperType = strtoupper($layer->type);
+            if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && ends_with($upperType, 'POLYGON')) {
                 $typeMatched = true;
-            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && ends_with($layer->type, 'Linestring')) {
+            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && ends_with($upperType, 'LINESTRING')) {
                 $typeMatched = true;
-            } else if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && ends_with($layer->type, 'Point')) {
+            } else if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && ends_with($upperType, 'POINT')) {
                 $typeMatched = true;
             }
             if(!$typeMatched) {
