@@ -84,6 +84,7 @@
     import VectorLayer from 'ol/layer/vector';
 
     import OSM from 'ol/source/osm';
+    import TileImage from 'ol/source/tileimage';
     import Vector from 'ol/source/vector';
 
     import Circle from 'ol/style/circle';
@@ -160,12 +161,24 @@
                 vm.$showErrorModal('init-wkt and init-geojson provided. They are not allowed at once.');
                 return;
             }
+
+            for(let k in vm.layers) {
+                const l = vm.layers[k];
+                if(l.is_overlay) {
+                    vm.overlays[k] = l;
+                } else {
+                    vm.baselayers[k] = l;
+                }
+            }
+
             // wait for DOM to be rendered
             vm.$nextTick(function() {
                 let geojsonLayers = {};
-                for(let k in vm.layers) {
-                    const l = vm.layers[k];
-                    if(!l.context_type_id && l.type != 'unlinked') continue;
+                for(let k in vm.overlays) {
+                    const l = vm.overlays[k];
+                    if(!l.context_type_id && l.type != 'unlinked') {
+                        vm.overlayLayers.push(vm.createNewLayer(l));
+                    };
                     const layerId = l.id;
                     let layerName;
                     if(l.context_type_id) {
@@ -237,9 +250,9 @@
                         let source = geojsonLayers[layerId].getSource();
                         source.addFeature(feature);
                     });
-                    for(let k in geojsonLayers) {
-                        vm.entityLayers.push(geojsonLayers[k]);
-                    }
+                }
+                for(let k in geojsonLayers) {
+                    vm.entityLayers.push(geojsonLayers[k]);
                 }
 
                 vm.draw = {
@@ -401,26 +414,20 @@
                     }
                 };
 
+                for(let k in vm.baselayers) {
+                    const l = vm.baselayers[k];
+                    vm.baselayerLayers.push(vm.createNewLayer(l));
+                }
+
                 vm.baselayersGroup = new Group({
                     title: 'Base Layers',
                     openInLayerSwitcher: true,
-                    layers: [
-                        new TileLayer({
-                            title: 'OpenStreetMap',
-                            baseLayer: true,
-                            displayInLayerSwitcher: true,
-                            visible: true,
-                            layer: 'osm',
-                            source: new OSM({
-                                wrapX: false
-                            })
-                        }),
-                    ]
+                    layers: vm.baselayerLayers
                 });
                 vm.overlaysGroup = new Group({
                     title: 'Overlays',
                     openInLayerSwitcher: true,
-                    layers: []
+                    layers: vm.overlayLayers
                 });
                 vm.entityLayersGroup = new Group({
                     title: 'Entity Layers',
@@ -581,6 +588,32 @@
                 proj4.defs(name, vm.epsg.proj4);
                 const projection = proj.get(name);
                 proj.addProjection(projection);
+            },
+            createNewLayer(l) {
+                let source;
+                switch(l.type) {
+                    case 'xyz':
+                        source = new TileImage({
+                            url: l.url,
+                            attributions: l.attribution,
+                            wrapX: false
+                        });
+                        break;
+                    default:
+                        new OSM({
+                            wrapX: false
+                        });
+                        break;
+                }
+                return new TileLayer({
+                    title: l.name,
+                    baseLayer: !l.is_overlay,
+                    displayInLayerSwitcher: true,
+                    visible: l.visible,
+                    opacity: l.opacity,
+                    layer: 'osm',
+                    source: source
+                });
             },
             getLayer(ctid) {
                 for(let k in this.layers) {
@@ -829,6 +862,10 @@
                 drawType: '',
                 interactionMode: '',
                 map: {},
+                baselayers: {},
+                overlays: {},
+                overlayLayers: [],
+                baselayerLayers: [],
                 baselayersGroup: {},
                 overlaysGroup: {},
                 entityLayersGroup: {},
