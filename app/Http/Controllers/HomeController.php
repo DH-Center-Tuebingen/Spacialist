@@ -72,21 +72,21 @@ class HomeController extends Controller
 
     public function users()
     {
-        $users = User::with('roles')->get();
-        $roles = Role::all();
+        $users = User::with('roles')->orderBy('id')->get();
+        $roles = Role::orderBy('id')->get();
         return view('settings.users', ['users' => $users, 'roles' => $roles]);
     }
 
     public function roles()
     {
-        $roles = Role::with('permissions')->get();
-        $perms = Permission::all();
+        $roles = Role::with('permissions')->orderBy('id')->get();
+        $perms = Permission::orderBy('id')->get();
         return view('settings.roles', ['roles' => $roles, 'permissions' => $perms]);
     }
 
     public function dme()
     {
-        $attributes = Attribute::whereNull('parent_id')->get();
+        $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
         foreach($attributes as $a) {
             $a->columns = Attribute::where('parent_id', $a->id)->get();
         }
@@ -99,24 +99,24 @@ class HomeController extends Controller
 
     public function layer()
     {
-        $baselayers = AvailableLayer::where('is_overlay', false)->get();
-        $overlays = AvailableLayer::with('context_type')->where('is_overlay', true)->get();
+        $baselayers = AvailableLayer::where('is_overlay', false)->orderBy('id')->get();
+        $overlays = AvailableLayer::with('context_type')->where('is_overlay', true)->orderBy('id')->get();
 
         return view('settings.editor.layer', ['baselayers' => $baselayers, 'overlays' => $overlays]);
     }
 
     public function gis()
     {
-        $contextTypes = ContextType::all();
-        $contextTypeMap = [];
-        foreach($contextTypes as $contextType) {
-            $contextTypeMap[$contextType->id] = $contextType;
-        }
+        $contextTypes = ContextType::with('sub_context_types')
+            ->orderBy('id')
+            ->get();
+        $contextTypeMap = $contextTypes->getDictionary();
         $contextTypeMap = json_encode($contextTypeMap);
 
         $contextLayers = AvailableLayer::with(['context_type'])
             ->whereNotNull('context_type_id')
             ->orWhere('type', 'unlinked')
+            ->orderBy('id')
             ->get();
         foreach($contextLayers as &$layer) {
             if(isset($layer->context_type)) {
@@ -138,7 +138,7 @@ class HomeController extends Controller
 
     public function bibliography()
     {
-        $entries = Bibliography::all();
+        $entries = Bibliography::orderBy('id')->get();
         return view('tools.bibliography', ['entries' => $entries]);
     }
 
