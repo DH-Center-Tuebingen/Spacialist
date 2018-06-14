@@ -485,28 +485,14 @@
                         }
                         vm.hideNewItemModal();
                     }).catch(function(error) {
-                        if(error.response) {
-                            const r = error.response;
-                            vm.$showErrorModal(r.data, r.status, r.headers);
-                        } else if(error.request) {
-                            vm.$showErrorModal(error.request);
-                        } else {
-                            vm.$showErrorModal(error.message);
-                        }
+                        vm.$throwError(error);
                     });
                 } else {
                     vm.$http.post('/api/bibliography', data).then(function(response) {
                         vm.localEntries.push(response.data);
                         vm.hideNewItemModal();
                     }).catch(function(error) {
-                        if(error.response) {
-                            const r = error.response;
-                            vm.$showErrorModal(r.data, r.status, r.headers);
-                        } else if(error.request) {
-                            vm.$showErrorModal(error.request);
-                        } else {
-                            vm.$showErrorModal(error.message);
-                        }
+                        vm.$throwError(error);
                     });
                 }
             },
@@ -533,14 +519,7 @@
                     }
                     vm.hideDeleteEntryModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             requestDeleteEntry(entry) {
@@ -550,14 +529,7 @@
                     vm.deleteItem.count = response.data;
                     vm.$modal.show('delete-bibliography-item-modal');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             hideDeleteEntryModal() {

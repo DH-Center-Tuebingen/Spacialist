@@ -50,14 +50,7 @@
                     vm.htmlContent = data;
                     vm.htmlLoaded = true;
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             }
         },

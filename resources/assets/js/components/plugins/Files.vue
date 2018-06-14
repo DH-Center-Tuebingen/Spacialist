@@ -508,40 +508,19 @@
                     vm.filterTypeList = [];
                     vm.filterTypeList = response.data;
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
                 vm.$http.get('/api/file/filter/camera').then(function(response) {
                     vm.filterCameraList = [];
                     vm.filterCameraList = response.data;
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
                 vm.$http.get('/api/file/filter/date').then(function(response) {
                     vm.filterDateList = [];
                     vm.filterDateList = response.data;
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             toggleFilters() {
@@ -680,14 +659,7 @@
                     filesObj.fetchingFiles = false;
                     vm.updateFileState(filesObj);
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             updateFileState(filesObj) {
@@ -789,14 +761,7 @@
                     vm.hideDeleteFileModal();
                     vm.$showToast('File deleted', `${file.name} successfully deleted.`, 'success');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             hideDeleteFileModal() {
@@ -812,14 +777,7 @@
                     vm.linkCount = response.data;
                     vm.$modal.show('unlink-file-modal');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             unlinkFile(file, context) {
@@ -833,14 +791,7 @@
                     vm.hideUnlinkFileModal();
                     vm.$showToast('File unlinked', `${file.name} successfully unlinked from ${context.name}.`, 'success');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             hideUnlinkFileModal() {
@@ -860,14 +811,7 @@
                     vm.onFileDeleted(file, vm.unlinkedFiles);
                     vm.$showToast('File linked', `${file.name} successfully linked to ${context.name}.`, 'success');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             enablePropertyEditing(property) {
@@ -884,14 +828,7 @@
                 vm.$http.patch(`/api/file/${id}/property`, data).then(function(response) {
                     vm.resetEditingProperty();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             cancelPropertyEditing() {

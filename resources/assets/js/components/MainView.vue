@@ -402,19 +402,7 @@
                     Vue.set(vm.selectedContext, 'references', data);
                     Vue.set(vm, 'dataLoaded', true);
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        const req = {
-                            status: r.status,
-                            url: r.config.url,
-                            method: r.config.method.toUpperCase()
-                        };
-                        vm.$showErrorModal(r.data, r.headers, req);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             showMetadataForReferenceGroup(referenceGroup) {
@@ -475,14 +463,7 @@
                     const attributeName = vm.$translateConcept(vm.concepts, vm.referenceModal.attribute.thesaurus_url);
                     vm.$showToast('Certainty updated', `Certainty of ${attributeName} successfully set to ${newData.possibility}% (${newData.possibility_description}).`, 'success');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             addReference(item) {
@@ -505,14 +486,7 @@
                     refs.push(response.data);
                     Vue.set(vm.referenceModal, 'references', refs.slice());
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             deleteReference(reference) {
@@ -526,14 +500,7 @@
                         Vue.set(vm.referenceModal, 'references', refs.slice());
                     }
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             enableEditReference(reference) {
@@ -558,14 +525,7 @@
                     Vue.set(vm.referenceModal, 'references', refs.slice());
                     vm.cancelEditReference();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             addEntityDisabled(entity) {
@@ -584,14 +544,7 @@
                     vm.roots.push(response.data);
                     vm.hideNewEntityModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             requestAddNewEntity(parent) {
@@ -612,14 +565,7 @@
                     }
                     vm.$modal.show('add-entity-modal');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             hideNewEntityModal() {
@@ -665,14 +611,7 @@
                     vm.resetFlags();
                     vm.$showToast('Entity updated', `Data of ${entity.name} successfully updated.`, 'success');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             deleteEntity(entity) {
@@ -687,14 +626,7 @@
                     vm.$showToast('Entity deleted', `${entity.name} successfully deleted.`, 'success');
                     vm.hideDeleteEntityModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             requestDeleteEntity(entity) {

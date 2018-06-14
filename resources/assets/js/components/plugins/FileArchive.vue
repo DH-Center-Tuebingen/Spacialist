@@ -43,14 +43,7 @@
                         vm.fileList.push(response.data[i]);
                     }
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             onSelect(newSelection) {
@@ -64,14 +57,7 @@
                 vm.$http.get(url).then(function(response) {
                     vm.$createDownloadLink(response.data, selectedFile.clean_filename, true);
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             }
         },

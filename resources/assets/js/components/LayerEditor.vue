@@ -192,14 +192,7 @@
                 vm.$http.post('/api/map/layer', data).then(function(response) {
                     vm.baselayer.push(response.data);
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             onAddNewOverlay() {
@@ -211,14 +204,7 @@
                 vm.$http.post('/api/map/layer', data).then(function(response) {
                     vm.overlays.push(response.data);
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             onLayerSelect(layer) {
@@ -250,14 +236,7 @@
                     }
                     // TODO update layer props
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             isPropUpdated(oldValue, newValue) {

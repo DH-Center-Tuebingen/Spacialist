@@ -162,14 +162,7 @@
                     vm.roleList.push(response.data);
                     vm.hideNewRoleModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             onPatchRole(id) {
@@ -187,14 +180,7 @@
                         vm.setPristine(`perms_${id}`);
                         vm.$showToast('Role updated', `${role.display_name} successfully updated.`, 'success');
                     }).catch(function(error) {
-                        if(error.response) {
-                            const r = error.response;
-                            vm.$showErrorModal(r.data, r.status, r.headers);
-                        } else if(error.request) {
-                            vm.$showErrorModal(error.request);
-                        } else {
-                            vm.$showErrorModal(error.message);
-                        }
+                        vm.$throwError(error);
                     });
                 }
             },
@@ -217,14 +203,7 @@
                     if(index > -1) vm.roleList.splice(index, 1);
                     vm.hideDeleteRoleModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             isDirty(fieldname) {

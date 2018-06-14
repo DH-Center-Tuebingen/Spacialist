@@ -127,6 +127,22 @@ Vue.prototype.$showToast = function(title, text, type, duration) {
     });
 };
 
+Vue.prototype.$throwError = function(error) {
+    if(error.response) {
+        const r = error.response;
+        const req = {
+            status: r.status,
+            url: r.config.url,
+            method: r.config.method.toUpperCase()
+        };
+        this.$showErrorModal(r.data, r.headers, req);
+    } else if(error.request) {
+        this.$showErrorModal(error.request);
+    } else {
+        this.$showErrorModal(error.message);
+    }
+};
+
 Vue.prototype.$showErrorModal = function(errorMsg, headers, request) {
     this.$modal.show('error-modal', {msg: errorMsg, headers: headers, request: request});
 };

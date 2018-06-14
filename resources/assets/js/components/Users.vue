@@ -158,14 +158,7 @@
                     vm.userList.push(response.data);
                     vm.hideNewUserModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             onPatchUser(id) {
@@ -183,14 +176,7 @@
                         vm.setPristine(`roles_${id}`);
                         vm.$showToast('User updated', `${user.name} successfully updated.`, 'success');
                     }).catch(function(error) {
-                        if(error.response) {
-                            const r = error.response;
-                            vm.$showErrorModal(r.data, r.status, r.headers);
-                        } else if(error.request) {
-                            vm.$showErrorModal(error.request);
-                        } else {
-                            vm.$showErrorModal(error.message);
-                        }
+                        vm.$throwError(error);
                     });
                 }
             },
@@ -213,14 +199,7 @@
                     if(index > -1) vm.userList.splice(index, 1);
                     vm.hideDeleteUserModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             isDirty(fieldname) {

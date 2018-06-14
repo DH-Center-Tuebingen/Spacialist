@@ -390,14 +390,7 @@
                     vm.localAttributes.push(response.data);
                     vm.hideNewAttributeModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             deleteAttribute(attribute) {
@@ -412,14 +405,7 @@
                     }
                     vm.hideDeleteAttributeModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             createContextType(contextType) {
@@ -434,14 +420,7 @@
                     vm.localContextTypes.push(response.data);
                     vm.hideNewContextTypeModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             deleteContextType(contextType) {
@@ -456,14 +435,7 @@
                     }
                     vm.hideDeleteContextTypeModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             addAllContextTypes() {
@@ -485,14 +457,7 @@
                     const name = vm.$translateConcept(vm.concepts, vm.contextType.thesaurus_url);
                     vm.$showToast('Entity-Type updated', `${name} successfully updated.`, 'success');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             addAttributeToContextType(oldIndex, index) {
@@ -515,14 +480,7 @@
                     const etName = vm.$translateConcept(vm.concepts, vm.contextType.thesaurus_url);
                     vm.$showToast('Attribute added', `${attrName} successfully added to ${etName}.`, 'success');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
 
             },
@@ -539,14 +497,7 @@
                 vm.$http.patch(`/api/editor/dm/context_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
 
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             removeAttributeFromContextType(attribute) {
@@ -567,14 +518,7 @@
                     }
                     vm.hideRemoveAttributeModal();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             reorderContextAttribute(oldIndex, index) {
@@ -603,14 +547,7 @@
                         }
                     }
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             // Modal Methods
@@ -625,14 +562,7 @@
                     vm.openedModal = 'remove-attribute-from-ct-modal';
                     vm.$modal.show('remove-attribute-from-ct-modal');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             hideRemoveAttributeModal() {
@@ -647,14 +577,7 @@
                     }
                     vm.$modal.show('new-attribute-modal');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             onDeleteAttribute(attribute) {
@@ -666,14 +589,7 @@
                     vm.openedModal = 'delete-attribute-modal';
                     vm.$modal.show('delete-attribute-modal');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             hideNewAttributeModal() {
@@ -735,14 +651,7 @@
                                 }
                             }
                         }).catch(function(error) {
-                            if(error.response) {
-                                const r = error.response;
-                                vm.$showErrorModal(r.data, r.status, r.headers);
-                            } else if(error.request) {
-                                vm.$showErrorModal(error.request);
-                            } else {
-                                vm.$showErrorModal(error.message);
-                            }
+                            vm.$throwError(error);
                         });
                         break;
                     default:
@@ -799,14 +708,7 @@
                     vm.openedModal = 'delete-context-type-modal';
                     vm.$modal.show('delete-context-type-modal');
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             hideNewContextTypeModal() {
@@ -851,14 +753,7 @@
                             vm.localAttributes[i].isDisabled = index > -1;
                         }
                     }).catch(function(error) {
-                        if(error.response) {
-                            const r = error.response;
-                            vm.$showErrorModal(r.data, r.status, r.headers);
-                        } else if(error.request) {
-                            vm.$showErrorModal(error.request);
-                        } else {
-                            vm.$showErrorModal(error.message);
-                        }
+                        vm.$throwError(error);
                     });
             },
             translateLabel(element, label) {

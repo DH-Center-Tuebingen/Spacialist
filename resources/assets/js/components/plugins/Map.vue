@@ -57,14 +57,7 @@
                     }
                     vm.dataInitialized = true;
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             getProperties(geodata) {
@@ -117,14 +110,7 @@
                     vm.$http.delete(`/api/map/${f.getProperties().id}`).then(function(response) {
 
                     }).catch(function(error) {
-                        if(error.response) {
-                            const r = error.response;
-                            vm.$showErrorModal(r.data, r.status, r.headers);
-                        } else if(error.request) {
-                            vm.$showErrorModal(error.request);
-                        } else {
-                            vm.$showErrorModal(error.message);
-                        }
+                        vm.$throwError(error);
                     });
                 });
             },
@@ -143,14 +129,7 @@
                         // feature.setProperties(vm.getProperties(geodata));
                     }
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             updateFeatures(features, wkt) {
@@ -163,14 +142,7 @@
                     vm.$http.patch(`/api/map/${f.getProperties().id}`, data).then(function(response) {
 
                     }).catch(function(error) {
-                        if(error.response) {
-                            const r = error.response;
-                            vm.$showErrorModal(r.data, r.status, r.headers);
-                        } else if(error.request) {
-                            vm.$showErrorModal(error.request);
-                        } else {
-                            vm.$showErrorModal(error.message);
-                        }
+                        vm.$throwError(error);
                     });
                 });
             }

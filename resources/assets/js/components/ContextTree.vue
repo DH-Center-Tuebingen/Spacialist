@@ -53,14 +53,7 @@
                 const result = response.data.map(n => new Node({...n, parent: this}));
                 return result;
             }).catch(function(error) {
-                if(error.response) {
-                    const r = error.response;
-                    vm.$showErrorModal(r.data, r.status, r.headers);
-                } else if(error.request) {
-                    vm.$showErrorModal(error.request);
-                } else {
-                    vm.$showErrorModal(error.message);
-                }
+                vm.$throwError(error);
             });
         }
     }
@@ -218,14 +211,7 @@
                             dragElem.rank = newIndex + 1;
                             children.splice(newIndex, 0, dragElem);
                         }).catch(function(error) {
-                            if(error.response) {
-                                const r = error.response;
-                                vm.$showErrorModal(r.data, r.status, r.headers);
-                            } else if(error.request) {
-                                vm.$showErrorModal(error.request);
-                            } else {
-                                vm.$showErrorModal(error.message);
-                            }
+                            vm.$throwError(error);
                         });
                     }
                 },

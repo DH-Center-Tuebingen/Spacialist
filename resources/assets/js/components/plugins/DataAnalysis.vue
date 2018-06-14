@@ -321,14 +321,7 @@
                     vm.visualizationColumns = vm.getAvailableColumns();
                     vm.visualizationResults = vm.getResults();
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             addSplit(relation, column, value, name) {
@@ -427,14 +420,7 @@
                     const filename = `${vm.origin.label}.${type}`;
                     vm.$createDownloadLink(response.data, filename, true, response.headers['content-type']);
                 }).catch(function(error) {
-                    if(error.response) {
-                        const r = error.response;
-                        vm.$showErrorModal(r.data, r.status, r.headers);
-                    } else if(error.request) {
-                        vm.$showErrorModal(error.request);
-                    } else {
-                        vm.$showErrorModal(error.message);
-                    }
+                    vm.$throwError(error);
                 });
             },
             setupFormData() {
