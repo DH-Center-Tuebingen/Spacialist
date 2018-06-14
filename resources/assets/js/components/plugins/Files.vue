@@ -32,6 +32,7 @@
                         <i class="fas fa-fw fa-angle-up"></i>
                     </span>
                 </small>
+                <small class="badge" :class="[filterCounts[selectedTopAction] ? 'badge-primary' : 'badge-secondary']">{{ filterCounts[selectedTopAction] }} active</small>
             </h5>
             <div class="mb-2" v-show="showFilters">
                 <form v-on:submit.prevent="applyFilters(selectedTopAction)">
@@ -526,6 +527,11 @@
             applyFilters(action) {
                 const vm = this;
                 const filters = vm.getFilters(action);
+                let count = 0;
+                count += vm.filterTypes[action].length;
+                count += vm.filterCameras[action].length;
+                count += vm.filterDates[action].length;
+                vm.filterCounts[action] = count;
                 vm.resetFiles(action);
                 vm.getNextFiles(action, filters);
 
@@ -963,6 +969,11 @@
                     linkedFiles: [],
                     unlinkedFiles: [],
                     allFiles: []
+                },
+                filterCounts: {
+                    linkedFiles: 0,
+                    unlinkedFiles: 0,
+                    allFiles: 0
                 },
                 // filterMatching: {
                 //     linkedFiles: 'any',
