@@ -76,6 +76,10 @@ body, #app {
     font-size: 50%;
 }
 
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
 .table-cell-250 td, .table-cell-250 ul {
     max-height: 250px;
     overflow-y: auto;
