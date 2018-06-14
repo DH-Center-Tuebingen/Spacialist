@@ -1,8 +1,11 @@
 <template>
     <div class="h-100" v-if="dataInitialized">
         <ol-map
+            :concepts="concepts"
+            :context-types="contextTypes"
             :epsg="epsg"
             :init-geojson="geojson"
+            :layers="layers"
             :on-deleteend="deleteFeatures"
             :on-drawend="addFeature"
             :on-modifyend="updateFeatures"
@@ -61,48 +64,10 @@
                 });
             },
             getProperties(geodata) {
-                const vm = this;
-                let props = {
+                return {
                     id: geodata.id,
                     entity: geodata.context
                 };
-                let layer;
-                if(geodata.context) {
-                    layer = vm.getLayer(geodata.context.context_type_id);
-                    props.layer_id = layer.context_type_id;
-                    const ct = vm.getContextType(geodata.context);
-                    if(ct) {
-                        props.layer_name = vm.$translateConcept(vm.concepts, ct.thesaurus_url);
-                    }
-                } else {
-                    layer = vm.getUnlinkedLayer();
-                    props.layer_id = layer.id;
-                    props.layer_name = 'Unlinked';
-                }
-                if(layer) {
-                    props.color = layer.color;
-                }
-                return props;
-            },
-            getLayer(ctid) {
-                for(let k in this.layers) {
-                    if(this.layers[k].context_type_id == ctid) {
-                        return this.layers[k];
-                    }
-                }
-                return;
-            },
-            getUnlinkedLayer() {
-                for(let k in this.layers) {
-                    if(this.layers[k].type == 'unlinked') {
-                        return this.layers[k];
-                    }
-                }
-                return;
-            },
-            getContextType(context) {
-                if(!context) return;
-                return this.contextTypes[context.context_type_id];
             },
             deleteFeatures(features, wkt) {
                 const vm = this;

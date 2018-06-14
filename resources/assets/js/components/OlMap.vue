@@ -117,6 +117,18 @@
                 required: false,
                 type: Object
             },
+            layers: {
+                required: true,
+                type: Object
+            },
+            concepts: {
+                required: true,
+                type: Object
+            },
+            contextTypes: {
+                required: true,
+                type: Object
+            },
             onDeleteend: {
                 required: false,
                 type: Function,
@@ -145,11 +157,38 @@
             vm.initMapProjection();
 
             if(vm.initWkt.length && vm.initGeojson.length) {
-                console.error('init-wkt and init-geojson provided. They are not allowed at once.');
+                vm.$showErrorModal('init-wkt and init-geojson provided. They are not allowed at once.');
                 return;
             }
             // wait for DOM to be rendered
             vm.$nextTick(function() {
+                let geojsonLayers = {};
+                for(let k in vm.layers) {
+                    const l = vm.layers[k];
+                    if(!l.context_type_id && l.type != 'unlinked') continue;
+                    const layerId = l.id;
+                    let layerName;
+                    if(l.context_type_id) {
+                        const ct = vm.getContextTypeById(l.context_type_id);
+                        if(ct) {
+                            layerName = vm.$translateConcept(vm.concepts, ct.thesaurus_url);
+                        }
+                    } else {
+                        layerName = 'Unlinked';
+                    }
+                    geojsonLayers[layerId] = new VectorLayer({
+                        baseLayer: false,
+                        displayInLayerSwitcher: true,
+                        title: layerName,
+                        visible: l.visible,
+                        opacity: l.opacity,
+                        layer: 'entity',
+                        source: new Vector({
+                            wrapX: false
+                        }),
+                        style: vm.createStyle(l.color)
+                    });
+                }
                 vm.vector = new VectorLayer({
                     baseLayer: false,
                     displayInLayerSwitcher: true,
@@ -183,29 +222,18 @@
                         source.addFeature(new Feature({geometry: geom}));
                     });
                 } else if(vm.initGeojson.length) {
-                    let geojsonLayers = {};
                     vm.initGeojson.forEach(geojson => {
                         let feature = vm.geoJsonFormat.readFeature(geojson.geom, {
                             featureProjection: 'EPSG:3857'
                         });
                         feature.setProperties(geojson.props);
-                        if(geojson.props.color) {
-                            feature.setStyle(vm.createStyle(geojson.props.color));
+                        let layer;
+                        if(geojson.props.entity) {
+                            layer = vm.getLayer(geojson.props.entity.context_type_id);
+                        } else {
+                            layer = vm.getUnlinkedLayer();
                         }
-                        const layerId = geojson.props.layer_id;
-                        if(!geojsonLayers[layerId]) {
-                            geojsonLayers[layerId] = new VectorLayer({
-                                baseLayer: false,
-                                displayInLayerSwitcher: true,
-                                title: geojson.props.layer_name,
-                                visible: true,
-                                layer: 'entity',
-                                source: new Vector({
-                                    wrapX: false
-                                }),
-                                style: vm.createStyle()
-                            });
-                        }
+                        const layerId = layer.id;
                         let source = geojsonLayers[layerId].getSource();
                         source.addFeature(feature);
                     });
@@ -553,6 +581,29 @@
                 proj4.defs(name, vm.epsg.proj4);
                 const projection = proj.get(name);
                 proj.addProjection(projection);
+            },
+            getLayer(ctid) {
+                for(let k in this.layers) {
+                    if(this.layers[k].context_type_id == ctid) {
+                        return this.layers[k];
+                    }
+                }
+                return;
+            },
+            getUnlinkedLayer() {
+                for(let k in this.layers) {
+                    if(this.layers[k].type == 'unlinked') {
+                        return this.layers[k];
+                    }
+                }
+                return;
+            },
+            getContextType(context) {
+                if(!context) return;
+                return this.getContextTypeById(context.context_type_id);
+            },
+            getContextTypeById(ctid) {
+                return this.contextTypes[ctid];
             },
             getEntityExtent() {
                 const layers = this.entityLayersGroup.getLayers();
