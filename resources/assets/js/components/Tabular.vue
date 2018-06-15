@@ -11,24 +11,24 @@
         </thead>
         <tbody>
             <tr v-for="(row, $index) in value">
-                <td v-for="col in attribute.columns">
-                    <input class="form-control form-control-sm" v-if="col.datatype == 'string'" type="text" :disabled="disabled" v-model="row[col.id]" @input="onInput($index, $event.target.value)"/>
-                    <input class="form-control form-control-sm" v-else-if="col.datatype == 'double'" type="number" :disabled="disabled" step="any" min="0" placeholder="0.0" v-model="row[col.id]" @input="onInput($index, $event.target.value)"/>
-                    <input class="form-control form-control-sm" v-else-if="col.datatype == 'integer'" type="number" :disabled="disabled" step="1" placeholder="0" v-model="row[col.id]" @input="onInput($index, $event.target.value)"/>
-                    <input class="form-control form-control-sm" v-else-if="col.datatype == 'boolean'" type="checkbox" :disabled="disabled" v-model="row[col.id]" @input="onInput($index, $event.target.value)"/>
-                    <div v-else-if="col.datatype == 'string-sc'">
+                <td v-for="column in attribute.columns">
+                    <input class="form-control form-control-sm" v-if="column.datatype == 'string'" type="text" :disabled="disabled" v-model="row[column.id]" @input="onInput($index, $event.target.value)"/>
+                    <input class="form-control form-control-sm" v-else-if="column.datatype == 'double'" type="number" :disabled="disabled" step="any" min="0" placeholder="0.0" v-model="row[column.id]" @input="onInput($index, $event.target.value)"/>
+                    <input class="form-control form-control-sm" v-else-if="column.datatype == 'integer'" type="number" :disabled="disabled" step="1" placeholder="0" v-model="row[column.id]" @input="onInput($index, $event.target.value)"/>
+                    <input class="form-control form-control-sm" v-else-if="column.datatype == 'boolean'" type="checkbox" :disabled="disabled" v-model="row[column.id]" @input="onInput($index, $event.target.value)"/>
+                    <div v-else-if="column.datatype == 'string-sc'">
                         <multiselect
                             class="multiselect-sm"
                             label="concept_url"
                             track-by="id"
-                            v-model="row[col.id]"
+                            v-model="row[column.id]"
                             :allowEmpty="true"
                             :closeOnSelect="true"
                             :customLabel="translateLabel"
                             :disabled="disabled"
                             :hideSelected="true"
                             :multiple="false"
-                            :options="selections[col.attribute_id] || []"
+                            :options="selections[column.id] || []"
                             @input="onInput($index, $event.target.value)">
                         </multiselect>
                     </div>
