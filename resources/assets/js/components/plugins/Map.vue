@@ -91,7 +91,7 @@
                     if(response.data.length) {
                         const geodata = response.data[0];
                         // TODO update feature
-                        // feature.setProperties(vm.getProperties(geodata));
+                        feature.setProperties(vm.getProperties(geodata));
                     }
                 }).catch(function(error) {
                     vm.$throwError(error);

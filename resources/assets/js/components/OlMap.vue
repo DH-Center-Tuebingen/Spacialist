@@ -49,6 +49,7 @@
 
 <script>
     import 'ol/ol.css';
+    import Collection from 'ol/collection';
     import control from 'ol/control';
     import Coordinate from 'ol/coordinate';
     import extent from 'ol/extent';
@@ -254,6 +255,7 @@
                 for(let k in geojsonLayers) {
                     vm.entityLayers.push(geojsonLayers[k]);
                 }
+                vm.entityLayers.push(vm.vector);
 
                 vm.draw = {
                     init: function() {
@@ -551,7 +553,7 @@
                 vm.delete.setActive(false);
 
                 vm.snap = new Snap({
-                    source: vm.vector.getSource()
+                    features: vm.getSnapFeatures()
                 });
                 vm.map.addInteraction(vm.snap);
 
@@ -637,6 +639,18 @@
             },
             getContextTypeById(ctid) {
                 return this.contextTypes[ctid];
+            },
+            getSnapFeatures() {
+                const vm = this;
+                const layers = vm.entityLayersGroup.getLayers();
+                let features = [];
+                layers.forEach(lg => {
+                    const src = lg.getSource();
+                    if(src) {
+                        features = features.concat(src.getFeatures());
+                    }
+                });
+                return new Collection(features);
             },
             getEntityExtent() {
                 const layers = this.entityLayersGroup.getLayers();
@@ -730,6 +744,7 @@
                         source.clear();
                     }
                 }
+                this.snap.addFeature(feature);
                 this.onDrawend(feature, this.wktFormat.writeFeature(feature));
             },
             updateFeatures() {
@@ -742,10 +757,14 @@
                 this.setInteractionMode('', true);
             },
             deleteFeatures() {
-                const features = this.delete.getDeletedFeatures();
-                let wktFeatures = features.map(f => this.wktFormat.writeFeature(f), this);
-                this.onDeleteend(features, wktFeatures);
-                this.setInteractionMode('');
+                const vm = this;
+                const features = vm.delete.getDeletedFeatures();
+                let wktFeatures = features.map(f => {
+                    vm.snap.removeFeature(f);
+                    vm.wktFormat.writeFeature(f);
+                });
+                vm.onDeleteend(features, wktFeatures);
+                vm.setInteractionMode('');
             },
             cancelDeleteFeatures() {
                 this.setInteractionMode('', true);
