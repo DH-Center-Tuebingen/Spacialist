@@ -26,7 +26,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <h1>{{ selectedContext.name }}</h1>
                     <span>
-                        <button type="button" class="btn btn-success" :disabled="isFormDirty" @click="saveEntity(selectedContext)">
+                        <button type="button" class="btn btn-success" :disabled="!isFormDirty" @click="saveEntity(selectedContext)">
                             <i class="fas fa-fw fa-save"></i> Save
                         </button>
                         <button type="button" class="btn btn-danger" @click="requestDeleteEntity(selectedContext)">
@@ -707,7 +707,7 @@
                 }
             },
             isFormDirty: function() {
-                return !Object.keys(this.fields).some(key => this.fields[key].dirty);
+                return Object.keys(this.fields).some(key => this.fields[key].dirty);
             }
         }
     }
