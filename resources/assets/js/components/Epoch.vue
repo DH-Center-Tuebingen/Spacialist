@@ -11,11 +11,11 @@
                     </a>
                 </ul>
             </div>
-            <input type="number" step="1" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('start', $event.target.value)" v-model="start">
+            <input type="number" step="1" min="1" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('start', $event.target.value)" v-model="start">
             <div class="input-group-prepend input-group-append">
                 <span class="input-group-text">-</span>
             </div>
-            <input type="number" step="1" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('end', $event.target.value)" v-model="end">
+            <input type="number" step="1" min="1" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('end', $event.target.value)" v-model="end">
             <div class="input-group-append">
                 <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {{ endLabel }}
