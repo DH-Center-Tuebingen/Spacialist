@@ -4,15 +4,15 @@
             <h5>Baselayer</h5>
             <layer
                 class="flex-grow-1 scroll-y-auto"
-                :add-new="onAddNewBaselayer"
+                :add-new="_ => onAddNewLayer(false)"
                 :concepts="concepts"
                 :layer="baselayer"
                 :on-select="onLayerSelect">
             </layer>
-            <h5>Overlays</h5>
+            <h5 class="mt-3">Overlays</h5>
             <layer
                 class="flex-grow-1 scroll-y-auto"
-                :add-new="onAddNewOverlay"
+                :add-new="_ => onAddNewLayer(true)"
                 :concepts="concepts"
                 :layer="overlays"
                 :on-select="onLayerSelect">
@@ -187,26 +187,15 @@
         },
         mounted() {},
         methods: {
-            onAddNewBaselayer() {
+            onAddNewLayer(is_overlay) {
                 const vm = this;
                 const data = {
                     name: 'Unnamed Layer',
-                    is_overlay: false
+                    is_overlay: is_overlay
                 };
                 vm.$http.post('/api/map/layer', data).then(function(response) {
-                    vm.baselayer.push(response.data);
-                }).catch(function(error) {
-                    vm.$throwError(error);
-                });
-            },
-            onAddNewOverlay() {
-                const vm = this;
-                const data = {
-                    name: 'Unnamed Layer',
-                    is_overlay: true
-                };
-                vm.$http.post('/api/map/layer', data).then(function(response) {
-                    vm.overlays.push(response.data);
+                    if(is_overlay) vm.overlays.push(response.data);
+                    else vm.baselayer.push(response.data);
                 }).catch(function(error) {
                     vm.$throwError(error);
                 });
