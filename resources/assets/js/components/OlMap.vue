@@ -86,6 +86,7 @@
 
     import OSM from 'ol/source/osm';
     import TileImage from 'ol/source/tileimage';
+    import TileWMS from 'ol/source/tilewms';
     import Vector from 'ol/source/vector';
 
     import Circle from 'ol/style/circle';
