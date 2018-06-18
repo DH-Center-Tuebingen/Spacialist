@@ -125,11 +125,11 @@
             },
             concepts: {
                 required: true,
-                type: Object
+                validator: Vue.$validateObject
             },
             contextTypes: {
                 required: true,
-                type: Object
+                validator: Vue.$validateObject
             },
             onDeleteend: {
                 required: false,

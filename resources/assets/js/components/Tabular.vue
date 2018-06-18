@@ -91,7 +91,8 @@
                 default: _ => new Array(),
             },
             concepts: {
-                type: Object,
+                validator: Vue.$validateObject,
+                required: false,
                 default: _ => new Object(),
             },
             selections: {

@@ -26,7 +26,7 @@
                 required: true
             },
             concepts: {
-                type: Object,
+                validator: Vue.$validateObject,
                 required: true
             },
             onAdd: {

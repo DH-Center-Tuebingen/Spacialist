@@ -46,11 +46,11 @@
     export default {
         props: {
             concepts: {
-                type: Object,
+                validator: Vue.$validateObject,
                 required: false
             },
             contextTypes: {
-                type: Object,
+                validator: Vue.$validateObject,
                 required: false
             },
             layers: {

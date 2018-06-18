@@ -234,7 +234,7 @@
         props: {
             concepts: {
                 required: false,
-                type: Object
+                validator: Vue.$validateObject
             }
         },
         mounted() {

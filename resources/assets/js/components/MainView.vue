@@ -327,11 +327,11 @@
             },
             concepts: {
                 required: false, // TODO required?
-                type: Object
+                validator: Vue.$validateObject
             },
             contextTypes: {
                 required: false, // TODO required?
-                type: Object
+                validator: Vue.$validateObject
             },
             preferences: {
                 required: true,

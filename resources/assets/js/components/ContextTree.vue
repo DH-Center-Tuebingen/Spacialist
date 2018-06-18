@@ -66,11 +66,11 @@
         props: {
             concepts: {
                 required: false, // TODO required?
-                type: Object
+                validator: Vue.$validateObject
             },
             contextTypes: {
                 required: false, // TODO required?
-                type: Object
+                validator: Vue.$validateObject
             },
             onContextMenuAdd: {
                 required: false,

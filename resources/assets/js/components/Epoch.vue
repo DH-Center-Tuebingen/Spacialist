@@ -66,7 +66,7 @@
                 default: _ => new Array(),
             },
             concepts: {
-                type: Object,
+                validator: Vue.$validateObject,
                 default: _ => new Object(),
             },
             disabled: {

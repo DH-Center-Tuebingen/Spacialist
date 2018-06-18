@@ -24,7 +24,7 @@
     export default {
         props: {
             concepts: {
-                type: Object,
+                validator: Vue.$validateObject,
                 required: true
             },
             context: {
