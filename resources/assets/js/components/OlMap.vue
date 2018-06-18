@@ -601,6 +601,18 @@
                             wrapX: false
                         });
                         break;
+                    case 'wms':
+                        source = new TileWMS({
+                            url: l.url,
+                            attributions: l.attribution,
+                            wrapX: false,
+                            serverType: 'geoserver',
+                            params: {
+                                layers: l.layers,
+                                tiled: true
+                            }
+                        });
+                        break;
                     default:
                         new OSM({
                             wrapX: false
