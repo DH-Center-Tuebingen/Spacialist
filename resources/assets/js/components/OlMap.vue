@@ -666,6 +666,18 @@
                         }
                     }
                 });
+                if(entityExtent[0] == Infinity) {
+                    entityExtent[0] = -20026376.39;
+                }
+                if(entityExtent[1] == Infinity) {
+                    entityExtent[1] = -20048966.10;
+                }
+                if(entityExtent[2] == -Infinity) {
+                    entityExtent[2] = 20026376.39;
+                }
+                if(entityExtent[3] == -Infinity) {
+                    entityExtent[3] = 20048966.10;
+                }
                 if(!entityExtent) {
                     // EPSG:3857 bounds (taken from epsg.io/3857)
                     entityExtent = [-20026376.39, -20048966.10, 20026376.39, 20048966.10];
