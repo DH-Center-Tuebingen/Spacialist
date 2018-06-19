@@ -87,7 +87,7 @@
             </attributes>
         </div>
 
-        <modal name="new-context-type-modal" height="auto" :scrollable="true">
+        <modal name="new-context-type-modal" height="auto" :scrollable="true" classes="of-visible">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Create Context-Type</h5>
@@ -113,10 +113,27 @@
                                 Top-Level Context-Type?
                             </label>
                         </div>
+                        <div class="form-group">
+                            <label class="col-form-label col-md-3" for="name">
+                                Geometry Type:
+                            </label>
+                            <div class="col-md-9">
+                                <multiselect
+                                    label="label"
+                                    track-by="id"
+                                    v-model="newContextType.geomtype"
+                                    :allowEmpty="false"
+                                    :closeOnSelect="false"
+                                    :hideSelected="true"
+                                    :multiple="false"
+                                    :options="availableGeometries">
+                                </multiselect>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" form="newContextTypeForm">
+                    <button type="submit" class="btn btn-success" form="newContextTypeForm" :disabled="newContextTypeDisabled">
                         <i class="fas fa-fw fa-plus"></i> Add
                     </button>
                     <button type="button" class="btn btn-danger" @click="hideNewContextTypeModal">
@@ -410,11 +427,12 @@
             },
             createContextType(contextType) {
                 const vm = this;
-                if(!contextType.label) return;
+                if(vm.newContextTypeDisabled) return;
                 const url = contextType.label.concept.concept_url;
                 let data = {
                     'concept_url': url,
-                    'is_root': contextType.is_root || false
+                    'is_root': contextType.is_root || false,
+                    'geomtype': contextType.geomtype.key
                 };
                 vm.$http.post('/api/editor/dm/context_type', data).then(function(response) {
                     vm.localContextTypes.push(response.data);
@@ -697,7 +715,26 @@
                 console.log(this.selectedDependency);
             },
             onCreateContextType() {
-                this.$modal.show('new-context-type-modal');
+                const vm = this;
+                vm.$http.get('/api/editor/dm/geometry').then(function(response) {
+                    vm.availableGeometries = [];
+                    let idCtr = 1;
+                    response.data.forEach(g => {
+                        const geom = {
+                            id: idCtr,
+                            label: g,
+                            key: g
+                        };
+                        vm.availableGeometries.push(geom);
+                        idCtr++;
+                    });
+                    vm.availableGeometries.push({
+                        id: idCtr,
+                        label: 'Any',
+                        key: 'any'
+                    });
+                    vm.$modal.show('new-context-type-modal');
+                });
             },
             onDeleteContextType(contextType) {
                 const vm = this;
@@ -799,6 +836,7 @@
                 modalSelectedAttribute: {},
                 attributeValueCount: 0,
                 localAttributes: this.attributes.slice(),
+                availableGeometries: [],
                 newContextType: {},
                 localContextTypes: this.contextTypes.slice(),
                 modalSelectedContextType: {},
@@ -877,6 +915,10 @@
                     (
                         this.newAttribute.type.datatype == 'sql'
                     );
+            },
+            newContextTypeDisabled: function() {
+                const nct = this.newContextType;
+                return !nct.label || !nct.geomtype;
             },
             editContextAttributeDisabled: function() {
                 return !this.modalSelectedAttribute ||

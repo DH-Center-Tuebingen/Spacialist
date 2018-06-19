@@ -24,6 +24,16 @@ class AppServiceProvider extends ServiceProvider
         Validator::extend('between_float', function ($attribute, $value, $parameters, $validator) {
             return $value >= $parameters[0] && $value <= $parameters[1];
         });
+        // Geometry can be either one of the supported simple features
+        // (*Point, *LineString and *Polygon)
+        // or 'any'
+        Validator::extend('geometry', function ($attribute, $value, $parameters, $validator) {
+            $isActualGeometry = in_array($value, \App\Geodata::getAvailableGeometryTypes());
+            if(!$isActualGeometry) {
+                return $value == 'any';
+            }
+            return true;
+        });
     }
 
     /**

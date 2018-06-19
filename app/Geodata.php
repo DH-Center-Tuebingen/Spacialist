@@ -25,9 +25,13 @@ class Geodata extends Model
         'geom',
     ];
 
-    const availableGeometryTypes = [
-        'Point', 'LineString', 'Polygon'
+    protected static $availableGeometryTypes = [
+        'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon'
     ];
+
+    public static function getAvailableGeometryTypes() {
+        return self::$availableGeometryTypes;
+    }
 
     public function updateGeometry($feature, $srid) {
         $geom = json_encode($feature->geometry);

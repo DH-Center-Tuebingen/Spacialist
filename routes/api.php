@@ -59,6 +59,7 @@ Route::get('/editor/context_type/{id}', 'EditorController@getContextType')->wher
 Route::get('/editor/context_type/{id}/attribute', 'EditorController@getContextTypeAttributes')->where('id', '[0-9]+');
 Route::get('/editor/attribute/{id}/selection', 'EditorController@getAttributeSelection')->where('id', '[0-9]+');
 Route::get('/editor/dm/context_type/{ctid}/attribute/{aid}/dependency', 'EditorController@getDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+Route::get('/editor/dm/geometry', 'EditorController@getAvailableGeometryTypes');
 
 Route::post('/editor/dm/context_type', 'EditorController@addContextType');
 Route::post('/editor/dm/{id}/relation', 'EditorController@setRelationInfo')->where('id', '[0-9]+');

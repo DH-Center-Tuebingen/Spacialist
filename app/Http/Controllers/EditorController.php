@@ -6,10 +6,12 @@ namespace App\Http\Controllers;
 use \DB;
 use App\Attribute;
 use App\AttributeValue;
+use App\AvailableLayer;
 use App\Context;
 use App\ContextAttribute;
 use App\ContextType;
 use App\ContextTypeRelation;
+use App\Geodata;
 use App\Helpers;
 use App\ThConcept;
 use Illuminate\Http\Request;
@@ -213,34 +215,39 @@ class EditorController extends Controller {
         ]);
     }
 
+    public function getAvailableGeometryTypes() {
+        $types = Geodata::getAvailableGeometryTypes();
+        return response()->json($types);
+    }
+
     // POST
 
     public function addContextType(Request $request) {
         $this->validate($request, [
             'concept_url' => 'required|url|exists:th_concept',
-            'is_root' => 'required|boolean_string'
-            // 'geomtype' => 'required|geom_type'
+            'is_root' => 'required|boolean_string',
+            'geomtype' => 'required|geometry'
         ]);
 
         $curl = $request->get('concept_url');
         $is_root = Helpers::parseBoolean($request->get('is_root'));
-        // $geomtype = $request->get('geomtype');
+        $geomtype = $request->get('geomtype');
         $cType = new ContextType();
         $cType->thesaurus_url = $curl;
         $cType->is_root = $is_root;
         $cType->save();
 
-        // $layer = new AvailableLayer();
-        // $layer->name = '';
-        // $layer->url = '';
-        // $layer->type = $geomtype;
-        // $layer->opacity = 1;
-        // $layer->visible = true;
-        // $layer->is_overlay = true;
-        // $layer->position = AvailableLayer::where('is_overlay', '=', true)->max('position') + 1;
-        // $layer->context_type_id = $cType->id;
-        // $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-        // $layer->save();
+        $layer = new AvailableLayer();
+        $layer->name = '';
+        $layer->url = '';
+        $layer->type = $geomtype;
+        $layer->opacity = 1;
+        $layer->visible = true;
+        $layer->is_overlay = true;
+        $layer->position = AvailableLayer::where('is_overlay', '=', true)->max('position') + 1;
+        $layer->context_type_id = $cType->id;
+        $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        $layer->save();
 
         return response()->json($cType, 201);
     }
