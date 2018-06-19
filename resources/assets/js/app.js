@@ -115,6 +115,15 @@ Vue.filter('bibtexify', function(value, type) {
     return rendered;
 });
 
+
+// Validators
+Vue.prototype.$validateObject = function(value) {
+    // concepts is valid if it is either an object
+    // or an empty array
+    // (empty assoc arrays are simple arrays in php)
+    return typeof value == 'object' || (typeof value == 'array' && value.length == 0);
+};
+
 Vue.prototype.$showToast = function(title, text, type, duration) {
     type = type || 'info'; // success, info, warn, error
     duration = duration || 2000;

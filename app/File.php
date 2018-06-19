@@ -52,52 +52,48 @@ class File extends Model
         foreach($filters as $col => $fs) {
             switch($col) {
                 case 'categories':
-                    // first category has to be added as AND,
-                    // all other categories as OR
-                    $or = false;
                     foreach($fs as $f) {
                         switch($f) {
                             case 'image':
-                                $builder = self::addImages($builder, $or);
+                                $builder = self::addImages($builder, true);
                                 break;
                             case 'audio':
-                                $builder = self::addAudio($builder, $or);
+                                $builder = self::addAudio($builder, true);
                                 break;
                             case 'video':
-                                $builder = self::addVideo($builder, $or);
+                                $builder = self::addVideo($builder, true);
                                 break;
                             case 'pdf':
-                                $builder = self::addPdfs($builder, $or);
+                                $builder = self::addPdfs($builder, true);
                                 break;
                             case 'xml':
-                                $builder = self::addXmls($builder, $or);
+                                $builder = self::addXmls($builder, true);
                                 break;
                             case 'html':
-                                $builder = self::addHtmls($builder, $or);
+                                $builder = self::addHtmls($builder, true);
                                 break;
                             case '3d':
-                                $builder = self::add3d($builder, $or);
+                                $builder = self::add3d($builder, true);
                                 break;
                             case 'dicom':
-                                $builder = self::addDicom($builder, $or);
+                                $builder = self::addDicom($builder, true);
                                 break;
                             case 'archive':
-                                $builder = self::addArchives($builder, $or);
+                                $builder = self::addArchives($builder, true);
                                 break;
                             case 'text':
-                                $builder = self::addTexts($builder, $or);
+                                $builder = self::addTexts($builder, true);
                                 break;
                             case 'document':
-                                $builder = self::addDocuments($builder, $or);
+                                $builder = self::addDocuments($builder, true);
                                 break;
                             case 'spreadsheet':
-                                $builder = self::addSpreadsheets($builder, $or);
+                                $builder = self::addSpreadsheets($builder, true);
                                 break;
                             case 'presentation':
-                                $builder = self::addPresentations($builder, $or);
+                                $builder = self::addPresentations($builder, true);
                                 break;
                         }
-                        $or = true;
                     }
                     break;
                 case 'cameras':
@@ -122,7 +118,10 @@ class File extends Model
     public static function getAllPaginate($page, $filters) {
         $files = self::with(['contexts'])
             ->orderBy('id', 'asc');
-        $files = self::applyFilters($files, $filters)->paginate();
+        $files->where(function($subQuery) use ($filters) {
+            self::applyFilters($subQuery, $filters);
+        });
+        $files = $files->paginate();
         $files->withPath('/file');
 
         foreach($files as &$file) {
@@ -136,7 +135,10 @@ class File extends Model
         $files = self::with(['contexts'])
             ->orderBy('id', 'asc')
             ->doesntHave('contexts');
-        $files = self::applyFilters($files, $filters)->paginate();
+        $files->where(function($subQuery) use ($filters) {
+            self::applyFilters($subQuery, $filters);
+        });
+        $files = $files->paginate();
         $files->withPath('/file/unlinked');
 
         foreach($files as &$file) {
@@ -155,7 +157,10 @@ class File extends Model
                 }
             })
             ->orderBy('id', 'asc');
-        $files = self::applyFilters($files, $filters)->paginate();
+        $files->where(function($subQuery) use ($filters) {
+            self::applyFilters($subQuery, $filters);
+        });
+        $files = $files->paginate();
         $files->withPath('/file/linked/'.$cid);
 
         foreach($files as &$file) {
