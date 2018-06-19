@@ -1,15 +1,12 @@
 <template>
     <div class="h-100 row of-hidden">
-        <button type="button" class="btn btn-outline-secondary btn-toggle" @click="toggleShowFilterOptions()">
-            <span v-show="showFilterOptions">
-                <i class="fas fa-fw fa-arrow-left"></i>
-            </span>
-            <span v-show="!showFilterOptions">
-                <i class="fas fa-fw fa-bars"></i>
-            </span>
-        </button>
-        <div :class="showFilterOptions ? 'col-md-3' : 'd-none'">
-            <h4>Query Options</h4>
+        <div :class="showFilterOptions ? 'col-md-3 h-100 scroll-y-auto' : 'd-none'">
+            <h4>
+                <button type="button" class="btn btn-outline-secondary" v-show="showFilterOptions" @click="toggleShowFilterOptions()">
+                    <i class="fas fa-fw fa-arrow-left"></i>
+                </button>
+                Query Options
+            </h4>
             <div v-show="expertMode">
                 TODO
                 <p class="alert alert-danger">
@@ -25,20 +22,39 @@
                     No order rules
                 </p>
             </div>
-            <h5>Active Filters</h5>
-            <ol v-if="filters.length">
-                <li v-for="filter in filters">
-                    <span>
-                        {{filter.col}} {{filter.comp}} {{filter.comp_value}}
-                        <span v-if="filter.func">
-                            (Usig {{filter.func}} with {{filter.func_values}})
-                        </span>
-                    </span>
-                </li>
-            </ol>
-            <p v-else>
-                No filters active.
-            </p>
+            <h5>Filters</h5>
+            <h6>Active</h6>
+            <div class="row">
+                <draggable
+                    class="col-md-4 filter-group rounded border border-success"
+                    v-for="(group, i) in filters.active.groups"
+                    v-model="filters.active.groups[i]"
+                    :key="i"
+                    :options="{group: 'filters'}"
+                    @add="filterMoved"
+                    @end="drag=false"
+                    @start="drag=true">
+                    <div v-for="filter in filters.active.groups[i]" :key="filter.id" class="grab-handle">
+                        {{ filter.name }}
+                    </div>
+                </draggable>
+                <div class="col-md-4 filter-group rounded border border-secondary d-flex flex-column justify-content-center align-items-center clickable" :disabled="newGroupDisabled" @click="addNewGroup">
+                    <i class="fas fa-fw fa-plus fa-2x"></i>
+                    Add new Group
+                </div>
+            </div>
+            <h6>Inactive</h6>
+            <draggable
+                class="col-md-12 filter-group rounded border border-secondary"
+                v-model="filters.inactive"
+                :options="{group: 'filters'}"
+                @add="filterMoved"
+                @end="drag=false"
+                @start="drag=true">
+                <div v-for="filter in filters.inactive" class="grab-handle">
+                    {{ filter.name }}
+                </div>
+            </draggable>
             <h5>Further Query Options</h5>
             <form role="form" @submit.prevent="applyFilter()">
                 <div class="form-check form-group offset-md-3">
@@ -61,31 +77,34 @@
                         </multiselect>
                     </div>
                 </div>
-                <div class="form-check form-group offset-md-3" v-show="!expertMode">
-                    <input type="checkbox" class="form-check-input" id="metadata-columns-toggle" v-model="showAmbiguous" />
-                    <label for="metadata-columns-toggle" class="form-check-label">Show Metadata Columns</label>
-                </div>
                 <div class="form-check form-group offset-md-3">
                     <input type="checkbox" class="form-check-input" id="expert-mode-toggle" v-model="expertMode" @change="onToggleExpertMode" />
                     <label for="expert-mode-toggle" class="form-check-label">Expert Mode</label>
                 </div>
-                <button type="submit" class="btn btn-default mt-2">
-                    <i class="fas fa-fw fa-filter"></i> Filter
-                </button>
-                <div class="form-group row">
-                    <label class="col-md-3 col-form-label"></label>
+                <div class="form-group row" v-if="expertMode">
+                    <label class="col-md-3 col-form-label">
+                        Query
+                    </label>
                     <div class="col-md-9">
                         <textarea class="form-control" rows="6" v-model="query" :disabled="true" :readonly="true"></textarea>
                     </div>
                 </div>
+                <button type="submit" class="btn btn-outline-primary mt-2 col-md-12">
+                    <i class="fas fa-fw fa-filter"></i> Filter
+                </button>
             </form>
         </div>
         <div class="h-100" :class="showFilterOptions ? 'col-md-9' : 'col-md-12'">
+            <h4>
+                <button type="button" class="btn btn-outline-secondary" v-show="!showFilterOptions" @click="toggleShowFilterOptions()">
+                    <i class="fas fa-fw fa-bars"></i>
+                </button>
+                Results <span class="badge badge-primary">{{overallResultCount}}</span>
+            </h4>
             <p class="alert alert-info" v-if="!hasResults">
                 Query returned no results or you didn't run the query yet.
             </p>
             <div v-else class="h-100 d-flex flex-column">
-                <h4>Results <span class="badge badge-primary">{{overallResultCount}}</span></h4>
                 <p class="text-secondary">
                     {{page.from}}-{{page.to}} / {{page.total}}
                 </p>
@@ -113,31 +132,43 @@
                 </ul>
                 <div v-show="activeResultTab == 'simple' && !expertMode" class="col px-0">
                     <div class="d-flex flex-column h-100">
-                        <ul class="pagination mb-2" v-show="!expertMode">
-                            <li class="page-item" :class="{'disabled': page.current_page == 1}">
-                                <a href="#" class="page-link" aria-label="First Page" @click="applyFilter(page.first_page_url)">
-                                    <i class="fas fa-fw fa-angle-double-left" aria-hidden="true"></i>
-                                    <i class="sr-only">First Page</i>
-                                </a>
-                            </li>
-                            <li class="page-item" :class="{'disabled': page.current_page == 1}">
-                                <a href="#" class="page-link" aria-label="Previous Page" @click="applyFilter(page.prev_page_url)">
-                                    <i class="fas fa-fw fa-arrow-left"></i> Previous {{previousResultCount}} results
-                                </a>
-                            </li>
-                            <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
-                                <a href="#" class="page-link" aria-label="Next Page" @click="applyFilter(page.next_page_url)">
-                                    Next {{nextResultCount}} results <i class="fas fa-fw fa-arrow-right"></i>
-                                </a>
-                            </li>
-                            <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
-                                <a href="#" class="page-link" aria-label="Last Page" @click="applyFilter(page.last_page_url)">
-                                    <i class="fas fa-fw fa-angle-double-right" aria-hidden="true"></i>
-                                    <i class="sr-only">Last Page</i>
-                                </a>
-                            </li>
-                        </ul>
-                        <component :is="pluginPrefix+origin.name"></component>
+                        <div class="d-flex flex-row justify-content-between">
+                            <ul class="pagination mb-2" v-show="!expertMode">
+                                <li class="page-item" :class="{'disabled': page.current_page == 1}">
+                                    <a href="#" class="page-link" aria-label="First Page" @click="applyFilter(page.first_page_url)">
+                                        <i class="fas fa-fw fa-angle-double-left" aria-hidden="true"></i>
+                                        <i class="sr-only">First Page</i>
+                                    </a>
+                                </li>
+                                <li class="page-item" :class="{'disabled': page.current_page == 1}">
+                                    <a href="#" class="page-link" aria-label="Previous Page" @click="applyFilter(page.prev_page_url)">
+                                        <i class="fas fa-fw fa-arrow-left"></i> Previous {{previousResultCount}} results
+                                    </a>
+                                </li>
+                                <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
+                                    <a href="#" class="page-link" aria-label="Next Page" @click="applyFilter(page.next_page_url)">
+                                        Next {{nextResultCount}} results <i class="fas fa-fw fa-arrow-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item" :class="{'disabled': page.current_page == page.last_page}">
+                                    <a href="#" class="page-link" aria-label="Last Page" @click="applyFilter(page.last_page_url)">
+                                        <i class="fas fa-fw fa-angle-double-right" aria-hidden="true"></i>
+                                        <i class="sr-only">Last Page</i>
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="form-check form-group">
+                                <input type="checkbox" class="form-check-input" id="metadata-columns-toggle" v-model="showAmbiguous" />
+                                <label for="metadata-columns-toggle" class="form-check-label">Show Metadata Columns</label>
+                            </div>
+                        </div>
+                        <analysis-table
+                            :concepts="concepts"
+                            :columns="resultColumns"
+                            :data="combinedResults"
+                            :show-hidden="showAmbiguous"
+                            :on-add-filter="addFilter">
+                        </analysis-table>
                     </div>
                 </div>
                 <div v-show="activeResultTab == 'raw' && expertMode">
@@ -224,13 +255,14 @@
 </template>
 
 <script>
-    Vue.component('da-attribute_values', require('./DataAnalysisAttributes.vue'));
-    Vue.component('da-contexts', require('./DataAnalysisEntity.vue'));
-    Vue.component('da-files', require('./DataAnalysisFiles.vue'));
-    Vue.component('da-geodata', require('./DataAnalysisGeodata.vue'));
-    Vue.component('da-bibliography', require('./DataAnalysisBibliography.vue'));
+    import draggable from 'vuedraggable';
+
+    Vue.component('analysis-table', require('./DataAnalysisTable.vue'));
 
     export default {
+        components: {
+            draggable
+        },
         props: {
             concepts: {
                 required: false,
@@ -256,13 +288,37 @@
                     this.applyFilter();
                 }
             },
+            addNewGroup() {
+                const vm = this;
+                if(vm.newGroupDisabled) return;
+                vm.filters.active.groups.push([]);
+            },
+            filterMoved() {
+                if(this.instantFilter) {
+                    this.applyFilter();
+                }
+            },
+            addFilter(filterObj) {
+                const id = this.filters.active.groups[0].length + 1;
+                this.filters.active.groups[0].push({
+                    comp: filterObj.comp,
+                    comp_value: filterObj.value,
+                    name: `${filterObj.comp} ${filterObj.value}`,
+                    id: id,
+                    and: false,
+                    col: 'name'
+                });
+            },
             applyFilter(url) {
                 url = url || '/api/analysis/filter?page=1';
                 const vm = this;
                 // check if current origin is different from last one
                 // and reset filters and columns
                 if(vm.filteredOrigin != vm.origin) {
-                    vm.filters = [];
+                    vm.filters.active.groups = [
+                        []
+                    ];
+                    vm.filters.inactive = [];
                     vm.columns = [];
                 }
                 const data = vm.setupFormData();
@@ -426,7 +482,7 @@
             setupFormData() {
                 const vm = this;
                 let data = {
-                    filters: vm.filters,
+                    filters: vm.filters.active.groups,
                     origin: vm.origin.name,
                     columns: vm.columns,
                     orders: vm.orders,
@@ -446,7 +502,6 @@
         },
         data() {
             return {
-                pluginPrefix: 'da-',
                 activeResultTab: '',
                 results: [],
                 combinedResults: [],
@@ -689,7 +744,14 @@
                 relation: {},
                 visualizationColumns: [],
                 availableColumns: [],
-                filters: [],
+                filters: {
+                    active: {
+                        groups: [
+                            []
+                        ]
+                    },
+                    inactive: []
+                },
                 origin: {},
                 filteredOrigin: {},
                 columns: [],
@@ -713,7 +775,286 @@
             }
         },
         computed: {
+            resultColumns: function() {
+                if(!this.filteredOrigin) return [];
+                switch(this.filteredOrigin.name) {
+                    case 'attribute_values':
+                        return [
+                            {
+                                label: 'Name',
+                                key: 'name',
+                                hidden: false
+                            },
+                            {
+                                label: 'Corresponding Entity',
+                                key: 'entity',
+                                hidden: false
+                            },
+                            {
+                                label: 'Value',
+                                key: 'value',
+                                hidden: false
+                            },
+                            {
+                                label: 'Certainty',
+                                key: 'certainty',
+                                hidden: true
+                            },
+                            {
+                                label: 'Created At',
+                                key: 'created_at',
+                                hidden: true
+                            },
+                            {
+                                label: 'Updated At',
+                                key: 'updated_at',
+                                hidden: true
+                            },
+                            {
+                                label: 'Last Editor',
+                                key: 'lasteditor',
+                                hidden: true
+                            }
+                        ];
+                    case 'contexts':
+                        return [
+                            {
+                                label: 'Name',
+                                key: 'name',
+                                hidden: false
+                            },
+                            {
+                                label: 'Entity-Type',
+                                key: 'context_type',
+                                hidden: false
+                            },
+                            {
+                                label: 'Attributes',
+                                key: 'attributes',
+                                hidden: false
+                            },
+                            // TODO split results
+                            {
+                                label: 'Geodata',
+                                key: 'geodata',
+                                hidden: true
+                            },
+                            {
+                                label: 'Literature',
+                                key: 'literature',
+                                hidden: true
+                            },
+                            {
+                                label: 'Files',
+                                key: 'files',
+                                hidden: true
+                            },
+                            {
+                                label: 'Child Entities',
+                                key: 'child_contexts',
+                                hidden: true
+                            },
+                            {
+                                label: 'Parent Entity',
+                                key: 'root_context',
+                                hidden: true
+                            },
+                            {
+                                label: 'Created At',
+                                key: 'created_at',
+                                hidden: true
+                            },
+                            {
+                                label: 'Updated At',
+                                key: 'updated_at',
+                                hidden: true
+                            },
+                            {
+                                label: 'Last Editor',
+                                key: 'lasteditor',
+                                hidden: true
+                            }
+                        ];
+                    case 'files':
+                        return [
+                            {
+                                label: 'Name',
+                                key: 'name',
+                                hidden: false
+                            },
+                            {
+                                label: 'Modified',
+                                key: 'modified',
+                                hidden: false
+                            },
+                            {
+                                label: 'Created',
+                                key: 'created',
+                                hidden: false
+                            },
+                            {
+                                label: 'Description',
+                                key: 'description',
+                                hidden: false
+                            },
+                            {
+                                label: 'Copyright',
+                                key: 'copyright',
+                                hidden: false
+                            },
+                            {
+                                label: 'Created At',
+                                key: 'created_at',
+                                hidden: true
+                            },
+                            {
+                                label: 'Updated At',
+                                key: 'updated_at',
+                                hidden: true
+                            },
+                            {
+                                label: 'Last Editor',
+                                key: 'lasteditor',
+                                hidden: true
+                            }
+                        ];
+                    case 'geodata':
+                        return [
+                            {
+                                label: 'Geometry',
+                                key: 'geom',
+                                hidden: false
+                            },
+                            {
+                                label: 'Entity',
+                                key: 'context',
+                                hidden: true
+                            },
+                            {
+                                label: 'Color',
+                                key: 'color',
+                                hidden: true
+                            },
+                            {
+                                label: 'Created At',
+                                key: 'created_at',
+                                hidden: true
+                            },
+                            {
+                                label: 'Updated At',
+                                key: 'updated_at',
+                                hidden: true
+                            },
+                            {
+                                label: 'Last Editor',
+                                key: 'lasteditor',
+                                hidden: true
+                            }
+                        ];
+                    case 'bibliography':
+                        return [
+                            {
+                                label: 'Authors',
+                                key: 'author',
+                                hidden: false
+                            },
+                            {
+                                label: 'Title',
+                                key: 'title',
+                                hidden: false
+                            },
+                            {
+                                label: 'Type',
+                                key: 'type',
+                                hidden: false
+                            },
+                            {
+                                label: 'Year',
+                                key: 'year',
+                                hidden: false
+                            },
+                            {
+                                label: 'Volume',
+                                key: 'volume',
+                                hidden: false
+                            },
+                            {
+                                label: 'Series',
+                                key: 'series',
+                                hidden: false
+                            },
+                            {
+                                label: 'School',
+                                key: 'school',
+                                hidden: false
+                            },
+                            {
+                                label: 'Publisher',
+                                key: 'publisher',
+                                hidden: false
+                            },
+                            {
+                                label: 'Pages',
+                                key: 'pages',
+                                hidden: false
+                            },
+                            {
+                                label: 'Organization',
+                                key: 'organization',
+                                hidden: false
+                            },
+                            {
+                                label: 'Issue',
+                                key: 'issue',
+                                hidden: false
+                            },
+                            {
+                                label: 'Note',
+                                key: 'note',
+                                hidden: false
+                            },
+                            {
+                                label: 'Month',
+                                key: 'month',
+                                hidden: false
+                            },
+                            {
+                                label: 'Journal',
+                                key: 'journal',
+                                hidden: false
+                            },
+                            {
+                                label: 'Institution',
+                                key: 'institution',
+                                hidden: false
+                            },
+                            {
+                                label: 'Chapter',
+                                key: 'chapter',
+                                hidden: false
+                            },
+                            {
+                                label: 'Updated At',
+                                key: 'updated_at',
+                                hidden: true
+                            },
+                            {
+                                label: 'Last Editor',
+                                key: 'lasteditor',
+                                hidden: true
+                            }
+                        ];
+                    default:
+                        return [];
+                }
+            },
+            newGroupDisabled: function() {
+                const lastGrpIdx = this.filters.active.groups.length - 1;
+                // Disable new groups, if last group is empty
+                return !this.filters.active.groups[lastGrpIdx].length;
+            },
             overallResultCount: function() {
+                if(!this.page.to || !this.page.from) return 0;
                 return (this.page.to - this.page.from) + 1;
             },
             previousResultCount: function() {

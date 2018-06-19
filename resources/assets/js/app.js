@@ -11,6 +11,7 @@ import VCalendar from 'v-calendar';
 import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
+import VTooltip from 'v-tooltip';
 
 fontawesome.library.add(solid, regular, brands);
 
@@ -41,11 +42,13 @@ Vue.use(VCalendar, {
 });
 Vue.use(VeeValidate);
 Vue.use(Notifications);
+Vue.use(VTooltip);
 Vue.use(SpacialistPluginSystem);
 
 // Imported Components
 Vue.component('multiselect', Multiselect);
 Vue.component('file-upload', VueUploadComponent);
+
 // Extended Components
 Vue.component('context-search', require('./components/ContextSearch.vue'));
 Vue.component('label-search', require('./components/LabelSearch.vue'));

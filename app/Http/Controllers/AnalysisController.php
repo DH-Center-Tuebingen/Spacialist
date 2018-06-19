@@ -440,7 +440,7 @@ class AnalysisController extends Controller {
             case 'bibliography':
                 if($relations) {
                     $query = Bibliography::with([
-                        'contexts'
+                        // 'contexts'
                     ]);
                 } else {
                     $query = Bibliography::leftJoin('sources', 'sources.literature_id', '=', 'literature.id')
@@ -461,14 +461,20 @@ class AnalysisController extends Controller {
         $groups = [];
         $hasGroupBy = false;
         if(!empty($filters)) {
-            foreach($filters as $f) {
-                $applied = $this->applyFilter($query, $f, $groups);
-                // check if it was a valid filter and a agg function
-                if($applied && isset($f->func) && $this->isAggregateFunction($f->func)) {
-                    $hasGroupBy = true;
-                } else {
-                    $groups[$f->col] = 1;
-                }
+            foreach($filters as $filterGroup) {
+                $query->where(function($subQuery) use ($filterGroup, $groups, $hasGroupBy) {
+                    foreach($filterGroup as $fArray) {
+                        $f = (object) $fArray;
+                        $f->and = false; // all filters in a group are OR
+                        $applied = $this->applyFilter($subQuery, $f);
+                        // check if it was a valid filter and a agg function
+                        if($applied && isset($f->func) && $this->isAggregateFunction($f->func)) {
+                            $hasGroupBy = true;
+                        } else {
+                            $groups[$f->col] = 1;
+                        }
+                    }
+                });
             }
         }
 
@@ -526,7 +532,7 @@ class AnalysisController extends Controller {
         }
     }
 
-    private function applyFilter($query, $filter, $groups) {
+    private function applyFilter($query, $filter) {
         if(!$this->isValidCompare($filter->comp)) {
             // TODO error?
             return false;

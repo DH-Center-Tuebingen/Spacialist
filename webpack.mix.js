@@ -58,6 +58,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'three-full',
        'transliteration',
        'v-calendar',
+       'v-tooltip',
        'vee-validate',
        'vue',
        'vue-context',

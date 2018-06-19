@@ -31,14 +31,6 @@ body, #app {
     width: 1.8rem;
 }
 
-.btn-toggle {
-    position: absolute;
-    left: 0;
-    top: -15px;
-    margin: .25rem;
-    z-index: 1;
-}
-
 .notification-info {
     margin-left: -.5rem;
 }
@@ -85,7 +77,7 @@ body, #app {
     overflow-y: auto;
 }
 
-.reorder-handle {
+.reorder-handle, .grab-handle {
     cursor: grab;
 }
 
