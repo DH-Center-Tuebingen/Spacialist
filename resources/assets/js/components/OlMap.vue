@@ -180,6 +180,7 @@
                     const l = vm.overlays[k];
                     if(!l.context_type_id && l.type != 'unlinked') {
                         vm.overlayLayers.push(vm.createNewLayer(l));
+                        continue;
                     };
                     const layerId = l.id;
                     let layerName;
@@ -206,7 +207,7 @@
                 }
                 vm.vector = new VectorLayer({
                     baseLayer: false,
-                    displayInLayerSwitcher: true,
+                    displayInLayerSwitcher: false,
                     title: 'Draw Layer',
                     visible: true,
                     layer: 'draw',
