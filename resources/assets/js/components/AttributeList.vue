@@ -1,8 +1,9 @@
 <template>
     <div>
         <draggable
-            style="min-height: 1px;"
+            class="h-100"
             v-model="localAttributes"
+            :class="{'drag-container': !disableDrag}"
             :clone="clone"
             :move="move"
             :options="dragOpts"
