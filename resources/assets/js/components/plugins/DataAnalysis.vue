@@ -24,35 +24,50 @@
             </div>
             <h5>Filters</h5>
             <h6>Active</h6>
-            <div class="row">
-                <draggable
-                    class="col-md-4 filter-group rounded border border-success"
-                    v-for="(group, i) in filters.active.groups"
-                    v-model="filters.active.groups[i]"
-                    :key="i"
-                    :options="{group: 'filters'}"
-                    @add="filterMoved"
-                    @end="drag=false"
-                    @start="drag=true">
-                    <div v-for="filter in filters.active.groups[i]" :key="filter.id" class="grab-handle">
-                        {{ filter.name }}
+            <div class="col-md-12">
+                <div class="row">
+                    <draggable
+                        class="col-md-4 filter-group rounded border border-success py-2"
+                        v-for="(group, i) in filters.active.groups"
+                        v-model="filters.active.groups[i]"
+                        :key="i"
+                        :options="{group: 'filters'}"
+                        @add="filterMoved"
+                        @end="drag=false"
+                        @start="drag=true">
+                        <div v-for="(filter, pos) in filters.active.groups[i]" :key="filter.id" class="grab-handle bg-info text-dark d-flex flex-row justify-content-between p-1 rounded">
+                            <span>{{ filter.name }}</span>
+                            <div>
+                                <a href="#" class="text-dark" @click="removeFilter(filters.active.groups[i], pos)">
+                                    <i class="fas fa-fw fa-times fa-sm"></i>
+                                </a>
+                                <a href="#" class="text-dark" @click="deleteFilter(filters.active.groups[i], pos)">
+                                    <i class="fas fa-fw fa-trash fa-sm"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </draggable>
+                    <div class="col-md-4 filter-group rounded border border-secondary d-flex flex-column justify-content-center align-items-center clickable" :disabled="newGroupDisabled" @click="addNewGroup">
+                        <i class="fas fa-fw fa-plus fa-2x"></i>
+                        Add new Group
                     </div>
-                </draggable>
-                <div class="col-md-4 filter-group rounded border border-secondary d-flex flex-column justify-content-center align-items-center clickable" :disabled="newGroupDisabled" @click="addNewGroup">
-                    <i class="fas fa-fw fa-plus fa-2x"></i>
-                    Add new Group
                 </div>
             </div>
             <h6>Inactive</h6>
             <draggable
-                class="col-md-12 filter-group rounded border border-secondary"
+                class="col-md-12 filter-group rounded border border-secondary py-2"
                 v-model="filters.inactive"
                 :options="{group: 'filters'}"
                 @add="filterMoved"
                 @end="drag=false"
                 @start="drag=true">
-                <div v-for="filter in filters.inactive" class="grab-handle">
-                    {{ filter.name }}
+                <div v-for="(filter, pos) in filters.inactive" class="grab-handle bg-warning text-dark d-flex flex-row justify-content-between p-1 rounded">
+                    <span>{{ filter.name }}</span>
+                    <div>
+                        <a href="#" class="text-dark" @click="deleteFilter(filters.inactive, pos)">
+                            <i class="fas fa-fw fa-trash fa-sm"></i>
+                        </a>
+                    </div>
                 </div>
             </draggable>
             <h5>Further Query Options</h5>
@@ -284,9 +299,7 @@
                 this.showFilterOptions = !this.showFilterOptions;
             },
             updateOrigin(value) {
-                if(this.instantFilter) {
-                    this.applyFilter();
-                }
+                this.applyOnlyInstantFilter();
             },
             addNewGroup() {
                 const vm = this;
@@ -294,9 +307,7 @@
                 vm.filters.active.groups.push([]);
             },
             filterMoved() {
-                if(this.instantFilter) {
-                    this.applyFilter();
-                }
+                this.applyOnlyInstantFilter();
             },
             addFilter(filterObj) {
                 const id = this.filters.active.groups[0].length + 1;
@@ -308,6 +319,27 @@
                     and: false,
                     col: 'name'
                 });
+                this.applyOnlyInstantFilter();
+            },
+            removeFilter(filterGroup, position) {
+                const filters = filterGroup.splice(position, 1);
+                if(filters.length) {
+                    this.filters.inactive.push(filters[0]);
+                }
+                this.applyOnlyInstantFilter();
+            },
+            deleteFilter(filterGroup, position) {
+                filterGroup.splice(position, 1);
+                // Only apply filters, if filter was removed from
+                // an active group
+                if(filterGroup != this.filters.inactive) {
+                    this.applyOnlyInstantFilter();
+                }
+            },
+            applyOnlyInstantFilter(url) {
+                if(this.instantFilter) {
+                    this.applyFilter(url);
+                }
             },
             applyFilter(url) {
                 url = url || '/api/analysis/filter?page=1';
@@ -393,9 +425,7 @@
                     value: value,
                     name: name
                 });
-                if(this.instantFilter) {
-                    this.applyFilter();
-                }
+                this.applyOnlyInstantFilter();
             },
             removeSpilt(index) {
                 this.splits.splice(index, 1);
