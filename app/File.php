@@ -42,7 +42,11 @@ class File extends Model
         'exif'
     ];
 
-    private $imageMime = 'image/';
+
+    private const THUMB_SUFFIX = "_thumb";
+    private const THUMB_WIDTH = 256;
+    private const EXP_SUFFIX = ".jpg";
+    private const EXP_FORMAT = "jpg";
 
     public static function applyFilters($builder, $filters) {
         if(isset($filters['strategy'])) {
@@ -201,18 +205,14 @@ class File extends Model
         $file->save();
 
         if($file->isImage()) {
-            $THUMB_SUFFIX = "_thumb";
-            $THUMB_WIDTH = 256;
-            $EXP_SUFFIX = ".jpg";
-            $EXP_FORMAT = "jpg";
             $nameNoExt = pathinfo($filename, PATHINFO_FILENAME);
-            $thumbFilename = $nameNoExt . $THUMB_SUFFIX . $EXP_SUFFIX;
+            $thumbFilename = $nameNoExt . self::THUMB_SUFFIX . self::EXP_SUFFIX;
 
             $imageInfo = getimagesize($fileUrl);
             $width = $imageInfo[0];
             $height = $imageInfo[1];
             $mime = $imageInfo[2];//$imageInfo['mime'];
-            if($width > $THUMB_WIDTH) {
+            if($width > self::THUMB_WIDTH) {
                 switch($mime) {
                     case IMAGETYPE_JPEG:
                         $image = imagecreatefromjpeg($fileUrl);
@@ -226,14 +226,14 @@ class File extends Model
                     default:
                         // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
                         $im = new Imagick($fileUrl);
-                        $fileUrl = Helpers::getStorageFilePath($nameNoExt . $EXP_SUFFIX);
-                        $im->setImageFormat($EXP_FORMAT);
+                        $fileUrl = Helpers::getStorageFilePath($nameNoExt . self::EXP_SUFFIX);
+                        $im->setImageFormat(self::EXP_FORMAT);
                         $im->writeImage($fileUrl);
                         $im->clear();
                         $im->destroy();
                         $image = imagecreatefromjpeg($fileUrl);
                 }
-                $scaled = imagescale($image, $THUMB_WIDTH);
+                $scaled = imagescale($image, self::THUMB_WIDTH);
                 ob_start();
                 imagejpeg($scaled);
                 $image = ob_get_clean();
@@ -306,6 +306,16 @@ class File extends Model
         $lastModified = date('Y-m-d H:i:s', filemtime($fileUrl));
 
         $this->modified = $lastModified;
+        $this->save();
+    }
+
+    public function rename($newName) {
+        Storage::move($this->name, $newName);
+        $this->name = $newName;
+        if($this->isImage()) {
+            $nameNoExt = pathinfo($newName, PATHINFO_FILENAME);
+            $this->thumb = $nameNoExt . self::THUMB_SUFFIX . self::EXP_SUFFIX;
+        }
         $this->save();
     }
 

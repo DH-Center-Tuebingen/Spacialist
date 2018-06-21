@@ -22,7 +22,7 @@
                 </a>
             </li>
         </ul>
-        <div v-if="selectedTopAction != 'upload'">
+        <div v-if="!this.isAction('upload')">
             <h5 class="clickable" @click="toggleFilters">Filter Rules
                 <small>
                     <span v-show="!showFilters">
@@ -162,7 +162,23 @@
         <modal name="file-modal" width="80%" height="auto" :scrollable="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ selectedFile.name }} - Details</h5>
+                    <h5 class="modal-title" @mouseenter="onFileHeaderHover(true)" @mouseleave="onFileHeaderHover(false)">
+                        <span v-if="!selectedFile.editing">
+                            {{ selectedFile.name }} - Details
+                            <a href="#" v-if="fileHeaderHovered" class="text-dark" @click="enableFilenameEditing()">
+                                <i class="fas fa-fw fa-edit"></i>
+                            </a>
+                        </span>
+                        <form class="form-inline" v-else>
+                            <input type="text" class="form-control mr-2" v-model="newFilename" />
+                            <button type="submit" class="btn btn-outline-success mr-2" @click="updateFilename(newFilename)">
+                                <i class="fas fa-fw fa-check"></i>
+                            </button>
+                            <button type="reset" class="btn btn-outline-danger" @click="cancelUpdateFilename()">
+                                <i class="fas fa-fw fa-ban"></i>
+                            </button>
+                        </form>
+                    </h5>
                     <button type="button" class="close" aria-label="Close" @click="hideFileModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -551,6 +567,39 @@
                 }
                 return filters;
             },
+            onFileHeaderHover(active) {
+                // If edit mode is enabled, do not disable it on hover
+                if(this.selectedFile.editing) return;
+                this.fileHeaderHovered = active;
+            },
+            enableFilenameEditing() {
+                this.newFilename = this.selectedFile.name;
+                this.selectedFile.editing = true;
+            },
+            updateFilename(newName) {
+                const vm = this;
+                const id = vm.selectedFile.id;
+                const data = {
+                    name: newName
+                };
+                vm.$http.patch(`/api/file/${id}/property`, data).then(function(response) {
+                    const filedata = response.data;
+                    let file = vm[vm.selectedTopAction].files.find(f => f.id == id);
+                    const keys = ['name', 'url', 'thumb', 'thumb_url', 'modified', 'modified_unix', 'lasteditor'];
+                    for(let i=0; i<keys.length; i++) {
+                        const k = keys[i];
+                        file[k] = filedata[k];
+                        vm.selectedFile[k] = filedata[k];
+                    }
+                    vm.selectedFile.editing = false;
+                }).catch(function(error) {
+                    vm.$throwError(error);
+                });
+            },
+            cancelUpdateFilename() {
+                this.newFilename = '';
+                this.selectedFile.editing = false;
+            },
             toggleFullscreen: function(event) {
                 let elem = document.getElementById('file-container');
                 if(!elem) return;
@@ -842,7 +891,8 @@
                 this.editingProperty.value = '';
             },
             showFileModal(file) {
-                this.selectedFile = Object.assign({}, file);
+                this.selectedFile.editing = false;
+                this.selectedFile = { ...this.selectedFile, ...file };
                 switch(file.category) {
                     case 'image':
                         this.fileCategoryComponent = 'file-image';
@@ -904,7 +954,7 @@
                     apiUrl: '/file/linked',
                     apiPageParam: 'page',
                     loadChunk: () => {
-                        if(this.selectedTopAction != 'linkedFiles') return;
+                        if(!this.isAction('linkedFiles')) return;
                         this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
                     }
                 },
@@ -917,7 +967,7 @@
                     apiUrl: '/file/unlinked',
                     apiPageParam: 'page',
                     loadChunk: () => {
-                        if(this.selectedTopAction != 'unlinkedFiles') return;
+                        if(!this.isAction('unlinkedFiles')) return;
                         this.getNextFiles('unlinkedFiles', this.getFilters('unlinkedFiles'));
                     }
                 },
@@ -930,7 +980,7 @@
                     apiUrl: '/file',
                     apiPageParam: 'page',
                     loadChunk: () => {
-                        if(this.selectedTopAction != 'allFiles') return;
+                        if(!this.isAction('allFiles')) return;
                         this.getNextFiles('allFiles', this.getFilters('allFiles'));
                     }
                 },
@@ -938,6 +988,8 @@
                     key: '',
                     value: ''
                 },
+                fileHeaderHovered: false,
+                newFilename: '',
                 selectedFile: {},
                 replaceFiles: [],
                 contextMenuFile: {},

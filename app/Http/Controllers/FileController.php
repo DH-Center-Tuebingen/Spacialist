@@ -150,7 +150,8 @@ class FileController extends Controller
     public function patchProperty(Request $request, $id) {
         $this->validate($request, [
             'copyright' => 'string',
-            'description' => 'string'
+            'description' => 'string',
+            'name' => 'string'
         ]);
 
         try {
@@ -161,12 +162,26 @@ class FileController extends Controller
             ], 400);
         }
 
+        if($request->has('name')) {
+            $newName = $request->get('name');
+            $otherFileWithName = File::where('name', $newName)->first();
+            if(isset($otherFileWithName)) {
+                return response()->json([
+                    'error' => 'There is already a file with this name'
+                ], 400);
+            }
+        }
+
         foreach($request->only(['copyright', 'description']) as $key => $value) {
             $file->{$key} = $value;
         }
-
         $file->save();
-        return response()->json(null, 204);
+
+        if(isset($newName)) {
+            $file->rename($newName);
+            $file->setFileInfo();
+        }
+        return response()->json($file);
     }
 
     // PUT
