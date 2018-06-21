@@ -1,14 +1,14 @@
 <template>
     <div class="modal-content-80-fix">
-        <div :id="containerId" class="w-100 h-100">
-        </div>
         <transition name="fade">
-            <div class="progress" style="height: 1px;" v-if="progress<100">
+            <div class="progress mb-2" style="height: 1px;" v-if="progress<100">
                 <div class="progress-bar" role="progressbar" :style="{width: progress+'%'}" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100">
                     <span class="sr-only">{{progress}}</span>
                 </div>
             </div>
         </transition>
+        <div :id="containerId" class="w-100 h-100">
+        </div>
     </div>
 </template>
 
