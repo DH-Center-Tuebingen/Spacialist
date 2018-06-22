@@ -3,6 +3,7 @@
 namespace App;
 
 use App\ContextFile;
+use App\Helpers;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -156,7 +157,8 @@ class File extends Model
         $files = self::with(['contexts'])
             ->whereHas('contexts', function($query) use($cid, $filters) {
                 $query->where('context_id', $cid);
-                if(isset($filters['sub_entities'])) {
+                $subs = $filters['sub_entities'];
+                if(isset($subs) && Helpers::parseBoolean($subs)) {
                     $query->orWhere('root_context_id', $cid);
                 }
             })
