@@ -65,6 +65,21 @@ class FileController extends Controller
         return response()->json($content);
     }
 
+    public function getSubFiles(Request $request, $id) {
+        try {
+            Context::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This entity does not exist'
+            ], 400);
+        }
+
+        $category = $request->query('c');
+        $subFiles = File::getSubFiles($id, $category);
+
+        return response()->json($subFiles);
+    }
+
     public function getLinkCount($id) {
         try {
             $file = File::findOrFail($id);

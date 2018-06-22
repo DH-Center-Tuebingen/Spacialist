@@ -186,7 +186,7 @@
                 <div class="modal-body text-center">
                     <div class="row">
                         <div class="col-md-6">
-                            <component id="file-container" :is="fileCategoryComponent" :file="selectedFile"></component>
+                            <component id="file-container" :is="fileCategoryComponent" :file="selectedFile" :context="localContext"></component>
                         </div>
                         <div class="col-md-6">
                             <ul class="nav nav-tabs nav-fill">

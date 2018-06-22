@@ -104,6 +104,7 @@ Route::get('/file/{id}/archive/list', 'FileController@getArchiveFileList')->wher
 Route::get('/file/{id}/archive/download', 'FileController@downloadArchivedFile')->where('id', '[0-9]+');
 Route::get('/file/{id}/as_html', 'FileController@getAsHtml')->where('id', '[0-9]+');
 Route::get('/file/{id}/link_count', 'FileController@getLinkCount')->where('id', '[0-9]+');
+Route::get('/file/{id}/sub_files', 'FileController@getSubFiles')->where('id', '[0-9]+');
 // Filters
 Route::get('/file/filter/category', 'FileController@getCategories');
 Route::get('/file/filter/camera', 'FileController@getCameraNames');

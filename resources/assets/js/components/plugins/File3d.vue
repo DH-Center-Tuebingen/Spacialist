@@ -8,6 +8,9 @@
             </div>
         </transition>
         <div :id="containerId" class="w-100 h-100">
+            <button type="button" class="btn btn-outline-info position-fixed m-2" v-if="context.id" @click="loadAllSubModels">
+                Load Sub-Models into scene
+            </button>
         </div>
     </div>
 </template>
@@ -57,6 +60,10 @@
         props: {
             file: {
                 required: true,
+                type: Object
+            },
+            context: {
+                required: false,
                 type: Object
             }
         },
@@ -128,6 +135,15 @@
                 this.scene.add(this.camera);
                 this.scene.add(this.group);
         		this.scene.add(new GridHelper(10, 20));
+            },
+            loadAllSubModels: function() {
+                const vm = this;
+                if(!vm.context && !vm.context.id) return;
+                const id = vm.context.id;
+                vm.$http.get(`/api/file/${id}/sub_files?c=3d`).then(function(response) {
+                    const models = response.data;
+                    models.forEach(m => vm.loadModel(m));
+                });
             },
             loadModel: function(file) {
                 let fileType = this.getFileType(file);
