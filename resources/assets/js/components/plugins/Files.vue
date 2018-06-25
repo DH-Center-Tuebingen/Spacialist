@@ -18,7 +18,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#" :class="{active: isAction('upload')}" @click="setAction('upload')">
-                    <i class="fas fa-fw fa-upload"></i> Upload Files
+                    <i class="fas fa-fw fa-file-upload"></i> Upload Files
                 </a>
             </li>
         </ul>
@@ -275,7 +275,7 @@
                                             </td>
                                             <td class="text-right font-weight-bold">
                                                 <a :href="selectedFile.url" :download="selectedFile.name" target="_blank">
-                                                    <i class="fas fa-fw fa-download text-muted"></i>
+                                                    <i class="fas fa-fw fa-file-download text-muted"></i>
                                                     Download
                                                 </a>
                                             </td>
@@ -293,7 +293,7 @@
                                         :post-action="replaceFileUrl"
                                         @input-file="onReplaceFileSet">
                                             <span class="btn btn-outline-secondary">
-                                                <i class="fas fa-fw fa-retweet"></i> Replace File
+                                                <i class="fas fa-fw fa-file-import"></i> Replace File
                                             </span>
                                     </file-upload>
                                     <div class="d-flex justify-content-between align-items-center" v-if="replaceFiles.length">

@@ -2,7 +2,7 @@
     <div>
         <ul class="ml-3 list-unstyled">
             <li v-for="l in layer" class="pb-1">
-                <i class="far fa-fw fa-map"></i>
+                <i class="fas fa-fw fa-map-marked-alt"></i>
                 <a href="#" @click="onSelect(l)">{{ getTitle(l) }}</a>
             </li>
             <li v-if="addNew">

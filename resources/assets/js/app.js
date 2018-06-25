@@ -1,8 +1,8 @@
 import Multiselect from 'vue-multiselect';
-import fontawesome from '@fortawesome/fontawesome';
-import regular from '@fortawesome/fontawesome-free-regular';
-import solid from '@fortawesome/fontawesome-free-solid';
-import brands from '@fortawesome/fontawesome-free-brands';
+import { library, dom } from '@fortawesome/fontawesome-svg-core';
+import { fab } from '@fortawesome/free-brands-svg-icons';
+import { far } from '@fortawesome/free-regular-svg-icons';
+import { fas } from '@fortawesome/free-solid-svg-icons';
 import VModal from 'vue-js-modal';
 import Axios from 'axios';
 import VueUploadComponent from 'vue-upload-component';
@@ -13,7 +13,8 @@ import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
 import VTooltip from 'v-tooltip';
 
-fontawesome.library.add(solid, regular, brands);
+library.add(fas, far, fab);
+dom.watch(); // search for <i> tags to replace with <svg>
 
 /**
  * First we will load all of this project's JavaScript dependencies which

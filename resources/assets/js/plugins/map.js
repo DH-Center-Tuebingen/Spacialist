@@ -19,13 +19,13 @@ const SpacialistPluginMap = {
         // Layer Editor
         Vue.prototype.$registerSpacialistPlugin({
             label: 'prefs.extension.layer-editor',
-            icon: 'fa-sticky-note',
+            icon: 'fa-atlas',
             href: '/editor/layer'
         }, 'settings');
         // GIS View
         Vue.prototype.$registerSpacialistPlugin({
             label: 'prefs.extension.gis-view',
-            icon: 'fa-globe',
+            icon: 'fa-globe-africa',
             href: '/tool/gis'
         }, 'tools');
     }
