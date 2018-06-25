@@ -5,7 +5,6 @@
             <layer
                 class="flex-grow-1 scroll-y-auto"
                 :add-new="_ => onAddNewLayer(false)"
-                :concepts="concepts"
                 :layer="baselayer"
                 :on-select="onLayerSelect">
             </layer>
@@ -13,7 +12,6 @@
             <layer
                 class="flex-grow-1 scroll-y-auto"
                 :add-new="_ => onAddNewLayer(true)"
-                :concepts="concepts"
                 :layer="overlays"
                 :on-select="onLayerSelect">
             </layer>
@@ -179,10 +177,6 @@
             overlays: {
                 type: Array,
                 required: true
-            },
-            concepts: {
-                validator: Vue.$validateObject,
-                required: false
             }
         },
         mounted() {},
@@ -259,11 +253,8 @@
                 if(layer.name) {
                     return layer.name
                 }
-                if(this.concepts && layer.context_type) {
-                    const concept = this.concepts[layer.context_type.thesaurus_url];
-                    if(concept) {
-                        return concept.label;
-                    }
+                if(layer.context_type) {
+                    this.$translateConcept(layer.context_type.thesaurus_url);
                 }
                 return 'No Title';
             }

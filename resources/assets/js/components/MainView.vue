@@ -8,7 +8,6 @@
                 </button>
                 <context-tree
                     class="col px-0 scroll-y-auto"
-                    :concepts="concepts"
                     :context-types="contextTypes"
                     :on-context-menu-add="requestAddNewEntity"
                     :on-context-menu-duplicate="duplicateEntity"
@@ -36,7 +35,6 @@
                 </div>
                 <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="dataLoaded"
                     :attributes="selectedContext.attributes"
-                    :concepts="concepts"
                     :dependencies="selectedContext.dependencies"
                     :disable-drag="true"
                     :on-metadata="showMetadata"
@@ -63,7 +61,6 @@
             <div class="mt-2 col px-0">
                 <keep-alive>
                     <component
-                        :concepts="concepts"
                         :context="selectedContext"
                         :context-data-loaded="dataLoaded"
                         :is="activePlugin"
@@ -76,7 +73,7 @@
                     </p>
                     <div v-else v-for="(referenceGroup, key) in selectedContext.references" class="mb-2">
                         <h5 class="mb-1">
-                            <a href="#" @click="showMetadataForReferenceGroup(referenceGroup)">{{ concepts[key].label }}</a>
+                            <a href="#" @click="showMetadataForReferenceGroup(referenceGroup)">{{ $translateConcept(key) }}</a>
                         </h5>
                         <div class="list-group">
                             <a class="list-group-item list-group-item-action" v-for="reference in referenceGroup">
@@ -325,10 +322,6 @@
                 type: Array,
                 default: []
             },
-            concepts: {
-                required: false, // TODO required?
-                validator: Vue.$validateObject
-            },
             contextTypes: {
                 required: false, // TODO required?
                 validator: Vue.$validateObject
@@ -510,7 +503,7 @@
                 vm.$http.patch(`/api/context/${cid}/attribute/${aid}`, data).then(function(response) {
                     oldData.possibility = newData.possibility;
                     oldData.possibility_description = newData.possibility_description;
-                    const attributeName = vm.$translateConcept(vm.concepts, vm.referenceModal.attribute.thesaurus_url);
+                    const attributeName = vm.$translateConcept(vm.referenceModal.attribute.thesaurus_url);
                     vm.$showToast('Certainty updated', `Certainty of ${attributeName} successfully set to ${newData.possibility}% (${newData.possibility_description}).`, 'success');
                 }).catch(function(error) {
                     vm.$throwError(error);
@@ -707,9 +700,7 @@
             translateLabel(element, label) {
                 let value = element[label];
                 if(!value) return element;
-                let concept = this.concepts[element[label]];
-                if(!concept) return element;
-                return concept.label;
+                return this.$translateConcept(element[label]);
             },
             resetFlags() {
                 this.$validator.fields.items.forEach(field => {

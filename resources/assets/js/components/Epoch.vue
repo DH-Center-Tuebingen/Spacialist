@@ -65,10 +65,6 @@
                 type: Array,
                 default: _ => new Array(),
             },
-            concepts: {
-                validator: Vue.$validateObject,
-                default: _ => new Object(),
-            },
             disabled: {
                 type: Boolean,
             },
@@ -92,7 +88,7 @@
             translateLabel(element, prop) {
                 const value = element[prop];
                 if(!value) return element;
-                return this.$translateConcept(this.concepts, value);
+                return this.$translateConcept(value);
             },
         },
         data () {

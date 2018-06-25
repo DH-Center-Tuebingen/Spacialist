@@ -1,7 +1,6 @@
 <template>
     <div class="h-100" v-if="dataInitialized">
         <ol-map
-            :concepts="concepts"
             :context-types="contextTypes"
             :epsg="epsg"
             :init-geojson="geojson"
@@ -23,10 +22,6 @@
 
     export default {
         props: {
-            concepts: {
-                validator: Vue.$validateObject,
-                required: true
-            },
             context: {
                 type: Object,
                 required: true

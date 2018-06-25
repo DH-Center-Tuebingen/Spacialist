@@ -27,7 +27,7 @@
                         </button>
                     </div>
                     <span class="text-right col">
-                        {{concepts[attribute.thesaurus_url].label}}:
+                        {{ $translateConcept(attribute.thesaurus_url) }}:
                     </span>
                     <sup class="clickable" v-if="onMetadata" @click="onMetadata(attribute)">
                         <span>
@@ -128,13 +128,13 @@
                         <list :entries="localValues[attribute.id].value" :disabled="attribute.isDisabled" :on-change="value => onChange(null, value, attribute.id)" :name="'attribute-'+attribute.id" v-validate="" />
                     </div>
                     <div v-else-if="attribute.datatype == 'epoch'">
-                        <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :concepts="concepts" :epochs="localSelections[attribute.id]" :disabled="attribute.isDisabled" v-validate=""/>
+                        <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :epochs="localSelections[attribute.id]" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
                     <div v-else-if="attribute.datatype == 'dimension'">
                         <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
                     <div v-else-if="attribute.datatype == 'table'">
-                        <tabular :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :concepts="concepts" :selections="localSelections" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""/>
+                        <tabular :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :selections="localSelections" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
                     <div v-else-if="attribute.datatype == 'sql'">
                         <div v-if="isArray(localValues[attribute.id].value)">
@@ -143,14 +143,14 @@
                                     <thead class="thead-light">
                                         <tr>
                                             <th v-for="(columnNames, index) in localValues[attribute.id].value[0]">
-                                                {{ getConceptLabel(index) }}
+                                                {{ $translateConcept(index) }}
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr v-for="(row, $index) in localValues[attribute.id].value">
                                             <td v-for="column in row">
-                                                {{ getConceptLabel(column) }}
+                                                {{ $translateConcept(column) }}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -211,10 +211,6 @@
             attributes: {
                 required: true,
                 type: Array
-            },
-            concepts: {
-                required: true,
-                validator: Vue.$validateObject
             },
             dependencies: {
                 required: false,
@@ -418,13 +414,7 @@
             translateLabel(element, prop) {
                 const value = element[prop];
                 if(!value) return element;
-                return this.getConceptLabel(value);
-            },
-            getConceptLabel(url)  {
-                if(!url) return url;
-                const concept = this.concepts[url];
-                if(!concept) return url;
-                return concept.label;
+                return this.$translateConcept(value);
             },
             // Vue.Draggable methods
             clone(original) {

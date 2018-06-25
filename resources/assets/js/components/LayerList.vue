@@ -20,10 +20,6 @@
                 type: Array,
                 required: true
             },
-            concepts: {
-                validator: Vue.$validateObject,
-                required: false
-            },
             addNew: {
                 type: Function,
                 required: false
@@ -40,11 +36,8 @@
                 if(layer.name) {
                     return layer.name
                 }
-                if(this.concepts && layer.context_type) {
-                    const concept = this.concepts[layer.context_type.thesaurus_url];
-                    if(concept) {
-                        return concept.label;
-                    }
+                if(layer.context_type) {
+                    return this.$translateConcept(layer.context_type.thesaurus_url);
                 }
                 return 'No Title';
             }

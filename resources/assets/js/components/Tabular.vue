@@ -3,7 +3,7 @@
         <thead class="thead-light">
             <tr>
                 <th v-for="column in attribute.columns">
-                    {{ concepts[column.thesaurus_url].label }}
+                    {{ $translateConcept(column.thesaurus_url) }}
                 </th>
                 <th>
                 </th>
@@ -90,11 +90,6 @@
                 type: Array,
                 default: _ => new Array(),
             },
-            concepts: {
-                validator: Vue.$validateObject,
-                required: false,
-                default: _ => new Object(),
-            },
             selections: {
                 type: Object,
             },
@@ -135,7 +130,7 @@
             translateLabel(element, prop) {
                 const value = element[prop];
                 if(!value) return element;
-                return this.$translateConcept(this.concepts, value);
+                return this.$translateConcept(value);
             },
         },
         computed: {

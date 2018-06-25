@@ -11,7 +11,6 @@
                 :attributes="localAttributes"
                 :values="localAttributeValues"
                 :selections="{}"
-                :concepts="concepts"
                 :is-source="true"
                 :on-delete="onDeleteAttribute"
                 :show-info="true">
@@ -22,7 +21,6 @@
             <context-types
                 class="col px-0 h-100 scroll-y-auto"
                 :data="localContextTypes"
-                :concepts="concepts"
                 :on-add="onCreateContextType"
                 :on-delete="onDeleteContextType"
                 :on-select="setContextType">
@@ -78,7 +76,6 @@
                 :attributes="contextAttributes"
                 :values="contextValues"
                 :selections="contextSelections"
-                :concepts="concepts"
                 :on-add="addAttributeToContextType"
                 :on-edit="onEditContextAttribute"
                 :on-remove="onRemoveAttributeFromContextType"
@@ -214,17 +211,17 @@
         <modal name="delete-context-type-modal" height="auto" :scrollable="true">
             <div class="modal-content" v-if="openedModal == 'delete-context-type-modal'">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete {{ concepts[modalSelectedContextType.thesaurus_url].label }}</h5>
+                    <h5 class="modal-title">Delete {{ $translateConcept(modalSelectedContextType.thesaurus_url)}}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteContextTypeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to delete Context-Type <i>{{ concepts[modalSelectedContextType.thesaurus_url].label }}</i>?
+                        Do you really want to delete Context-Type <i>{{ $translateConcept(modalSelectedContextType.thesaurus_url) }}</i>?
                     </p>
                     <p class="alert alert-danger">
-                        Please note: If you delete <i>{{ concepts[modalSelectedContextType.thesaurus_url].label }}</i>, {{ contextCount }} contexts of this type are deleted as well.
+                        Please note: If you delete <i>{{ $translateConcept(modalSelectedContextType.thesaurus_url) }}</i>, {{ contextCount }} contexts of this type are deleted as well.
                     </p>
                 </div>
                 <div class="modal-footer">
@@ -241,7 +238,7 @@
         <modal name="edit-context-attribute-modal" height="auto" :scrollable="true">
             <div class="modal-content" v-if="openedModal == 'edit-context-attribute-modal'">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit {{ concepts[modalSelectedAttribute.thesaurus_url].label }}</h5>
+                    <h5 class="modal-title">Edit {{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideEditContextAttributeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -253,7 +250,7 @@
                                 Label:
                             </label>
                             <div class="col-md-9">
-                                <input type="text" class="form-control-plaintext" :value="concepts[modalSelectedAttribute.thesaurus_url].label" readonly />
+                                <input type="text" class="form-control-plaintext" :value="$translateConcept(modalSelectedAttribute.thesaurus_url)" readonly />
                             </div>
                         </div>
                         <div class="form-group row">
@@ -330,17 +327,17 @@
         <modal name="delete-attribute-modal" height="auto" :scrollable="true">
             <div class="modal-content" v-if="openedModal == 'delete-attribute-modal'">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete {{ concepts[modalSelectedAttribute.thesaurus_url].label }}</h5>
+                    <h5 class="modal-title">Delete {{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteAttributeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to delete Attribute <i>{{ concepts[modalSelectedAttribute.thesaurus_url].label }}</i>?
+                        Do you really want to delete Attribute <i>{{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</i>?
                     </p>
                     <p class="alert alert-danger">
-                        Please note: If you delete <i>{{ concepts[modalSelectedAttribute.thesaurus_url].label }}</i>, {{ attributeValueCount }} values of this attribute in the contexts are deleted as well.
+                        Please note: If you delete <i>{{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</i>, {{ attributeValueCount }} values of this attribute in the contexts are deleted as well.
                     </p>
                 </div>
                 <div class="modal-footer">
@@ -357,17 +354,17 @@
         <modal name="remove-attribute-from-ct-modal" height="auto" :scrollable="true">
             <div class="modal-content" v-if="openedModal == 'remove-attribute-from-ct-modal'">
                 <div class="modal-header">
-                    <h5 class="modal-title">Remove {{ concepts[modalSelectedAttribute.thesaurus_url].label }} from {{ concepts[modalSelectedContextType.thesaurus_url].label }}</h5>
+                    <h5 class="modal-title">Remove {{ $translateConcept(modalSelectedAttribute.thesaurus_url) }} from {{ $translateConcept(modalSelectedContextType.thesaurus_url) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideRemoveAttributeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to remove Attribute <i>{{ concepts[modalSelectedAttribute.thesaurus_url].label }}</i> from Context-Type <i>{{ concepts[modalSelectedContextType.thesaurus_url].label }}</i>?
+                        Do you really want to remove Attribute <i>{{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</i> from Context-Type <i>{{ $translateConcept(modalSelectedContextType.thesaurus_url) }}</i>?
                     </p>
                     <p class="alert alert-danger">
-                        Please note: If you delete <i>{{ concepts[modalSelectedAttribute.thesaurus_url].label }}</i>, {{ attributeValueCount }} values of this attribute in the contexts of type <i>{{ concepts[modalSelectedContextType.thesaurus_url].label }}</i> are deleted as well.
+                        Please note: If you delete <i>{{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</i>, {{ attributeValueCount }} values of this attribute in the contexts of type <i>{{ $translateConcept(modalSelectedContextType.thesaurus_url) }}</i> are deleted as well.
                     </p>
                 </div>
                 <div class="modal-footer">
@@ -385,7 +382,7 @@
 
 <script>
     export default {
-        props: ['attributes', 'concepts', 'contextTypes', 'values'],
+        props: ['attributes', 'contextTypes', 'values'],
         mounted() {},
         methods: {
             createAttribute(attribute) {
@@ -472,7 +469,7 @@
                     'sub_context_types': vm.contextType.sub_context_types.map(t => t.id)
                 };
                 vm.$http.post('/api/editor/dm/'+id+'/relation', data).then(function(response) {
-                    const name = vm.$translateConcept(vm.concepts, vm.contextType.thesaurus_url);
+                    const name = vm.$translateConcept(vm.contextType.thesaurus_url);
                     vm.$showToast('Entity-Type updated', `${name} successfully updated.`, 'success');
                 }).catch(function(error) {
                     vm.$throwError(error);
@@ -494,8 +491,8 @@
                     for(let i=index+1; i<attributes.length; i++) {
                         attributes[i].position++;
                     }
-                    const attrName = vm.$translateConcept(vm.concepts, response.data.thesaurus_url);
-                    const etName = vm.$translateConcept(vm.concepts, vm.contextType.thesaurus_url);
+                    const attrName = vm.$translateConcept(response.data.thesaurus_url);
+                    const etName = vm.$translateConcept(vm.contextType.thesaurus_url);
                     vm.$showToast('Attribute added', `${attrName} successfully added to ${etName}.`, 'success');
                 }).catch(function(error) {
                     vm.$throwError(error);
@@ -796,9 +793,7 @@
             translateLabel(element, label) {
                 let value = element[label];
                 if(!value) return element;
-                let concept = this.concepts[element[label]];
-                if(!concept) return element;
-                return concept.label;
+                return this.$translateConcept(element[label]);
             },
             //
             setAttributeValueCount(cnt) {

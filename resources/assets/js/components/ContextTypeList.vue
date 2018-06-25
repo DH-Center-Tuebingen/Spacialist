@@ -3,7 +3,7 @@
         <li v-for="(d, i) in data" class="pb-1 d-flex align-items-center justify-content-between" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
             <i class="fas fa-fw fa-monument"></i>
             <a class="p-2" href="#" :class="{ 'font-weight-bold': d.id == selectedElement.id }" @click="select(d)">
-                {{ concepts[d.thesaurus_url].label }}
+                {{ $translateConcept(d.thesaurus_url) }}
             </a>
             <span class="ml-auto" v-if="onDelete">
                 <button class="btn btn-danger btn-fab rounded-circle" v-show="hoverState[i]" @click="onDelete(d)">
@@ -23,10 +23,6 @@
         props: {
             data: {
                 type: Array,
-                required: true
-            },
-            concepts: {
-                validator: Vue.$validateObject,
                 required: true
             },
             onAdd: {

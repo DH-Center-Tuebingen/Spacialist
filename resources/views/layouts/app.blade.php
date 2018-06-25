@@ -17,7 +17,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div id="app" class="d-flex flex-column" preferences="{{json_encode($p)}}">
+    <div id="app" class="d-flex flex-column" concepts="{{$concepts}}" preferences="{{json_encode($p)}}">
         <nav class="navbar navbar-dark bg-dark sticky-top navbar-expand-lg">
             <!-- Branding Image -->
             <a class="navbar-brand" href="{{ url('/home') }}">

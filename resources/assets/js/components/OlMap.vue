@@ -124,10 +124,6 @@
                 required: true,
                 type: Object
             },
-            concepts: {
-                required: true,
-                validator: Vue.$validateObject
-            },
             contextTypes: {
                 required: true,
                 validator: Vue.$validateObject
@@ -187,7 +183,7 @@
                     if(l.context_type_id) {
                         const ct = vm.getContextTypeById(l.context_type_id);
                         if(ct) {
-                            layerName = vm.$translateConcept(vm.concepts, ct.thesaurus_url);
+                            layerName = vm.$translateConcept(ct.thesaurus_url);
                         }
                     } else {
                         layerName = 'Unlinked';

@@ -10,7 +10,7 @@
                     <div class="list-group scroll-y-auto col">
                         <a href="#" class="list-group-item list-group-item-action" v-for="l in layers" @dblclick="addLayerToSelection(l)">
                             <span v-if="l.thesaurus_url">
-                                {{ concepts[l.thesaurus_url].label }}
+                                {{ $translateConcept(l.thesaurus_url) }}
                             </span>
                             <span v-else>
                                 {{ l.name }}
@@ -26,7 +26,7 @@
                     <div class="list-group scroll-y-auto col">
                         <a href="#" class="list-group-item list-group-item-action" v-for="(l, i) in selectedLayers" @dblclick="removeLayerFromSelection(i)">
                             <span v-if="l.thesaurus_url">
-                                {{ concepts[l.thesaurus_url].label }}
+                                {{ $translateConcept(l.thesaurus_url) }}
                             </span>
                             <span v-else>
                                 {{ l.name }}
@@ -45,10 +45,6 @@
 <script>
     export default {
         props: {
-            concepts: {
-                validator: Vue.$validateObject,
-                required: false
-            },
             contextTypes: {
                 validator: Vue.$validateObject,
                 required: false

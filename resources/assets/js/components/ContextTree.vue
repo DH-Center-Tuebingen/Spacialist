@@ -64,10 +64,6 @@
             VueContext
         },
         props: {
-            concepts: {
-                required: false, // TODO required?
-                validator: Vue.$validateObject
-            },
             contextTypes: {
                 required: false, // TODO required?
                 validator: Vue.$validateObject
@@ -236,7 +232,7 @@
                     <span onContextmenu={($event) => this.openContextMenu($event, item)}>
                         <span>{item.name}</span>
                         <span class="pl-2 font-italic mb-0">
-                            {this.concepts[this.contextTypes[item.context_type_id].thesaurus_url].label}
+                            {this.$translateConcept(this.contextTypes[item.context_type_id].thesaurus_url)}
                         </span>
                         <span class="pl-2">
                             {item.children_count > 0 ? `(${item.children_count})` : ""}
