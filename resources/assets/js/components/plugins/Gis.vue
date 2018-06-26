@@ -45,10 +45,6 @@
 <script>
     export default {
         props: {
-            contextTypes: {
-                validator: Vue.$validateObject,
-                required: false
-            },
             layers: {
                 type: Array,
                 required: true

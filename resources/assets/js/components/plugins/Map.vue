@@ -1,7 +1,6 @@
 <template>
     <div class="h-100" v-if="dataInitialized">
         <ol-map
-            :context-types="contextTypes"
             :epsg="epsg"
             :init-geojson="geojson"
             :layers="layers"
@@ -42,8 +41,6 @@
                 vm.$http.get('/api/map').then(function(response) {
                     const mapData = response.data;
                     vm.layers = mapData.layers;
-                    vm.contextTypes = mapData.contextTypes;
-                    vm.contexts = mapData.contexts;
                     vm.geodata = mapData.geodata;
                     for(let k in vm.geodata) {
                         const curr = vm.geodata[k];
@@ -112,8 +109,6 @@
                 dataInitialized: false,
                 epsg: {},
                 layers:{},
-                contextTypes: {},
-                contexts: {},
                 geodata: {},
                 geojson: [],
                 geoJsonFormat: new GeoJSON()

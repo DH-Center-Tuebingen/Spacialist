@@ -185,7 +185,7 @@ Vue.prototype.$createDownloadLink = function(content, filename, base64, contentT
 
 Vue.prototype.$hasConcept = function(url) {
     if(!url) return false;
-    return !!this.concepts[url];
+    return !!this.$root.$data.concepts[url];
 }
 
 Vue.prototype.$translateConcept = function(url) {
@@ -195,11 +195,20 @@ Vue.prototype.$translateConcept = function(url) {
     return concepts[url].label;
 }
 
+Vue.prototype.$getEntityType = function(id) {
+    return this.$root.$data.contextTypes[id];
+}
+
+Vue.prototype.$getEntityTypes = function() {
+    return this.$root.$data.contextTypes;
+}
+
 const app = new Vue({
     el: '#app',
     mounted: function() {
         this.preferences = JSON.parse(this.$el.attributes.preferences.value);
         this.concepts = JSON.parse(this.$el.attributes.concepts.value);
+        this.contextTypes = JSON.parse(this.$el.attributes['context-types'].value);
         let extensions = this.preferences['prefs.load-extensions'];
         for(let k in extensions) {
             if(!extensions[k] || (k != 'map' && k != 'files')) {
@@ -221,6 +230,7 @@ const app = new Vue({
         },
         preferences: {},
         concepts: {},
+        contextTypes: {},
         plugins: {}
     },
     methods: {

@@ -124,10 +124,6 @@
                 required: true,
                 type: Object
             },
-            contextTypes: {
-                required: true,
-                validator: Vue.$validateObject
-            },
             onDeleteend: {
                 required: false,
                 type: Function,
@@ -648,7 +644,7 @@
                 return this.getContextTypeById(context.context_type_id);
             },
             getContextTypeById(ctid) {
-                return this.contextTypes[ctid];
+                return this.$getEntityType(ctid);
             },
             getSnapFeatures() {
                 const vm = this;

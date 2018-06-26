@@ -64,10 +64,6 @@
             VueContext
         },
         props: {
-            contextTypes: {
-                required: false, // TODO required?
-                validator: Vue.$validateObject
-            },
             onContextMenuAdd: {
                 required: false,
                 type: Function
@@ -118,8 +114,8 @@
                     guard: (target, event, inputs) => {
                         const vm = this;
                         const dragElem = inputs.selection[0];
-                        const dragContextType = vm.contextTypes[dragElem.context_type_id];
-                        const dropContextType = vm.contextTypes[target.context_type_id];
+                        const dragContextType = vm.$getEntityType(dragElem.context_type_id);
+                        const dropContextType = vm.$getEntityType(target.context_type_id);
                         // If currently dragged element is not allowed as root
                         // and dragged on element is a root element (no parent)
                         // do not allow drop
@@ -232,7 +228,7 @@
                     <span onContextmenu={($event) => this.openContextMenu($event, item)}>
                         <span>{item.name}</span>
                         <span class="pl-2 font-italic mb-0">
-                            {this.$translateConcept(this.contextTypes[item.context_type_id].thesaurus_url)}
+                            {this.$translateConcept(this.$getEntityType(item.context_type_id).thesaurus_url)}
                         </span>
                         <span class="pl-2">
                             {item.children_count > 0 ? `(${item.children_count})` : ""}

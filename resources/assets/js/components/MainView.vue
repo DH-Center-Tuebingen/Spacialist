@@ -8,7 +8,6 @@
                 </button>
                 <context-tree
                     class="col px-0 scroll-y-auto"
-                    :context-types="contextTypes"
                     :on-context-menu-add="requestAddNewEntity"
                     :on-context-menu-duplicate="duplicateEntity"
                     :on-context-menu-delete="requestDeleteEntity"
@@ -321,10 +320,6 @@
                 required: false,
                 type: Array,
                 default: []
-            },
-            contextTypes: {
-                required: false, // TODO required?
-                validator: Vue.$validateObject
             },
             preferences: {
                 required: true,

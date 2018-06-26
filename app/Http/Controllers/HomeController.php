@@ -36,19 +36,12 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $contextTypes = ContextType::with('sub_context_types')
-            ->orderBy('id')
-            ->get();
-        $contextTypeMap = $contextTypes->getDictionary();
-        $contextTypeMap = json_encode($contextTypeMap);
-
         $roots = Context::getEntitiesByParent();
 
         $bibliography = Bibliography::all();
 
         $data = [
             'bibliography' => $bibliography,
-            'contextTypes' => $contextTypeMap,
             'roots' => $roots
         ];
         return view('home', $data);
@@ -90,11 +83,10 @@ class HomeController extends Controller
         foreach($attributes as $a) {
             $a->columns = Attribute::where('parent_id', $a->id)->get();
         }
-        $contextTypes = ContextType::with('sub_context_types')
-            ->orderBy('id')
-            ->get();
 
-        return view('settings.editor.dme', ['attributes' => $attributes, 'contextTypes' => $contextTypes]);
+        return view('settings.editor.dme', [
+            'attributes' => $attributes
+        ]);
     }
 
     public function layer()
@@ -107,12 +99,6 @@ class HomeController extends Controller
 
     public function gis()
     {
-        $contextTypes = ContextType::with('sub_context_types')
-            ->orderBy('id')
-            ->get();
-        $contextTypeMap = $contextTypes->getDictionary();
-        $contextTypeMap = json_encode($contextTypeMap);
-
         $contextLayers = AvailableLayer::with(['context_type'])
             ->whereNotNull('context_type_id')
             ->orWhere('type', 'unlinked')
@@ -129,7 +115,6 @@ class HomeController extends Controller
         $contextLayers = json_encode($contextLayers);
 
         $data = [
-            'contextTypes' => $contextTypeMap,
             'contextLayers' => $contextLayers
         ];
 

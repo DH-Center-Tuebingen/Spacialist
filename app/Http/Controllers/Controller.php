@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\ContextType;
 use App\Preference;
 use App\ThConcept;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -23,7 +24,14 @@ class Controller extends BaseController
 
         $concepts = json_encode(ThConcept::getMap());
 
+        $contextTypes = ContextType::with('sub_context_types')
+            ->orderBy('id')
+            ->get();
+        $contextTypeMap = $contextTypes->getDictionary();
+        $contextTypeMap = json_encode($contextTypeMap);
+
         View::share('p', $preferenceValues);
         View::share('concepts', $concepts);
+        View::share('contextTypes', $contextTypeMap);
   }
 }
