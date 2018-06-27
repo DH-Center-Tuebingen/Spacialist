@@ -204,13 +204,26 @@ class AnalysisController extends Controller {
         $rows = $query->paginate($pageCount);
         $rows->withPath('/analysis/filter');
 
+        $total = 0;
+
         switch($origin) {
             case 'attribute_values':
+                $total = AttributeValue::count();
                 foreach($rows->items() as $a) {
                     $a->value = $a->getValue();
                 }
                 break;
+            case 'contexts':
+                $total = Context::count();
+                break;
+            case 'Geodata':
+                $total = Geodata::count();
+                break;
+            case 'bibliography':
+                $total = Bibliography::count();
+                break;
             case 'files':
+                $total = File::count();
                 foreach($rows->items() as $f) {
                     $f->setFileInfo();
                 }
@@ -234,7 +247,8 @@ class AnalysisController extends Controller {
         }
 
         $result = [
-            'page' => $rows
+            'page' => $rows,
+            'hidden' => $total - $rows->total()
         ];
         if(!$simple) {
             $result['query'] = $this->cleanSql($query->toSql());
@@ -471,7 +485,7 @@ class AnalysisController extends Controller {
                         if($applied && isset($f->func) && $this->isAggregateFunction($f->func)) {
                             $hasGroupBy = true;
                         } else {
-                            $groups[$f->col] = 1;
+                            $groups[$f->column] = 1;
                         }
                     }
                 });
@@ -537,15 +551,15 @@ class AnalysisController extends Controller {
             // TODO error?
             return false;
         }
-        $col = $filter->col;
+        $col = $filter->column;
         $comp = strtoupper($filter->comp);
         $compValue = null;
         if(isset($filter->comp_value)) {
             $compValue = $filter->comp_value;
         }
-        if(isset($filter->relation) && isset($filter->relation->name)) {
-            $isRelationFilter = true;
-            $relation = $filter->relation;
+        if(isset($filter->relation)) {
+            $relation = (object) $filter->relation;
+            $isRelationFilter = isset($relation->name);
         } else {
             $isRelationFilter = false;
         }
@@ -555,7 +569,7 @@ class AnalysisController extends Controller {
             $func = $filter->func;
             $funcValues = null;
             if(isset($filter->func_values)) {
-                $funcValues = $filter->func_values;
+                $funcValues = json_decode($filter->func_values);
             }
             if(!$this->isValidFunction($func)) {
                 // TODO error?
@@ -624,42 +638,42 @@ class AnalysisController extends Controller {
         return true;
     }
 
-    private function applyQueryPart($query, $col, $comp, $compValue, $and) {
-        switch($comp) {
+    private function applyQueryPart($query, $column, $cmp, $values, $and) {
+        switch($cmp) {
             case 'BETWEEN':
-                if($and) $query->whereBetween($col, $compValue);
-                else $query->orWhereBetween($col, $compValue);
+                if($and) $query->whereBetween($column, $values);
+                else $query->orWhereBetween($column, $values);
                 break;
             case 'IN':
-                if($and) $query->whereIn($col, $compValue);
-                else $query->orWhereIn($col, $compValue);
+                if($and) $query->whereIn($column, $values);
+                else $query->orWhereIn($column, $values);
                 break;
             case 'IS NULL':
-                if($and) $query->whereNull($col);
-                else $query->orWhereNull($col);
+                if($and) $query->whereNull($column);
+                else $query->orWhereNull($column);
                 break;
             case 'NOT BETWEEN':
-                if($and) $query->whereNotBetween($col, $compValue);
-                else $query->whereNotBetween($col, $compValue);
+                if($and) $query->whereNotBetween($column, $values);
+                else $query->whereNotBetween($column, $values);
                 break;
             case 'NOT IN':
-                if($and) $query->whereNotIn($col, $compValue);
-                else $query->orWhereNotIn($col, $compValue);
+                if($and) $query->whereNotIn($column, $values);
+                else $query->orWhereNotIn($column, $values);
                 break;
             case 'IS NOT NULL':
-                if($and) $query->whereNotNull($col);
-                else $query->orWhereNotNull($col);
+                if($and) $query->whereNotNull($column);
+                else $query->orWhereNotNull($column);
                 break;
             default:
-                if($and) $query->where($col, $comp, $compValue);
-                else $query->orWhere($col, $comp, $compValue);
+                if($and) $query->where($column, $cmp, $values);
+                else $query->orWhere($column, $cmp, $values);
                 break;
         }
     }
 
-    private function isValidCompare($comp) {
-        $compU = strtoupper($comp);
-        switch($comp) {
+    private function isValidCompare($cmp) {
+        $cmp = strtoupper($cmp);
+        switch($cmp) {
             case '=':
             case '!=':
             case '>':
@@ -681,12 +695,12 @@ class AnalysisController extends Controller {
     }
 
     private function isValidFunction($func) {
-        if(!isset($func)) return false;
         $func = strtoupper($func);
         if($this->isAggregateFunction($func)) return true;
         switch($func) {
             case 'PG_DISTANCE':
             case 'PG_AREA':
+            case 'GEOMETRYTYPE':
                 return true;
             default:
                 return false;
@@ -694,7 +708,6 @@ class AnalysisController extends Controller {
     }
 
     private function isAggregateFunction($func) {
-        if(!isset($func)) return false;
         $func = strtoupper($func);
         switch($func) {
             case 'COUNT':
@@ -723,6 +736,8 @@ class AnalysisController extends Controller {
             case 'PG_AREA':
                 // return area as sqm, sqm should be default for SRID 4326
                 return DB::raw("ST_Area($column, true)$as");
+            case 'GEOMETRYTYPE':
+                return DB::raw("GeometryType($column)$as");
             case 'COUNT':
                 return DB::raw("COUNT($column)$as");
             case 'MIN':

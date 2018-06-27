@@ -7,71 +7,10 @@
                 </button>
                 Query Options
             </h4>
-            <div v-show="expertMode">
-                TODO
-                <p class="alert alert-danger">
-                    Expert Mode is still WIP
-                </p>
-                <h5>Active Order Rules</h5>
-                <ol v-if="orders.length">
-                    <li v-for="order in orders">
-                        <span>{{order.col}} {{order.dir}}</span>
-                    </li>
-                </ol>
-                <p v-else>
-                    No order rules
-                </p>
-            </div>
-            <h5>Filters</h5>
-            <h6>Active</h6>
-            <div class="col-md-12">
-                <div class="row">
-                    <draggable
-                        class="col-md-4 filter-group rounded border border-success py-2"
-                        v-for="(group, i) in filters.active.groups"
-                        v-model="filters.active.groups[i]"
-                        :key="i"
-                        :options="{group: 'filters'}"
-                        @add="filterMoved"
-                        @end="drag=false"
-                        @start="drag=true">
-                        <div v-for="(filter, pos) in filters.active.groups[i]" :key="filter.id" class="grab-handle bg-info text-dark d-flex flex-row justify-content-between p-1 rounded">
-                            <span>{{ filter.name }}</span>
-                            <div>
-                                <a href="#" class="text-dark" @click="removeFilter(filters.active.groups[i], pos)">
-                                    <i class="fas fa-fw fa-times fa-sm"></i>
-                                </a>
-                                <a href="#" class="text-dark" @click="deleteFilter(filters.active.groups[i], pos)">
-                                    <i class="fas fa-fw fa-trash fa-sm"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </draggable>
-                    <div class="col-md-4 filter-group rounded border border-secondary d-flex flex-column justify-content-center align-items-center clickable" :disabled="newGroupDisabled" @click="addNewGroup">
-                        <i class="fas fa-fw fa-plus fa-2x"></i>
-                        Add new Group
-                    </div>
-                </div>
-            </div>
-            <h6>Inactive</h6>
-            <draggable
-                class="col-md-12 filter-group rounded border border-secondary py-2"
-                v-model="filters.inactive"
-                :options="{group: 'filters'}"
-                @add="filterMoved"
-                @end="drag=false"
-                @start="drag=true">
-                <div v-for="(filter, pos) in filters.inactive" class="grab-handle bg-warning text-dark d-flex flex-row justify-content-between p-1 rounded">
-                    <span>{{ filter.name }}</span>
-                    <div>
-                        <a href="#" class="text-dark" @click="deleteFilter(filters.inactive, pos)">
-                            <i class="fas fa-fw fa-trash fa-sm"></i>
-                        </a>
-                    </div>
-                </div>
-            </draggable>
-            <h5>Further Query Options</h5>
-            <form role="form" @submit.prevent="applyFilter()">
+            <button type="submit" class="btn btn-outline-primary mt-2 col-md-12" form="filter-form">
+                <i class="fas fa-fw fa-filter"></i> Filter
+            </button>
+            <form role="form" class="mt-2" id="filter-form" name="filter-form" @submit.prevent="applyFilter()">
                 <div class="form-check form-group offset-md-3">
                     <input type="checkbox" class="form-check-input" id="apply-changes-toggle" v-model="instantFilter" />
                     <label for="apply-changes-toggle" class="form-check-label">Apply Changes immediately</label>
@@ -104,10 +43,82 @@
                         <textarea class="form-control" rows="6" v-model="query" :disabled="true" :readonly="true"></textarea>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-outline-primary mt-2 col-md-12">
-                    <i class="fas fa-fw fa-filter"></i> Filter
-                </button>
             </form>
+            <h5>
+                Filters
+                <span class="badge badge-primary" v-if="hiddenByFilter">
+                    Hides {{ hiddenByFilter }} results
+                </span>
+            </h5>
+            <div v-if="expertMode">
+                TODO
+                <p class="alert alert-danger">
+                    Expert Mode is still WIP
+                </p>
+                <h5>Active Order Rules</h5>
+                <ol v-if="orders.length">
+                    <li v-for="order in orders">
+                        <span>{{order.col}} {{order.dir}}</span>
+                    </li>
+                </ol>
+                <p v-else>
+                    No order rules
+                </p>
+            </div>
+            <div v-else>
+                <div class="col-md-12">
+                    <div class="row">
+                        <div
+                            class="col-md-4 filter-group rounded border border-success p-2"
+                            v-for="(group, i) in filters.active.groups">
+                            <draggable
+                                class="h-100 scroll-y-auto"
+                                v-model="filters.active.groups[i]"
+                                :key="i"
+                                :options="{group: 'filters'}"
+                                @add="filterMoved"
+                                @end="drag=false"
+                                @start="drag=true">
+                                <div v-for="(filter, pos) in filters.active.groups[i]" :key="filter.id" class="filter-item grab-handle bg-info text-dark d-flex flex-row justify-content-between my-1 p-1 rounded">
+                                    <span>{{ filter.name }}</span>
+                                    <div>
+                                        <a href="#" class="text-dark" @click="removeFilter(filters.active.groups[i], pos)">
+                                            <i class="fas fa-fw fa-times fa-sm"></i>
+                                        </a>
+                                        <a href="#" class="text-dark" @click="deleteFilter(filters.active.groups[i], pos)">
+                                            <i class="fas fa-fw fa-trash fa-sm"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </draggable>
+                        </div>
+                        <div class="col-md-4 filter-group rounded border border-secondary d-flex flex-column justify-content-center align-items-center clickable" :disabled="newGroupDisabled" @click="addNewGroup">
+                            <i class="fas fa-fw fa-plus fa-2x"></i>
+                            Add new Group
+                        </div>
+                    </div>
+                </div>
+                <h6 class="mt-2 mb-1">Inactive</h6>
+                <div
+                    class="col-md-12 filter-group rounded border border-secondary p-2">
+                    <draggable
+                        class="h-100 scroll-y-auto"
+                        v-model="filters.inactive"
+                        :options="{group: 'filters'}"
+                        @add="filterMoved"
+                        @end="drag=false"
+                        @start="drag=true">
+                        <div v-for="(filter, pos) in filters.inactive" class="filter-item grab-handle bg-warning text-dark d-flex flex-row justify-content-between my-1 p-1 rounded">
+                            <span>{{ filter.name }}</span>
+                            <div>
+                                <a href="#" class="text-dark" @click="deleteFilter(filters.inactive, pos)">
+                                    <i class="fas fa-fw fa-trash fa-sm"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </draggable>
+                </div>
+            </div>
         </div>
         <div class="h-100" :class="showFilterOptions ? 'col-md-9' : 'col-md-12'">
             <h4>
@@ -178,7 +189,6 @@
                             </div>
                         </div>
                         <analysis-table
-                            :concepts="concepts"
                             :columns="resultColumns"
                             :data="combinedResults"
                             :show-hidden="showAmbiguous"
@@ -278,12 +288,6 @@
         components: {
             draggable
         },
-        props: {
-            concepts: {
-                required: false,
-                validator: Vue.$validateObject
-            }
-        },
         mounted() {
             $('[data-toggle="popover"]').popover();
             this.origin = this.origins[1]; // Use entity table as default
@@ -310,15 +314,18 @@
                 this.applyOnlyInstantFilter();
             },
             addFilter(filterObj) {
-                const id = this.filters.active.groups[0].length + 1;
-                this.filters.active.groups[0].push({
-                    comp: filterObj.comp,
-                    comp_value: filterObj.value,
-                    name: `${filterObj.comp} ${filterObj.value}`,
-                    id: id,
-                    and: false,
-                    col: 'name'
-                });
+                let newFilter = {
+                    id: this.getNextFilterId(),
+                };
+                let col;
+                if(filterObj.relation) {
+                    col = filterObj.relation.name;
+                } else {
+                    col = filterObj.column;
+                }
+                newFilter.name = `${col} ${filterObj.comp} ${filterObj.comp_value}`;
+                newFilter = { ...newFilter, ...filterObj };
+                this.filters.active.groups[0].push(newFilter);
                 this.applyOnlyInstantFilter();
             },
             removeFilter(filterGroup, position) {
@@ -335,6 +342,9 @@
                 if(filterGroup != this.filters.inactive) {
                     this.applyOnlyInstantFilter();
                 }
+            },
+            getNextFilterId() {
+                return this.filterId++;
             },
             applyOnlyInstantFilter(url) {
                 if(this.instantFilter) {
@@ -367,6 +377,7 @@
                         vm.page.next_page_url = '/api' + vm.page.next_page_url;
                     }
                     vm.page.path = '/api' + vm.page.path;
+                    vm.hiddenByFilter = response.data.hidden;
                     vm.results = [];
                     vm.combinedResults = [];
                     vm.filteredOrigin = vm.origin;
@@ -464,8 +475,8 @@
                     // add splits
                     for(let k in vm.splitResults) {
                         let label = k;
-                        if(vm.concepts[k]) {
-                            label = vm.concepts[k].label;
+                        if(vm.$hasConcept(k)) {
+                            label = vm.$translateConcept(k);
                         }
                         columns.push(label);
                     }
@@ -527,7 +538,7 @@
                 return data;
             },
             getConceptLabel(url)  {
-                return this.$translateConcept(this.concepts, url);
+                return this.$translateConcept(url);
             }
         },
         data() {
@@ -560,164 +571,6 @@
                         name: 'bibliography'
                     }
                 ],
-                comps: [
-                    '=',
-                    '!=',
-                    '>',
-                    '>=',
-                    '<',
-                    '<=',
-                    'IS NULL',
-                    'IS NOT NULL',
-                    'LIKE',
-                    'NOT LIKE',
-                    'ILIKE',
-                    'NOT ILIKE',
-                    'BETWEEN',
-                    'NOT BETWEEN',
-                    'IN',
-                    'NOT IN'
-                ],
-                simpleComps: {
-                    beginsWith: {
-                        label: 'analysis.comparisons.label.begins-with',
-                        id: 'begins_with',
-                        comp: 'ILIKE%',
-                        needs_value: true
-                    },
-                    endsWith: {
-                        label: 'analysis.comparisons.label.ends-with',
-                        id: 'ends_with',
-                        comp: '%ILIKE',
-                        needs_value: true
-                    },
-                    doesntBeginWith: {
-                        label: 'analysis.comparisons.label.not-begins-with',
-                        id: 'doesnt_begin_with',
-                        comp: 'NOT ILIKE%',
-                        needs_value: true
-                    },
-                    doesntEndWith: {
-                        label: 'analysis.comparisons.label.not-ends-with',
-                        id: 'doesnt_end_with',
-                        comp: '%NOT ILIKE',
-                        needs_value: true
-                    },
-                    contains: {
-                        label: 'analysis.comparisons.label.contains',
-                        id: 'containts',
-                        comp: '%ILIKE%',
-                        needs_value: true
-                    },
-                    doesntContain: {
-                        label: 'analysis.comparisons.label.not-contains',
-                        id: 'doesnt_contain',
-                        comp: '%NOT ILIKE%',
-                        needs_value: true
-                    },
-                    is: {
-                        label: 'analysis.comparisons.label.exists',
-                        id: 'is',
-                        comp: 'IS NOT NULL'
-                    },
-                    isNull: {
-                        label: 'analysis.comparisons.label.not-exists',
-                        id: 'is_not',
-                        comp: 'IS NULL'
-                    },
-                    lessThan: {
-                        label: 'analysis.comparisons.label.less-than',
-                        id: 'less_than',
-                        comp: '<',
-                        needs_value: true
-                    },
-                    lessOrEqual: {
-                        label: 'analysis.comparisons.label.less-than-or-equal',
-                        id: 'less_than_equal',
-                        comp: '<=',
-                        needs_value: true
-                    },
-                    greaterThan: {
-                        label: 'analysis.comparisons.label.greater-than',
-                        id: 'greater_than',
-                        comp: '>',
-                        needs_value: true
-                    },
-                    greaterOrEqual: {
-                        label: 'analysis.comparisons.label.greater-than-or-equal',
-                        id: 'greater_than_equal',
-                        comp: '>=',
-                        needs_value: true
-                    },
-                    equals: {
-                        label: 'analysis.comparisons.label.equals',
-                        id: 'equals',
-                        comp: '=',
-                        needs_value: true
-                    },
-                    notEquals: {
-                        label: 'analysis.comparisons.label.not-equals',
-                        id: 'doesnt_equal',
-                        comp: '!=',
-                        needs_value: true
-                    },
-                    between: {
-                        label: 'analysis.comparisons.label.between',
-                        id: 'between',
-                        comp: 'BETWEEN',
-                        needs_value: true
-                    },
-                    notBetween: {
-                        label: 'analysis.comparisons.label.not-between',
-                        id: 'not_between',
-                        comp: 'NOT BETWEEN',
-                        needs_value: true
-                    },
-                    in: {
-                        label: 'analysis.comparisons.label.in',
-                        id: 'in',
-                        comp: 'IN',
-                        needs_value: true
-                    },
-                    notIn: {
-                        label: 'analysis.comparisons.label.not-in',
-                        id: 'not_in',
-                        comp: 'NOT IN',
-                        needs_value: true
-                    },
-                    comesBefore: {
-                        label: 'analysis.comparisons.label.comes-before',
-                        id: 'comes_before',
-                        comp: '<',
-                        needs_value: true
-                    },
-                    comesAfter: {
-                        label: 'analysis.comparisons.label.comes-after',
-                        id: 'comes_after',
-                        comp: '>',
-                        needs_value: true
-                    },
-                },
-                functions: [
-                    'pg_distance',
-                    'pg_area',
-                    'count',
-                    'min',
-                    'max',
-                    'avg',
-                    'sum'
-                ],
-                simpleFunctions: {
-                    geoDistance: {
-                        label: 'distance to (in m)',
-                        comp: 'pg_distance',
-                        needs_value: true
-                    },
-                    geoArea: {
-                        label: 'area (in qm)',
-                        comp: 'pg_area'
-                    }
-                },
                 availableVisualizations: [
                     {
                         label: 'analysis.results.tabs.visualization.type.scatter',
@@ -774,6 +627,8 @@
                 relation: {},
                 visualizationColumns: [],
                 availableColumns: [],
+                hiddenByFilter: 0,
+                filterId: 1,
                 filters: {
                     active: {
                         groups: [
@@ -812,13 +667,15 @@
                         return [
                             {
                                 label: 'Name',
-                                key: 'name',
-                                hidden: false
+                                key: 'attribute',
+                                hidden: false,
+                                type: 'thesaurus'
                             },
                             {
                                 label: 'Corresponding Entity',
-                                key: 'entity',
-                                hidden: false
+                                key: 'context',
+                                hidden: false,
+                                type: 'entity'
                             },
                             {
                                 label: 'Value',
@@ -827,18 +684,21 @@
                             },
                             {
                                 label: 'Certainty',
-                                key: 'certainty',
-                                hidden: true
+                                key: 'possibility',
+                                hidden: true,
+                                type: 'percentage'
                             },
                             {
                                 label: 'Created At',
                                 key: 'created_at',
-                                hidden: true
+                                hidden: true,
+                                type: 'date'
                             },
                             {
                                 label: 'Updated At',
                                 key: 'updated_at',
-                                hidden: true
+                                hidden: true,
+                                type: 'date'
                             },
                             {
                                 label: 'Last Editor',
@@ -856,48 +716,64 @@
                             {
                                 label: 'Entity-Type',
                                 key: 'context_type',
-                                hidden: false
+                                hidden: false,
+                                type: 'entity_type',
+                                isRelation: true
                             },
                             {
                                 label: 'Attributes',
                                 key: 'attributes',
-                                hidden: false
+                                hidden: false,
+                                type: 'list.thesaurus',
+                                isRelation: true
                             },
                             // TODO split results
                             {
                                 label: 'Geodata',
                                 key: 'geodata',
-                                hidden: true
+                                hidden: true,
+                                type: 'geometry',
+                                isRelation: true
                             },
                             {
                                 label: 'Literature',
-                                key: 'literature',
-                                hidden: true
+                                key: 'bibliography',
+                                hidden: true,
+                                type: 'list.bibliography',
+                                isRelation: true
                             },
                             {
                                 label: 'Files',
                                 key: 'files',
-                                hidden: true
+                                hidden: true,
+                                type: 'list.entity',
+                                isRelation: true
                             },
                             {
                                 label: 'Child Entities',
                                 key: 'child_contexts',
-                                hidden: true
+                                hidden: true,
+                                type: 'list.entity',
+                                isRelation: true
                             },
                             {
                                 label: 'Parent Entity',
                                 key: 'root_context',
-                                hidden: true
+                                hidden: true,
+                                type: 'entity',
+                                isRelation: true
                             },
                             {
                                 label: 'Created At',
                                 key: 'created_at',
-                                hidden: true
+                                hidden: true,
+                                type: 'date'
                             },
                             {
                                 label: 'Updated At',
                                 key: 'updated_at',
-                                hidden: true
+                                hidden: true,
+                                type: 'date'
                             },
                             {
                                 label: 'Last Editor',
@@ -915,12 +791,14 @@
                             {
                                 label: 'Modified',
                                 key: 'modified',
-                                hidden: false
+                                hidden: false,
+                                type: 'date'
                             },
                             {
                                 label: 'Created',
                                 key: 'created',
-                                hidden: false
+                                hidden: false,
+                                type: 'date'
                             },
                             {
                                 label: 'Description',
@@ -935,12 +813,14 @@
                             {
                                 label: 'Created At',
                                 key: 'created_at',
-                                hidden: true
+                                hidden: true,
+                                type: 'date'
                             },
                             {
                                 label: 'Updated At',
                                 key: 'updated_at',
-                                hidden: true
+                                hidden: true,
+                                type: 'date'
                             },
                             {
                                 label: 'Last Editor',
@@ -953,27 +833,32 @@
                             {
                                 label: 'Geometry',
                                 key: 'geom',
-                                hidden: false
+                                hidden: false,
+                                type: 'geometry'
                             },
                             {
                                 label: 'Entity',
                                 key: 'context',
-                                hidden: true
+                                hidden: true,
+                                type: 'entity'
                             },
                             {
                                 label: 'Color',
                                 key: 'color',
-                                hidden: true
+                                hidden: true,
+                                type: 'color'
                             },
                             {
                                 label: 'Created At',
                                 key: 'created_at',
-                                hidden: true
+                                hidden: true,
+                                type: 'date'
                             },
                             {
                                 label: 'Updated At',
                                 key: 'updated_at',
-                                hidden: true
+                                hidden: true,
+                                type: 'date'
                             },
                             {
                                 label: 'Last Editor',
@@ -1064,9 +949,16 @@
                                 hidden: false
                             },
                             {
+                                label: 'Created At',
+                                key: 'created_at',
+                                hidden: true,
+                                type: 'date'
+                            },
+                            {
                                 label: 'Updated At',
                                 key: 'updated_at',
-                                hidden: true
+                                hidden: true,
+                                type: 'date'
                             },
                             {
                                 label: 'Last Editor',

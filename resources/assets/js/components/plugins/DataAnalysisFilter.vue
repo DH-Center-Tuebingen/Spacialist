@@ -1,25 +1,100 @@
 <template>
-    <div>
+    <div class="d-flex flex-column">
         <div class="text-right">
-            <button type="button" class="close" aria-label="Close" @click="closePopover">
+            <button type="button" class="close" aria-label="Close" v-close-popover>
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
         <form role="form" class="mt-2" @submit.prevent="addFilter(filter)">
+            <div class="form-group row" v-if="filter.comp.needs_value">
+                <label class="col-form-label col-md-3 text-right">Value</label>
+                <div class="col-md-9">
+                    <span v-if="isType(column.type, 'thesaurus|entity_type|entity') && filter.comp.is_dropdown">
+                        <multiselect
+                            label="thesaurus_url"
+                            track-by="id"
+                            v-model="filter.tmp_value"
+                            :allowEmpty="false"
+                            :closeOnSelect="true"
+                            :customLabel="translateLabel"
+                            :hideSelected="false"
+                            :multiple="false"
+                            :options="selections"
+                            @input="setSelectionValue">
+                        </multiselect>
+                    </span>
+                    <v-date-picker
+                        mode="single"
+                        v-else-if="isType(column.type, 'date')"
+                        v-model="filter.value"
+                        :max-date="new Date()">
+                        <div class="input-group date" slot-scope="{ inputValue, updateValue }">
+                            <input type="text" class="form-control" :value="inputValue" @input="updateValue($event.target.value, { formatInput: false, hidePopover: false })" @change="updateValue($event.target.value, { formatInput: true, hidePopover: false }) "/>
+                            <div class="input-group-append input-group-addon">
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="fas fa-fw fa-calendar-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </v-date-picker>
+                    <span v-else-if="isType(column.type, 'list.bibliography|list.entity')"></span>
+                    <input v-else-if="isType(column.type, 'integer|percentage')" class="form-control" type="number" v-model="filter.value" />
+                    <input v-else-if="isType(column.type, 'color')" class="form-control" type="color" v-model="filter.value" />
+                    <input v-else class="form-control" type="text" v-model="filter.value" />
+                </div>
+            </div>
             <div class="form-group row">
                 <label class="col-form-label col-md-3 text-right">Comp</label>
                 <div class="col-md-9">
-                    <input class="form-control" type="text" v-model="filter.comp" />
+                    <multiselect
+                        label="label"
+                        track-by="id"
+                        v-model="filter.comp"
+                        :allowEmpty="false"
+                        :closeOnSelect="true"
+                        :hideSelected="false"
+                        :multiple="false"
+                        :options="typeComparisons">
+                    </multiselect>
                 </div>
             </div>
-            <div class="form-group row">
-                <label class="col-form-label col-md-3 text-right">Value</label>
-                <div class="col-md-9">
-                    <input class="form-control" type="text" v-model="filter.value" />
+            <div v-if="filter.comp.is_function && !filter.comp.silent">
+                <div class="form-group row" v-if="filter.comp.needs_fvalue">
+                    <label class="col-form-label col-md-3 text-right">Function Value</label>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" v-model="filter.fvalue" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-form-label col-md-3 text-right">Comp</label>
+                    <div class="col-md-9">
+                        <multiselect
+                            label="label"
+                            track-by="id"
+                            v-model="filter.fcomp"
+                            :allowEmpty="false"
+                            :closeOnSelect="true"
+                            :hideSelected="false"
+                            :multiple="false"
+                            :options="functionComparisons">
+                        </multiselect>
+                    </div>
+                </div>
+                <div class="form-group row" v-if="filter.fcomp.needs_value">
+                    <label class="col-form-label col-md-3 text-right">Value</label>
+                    <div class="col-md-9">
+                        <input class="form-control" type="text" v-model="filter.value" />
+                    </div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-outline-success">
-                Add Filter
+            <button type="submit" class="btn btn-outline-success w-100">
+                <span class="fa-stack d-inline">
+                    <i class="fas fa-filter"></i>
+                    <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i>
+                </span>
+                <span style="margin-left: -0.5rem;">
+                    Add Filter
+                </span>
             </button>
         </form>
     </div>
@@ -28,9 +103,9 @@
 <script>
     export default {
         props: {
-            concepts: {
+            column: {
                 required: true,
-                validator: Vue.$validateObject
+                type: Object
             },
             onAdd: {
                 required: false,
@@ -38,23 +113,372 @@
                 default: _ => {}
             }
         },
-        mounted() {},
+        mounted() {
+            this.init();
+        },
         methods: {
-            closePopover() {
-
+            init() {
+                const c = this.comparisons;
+                const f = this.functions;
+                let newTypes;
+                this.selections = [];
+                switch(this.column.type) {
+                    case 'entity_type':
+                        this.filter.comp = c.equals_dd;
+                        newTypes = [
+                            c.equals_dd,
+                            c.notEqual_dd
+                        ];
+                        this.selections = Object.values(this.$getEntityTypes());
+                        break;
+                    case 'entity':
+                        this.filter.comp = c.equals;
+                        newTypes = [
+                            c.is,
+                            c.isNull,
+                            c.equals,
+                            c.notEqual,
+                            c.equals_dd,
+                            c.notEqual_dd
+                        ];
+                        this.selections = Object.values(this.$getEntityTypes());
+                        break;
+                    case 'geometry':
+                        this.filter.comp = c.is;
+                        newTypes = [
+                            c.is,
+                            c.isNull,
+                            f.geoDistance,
+                            f.geoArea,
+                            f.isPoint,
+                            f.isLine,
+                            f.isPolygon
+                        ];
+                        break;
+                    case 'thesaurus':
+                        this.filter.comp = c.beginsWith;
+                        newTypes = [
+                            c.beginsWith,
+                            c.notEqual
+                        ];
+                        break;
+                    case 'date':
+                        this.filter.comp = c.lessThan;
+                        newTypes = [
+                            c.lessThan,
+                            c.greaterThan
+                        ];
+                        break;
+                    case 'integer':
+                    case 'percentage':
+                        this.filter.comp = c.equals;
+                        newTypes = [
+                            c.lessThan,
+                            c.lessOrEqual,
+                            c.greaterThan,
+                            c.greaterOrEqual,
+                            c.equals,
+                            c.notEqual
+                        ];
+                        break;
+                    case 'color':
+                        this.filter.comp = c.equals;
+                        newTypes = [
+                            c.is,
+                            c.isNull,
+                            c.equals,
+                            c.notEqual
+                        ];
+                        break;
+                    case 'list.bibliography':
+                    case 'list.entity':
+                        this.filter.comp = c.is;
+                        newTypes = [
+                            c.is,
+                            c.isNull
+                        ];
+                        break;
+                    default: // strings
+                        this.filter.comp = c.equals;
+                        newTypes = [
+                            c.beginsWith,
+                            c.endsWith,
+                            c.doesntBeginWith,
+                            c.doesntEndWith,
+                            c.contains,
+                            c.doesntContain,
+                            c.equals,
+                            c.notEqual
+                        ];
+                }
+                this.typeComparisons = [];
+                newTypes.forEach(t => this.typeComparisons.push(t));
+            },
+            setSelectionValue(value, id) {
+                if(value) {
+                    this.filter.value = value.id;
+                } else {
+                    this.filter.value = '';
+                }
             },
             addFilter(filter) {
-                this.onAdd(filter);
+                this.onAdd(this.parseFilter(filter));
+            },
+            parseFilter(filter) {
+                // Copy filter, because we have to modify it
+                let f = {...filter};
+                if(f.comp.is_function) {
+                    const tmp = {...f.comp};
+                    f.comp = {...f.fcomp};
+                    f.fcomp = tmp;
+                    // Automatically set comparison for is_... geometry type
+                    // functions/filter
+                    if(f.fcomp.id == 'is_point') {
+                        f.comp = this.comparisons.endsWith;
+                        f.value = 'POINT'
+                    } else if(f.fcomp.id == 'is_line') {
+                        f.comp = this.comparisons.endsWith;
+                        f.value = 'LINESTRING'
+                    } else if(f.fcomp.id == 'is_polygon') {
+                        f.comp = this.comparisons.endsWith;
+                        f.value = 'POLYGON'
+                    }
+                }
+                let value;
+                if(f.comp.returnValue) {
+                    value = f.comp.returnValue(f.value);
+                } else {
+                    value = f.value;
+                }
+                let obj = {
+                    comp_value: value,
+                    comp: f.comp.comp,
+                    column: this.column.key
+                };
+                if(this.column.isRelation) {
+                    obj.relation = {
+                        name: this.column.key,
+                    };
+                    if(this.isType(this.column.type, 'geometry')) {
+                        obj.column = 'geom';
+                    }
+                    if(f.comp.on_relation) {
+                        if(this.isType(this.column.type, 'entity_type')) {
+                            obj.column = 'id';
+                        } else if(this.isType(this.column.type, 'entity')) {
+                            obj.column = 'context_type_id';
+                        } else {
+                            obj.relation.comp = f.comp.comp;
+                            obj.relation.value = f.value;
+                        }
+                    } else {
+                        switch(this.column.type) {
+                            case 'entity':
+                                obj.column = 'name';
+                                break;
+                        }
+                    }
+                }
+                if(f.fcomp.is_function) {
+                    obj.func = f.fcomp.comp;
+                    obj.func_values = f.fvalue;
+                }
+                return obj;
+            },
+            isType(columnType, types) {
+                const typeArray = types.split('|');
+                for(let i=0; i<typeArray.length; i++) {
+                    if(typeArray[i] == columnType) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            translateLabel(element, label) {
+                let value = element[label];
+                if(!value) return element;
+                return this.$translateConcept(element[label]);
             }
         },
         data() {
             return {
                 filter: {
-
+                    comp: {},
+                    fcomp: {},
+                    value: '',
+                    fvalue: '',
+                    tmp_value: ''
+                },
+                selections: [],
+                typeComparisons: [],
+                comparisons: {
+                    beginsWith: {
+                        label: 'begins-with',
+                        id: 'begins_with',
+                        comp: 'ILIKE',
+                        returnValue: function(value) {
+                            return `${value}%`;
+                        },
+                        needs_value: true
+                    },
+                    endsWith: {
+                        label: 'ends-with',
+                        id: 'ends_with',
+                        comp: 'ILIKE',
+                        returnValue: function(value) {
+                            return `%${value}`;
+                        },
+                        needs_value: true
+                    },
+                    doesntBeginWith: {
+                        label: 'not-begins-with',
+                        id: 'doesnt_begin_with',
+                        comp: 'NOT ILIKE',
+                        returnValue: function(value) {
+                            return `${value}%`;
+                        },
+                        needs_value: true
+                    },
+                    doesntEndWith: {
+                        label: 'not-ends-with',
+                        id: 'doesnt_end_with',
+                        comp: 'NOT ILIKE',
+                        returnValue: function(value) {
+                            return `%${value}`;
+                        },
+                        needs_value: true
+                    },
+                    contains: {
+                        label: 'contains',
+                        id: 'containts',
+                        comp: 'ILIKE',
+                        returnValue: function(value) {
+                            return `%${value}%`;
+                        },
+                        needs_value: true
+                    },
+                    doesntContain: {
+                        label: 'not-contains',
+                        id: 'doesnt_contain',
+                        comp: 'NOT ILIKE',
+                        returnValue: function(value) {
+                            return `%${value}%`;
+                        },
+                        needs_value: true
+                    },
+                    is: {
+                        label: 'exists',
+                        id: 'is',
+                        comp: 'IS NOT NULL',
+                        on_relation: true
+                    },
+                    isNull: {
+                        label: 'not-exists',
+                        id: 'is_not',
+                        comp: 'IS NULL',
+                        on_relation: true
+                    },
+                    lessThan: {
+                        label: 'less-than',
+                        id: 'less_than',
+                        comp: '<',
+                        needs_value: true
+                    },
+                    lessOrEqual: {
+                        label: 'less-than-or-equal',
+                        id: 'less_than_equal',
+                        comp: '<=',
+                        needs_value: true
+                    },
+                    greaterThan: {
+                        label: 'greater-than',
+                        id: 'greater_than',
+                        comp: '>',
+                        needs_value: true
+                    },
+                    greaterOrEqual: {
+                        label: 'greater-than-or-equal',
+                        id: 'greater_than_equal',
+                        comp: '>=',
+                        needs_value: true
+                    },
+                    equals: {
+                        label: 'equals',
+                        id: 'equals',
+                        comp: '=',
+                        needs_value: true
+                    },
+                    notEqual: {
+                        label: 'not-equals',
+                        id: 'doesnt_equal',
+                        comp: '!=',
+                        needs_value: true
+                    },
+                    equals_dd: {
+                        label: 'dd_equals',
+                        id: 'dd_equals',
+                        comp: '=',
+                        needs_value: true,
+                        is_dropdown: true,
+                        on_relation: true
+                    },
+                    notEqual_dd: {
+                        label: 'dd_not-equals',
+                        id: 'dd_doesnt_equal',
+                        comp: '!=',
+                        needs_value: true,
+                        is_dropdown: true,
+                        on_relation: true
+                    }
+                },
+                functions: {
+                    geoDistance: {
+                        label: 'distance to (in m)',
+                        id: 'distance_to_m',
+                        comp: 'pg_distance',
+                        needs_fvalue: true,
+                        is_function: true
+                    },
+                    geoArea: {
+                        label: 'area (in qm)',
+                        id: 'area_qm',
+                        comp: 'pg_area',
+                        is_function: true
+                    },
+                    isPoint: {
+                        label: 'is-point',
+                        id: 'is_point',
+                        comp: 'GeometryType',
+                        is_function: true,
+                        silent: true
+                    },
+                    isLine: {
+                        label: 'is-line',
+                        id: 'is_line',
+                        comp: 'GeometryType',
+                        is_function: true,
+                        silent: true
+                    },
+                    isPolygon: {
+                        label: 'is-polygon',
+                        id: 'is_polygon',
+                        comp: 'GeometryType',
+                        is_function: true,
+                        silent: true
+                    }
                 }
             }
         },
         computed: {
+            functionComparisons: function() {
+                if(!this.filter.comp || !this.filter.comp.is_function) {
+                    return [];
+                }
+                return [
+                    this.comparisons.lessThan,
+                    this.comparisons.greaterThan
+                ];
+            }
         }
     }
 </script>
