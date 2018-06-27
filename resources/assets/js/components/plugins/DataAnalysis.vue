@@ -289,7 +289,6 @@
             draggable
         },
         mounted() {
-            $('[data-toggle="popover"]').popover();
             this.origin = this.origins[1]; // Use entity table as default
         },
         methods: {
@@ -675,7 +674,8 @@
                                 label: 'Corresponding Entity',
                                 key: 'context',
                                 hidden: false,
-                                type: 'entity'
+                                type: 'entity',
+                                is_relation: true
                             },
                             {
                                 label: 'Value',
@@ -718,14 +718,14 @@
                                 key: 'context_type',
                                 hidden: false,
                                 type: 'entity_type',
-                                isRelation: true
+                                is_relation: true
                             },
                             {
                                 label: 'Attributes',
                                 key: 'attributes',
                                 hidden: false,
                                 type: 'list.thesaurus',
-                                isRelation: true
+                                is_relation: true
                             },
                             // TODO split results
                             {
@@ -733,35 +733,35 @@
                                 key: 'geodata',
                                 hidden: true,
                                 type: 'geometry',
-                                isRelation: true
+                                is_relation: true
                             },
                             {
                                 label: 'Literature',
                                 key: 'bibliography',
                                 hidden: true,
                                 type: 'list.bibliography',
-                                isRelation: true
+                                is_relation: true
                             },
                             {
                                 label: 'Files',
                                 key: 'files',
                                 hidden: true,
                                 type: 'list.entity',
-                                isRelation: true
+                                is_relation: true
                             },
                             {
                                 label: 'Child Entities',
                                 key: 'child_contexts',
                                 hidden: true,
                                 type: 'list.entity',
-                                isRelation: true
+                                is_relation: true
                             },
                             {
                                 label: 'Parent Entity',
                                 key: 'root_context',
                                 hidden: true,
                                 type: 'entity',
-                                isRelation: true
+                                is_relation: true
                             },
                             {
                                 label: 'Created At',

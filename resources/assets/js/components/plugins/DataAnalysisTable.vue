@@ -3,7 +3,7 @@
         <table class="table table-striped table-hover table-bordered table-sm table-cell-250">
             <thead class="thead-light sticky-top">
                 <tr>
-                    <th class="align-top" v-for="column in columns" v-show="renderColumn(column)">
+                    <th class="align-top" v-for="column in columns" :key="column.key" v-show="renderColumn(column)">
                         {{ column.label }}
                         <v-popover class="d-inline" popover-base-class="popover popover-filter">
                             <a href="#">

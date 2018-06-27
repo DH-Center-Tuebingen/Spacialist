@@ -210,6 +210,7 @@
                             c.equals,
                             c.notEqual
                         ];
+                        break;
                 }
                 this.typeComparisons = [];
                 newTypes.forEach(t => this.typeComparisons.push(t));
@@ -255,7 +256,7 @@
                     comp: f.comp.comp,
                     column: this.column.key
                 };
-                if(this.column.isRelation) {
+                if(this.column.is_relation) {
                     obj.relation = {
                         name: this.column.key,
                     };
