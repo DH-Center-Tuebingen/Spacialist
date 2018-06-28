@@ -24,10 +24,6 @@
             context: {
                 type: Object,
                 required: true
-            },
-            preferences: {
-                type: Object,
-                required: true
             }
         },
         mounted() {
@@ -36,7 +32,7 @@
         methods: {
             initData() {
                 const vm = this;
-                vm.epsg = vm.preferences['prefs.map-projection'];
+                vm.epsg = vm.$getPreference('prefs.map-projection');
                 vm.dataInitialized = false;
                 vm.$http.get('/api/map').then(function(response) {
                     const mapData = response.data;

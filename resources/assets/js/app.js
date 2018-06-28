@@ -203,9 +203,13 @@ Vue.prototype.$getEntityTypes = function() {
     return this.$root.$data.contextTypes;
 }
 
+Vue.prototype.$getPreference = function(pref) {
+    return this.$root.$data.preferences[pref];
+}
+
 const app = new Vue({
     el: '#app',
-    mounted: function() {
+    beforeMount: function() {
         this.preferences = JSON.parse(this.$el.attributes.preferences.value);
         this.concepts = JSON.parse(this.$el.attributes.concepts.value);
         this.contextTypes = JSON.parse(this.$el.attributes['context-types'].value);

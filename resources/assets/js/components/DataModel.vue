@@ -833,7 +833,7 @@
                 localAttributes: this.attributes.slice(),
                 availableGeometries: [],
                 newContextType: {},
-                localContextTypes: this.contextTypes.slice(),
+                localContextTypes: Object.values(this.$getEntityTypes()),
                 modalSelectedContextType: {},
                 contextCount: 0,
                 allowedTableKeys: [

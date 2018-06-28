@@ -1,6 +1,6 @@
 <template>
     <div class="row h-100 of-hidden">
-        <div :class="'col-md-'+preferences['prefs.columns'].left" id="tree-container" class="d-flex flex-column h-100">
+        <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100">
             <h3>Entities <small class="badge badge-secondary font-weight-light align-middle font-size-50">{{topLevelCount}} Top-Level Entities</small></h3>
             <div class="d-flex flex-column h-100 col px-0">
                 <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="requestAddNewEntity()">
@@ -19,7 +19,7 @@
                 </button>
             </div>
         </div>
-        <div :class="'col-md-'+preferences['prefs.columns'].center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100">
+        <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100">
             <div v-if="selectedContext.id" class="h-100 d-flex flex-column">
                 <div class="d-flex align-items-center justify-content-between">
                     <h1>{{ selectedContext.name }}</h1>
@@ -44,7 +44,7 @@
             </div>
             <h1 v-else>Nothing selected</h1>
         </div>
-        <div :class="'col-md-'+preferences['prefs.columns'].right" id="addon-container" class="d-flex flex-column">
+        <div :class="'col-md-'+$getPreference('prefs.columns').right" id="addon-container" class="d-flex flex-column">
             <ul class="nav nav-tabs">
                 <li class="nav-item" v-for="plugin in plugins.tab">
                     <a class="nav-link" href="#" :class="{active: tab == plugin.key}" @click="setActivePlugin(plugin)">
@@ -62,8 +62,7 @@
                     <component
                         :context="selectedContext"
                         :context-data-loaded="dataLoaded"
-                        :is="activePlugin"
-                        :preferences="preferences">
+                        :is="activePlugin">
                     </component>
                 </keep-alive>
                 <div v-show="tab == 'references'">
@@ -320,10 +319,6 @@
                 required: false,
                 type: Array,
                 default: []
-            },
-            preferences: {
-                required: true,
-                type: Object
             },
             roots: {
                 required: true,
@@ -587,24 +582,19 @@
             },
             requestAddNewEntity(parent) {
                 const vm = this;
-                let url;
+                let selection = [];
                 if(parent) {
-                    url = '/api/editor/dm/context_type/parent/' + parent.id;
+                    selection = vm.$getEntityType(parent.context_type_id).sub_context_types;
                 } else {
-                    url = '/api/editor/dm/context_type/top';
+                    selection = Object.values(vm.$getEntityTypes()).filter(f => f.is_root);
                 }
-                vm.$http.get(url).then(function(response) {
-                    let selection = response.data;
-                    Vue.set(vm.newEntity, 'name', '');
-                    Vue.set(vm.newEntity, 'type', selection.length == 1 ? selection[0] : null);
-                    Vue.set(vm.newEntity, 'selection', selection);
-                    if(parent) {
-                        Vue.set(vm.newEntity, 'root_context_id', parent.id);
-                    }
-                    vm.$modal.show('add-entity-modal');
-                }).catch(function(error) {
-                    vm.$throwError(error);
-                });
+                Vue.set(vm.newEntity, 'name', '');
+                Vue.set(vm.newEntity, 'type', selection.length == 1 ? selection[0] : null);
+                Vue.set(vm.newEntity, 'selection', selection);
+                if(parent) {
+                    Vue.set(vm.newEntity, 'root_context_id', parent.id);
+                }
+                vm.$modal.show('add-entity-modal');
             },
             hideNewEntityModal() {
                 this.newEntity = {};
