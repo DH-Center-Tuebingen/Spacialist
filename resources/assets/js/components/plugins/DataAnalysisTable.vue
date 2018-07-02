@@ -42,21 +42,21 @@
                             {{ row[column.key] }}
                         </div>
                         <div v-else-if="isType(row, column, 'list.entity')">
-                            <ul>
+                            <ul class="mb-0">
                                 <li v-for="el in row[column.key]">
                                     {{ el.name }}
                                 </li>
                             </ul>
                         </div>
                         <div v-else-if="isType(row, column, 'list.thesaurus')">
-                            <ul>
+                            <ul class="mb-0">
                                 <li v-for="el in row[column.key]">
                                     {{ $translateConcept(el.thesaurus_url) }}
                                 </li>
                             </ul>
                         </div>
                         <div v-else-if="isType(row, column, 'list.bibliography')">
-                            <ul>
+                            <ul class="mb-0">
                                 <li v-for="el in row[column.key]">
                                     {{ el.title }} - {{ el.author }}
                                 </li>
