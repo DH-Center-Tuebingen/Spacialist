@@ -271,45 +271,46 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td>
+                                            <td class="text-left font-weight-bold">
+                                                <file-upload
+                                                    class="mb-0"
+                                                    v-show="!replaceFiles.length"
+                                                    ref="replace"
+                                                    v-model="replaceFiles"
+                                                    :directory="false"
+                                                    :drop="true"
+                                                    :multiple="false"
+                                                    :post-action="replaceFileUrl"
+                                                    @input-file="onReplaceFileSet">
+                                                        <span class="text-primary clickable hover-underline">
+                                                            <i class="fas fa-fw fa-file-import text-muted"></i> Replace File
+                                                        </span>
+                                                </file-upload>
+                                                <div class="d-flex flex-column align-items-start font-weight-normal" v-if="replaceFiles.length">
+                                                    <span>
+                                                        Do you want to replace {{selectedFile.name}} ({{selectedFile.size | bytes}}) with {{replaceFiles[0].name}} ({{replaceFiles[0].size | bytes}})?
+                                                    </span>
+                                                    <div class="d-flex mt-1">
+                                                        <button type="button" class="btn btn-outline-success" @click="doReplaceFile">
+                                                            <i class="fas fa-fw fa-check"></i>
+                                                            Replace
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-danger ml-2" @click="cancelReplaceFile">
+                                                            <i class="fas fa-fw fa-ban"></i>
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td class="text-right font-weight-bold">
                                                 <a :href="selectedFile.url" :download="selectedFile.name" target="_blank">
-                                                    <i class="fas fa-fw fa-file-download text-muted"></i>
                                                     Download
+                                                    <i class="fas fa-fw fa-file-download text-muted"></i>
                                                 </a>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
-                                <div class="mt-3 text-right">
-                                    <file-upload
-                                        v-show="!replaceFiles.length"
-                                        ref="replace"
-                                        v-model="replaceFiles"
-                                        :directory="false"
-                                        :drop="true"
-                                        :multiple="false"
-                                        :post-action="replaceFileUrl"
-                                        @input-file="onReplaceFileSet">
-                                            <span class="btn btn-outline-secondary">
-                                                <i class="fas fa-fw fa-file-import"></i> Replace File
-                                            </span>
-                                    </file-upload>
-                                    <div class="d-flex justify-content-between align-items-center" v-if="replaceFiles.length">
-                                        <span>
-                                            Do you want to replace {{selectedFile.name}} ({{selectedFile.size | bytes}}) with {{replaceFiles[0].name}} ({{replaceFiles[0].size | bytes}})?
-                                        </span>
-                                        <div class="d-flex">
-                                            <button type="button" class="btn btn-outline-success" @click="doReplaceFile">
-                                                Replace
-                                            </button>
-                                            <button type="button" class="btn btn-outline-danger ml-2" @click="cancelReplaceFile">
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
                                 <h5 class="mt-3">Tags</h5>
                             </div>
                             <div v-show="modalTab == 'links'">

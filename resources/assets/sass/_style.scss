@@ -116,6 +116,10 @@ body, #app {
     cursor: pointer;
 }
 
+.hover-underline:hover {
+    text-decoration: underline;
+}
+
 .of-hidden {
     overflow: hidden;
 }
