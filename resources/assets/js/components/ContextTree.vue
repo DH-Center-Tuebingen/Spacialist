@@ -125,7 +125,14 @@
         },
         methods: {
             itemClick(node, item, e) {
-                this.selectionCallback(item);
+                if(this.selectedItem.id == item.id) {
+                    this.selectedItem = {};
+                    item.selected = false;
+                    this.selectionCallback();
+                } else {
+                    this.selectedItem = item;
+                    this.selectionCallback(item);
+                }
             },
             itemToggle(node, item, e) {
             },
@@ -235,6 +242,7 @@
         data() {
             return {
                 tree: [],
+                selectedItem: {},
                 dragging: false,
                 dragOverColor: '#C9FDC9',
                 itemEvents: {
