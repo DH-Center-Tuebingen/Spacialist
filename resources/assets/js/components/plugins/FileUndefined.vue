@@ -5,7 +5,7 @@
             If you need support for this kind of filetype, please create an <a href="https://github.com/eScienceCenter/Spacialist/issues/new">issue on GitHub<sup><i class="fas fa-fw fa-external-link-alt"></i></sup></a>
         </p>
         <a :href="file.url" :download="file.name" target="_blank">
-            <i class="fas fa-fw fa-download fa-5x"></i>
+            <i class="fas fa-fw fa-file-download fa-5x mb-2"></i>
             <h4>Download {{file.name}}</h4>
         </a>
         <div v-if="supportsHtmlRendering && !htmlLoaded">
