@@ -11,9 +11,12 @@
                 <i class="fas fa-fw fa-filter"></i> Filter
             </button>
             <form role="form" class="mt-2" id="filter-form" name="filter-form" @submit.prevent="applyFilter()">
-                <div class="form-check form-group offset-md-3">
-                    <input type="checkbox" class="form-check-input" id="apply-changes-toggle" v-model="instantFilter" />
-                    <label for="apply-changes-toggle" class="form-check-label">Apply Changes immediately</label>
+                <div class="d-flex flex-row justify-content-between form-group offset-md-3 pl-2 clickable" @click="instantFilter = !instantFilter">
+                    <span class="align-middle">Apply Changes immediately</span>
+                    <label class="cb-toggle mx-0 my-auto align-middle">
+                        <input type="checkbox" id="apply-changes-toggle" v-model="instantFilter" />
+                        <span class="slider slider-rounded slider-primary"></span>
+                    </label>
                 </div>
                 <div class="form-group row">
                     <label for="table" class="col-md-3 col-form-label">Table</label>
@@ -183,9 +186,12 @@
                                     </a>
                                 </li>
                             </ul>
-                            <div class="form-check form-group">
-                                <input type="checkbox" class="form-check-input" id="metadata-columns-toggle" v-model="showAmbiguous" />
-                                <label for="metadata-columns-toggle" class="form-check-label">Show Metadata Columns</label>
+                            <div class="clickable" @click="showAmbiguous = !showAmbiguous">
+                                <span class="align-middle">Metadata Columns</span>
+                                <label class="cb-toggle mx-0 my-auto align-middle">
+                                    <input type="checkbox" id="metadata-columns-toggle" v-model="showAmbiguous" />
+                                    <span class="slider slider-rounded slider-primary"></span>
+                                </label>
                             </div>
                         </div>
                         <analysis-table
