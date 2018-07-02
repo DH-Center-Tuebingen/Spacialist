@@ -232,7 +232,12 @@
                 return true;
             },
             treeContextMenuEvent(node, item, e) {
-                this.openContextMenu(e, item);
+                if(item.isRootNode) {
+                    // TODO open different context menu?
+                    e.preventDefault();
+                } else {
+                    this.openContextMenu(e, item);
+                }
             },
             openContextMenu(e, item) {
                 this.$refs.contextMenu.open(e, { item: item });
