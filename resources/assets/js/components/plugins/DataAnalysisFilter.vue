@@ -9,7 +9,7 @@
             <div class="form-group row" v-if="filter.comp.needs_value">
                 <label class="col-form-label col-md-3 text-right">Value</label>
                 <div class="col-md-9">
-                    <span v-if="isType(column.type, 'thesaurus|entity_type|entity') && filter.comp.is_dropdown">
+                    <span v-if="isType(column.type, 'thesaurus|entity_type|entity|attribute') && filter.comp.is_dropdown">
                         <multiselect
                             label="thesaurus_url"
                             track-by="id"
@@ -118,21 +118,22 @@
         },
         methods: {
             init() {
-                const c = this.comparisons;
-                const f = this.functions;
+                const vm = this;
+                const c = vm.comparisons;
+                const f = vm.functions;
                 let newTypes;
-                this.selections = [];
-                switch(this.column.type) {
+                vm.selections = [];
+                switch(vm.column.type) {
                     case 'entity_type':
-                        this.filter.comp = c.equals_dd;
+                        vm.filter.comp = c.equals_dd;
                         newTypes = [
                             c.equals_dd,
                             c.notEqual_dd
                         ];
-                        this.selections = Object.values(this.$getEntityTypes());
+                        vm.selections = Object.values(vm.$getEntityTypes());
                         break;
                     case 'entity':
-                        this.filter.comp = c.equals;
+                        vm.filter.comp = c.equals;
                         newTypes = [
                             c.is,
                             c.isNull,
@@ -141,10 +142,10 @@
                             c.equals_dd,
                             c.notEqual_dd
                         ];
-                        this.selections = Object.values(this.$getEntityTypes());
+                        vm.selections = Object.values(vm.$getEntityTypes());
                         break;
                     case 'geometry':
-                        this.filter.comp = c.is;
+                        vm.filter.comp = c.is;
                         newTypes = [
                             c.is,
                             c.isNull,
@@ -156,14 +157,25 @@
                         ];
                         break;
                     case 'thesaurus':
-                        this.filter.comp = c.beginsWith;
+                        vm.filter.comp = c.equals_dd;
                         newTypes = [
-                            c.beginsWith,
-                            c.notEqual
+                            c.equals_dd,
+                            c.notEqual_dd
                         ];
+                        vm.selections = [];
+                        break;
+                    case 'attribute':
+                        vm.filter.comp = c.equals_dd;
+                        newTypes = [
+                            c.equals_dd,
+                            c.notEqual_dd
+                        ];
+                        vm.$http.get('/api/editor/dm/attribute').then(function(response) {
+                            vm.selections = response.data;
+                        });
                         break;
                     case 'date':
-                        this.filter.comp = c.lessThan;
+                        vm.filter.comp = c.lessThan;
                         newTypes = [
                             c.lessThan,
                             c.greaterThan
@@ -171,7 +183,7 @@
                         break;
                     case 'integer':
                     case 'percentage':
-                        this.filter.comp = c.equals;
+                        vm.filter.comp = c.equals;
                         newTypes = [
                             c.lessThan,
                             c.lessOrEqual,
@@ -182,7 +194,7 @@
                         ];
                         break;
                     case 'color':
-                        this.filter.comp = c.equals;
+                        vm.filter.comp = c.equals;
                         newTypes = [
                             c.is,
                             c.isNull,
@@ -192,14 +204,14 @@
                         break;
                     case 'list.bibliography':
                     case 'list.entity':
-                        this.filter.comp = c.is;
+                        vm.filter.comp = c.is;
                         newTypes = [
                             c.is,
                             c.isNull
                         ];
                         break;
                     default: // strings
-                        this.filter.comp = c.equals;
+                        vm.filter.comp = c.equals;
                         newTypes = [
                             c.beginsWith,
                             c.endsWith,
@@ -212,8 +224,8 @@
                         ];
                         break;
                 }
-                this.typeComparisons = [];
-                newTypes.forEach(t => this.typeComparisons.push(t));
+                vm.typeComparisons = [];
+                newTypes.forEach(t => vm.typeComparisons.push(t));
             },
             setSelectionValue(value, id) {
                 if(value) {
@@ -289,6 +301,8 @@
                             obj.column = 'id';
                         } else if(this.isType(this.column.type, 'entity')) {
                             obj.column = 'context_type_id';
+                        } else if(this.isType(this.column.type, 'attribute')) {
+                            obj.column = 'attribute_id';
                         } else {
                             obj.relation.comp = f.comp.comp;
                             obj.relation.value = f.value;

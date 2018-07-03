@@ -63,6 +63,15 @@ class AttributeValue extends Model
                $this->dt_val;
     }
 
+    public static function getValueById($aid, $cid) {
+        $av = self::where('attribute_id', $aid)
+            ->where('context_id', $cid)->first();
+        if(!isset($av)) {
+            return null;
+        }
+        return $av->getValue();
+    }
+
     public function patch($values) {
         foreach($values as $k => $v) {
             if($k == 'certainty') {

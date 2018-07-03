@@ -687,7 +687,8 @@
                                 label: 'Name',
                                 key: 'attribute',
                                 hidden: false,
-                                type: 'thesaurus'
+                                type: 'attribute',
+                                is_relation: true
                             },
                             {
                                 label: 'Corresponding Entity',
@@ -743,7 +744,7 @@
                                 label: 'Attributes',
                                 key: 'attributes',
                                 hidden: false,
-                                type: 'list.thesaurus',
+                                type: 'list.attribute',
                                 is_relation: true
                             },
                             // TODO split results

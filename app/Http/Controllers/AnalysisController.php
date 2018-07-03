@@ -215,6 +215,11 @@ class AnalysisController extends Controller {
                 break;
             case 'contexts':
                 $total = Context::count();
+                foreach($rows->items() as $c) {
+                    foreach($c->attributes as $a) {
+                        $a->pivot->value = AttributeValue::getValueById($a->pivot->attribute_id, $a->pivot->context_id);
+                    }
+                }
                 break;
             case 'geodata':
                 $total = Geodata::count();

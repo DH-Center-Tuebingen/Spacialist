@@ -146,6 +146,14 @@ class EditorController extends Controller {
         return response()->json($contextTypes);
     }
 
+    public function getAttributes() {
+        $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
+        foreach($attributes as $a) {
+            $a->columns = Attribute::where('parent_id', $a->id)->get();
+        }
+        return response()->json($attributes);
+    }
+
     public function getAttributeTypes() {
         return response()->json([
             [

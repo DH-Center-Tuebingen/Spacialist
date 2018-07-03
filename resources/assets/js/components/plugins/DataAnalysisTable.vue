@@ -35,6 +35,9 @@
                         <div v-else-if="isType(row, column, 'thesaurus') || isType(row, column, 'entity_type')">
                             {{ $translateConcept(row[column.key].thesaurus_url) }}
                         </div>
+                        <div v-else-if="isType(row, column, 'attribute')">
+                            {{ $translateConcept(row[column.key].thesaurus_url) }}
+                        </div>
                         <div v-else-if="isType(row, column, 'percentage')">
                             {{ row[column.key] }}%
                         </div>
@@ -55,6 +58,12 @@
                                 </li>
                             </ul>
                         </div>
+                        <attributes v-else-if="isType(row, column, 'list.attribute')"
+                            :attributes="getAttributes(row[column.key])"
+                            :disable-drag="true"
+                            :selections="{}"
+                            :values="getValues(row[column.key])">
+                        </attributes>
                         <div v-else-if="isType(row, column, 'list.bibliography')">
                             <ul class="mb-0">
                                 <li v-for="el in row[column.key]">
@@ -96,6 +105,19 @@
             }
         },
         methods: {
+            getAttributes(column) {
+                return column.map(c => {
+                    c.isDisabled = true;
+                    return c;
+                });
+            },
+            getValues(column) {
+                let values = {};
+                column.forEach(c => {
+                    values[c.id] = c.pivot;
+                });
+                return values;
+            },
             renderColumn(column) {
                 return !column.hidden || (column.hidden && this.showHidden);
             },

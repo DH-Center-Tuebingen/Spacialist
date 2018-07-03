@@ -54,6 +54,7 @@ Route::get('/editor/dm/attribute/occurrence_count/{aid}', 'EditorController@getA
 Route::get('/editor/dm/attribute/occurrence_count/{aid}/{ctid}', 'EditorController@getAttributeOccurrenceCount')->where('aid', '[0-9]+')->where('ctid', '[0-9]+');
 Route::get('/editor/dm/context_type/top', 'EditorController@getTopContextTypes');
 Route::get('/editor/dm/context_type/parent/{cid}', 'EditorController@getContextTypesByParent')->where('cid', '[0-9]+');
+Route::get('/editor/dm/attribute', 'EditorController@getAttributes');
 Route::get('/editor/dm/attribute_types', 'EditorController@getAttributeTypes');
 Route::get('/editor/context_type/{id}', 'EditorController@getContextType')->where('id', '[0-9]+');
 Route::get('/editor/context_type/{id}/attribute', 'EditorController@getContextTypeAttributes')->where('id', '[0-9]+');
