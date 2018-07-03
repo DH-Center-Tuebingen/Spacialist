@@ -216,7 +216,7 @@ class AnalysisController extends Controller {
             case 'contexts':
                 $total = Context::count();
                 break;
-            case 'Geodata':
+            case 'geodata':
                 $total = Geodata::count();
                 break;
             case 'bibliography':
