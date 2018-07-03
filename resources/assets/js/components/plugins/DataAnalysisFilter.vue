@@ -223,26 +223,47 @@
                 }
             },
             addFilter(filter) {
-                this.onAdd(this.parseFilter(filter));
+                const parsedFilter = this.parseFilter(filter);
+                this.onAdd(parsedFilter.filter, this.column, parsedFilter.comps);
             },
             parseFilter(filter) {
                 // Copy filter, because we have to modify it
                 let f = {...filter};
+                let comps = {};
+                comps.comp1 = {
+                    comp: f.comp,
+                    value: f.value
+                };
                 if(f.comp.is_function) {
+                    // Swap comparisons, because we have to apply the
+                    // non-function comparison first
                     const tmp = {...f.comp};
                     f.comp = {...f.fcomp};
                     f.fcomp = tmp;
+                    comps.comp1 = {
+                        comp: f.fcomp,
+                        value: f.fvalue
+                    };
+                    comps.comp2 = {
+                        comp: f.comp,
+                        value: f.value
+                    };
                     // Automatically set comparison for is_... geometry type
                     // functions/filter
+                    // Setting f.comp here is "magic", so we delete this
+                    // comparison from the comps
                     if(f.fcomp.id == 'is_point') {
                         f.comp = this.comparisons.endsWith;
-                        f.value = 'POINT'
+                        f.value = 'POINT';
+                        delete comps.comp2;
                     } else if(f.fcomp.id == 'is_line') {
                         f.comp = this.comparisons.endsWith;
-                        f.value = 'LINESTRING'
+                        f.value = 'LINESTRING';
+                        delete comps.comp2;
                     } else if(f.fcomp.id == 'is_polygon') {
                         f.comp = this.comparisons.endsWith;
-                        f.value = 'POLYGON'
+                        f.value = 'POLYGON';
+                        delete comps.comp2;
                     }
                 }
                 let value;
@@ -284,7 +305,12 @@
                     obj.func = f.fcomp.comp;
                     obj.func_values = f.fvalue;
                 }
-                return obj;
+                // Returns the parsed filter, but also the applied
+                // comparisons, so they can be displayed human-readable
+                return {
+                    filter: obj,
+                    comps: comps
+                };
             },
             isType(columnType, types) {
                 const typeArray = types.split('|');

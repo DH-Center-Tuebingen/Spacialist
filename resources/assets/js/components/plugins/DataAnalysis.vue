@@ -318,7 +318,7 @@
             filterMoved() {
                 this.applyOnlyInstantFilter();
             },
-            addFilter(filterObj) {
+            addFilter(filterObj, column, comps) {
                 let newFilter = {
                     id: this.getNextFilterId(),
                 };
@@ -328,10 +328,23 @@
                 } else {
                     col = filterObj.column;
                 }
-                newFilter.name = `${col} ${filterObj.comp} ${filterObj.comp_value}`;
+                newFilter.name = this.getFilterLabel(column, comps);
                 newFilter = { ...newFilter, ...filterObj };
                 this.filters.active.groups[0].push(newFilter);
                 this.applyOnlyInstantFilter();
+            },
+            getFilterLabel(column, comps) {
+                const keys = ['comp1', 'comp2'];
+                let label = column.label;
+                keys.forEach(k => {
+                    if(comps[k]) {
+                        label += ` ${comps[k].comp.label}`;
+                        if(comps[k].value) {
+                            label += ` ${comps[k].value}`
+                        }
+                    }
+                });
+                return label;
             },
             removeFilter(filterGroup, position) {
                 const filters = filterGroup.splice(position, 1);
