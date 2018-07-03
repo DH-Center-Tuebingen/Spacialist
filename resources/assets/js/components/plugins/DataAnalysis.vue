@@ -859,7 +859,8 @@
                                 label: 'Entity',
                                 key: 'context',
                                 hidden: true,
-                                type: 'entity'
+                                type: 'entity',
+                                is_relation: true
                             },
                             {
                                 label: 'Color',
