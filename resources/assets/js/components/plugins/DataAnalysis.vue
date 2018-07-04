@@ -199,7 +199,7 @@
                         </div>
                         <analysis-table
                             :columns="resultColumns"
-                            :data="combinedResults"
+                            :data="results"
                             :show-hidden="showAmbiguous"
                             :on-add-filter="addFilter">
                         </analysis-table>
@@ -234,8 +234,43 @@
                         </table>
                     </div>
                 </div>
-                <div v-show="activeResultTab == 'visualization'">
-                    Visualization
+                <div v-show="activeResultTab == 'visualization'" class="row">
+                    <div class="col-md-6 text-right">
+                        <form role="form">
+                            <div class="form-group row">
+                                <label for="vis-type" class="col-form-label col-md-3">Visualization Type:</label>
+                                <div class="col-md-9">
+                                    <multiselect
+                                        id="vis-type"
+                                        label="label"
+                                        track-by="type"
+                                        v-model="selectedVisualization"
+                                        :allowEmpty="true"
+                                        :closeOnSelect="true"
+                                        :hideSelected="false"
+                                        :multiple="false"
+                                        :options="availableVisualizations">
+                                    </multiselect>
+                                </div>
+                            </div>
+                        </form>
+                        <component
+                            v-if="visualizationSelected"
+                            :is="plotAddon"
+                            :options="plotOptions"
+                            :layout="plotLayout"
+                            :selections="resultColumns"
+                            :on-selection="getColumnValues">
+                        </component>
+                        <p class="alert alert-info" v-else>
+                            Please select a visualization from the list above. For a detailed explanation of their options, please refer to <a href="https://plot.ly/javascript/" target="_blank">plotly.js</a> API.
+                        </p>
+                        <button type="button" class="btn btn-outline-primary col" @click="visualize(plotOptions)">
+                            <i class="fas fa-fw fa-eye"></i>
+                            Visualize
+                        </button>
+                    </div>
+                    <div class="col-md-6 border-left border-secondary" :id="plotContainer"></div>
                 </div>
                 <div v-show="activeResultTab == 'export'">
                     <p class="alert alert-info">
@@ -290,8 +325,20 @@
 
 <script>
     import draggable from 'vuedraggable';
+    import Plotly from 'plotly.js/dist/plotly';
 
     Vue.component('analysis-table', require('./DataAnalysisTable.vue'));
+    Vue.component('scatter-plot', require('./ScatterPlot.vue'));
+    Vue.component('line-plot', require('./LinePlot.vue'));
+    Vue.component('bar-plot', require('./BarPlot.vue'));
+    Vue.component('pie-plot', require('./PiePlot.vue'));
+    Vue.component('histogram-plot', require('./HistogramPlot.vue'));
+    Vue.component('histogram2d-plot', require('./Histogram2dPlot.vue'));
+    Vue.component('ternary-plot', require('./TernaryPlot.vue'));
+    Vue.component('ternarycontour-plot', require('./TernaryContourPlot.vue'));
+    Vue.component('heatmap-plot', require('./HeatmapPlot.vue'));
+    Vue.component('windrose-plot', require('./WindrosePlot.vue'));
+    Vue.component('radar-plot', require('./RadarPlot.vue'));
 
     export default {
         components: {
@@ -404,7 +451,6 @@
                     vm.page.path = '/api' + vm.page.path;
                     vm.hiddenByFilter = response.data.hidden;
                     vm.results = [];
-                    vm.combinedResults = [];
                     vm.filteredOrigin = vm.origin;
                     vm.query = data.query;
                     vm.splitResults = Object.assign({});
@@ -430,7 +476,7 @@
                             }
                         } else {
                             for(let i=0; i<data.length; i++) {
-                                vm.combinedResults.push(data[i]);
+                                vm.results.push(data[i]);
                             }
                             const splits = response.data.splits;
                             for(let k in splits) {
@@ -440,10 +486,6 @@
                         }
                         vm.activeResultTab = vm.expertMode ? 'raw' : 'simple';
                     }
-                    vm.visualizationColumns = [];
-                    vm.visualizationResults = [];
-                    vm.visualizationColumns = vm.getAvailableColumns();
-                    vm.visualizationResults = vm.getResults();
                 }).catch(function(error) {
                     vm.$throwError(error);
                 });
@@ -465,63 +507,7 @@
             },
             removeSpilt(index) {
                 this.splits.splice(index, 1);
-                this.applyFilter();
-            },
-            datatypeSupportsSplit(datatype) {
-                switch(datatype) {
-                    case 'string':
-                    case 'stringf':
-                    case 'double':
-                    case 'date':
-                    case 'integer':
-                    case 'boolean':
-                    case 'percentage':
-                    case 'geography':
-                    case 'sql':
-                        return true;
-                    default:
-                        return false;
-                }
-            },
-            getAvailableColumns() {
-                const vm = this;
-                if(vm.expertMode) {
-                    return vm.availableColumns;
-                } else {
-                    let columns = [];
-                    // add predefined columns
-                    if(vm.combinedResults.length) {
-                        let header = vm.combinedResults[0];
-                        for(let k in header) {
-                            columns.push(k);
-                        }
-                    }
-
-                    // add splits
-                    for(let k in vm.splitResults) {
-                        let label = k;
-                        if(vm.$hasConcept(k)) {
-                            label = vm.$translateConcept(k);
-                        }
-                        columns.push(label);
-                    }
-                    return columns;
-                }
-            },
-            getResults() {
-                const vm = this;
-                if(vm.expertMode) {
-                    return vm.results;
-                } else {
-                    let results = vm.combinedResults.slice();
-                    for(let i=0; i<results.length; i++) {
-                        let r = results[i];
-                        for(let k in vm.splitResults) {
-                            r[k] = vm.splitResults[k][i];
-                        }
-                    }
-                    return results;
-                }
+                this.applyOnlyInstantFilter();
             },
             exportRows(type, all) {
                 const vm = this;
@@ -543,6 +529,22 @@
                     vm.$createDownloadLink(response.data, filename, true, response.headers['content-type']);
                 }).catch(function(error) {
                     vm.$throwError(error);
+                });
+            },
+            visualize(options) {
+                const o = {...options};
+                const l = {...this.plotLayout};
+                Plotly.newPlot(this.plotContainer, [o], l);
+            },
+            getColumnValues(column) {
+                // TODO
+                return this.results.map(r => {
+                    let curr = r[column.key];
+                    if(curr.id) {
+                        return curr.id;
+                    } else {
+                        return curr;
+                    }
                 });
             },
             setupFormData() {
@@ -570,7 +572,6 @@
             return {
                 activeResultTab: '',
                 results: [],
-                combinedResults: [],
                 splitResults: {},
                 splitType: {},
                 query: '',
@@ -650,7 +651,6 @@
                 page: {},
                 column: {},
                 relation: {},
-                visualizationColumns: [],
                 availableColumns: [],
                 hiddenByFilter: 0,
                 filterId: 1,
@@ -665,10 +665,6 @@
                 origin: {},
                 filteredOrigin: {},
                 columns: [],
-                contextColumns: [],
-                attributeColumns: [],
-                actionColumns: [],
-                datatypeColumns: [],
                 orders: [],
                 groups: [],
                 splits: [],
@@ -676,12 +672,16 @@
                     from: 0,
                     amount: 30
                 },
-                plotLayout: {
+                plotSuffix: '-plot',
+                plotContainer: 'plotly-visualization-container',
+                defaultPlotLayout: {
                     width: 500,
                     height: 500,
                     paper_bgcolor: 'rgba(0,0,0,0)',
                     plot_bgcolor: 'rgba(0,0,0,0)'
-                }
+                },
+                plotOptions: {},
+                selectedVisualization: null
             }
         },
         computed: {
@@ -1019,7 +1019,60 @@
                 return (max - min) + 1;
             },
             hasResults: function() {
-                return (this.expertMode && this.results.length > 0) || (!this.expertMode && this.combinedResults.length > 0);
+                return (this.expertMode && this.results.length > 0) || (!this.expertMode && this.results.length > 0);
+            },
+            plotLayout: function() {
+                if(this.visualizationSelected) {
+                    return {...this.defaultPlotLayout};
+                } else {
+                    return {};
+                }
+            },
+            plotAddon: function() {
+                return this.selectedVisualization.type + this.plotSuffix;
+            },
+            visualizationSelected: function() {
+                return !!this.selectedVisualization;
+            },
+            visualizationColumns: function() {
+                const vm = this;
+                if(vm.expertMode) {
+                    return vm.availableColumns;
+                } else {
+                    let columns = [];
+                    // add predefined columns
+                    if(vm.results.length) {
+                        let header = vm.results[0];
+                        for(let k in header) {
+                            columns.push(k);
+                        }
+                    }
+
+                    // add splits
+                    for(let k in vm.splitResults) {
+                        let label = k;
+                        if(vm.$hasConcept(k)) {
+                            label = vm.$translateConcept(k);
+                        }
+                        columns.push(label);
+                    }
+                    return columns;
+                }
+            },
+            visualizationResults: function() {
+                const vm = this;
+                if(vm.expertMode) {
+                    return vm.results;
+                } else {
+                    let results = vm.results.slice();
+                    for(let i=0; i<results.length; i++) {
+                        let r = results[i];
+                        for(let k in vm.splitResults) {
+                            r[k] = vm.splitResults[k][i];
+                        }
+                    }
+                    return results;
+                }
             }
         }
     }
