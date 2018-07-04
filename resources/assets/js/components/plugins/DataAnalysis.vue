@@ -707,7 +707,8 @@
                             {
                                 label: 'Value',
                                 key: 'value',
-                                hidden: false
+                                hidden: false,
+                                type: 'value'
                             },
                             {
                                 label: 'Certainty',

@@ -64,6 +64,12 @@
                             :selections="{}"
                             :values="getValues(row[column.key])">
                         </attributes>
+                        <attributes v-else-if="isType(row, column, 'value')"
+                            :attributes="attributeToAttributeArray(row.attribute)"
+                            :disable-drag="true"
+                            :selections="{}"
+                            :values="attributeToValueList(row.attribute, row[column.key])">
+                        </attributes>
                         <div v-else-if="isType(row, column, 'list.bibliography')">
                             <ul class="mb-0">
                                 <li v-for="el in row[column.key]">
@@ -117,6 +123,21 @@
                     values[c.id] = c.pivot;
                 });
                 return values;
+            },
+            attributeToAttributeArray(attribute) {
+                return [
+                    {
+                        ...attribute,
+                        isDisabled: true
+                    }
+                ];
+            },
+            attributeToValueList(attribute, value) {
+                let valueList = {};
+                valueList[attribute.id] = {
+                    value: value
+                };
+                return valueList;
             },
             renderColumn(column) {
                 return !column.hidden || (column.hidden && this.showHidden);
