@@ -18,6 +18,13 @@
                         <span class="slider slider-rounded slider-primary"></span>
                     </label>
                 </div>
+                <div class="d-flex flex-row justify-content-between form-group offset-md-3 pl-2 clickable" @click="toggleExpertMode">
+                    <span class="align-middle">Expert Mode</span>
+                    <label class="cb-toggle mx-0 my-auto align-middle">
+                        <input type="checkbox" id="apply-changes-toggle" v-model="expertMode" />
+                        <span class="slider slider-rounded slider-primary"></span>
+                    </label>
+                </div>
                 <div class="form-group row">
                     <label for="table" class="col-md-3 col-form-label">Table</label>
                     <div class="col-md-9">
@@ -33,10 +40,6 @@
                             @input="updateOrigin">
                         </multiselect>
                     </div>
-                </div>
-                <div class="form-check form-group offset-md-3">
-                    <input type="checkbox" class="form-check-input" id="expert-mode-toggle" v-model="expertMode" @change="onToggleExpertMode" />
-                    <label for="expert-mode-toggle" class="form-check-label">Expert Mode</label>
                 </div>
                 <div class="form-group row" v-if="expertMode">
                     <label class="col-md-3 col-form-label">
@@ -298,6 +301,10 @@
             this.origin = this.origins[1]; // Use entity table as default
         },
         methods: {
+            toggleExpertMode() {
+                this.expertMode = !this.expertMode;
+                this.onToggleExpertMode();
+            },
             onToggleExpertMode() {
                 // switch to simple tab if we no longer in expert mode
                 if(!this.expertMode && this.activeResultTab == 'raw') {
