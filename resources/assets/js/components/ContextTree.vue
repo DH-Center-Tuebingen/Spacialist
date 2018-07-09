@@ -1,30 +1,7 @@
 <template>
     <div class="container">
-        <v-jstree
-            :async="loadAsync"
-            :data="tree"
-            :draggable="true"
-            :drag-over-background-color="dragOverColor"
-            :item-events="itemEvents"
-            @item-click="itemClick"
-            @item-toggle="itemToggle"
-            @item-drag-start="itemDragStart"
-            @item-drag-enter="itemDragEnter"
-            @item-drag-leave="itemDragLeave"
-            @item-drag-end="itemDragEnd"
-            @item-drop-before="itemDropBefore"
-            @item-drop="itemDrop">
-            <div slot-scope="_">
-                <i class="fas fa-fw fa-spa"></i>
-                <span>{{_.model.name}}</span>
-                <span class="pl-1 font-italic mb-0" v-if="_.model.context_type_id">
-                    {{ $translateConcept($getEntityType(_.model.context_type_id).thesaurus_url) }}
-                </span>
-                <span class="pl-1" v-show="_.model.children_count">
-                    ({{ _.model.children_count }})
-                </span>
-            </div>
-        </v-jstree>
+        <tree :data="tree" :draggable="true" @change="itemClick" @toggle="itemToggle" @drop="itemDrop">
+        </tree>
 
         <vue-context ref="contextMenu" class="context-menu-wrapper">
             <ul class="list-group list-group-vue-context" slot-scope="itemScope" v-if="itemScope.data">
@@ -46,52 +23,34 @@
 </template>
 
 <script>
-    import VJstree from 'vue-jstree';
+    import * as treeUtility from 'tree-vue-component';
     import { VueContext } from 'vue-context';
     import { transliterate as tr, slugify } from 'transliteration';
+    Vue.component('node-component', require('./NodeComponent.vue'));
 
     class Node {
         constructor(data) {
             Object.assign(this, data);
-            this.opened = false;
-            this.selected = false;
-            this.disabled = false;
-            this.loading = false;
-            this.isLeaf = false;
-            this.dropDisabled = false;
-            this.dragDisabled = false;
-            if(this.children_count > 0) {
-                this.children = [{
-                    name: 'Loading...',
-                    opened: false,
-                    selected: false,
-                    disabled: true,
-                    loading: true,
-                    children: []
-                }];
-                this.asyncChildren = () => this.fetchChildren(this.id);
-            } else {
-                this.children = [];
-            }
-        }
-
-        fetchChildren(id) {
-            return $http.get('/api/context/byParent/'+id)
-            .then(response => {
-                const result = response.data.map(n => new Node({...n, parent: this}));
-                return result;
-            }).catch(function(error) {
-                log.error("FIX ME");
-                // TODO neither vm nor this nor Vue are accessible here
-                // vm.$throwError(error);
-            });
+            this.state = {
+                opened: false,
+                selected: false,
+                disabled: false,
+                loading: false,
+                highlighted: false,
+                openable: this.children_count > 0,
+                dropPosition: 0, //TODO set to DropPosition.empty once exported by tree-vue-component
+                dropAllowed: true,
+            };
+            this.icon = false;
+            this.children = [];
+            this.childrenLoaded = this.children.length < this.children_count;
+            this.component = 'node-component';
         }
     }
 
     export default {
         components: {
             VueContext,
-            VJstree
         },
         props: {
             onContextMenuAdd: {
@@ -124,101 +83,116 @@
             this.init();
         },
         methods: {
-            itemClick(node, item, e) {
+            itemClick(eventData) {
+                const item = eventData.data;
                 if(this.selectedItem.id == item.id) {
                     this.selectedItem = {};
-                    item.selected = false;
+                    item.state.selected = false;
                     this.selectionCallback();
                 } else {
                     this.selectedItem = item;
                     this.selectionCallback(item);
                 }
             },
-            itemToggle(node, item, e) {
-            },
-            itemDragStart(node, item, e) {
-                this.dragging = true;
-            },
-            itemDragEnter(node, item, draggedItem, e) {
-                const vm = this;
-                if(vm.dragDelayId) {
-                    clearTimeout(vm.dragDelayId);
+            itemToggle(eventData) {
+                const item = eventData.data;
+                if (item.children.length < item.children_count) {
+                    item.state.loading = true;
+                    this.fetchChildren(item.id).then(response => {
+                        item.children =  response;
+                        item.state.loading = false;
+                        item.childrenLoaded = true;
+                    })
                 }
-                item.dropDisabled = !vm.isDropAllowed(item, draggedItem);
-                if(item.dropDisabled) {
-                    vm.dragOverColor = '#FDC9C9';
-                } else {
-                    vm.dragOverColor = '#C9FDC9'
-                }
-                vm.dragDelayId = setTimeout(function() {
-                    if(!item.opened && item.children_count) {
-                        item.opened = true;
-                    }
-                    vm.dragDelayId = 0;
-                }, vm.dragDelay);
+                item.state.opened = !item.state.opened;
             },
-            itemDragLeave(node, item, draggedItem, e) {
-            },
-            itemDragEnd(node, item, e) {
-                this.dragging = false;
-            },
-            itemDropBefore(node, item, draggedItem, e) {
-            },
-            itemDrop(node, item, draggedItem, e) {
-                const vm = this;
-                const rank = item.children ? item.children.length + 1 : 1;
-                let data = {
-                    rank: rank
+            itemDrop(dropData) {
+                //TODO: remove once DropPosition can be imported from tree-vue-component
+                const DropPosition = {
+                    empty: 0,
+                    up: 1,
+                    inside: 2,
+                    down: 3,
                 };
-                if(!item.isRootNode) {
-                    data.parent_id = item.id;
+
+                if (!this.isDropAllowed(dropData)) {
+                    return;
                 }
 
-                vm.$http.patch(`/api/context/${draggedItem.id}/rank`, data).then(function(response) {
-                    // Because dropped elements are added at the end,
-                    // we do not have to update the local tree and
-                    // simply use array length as rank
-                });
-            },
-            loadAsync(node, resolve) {
-                if(!node.data.id || !node.data.asyncChildren) {
-                    // resolve([]);
+                const draggedElement = dropData.sourceData;
+                const targetElement = dropData.targetData;
+                let oldParent = treeUtility.getNodeFromPath(this.tree, dropData.sourcePath.slice(0, dropData.sourcePath.length - 1));
+                let oldSiblings = oldParent ? oldParent.children : this.tree;
+                let newParent;
+                let siblingPromise;
+                let newRank;
+                if (targetElement.state.dropPosition == DropPosition.inside) {
+                    if (!targetElement.childrenLoaded) {
+                        siblingPromise = fetchChildren(targetElement.id);
+                    }
+                    newRank = targetElement.children_count + 1;
+                    newParent = targetElement;
                 } else {
-                    const id = node.data.id;
-                    node.data.asyncChildren().then(function(response) {
-                        resolve(response);
-                    });
+                    newParent = treeUtility.getNodeFromPath(this.tree, dropData.targetPath.slice(0, dropData.targetPath.length - 1));
+                    siblingPromise = new Promise((resolve, reject) => resolve(newParent ? newParent.children : this.tree));
+                    const targetRank = dropData.targetPath[dropData.targetPath.length - 1] + 1;
+                    if (targetElement.state.dropPosition == DropPosition.up) {
+                        newRank = targetRank;
+                    } else if (targetElement.state.dropPosition == DropPosition.down) {
+                        newRank = targetRank + 1;
+                    } else {
+                        this.$throwError({message: `DropPosition ${targetElement.state.dropPosition} does not correspond to a valid choice`});
+                        return;
+                    }
                 }
+
+                let data = {
+                    rank: newRank,
+                    parent_id: newParent ? newParent.id : null
+                };
+
+                this.$http.patch(`/api/context/${draggedElement.id}/rank`, data).then(function(response) {
+                    const oldIndex = oldSiblings.indexOf(draggedElement);
+                    oldSiblings.splice(oldIndex, 1);
+                    siblingPromise.then(newSiblings => {
+                        newSiblings.splice(newRank - 1, 0, draggedElement)
+                    });
+                    if (oldParent) {
+                        oldParent.children_count--;
+                    }
+                    if (newParent) {
+                        newParent.children_count++;
+                    }
+                }).catch(error => this.$throwError(error));
+            },
+            fetchChildren(id) {
+                return $http.get('/api/context/byParent/'+id)
+                .then(response => {
+                    const result = response.data.map(n => new Node(n));
+                    return result;
+                }).catch(error => this.$throwError(error));
             },
             init() {
-                this.tree = [{
-                    name: 'Root Node',
-                    opened: true,
-                    selected: false,
-                    disabled: true,
-                    loading: false,
-                    isLeaf: false,
-                    dropDisabled: false,
-                    dragDisabled: true,
-                    isRootNode: true,
-                    children: this.roots.map(n => new Node(n))
-                }];
+                this.roots.forEach(n => this.tree.push(new Node(n)))
             },
-            isDropAllowed(tgtItem, item) {
+            isDropAllowed(dropData) {
+                //TODO check if it works with tree-vue-component
+                const item = dropData.sourceData;
+                const target = dropData.targetData;
                 const vm = this;
                 const dragContextType = vm.$getEntityType(item.context_type_id);
                 let dropContextType;
-                if(tgtItem.isRootNode) {
+                if(dropData.targetPath.length == 1) {
                     dropContextType = {
                         sub_context_types: Object.values(vm.$getEntityTypes()).filter(f => f.is_root)
                     }
                 } else {
-                    dropContextType = vm.$getEntityType(tgtItem.context_type_id);
+                    dropContextType = vm.$getEntityType(target.context_type_id);
                 }
                 // If currently dragged element is not allowed as root
                 // and dragged on element is a root element (no parent)
                 // do not allow drop
-                if(!dragContextType.is_root && tgtItem.isRootNode) {
+                if(!dragContextType.is_root && dropData.targetPath.length == 1) {
                     return false;
                 }
 
@@ -248,12 +222,6 @@
             return {
                 tree: [],
                 selectedItem: {},
-                dragging: false,
-                dragOverColor: '#C9FDC9',
-                itemEvents: {
-                    contextmenu: this.treeContextMenuEvent
-                },
-                dragDelayId: 0
             }
         }
     }

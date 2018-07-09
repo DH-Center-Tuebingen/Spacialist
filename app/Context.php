@@ -69,6 +69,7 @@ class Context extends Model
             $context->root_context_id = $parent;
             $query = self::where('root_context_id', $parent);
         } else {
+            $context->root_context_id = null;
             $query = self::whereNull('root_context_id');
         }
         $newContexts = $query->where('rank', '>=', $rank)->get();

@@ -34,9 +34,6 @@ mix.js('resources/assets/js/app.js', 'public/js')
        axios: ['$http']
    })
    .extract([
-       '@bosket/core',
-       '@bosket/tools',
-       '@bosket/vue',
        '@fortawesome/fontawesome-svg-core',
        '@fortawesome/free-brands-svg-icons',
        '@fortawesome/free-regular-svg-icons',
@@ -58,6 +55,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'screenfull',
        'three-full',
        'transliteration',
+       'tree-vue-component',
        'v-calendar',
        'v-tooltip',
        'vee-validate',
