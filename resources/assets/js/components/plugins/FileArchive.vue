@@ -3,26 +3,20 @@
         <p class="alert alert-info">
             Click on files to download them without downloading the whole archive first. Download of folders is currently not supported.
         </p>
-        <tree-view
-            :category="category"
-            :css="css"
-            :display="display"
-            :model="fileList"
-            :onSelect="onSelect"
-            :openerOpts="openerOpts"
-            :selection="selection"
-            :strategies="strategies">
-        </tree-view>
+        <tree class="text-left"
+            :data="fileList"
+            :draggable="false"
+            @change="onSelect"
+            @toggle="itemToggle">
+        </tree>
     </div>
 </template>
 
 <script>
-    import { TreeView } from '@bosket/vue';
+    import * as treeUtility from 'tree-vue-component';
+    Vue.component('archive-node', require('./ArchiveNode.vue'));
 
     export default {
-        components: {
-            'tree-view': TreeView
-        },
         props: {
             file: {
                 required: true,
@@ -33,24 +27,43 @@
             this.setArchiveFileList();
         },
         methods: {
+            addNodeProperties(item) {
+                item.icon = false;
+                item.component = 'archive-node';
+                item.state = {
+                    opened: false,
+                    selected: false,
+                    disabled: false,
+                    loading: false,
+                    highlighted: false,
+                    openable: (item.children && item.children.length > 0) || false,
+                    dropPosition: 0, //TODO set to DropPosition.empty once exported by tree-vue-component
+                    dropAllowed: false,
+                };
+                item.children = item.children || [];
+                item.children.forEach(c => {
+                    this.addNodeProperties(c);
+                });
+            },
             setArchiveFileList() {
                 const vm = this;
                 const id = vm.file.id;
                 const url = `/api/file/${id}/archive/list`;
                 vm.fileList = [];
                 vm.$http.get(url).then(function(response) {
-                    for(let i=0; i<response.data.length; i++) {
-                        vm.fileList.push(response.data[i]);
-                    }
+                    response.data.forEach(entry => {
+                        vm.addNodeProperties(entry);
+                        vm.fileList.push(entry);
+                    });
                 }).catch(function(error) {
                     vm.$throwError(error);
                 });
             },
-            onSelect(newSelection) {
-                let selectedFile = newSelection[0];
+            onSelect(eventData) {
+                const vm = this;
+                const selectedFile = eventData.data;
                 // Download of folders is not supported
                 if(selectedFile.is_directory) return;
-                const vm = this;
                 const id = vm.file.id;
                 const p = selectedFile.filename;
                 const url = '/api/file/'+id+'/archive/download?p='+p;
@@ -59,34 +72,15 @@
                 }).catch(function(error) {
                     vm.$throwError(error);
                 });
+            },
+            itemToggle(eventData) {
+                const item = eventData.data;
+                item.state.opened = !item.state.opened;
             }
         },
         data() {
             return {
-                fileList: [],
-                // Bosket
-                selection: [],
-                strategies: {
-                    selection: ["single"],
-                    click: ["select"],
-                    fold: ["opener-control"]
-                },
-                openerOpts: {
-                    position: 'left'
-                },
-                css: {
-                    opener: 'opener mr-2 text-info',
-                    item: 'item d-flex w-100'
-                },
-                category: "children",
-                display: (item, inputs) =>
-                    <span class="d-flex flex-row align-items-center justify-content-start w-100">
-                        <span>
-                            {item.is_directory ? <i class="fas fa-fw fa-folder"></i> : <i class="fas fa-fw fa-file"></i>}
-                            <span class="ml-1">{item.clean_filename}</span>
-                        </span>
-                        {!item.is_directory ? <span class="text-secondary ml-auto">{this.$options.filters.bytes(item.compressed_size)}/{this.$options.filters.bytes(item.uncompressed_size)}</span> : <span></span>}
-                    </span>
+                fileList: []
             }
         }
     }
