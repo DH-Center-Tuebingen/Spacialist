@@ -1,6 +1,11 @@
 <template>
     <div class="container">
-        <tree :data="tree" :draggable="true" @change="itemClick" @toggle="itemToggle" @drop="itemDrop">
+        <tree
+            :data="tree"
+            :draggable="true"
+            @change="itemClick"
+            @drop="itemDrop"
+            @toggle="itemToggle">
         </tree>
 
         <vue-context ref="contextMenu" class="context-menu-wrapper">
@@ -26,7 +31,7 @@
     import * as treeUtility from 'tree-vue-component';
     import { VueContext } from 'vue-context';
     import { transliterate as tr, slugify } from 'transliteration';
-    Vue.component('node-component', require('./NodeComponent.vue'));
+    Vue.component('tree-node', require('./TreeNode.vue'));
 
     class Node {
         constructor(data) {
@@ -44,7 +49,7 @@
             this.icon = false;
             this.children = [];
             this.childrenLoaded = this.children.length < this.children_count;
-            this.component = 'node-component';
+            this.component = 'tree-node';
         }
     }
 
@@ -96,7 +101,7 @@
             },
             itemToggle(eventData) {
                 const item = eventData.data;
-                if (item.children.length < item.children_count) {
+                if(item.children.length < item.children_count) {
                     item.state.loading = true;
                     this.fetchChildren(item.id).then(response => {
                         item.children =  response;
@@ -115,7 +120,7 @@
                     down: 3,
                 };
 
-                if (!this.isDropAllowed(dropData)) {
+                if(!this.isDropAllowed(dropData)) {
                     return;
                 }
 
@@ -126,8 +131,8 @@
                 let newParent;
                 let siblingPromise;
                 let newRank;
-                if (targetElement.state.dropPosition == DropPosition.inside) {
-                    if (!targetElement.childrenLoaded) {
+                if(targetElement.state.dropPosition == DropPosition.inside) {
+                    if(!targetElement.childrenLoaded) {
                         siblingPromise = fetchChildren(targetElement.id);
                     }
                     newRank = targetElement.children_count + 1;
@@ -136,9 +141,9 @@
                     newParent = treeUtility.getNodeFromPath(this.tree, dropData.targetPath.slice(0, dropData.targetPath.length - 1));
                     siblingPromise = new Promise((resolve, reject) => resolve(newParent ? newParent.children : this.tree));
                     const targetRank = dropData.targetPath[dropData.targetPath.length - 1] + 1;
-                    if (targetElement.state.dropPosition == DropPosition.up) {
+                    if(targetElement.state.dropPosition == DropPosition.up) {
                         newRank = targetRank;
-                    } else if (targetElement.state.dropPosition == DropPosition.down) {
+                    } else if(targetElement.state.dropPosition == DropPosition.down) {
                         newRank = targetRank + 1;
                     } else {
                         this.$throwError({message: `DropPosition ${targetElement.state.dropPosition} does not correspond to a valid choice`});
@@ -157,10 +162,10 @@
                     siblingPromise.then(newSiblings => {
                         newSiblings.splice(newRank - 1, 0, draggedElement)
                     });
-                    if (oldParent) {
+                    if(oldParent) {
                         oldParent.children_count--;
                     }
-                    if (newParent) {
+                    if(newParent) {
                         newParent.children_count++;
                     }
                 }).catch(error => this.$throwError(error));
