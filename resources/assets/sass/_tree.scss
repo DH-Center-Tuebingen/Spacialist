@@ -1,0 +1,11 @@
+.tree-hovered {
+    background-color: $light !important;
+}
+
+.tree-clicked {
+    background: none !important;
+    border-radius: 0 !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    font-weight: $font-weight-bold !important;
+}

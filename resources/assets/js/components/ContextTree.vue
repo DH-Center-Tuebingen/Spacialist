@@ -83,7 +83,15 @@
                     item.state.selected = false;
                     this.selectionCallback();
                 } else {
+                    if(this.selectedItem.path) {
+                        let oldItem = treeUtility.getNodeFromPath(this.tree, this.selectedItem.path);
+                        if(oldItem) {
+                            oldItem.state.selected = false;
+                        }
+                    }
+                    item.state.selected = true;
                     this.selectedItem = item;
+                    this.selectedItem.path = eventData.path;
                     this.selectionCallback(item);
                 }
             },
