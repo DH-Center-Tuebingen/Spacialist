@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div @dragenter="onDragEnter" @dragleave="onDragLeave">
         <i class="fas fa-fw fa-spa"></i>
         <span>{{data.name}}</span>
         <span class="pl-1 font-italic mb-0" v-if="data.context_type_id">
@@ -12,12 +12,36 @@
 </template>
 
 <script>
-export default {
-    props: {
-        data: {
-            required: true,
-            type: Object
+    import debounce from 'debounce';
+
+    export default {
+        props: {
+            data: {
+                required: true,
+                type: Object
+            }
+        },
+        methods: {
+            onDragEnter() {
+                this.asyncToggle.clear();
+                this.asyncToggle();
+            },
+            onDragLeave(item) {
+            },
+            doToggle() {
+                if(!this.data.state.opened && this.data.state.openable) {
+                    this.data.onToggle({data: this.data});
+                }
+            }
+        },
+        data() {
+            return {
+            }
+        },
+        computed: {
+            asyncToggle() {
+                return debounce(this.doToggle, this.data.dragDelay || 500);
+            },
         }
     }
-}
 </script>

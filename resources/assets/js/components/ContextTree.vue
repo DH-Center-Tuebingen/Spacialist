@@ -3,6 +3,7 @@
         <tree
             :data="tree"
             :draggable="true"
+            :drop-allowed="isDropAllowed"
             @change="itemClick"
             @drop="itemDrop"
             @toggle="itemToggle">
@@ -34,6 +35,8 @@
             this.children = [];
             this.childrenLoaded = this.children.length < this.children_count;
             this.component = 'tree-node';
+            this.dragDelay = vm.dragDelay;
+            this.onToggle = vm.itemToggle;
             this.contextmenu = 'tree-contextmenu';
             this.onContextMenuAdd = vm.onContextMenuAdd;
             this.onContextMenuDuplicate = vm.onContextMenuDuplicate;
