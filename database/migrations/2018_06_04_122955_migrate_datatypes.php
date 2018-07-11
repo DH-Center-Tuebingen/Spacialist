@@ -25,6 +25,7 @@ class MigrateDatatypes extends Migration
 
         foreach($epochs as $e) {
             $value = json_decode($e->json_val, TRUE);
+            if(!isset($value)) continue;
             $value = array_intersect_key($value, array_flip($allowed));
             $value = json_encode($value);
             $e->json_val = $value;
