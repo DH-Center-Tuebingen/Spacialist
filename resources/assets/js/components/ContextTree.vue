@@ -7,23 +7,6 @@
             @drop="itemDrop"
             @toggle="itemToggle">
         </tree>
-
-        <vue-context ref="contextMenu" class="context-menu-wrapper">
-            <ul class="list-group list-group-vue-context" slot-scope="itemScope" v-if="itemScope.data">
-                <li class="list-group-item list-group-item-vue-context disabled">
-                    {{ itemScope.data.item.name }}
-                </li>
-                <li class="list-group-item list-group-item-vue-context" @click="onContextMenuAdd(itemScope.data.item)">
-                    <i class="fas fa-fw fa-plus text-success"></i> Add new Sub-Entity
-                </li>
-                <li class="list-group-item list-group-item-vue-context" @click="onContextMenuDuplicate(itemScope.data.item)">
-                    <i class="fas fa-fw fa-copy text-info"></i> Duplicate <i>{{ itemScope.data.item.name }}</i>
-                </li>
-                <li class="list-group-item list-group-item-vue-context" @click="onContextMenuDelete(itemScope.data.item)">
-                    <i class="fas fa-fw fa-trash text-danger"></i> Delete <i>{{ itemScope.data.item.name }}</i>
-                </li>
-            </ul>
-        </vue-context>
     </div>
 </template>
 
@@ -32,9 +15,10 @@
     import { VueContext } from 'vue-context';
     import { transliterate as tr, slugify } from 'transliteration';
     Vue.component('tree-node', require('./TreeNode.vue'));
+    Vue.component('tree-contextmenu', require('./TreeContextmenu.vue'));
 
     class Node {
-        constructor(data) {
+        constructor(data, vm) {
             Object.assign(this, data);
             this.state = {
                 opened: false,
@@ -50,6 +34,10 @@
             this.children = [];
             this.childrenLoaded = this.children.length < this.children_count;
             this.component = 'tree-node';
+            this.contextmenu = 'tree-contextmenu';
+            this.onContextMenuAdd = vm.onContextMenuAdd;
+            this.onContextMenuDuplicate = vm.onContextMenuDuplicate;
+            this.onContextMenuDelete = vm.onContextMenuDelete;
         }
     }
 
@@ -171,14 +159,14 @@
                 }).catch(error => this.$throwError(error));
             },
             fetchChildren(id) {
+                const vm = this;
                 return $http.get('/api/context/byParent/'+id)
                 .then(response => {
-                    const result = response.data.map(n => new Node(n));
-                    return result;
+                    return response.data.map(n => new Node(n, vm));
                 }).catch(error => this.$throwError(error));
             },
             init() {
-                this.roots.forEach(n => this.tree.push(new Node(n)))
+                this.roots.forEach(n => this.tree.push(new Node(n, this)))
             },
             isDropAllowed(dropData) {
                 //TODO check if it works with tree-vue-component
@@ -209,18 +197,6 @@
                 }
                 // In any other cases allow drop
                 return true;
-            },
-            treeContextMenuEvent(node, item, e) {
-                if(item.isRootNode) {
-                    // TODO open different context menu?
-                    e.preventDefault();
-                } else {
-                    this.openContextMenu(e, item);
-                }
-            },
-            openContextMenu(e, item) {
-                this.$refs.contextMenu.open(e, { item: item });
-                e.preventDefault();
             }
         },
         data() {
