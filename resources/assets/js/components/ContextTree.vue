@@ -132,7 +132,7 @@
                 let newRank;
                 if(targetElement.state.dropPosition == DropPosition.inside) {
                     if(!targetElement.childrenLoaded) {
-                        siblingPromise = fetchChildren(targetElement.id);
+                        siblingPromise = this.fetchChildren(targetElement.id);
                     }
                     newRank = targetElement.children_count + 1;
                     newParent = targetElement;
@@ -159,13 +159,15 @@
                     const oldIndex = oldSiblings.indexOf(draggedElement);
                     oldSiblings.splice(oldIndex, 1);
                     siblingPromise.then(newSiblings => {
-                        newSiblings.splice(newRank - 1, 0, draggedElement)
+                        newSiblings.splice(newRank - 1, 0, draggedElement);
+                        if(newParent) {
+                            newParent.children_count++;
+                            newParent.state.openable = true;
+                        }
                     });
                     if(oldParent) {
                         oldParent.children_count--;
-                    }
-                    if(newParent) {
-                        newParent.children_count++;
+                        oldParent.state.openable = oldParent.children_count > 0;
                     }
                 }).catch(error => this.$throwError(error));
             },
