@@ -565,7 +565,7 @@
                 if(entity.geodata_id) data.geodata_id = entity.geodata_id;
 
                 vm.$http.post('/api/context', data).then(function(response) {
-                    if (!parent) {
+                    if (!entity.parent) {
                         vm.roots.push(response.data);
                     }
                     vm.hideNewEntityModal();
@@ -650,26 +650,33 @@
                         vm.setSelectedElement(undefined);
                     }
                     vm.$showToast('Entity deleted', `${entity.name} successfully deleted.`, 'success');
+                    if (entity.callback) {
+                        entity.callback(entity);
+                    }
                     vm.hideDeleteEntityModal();
                 }).catch(function(error) {
                     vm.$throwError(error);
                 });
             },
-            requestDeleteEntity(entity) {
+            requestDeleteEntity(cb, entity, path) {
                 this.toDeleteEntity = Object.assign({}, entity);
+                Vue.set(this.toDeleteEntity, 'callback', cb);
+                Vue.set(this.toDeleteEntity, 'path', path);
                 this.$modal.show('delete-entity-modal');
             },
             hideDeleteEntityModal() {
                 this.toDeleteEntity = {};
                 this.$modal.hide('delete-entity-modal');
             },
-            duplicateEntity(entity) {
+            duplicateEntity(callback, entity, parent) {
                 let duplicate = {
                     name: entity.name,
                     type: {
                         id: entity.context_type_id
                     },
-                    root_context_id: entity.root_context_id
+                    root_context_id: entity.root_context_id,
+                    callback: callback,
+                    parent: parent
                 };
                 this.addNewEntity(duplicate);
             },

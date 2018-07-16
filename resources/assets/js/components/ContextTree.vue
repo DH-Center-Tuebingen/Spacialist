@@ -48,10 +48,18 @@
             this.onToggle = vm.itemToggle;
             this.contextmenu = 'tree-contextmenu';
             this.onContextMenuAdd = function(parent) {
-                vm.onEntityAdd(vm.onAdd, parent)
+                vm.onEntityAdd(vm.onAdd, parent);
             };
-            this.onContextMenuDuplicate = vm.onContextMenuDuplicate;
-            this.onContextMenuDelete = vm.onContextMenuDelete;
+            this.onContextMenuDuplicate = function(entity, path) {
+                let parent;
+                if (path.length > 1) {
+                    parent = treeUtility.getNodeFromPath(vm.tree, path.slice(0, path.length - 1));
+                }
+                vm.onContextMenuDuplicate(vm.onAdd, entity, parent);
+            };
+            this.onContextMenuDelete = function(entity, path) {
+                vm.onContextMenuDelete(vm.onDelete, entity, path);
+            };
         }
     }
 
@@ -191,12 +199,25 @@
             },
             onAdd(entity, parent) {
                 const node = new Node(entity, this);
+                let siblings;
                 if(parent) {
-                    parent.children.push(node);
+                    siblings = parent.children;
                     parent.children_count++;
                     parent.state.openable = true;
                 } else {
-                    this.tree.push(node);
+                    siblings = this.tree;
+                }
+                siblings.splice(entity.rank, 0, node);
+            },
+            onDelete(entity) {
+                const index = entity.path.pop();
+                if (entity.path.length > 0) {
+                    let parent = treeUtility.getNodeFromPath(this.tree, entity.path);
+                    parent.children.splice(index, 1);
+                    parent.children_count--;
+                    parent.state.openable = parent.children_count > 0;
+                } else {
+                    this.tree.splice(index, 1);
                 }
             },
             init() {
