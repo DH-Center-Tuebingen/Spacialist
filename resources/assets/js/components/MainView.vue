@@ -1,23 +1,14 @@
 <template>
     <div class="row h-100 of-hidden">
         <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100">
-            <h3>Entities <small class="badge badge-secondary font-weight-light align-middle font-size-50">{{topLevelCount}} Top-Level Entities</small></h3>
-            <div class="d-flex flex-column h-100 col px-0">
-                <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="requestAddNewEntity()">
-                    <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
-                </button>
-                <context-tree
-                    class="col px-0 scroll-y-auto"
-                    :on-context-menu-add="requestAddNewEntity"
-                    :on-context-menu-duplicate="duplicateEntity"
-                    :on-context-menu-delete="requestDeleteEntity"
-                    :roots="roots"
-                    :selection-callback="onSetSelectedElement">
-                </context-tree>
-                <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="requestAddNewEntity()">
-                    <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
-                </button>
-            </div>
+            <context-tree
+                class="col px-0 scroll-y-auto"
+                :on-entity-add="requestAddNewEntity"
+                :on-context-menu-duplicate="duplicateEntity"
+                :on-context-menu-delete="requestDeleteEntity"
+                :roots="roots"
+                :selection-callback="onSetSelectedElement">
+            </context-tree>
         </div>
         <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100">
             <div v-if="selectedContext.id" class="h-100 d-flex flex-column">
@@ -574,13 +565,18 @@
                 if(entity.geodata_id) data.geodata_id = entity.geodata_id;
 
                 vm.$http.post('/api/context', data).then(function(response) {
-                    vm.roots.push(response.data);
+                    if (!parent) {
+                        vm.roots.push(response.data);
+                    }
                     vm.hideNewEntityModal();
+                    if (entity.callback) {
+                        entity.callback(response.data, entity.parent);
+                    }
                 }).catch(function(error) {
                     vm.$throwError(error);
                 });
             },
-            requestAddNewEntity(parent) {
+            requestAddNewEntity(callback, parent) {
                 const vm = this;
                 let selection = [];
                 if(parent) {
@@ -591,8 +587,10 @@
                 Vue.set(vm.newEntity, 'name', '');
                 Vue.set(vm.newEntity, 'type', selection.length == 1 ? selection[0] : null);
                 Vue.set(vm.newEntity, 'selection', selection);
+                Vue.set(vm.newEntity, 'callback', callback);
                 if(parent) {
                     Vue.set(vm.newEntity, 'root_context_id', parent.id);
+                    Vue.set(vm.newEntity, 'parent', parent);
                 }
                 vm.$modal.show('add-entity-modal');
             },
@@ -716,9 +714,6 @@
             },
             hasReferences: function() {
                 return this.selectedContext.references && Object.keys(this.selectedContext.references).length;
-            },
-            topLevelCount: function() {
-                return this.roots.length || 0;
             },
             tab: {
                 get() {

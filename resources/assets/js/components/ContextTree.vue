@@ -1,13 +1,22 @@
 <template>
-    <div class="container">
-        <tree
-            :data="tree"
-            :draggable="true"
-            :drop-allowed="isDropAllowed"
-            @change="itemClick"
-            @drop="itemDrop"
-            @toggle="itemToggle">
-        </tree>
+    <div class="">
+        <h3>Entities <small class="badge badge-secondary font-weight-light align-middle font-size-50">{{topLevelCount}} Top-Level Entities</small></h3>
+        <div class="d-flex flex-column h-100 col px-0">
+            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAdd)">
+                <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
+            </button>
+            <tree
+                :data="tree"
+                :draggable="true"
+                :drop-allowed="isDropAllowed"
+                @change="itemClick"
+                @drop="itemDrop"
+                @toggle="itemToggle">
+            </tree>
+            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAdd)">
+                <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
+            </button>
+        </div>
     </div>
 </template>
 
@@ -38,7 +47,9 @@
             this.dragDelay = vm.dragDelay;
             this.onToggle = vm.itemToggle;
             this.contextmenu = 'tree-contextmenu';
-            this.onContextMenuAdd = vm.onContextMenuAdd;
+            this.onContextMenuAdd = function(parent) {
+                vm.onEntityAdd(vm.onAdd, parent)
+            };
             this.onContextMenuDuplicate = vm.onContextMenuDuplicate;
             this.onContextMenuDelete = vm.onContextMenuDelete;
         }
@@ -49,7 +60,7 @@
             VueContext,
         },
         props: {
-            onContextMenuAdd: {
+            onEntityAdd: {
                 required: false,
                 type: Function
             },
@@ -178,6 +189,16 @@
                     return response.data.map(n => new Node(n, vm));
                 }).catch(error => this.$throwError(error));
             },
+            onAdd(entity, parent) {
+                const node = new Node(entity, this);
+                if(parent) {
+                    parent.children.push(node);
+                    parent.children_count++;
+                    parent.state.openable = true;
+                } else {
+                    this.tree.push(node);
+                }
+            },
             init() {
                 this.roots.forEach(n => this.tree.push(new Node(n, this)))
             },
@@ -217,6 +238,11 @@
                 tree: [],
                 selectedItem: {},
             }
+        },
+        computed: {
+            topLevelCount: function() {
+                return this.tree.length || 0;
+            },
         }
     }
 </script>

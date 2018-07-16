@@ -1,6 +1,6 @@
 <template>
     <div @dragenter="onDragEnter" @dragleave="onDragLeave">
-        <i class="fas fa-fw fa-spa"></i>
+        <i class="fas fa-fw fa-monument"></i>
         <span>{{data.name}}</span>
         <span class="pl-1 font-italic mb-0" v-if="data.context_type_id">
             {{ $translateConcept($getEntityType(data.context_type_id).thesaurus_url) }}

@@ -22,9 +22,6 @@ export default {
             required: true,
             type: Object
         }
-    },
-    mounted() {
-        console.log(this.data);
     }
 }
 </script>
