@@ -140,7 +140,7 @@
                 const vm = this;
                 if(!vm.context && !vm.context.id) return;
                 const id = vm.context.id;
-                vm.$http.get(`/api/file/${id}/sub_files?c=3d`).then(function(response) {
+                vm.$http.get(`/file/${id}/sub_files?c=3d`).then(function(response) {
                     const models = response.data;
                     models.forEach(m => vm.loadModel(m));
                 });

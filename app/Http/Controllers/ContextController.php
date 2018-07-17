@@ -25,6 +25,12 @@ class ContextController extends Controller {
 
     // GET
 
+    public function getTopEntities() {
+        $roots = Context::getEntitiesByParent();
+
+        return response()->json($roots);
+    }
+
     public function getData($id) {
         try {
             $context = Context::findOrFail($id);

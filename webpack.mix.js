@@ -38,6 +38,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
        '@fortawesome/free-brands-svg-icons',
        '@fortawesome/free-regular-svg-icons',
        '@fortawesome/free-solid-svg-icons',
+       '@websanova/vue-auth',
        'axios',
        'bootstrap',
        'cornerstone-core',
@@ -67,6 +68,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'vue-markdown',
        'vue-multiselect',
        'vue-pdf',
+       'vue-router',
        'vue-typeahead',
        'vue-upload-component',
        'vuedraggable'

@@ -115,7 +115,7 @@
         </div>
         <div v-if="isAction('upload')">
             <file-upload class="w-100"
-                post-action="/api/file/new"
+                post-action="/file/new"
                 ref="upload"
                 v-model="uploadFiles"
                 :multiple="true"
@@ -186,7 +186,7 @@
                 <div class="modal-body text-center">
                     <div class="row">
                         <div class="col-md-6">
-                            <component id="file-container" :is="fileCategoryComponent" :file="selectedFile" :context="localContext"></component>
+                            <component id="file-container" :is="fileCategoryComponent" :file="selectedFile" :storage-config="storageConfig" :context="localContext"></component>
                         </div>
                         <div class="col-md-6">
                             <ul class="nav nav-tabs nav-fill">
@@ -521,19 +521,19 @@
         methods: {
             initFilters() {
                 const vm = this;
-                vm.$http.get('/api/file/filter/category').then(function(response) {
+                vm.$http.get('/file/filter/category').then(function(response) {
                     vm.filterTypeList = [];
                     vm.filterTypeList = response.data;
                 }).catch(function(error) {
                     vm.$throwError(error);
                 });
-                vm.$http.get('/api/file/filter/camera').then(function(response) {
+                vm.$http.get('/file/filter/camera').then(function(response) {
                     vm.filterCameraList = [];
                     vm.filterCameraList = response.data;
                 }).catch(function(error) {
                     vm.$throwError(error);
                 });
-                vm.$http.get('/api/file/filter/date').then(function(response) {
+                vm.$http.get('/file/filter/date').then(function(response) {
                     vm.filterDateList = [];
                     vm.filterDateList = response.data;
                 }).catch(function(error) {
@@ -583,7 +583,7 @@
                 const data = {
                     name: newName
                 };
-                vm.$http.patch(`/api/file/${id}/property`, data).then(function(response) {
+                vm.$http.patch(`/file/${id}/property`, data).then(function(response) {
                     const filedata = response.data;
                     let file = vm[vm.selectedTopAction].files.find(f => f.id == id);
                     const keys = ['name', 'url', 'thumb', 'thumb_url', 'modified', 'modified_unix', 'lasteditor'];
@@ -804,7 +804,7 @@
             deleteFile(file) {
                 const vm = this;
                 let id = file.id;
-                vm.$http.delete('/api/file/'+id).then(function(response) {
+                vm.$http.delete('/file/'+id).then(function(response) {
                     vm.onFileDeleted(file, vm.linkedFiles);
                     vm.onFileDeleted(file, vm.unlinkedFiles);
                     vm.onFileDeleted(file, vm.allFiles);
@@ -823,7 +823,7 @@
                 const id = file.id;
                 vm.contextMenuFile = Object.assign({}, file);
                 vm.contextMenuContext = Object.assign({}, context);
-                vm.$http.get(`/api/file/${id}/link_count`).then(function(response) {
+                vm.$http.get(`/file/${id}/link_count`).then(function(response) {
                     vm.linkCount = response.data;
                     vm.$modal.show('unlink-file-modal');
                 }).catch(function(error) {
@@ -834,7 +834,7 @@
                 const vm = this;
                 const id = file.id;
                 const cid = context.id;
-                vm.$http.delete(`/api/file/${id}/link/${cid}`).then(function(response) {
+                vm.$http.delete(`/file/${id}/link/${cid}`).then(function(response) {
                     vm.linkCount--;
                     vm.onFileDeleted(file, vm.linkedFiles);
                     vm.onFileUnlinked(file, vm.unlinkedFiles, vm.linkCount);
@@ -856,7 +856,7 @@
                 let data = {
                     'context_id': context.id
                 };
-                vm.$http.put(`/api/file/${id}/link`, data).then(function(response) {
+                vm.$http.put(`/file/${id}/link`, data).then(function(response) {
                     vm.onFileLinked(file, vm.linkedFiles);
                     vm.onFileDeleted(file, vm.unlinkedFiles);
                     vm.$showToast('File linked', `${file.name} successfully linked to ${context.name}.`, 'success');
@@ -875,7 +875,7 @@
                 const id = vm.selectedFile.id;
                 let data = {};
                 data[p.key] = vm.selectedFile[p.key];
-                vm.$http.patch(`/api/file/${id}/property`, data).then(function(response) {
+                vm.$http.patch(`/file/${id}/property`, data).then(function(response) {
                     vm.resetEditingProperty();
                 }).catch(function(error) {
                     vm.$throwError(error);
@@ -936,6 +936,9 @@
         },
         data() {
             return {
+                storageConfig: {
+                    baseURL: ''
+                },
                 showFilters: false,
                 filterRules: {
                     type: {},
@@ -951,7 +954,7 @@
                     fileState: {},
                     fetchingFiles: false,
                     pagination: {},
-                    apiPrefix: '/api',
+                    apiPrefix: '',
                     apiUrl: '/file/linked',
                     apiPageParam: 'page',
                     loadChunk: () => {
@@ -964,7 +967,7 @@
                     fileState: {},
                     fetchingFiles: false,
                     pagination: {},
-                    apiPrefix: '/api',
+                    apiPrefix: '',
                     apiUrl: '/file/unlinked',
                     apiPageParam: 'page',
                     loadChunk: () => {
@@ -977,7 +980,7 @@
                     fileState: {},
                     fetchingFiles: false,
                     pagination: {},
-                    apiPrefix: '/api',
+                    apiPrefix: '',
                     apiUrl: '/file',
                     apiPageParam: 'page',
                     loadChunk: () => {
@@ -1039,7 +1042,7 @@
             },
             replaceFileUrl: function() {
                 if(!this.selectedFile.id) return '';
-                return '/api/file/'+this.selectedFile.id+'/patch';
+                return '/file/'+this.selectedFile.id+'/patch';
             },
             contextMenu: function() {
                 const vm = this;

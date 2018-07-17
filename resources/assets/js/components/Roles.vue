@@ -146,9 +146,21 @@
     import { mapFields } from 'vee-validate';
 
     export default {
-        props: ['roles', 'permissions'],
+        beforeRouteEnter(to, from, next) {
+            $http.get('role').then(response => {
+                const roles = response.data.roles;
+                const permissions = response.data.permissions;
+                next(vm => vm.init(roles, permissions));
+            }).catch(error => {
+                $throwError(error);
+            });
+        },
         mounted() {},
         methods: {
+            init(roles, permissions) {
+                this.roleList = roles;
+                this.permissions = permissions;
+            },
             showNewRoleModal() {
                 this.$modal.show('new-role-modal');
             },
@@ -221,15 +233,11 @@
         },
         data() {
             return {
+                roleList: [],
+                permissions: [],
                 userRoles: {},
                 newRole: {},
-                selectedRole: {},
-                localRoles: this.roles.slice()
-            }
-        },
-        computed: {
-            roleList() {
-                return this.localRoles;
+                selectedRole: {}
             }
         }
     }

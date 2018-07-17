@@ -13,6 +13,11 @@ class BibliographyController extends Controller
 {
 
     // GET
+    public function getBibliography() {
+        $bibliography = Bibliography::all();
+
+        return response()->json($bibliography);
+    }
 
     public function exportBibtex() {
         $entries = Bibliography::orderBy('author', 'asc')->get();

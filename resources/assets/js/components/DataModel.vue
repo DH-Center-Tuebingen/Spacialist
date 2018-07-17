@@ -8,8 +8,8 @@
             <attributes
                 class="col scroll-y-auto"
                 group="attributes"
-                :attributes="localAttributes"
-                :values="localAttributeValues"
+                :attributes="attributeList"
+                :values="attributeListValues"
                 :selections="{}"
                 :is-source="true"
                 :on-delete="onDeleteAttribute"
@@ -382,9 +382,20 @@
 
 <script>
     export default {
-        props: ['attributes', 'contextTypes', 'values'],
+        beforeRouteEnter(to, from, next) {
+            $http.get('editor/dm/attribute').then(response => {
+                next(vm => vm.init(response.data));
+            }).catch(error => {
+                $throwError(error);
+            });
+        },
         mounted() {},
         methods: {
+            init(attributes) {
+                this.initFinished = false;
+                this.attributeList = attributes;
+                this.initFinished = true;
+            },
             createAttribute(attribute) {
                 const vm = this;
                 if(!vm.validated) return;
@@ -400,8 +411,8 @@
                 if(vm.needsTextElement) {
                     data.text = attribute.textContent;
                 }
-                vm.$http.post('/api/editor/dm/attribute', data).then(function(response) {
-                    vm.localAttributes.push(response.data);
+                vm.$http.post('/editor/dm/attribute', data).then(function(response) {
+                    vm.attributeList.push(response.data);
                     vm.hideNewAttributeModal();
                 }).catch(function(error) {
                     vm.$throwError(error);
@@ -410,12 +421,12 @@
             deleteAttribute(attribute) {
                 const vm = this;
                 const id = attribute.id;
-                vm.$http.delete(`/api/editor/dm/attribute/${id}`).then(function(response) {
-                    let index = vm.localAttributes.findIndex(function(a) {
+                vm.$http.delete(`/editor/dm/attribute/${id}`).then(function(response) {
+                    let index = vm.attributeList.findIndex(function(a) {
                         return a.id == id;
                     });
                     if(index) {
-                        vm.localAttributes.splice(index, 1);
+                        vm.attributeList.splice(index, 1);
                     }
                     vm.hideDeleteAttributeModal();
                 }).catch(function(error) {
@@ -431,7 +442,7 @@
                     'is_root': contextType.is_root || false,
                     'geomtype': contextType.geomtype.key
                 };
-                vm.$http.post('/api/editor/dm/context_type', data).then(function(response) {
+                vm.$http.post('/editor/dm/context_type', data).then(function(response) {
                     vm.localContextTypes.push(response.data);
                     vm.hideNewContextTypeModal();
                 }).catch(function(error) {
@@ -441,7 +452,7 @@
             deleteContextType(contextType) {
                 const vm = this;
                 const id = contextType.id;
-                vm.$http.delete('/api/editor/dm/context_type/' + id).then(function(response) {
+                vm.$http.delete('/editor/dm/context_type/' + id).then(function(response) {
                     const index = vm.localContextTypes.findIndex(function(ct) {
                         return ct.id == id;
                     });
@@ -468,7 +479,7 @@
                     'is_root': vm.contextType.is_root,
                     'sub_context_types': vm.contextType.sub_context_types.map(t => t.id)
                 };
-                vm.$http.post('/api/editor/dm/'+id+'/relation', data).then(function(response) {
+                vm.$http.post('/editor/dm/'+id+'/relation', data).then(function(response) {
                     const name = vm.$translateConcept(vm.contextType.thesaurus_url);
                     vm.$showToast('Entity-Type updated', `${name} successfully updated.`, 'success');
                 }).catch(function(error) {
@@ -478,12 +489,12 @@
             addAttributeToContextType(oldIndex, index) {
                 const vm = this;
                 const ctid = vm.contextType.id;
-                const attribute = vm.localAttributes[oldIndex];
+                const attribute = vm.attributeList[oldIndex];
                 let attributes = vm.contextAttributes;
                 let data = {};
                 data.attribute_id = attribute.id;
                 data.position = index + 1;
-                vm.$http.post(`/api/editor/dm/context_type/${ctid}/attribute`, data).then(function(response) {
+                vm.$http.post(`/editor/dm/context_type/${ctid}/attribute`, data).then(function(response) {
                     // Add element to attribute list
                     attributes.splice(index, 0, response.data);
                     Vue.set(vm.contextValues, response.data.id, '');
@@ -509,7 +520,7 @@
                     d_operator: options.operator.id
                 };
                 data.d_value = vm.getDependencyValue(options.value, options.attribute.datatype);
-                vm.$http.patch(`/api/editor/dm/context_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
+                vm.$http.patch(`/editor/dm/context_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
 
                 }).catch(function(error) {
                     vm.$throwError(error);
@@ -519,7 +530,7 @@
                 const vm = this;
                 const ctid = vm.contextType.id;
                 const aid = attribute.id;
-                vm.$http.delete('/api/editor/dm/context_type/'+ctid+'/attribute/'+aid).then(function(response) {
+                vm.$http.delete('/editor/dm/context_type/'+ctid+'/attribute/'+aid).then(function(response) {
                     const index = vm.contextAttributes.findIndex(function(a) {
                         return a.id == attribute.id;
                     });
@@ -548,7 +559,7 @@
                 }
                 let data = {};
                 data.position = position;
-                vm.$http.patch(`/api/editor/dm/context_type/${ctid}/attribute/${aid}/position`, data).then(function(response) {
+                vm.$http.patch(`/editor/dm/context_type/${ctid}/attribute/${aid}/position`, data).then(function(response) {
                     attribute.position = position;
                     vm.contextAttributes.splice(oldIndex, 1);
                     vm.contextAttributes.splice(index, 0, attribute);
@@ -570,7 +581,7 @@
                 const vm = this;
                 const aid = attribute.id;
                 const ctid = vm.contextType.id;
-                vm.$http.get(`/api/editor/dm/attribute/occurrence_count/${aid}/${ctid}`).then(function(response) {
+                vm.$http.get(`/editor/dm/attribute/occurrence_count/${aid}/${ctid}`).then(function(response) {
                     vm.setModalSelectedAttribute(attribute);
                     vm.setModalSelectedContextType(vm.contextType);
                     vm.setAttributeValueCount(response.data);
@@ -586,7 +597,7 @@
             },
             onCreateAttribute() {
                 const vm = this;
-                vm.$http.get('/api/editor/dm/attribute_types').then(function(response) {
+                vm.$http.get('/editor/dm/attribute_types').then(function(response) {
                     for(let i=0; i<response.data.length; i++) {
                         vm.attributeTypes.push(response.data[i]);
                     }
@@ -598,7 +609,7 @@
             onDeleteAttribute(attribute) {
                 const vm = this;
                 const id = attribute.id;
-                vm.$http.get('/api/editor/dm/attribute/occurrence_count/'+id).then(function(response) {
+                vm.$http.get('/editor/dm/attribute/occurrence_count/'+id).then(function(response) {
                     vm.setAttributeValueCount(response.data);
                     vm.setModalSelectedAttribute(attribute);
                     vm.openedModal = 'delete-attribute-modal';
@@ -657,7 +668,7 @@
                 switch(attribute.datatype) {
                     case 'string-sc':
                     case 'string-mc':
-                        vm.$http.get(`/api/editor/attribute/${id}/selection`).then(function(response) {
+                        vm.$http.get(`/editor/attribute/${id}/selection`).then(function(response) {
                             vm.depends.values = [];
                             const selections = response.data;
                             if(selections) {
@@ -713,7 +724,7 @@
             },
             onCreateContextType() {
                 const vm = this;
-                vm.$http.get('/api/editor/dm/geometry').then(function(response) {
+                vm.$http.get('/editor/dm/geometry').then(function(response) {
                     vm.availableGeometries = [];
                     let idCtr = 1;
                     response.data.forEach(g => {
@@ -736,7 +747,7 @@
             onDeleteContextType(contextType) {
                 const vm = this;
                 const id = contextType.id;
-                vm.$http.get('/api/editor/dm/context_type/occurrence_count/' + id).then(function(response) {
+                vm.$http.get('/editor/dm/context_type/occurrence_count/' + id).then(function(response) {
                     vm.setContextCount(response.data);
                     vm.setModalSelectedContextType(contextType);
                     vm.openedModal = 'delete-context-type-modal';
@@ -767,7 +778,7 @@
                 vm.contextAttributes = [];
                 vm.contextType = Object.assign({}, contextType);
                 let id = contextType.id;
-                vm.$http.get('/api/editor/context_type/'+id+'/attribute')
+                vm.$http.get('/editor/context_type/'+id+'/attribute')
                     .then(function(response) {
                         let data = response.data;
                         // if result is empty, php returns [] instead of {}
@@ -781,10 +792,10 @@
                             // Set values for all context attributes to '', so values in <attributes> are existant
                             Vue.set(vm.contextValues, data.attributes[i].id, '');
                         }
-                        for(let i=0; i<vm.localAttributes.length; i++) {
-                            let id = vm.localAttributes[i].id;
+                        for(let i=0; i<vm.attributeList.length; i++) {
+                            let id = vm.attributeList[i].id;
                             let index = vm.contextAttributes.findIndex(a => a.id == id);
-                            vm.localAttributes[i].isDisabled = index > -1;
+                            vm.attributeList[i].isDisabled = index > -1;
                         }
                     }).catch(function(error) {
                         vm.$throwError(error);
@@ -811,6 +822,8 @@
         },
         data() {
             return {
+                attributeList: [],
+                initFinished: false,
                 contextType: {},
                 contextAttributes: [],
                 contextSelections: {},
@@ -830,7 +843,6 @@
                 openedModal: '',
                 modalSelectedAttribute: {},
                 attributeValueCount: 0,
-                localAttributes: this.attributes.slice(),
                 availableGeometries: [],
                 newContextType: {},
                 localContextTypes: Object.values(this.$getEntityTypes()),
@@ -883,10 +895,10 @@
                 }
             },
             // set values for all attributes to '', so values in <attributes> are existant
-            localAttributeValues: function() {
+            attributeListValues: function() {
                 let data = {};
-                for(let i=0; i<this.localAttributes.length; i++) {
-                    let a = this.localAttributes[i];
+                for(let i=0; i<this.attributeList.length; i++) {
+                    let a = this.attributeList[i];
                     data[a.id] = '';
                 }
                 return data;

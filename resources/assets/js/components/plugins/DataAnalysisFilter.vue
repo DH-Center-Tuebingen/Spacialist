@@ -170,7 +170,7 @@
                             c.equals_dd,
                             c.notEqual_dd
                         ];
-                        vm.$http.get('/api/editor/dm/attribute').then(function(response) {
+                        vm.$http.get('/editor/dm/attribute').then(function(response) {
                             vm.selections = response.data;
                         });
                         break;

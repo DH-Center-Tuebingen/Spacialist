@@ -1,5 +1,5 @@
 <template>
-    <div class="row h-100 of-hidden">
+    <div class="row h-100 of-hidden" v-if="initFinished">
         <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100">
             <context-tree
                 class="col px-0 scroll-y-auto"
@@ -37,7 +37,7 @@
         </div>
         <div :class="'col-md-'+$getPreference('prefs.columns').right" id="addon-container" class="d-flex flex-column">
             <ul class="nav nav-tabs">
-                <li class="nav-item" v-for="plugin in plugins.tab">
+                <li class="nav-item" v-for="plugin in $getTabPlugins()">
                     <a class="nav-link" href="#" :class="{active: tab == plugin.key}" @click="setActivePlugin(plugin)">
                         <i class="fas fa-fw" :class="plugin.icon"></i> {{ plugin.label }}
                     </a>
@@ -305,19 +305,26 @@
     import { mapFields } from 'vee-validate';
 
     export default {
-        props: {
-            bibliography: {
-                required: false,
-                type: Array,
-                default: []
-            },
-            roots: {
-                required: true,
-                type: Array
-            }
+        beforeRouteEnter(to, from, next) {
+            let bibliography, roots;
+            $http.get('bibliography').then(response => {
+                bibliography = response.data;
+                return $http.get('context/top');
+            }).then(response => {
+                roots = response.data;
+                next(vm => vm.init(roots, bibliography));
+            }).catch(error => {
+                $throwError(error);
+            });
         },
         mounted() {},
         methods: {
+            init(roots, bibliography) {
+                this.initFinished = false;
+                this.roots = roots;
+                this.bibliography = bibliography;
+                this.initFinished = true;
+            },
             hideDiscardModal() {
                 this.$modal.hide('discard-changes-modal');
             },
@@ -372,13 +379,13 @@
                 const cid = elem.id;
                 const ctid = elem.context_type_id;
                 vm.dataLoaded = false;
-                vm.$http.get(`/api/context/${cid}/data`).then(function(response) {
+                vm.$http.get(`/context/${cid}/data`).then(function(response) {
                     // if result is empty, php returns [] instead of {}
                     if(response.data instanceof Array) {
                         response.data = {};
                     }
                     Vue.set(vm.selectedContext, 'data', response.data);
-                    return vm.$http.get(`/api/editor/context_type/${ctid}/attribute`);
+                    return vm.$http.get(`/editor/context_type/${ctid}/attribute`);
                 }).then(function(response) {
                     vm.selectedContext.attributes = [];
                     let data = response.data;
@@ -417,7 +424,7 @@
                     }
                     Vue.set(vm.selectedContext, 'selections', data.selections);
                     Vue.set(vm.selectedContext, 'dependencies', data.dependencies);
-                    return vm.$http.get(`/api/context/${cid}/reference`);
+                    return vm.$http.get(`/context/${cid}/reference`);
                 }).then(function(response) {
                     let data = response.data;
                     if(data instanceof Array) {
@@ -481,7 +488,7 @@
                     certainty: newData.possibility,
                     certainty_description: newData.possibility_description
                 };
-                vm.$http.patch(`/api/context/${cid}/attribute/${aid}`, data).then(function(response) {
+                vm.$http.patch(`/context/${cid}/attribute/${aid}`, data).then(function(response) {
                     oldData.possibility = newData.possibility;
                     oldData.possibility_description = newData.possibility_description;
                     const attributeName = vm.$translateConcept(vm.referenceModal.attribute.thesaurus_url);
@@ -501,7 +508,7 @@
                     bibliography_id: item.bibliography.id,
                     description: item.description
                 };
-                vm.$http.post(`/api/context/${cid}/reference/${aid}`, data).then(function(response) {
+                vm.$http.post(`/context/${cid}/reference/${aid}`, data).then(function(response) {
                     const refUrl = vm.referenceModal.attribute.thesaurus_url;
                     let refs = vm.selectedContext.references[refUrl];
                     if(!refs) {
@@ -564,7 +571,7 @@
                 if(entity.root_context_id) data.root_context_id = entity.root_context_id;
                 if(entity.geodata_id) data.geodata_id = entity.geodata_id;
 
-                vm.$http.post('/api/context', data).then(function(response) {
+                vm.$http.post('/context', data).then(function(response) {
                     if (!entity.parent) {
                         vm.roots.push(response.data);
                     }
@@ -633,7 +640,7 @@
                         }
                     }
                 }
-                vm.$http.patch('/api/context/'+cid+'/attributes', patches).then(function(response) {
+                vm.$http.patch('/context/'+cid+'/attributes', patches).then(function(response) {
                     vm.resetFlags();
                     vm.$showToast('Entity updated', `Data of ${entity.name} successfully updated.`, 'success');
                 }).catch(function(error) {
@@ -643,7 +650,7 @@
             deleteEntity(entity) {
                 const vm = this;
                 const id = entity.id;
-                vm.$http.delete(`/api/context/${id}`).then(function(response) {
+                vm.$http.delete(`/context/${id}`).then(function(response) {
                     // if deleted entity is currently selected entity...
                     if(entity == vm.selectedContext) {
                         // ...unset it
@@ -700,6 +707,9 @@
         },
         data() {
             return {
+                roots: [],
+                bibliography: {},
+                initFinished: false,
                 selectedContext: {},
                 toDeleteEntity: {},
                 referenceModal: {},
@@ -708,12 +718,9 @@
                 discardCallback: _ => {},
                 dataLoaded: false,
                 defaultKey: undefined,
-                plugins: {},
+                plugins: this.$getTabPlugins(),
                 activePlugin: ''
             }
-        },
-        created() {
-            this.$getSpacialistPlugins('plugins');
         },
         computed: {
             addReferenceDisabled: function() {
@@ -725,9 +732,9 @@
             tab: {
                 get() {
                     if(this.defaultKey) return this.defaultKey;
-                    else if(this.plugins.tab && this.plugins.tab[0]) {
-                        this.activePlugin = this.plugins.tab[0].tag;
-                        return this.plugins.tab[0].key;
+                    else if(this.plugins && this.plugins[0]) {
+                        this.activePlugin = this.plugins[0].tag;
+                        return this.plugins[0].key;
                     } else {
                         return '';
                     }

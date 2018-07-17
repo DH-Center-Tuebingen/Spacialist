@@ -1,11 +1,12 @@
 <template>
-    <div class="">
+    <div class="d-flex flex-column">
         <h3>Entities <small class="badge badge-secondary font-weight-light align-middle font-size-50">{{topLevelCount}} Top-Level Entities</small></h3>
-        <div class="d-flex flex-column h-100 col px-0">
+        <div class="d-flex flex-column col px-0">
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAdd)">
                 <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
             </button>
             <tree
+                class="col px-0"
                 :data="tree"
                 :draggable="true"
                 :drop-allowed="isDropAllowed"
@@ -174,7 +175,7 @@
                     parent_id: newParent ? newParent.id : null
                 };
 
-                this.$http.patch(`/api/context/${draggedElement.id}/rank`, data).then(function(response) {
+                this.$http.patch(`/context/${draggedElement.id}/rank`, data).then(function(response) {
                     const oldIndex = oldSiblings.indexOf(draggedElement);
                     oldSiblings.splice(oldIndex, 1);
                     siblingPromise.then(newSiblings => {
@@ -192,7 +193,7 @@
             },
             fetchChildren(id) {
                 const vm = this;
-                return $http.get('/api/context/byParent/'+id)
+                return $http.get('/context/byParent/'+id)
                 .then(response => {
                     return response.data.map(n => new Node(n, vm));
                 }).catch(error => this.$throwError(error));

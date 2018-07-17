@@ -27,6 +27,7 @@
         "@fortawesome/free-brands-svg-icons": "^5.1.0",
         "@fortawesome/free-regular-svg-icons": "^5.1.0",
         "@fortawesome/free-solid-svg-icons": "^5.1.0",
+        "@websanova/vue-auth": "^2.21.14-beta",
         "axios": "^0.17",
         "babel-helper-vue-jsx-merge-props": "^2.0.3",
         "babel-plugin-syntax-jsx": "^6.18.0",
@@ -35,7 +36,8 @@
         "jquery": "^3.2",
         "laravel-mix": "^2.1",
         "lodash": "^4.17.4",
-        "vue": "^2.5.16"
+        "vue": "^2.5.16",
+        "vue-router": "^3.0.1"
     },
     "dependencies": {
         "bootstrap": "^4.1.0",

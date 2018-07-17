@@ -34,7 +34,7 @@
                 const vm = this;
                 vm.epsg = vm.$getPreference('prefs.map-projection');
                 vm.dataInitialized = false;
-                vm.$http.get('/api/map').then(function(response) {
+                vm.$http.get('/map').then(function(response) {
                     const mapData = response.data;
                     vm.layers = mapData.layers;
                     vm.geodata = mapData.geodata;
@@ -60,7 +60,7 @@
             deleteFeatures(features, wkt) {
                 const vm = this;
                 features.forEach(f => {
-                    vm.$http.delete(`/api/map/${f.getProperties().id}`).then(function(response) {
+                    vm.$http.delete(`/map/${f.getProperties().id}`).then(function(response) {
 
                     }).catch(function(error) {
                         vm.$throwError(error);
@@ -75,7 +75,7 @@
                     collection: collection,
                     srid: srid
                 };
-                vm.$http.post('/api/map', data).then(function(response) {
+                vm.$http.post('/map', data).then(function(response) {
                     if(response.data.length) {
                         const geodata = response.data[0];
                         // TODO update feature
@@ -92,7 +92,7 @@
                         feature: vm.geoJsonFormat.writeFeature(f),
                         srid: 3857
                     };
-                    vm.$http.patch(`/api/map/${f.getProperties().id}`, data).then(function(response) {
+                    vm.$http.patch(`/map/${f.getProperties().id}`, data).then(function(response) {
 
                     }).catch(function(error) {
                         vm.$throwError(error);

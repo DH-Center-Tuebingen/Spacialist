@@ -40,7 +40,7 @@
             loadAsHtml: function() {
                 const vm = this;
                 const id = vm.file.id;
-                vm.$http.get(`/api/file/${id}/as_html`).then(function(response) {
+                vm.$http.get(`/file/${id}/as_html`).then(function(response) {
                     let data;
                     if(typeof response.data == 'object') {
                         data = JSON.stringify(response.data, null, 4);

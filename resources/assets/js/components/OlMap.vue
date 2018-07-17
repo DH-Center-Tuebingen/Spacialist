@@ -793,7 +793,7 @@
                 const props = feature.getProperties();
                 const gid = props.id;
                 const eid = entity.id;
-                vm.$http.post(`/api/map/link/${gid}/${eid}`, {}).then(function(response) {
+                vm.$http.post(`/map/link/${gid}/${eid}`, {}).then(function(response) {
                     feature.setProperties({
                         entity: Object.assign({}, entity)
                     });
@@ -807,7 +807,7 @@
                 const props = feature.getProperties();
                 const gid = props.id;
                 const eid = entity.id;
-                vm.$http.delete(`/api/map/link/${gid}/${eid}`, {}).then(function(response) {
+                vm.$http.delete(`/map/link/${gid}/${eid}`, {}).then(function(response) {
                     feature.setProperties({
                         entity: {}
                     });

@@ -73,6 +73,11 @@
             file: {
                 required: true,
                 type: Object
+            },
+            storageConfig: {
+                required: false,
+                type: Object,
+                default: () => new Object()
             }
         },
         mounted() {
@@ -95,7 +100,7 @@
             },
             setFileContent() {
                 const vm = this;
-                vm.$http.get(vm.file.url).then(function(response) {
+                vm.$http.get(vm.file.url, vm.storageConfig).then(function(response) {
                     let data;
                     if(typeof response.data == 'object') {
                         data = JSON.stringify(response.data, null, 4);
@@ -113,7 +118,7 @@
                 let blob = new Blob([content], {type: file.mime_type});
                 let data = new FormData();
                 data.append('file', blob, file.name);
-                vm.$http.post('/api/file/'+id+'/patch', data, {
+                vm.$http.post('/file/'+id+'/patch', data, {
                     headers: { 'content-type': false }
                 }).then(function(response) {
                     Vue.set(vm.file, 'modified', response.data.modified);

@@ -68,7 +68,7 @@
         },
         created() {
             const vm = this;
-            vm.$http.get('/api/version').then(function(response) {
+            vm.$http.get('/version').then(function(response) {
                 for(var k in response.data) {
                     Vue.set(vm.version, k, response.data[k]);
                 }

@@ -21,17 +21,7 @@ class Controller extends BaseController
         foreach($preferences as $p) {
             $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
         }
-
-        $concepts = json_encode(ThConcept::getMap());
-
-        $contextTypes = ContextType::with('sub_context_types')
-            ->orderBy('id')
-            ->get();
-        $contextTypeMap = $contextTypes->getDictionary();
-        $contextTypeMap = json_encode($contextTypeMap);
-
+        
         View::share('p', $preferenceValues);
-        View::share('concepts', $concepts);
-        View::share('contextTypes', $contextTypeMap);
   }
 }

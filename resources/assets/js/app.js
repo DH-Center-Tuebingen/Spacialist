@@ -5,6 +5,15 @@ import { far } from '@fortawesome/free-regular-svg-icons';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import VModal from 'vue-js-modal';
 import Axios from 'axios';
+import VueRouter from 'vue-router';
+
+import App from './App.vue';
+import MainView from './components/MainView.vue';
+import Users from './components/Users.vue';
+import Roles from './components/Roles.vue';
+import DataModel from './components/DataModel.vue';
+import Login from './components/Login.vue';
+
 import VueUploadComponent from 'vue-upload-component';
 import moment from 'moment';
 import VCalendar from 'v-calendar';
@@ -22,13 +31,14 @@ dom.watch(); // search for <i> tags to replace with <svg>
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-// require('./bootstrap');
-require('popper.js')
-require('bootstrap')
-
+require('popper.js');
+require('bootstrap');
 window.Vue = require('vue');
 window._ = require('lodash');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
+require('./globals.js');
+
+Axios.defaults.baseURL = '/api/v1';
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -36,13 +46,18 @@ $ = jQuery  = window.$ = window.jQuery = require('jquery');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 Vue.prototype.$http = Axios;
+Vue.axios = Axios;
+Vue.use(VueRouter);
+
+Vue.use(SpacialistPluginSystem);
+
 Vue.use(VModal);
+Vue.use(VeeValidate);
+Vue.use(Notifications);
 Vue.use(VCalendar, {
     firstDayOfWeek: 2,
     popoverVisibility: 'focus'
 });
-Vue.use(VeeValidate);
-Vue.use(Notifications);
 Vue.use(VTooltip, {
     popover: {
         defaultBaseClass: 'popover',
@@ -50,7 +65,66 @@ Vue.use(VTooltip, {
         defaultArrowClass: 'arrow'
     }
 });
-Vue.use(SpacialistPluginSystem);
+
+const router = new VueRouter({
+    scrollBehavior(to, from, savedPosition) {
+        return {
+            x: 0,
+            y: 0
+        };
+    },
+    routes: [
+        {
+            path: '/',
+            name: 'home',
+            component: MainView,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/users',
+            name: 'users',
+            component: Users,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/roles',
+            name: 'roles',
+            component: Roles,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/editor/dme',
+            name: 'dme',
+            component: DataModel,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/login',
+            name: 'login',
+            component: Login,
+            meta: {
+                auth: false
+            }
+        }
+    ]
+});
+
+Vue.router = router;
+App.router = Vue.router;
+
+Vue.use(require('@websanova/vue-auth'), {
+   auth: require('@websanova/vue-auth/drivers/auth/bearer.js'),
+   http: require('@websanova/vue-auth/drivers/http/axios.1.x.js'),
+   router: require('@websanova/vue-auth/drivers/router/vue-router.2.x.js'),
+});
 
 // Imported Components
 Vue.component('multiselect', Multiselect);
@@ -70,19 +144,14 @@ Vue.component('layer', require('./components/LayerList.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 
 // Page Components
-Vue.component('main-view', require('./components/MainView.vue'));
 Vue.component('preferences', require('./components/Preferences.vue'));
-Vue.component('roles', require('./components/Roles.vue'));
-Vue.component('users', require('./components/Users.vue'));
 Vue.component('user-preferences', require('./components/UserPreferences.vue'));
-Vue.component('data-model', require('./components/DataModel.vue'));
 Vue.component('layer-editor', require('./components/LayerEditor.vue'));
 Vue.component('about-dialog', require('./components/About.vue'));
 Vue.component('error-modal', require('./components/Error.vue'));
 
 Vue.component('gis', require('./components/plugins/Gis.vue')); // TODO
 Vue.component('data-analysis', require('./components/plugins/DataAnalysis.vue'));
-
 
 // Filter
 Vue.filter('date', function(value, format) {
@@ -125,107 +194,29 @@ Vue.filter('bibtexify', function(value, type) {
     return rendered;
 });
 
-
-// Validators
-Vue.prototype.$validateObject = function(value) {
-    // concepts is valid if it is either an object
-    // or an empty array
-    // (empty assoc arrays are simple arrays in php)
-    return typeof value == 'object' || (typeof value == 'array' && value.length == 0);
-};
-
-Vue.prototype.$showToast = function(title, text, type, duration) {
-    type = type || 'info'; // success, info, warn, error
-    duration = duration || 2000;
-    this.$notify({
-        group: 'spacialist',
-        title: title,
-        text: text,
-        type: type,
-        duration: duration
-    });
-};
-
-Vue.prototype.$throwError = function(error) {
-    if(error.response) {
-        const r = error.response;
-        const req = {
-            status: r.status,
-            url: r.config.url,
-            method: r.config.method.toUpperCase()
-        };
-        this.$showErrorModal(r.data, r.headers, req);
-    } else if(error.request) {
-        this.$showErrorModal(error.request);
-    } else {
-        this.$showErrorModal(error.message);
-    }
-};
-
-Vue.prototype.$showErrorModal = function(errorMsg, headers, request) {
-    this.$modal.show('error-modal', {msg: errorMsg, headers: headers, request: request});
-};
-
-Vue.prototype.$createDownloadLink = function(content, filename, base64, contentType) {
-    base64 = base64 || false;
-    var link = document.createElement("a");
-    let url;
-    if(base64) {
-        contentType = contentType || 'text/plain';
-        url = `data:${contentType};base64,${content}`;
-    } else {
-        url = window.URL.createObjectURL(new Blob([content]));
-    }
-    // link.setAttribute("href", 'data:;base64,' + raw);
-    link.setAttribute("href", url);
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-}
-
-Vue.prototype.$hasConcept = function(url) {
-    if(!url) return false;
-    return !!this.$root.$data.concepts[url];
-}
-
-Vue.prototype.$translateConcept = function(url) {
-    const concepts = this.$root.$data.concepts;
-    if(!url || !concepts) return url;
-    if(!concepts[url]) return url;
-    return concepts[url].label;
-}
-
-Vue.prototype.$getEntityType = function(id) {
-    return this.$root.$data.contextTypes[id];
-}
-
-Vue.prototype.$getEntityTypes = function() {
-    return this.$root.$data.contextTypes;
-}
-
-Vue.prototype.$getPreference = function(pref) {
-    return this.$root.$data.preferences[pref];
-}
-
 const app = new Vue({
     el: '#app',
+    router: router,
+    render: app => app(App),
     beforeMount: function() {
-        this.preferences = JSON.parse(this.$el.attributes.preferences.value);
-        this.concepts = JSON.parse(this.$el.attributes.concepts.value);
-        this.contextTypes = JSON.parse(this.$el.attributes['context-types'].value);
-        let extensions = this.preferences['prefs.load-extensions'];
-        for(let k in extensions) {
-            if(!extensions[k] || (k != 'map' && k != 'files')) {
-                console.log("Skipping plugin " + k);
-                continue;
+        Axios.get('pre').then(response =>  {
+            this.preferences = response.data.preferences;
+            this.concepts = response.data.concepts;
+            this.contextTypes = response.data.contextTypes;
+            const extensions = this.preferences['prefs.load-extensions'];
+            for(let k in extensions) {
+                if(!extensions[k] || (k != 'map' && k != 'files')) {
+                    console.log("Skipping plugin " + k);
+                    continue;
+                }
+                let name = k;
+                let nameExt = name + '.js';
+                System.import('./plugins/' + nameExt).then(function(data) {
+                    Vue.use(data.default);
+                });
             }
-            let name = k;
-            let nameExt = name + '.js';
-            System.import('./plugins/' + nameExt).then(function(data) {
-                Vue.use(data.default);
-            });
-        }
-        this.$getSpacialistPlugins('plugins');
+            this.$getSpacialistPlugins('plugins');
+        });
     },
     data: {
         selectedContext: {},
@@ -236,10 +227,5 @@ const app = new Vue({
         concepts: {},
         contextTypes: {},
         plugins: {}
-    },
-    methods: {
-        showAboutModal() {
-            this.$modal.show('about-modal');
-        }
     }
 });

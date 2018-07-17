@@ -48,7 +48,7 @@
             setArchiveFileList() {
                 const vm = this;
                 const id = vm.file.id;
-                const url = `/api/file/${id}/archive/list`;
+                const url = `/file/${id}/archive/list`;
                 vm.fileList = [];
                 vm.$http.get(url).then(function(response) {
                     response.data.forEach(entry => {
@@ -66,7 +66,7 @@
                 if(selectedFile.is_directory) return;
                 const id = vm.file.id;
                 const p = selectedFile.filename;
-                const url = '/api/file/'+id+'/archive/download?p='+p;
+                const url = '/file/'+id+'/archive/download?p='+p;
                 vm.$http.get(url).then(function(response) {
                     vm.$createDownloadLink(response.data, selectedFile.clean_filename, true);
                 }).catch(function(error) {

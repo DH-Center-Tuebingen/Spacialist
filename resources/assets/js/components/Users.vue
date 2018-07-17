@@ -142,9 +142,21 @@
     import { mapFields } from 'vee-validate';
 
     export default {
-        props: ['users', 'roles'],
+        beforeRouteEnter(to, from, next) {
+            $http.get('user').then(response => {
+                const users = response.data.users;
+                const roles = response.data.roles;
+                next(vm => vm.init(users, roles));
+            }).catch(error => {
+                $throwError(error);
+            });
+        },
         mounted() {},
         methods: {
+            init(users, roles) {
+                this.userList = users;
+                this.roles = roles;
+            },
             showNewUserModal() {
                 this.$modal.show('new-user-modal');
             },
@@ -217,18 +229,14 @@
         },
         data() {
             return {
+                userList: [],
+                roles: [],
                 userRoles: {},
                 updatePassword: id => (
                     console.log(id)
                 ),
                 newUser: {},
-                selectedUser: {},
-                localUsers: this.users.slice()
-            }
-        },
-        computed: {
-            userList() {
-                return this.localUsers;
+                selectedUser: {}
             }
         }
     }

@@ -11,6 +11,7 @@ use App\ContextType;
 use App\Permission;
 use App\Preference;
 use App\Role;
+use App\ThConcept;
 use App\User;
 
 class HomeController extends Controller
@@ -29,6 +30,27 @@ class HomeController extends Controller
         $this->middleware('guest')->only('welcome');
     }
 
+    public function getGlobalData() {
+        $preferences = Preference::all();
+        $preferenceValues = [];
+        foreach($preferences as $p) {
+            $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
+        }
+
+        $concepts = ThConcept::getMap();
+
+        $contextTypes = ContextType::with('sub_context_types')
+            ->orderBy('id')
+            ->get();
+        $contextTypeMap = $contextTypes->getDictionary();
+
+        return response()->json([
+            'preferences' => $preferenceValues,
+            'concepts' => $concepts,
+            'contextTypes' => $contextTypeMap
+        ]);
+    }
+
     /**
      * Show the application dashboard.
      *
@@ -36,15 +58,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $roots = Context::getEntitiesByParent();
-
-        $bibliography = Bibliography::all();
-
-        $data = [
-            'bibliography' => $bibliography,
-            'roots' => $roots
-        ];
-        return view('home', $data);
+        return view('home');
     }
 
     public function welcome() {
@@ -75,18 +89,6 @@ class HomeController extends Controller
         $roles = Role::with('permissions')->orderBy('id')->get();
         $perms = Permission::orderBy('id')->get();
         return view('settings.roles', ['roles' => $roles, 'permissions' => $perms]);
-    }
-
-    public function dme()
-    {
-        $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
-        foreach($attributes as $a) {
-            $a->columns = Attribute::where('parent_id', $a->id)->get();
-        }
-
-        return view('settings.editor.dme', [
-            'attributes' => $attributes
-        ]);
     }
 
     public function layer()

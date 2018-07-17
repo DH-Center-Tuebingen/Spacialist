@@ -1,0 +1,150 @@
+<template>
+    <div class="d-flex flex-column h-100">
+        <nav class="navbar navbar-dark bg-dark sticky-top navbar-expand-lg">
+            <!-- Branding Image -->
+            <router-link :to="{name: 'home'}" class="navbar-brand">
+                <img src="favicon.png" class="logo" alt="spacialist logo" />
+                {{ $getPreference('prefs.project-name') }}
+            </router-link>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <!-- Left Side Of Navbar -->
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <form class="form-inline mr-auto">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <input class="form-control global-search" type="text" id="global-search" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-fw fa-search" aria-hidden="true"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </li>
+                </ul>
+
+                <!-- Right Side Of Navbar -->
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="nav-item">
+                        <a class="nav-link" target="_blank" href="https://github.com/eScienceCenter/Spacialist/wiki/User-manual">
+                            <i class="far fa-fw fa-question-circle"></i>
+                        </a>
+                    </li>
+                    <!-- Authentication Links -->
+                    <li class="nav-item" v-if="!$auth.check()">
+                        <router-link :to="{name: 'login'}" class="nav-link">
+                            Login
+                        </router-link>
+                    </li>
+                    <li class="nav-item dropdown" v-if="$auth.check()">
+                        <a href="#" class="nav-link dropdown-toggle" id="tools-navbar" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-fw fa-cogs"></i> Tools
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="tools-navbar">
+                            <a class="dropdown-item" v-for="plugin in plugins.tools" :href="plugin.href">
+                                <i class="fas fa-fw" :class="plugin.icon"></i> {{ plugin.label }}
+                            </a>
+                            <a class="dropdown-item" href="/bibliography">
+                                <i class="fas fa-fw fa-book"></i> Bibliography
+                            </a>
+                            <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="/analysis">
+                                    <i class="far fa-fw fa-chart-bar"></i> Data Analysis <sup>(BETA)</sup>
+                                </a>
+                            </template>
+                            <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">
+                                    External Tools <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
+                                </h6>
+                            </template>
+                            <template v-if="$getPreference('prefs.link-to-thesaurex')">
+                                <a class="dropdown-item" :href="$getPreference('prefs.link-to-thesaurex')">
+                                    <i class="fas fa-fw fa-paw"></i> ThesauRex
+                                </a>
+                            </template>
+                            <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
+                                <a class="dropdown-item" href="/db">
+                                    <i class="fas fa-fw fa-chart-bar"></i> dbWebGen
+                                </a>
+                            </template>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown" v-if="$auth.check()">
+                        <a href="#" class="nav-link dropdown-toggle" id="settings-dropdown" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-fw fa-sliders-h"></i> Settings <span class="caret"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="settings-dropdown">
+                            <router-link :to="{name: 'users'}" class="dropdown-item">
+                                <i class="fas fa-fw fa-users"></i> User Management
+                            </router-link>
+                            <router-link :to="{name: 'roles'}" class="dropdown-item">
+                                <i class="fas fa-fw fa-shield-alt"></i> Role Management
+                            </router-link>
+                            <router-link :to="{name: 'dme'}" class="dropdown-item">
+                                <i class="fas fa-fw fa-sitemap"></i> Data Model Editor
+                            </router-link>
+                            <a class="dropdown-item" href="/prefs">
+                                <i class="fas fa-fw fa-cog"></i> System Preferences
+                            </a>
+                            <a class="dropdown-item" v-for="plugin in plugins.settings" :href="plugin.href">
+                                <i class="fas fa-fw" :class="plugin.icon"></i> @{{ plugin.label }}
+                            </a>
+                            <a class="dropdown-item" href="">
+                                <i class="fas fa-fw fa-pencil-alt"></i> Toggle Edit Mode
+                            </a>
+                            <a class="dropdown-item" href="#" @click="showAboutModal">
+                                <i class="fas fa-fw fa-info-circle"></i> About
+                            </a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown" v-if="$auth.check()">
+                        <a href="#" class="nav-link dropdown-toggle" id="user-dropdown" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-fw fa-user"></i> {{ $auth.user().name }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="user-dropdown">
+                            <a class="dropdown-item" href="/userprefs/id">
+                                <i class="fas fa-fw fa-cog"></i> Preferences
+                            </a>
+                            <a class="dropdown-item" href="#"
+                                @click="$auth.logout()">
+                                <i class="fas fa-fw fa-sign-out-alt"></i> Logout
+                            </a>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container-fluid mt-3 mb-3 col">
+            <router-view></router-view>
+            <about-dialog></about-dialog>
+            <error-modal></error-modal>
+        </div>
+        <notifications group="spacialist" position="bottom left" class="m-2" />
+    </div>
+</template>
+
+<script>
+    export default {
+        mounted() {},
+        methods: {
+            showAboutModal() {
+                this.$modal.show('about-modal');
+            }
+        },
+        data() {
+            return {
+                plugins: {},
+                prefs: {},
+                concepts: {},
+                contextTypes: {}
+            }
+        }
+    }
+</script>

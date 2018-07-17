@@ -187,7 +187,7 @@
                     name: 'Unnamed Layer',
                     is_overlay: is_overlay
                 };
-                vm.$http.post('/api/map/layer', data).then(function(response) {
+                vm.$http.post('/map/layer', data).then(function(response) {
                     if(is_overlay) vm.overlays.push(response.data);
                     else vm.baselayer.push(response.data);
                 }).catch(function(error) {
@@ -215,7 +215,7 @@
                     console.log("No update needed");
                     return;
                 }
-                vm.$http.patch(`/api/map/layer/${lid}`, data).then(function(response) {
+                vm.$http.patch(`/map/layer/${lid}`, data).then(function(response) {
                     let activeBaseLayerChanged = false;
                     let layerGroup;
                     if(!tmpLayer.is_overlay) {
