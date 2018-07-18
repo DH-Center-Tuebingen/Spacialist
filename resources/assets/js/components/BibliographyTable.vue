@@ -10,7 +10,7 @@
                                     <i class="fas fa-fw fa-search"></i>
                                 </span>
                             </div>
-                            <input type="text" class="form-control" v-model="query" placehoder="Search&ellipsis;">
+                            <input type="text" class="form-control" @input="debouncedSearch" placehoder="Search&ellipsis;">
                         </div>
                     </div>
                 </form>
@@ -30,13 +30,13 @@
                 :drop="true"
                 @input-file="inputFile">
                     <span class="btn btn-outline-primary">
-                        <i class="fas fa-fw fa-download"></i> Import BibTex File
+                        <i class="fas fa-fw fa-file-import"></i> Import BibTex File
                     </span>
                 </file-upload>
             </li>
             <li class="list-inline-item">
                 <a type="button" class="btn btn-outline-primary" href="/api/bibliography/export">
-                    <i class="fas fa-fw fa-upload"></i> Export BibTex File
+                    <i class="fas fa-fw fa-file-export"></i> Export BibTex File
                 </a>
             </li>
         </ul>
@@ -244,7 +244,7 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody v-infinite-scroll="getNextEntries">
                     <tr v-for="entry in orderedList">
                         <td>
                             {{ entry.type }}
@@ -427,15 +427,43 @@
 </template>
 
 <script>
+    import infiniteScroll from 'vue-infinite-scroll';
+    import debounce from 'debounce';
+
     export default {
-        props: {
-            entries: {
-                type: Array,
-                required: true
-            }
+        directives: {
+            infiniteScroll
+        },
+        beforeRouteEnter(to, from, next) {
+            $http.get('bibliography').then(response => {
+                next(vm => vm.init(response.data));
+            }).catch(error => {
+                $throwError(error);
+            });
+        },
+        created() {
+            this.debouncedSearch = debounce(e => {
+                this.query = e.target.value;
+            }, this.debounceTimeout);
         },
         mounted() {},
         methods: {
+            init(entries) {
+                this.allEntries = entries;
+                const start = this.entriesLoaded;
+                const end = Math.min(start + this.chunkSize, this.allEntries.length);
+                this.localEntries = this.allEntries.slice(start, end);
+                this.entriesLoaded = this.localEntries.length;
+            },
+            getNextEntries() {
+                if(this.entriesLoaded == this.allEntries.length) return;
+                const start = this.entriesLoaded;
+                const end = Math.min(start + this.chunkSize, this.allEntries.length);
+                this.allEntries.slice(start, end).forEach(e => {
+                    this.localEntries.push(e);
+                });
+                this.entriesLoaded = this.localEntries.length;
+            },
             setOrderColumn(column) {
                 if(this.orderColumn == column) {
                     if(this.orderType == 'asc') {
@@ -549,10 +577,15 @@
         },
         data() {
             return {
-                localEntries: this.entries.slice(),
+                allEntries: [],
+                entriesLoaded: 0,
+                chunkSize: 20,
+                localEntries: [],
                 orderColumn: 'author',
                 orderType: 'asc',
                 query: '',
+                debouncedSearch: undefined,
+                debounceTimeout: 1000,
                 files: [],
                 newItem: {
                     fields: {}
@@ -715,12 +748,12 @@
                 return this.availableTypes[0].optionalFields;
             },
             orderedList: function() {
-                let query = this.query.toLowerCase();
+                const query = this.query.toLowerCase();
                 let filteredEntries;
                 if(!query.length) {
                     filteredEntries = this.localEntries;
                 } else {
-                    filteredEntries = this.localEntries.filter(function(e) {
+                    filteredEntries = this.allEntries.filter(function(e) {
                         for(let k in e) {
                             if(e.hasOwnProperty(k) && e[k]) {
                                 if(k == 'id') continue;

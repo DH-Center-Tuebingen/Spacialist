@@ -49,9 +49,9 @@
                             <a class="dropdown-item" v-for="plugin in plugins.tools" :href="plugin.href">
                                 <i class="fas fa-fw" :class="plugin.icon"></i> {{ plugin.label }}
                             </a>
-                            <a class="dropdown-item" href="/bibliography">
+                            <router-link :to="{name: 'bibliography'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-book"></i> Bibliography
-                            </a>
+                            </router-link>
                             <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="/analysis">

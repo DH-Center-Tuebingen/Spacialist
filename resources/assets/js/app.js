@@ -12,6 +12,7 @@ import MainView from './components/MainView.vue';
 import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
 import DataModel from './components/DataModel.vue';
+import Bibliography from './components/BibliographyTable.vue';
 import Login from './components/Login.vue';
 
 import VueUploadComponent from 'vue-upload-component';
@@ -83,7 +84,7 @@ const router = new VueRouter({
             }
         },
         {
-            path: '/users',
+            path: '/mg/users',
             name: 'users',
             component: Users,
             meta: {
@@ -91,7 +92,7 @@ const router = new VueRouter({
             }
         },
         {
-            path: '/roles',
+            path: '/mg/roles',
             name: 'roles',
             component: Roles,
             meta: {
@@ -99,9 +100,17 @@ const router = new VueRouter({
             }
         },
         {
-            path: '/editor/dme',
+            path: '/editor/dm',
             name: 'dme',
             component: DataModel,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/bibliography',
+            name: 'bibliography',
+            component: Bibliography,
             meta: {
                 auth: true
             }
@@ -137,7 +146,6 @@ Vue.component('csv-table', require('./components/CsvTable.vue'));
 
 // Reusable Components
 Vue.component('attributes', require('./components/AttributeList.vue'));
-Vue.component('bibliography', require('./components/BibliographyTable.vue'));
 Vue.component('context-tree', require('./components/ContextTree.vue'));
 Vue.component('context-types', require('./components/ContextTypeList.vue'));
 Vue.component('layer', require('./components/LayerList.vue'));

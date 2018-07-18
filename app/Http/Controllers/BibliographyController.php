@@ -14,7 +14,7 @@ class BibliographyController extends Controller
 
     // GET
     public function getBibliography() {
-        $bibliography = Bibliography::all();
+        $bibliography = Bibliography::orderBy('id')->get();
 
         return response()->json($bibliography);
     }

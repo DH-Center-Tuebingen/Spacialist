@@ -56,11 +56,6 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        return view('home');
-    }
-
     public function welcome() {
         return view('welcome');
     }
@@ -75,20 +70,6 @@ class HomeController extends Controller
     {
         $userPrefs = Preference::getUserPreferences($id);
         return view('settings.userpreferences', ['preferences' => json_encode($userPrefs), 'user_id' => $id]);
-    }
-
-    public function users()
-    {
-        $users = User::with('roles')->orderBy('id')->get();
-        $roles = Role::orderBy('id')->get();
-        return view('settings.users', ['users' => $users, 'roles' => $roles]);
-    }
-
-    public function roles()
-    {
-        $roles = Role::with('permissions')->orderBy('id')->get();
-        $perms = Permission::orderBy('id')->get();
-        return view('settings.roles', ['roles' => $roles, 'permissions' => $perms]);
     }
 
     public function layer()
@@ -121,12 +102,6 @@ class HomeController extends Controller
         ];
 
         return view('tools.gis', $data);
-    }
-
-    public function bibliography()
-    {
-        $entries = Bibliography::orderBy('id')->get();
-        return view('tools.bibliography', ['entries' => $entries]);
     }
 
     public function analysis()
