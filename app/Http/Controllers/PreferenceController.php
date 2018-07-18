@@ -18,6 +18,20 @@ class PreferenceController extends Controller {
     }
 
     // GET
+    public function getPreferences() {
+        $preferences = Preference::getPreferences();
+        return response()->json($preferences);
+    }
+
+    public function getUserPreferences($id) {
+        if(auth()->user()->id != $id) {
+            return response()->json([
+                'error' => 'You are not allowed to access preferences of another user'
+            ], 403);
+        }
+        $preferences = Preference::getUserPreferences($id);
+        return response()->json($preferences);
+    }
 
     // POST
 

@@ -60,18 +60,6 @@ class HomeController extends Controller
         return view('welcome');
     }
 
-    public function prefs()
-    {
-        $preferences = Preference::getPreferences();
-        return view('settings.preferences', ["preferences" => json_encode($preferences)]);
-    }
-
-    public function userPrefs($id)
-    {
-        $userPrefs = Preference::getUserPreferences($id);
-        return view('settings.userpreferences', ['preferences' => json_encode($userPrefs), 'user_id' => $id]);
-    }
-
     public function layer()
     {
         $baselayers = AvailableLayer::where('is_overlay', false)->orderBy('id')->get();

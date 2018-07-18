@@ -106,6 +106,9 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
 // PREFERENCES
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/preference')->group(function() {
+    Route::get('', 'PreferenceController@getPreferences');
+    Route::get('/{id}', 'PreferenceController@getUserPreferences')->where('id', '[0-9]+');
+
     Route::patch('/{id}', 'PreferenceController@patchPreference')->where('id', '[0-9]+');
 });
 

@@ -9,11 +9,15 @@ import VueRouter from 'vue-router';
 
 import App from './App.vue';
 import MainView from './components/MainView.vue';
+import Login from './components/Login.vue';
+// Tools
+import Bibliography from './components/BibliographyTable.vue';
+// Settings
 import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
 import DataModel from './components/DataModel.vue';
-import Bibliography from './components/BibliographyTable.vue';
-import Login from './components/Login.vue';
+import Preferences from './components/Preferences.vue';
+import UserPreferences from './components/UserPreferences.vue';
 
 import VueUploadComponent from 'vue-upload-component';
 import moment from 'moment';
@@ -83,6 +87,24 @@ const router = new VueRouter({
                 auth: true
             }
         },
+        // Tools
+        {
+            path: '/bibliography',
+            name: 'bibliography',
+            component: Bibliography,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/login',
+            name: 'login',
+            component: Login,
+            meta: {
+                auth: false
+            }
+        },
+        // Settings
         {
             path: '/mg/users',
             name: 'users',
@@ -108,21 +130,21 @@ const router = new VueRouter({
             }
         },
         {
-            path: '/bibliography',
-            name: 'bibliography',
-            component: Bibliography,
+            path: '/preferences',
+            name: 'preferences',
+            component: Preferences,
             meta: {
                 auth: true
             }
         },
         {
-            path: '/login',
-            name: 'login',
-            component: Login,
+            path: '/preferences/u/:id',
+            name: 'userpreferences',
+            component: UserPreferences,
             meta: {
-                auth: false
+                auth: true
             }
-        }
+        },
     ]
 });
 
@@ -152,8 +174,6 @@ Vue.component('layer', require('./components/LayerList.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 
 // Page Components
-Vue.component('preferences', require('./components/Preferences.vue'));
-Vue.component('user-preferences', require('./components/UserPreferences.vue'));
 Vue.component('layer-editor', require('./components/LayerEditor.vue'));
 Vue.component('about-dialog', require('./components/About.vue'));
 Vue.component('error-modal', require('./components/Error.vue'));

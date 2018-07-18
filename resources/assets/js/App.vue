@@ -90,9 +90,9 @@
                             <router-link :to="{name: 'dme'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-sitemap"></i> Data Model Editor
                             </router-link>
-                            <a class="dropdown-item" href="/prefs">
+                            <router-link :to="{name: 'preferences'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-cog"></i> System Preferences
-                            </a>
+                            </router-link>
                             <a class="dropdown-item" v-for="plugin in plugins.settings" :href="plugin.href">
                                 <i class="fas fa-fw" :class="plugin.icon"></i> @{{ plugin.label }}
                             </a>
@@ -109,9 +109,9 @@
                             <i class="fas fa-fw fa-user"></i> {{ $auth.user().name }}
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="user-dropdown">
-                            <a class="dropdown-item" href="/userprefs/id">
+                            <router-link :to="{name: 'userpreferences', params: { id: $auth.user().id }}" class="dropdown-item">
                                 <i class="fas fa-fw fa-cog"></i> Preferences
-                            </a>
+                            </router-link>
                             <a class="dropdown-item" href="#"
                                 @click="$auth.logout()">
                                 <i class="fas fa-fw fa-sign-out-alt"></i> Logout

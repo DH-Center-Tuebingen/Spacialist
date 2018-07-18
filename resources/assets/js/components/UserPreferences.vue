@@ -1,5 +1,5 @@
 <template>
-    <table class="table table-striped table-hover">
+    <table class="table table-striped table-hover" v-if="initFinished">
         <thead class="thead-light">
             <tr>
                 <th>Preference</th>
@@ -17,13 +17,13 @@
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label"></label>
                             <div class="col-md-10">
-                                <input type="text" :readonly="!localPreferences['prefs.gui-language'].allow_override" :class="[localPreferences['prefs.gui-language'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.gui-language'].value" />
+                                <input type="text" :readonly="!preferences['prefs.gui-language'].allow_override" :class="[preferences['prefs.gui-language'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.gui-language'].value" />
                             </div>
                         </div>
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.gui-language'])" :disabled="!localPreferences['prefs.gui-language'].allow_override">
+                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.gui-language'])" :disabled="!preferences['prefs.gui-language'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -37,25 +37,25 @@
                         <div class="form-group row">
                             <label for="left-column" class="col-md-2 col-form-label">Left-Hand Column:</label>
                             <div class="col-md-10">
-                                <input id="left-column" type="number" :readonly="!localPreferences['prefs.columns'].allow_override" :class="[localPreferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.columns'].value.left" />
+                                <input id="left-column" type="number" :readonly="!preferences['prefs.columns'].allow_override" :class="[preferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.columns'].value.left" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="center-column" class="col-md-2 col-form-label">Center Column:</label>
                             <div class="col-md-10">
-                                <input id="center-column" type="number" :readonly="!localPreferences['prefs.columns'].allow_override" :class="[localPreferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.columns'].value.center" />
+                                <input id="center-column" type="number" :readonly="!preferences['prefs.columns'].allow_override" :class="[preferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.columns'].value.center" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="right-column" class="col-md-2 col-form-label">Right-Hand Column:</label>
                             <div class="col-md-10">
-                                <input id="right-column" type="number" :readonly="!localPreferences['prefs.columns'].allow_override" :class="[localPreferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.columns'].value.right" />
+                                <input id="right-column" type="number" :readonly="!preferences['prefs.columns'].allow_override" :class="[preferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.columns'].value.right" />
                             </div>
                         </div>
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.columns'])" :disabled="!localPreferences['prefs.columns'].allow_override">
+                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.columns'])" :disabled="!preferences['prefs.columns'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -70,14 +70,14 @@
                             <div class="col-md-2"></div>
                             <div class="col-md-10">
                                 <div class="form-check">
-                                    <input class="form-check-input" id="show-tooltips" type="checkbox" :disabled="!localPreferences['prefs.show-tooltips'].allow_override" v-model="localPreferences['prefs.show-tooltips'].value" />
+                                    <input class="form-check-input" id="show-tooltips" type="checkbox" :disabled="!preferences['prefs.show-tooltips'].allow_override" v-model="preferences['prefs.show-tooltips'].value" />
                                 </div>
                             </div>
                         </div>
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.show-tooltips'])" :disabled="!localPreferences['prefs.show-tooltips'].allow_override">
+                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.show-tooltips'])" :disabled="!preferences['prefs.show-tooltips'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -91,13 +91,13 @@
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label"></label>
                             <div class="col-md-10">
-                                <input type="text" :readonly="!localPreferences['prefs.tag-root'].allow_override" :class="[localPreferences['prefs.tag-root'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.tag-root'].value" />
+                                <input type="text" :readonly="!preferences['prefs.tag-root'].allow_override" :class="[preferences['prefs.tag-root'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.tag-root'].value" />
                             </div>
                         </div>
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.tag-root'])" :disabled="!localPreferences['prefs.tag-root'].allow_override">
+                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.tag-root'])" :disabled="!preferences['prefs.tag-root'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -108,11 +108,11 @@
                 </td>
                 <td>
                     <form>
-                        <div class="form-group row" v-for="(extension, key) in localPreferences['prefs.load-extensions'].value">
+                        <div class="form-group row" v-for="(extension, key) in preferences['prefs.load-extensions'].value">
                             <div class="col-md-2"></div>
                             <div class="col-md-10">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" :id="'extension-'+key" :checked="extension" :disabled="!localPreferences['prefs.load-extensions'].allow_override" />
+                                    <input type="checkbox" class="form-check-input" :id="'extension-'+key" :checked="extension" :disabled="!preferences['prefs.load-extensions'].allow_override" />
                                     <label class="form-check-label" :for="'extension-'+key">
                                         {{ key }}
                                     </label>
@@ -122,7 +122,7 @@
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.load-extensions'])" :disabled="!localPreferences['prefs.load-extensions'].allow_override">
+                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.load-extensions'])" :disabled="!preferences['prefs.load-extensions'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -136,13 +136,13 @@
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label"></label>
                             <div class="col-md-10">
-                                <input type="text" :readonly="!localPreferences['prefs.link-to-thesaurex'].allow_override" :class="[localPreferences['prefs.link-to-thesaurex'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.link-to-thesaurex'].value" />
+                                <input type="text" :readonly="!preferences['prefs.link-to-thesaurex'].allow_override" :class="[preferences['prefs.link-to-thesaurex'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.link-to-thesaurex'].value" />
                             </div>
                         </div>
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.link-to-thesaurex'])" :disabled="!localPreferences['prefs.link-to-thesaurex'].allow_override">
+                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.link-to-thesaurex'])" :disabled="!preferences['prefs.link-to-thesaurex'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -156,13 +156,13 @@
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label"></label>
                             <div class="col-md-10">
-                                <input type="text" :readonly="!localPreferences['prefs.project-name'].allow_override" :class="[localPreferences['prefs.project-name'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.project-name'].value" />
+                                <input type="text" :readonly="!preferences['prefs.project-name'].allow_override" :class="[preferences['prefs.project-name'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.project-name'].value" />
                             </div>
                         </div>
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.project-name'])" :disabled="!localPreferences['prefs.project-name'].allow_override">
+                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.project-name'])" :disabled="!preferences['prefs.project-name'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -176,38 +176,38 @@
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label">Name:</label>
                             <div class="col-md-10">
-                                <input type="text" :readonly="!localPreferences['prefs.project-maintainer'].allow_override" :class="[localPreferences['prefs.project-maintainer'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.project-maintainer'].value.name" />
+                                <input type="text" :readonly="!preferences['prefs.project-maintainer'].allow_override" :class="[preferences['prefs.project-maintainer'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.project-maintainer'].value.name" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label">E-Mail-Address:</label>
                             <div class="col-md-10">
-                                <input type="text" :readonly="!localPreferences['prefs.project-maintainer'].allow_override" :class="[localPreferences['prefs.project-maintainer'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.project-maintainer'].value.email" />
+                                <input type="text" :readonly="!preferences['prefs.project-maintainer'].allow_override" :class="[preferences['prefs.project-maintainer'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.project-maintainer'].value.email" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label">Description:</label>
                             <div class="col-md-10">
-                                <input type="text" :readonly="!localPreferences['prefs.project-maintainer'].allow_override" :class="[localPreferences['prefs.project-maintainer'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.project-maintainer'].value.description" />
+                                <input type="text" :readonly="!preferences['prefs.project-maintainer'].allow_override" :class="[preferences['prefs.project-maintainer'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.project-maintainer'].value.description" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label" for="public">Public?</label>
                             <div class="col-md-10">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="public" :disabled="!localPreferences['prefs.project-maintainer'].allow_override" v-model="localPreferences['prefs.project-maintainer'].value.public" />
+                                    <input type="checkbox" class="form-check-input" id="public" :disabled="!preferences['prefs.project-maintainer'].allow_override" v-model="preferences['prefs.project-maintainer'].value.public" />
                                 </div>
                             </div>
                         </div>
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.project-maintainer'])" :disabled="!localPreferences['prefs.project-maintainer'].allow_override">
+                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.project-maintainer'])" :disabled="!preferences['prefs.project-maintainer'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
             </tr>
-            <tr v-if="localPreferences['prefs.load-extensions'].value.map">
+            <tr v-if="preferences['prefs.load-extensions'].value.map">
                 <td>
                     <strong>Map Projection</strong>
                 </td>
@@ -216,13 +216,13 @@
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label">EPSG-Code:</label>
                             <div class="col-md-10">
-                                <input type="text" :readonly="!localPreferences['prefs.map-projection'].allow_override" :class="[localPreferences['prefs.map-projection'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="localPreferences['prefs.map-projection'].value.epsg" />
+                                <input type="text" :readonly="!preferences['prefs.map-projection'].allow_override" :class="[preferences['prefs.map-projection'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.map-projection'].value.epsg" />
                             </div>
                         </div>
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(localPreferences['prefs.map-projection'])" :disabled="!localPreferences['prefs.map-projection'].allow_override">
+                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.map-projection'])" :disabled="!preferences['prefs.map-projection'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -233,16 +233,27 @@
 
 <script>
     export default {
-        props: ['preferences', 'userId'],
+        beforeRouteEnter(to, from, next) {
+            $http.get(`preference/${to.params.id}`).then(response => {
+                next(vm => vm.init(response.data));
+            }).catch(error => {
+                $throwError(error);
+            });
+        },
         mounted() {},
         methods: {
+            init(preferences) {
+                this.initFinished = false;
+                this.preferences = preferences;
+                this.initFinished = true;
+            },
             savePreference(pref) {
                 const vm = this;
                 let data = {};
                 data.label = pref.label;
                 data.value = pref.value;
                 if(typeof data.value === 'object') data.value = JSON.stringify(data.value);
-                data.user_id = vm.userId;
+                data.user_id = this.$auth.user().id;
                 vm.$http.patch('/api/preference/' + pref.id, data).then(function(response) {
                     const label = pref.label; // TODO translation
                     vm.$showToast('Preference updated', `${label} successfully updated.`, 'success');
@@ -253,7 +264,8 @@
         },
         data() {
             return {
-                localPreferences: Object.assign({}, this.preferences)
+                preferences: {},
+                initFinished: false
             }
         },
     }
