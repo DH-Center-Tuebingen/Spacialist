@@ -31,6 +31,18 @@ class ContextController extends Controller {
         return response()->json($roots);
     }
 
+    public function getContext($id) {
+        try {
+            $context = Context::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ], 400);
+        }
+
+        return response()->json($context);
+    }
+
     public function getData($id) {
         try {
             $context = Context::findOrFail($id);

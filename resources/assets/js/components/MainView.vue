@@ -11,29 +11,9 @@
             </context-tree>
         </div>
         <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100">
-            <div v-if="selectedContext.id" class="h-100 d-flex flex-column">
-                <div class="d-flex align-items-center justify-content-between">
-                    <h1>{{ selectedContext.name }}</h1>
-                    <span>
-                        <button type="button" class="btn btn-success" :disabled="!isFormDirty" @click="saveEntity(selectedContext)">
-                            <i class="fas fa-fw fa-save"></i> Save
-                        </button>
-                        <button type="button" class="btn btn-danger" @click="requestDeleteEntity(selectedContext)">
-                            <i class="fas fa-fw fa-trash"></i> Delete
-                        </button>
-                    </span>
-                </div>
-                <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="dataLoaded"
-                    :attributes="selectedContext.attributes"
-                    :dependencies="selectedContext.dependencies"
-                    :disable-drag="true"
-                    :on-metadata="showMetadata"
-                    :metadata-addon="hasReferenceGroup"
-                    :selections="selectedContext.selections"
-                    :values="selectedContext.data">
-                </attributes>
-            </div>
-            <h1 v-else>Nothing selected</h1>
+            <router-view class="h-100"
+                :bibliography="bibliography">
+            </router-view>
         </div>
         <div :class="'col-md-'+$getPreference('prefs.columns').right" id="addon-container" class="d-flex flex-column">
             <ul class="nav nav-tabs">
@@ -180,124 +160,6 @@
                 </div>
             </div>
         </modal>
-
-        <modal name="entity-references-modal" width="50%" :scrollable="true" :draggable="true" :resizable="true">
-            <div class="modal-content h-100">
-                <div class="modal-header">
-                    <h5 class="modal-title">References</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideEntityReferenceModal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body col col-md-8 offset-md-2 scroll-y-auto" v-if="referenceModal.active">
-                    <h4>Certainty</h4>
-                    <div class="progress" @click="setCertainty">
-                        <div class="progress-bar" role="progressbar" :class="{'bg-danger': referenceModal.attributeValue.possibility <= 25, 'bg-warning': referenceModal.attributeValue.possibility <= 50, 'bg-info': referenceModal.attributeValue.possibility <= 75, 'bg-success': referenceModal.attributeValue.possibility > 75}" :aria-valuenow="referenceModal.attributeValue.possibility" aria-valuemin="0" aria-valuemax="100" :style="{width: referenceModal.attributeValue.possibility+'%'}">
-                            <span class="sr-only">
-                                {{ referenceModal.attributeValue.possibility }}% certainty
-                            </span>
-                            {{ referenceModal.attributeValue.possibility }}%
-                        </div>
-                    </div>
-                    <form role="form" class="mt-2" @submit.prevent="updateCertainty">
-                        <div class="form-group">
-                            <textarea class="form-control" v-model="referenceModal.attributeValue.possibility_description" placeholder="Certainty Comment"></textarea>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="fas fa-fw fa-save"></i> Update Certainty
-                            </button>
-                        </div>
-                    </form>
-                    <h4 class="mt-3">References</h4>
-                    <table class="table table-hover">
-                        <tbody>
-                            <tr v-for="reference in referenceModal.references">
-                                <td class="text-left py-2">
-                                    <h6>{{ reference.bibliography.title }}</h6>
-                                    <p class="mb-0">
-                                        {{ reference.bibliography.author }}, <span class="text-muted font-weight-light">{{ reference.bibliography.year}}</span>
-                                    </p>
-                                </td>
-                                <td class="text-right py-2">
-                                    <p class="font-weight-light font-italic mb-0" v-if="referenceModal.editReference.id != reference.id">
-                                        {{ reference.description }}
-                                    </p>
-                                    <div class="d-flex" v-else>
-                                        <input type="text" class="form-control mr-1" v-model="referenceModal.editReference.description" />
-                                        <button type="button" class="btn btn-outline-success mr-1" @click="updateReference(referenceModal.editReference)">
-                                            <i class="fas fa-fw fa-check"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-danger" @click="cancelEditReference">
-                                            <i class="fas fa-fw fa-times"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="dropdown">
-                                        <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fas fa-fw fa-ellipsis-h"></i>
-                                        </span>
-                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                            <a class="dropdown-item" href="#" @click="enableEditReference(reference)">
-                                                <i class="fas fa-fw fa-edit text-info"></i> Edit
-                                            </a>
-                                            <a class="dropdown-item" href="#" @click="deleteReference(reference)">
-                                                <i class="fas fa-fw fa-trash text-danger"></i> Delete
-                                            </a>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <h5>Add new Reference</h5>
-                    <form role="form" @submit.prevent="addReference(referenceModal.newItem)">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <multiselect
-                                    label="title"
-                                    track-by="id"
-                                    v-model="referenceModal.newItem.bibliography"
-                                    :closeOnSelect="true"
-                                    :hideSelected="true"
-                                    :multiple="false"
-                                    :options="bibliography">
-                                    <template slot="singleLabel" slot-scope="props">
-                                        <span class="option__desc">
-                                            <span class="option__title">
-                                                {{ props.option.title }}
-                                            </span>
-                                        </span>
-                                    </template>
-                                    <template slot="option" slot-scope="props">
-                                        <div class="option__desc">
-                                            <span class="option__title d-block">
-                                                {{ props.option.title }}
-                                            </span>
-                                            <span class="option__small">
-                                                {{ props.option.author }}, <span class="text-muted font-weight-light">{{ props.option.year}}</span>
-                                            </span>
-                                        </div>
-                                    </template>
-                                </multiselect>
-                            </div>
-                            <div class="col-md-6">
-                                <textarea class="form-control" v-model="referenceModal.newItem.description" placeholder="Reference Comment"></textarea>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-outline-success col-md-12 mt-2" :disabled="addReferenceDisabled">
-                            <i class="fas fa-fw fa-plus"></i> Add Reference
-                        </button>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @click="hideEntityReferenceModal">
-                        <i class="fas fa-fw fa-times"></i> Cancel
-                    </button>
-                </div>
-            </div>
-        </modal>
     </div>
 </template>
 
@@ -353,14 +215,22 @@
                 this.dataLoaded = false;
                 if(!element) {
                     this.selectedContext = {};
+                    this.$router.push({
+                        name: 'home'
+                    });
                 } else {
                     this.selectedContext = Object.assign({}, element);
-                    this.getContextData(element);
                     // if all extensions are disabled, auto-load references on select
                     if(this.tab == '') {
                         this.tab = 'references';
                     }
                     this.$requestHooks(this.selectedContext);
+                    this.$router.push({
+                        name: 'contextdetail',
+                        params: {
+                            id: this.selectedContext.id
+                        }
+                    });
                 }
             },
             setActiveTab: function(tab) {
@@ -374,190 +244,13 @@
                 this.setActiveTab(plugin.key);
                 this.activePlugin = plugin.tag;
             },
-            getContextData(elem) {
-                const vm = this;
-                const cid = elem.id;
-                const ctid = elem.context_type_id;
-                vm.dataLoaded = false;
-                vm.$http.get(`/context/${cid}/data`).then(function(response) {
-                    // if result is empty, php returns [] instead of {}
-                    if(response.data instanceof Array) {
-                        response.data = {};
-                    }
-                    Vue.set(vm.selectedContext, 'data', response.data);
-                    return vm.$http.get(`/editor/context_type/${ctid}/attribute`);
-                }).then(function(response) {
-                    vm.selectedContext.attributes = [];
-                    let data = response.data;
-                    for(let i=0; i<data.attributes.length; i++) {
-                        let aid = data.attributes[i].id;
-                        if(!vm.selectedContext.data[aid]) {
-                            let val = {};
-                            switch(data.attributes[i].datatype) {
-                                case 'dimension':
-                                case 'epoch':
-                                    val.value = {};
-                                    break;
-                                case 'table':
-                                case 'list':
-                                    val.value = [];
-                                    break;
-                            }
-                            Vue.set(vm.selectedContext.data, aid, val);
-                        } else {
-                            const val = vm.selectedContext.data[aid].value;
-                            switch(data.attributes[i].datatype) {
-                                case 'date':
-                                    const dtVal = new Date(val);
-                                    vm.selectedContext.data[aid].value = dtVal;
-                                    break;
-                            }
-                        }
-                        vm.selectedContext.attributes.push(data.attributes[i]);
-                    }
-                    // if result is empty, php returns [] instead of {}
-                    if(data.selections instanceof Array) {
-                        data.selections = {};
-                    }
-                    if(data.dependencies instanceof Array) {
-                        data.dependencies = {};
-                    }
-                    Vue.set(vm.selectedContext, 'selections', data.selections);
-                    Vue.set(vm.selectedContext, 'dependencies', data.dependencies);
-                    return vm.$http.get(`/context/${cid}/reference`);
-                }).then(function(response) {
-                    let data = response.data;
-                    if(data instanceof Array) {
-                        data = {};
-                    }
-                    Vue.set(vm.selectedContext, 'references', data);
-                    Vue.set(vm, 'dataLoaded', true);
-                }).catch(function(error) {
-                    vm.$throwError(error);
-                });
-            },
             showMetadataForReferenceGroup(referenceGroup) {
                 if(!referenceGroup) return;
                 if(!this.selectedContext) return;
                 const aid = referenceGroup[0].attribute_id;
                 const attribute = this.selectedContext.attributes.find(a => a.id == aid);
                 if(!attribute) return;
-                this.showMetadata(attribute);
-            },
-            showMetadata(attribute) {
-                const refs = this.selectedContext.references[attribute.thesaurus_url];
-                Vue.set(this.referenceModal, 'attribute', Object.assign({}, attribute));
-                Vue.set(this.referenceModal, 'attributeValue', Object.assign({}, this.selectedContext.data[attribute.id]));
-                Vue.set(this.referenceModal, 'references', refs ? refs.slice() : []);
-                Vue.set(this.referenceModal, 'active', true);
-                Vue.set(this.referenceModal, 'editReference', {});
-                Vue.set(this.referenceModal, 'newItem', {bibliography: {}, description: ''});
-                this.$modal.show('entity-references-modal');
-            },
-            hideEntityReferenceModal() {
-                this.referenceModal = {};
-                this.$modal.hide('entity-references-modal');
-            },
-            setCertainty(event) {
-                const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
-                const clickPos = event.layerX; // in px
-                const currentValue = this.referenceModal.attributeValue.possibility;
-                let value = parseInt(clickPos/maxSize*100);
-                const diff = Math.abs(value-currentValue);
-                if(diff < 10) {
-                    if(value > currentValue) {
-                        value = parseInt((value+10)/10)*10;
-                    } else {
-                        value = parseInt(value/10)*10;
-                    }
-                } else {
-                    value = parseInt((value+5)/10)*10;
-                }
-                Vue.set(this.referenceModal.attributeValue, 'possibility', value);
-            },
-            updateCertainty() {
-                const vm = this;
-                const cid = vm.selectedContext.id;
-                const aid = vm.referenceModal.attribute.id;
-                const oldData = vm.selectedContext.data[aid];
-                const newData = vm.referenceModal.attributeValue;
-                if(newData.possibility == oldData.possibility && newData.possibility_description == oldData.possibility_description) {
-                    return;
-                }
-                const data = {
-                    certainty: newData.possibility,
-                    certainty_description: newData.possibility_description
-                };
-                vm.$http.patch(`/context/${cid}/attribute/${aid}`, data).then(function(response) {
-                    oldData.possibility = newData.possibility;
-                    oldData.possibility_description = newData.possibility_description;
-                    const attributeName = vm.$translateConcept(vm.referenceModal.attribute.thesaurus_url);
-                    vm.$showToast('Certainty updated', `Certainty of ${attributeName} successfully set to ${newData.possibility}% (${newData.possibility_description}).`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
-                });
-            },
-            addReference(item) {
-                const vm = this;
-                const cid = vm.selectedContext.id;
-                const aid = vm.referenceModal.attribute.id;
-                if(this.addReferenceDisabled) {
-                    return;
-                }
-                const data = {
-                    bibliography_id: item.bibliography.id,
-                    description: item.description
-                };
-                vm.$http.post(`/context/${cid}/reference/${aid}`, data).then(function(response) {
-                    const refUrl = vm.referenceModal.attribute.thesaurus_url;
-                    let refs = vm.selectedContext.references[refUrl];
-                    if(!refs) {
-                        refs = vm.selectedContext.references[refUrl] = [];
-                    }
-                    refs.push(response.data);
-                    Vue.set(vm.referenceModal, 'references', refs.slice());
-                }).catch(function(error) {
-                    vm.$throwError(error);
-                });
-            },
-            deleteReference(reference) {
-                const vm = this;
-                const id = reference.id;
-                vm.$http.delete(`/api/reference/${id}`).then(function(response) {
-                    let refs = vm.selectedContext.references[vm.referenceModal.attribute.thesaurus_url];
-                    const index = refs.findIndex(r => r.id == reference.id);
-                    if(index > -1) {
-                        refs.splice(index, 1);
-                        Vue.set(vm.referenceModal, 'references', refs.slice());
-                    }
-                }).catch(function(error) {
-                    vm.$throwError(error);
-                });
-            },
-            enableEditReference(reference) {
-                Vue.set(this.referenceModal, 'editReference', Object.assign({}, reference));
-            },
-            cancelEditReference() {
-                Vue.set(this.referenceModal, 'editReference', {});
-            },
-            updateReference(referenceClone) {
-                const vm = this;
-                const id = referenceClone.id;
-                let refs = vm.selectedContext.references[vm.referenceModal.attribute.thesaurus_url];
-                let ref = refs.find(r => r.id == referenceClone.id);
-                if(ref.description == referenceClone.description) {
-                    return;
-                }
-                const data = {
-                    description: referenceClone.description
-                };
-                vm.$http.patch(`/api/reference/${id}`, data).then(function(response) {
-                    ref.description = referenceClone.description;
-                    Vue.set(vm.referenceModal, 'references', refs.slice());
-                    vm.cancelEditReference();
-                }).catch(function(error) {
-                    vm.$throwError(error);
-                });
+                // this.showMetadata(attribute); TODO
             },
             addEntityDisabled(entity) {
                 return !entity.name || !entity.type;
@@ -605,48 +298,6 @@
                 this.newEntity = {};
                 this.$modal.hide('add-entity-modal');
             },
-            saveEntity(entity) {
-                const vm = this;
-                let cid = entity.id;
-                var patches = [];
-                for(let f in vm.fields) {
-                    if(vm.fields.hasOwnProperty(f) && f.startsWith('attribute-')) {
-                        if(this.fields[f].dirty) {
-                            let aid = Number(f.replace(/^attribute-/, ''));
-                            let data = entity.data[aid];
-                            var patch = {};
-                            patch.params = {};
-                            patch.params.aid = aid;
-                            patch.params.cid = cid;
-                            if(data.id) {
-                                // if data.id exists, there has been an entry in the database, therefore it is a replace/remove operation
-                                patch.params.id = data.id;
-                                if(data.value && data.value != '') {
-                                    // value is set, therefore it is a replace
-                                    patch.op = "replace";
-                                    patch.value = data.value;
-                                } else {
-                                    // value is empty, therefore it is a remove
-                                    patch.op = "remove";
-                                }
-                            } else {
-                                // there has been no entry in the database before, therefore it is an add operation
-                                if(data.value && data.value != '') {
-                                    patch.op = "add";
-                                    patch.value = data.value;
-                                }
-                            }
-                            patches.push(patch);
-                        }
-                    }
-                }
-                vm.$http.patch('/context/'+cid+'/attributes', patches).then(function(response) {
-                    vm.resetFlags();
-                    vm.$showToast('Entity updated', `Data of ${entity.name} successfully updated.`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
-                });
-            },
             deleteEntity(entity) {
                 const vm = this;
                 const id = entity.id;
@@ -687,22 +338,10 @@
                 };
                 this.addNewEntity(duplicate);
             },
-            hasReferenceGroup: function(group) {
-                if(!this.selectedContext.references) return false;
-                if(!Object.keys(this.selectedContext.references).length) return false;
-                if(!this.selectedContext.references[group]) return false;
-                let count = Object.keys(this.selectedContext.references[group]).length > 0;
-                return count > 0;
-            },
             translateLabel(element, label) {
                 let value = element[label];
                 if(!value) return element;
                 return this.$translateConcept(element[label]);
-            },
-            resetFlags() {
-                this.$validator.fields.items.forEach(field => {
-                    field.reset();
-                });
             }
         },
         data() {
@@ -723,9 +362,6 @@
             }
         },
         computed: {
-            addReferenceDisabled: function() {
-                return !this.referenceModal.newItem.bibliography.id || this.referenceModal.newItem.description.length == 0;
-            },
             hasReferences: function() {
                 return this.selectedContext.references && Object.keys(this.selectedContext.references).length;
             },
@@ -742,9 +378,6 @@
                 set(newValue) {
                     this.defaultKey = newValue;
                 }
-            },
-            isFormDirty: function() {
-                return Object.keys(this.fields).some(key => this.fields[key].dirty);
             }
         }
     }

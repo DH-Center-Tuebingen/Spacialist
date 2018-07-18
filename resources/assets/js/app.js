@@ -9,6 +9,7 @@ import VueRouter from 'vue-router';
 
 import App from './App.vue';
 import MainView from './components/MainView.vue';
+import ContextDetail from './components/ContextDetail.vue';
 import Login from './components/Login.vue';
 // Tools
 import Bibliography from './components/BibliographyTable.vue';
@@ -79,10 +80,128 @@ const router = new VueRouter({
         };
     },
     routes: [
+        // deprecated pre-0.6 routes
+        {
+            path: '/s',
+            redirect: { name: 'home' },
+            children: [
+                {
+                    path: 'context/:id',
+                    redirect: to => {
+                        return {
+                            name: 'contextdetail',
+                            params: {
+                                id: to.params.id
+                            }
+                        }
+                    },
+                    children: [{
+                        path: 'sources/:aid',
+                        redirect: to => {
+                            return {
+                                // TODO not contextdetail
+                                name: 'contextdetail',
+                                params: {
+                                    id: to.params.id,
+                                    aid: to.params.aid,
+                                }
+                            }
+                        }
+                    }]
+                },
+                {
+                    path: 'f/:id',
+                    redirect: to => {
+                        return {
+                            // TODO not home
+                            name: 'home',
+                            params: {
+                                id: to.params.id
+                            }
+                        }
+                    }
+                },
+                {
+                    path: 'g/:id',
+                    redirect: to => {
+                        return {
+                            // TODO not home
+                            name: 'home',
+                            params: {
+                                id: to.params.id
+                            }
+                        }
+                    }
+                },
+                {
+                    path: 'user',
+                    redirect: { name: 'users' },
+                    // TODO user edit route (redirect to users or add it)
+                },
+                {
+                    path: 'role',
+                    redirect: { name: 'roles' },
+                    // TODO role edit route (redirect to roles or add it)
+                },
+                {
+                    path: 'editor/data-model',
+                    redirect: { name: 'dme' },
+                    children: [{
+                        path: 'contexttype/:id',
+                        redirect: to => {
+                            return {
+                                // TODO not dme
+                                name: 'dme',
+                                params: {
+                                    id: to.params.id
+                                }
+                            }
+                        }
+                    }]
+                },
+                {
+                    path: 'editor/layer',
+                    redirect: { name: 'home' }, // TODO not home
+                    children: [{
+                        path: 'layer/:id',
+                        redirect: to => {
+                            return {
+                                // TODO not home
+                                name: 'home',
+                                params: {
+                                    id: to.params.id
+                                }
+                            }
+                        }
+                    }]
+                },
+                {
+                    path: 'editor/gis',
+                    redirect: { name: 'home' } // TODO not home
+                },
+                {
+                    path: 'preferences/:id',
+                    redirect: to => {
+                        return {
+                            // TODO not home
+                            name: 'userpreferences',
+                            params: {
+                                id: to.params.id
+                            }
+                        }
+                    }
+                }
+            ]
+        },
         {
             path: '/',
             name: 'home',
             component: MainView,
+            children: [{
+                path: 'e/:id',
+                name: 'contextdetail',
+                component: ContextDetail
+            }],
             meta: {
                 auth: true
             }
@@ -174,6 +293,7 @@ Vue.component('layer', require('./components/LayerList.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 
 // Page Components
+Vue.component('entity-reference-modal', require('./components/EntityReferenceModal.vue'));
 Vue.component('layer-editor', require('./components/LayerEditor.vue'));
 Vue.component('about-dialog', require('./components/About.vue'));
 Vue.component('error-modal', require('./components/Error.vue'));
