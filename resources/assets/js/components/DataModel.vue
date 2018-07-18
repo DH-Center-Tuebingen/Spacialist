@@ -1,5 +1,5 @@
 <template>
-    <div class="row d-flex flex-row of-hidden col h-100">
+    <div class="row d-flex flex-row of-hidden h-100">
         <div class="col-md-5 h-100 d-flex flex-column">
             <h4>Available Attributes</h4>
             <button type="button" class="btn btn-success mb-2" @click="onCreateAttribute">
@@ -28,60 +28,65 @@
         </div>
         <div class="col-md-5 h-100 d-flex flex-column">
             <h4>Properties</h4>
-            <form role="form" v-on:submit.prevent="updateContextType" v-if="contextType.id">
-                <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right">Top-Level Context-Type</label>
-                    <div class="col-md-9">
-                        <input type="checkbox" v-model="contextType.is_root" />
+            <div v-if="contextType.id" class="col d-flex flex-column">
+                <form role="form" v-on:submit.prevent="updateContextType">
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3 text-right">Top-Level Context-Type</label>
+                        <div class="col-md-9">
+                            <input type="checkbox" v-model="contextType.is_root" />
+                        </div>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right">Allowed Sub Context-Types</label>
-                    <div class="col-md-9">
-                        <multiselect
-                            label="thesaurus_url"
-                            track-by="id"
-                            v-model="contextType.sub_context_types"
-                            :allowEmpty="true"
-                            :closeOnSelect="false"
-                            :customLabel="translateLabel"
-                            :hideSelected="true"
-                            :multiple="true"
-                            :options="minimalContextTypes">
-                        </multiselect>
-                        <div class="pt-2">
-                            <button type="button" class="btn btn-outline-success mr-2" @click="addAllContextTypes">
-                                <i class="fas fa-fw fa-tasks"></i> Select all
-                            </button>
-                            <button type="button" class="btn btn-outline-danger" @click="removeAllContextTypes">
-                                <i class="fas fa-fw fa-times"></i> Deselect all
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3 text-right">Allowed Sub Context-Types</label>
+                        <div class="col-md-9">
+                            <multiselect
+                                label="thesaurus_url"
+                                track-by="id"
+                                v-model="contextType.sub_context_types"
+                                :allowEmpty="true"
+                                :closeOnSelect="false"
+                                :customLabel="translateLabel"
+                                :hideSelected="true"
+                                :multiple="true"
+                                :options="minimalContextTypes">
+                            </multiselect>
+                            <div class="pt-2">
+                                <button type="button" class="btn btn-outline-success mr-2" @click="addAllContextTypes">
+                                    <i class="fas fa-fw fa-tasks"></i> Select all
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" @click="removeAllContextTypes">
+                                    <i class="fas fa-fw fa-times"></i> Deselect all
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3"></label>
+                        <div class="col-md-9">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-fw fa-save"></i> Save
                             </button>
                         </div>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-form-label col-md-3"></label>
-                    <div class="col-md-9">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-fw fa-save"></i> Save
-                        </button>
-                    </div>
-                </div>
-                <hr />
-            </form>
-            <h4>Added Attributes</h4>
-            <attributes
-                class="col scroll-y-auto"
-                group="attributes"
-                :attributes="contextAttributes"
-                :values="contextValues"
-                :selections="contextSelections"
-                :on-add="addAttributeToContextType"
-                :on-edit="onEditContextAttribute"
-                :on-remove="onRemoveAttributeFromContextType"
-                :on-reorder="reorderContextAttribute"
-                :show-info="true">
-            </attributes>
+                    <hr />
+                </form>
+                <h4>Added Attributes</h4>
+                <attributes
+                    class="col scroll-y-auto"
+                    group="attributes"
+                    :attributes="contextAttributes"
+                    :values="contextValues"
+                    :selections="contextSelections"
+                    :on-add="addAttributeToContextType"
+                    :on-edit="onEditContextAttribute"
+                    :on-remove="onRemoveAttributeFromContextType"
+                    :on-reorder="reorderContextAttribute"
+                    :show-info="true">
+                </attributes>
+            </div>
+            <p v-else class="alert alert-info">
+                Select a Entity-Type to edit it and add/remove attributes.
+            </p>
         </div>
 
         <modal name="new-context-type-modal" height="auto" :scrollable="true" classes="of-visible">
