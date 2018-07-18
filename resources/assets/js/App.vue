@@ -65,12 +65,12 @@
                                 </h6>
                             </template>
                             <template v-if="$getPreference('prefs.link-to-thesaurex')">
-                                <a class="dropdown-item" :href="$getPreference('prefs.link-to-thesaurex')">
+                                <a class="dropdown-item" :href="$getPreference('prefs.link-to-thesaurex')" target="_blank">
                                     <i class="fas fa-fw fa-paw"></i> ThesauRex
                                 </a>
                             </template>
                             <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
-                                <a class="dropdown-item" href="/db">
+                                <a class="dropdown-item" href="/db" target="_blank">
                                     <i class="fas fa-fw fa-chart-bar"></i> dbWebGen
                                 </a>
                             </template>
