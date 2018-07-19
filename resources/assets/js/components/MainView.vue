@@ -36,7 +36,7 @@
                         :is="activePlugin">
                     </component>
                 </keep-alive>
-                <div v-show="tab == 'references'">
+                <div v-show="tab == 'references'" class="h-100 scroll-y-auto">
                     <p class="alert alert-info" v-if="!hasReferences">
                         No references found.
                     </p>
