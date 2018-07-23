@@ -36,13 +36,17 @@
             });
         },
         beforeRouteUpdate(to, from, next) {
-            const entityId = to.params.id;
-            $http.get(`context/${entityId}`).then(response => {
-                this.init(response.data);
+            if(to.params.id == from.params.id && to.name == from.name) {
                 next();
-            }).catch(error => {
-                $throwError(error);
-            });
+            } else {
+                const entityId = to.params.id;
+                $http.get(`context/${entityId}`).then(response => {
+                    this.init(response.data);
+                    next();
+                }).catch(error => {
+                    $throwError(error);
+                });
+            }
         },
         props: {
             bibliography: {

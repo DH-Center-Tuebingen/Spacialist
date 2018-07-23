@@ -22,6 +22,17 @@ class FileController extends Controller
 
     // GET
 
+    public function getFile($id) {
+        try {
+            $file = File::getFileById($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This file does not exist'
+            ], 400);
+        }
+        return response()->json($file);
+    }
+
     public function getArchiveFileList($id) {
         try {
             $file = File::findOrFail($id);

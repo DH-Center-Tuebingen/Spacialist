@@ -2,22 +2,22 @@
     <div class="d-flex flex-column h-100">
         <ul class="nav nav-pills nav-fill mb-2">
             <li class="nav-item">
-                <a class="nav-link" href="#" :class="{active: isAction('linkedFiles'), disabled: !context.id}" @click="setAction('linkedFiles')">
+                <a class="nav-link" href="#" :class="{active: isAction('linkedFiles'), disabled: !context.id}" @click.prevent="setAction('linkedFiles')">
                     <i class="fas fa-fw fa-link"></i> Linked Files <span class="badge" :class="[isAction('linkedFiles') ? 'badge-light' : 'badge-primary']" v-show="context.id">{{linkedFiles.files.length}}</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" :class="{active: isAction('unlinkedFiles')}" @click="setAction('unlinkedFiles')">
+                <a class="nav-link" href="#" :class="{active: isAction('unlinkedFiles')}" @click.prevent="setAction('unlinkedFiles')">
                     <i class="fas fa-fw fa-unlink"></i> Unlinked Files
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" :class="{active: isAction('allFiles')}" @click="setAction('allFiles')">
+                <a class="nav-link" href="#" :class="{active: isAction('allFiles')}" @click.prevent="setAction('allFiles')">
                     <i class="fas fa-fw fa-copy"></i> All Files
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" :class="{active: isAction('upload')}" @click="setAction('upload')">
+                <a class="nav-link" href="#" :class="{active: isAction('upload')}" @click.prevent="setAction('upload')">
                     <i class="fas fa-fw fa-file-upload"></i> Upload Files
                 </a>
             </li>
@@ -159,7 +159,7 @@
             </ul>
         </div>
 
-        <modal name="file-modal" width="80%" height="auto" :scrollable="true">
+        <modal name="file-modal" width="80%" height="auto" :scrollable="true" @closed="hideFileModal">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" @mouseenter="onFileHeaderHover(true)" @mouseleave="onFileHeaderHover(false)">
@@ -511,6 +511,12 @@
             if(this.contextDataLoaded) {
                 this.linkedFilesChanged();
             }
+            if(this.$router.history.current.query.f) {
+                const fileId = this.$router.history.current.query.f;
+                $http.get(`/file/${fileId}`).then(response => {
+                    this.showFileModal(response.data);
+                });
+            }
         },
         mounted() {
             if(screenfull.enabled) {
@@ -662,7 +668,6 @@
             onReplaceFileSet(newFile, oldFile) {
                 // Wait for response
                 if(newFile && oldFile && newFile.success && !oldFile.success) {
-                    console.log(newFile.response);
                     Vue.set(this, 'selectedFile', newFile.response);
                     this.replaceFiles = [];
                     this.$refs.replace.active = false;
@@ -927,9 +932,19 @@
                         this.fileCategoryComponent = 'file-undefined';
                         break;
                 }
+                this.$router.push({
+                    append: true,
+                    query: { ...this.$router.history.current.query, f: file.id }
+                });
                 this.$modal.show('file-modal');
             },
             hideFileModal() {
+                let query = { ...this.$router.history.current.query };
+                delete query.f;
+                this.$router.push({
+                    append: true,
+                    query: query
+                });
                 this.$modal.hide('file-modal');
                 this.selectedFile = {};
             }
@@ -1080,7 +1095,7 @@
             }
         },
         watch: {
-            contextDataLoaded: function(newContextDataLoaded, oldContextDataLoaded) {
+            context: function(newContextDataLoaded, oldContextDataLoaded) {
                 if(newContextDataLoaded) {
                     this.linkedFilesChanged();
                 }

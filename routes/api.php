@@ -131,6 +131,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
 // FILE
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/file')->group(function() {
+    Route::get('/{id}', 'FileController@getFile')->where('id', '[0-9]+');
     Route::get('/{id}/archive/list', 'FileController@getArchiveFileList')->where('id', '[0-9]+');
     Route::get('/{id}/archive/download', 'FileController@downloadArchivedFile')->where('id', '[0-9]+');
     Route::get('/{id}/as_html', 'FileController@getAsHtml')->where('id', '[0-9]+');

@@ -13,6 +13,7 @@ import ContextDetail from './components/ContextDetail.vue';
 import Login from './components/Login.vue';
 // Tools
 import Bibliography from './components/BibliographyTable.vue';
+import BibliographyItemModal from './components/BibliographyItemModal.vue';
 // Settings
 import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
@@ -113,8 +114,7 @@ const router = new VueRouter({
                     path: 'f/:id',
                     redirect: to => {
                         return {
-                            // TODO not home
-                            name: 'home',
+                            name: 'file',
                             params: {
                                 id: to.params.id
                             }
@@ -197,11 +197,13 @@ const router = new VueRouter({
             path: '/',
             name: 'home',
             component: MainView,
-            children: [{
-                path: 'e/:id',
-                name: 'contextdetail',
-                component: ContextDetail
-            }],
+            children: [
+                {
+                    path: 'e/:id',
+                    name: 'contextdetail',
+                    component: ContextDetail
+                }
+            ],
             meta: {
                 auth: true
             }
@@ -211,6 +213,18 @@ const router = new VueRouter({
             path: '/bibliography',
             name: 'bibliography',
             component: Bibliography,
+            children: [
+                {
+                    path: 'edit/:id',
+                    name: 'bibedit',
+                    component: BibliographyItemModal
+                },
+                {
+                    path: 'new',
+                    name: 'bibnew',
+                    component: BibliographyItemModal
+                }
+            ],
             meta: {
                 auth: true
             }

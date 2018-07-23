@@ -327,10 +327,10 @@
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="#" @click="editEntry(entry)">
+                                    <a class="dropdown-item" href="#" @click.prevent="editEntry(entry)">
                                         <i class="fas fa-fw fa-edit text-info"></i> Edit
                                     </a>
-                                    <a class="dropdown-item" href="#" @click="requestDeleteEntry(entry)">
+                                    <a class="dropdown-item" href="#" @click.prevent="requestDeleteEntry(entry)">
                                         <i class="fas fa-fw fa-trash text-danger"></i> Delete
                                     </a>
                                 </div>
@@ -341,61 +341,12 @@
             </table>
         </div>
 
-        <modal name="new-bibliography-item-modal" height="auto" :scrollable="true">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" v-if="newItem.id">Edit Item</h5>
-                    <h5 class="modal-title" v-else>Add new Item</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideNewItemModal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form role="form" id="newBibliographyItemForm" name="newBibliographyItemForm" @submit.prevent="addBibliographyItem(newItem)">
-                        <div class="form-group">
-                            <label class="col-form-label col-md-3" for="type">Type:</label>
-                            <div class="col-md-9">
-                                <multiselect
-                                    v-model="newItem.type"
-                                    label="name"
-                                    track-by="id"
-                                    :allowEmpty="false"
-                                    :closeOnSelect="true"
-                                    :hideSelected="true"
-                                    :multiple="false"
-                                    :options="availableTypes">
-                                </multiselect>
-                            </div>
-                        </div>
-                        <div class="form-group" v-for="mandatory in mandatoryFields">
-                            <label class="col-form-label col-md-3">{{ mandatory }}:<span style="color: red;">*</span></label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" v-model="newItem.fields[mandatory]" required/>
-                            </div>
-                        </div>
-                        <div class="form-group" v-for="optional in optionalFields">
-                            <label class="col-form-label col-md-3">{{ optional }}:</label>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" v-model="newItem.fields[optional]"/>
-                            </div>
-                        </div>
-                    </form>
-                    <h4 class="mt-3">BibTeX-Code</h4>
-                    <span v-if="newItem.type" v-html="this.$options.filters.bibtexify(newItem.fields, newItem.type.name)"></span>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" form="newBibliographyItemForm" v-if="newItem.id">
-                        <i class="fas fa-fw fa-save"></i> Update
-                    </button>
-                    <button type="submit" class="btn btn-success" form="newBibliographyItemForm" v-else>
-                        <i class="fas fa-fw fa-plus"></i> Add
-                    </button>
-                    <button type="button" class="btn btn-danger" @click="hideNewItemModal">
-                        <i class="fas fa-fw fa-ban"></i> Cancel
-                    </button>
-                </div>
-            </div>
-        </modal>
+        <router-view
+            :data="newItem"
+            :available-types="availableTypes"
+            :on-success="addBibliographyItem"
+            :on-close="onModalClose">
+        </router-view>
 
         <modal name="delete-bibliography-item-modal" height="auto" :scrollable="true">
             <div class="modal-content">
@@ -488,6 +439,9 @@
                     }
                 }
             },
+            onModalClose() {
+                this.$router.go(-1);
+            },
             addBibliographyItem(item) {
                 if(!item.type) return;
                 if(!item.fields) return;
@@ -536,7 +490,12 @@
                 Vue.set(this.newItem, 'fields', fields);
                 Vue.set(this.newItem, 'type', type);
                 Vue.set(this.newItem, 'id', entry.id);
-                this.$modal.show('new-bibliography-item-modal');
+                this.$router.push({
+                    name: 'bibedit',
+                    params: {
+                        id: entry.id
+                    }
+                });
             },
             deleteEntry(entry) {
                 const vm = this;
@@ -569,7 +528,10 @@
                     fields: {}
                 };
                 Vue.set(this.newItem, 'type', this.availableTypes[0]);
-                this.$modal.show('new-bibliography-item-modal');
+
+                this.$router.push({
+                    name: 'bibnew'
+                });
             },
             hideNewItemModal() {
                 this.$modal.hide('new-bibliography-item-modal');
@@ -735,18 +697,6 @@
             }
         },
         computed: {
-            mandatoryFields: function() {
-                if(this.newItem.type) {
-                    return this.newItem.type.mandatoryFields;
-                }
-                return this.availableTypes[0].mandatoryFields;
-            },
-            optionalFields: function() {
-                if(this.newItem.type) {
-                    return this.newItem.type.optionalFields;
-                }
-                return this.availableTypes[0].optionalFields;
-            },
             orderedList: function() {
                 const query = this.query.toLowerCase();
                 let filteredEntries;

@@ -176,6 +176,12 @@ class File extends Model
         return $files;
     }
 
+    public static function getFileById($id) {
+        $file = self::findOrFail($id);
+        $file->setFileInfo();
+        return $file;
+    }
+
     public static function getSubFiles($id, $category) {
         $subFiles = self::whereHas('contexts', function($query) use ($id) {
             $query->where('root_context_id', $id);

@@ -18,14 +18,14 @@
         <div :class="'col-md-'+$getPreference('prefs.columns').right" id="addon-container" class="d-flex flex-column">
             <ul class="nav nav-tabs">
                 <li class="nav-item" v-for="plugin in $getTabPlugins()">
-                    <a class="nav-link" href="#" :class="{active: tab == plugin.key}" @click="setActivePlugin(plugin)">
+                    <router-link class="nav-link" :class="{active: tab == plugin.key}" :to="{ query: { tab: plugin.key }}" append>
                         <i class="fas fa-fw" :class="plugin.icon"></i> {{ plugin.label }}
-                    </a>
+                    </router-link>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" :class="{active: tab == 'references', disabled: !selectedContext.id}" @click="setActiveTab('references')">
+                    <router-link class="nav-link" :class="{active: tab == 'references', disabled: !selectedContext.id}" :to="{ query: { tab: 'references' }}" append>
                         <i class="fas fa-fw fa-bookmark"></i> References
-                    </a>
+                    </router-link>
                 </li>
             </ul>
             <div class="mt-2 col px-0">
@@ -174,17 +174,26 @@
                 return $http.get('context/top');
             }).then(response => {
                 roots = response.data;
-                next(vm => vm.init(roots, bibliography));
+                next(vm => vm.init(roots, bibliography, to.query.tab));
             }).catch(error => {
                 $throwError(error);
             });
         },
+        beforeRouteUpdate(to, from, next) {
+            if(to.query.tab) {
+                this.setTabOrPlugin(to.query.tab);
+            }
+            next();
+        },
         mounted() {},
         methods: {
-            init(roots, bibliography) {
+            init(roots, bibliography, openTab) {
                 this.initFinished = false;
                 this.roots = roots;
                 this.bibliography = bibliography;
+                if(openTab) {
+                    this.setTabOrPlugin(openTab);
+                }
                 this.initFinished = true;
             },
             hideDiscardModal() {
@@ -216,8 +225,10 @@
                 if(!element) {
                     this.selectedContext = {};
                     this.$router.push({
-                        name: 'home'
+                        name: 'home',
+                        query: this.$router.history.current.query
                     });
+                    this.dataLoaded = true;
                 } else {
                     this.selectedContext = Object.assign({}, element);
                     // if all extensions are disabled, auto-load references on select
@@ -225,12 +236,25 @@
                         this.tab = 'references';
                     }
                     this.$requestHooks(this.selectedContext);
+                    this.dataLoaded = true;
                     this.$router.push({
                         name: 'contextdetail',
                         params: {
                             id: this.selectedContext.id
-                        }
+                        },
+                        query: this.$router.history.current.query
                     });
+                }
+            },
+            setTabOrPlugin(key) {
+                if(key == 'references') {
+                    this.setActiveTab('references');
+                } else {
+                    const plugins = this.$getTabPlugins();
+                    const plugin = plugins.find(p => p.key == key);
+                    if(plugin) {
+                        this.setActivePlugin(plugin);
+                    }
                 }
             },
             setActiveTab: function(tab) {
