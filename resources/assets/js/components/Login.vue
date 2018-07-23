@@ -70,15 +70,21 @@
             login() {
                 const vm = this;
                 const redirect = vm.$auth.redirect();
+                let to = {};
+                if(redirect) {
+                    to.name = redirect.from.name;
+                    to.params = redirect.from.params;
+                    to.query = redirect.from.query;
+                } else {
+                    to.name = 'home';
+                }
                 vm.$auth.login({
                     data: {
                         email: vm.user.email,
                         password: vm.user.password
                     },
                     rememberMe: vm.user.remember,
-                    redirect: {
-                        name: redirect ? redirect.from.name : 'home'
-                    },
+                    redirect: to,
                     fetchUser: true
                 });
             }
