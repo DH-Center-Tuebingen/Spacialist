@@ -258,6 +258,13 @@ const router = new VueRouter({
             path: '/editor/dm',
             name: 'dme',
             component: DataModel,
+            children: [
+                {
+                    path: 'et/:id',
+                    name: 'dmdetail',
+                    component: DataModelDetailView
+                }
+            ],
             meta: {
                 auth: true
             }
