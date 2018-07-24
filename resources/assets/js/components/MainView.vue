@@ -23,9 +23,9 @@
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <router-link class="nav-link" :class="{active: tab == 'references', disabled: !selectedContext.id}" :to="{ query: { tab: 'references' }}" append>
+                    <a href="#" class="nav-link" :class="{active: tab == 'references', disabled: !selectedContext.id}" @click.prevent="setReferencesTab()">
                         <i class="fas fa-fw fa-bookmark"></i> References
-                    </router-link>
+                    </a>
                 </li>
             </ul>
             <div class="mt-2 col px-0">
@@ -40,7 +40,7 @@
                     <p class="alert alert-info" v-if="!hasReferences">
                         No references found.
                     </p>
-                    <div v-else v-for="(referenceGroup, key) in selectedContext.references" class="mb-2">
+                    <div v-else v-for="(referenceGroup, key) in references" class="mb-2">
                         <h5 class="mb-1">
                             <a href="#" @click="showMetadataForReferenceGroup(referenceGroup)">{{ $translateConcept(key) }}</a>
                         </h5>
@@ -174,7 +174,7 @@
                 return $http.get('context/top');
             }).then(response => {
                 roots = response.data;
-                next(vm => vm.init(roots, bibliography, to.query.tab));
+                next(vm => vm.init(roots, bibliography, to.query.tab, to.params.id));
             }).catch(error => {
                 $throwError(error);
             });
@@ -183,14 +183,25 @@
             if(to.query.tab) {
                 this.setTabOrPlugin(to.query.tab);
             }
+            if(to.params.id) {
+                $http.get(`/context/${to.params.id}/reference`).then(response => {
+                    console.log(response.data);
+                    this.references = response.data;
+                });
+            } else {
+                this.references = [];
+            }
             next();
         },
         mounted() {},
         methods: {
-            init(roots, bibliography, openTab) {
+            init(roots, bibliography, openTab, initialSelectedId) {
                 this.initFinished = false;
                 this.roots = roots;
                 this.bibliography = bibliography;
+                if(initialSelectedId) {
+                    this.selectedContext.id = initialSelectedId;
+                }
                 if(openTab) {
                     this.setTabOrPlugin(openTab);
                 }
@@ -245,6 +256,15 @@
                         query: this.$router.history.current.query
                     });
                 }
+            },
+            setReferencesTab() {
+                if(!this.selectedContext.id) return;
+                this.$router.push({
+                    append: true,
+                    query: {
+                        tab: 'references'
+                    }
+                });
             },
             setTabOrPlugin(key) {
                 if(key == 'references') {
@@ -376,6 +396,7 @@
                 selectedContext: {},
                 toDeleteEntity: {},
                 referenceModal: {},
+                references: [],
                 newEntity: {},
                 saveAndContinueCallback: _ => {},
                 discardCallback: _ => {},
@@ -387,7 +408,7 @@
         },
         computed: {
             hasReferences: function() {
-                return this.selectedContext.references && Object.keys(this.selectedContext.references).length;
+                return this.references && Object.keys(this.references).length;
             },
             tab: {
                 get() {
