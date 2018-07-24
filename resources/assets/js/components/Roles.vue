@@ -54,10 +54,10 @@
                                 <a class="dropdown-item" href="#" v-if="isDirty('perms_'+role.id)" @click="onPatchRole(role.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> Save
                                 </a>
-                                <a class="dropdown-item" href="#">
+                                <!-- <a class="dropdown-item" href="#">
                                     <i class="fas fa-fw fa-edit text-info"></i> Edit
-                                </a>
-                                <a class="dropdown-item" href="#" @click="requestDeleteRole(role.id)">
+                                </a> -->
+                                <a class="dropdown-item" href="#" @click.prevent="requestDeleteRole(role.id)">
                                     <i class="fas fa-fw fa-trash text-danger"></i> Delete
                                 </a>
                             </div>
