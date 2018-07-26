@@ -30,6 +30,7 @@
                             v-model="role.permissions"
                             v-validate=""
                             :closeOnSelect="false"
+                            :disabled="!$can('add_remove_permission')"
                             :hideSelected="true"
                             :multiple="true"
                             :name="'perms_'+role.id"
@@ -51,13 +52,13 @@
                                 </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="isDirty('perms_'+role.id)" @click="onPatchRole(role.id)">
+                                <a class="dropdown-item" href="#" v-if="isDirty('perms_'+role.id)" :disabled="!$can('add_remove_permission')" @click="onPatchRole(role.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> Save
                                 </a>
                                 <!-- <a class="dropdown-item" href="#">
                                     <i class="fas fa-fw fa-edit text-info"></i> Edit
                                 </a> -->
-                                <a class="dropdown-item" href="#" @click.prevent="requestDeleteRole(role.id)">
+                                <a class="dropdown-item" href="#" @click.prevent="requestDeleteRole(role.id)" :disabled="!$can('delete_role')">
                                     <i class="fas fa-fw fa-trash text-danger"></i> Delete
                                 </a>
                             </div>
@@ -67,11 +68,11 @@
             </tbody>
         </table>
 
-        <button type="button" class="btn btn-success" @click="showNewRoleModal">
+        <button type="button" class="btn btn-success" @click="showNewRoleModal" :disabled="!$can('add_edit_role')">
             <i class="fas fa-fw fa-plus"></i> Add New Role
         </button>
 
-        <modal name="new-role-modal" height="auto" :scrollable="true">
+        <modal name="new-role-modal" height="auto" :scrollable="true" v-can="'add_edit_role'">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="newRoleModalLabel">Add new Role</h5>
@@ -118,7 +119,7 @@
             </div>
         </modal>
 
-        <modal name="confirm-delete-role-modal" height="auto" :scrollable="true">
+        <modal name="confirm-delete-role-modal" height="auto" :scrollable="true" v-can="'delete_role'">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Delete Role {{ selectedRole.name }}</h5>
@@ -162,6 +163,7 @@
                 this.permissions = permissions;
             },
             showNewRoleModal() {
+                if(!this.$can('add_edit_role')) return;
                 this.$modal.show('new-role-modal');
             },
             hideNewRoleModal() {
@@ -170,6 +172,7 @@
             },
             onAddRole(newRole) {
                 const vm = this;
+                if(!vm.$can('add_edit_role')) return;
                 vm.$http.post('/api/role', newRole).then(function(response) {
                     vm.roleList.push(response.data);
                     vm.hideNewRoleModal();
@@ -179,6 +182,7 @@
             },
             onPatchRole(id) {
                 const vm = this;
+                if(!vm.$can('add_edit_role')) return;
                 if(vm.isDirty(`perms_${id}`)) {
                     let role = vm.roleList.find(r => r.id == id);
                     let permissions = [];
@@ -197,6 +201,7 @@
                 }
             },
             showDeleteRoleModal() {
+                if(!this.$can('delete_role')) return;
                 this.$modal.show('confirm-delete-role-modal');
             },
             hideDeleteRoleModal() {
@@ -204,11 +209,13 @@
                 this.selectedRole = {};
             },
             requestDeleteRole(id) {
+                if(!this.$can('delete_role')) return;
                 this.selectedRole = this.roleList.find(r => r.id == id);
                 this.showDeleteRoleModal();
             },
             deleteRole(id) {
                 const vm = this;
+                if(!vm.$can('delete_role')) return;
                 if(!id) return;
                 vm.$http.delete(`/api/role/${id}`).then(function(response) {
                     const index = vm.roleList.findIndex(r => r.id == id);

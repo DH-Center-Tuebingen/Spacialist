@@ -3,15 +3,15 @@
         <div class="d-flex align-items-center justify-content-between">
             <h1>{{ entity.name }}</h1>
             <span>
-                <button type="button" class="btn btn-success" :disabled="!isFormDirty" @click="saveEntity(entity)">
+                <button type="button" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(entity)">
                     <i class="fas fa-fw fa-save"></i> Save
                 </button>
-                <button type="button" class="btn btn-danger" @click="requestDeleteEntity(entity)">
+                <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="requestDeleteEntity(entity)">
                     <i class="fas fa-fw fa-trash"></i> Delete
                 </button>
             </span>
         </div>
-        <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="dataLoaded"
+        <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="dataLoaded" v-can="'view_concept_props'"
             :attributes="entity.attributes"
             :dependencies="entity.dependencies"
             :disable-drag="true"
@@ -21,7 +21,7 @@
             :values="entity.data">
         </attributes>
 
-        <entity-reference-modal></entity-reference-modal>
+        <entity-reference-modal v-can="'view_concept_props'"></entity-reference-modal>
     </div>
 </template>
 
@@ -65,6 +65,15 @@
             },
             getContextData(entity) {
                 const vm = this;
+                if(!vm.$can('view_concept_props')) {
+                    Vue.set(vm.entity, 'data', {});
+                    Vue.set(vm.entity, 'attributes', []);
+                    Vue.set(vm.entity, 'selections', {});
+                    Vue.set(vm.entity, 'dependencies', []);
+                    Vue.set(vm.entity, 'references', []);
+                    Vue.set(vm, 'dataLoaded', true);
+                    return;
+                }
                 const cid = entity.id;
                 const ctid = entity.context_type_id;
                 vm.$http.get(`/context/${cid}/data`).then(function(response) {
@@ -126,6 +135,7 @@
             },
             saveEntity(entity) {
                 const vm = this;
+                if(!vm.$can('duplicate_edit_concepts')) return;
                 let cid = entity.id;
                 var patches = [];
                 for(let f in vm.fields) {
@@ -181,6 +191,7 @@
                 });
             },
             updateCertainty(reference) {
+                if(!vm.$can('duplicate_edit_concepts')) return;
                 const vm = this;
                 const cid = vm.entity.id;
                 const aid = reference.attribute.id;
@@ -204,6 +215,7 @@
             },
             addReference(item, reference) {
                 const vm = this;
+                if(!vm.$can('add_remove_literature')) return;
                 const cid = vm.entity.id;
                 const aid = reference.attribute.id;
                 const data = {
@@ -224,6 +236,7 @@
             },
             deleteReference(reference, referenceModal) {
                 const vm = this;
+                if(!vm.$can('add_remove_literature')) return;
                 const id = reference.id;
                 return vm.$http.delete(`/context/reference/${id}`).then(function(response) {
                     let refs = vm.entity.references[referenceModal.attribute.thesaurus_url];
@@ -238,6 +251,7 @@
             },
             updateReference(referenceClone, referenceModal) {
                 const vm = this;
+                if(!vm.$can('edit_literature')) return;
                 const id = referenceClone.id;
                 let refs = vm.entity.references[referenceModal.attribute.thesaurus_url];
                 let ref = refs.find(r => r.id == referenceClone.id);

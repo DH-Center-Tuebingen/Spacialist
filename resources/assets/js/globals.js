@@ -6,6 +6,57 @@ Vue.prototype.$validateObject = function(value) {
     return typeof value == 'object' || (typeof value == 'array' && value.length == 0);
 };
 
+// Directives
+Vue.directive('can', {
+    terminal: true,
+    bind: function(el, bindings) {
+        const canI = this.Vue.prototype.$can(bindings.value, bindings.modifiers.one);
+
+        if(!canI) {
+            this.warning = document.createElement('p');
+            this.warning.className = 'alert alert-warning v-can-warning';
+            this.warning.innerHTML = 'You do not have permission to access this page';
+            for(let i=0; i<el.children.length; i++) {
+                let c = el.children[i];
+                c.classList.add('v-can-hidden');
+            }
+            el.appendChild(this.warning);
+        }
+    },
+    unbind: function(el) {
+        console.log(el.children);
+        if(!el.children) return;
+        for(let i=0; i<el.children.length; i++) {
+            let c = el.children[i];
+            // remove our warning elem
+            if(c.classList.contains('v-can-warning')) {
+                el.removeChild(c);
+                continue;
+            }
+            if(c.classList.contains('v-can-hidden')) {
+                c.classList.remove('v-can-hidden');
+            }
+        }
+    }
+});
+
+// Prototype
+Vue.prototype.$can = function(permissionString, oneOf) {
+    oneOf = oneOf || false;
+    const user = this.$auth.user();
+    if(!user) return false;
+    const permissions = permissionString.split('|');
+    const hasPermission = function(permission) {
+        return user.permissions[permission] === 1;
+    };
+
+    if(oneOf) {
+        return permissions.some(hasPermission);
+    } else {
+        return permissions.every(hasPermission);
+    }
+}
+
 Vue.prototype.$showToast = function(title, text, type, duration) {
     type = type || 'info'; // success, info, warn, error
     duration = duration || 2000;

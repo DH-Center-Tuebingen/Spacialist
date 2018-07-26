@@ -1,6 +1,6 @@
 <template>
     <div>
-        <table class="table table-striped table-hover">
+        <table class="table table-striped table-hover" v-can="'view_users'">
             <thead class="thead-light">
                 <tr>
                     <th>Name</th>
@@ -26,6 +26,7 @@
                             v-model="user.roles"
                             v-validate=""
                             :closeOnSelect="false"
+                            :disabled="!$can('add_remove_role')"
                             :hideSelected="true"
                             :multiple="true"
                             :name="'roles_'+user.id"
@@ -47,13 +48,13 @@
                                 </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="isDirty('roles_'+user.id)" @click="onPatchUser(user.id)">
+                                <a class="dropdown-item" href="#" v-if="isDirty('roles_'+user.id)" :disabled="!$can('add_remove_role')" @click="onPatchUser(user.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> Save
                                 </a>
-                                <a class="dropdown-item" href="#" @click="updatePassword(user.id)">
+                                <a class="dropdown-item" href="#" :disabled="!$can('change_password')" @click="updatePassword(user.id)">
                                     <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
                                 </a>
-                                <a class="dropdown-item" href="#" @click="requestDeleteUser(user.id)">
+                                <a class="dropdown-item" href="#" :disabled="!$can('delete_users')" @click="requestDeleteUser(user.id)">
                                     <i class="fas fa-fw fa-trash text-danger"></i> Delete
                                 </a>
                             </div>
@@ -63,7 +64,7 @@
             </tbody>
         </table>
 
-        <button type="button" class="btn btn-success" @click="showNewUserModal">
+        <button type="button" class="btn btn-success" @click="showNewUserModal" :disabled="!$can('create_users')">
             <i class="fas fa-fw fa-plus"></i> Add New User
         </button>
 
@@ -158,6 +159,7 @@
                 this.roles = roles;
             },
             showNewUserModal() {
+                if(!this.$can('create_users')) return;
                 this.$modal.show('new-user-modal');
             },
             hideNewUserModal() {
@@ -166,6 +168,7 @@
             },
             onAddUser(newUser) {
                 const vm = this;
+                if(!vm.$can('create_users')) return;
                 vm.$http.post('/api/user', newUser).then(function(response) {
                     vm.userList.push(response.data);
                     vm.hideNewUserModal();
@@ -175,6 +178,7 @@
             },
             onPatchUser(id) {
                 const vm = this;
+                if(!vm.$can('add_remove_role')) return;
                 if(vm.isDirty(`roles_${id}`)) {
                     let user = this.userList.find(u => u.id == id);
                     let roles = [];
@@ -193,6 +197,7 @@
                 }
             },
             showDeleteUserModal() {
+                if(!this.$can('delete_users')) return;
                 this.$modal.show('confirm-delete-user-modal');
             },
             hideDeleteUserModal() {
@@ -200,11 +205,13 @@
                 this.selectedUser = {};
             },
             requestDeleteUser(id) {
+                if(!this.$can('delete_users')) return;
                 this.selectedUser = this.userList.find(u => u.id == id);
                 this.showDeleteUserModal();
             },
             deleteUser(id) {
                 const vm = this;
+                if(!vm.$can('delete_users')) return;
                 if(!id) return;
                 vm.$http.delete(`/api/user/${id}`).then(function(response) {
                     const index = vm.userList.findIndex(u => u.id == id);
@@ -213,6 +220,9 @@
                 }).catch(function(error) {
                     vm.$throwError(error);
                 });
+            },
+            updatePassword(id) {
+                if(!vm.$can('change_password')) return;
             },
             isDirty(fieldname) {
                 if(this.fields[fieldname]) {
@@ -232,9 +242,6 @@
                 userList: [],
                 roles: [],
                 userRoles: {},
-                updatePassword: id => (
-                    console.log(id)
-                ),
                 newUser: {},
                 selectedUser: {}
             }

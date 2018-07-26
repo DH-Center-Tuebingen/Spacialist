@@ -18,6 +18,7 @@ import BibliographyItemModal from './components/BibliographyItemModal.vue';
 import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
 import DataModel from './components/DataModel.vue';
+import DataModelDetailView from './components/DataModelDetailView.vue';
 import Preferences from './components/Preferences.vue';
 import UserPreferences from './components/UserPreferences.vue';
 

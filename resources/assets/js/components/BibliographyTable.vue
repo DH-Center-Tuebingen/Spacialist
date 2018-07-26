@@ -16,7 +16,7 @@
                 </form>
             </li>
             <li class="list-inline-item">
-                <button type="button" class="btn btn-success" id="literature-add-button" @click="showNewItemModal">
+                <button type="button" class="btn btn-success" id="literature-add-button" @click="showNewItemModal" :disabled="!$can('add_remove_literature')">
                     <i class="fas fa-fw fa-plus"></i> New Bibliography Item
                 </button>
             </li>
@@ -25,8 +25,9 @@
                 ref="upload"
                 v-model="files"
                 post-action="/api/bibliography/import"
-                :multiple="false"
                 :directory="false"
+                :disabled="!$can('add_remove_literature|edit_literature')"
+                :multiple="false"
                 :drop="true"
                 @input-file="inputFile">
                     <span class="btn btn-outline-primary">
@@ -327,10 +328,10 @@
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="#" @click.prevent="editEntry(entry)">
+                                    <a class="dropdown-item" href="#" @click.prevent="editEntry(entry)" :disabled="!$can('edit_literature')">
                                         <i class="fas fa-fw fa-edit text-info"></i> Edit
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="requestDeleteEntry(entry)">
+                                    <a class="dropdown-item" href="#" @click.prevent="requestDeleteEntry(entry)" :disabled="!$can('add_remove_literature')">
                                         <i class="fas fa-fw fa-trash text-danger"></i> Delete
                                     </a>
                                 </div>
@@ -342,13 +343,14 @@
         </div>
 
         <router-view
+            v-can.one="'add_remove_literature|edit_literature'"
             :data="newItem"
             :available-types="availableTypes"
             :on-success="addBibliographyItem"
             :on-close="onModalClose">
         </router-view>
 
-        <modal name="delete-bibliography-item-modal" height="auto" :scrollable="true">
+        <modal name="delete-bibliography-item-modal" height="auto" :scrollable="true" v-can="'add_remove_literature'">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Delete Entry</h5>
@@ -428,6 +430,7 @@
                 }
             },
             inputFile(newFile, oldFile) {
+                if(!this.$can('add_remove_literature|edit_literature')) return;
                 // Wait for response
                 if(newFile && oldFile && newFile.success && !oldFile.success) {
                     this.localEntries.push(newFile.response);
@@ -443,6 +446,7 @@
                 this.$router.go(-1);
             },
             addBibliographyItem(item) {
+                if(!this.$can('add_remove_literature')) return;
                 if(!item.type) return;
                 if(!item.fields) return;
                 const vm = this;
@@ -479,6 +483,7 @@
                 }
             },
             editEntry(entry) {
+                if(!this.$can('edit_literature')) return;
                 const type = this.availableTypes.find(t => t.name == entry.type);
                 if(!type) return;
                 let fields = {};
@@ -499,6 +504,7 @@
             },
             deleteEntry(entry) {
                 const vm = this;
+                if(!vm.$can('add_remove_literature')) return;
                 vm.$http.delete(`/api/bibliography/${entry.id}`).then(function(response) {
                     const index = vm.localEntries.findIndex(e => e.id == entry.id);
                     if(index > -1) {
@@ -511,6 +517,7 @@
             },
             requestDeleteEntry(entry) {
                 const vm = this;
+                if(!vm.$can('add_remove_literature')) return;
                 vm.$http.get(`/api/bibliography/${entry.id}/ref_count`).then(function(response) {
                     vm.deleteItem = Object.assign({}, entry);
                     vm.deleteItem.count = response.data;
@@ -524,6 +531,7 @@
                 this.$modal.hide('delete-bibliography-item-modal');
             },
             showNewItemModal() {
+                if(!vm.$can('add_remove_literature')) return;
                 this.newItem = {
                     fields: {}
                 };

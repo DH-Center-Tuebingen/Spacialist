@@ -1,6 +1,6 @@
 <template>
     <div class="row h-100 of-hidden" v-if="initFinished">
-        <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100">
+        <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100" v-can="'view_concepts'">
             <context-tree
                 class="col px-0 scroll-y-auto"
                 :on-entity-add="requestAddNewEntity"
@@ -10,7 +10,7 @@
                 :selection-callback="onSetSelectedElement">
             </context-tree>
         </div>
-        <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100">
+        <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100" v-can="'view_concepts|view_concept_props'">
             <router-view class="h-100"
                 :bibliography="bibliography">
             </router-view>
@@ -63,7 +63,7 @@
             </div>
         </div>
 
-        <modal name="add-entity-modal" height="auto" :scrollable="true" classes="of-visible">
+        <modal name="add-entity-modal" height="auto" :scrollable="true" classes="of-visible" v-can="'create_concepts'">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add new Entity</h5>
@@ -185,7 +185,6 @@
             }
             if(to.params.id) {
                 $http.get(`/context/${to.params.id}/reference`).then(response => {
-                    console.log(response.data);
                     this.references = response.data;
                 });
             } else {
@@ -301,6 +300,7 @@
             },
             addNewEntity(entity) {
                 const vm = this;
+                if(!vm.$can('create_concepts')) return;
                 if(vm.addEntityDisabled(entity)) return;
                 let data = {};
                 data.name = entity.name;
@@ -322,6 +322,7 @@
             },
             requestAddNewEntity(callback, parent) {
                 const vm = this;
+                if(!vm.$can('create_concepts')) return;
                 let selection = [];
                 if(parent) {
                     selection = vm.$getEntityType(parent.context_type_id).sub_context_types;
@@ -344,6 +345,7 @@
             },
             deleteEntity(entity) {
                 const vm = this;
+                if(!vm.$can('delete_move_concepts')) return;
                 const id = entity.id;
                 vm.$http.delete(`/context/${id}`).then(function(response) {
                     // if deleted entity is currently selected entity...
@@ -361,6 +363,7 @@
                 });
             },
             requestDeleteEntity(cb, entity, path) {
+                if(!this.$can('delete_move_concepts')) return;
                 this.toDeleteEntity = Object.assign({}, entity);
                 Vue.set(this.toDeleteEntity, 'callback', cb);
                 Vue.set(this.toDeleteEntity, 'path', path);
@@ -371,6 +374,7 @@
                 this.$modal.hide('delete-entity-modal');
             },
             duplicateEntity(callback, entity, parent) {
+                if(!vm.$can('duplicate_edit_concepts')) return;
                 let duplicate = {
                     name: entity.name,
                     type: {

@@ -37,6 +37,20 @@ class User extends Authenticatable implements JWTSubject
         return 'en';
     }
 
+    public function setPermissions() {
+        $permissions = [];
+        foreach($this->roles as $role) {
+            $rolePermissions = $role->permissions;
+            foreach($rolePermissions as $p) {
+                if(!isset($permissions[$p->name])) {
+                    $permissions[$p->name] = 1;
+                }
+
+            }
+        }
+        $this->permissions = $permissions;
+    }
+
     public function preferences() {
         return $this->hasMany('App\UserPreference');
     }
