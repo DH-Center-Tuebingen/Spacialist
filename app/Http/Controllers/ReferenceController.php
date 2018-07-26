@@ -21,6 +21,12 @@ class ReferenceController extends Controller {
     // GET
 
     public function getByContext($id) {
+        $user = auth()->user();
+        if(!$user->can('view_concept_props')) {
+            return response()->json([
+                'error' => 'You do not have the permission to view references'
+            ], 403);
+        }
         $references = Reference::with(['attribute', 'bibliography'])->where('context_id', $id)->get();
 
         $groupedReferences = [];
@@ -39,6 +45,12 @@ class ReferenceController extends Controller {
     // POST
 
     public function addReference(Request $request, $id, $aid) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add references'
+            ], 403);
+        }
         $this->validate($request, Reference::rules);
 
         try {
@@ -60,13 +72,19 @@ class ReferenceController extends Controller {
             'context_id' => $id,
             'attribute_id' => $aid
         ], $request->only(array_keys(Reference::rules)));
-        $reference = Reference::add($props);
+        $reference = Reference::add($props, $user);
         return response()->json($reference, 201);
     }
 
     // PATCH
 
     public function patchReference(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to edit references'
+            ], 403);
+        }
         $this->validate($request, Reference::patchRules);
 
         try {
@@ -86,6 +104,12 @@ class ReferenceController extends Controller {
     // DELETE
 
     public function delete($id) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to delete references'
+            ], 403);
+        }
         try {
             $reference = Reference::findOrFail($id);
         } catch(ModelNotFoundException $e) {

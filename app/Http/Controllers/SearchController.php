@@ -11,6 +11,12 @@ use Illuminate\Http\Request;
 class SearchController extends Controller {
 
     public function searchContextByName(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to search for entities'
+            ], 403);
+        }
         $q = $request->query('q');
         $matches = Context::where('name', 'ilike', '%'.$q.'%')
             ->select('name', 'id')

@@ -33,15 +33,15 @@ class Geodata extends Model
         return self::$availableGeometryTypes;
     }
 
-    public function updateGeometry($feature, $srid) {
+    public function updateGeometry($feature, $srid, $user) {
         $geom = json_encode($feature->geometry);
         $wkt = \DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geom')), $srid), 4326)) AS wkt")[0]->wkt;
         $this->geom = self::parseWkt($wkt);
-        $this->lasteditor = 'Admin'; // TODO
+        $this->lasteditor = $user->name;
         $this->save();
     }
 
-    public static function createFromFeatureCollection($collection, $srid) {
+    public static function createFromFeatureCollection($collection, $srid, $user) {
         $objs = [];
         foreach($collection->features as $feature) {
             $geom = json_encode($feature->geometry);
@@ -49,7 +49,7 @@ class Geodata extends Model
             $wkt = \DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geom')), $srid), 4326)) AS wkt")[0]->wkt;
             $geodata = new self();
             $geodata->geom = self::parseWkt($wkt);
-            $geodata->lasteditor = 'Admin'; // TODO
+            $geodata->lasteditor = $user->name;
             $geodata->save();
             $objs[] = $geodata;
         }

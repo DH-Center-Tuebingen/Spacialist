@@ -36,6 +36,12 @@ class EditorController extends Controller {
     }
 
     public function getContextType($id) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to get an entity type\'s data'
+            ], 403);
+        }
         try {
             $contextType = ContextType::with('sub_context_types')->findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -47,6 +53,12 @@ class EditorController extends Controller {
     }
 
     public function getContextTypeAttributes($id) {
+        $user = auth()->user();
+        if(!$user->can('view_concept_props')) {
+            return response()->json([
+                'error' => 'You do not have the permission to view entity data'
+            ], 403);
+        }
         $attributes = DB::table('context_types as c')
             ->where('c.id', $id)
             ->whereNull('a.parent_id')
@@ -95,6 +107,12 @@ class EditorController extends Controller {
     }
 
     public function getAttributeSelection($id) {
+        $user = auth()->user();
+        if(!$user->can('view_concept_props')) {
+            return response()->json([
+                'error' => 'You do not have the permission to view entity data'
+            ], 403);
+        }
         try {
             $attribute = Attribute::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -128,11 +146,23 @@ class EditorController extends Controller {
     }
 
     public function getTopContextTypes() {
+        $user = auth()->user();
+        if(!$user->can('view_concept_props')) {
+            return response()->json([
+                'error' => 'You do not have the permission to view entity data'
+            ], 403);
+        }
         $contextTypes = ContextType::where('is_root', true)->get();
         return response()->json($contextTypes);
     }
 
     public function getContextTypesByParent($cid) {
+        $user = auth()->user();
+        if(!$user->can('view_concept_props')) {
+            return response()->json([
+                'error' => 'You do not have the permission to view entity data'
+            ], 403);
+        }
         try {
             $parentContext = Context::findOrFail($cid);
         } catch(ModelNotFoundException $e) {
@@ -147,6 +177,12 @@ class EditorController extends Controller {
     }
 
     public function getAttributes() {
+        $user = auth()->user();
+        if(!$user->can('view_concept_props')) {
+            return response()->json([
+                'error' => 'You do not have the permission to view entity data'
+            ], 403);
+        }
         $attributes = Attribute::whereNull('parent_id')->orderBy('id')->get();
         foreach($attributes as $a) {
             $a->columns = Attribute::where('parent_id', $a->id)->get();
@@ -231,6 +267,12 @@ class EditorController extends Controller {
     // POST
 
     public function addContextType(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to create a new entity type'
+            ], 403);
+        }
         $this->validate($request, [
             'concept_url' => 'required|url|exists:th_concept',
             'is_root' => 'required|boolean_string',
@@ -261,6 +303,12 @@ class EditorController extends Controller {
     }
 
     public function setRelationInfo(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to modify entity relations'
+            ], 403);
+        }
         $this->validate($request, [
             'is_root' => 'boolean_string',
             'sub_context_types' => 'array'
@@ -279,6 +327,12 @@ class EditorController extends Controller {
     }
 
     public function addAttribute(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add attributes'
+            ], 403);
+        }
         $this->validate($request, [
             'label_id' => 'required|integer|exists:th_concept,id',
             'datatype' => 'required|string',
@@ -325,6 +379,12 @@ class EditorController extends Controller {
     }
 
     public function addAttributeToContextType(Request $request, $ctid) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add attributes to an entity type'
+            ], 403);
+        }
         $this->validate($request, [
             'attribute_id' => 'required|integer|exists:attributes,id',
             'position' => 'integer'
@@ -363,6 +423,12 @@ class EditorController extends Controller {
     // PATCH
 
     public function reorderAttribute(Request $request, $ctid, $aid) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to reorder attributes'
+            ], 403);
+        }
         $this->validate($request, [
             'position' => 'required|integer|exists:context_attributes,position'
         ]);
@@ -410,6 +476,12 @@ class EditorController extends Controller {
     }
 
     public function patchDependency(Request $request, $ctid, $aid) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add/modify attribute dependencies'
+            ], 403);
+        }
         $this->validate($request, [
             'd_attribute' => 'required|nullable|integer|exists:context_attributes,attribute_id',
             'd_operator' => 'required|nullable|in:<,>,=',
@@ -464,16 +536,34 @@ class EditorController extends Controller {
     // DELETE
 
     public function deleteContextType($id) {
+        $user = auth()->user();
+        if(!$user->can('delete_move_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to delete entity types'
+            ], 403);
+        }
         ContextType::find($id)->delete();
         return response()->json(null, 204);
     }
 
     public function deleteAttribute($id) {
+        $user = auth()->user();
+        if(!$user->can('delete_move_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to delete attributes'
+            ], 403);
+        }
         Attribute::find($id)->delete();
         return response()->json(null, 204);
     }
 
     public function removeAttributeFromContextType($ctid, $aid) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to remove attributes from entity types'
+            ], 403);
+        }
         $ca = ContextAttribute::where([
             ['attribute_id', '=', $aid],
             ['context_type_id', '=', $ctid]

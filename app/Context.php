@@ -33,7 +33,7 @@ class Context extends Model
         // 'geodata_id'        => 'integer|exists:geodata,id'
     ];
 
-    public static function getEntitiesByParent($id = null) {
+    public static function getEntitiesByParent($id = null, $user) {
         $entities = self::withCount(['child_contexts as children_count']);
         if(!isset($id)) {
             $entities->whereNull('root_context_id');
@@ -49,7 +49,7 @@ class Context extends Model
         $hasParent = isset($parent);
         $oldRank = $context->rank;
         $context->rank = $rank;
-        $context->lasteditor = 'Admin';
+        $context->lasteditor = $user->name;
 
         $query;
         if(isset($context->root_context_id)) {

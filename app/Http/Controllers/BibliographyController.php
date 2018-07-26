@@ -67,6 +67,12 @@ class BibliographyController extends Controller
     // POST
 
     public function addItem(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('add_remove_literature')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add new literature'
+            ], 403);
+        }
         $this->validate($request, [
             'type' => 'required|alpha'
         ]);
@@ -128,7 +134,7 @@ class BibliographyController extends Controller
             ], 400);
         }
 
-        $bib->fieldsFromRequest($request);
+        $bib->fieldsFromRequest($request, $user);
 
         return response()->json(null, 204);
     }
@@ -136,6 +142,12 @@ class BibliographyController extends Controller
     // DELETE
 
     public function deleteItem($id) {
+        $user = auth()->user();
+        if(!$user->can('add_remove_literature')) {
+            return response()->json([
+                'error' => 'You do not have the permission to remove bibliogra entries'
+            ], 403);
+        }
         try {
             $bib = Bibliography::findOrFail($id);
         } catch(ModelNotFoundException $e) {

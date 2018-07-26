@@ -24,7 +24,7 @@ class PreferenceController extends Controller {
     }
 
     public function getUserPreferences($id) {
-        if(auth()->user()->id != $id) {
+        if(!isset(auth()->user()) || auth()->user()->id != $id) {
             return response()->json([
                 'error' => 'You are not allowed to access preferences of another user'
             ], 403);
@@ -43,6 +43,13 @@ class PreferenceController extends Controller {
             'user_id' => 'nullable|integer|exists:users,id',
             'allow_override' => 'nullable|boolean_string'
         ]);
+        
+        $user = auth()->user();
+        if(!$user->can('edit_preferences') && !isset($request->get('user_id'))) {
+            return response()->json([
+                'error' => 'You do not have the permission to edit preferences'
+            ], 403);
+        }
 
         $label = $request->get('label');
         $value = $request->get('value');

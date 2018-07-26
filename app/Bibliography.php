@@ -70,7 +70,7 @@ class Bibliography extends Model
         'series'    => 'string'
     ];
 
-    public function fieldsFromRequest($request) {
+    public function fieldsFromRequest($request, $user) {
         foreach($request->toArray() as $key => $value){
             $this->{$key} = $value;
         }
@@ -81,7 +81,7 @@ class Bibliography extends Model
                 'error' => 'Could not compute citation key.'
             ], 400);
         }
-        $this->lasteditor = 'Admin'; // TODO
+        $this->lasteditor = $user->name;
         $this->save();
     }
 

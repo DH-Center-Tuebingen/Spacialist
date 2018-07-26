@@ -26,12 +26,22 @@ class ContextController extends Controller {
     // GET
 
     public function getTopEntities() {
-        $roots = Context::getEntitiesByParent();
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([], 204);
+        }
+        $roots = Context::getEntitiesByParent(null, $user);
 
         return response()->json($roots);
     }
 
     public function getContext($id) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to get a specific entity'
+            ], 403);
+        }
         try {
             $context = Context::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -44,6 +54,12 @@ class ContextController extends Controller {
     }
 
     public function getData($id) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to get an entity\'s data'
+            ], 403);
+        }
         try {
             $context = Context::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -118,6 +134,12 @@ class ContextController extends Controller {
     }
 
     public function getChildren($id) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to get an entity\'s successors'
+            ], 403);
+        }
         try {
             $context = Context::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -129,13 +151,19 @@ class ContextController extends Controller {
         return response()->json($children);
     }
 
-    public function getEntitiesByParent($id) {
-        return Context::getEntitiesByParent($id);
+    public function getEntitiesByParent($id, $user) {
+        return Context::getEntitiesByParent($id, $user);
     }
 
     // POST
 
     public function addEntity(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add a new entity'
+            ], 403);
+        }
         $this->validate($request, Context::rules);
 
         $isChild = $request->has('root_context_id');
@@ -170,7 +198,7 @@ class ContextController extends Controller {
         foreach($request->only(array_keys(Context::rules)) as $key => $value) {
             $context->{$key} = $value;
         }
-        $context->lasteditor = 'Admin'; // TODO
+        $context->lasteditor = $user->name;
         $context->save();
 
         return response()->json($context, 201);
@@ -179,6 +207,12 @@ class ContextController extends Controller {
     // PATCH
 
     public function patchAttributes($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to modify an entity\' data'
+            ], 403);
+        }
         foreach($request->request as $pid => $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
@@ -250,12 +284,18 @@ class ContextController extends Controller {
                 case 'context':
                     $attrval->context_val = $value;
             }
-            $attrval->lasteditor = 'Admin'; // TODO
+            $attrval->lasteditor = $user->name;
             $attrval->save();
         }
     }
 
     public function patchAttribute($id, $aid, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to modify an entity\'s data'
+            ], 403);
+        }
         $this->validate($request, AttributeValue::patchRules);
 
         try {
@@ -285,6 +325,12 @@ class ContextController extends Controller {
     }
 
     public function patchRank(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('delete_move_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to modify an entity'
+            ], 403);
+        }
         $this->validate($request, [
             'rank' => 'required|integer',
             'parent_id' => 'nullable|integer|exists:contexts,id',
@@ -307,6 +353,12 @@ class ContextController extends Controller {
     // DELETE
 
     public function deleteContext($id) {
+        $user = auth()->user();
+        if(!$user->can('delete_move_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to delete an entity'
+            ], 403);
+        }
         try {
             $context = Context::findOrFail($id);
         } catch(ModelNotFoundException $e) {

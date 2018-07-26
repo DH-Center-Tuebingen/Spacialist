@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserController extends Controller
 {
@@ -25,16 +26,28 @@ class UserController extends Controller
     }
 
     public function getUser(Request $request) {
-        $user = User::find(auth()->user()->id);
-        $user->setPermissions();
+        try {
+            $user = User::findOrFail(auth()->user()->id);
+            $user->setPermissions();
 
-        return response()->json([
+            return response()->json([
                 'status' => 'success',
                 'data' => $user
             ]);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This user does not exist'
+            ], 400);
+        }
     }
 
     public function getUsers() {
+        $user = auth()->user();
+        if(!$user->can('view_users')) {
+            return response()->json([
+                'error' => 'You do not have the permission to view users'
+            ], 403);
+        }
         $users = User::with('roles')->orderBy('id')->get();
         $roles = Role::orderBy('id')->get();
 
@@ -45,6 +58,12 @@ class UserController extends Controller
     }
 
     public function getRoles() {
+        $user = auth()->user();
+        if(!$user->can('view_users')) {
+            return response()->json([
+                'error' => 'You do not have the permission to view roles'
+            ], 403);
+        }
         $roles = Role::with('permissions')->orderBy('id')->get();
         $perms = Permission::orderBy('id')->get();
 
@@ -74,6 +93,12 @@ class UserController extends Controller
     }
 
     public function addUser(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_users')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add new users'
+            ], 403);
+        }
         $this->validate($request, [
             'email' => 'required|email|max:255|unique:users,email',
             'name' => 'required|string|max:255',
@@ -94,6 +119,12 @@ class UserController extends Controller
     }
 
     public function addRole(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('add_edit_role')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add roles'
+            ], 403);
+        }
         $role = new Role();
         foreach($request->only(array_keys(Role::rules)) as $key => $value) {
             $role->{$key} = $value;
@@ -105,6 +136,12 @@ class UserController extends Controller
     // PATCH
 
     public function setRoles(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('add_remove_role')) {
+            return response()->json([
+                'error' => 'You do not have the permission to set user roles'
+            ], 403);
+        }
         $this->validate($request, [
             'roles' => 'required'
         ]);
@@ -126,6 +163,12 @@ class UserController extends Controller
     }
 
     public function setPermissions(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('add_remove_permission')) {
+            return response()->json([
+                'error' => 'You do not have the permission to set role permissions'
+            ], 403);
+        }
         $this->validate($request, [
             'permissions' => 'required'
         ]);
@@ -151,11 +194,23 @@ class UserController extends Controller
     // DELETE
 
     public function deleteUser($id) {
+        $user = auth()->user();
+        if(!$user->can('delete_users')) {
+            return response()->json([
+                'error' => 'You do not have the permission to delete users'
+            ], 403);
+        }
         User::find($id)->delete();
         return response()->json(null, 204);
     }
 
     public function deleteRole($id) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to delete roles'
+            ], 403);
+        }
         Role::find($id)->delete();
         return response()->json(null, 204);
     }

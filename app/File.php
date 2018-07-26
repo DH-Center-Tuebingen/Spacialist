@@ -241,7 +241,7 @@ class File extends Model
         return $subFiles;
     }
 
-    public static function createFromUpload($input) {
+    public static function createFromUpload($input, $user) {
         $filename = $input->getClientOriginalName();
         $ext = $input->getClientOriginalExtension();
         // filename without extension, but with trailing '.'
@@ -264,7 +264,7 @@ class File extends Model
 
         $file = new File();
         $file->modified = $lastModified;
-        $file->lasteditor = 'Admin'; // TODO
+        $file->lasteditor = $user->name;
         $file->mime_type = $mimeType;
         $file->name = $filename;
         $file->created = $lastModified;
@@ -386,11 +386,11 @@ class File extends Model
         $this->save();
     }
 
-    public function link($eid) {
+    public function link($eid, $user) {
         $link = new ContextFile();
         $link->photo_id = $this->id;
         $link->context_id = $eid;
-        $link->lasteditor = 'Admin'; // TODO
+        $link->lasteditor = $user->name;
         $link->save();
     }
 

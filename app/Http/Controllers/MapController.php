@@ -30,6 +30,12 @@ class MapController extends Controller
     // GET
 
     public function getData() {
+        $user = auth()->user();
+        if(!$user->can('view_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to view the geo data'
+            ], 403);
+        }
         // layers: id => layer
         $layers = AvailableLayer::all()->getDictionary();
         // contexts: id => context
@@ -47,16 +53,28 @@ class MapController extends Controller
     // POST
 
     public function addGeometry(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_edit_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add geometric data'
+            ], 403);
+        }
         $this->validate($request, [
             'collection' => 'required|json',
             'srid' => 'required|integer'
         ]);
 
-        $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'));
+        $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'), $user);
         return response()->json($objs);
     }
 
     public function addLayer(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_edit_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add layers'
+            ], 403);
+        }
         $this->validate($request, [
             'name' => 'required|string',
             'is_overlay' => 'nullable|boolean_string'
@@ -76,6 +94,12 @@ class MapController extends Controller
     }
 
     public function link(Request $request, $gid, $eid) {
+        $user = auth()->user();
+        if(!$user->can('link_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to link geo data'
+            ], 403);
+        }
         try {
             $geodata = Geodata::findOrFail($gid);
         } catch (ModelNotFoundException $e) {
@@ -134,6 +158,12 @@ class MapController extends Controller
     // PATCH
 
     public function updateGeometry($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_edit_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to edit geometric data'
+            ], 403);
+        }
         $this->validate($request, [
             'feature' => 'required|json',
             'srid' => 'required|integer'
@@ -146,10 +176,16 @@ class MapController extends Controller
                 'error' => 'This geodata does not exist'
             ], 400);
         }
-        $geodata->updateGeometry(json_decode($request->get('feature')), $request->get('srid'));
+        $geodata->updateGeometry(json_decode($request->get('feature')), $request->get('srid'), $user);
     }
 
     public function updateLayer($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('create_edit_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to update layers'
+            ], 403);
+        }
         $this->validate($request, AvailableLayer::patchRules);
         try {
             $layer = AvailableLayer::findOrFail($id);
@@ -183,6 +219,12 @@ class MapController extends Controller
     // DELETE
 
     public function delete($id) {
+        $user = auth()->user();
+        if(!$user->can('upload_remove_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to delete geo data'
+            ], 403);
+        }
         try {
             $geodata = Geodata::findOrFail($id);
         } catch (ModelNotFoundException $e) {
@@ -196,6 +238,12 @@ class MapController extends Controller
     }
 
     public function unlink(Request $request, $gid, $eid) {
+        $user = auth()->user();
+        if(!$user->can('link_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to unlink geo data'
+            ], 403);
+        }
         try {
             Geodata::findOrFail($gid);
         } catch (ModelNotFoundException $e) {

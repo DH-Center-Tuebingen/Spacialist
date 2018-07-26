@@ -29,7 +29,7 @@ class Reference extends Model
         'description' => 'string|nullable'
     ];
 
-    public static function add($values) {
+    public static function add($values, $user) {
         $reference = new self();
         foreach($values as $k => $v) {
             // TODO remove after table/column renaming
@@ -39,7 +39,7 @@ class Reference extends Model
                 $reference->{$k} = $v;
             }
         }
-        $reference->lasteditor = 'Admin'; // TODO
+        $reference->lasteditor = $user->name;
         $reference->save();
         $reference->bibliography; // Retrieve bibliography relation
 
