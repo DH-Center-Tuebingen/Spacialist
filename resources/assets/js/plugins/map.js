@@ -1,8 +1,80 @@
+import LayerEditor from '../components/plugins/MapLayerEditor.vue';
+import LayerEditorDetail from '../components/plugins/MapLayerEditorDetail.vue';
+import Gis from '../components/plugins/MapGis.vue';
+
 Vue.component('map-plugin', require('../components/plugins/Map.vue'));
+Vue.component('layer-list', require('../components/plugins/MapLayerList.vue'));
 
 const SpacialistPluginMap = {
     name: 'SpacialistPluginMap',
     install(Vue, options) {
+        if(Vue.router) {
+            Vue.router.addRoutes([
+                // deprecated pre-0.6 routes
+                {
+                    path: 'geodata/:id',
+                    redirect: to => {
+                        return {
+                            name: 'geodata',
+                            params: {
+                                id: to.params.id
+                            }
+                        }
+                    }
+                },
+                {
+                    path: 'editor/layer',
+                    redirect: { name: 'layeredit' },
+                    children: [{
+                        path: 'layer/:id',
+                        redirect: to => {
+                            return {
+                                name: 'ldetail',
+                                params: {
+                                    id: to.params.id
+                                }
+                            }
+                        }
+                    }]
+                },
+                {
+                    path: 'editor/gis',
+                    redirect: { name: 'home' } // TODO not home
+                },
+                // New routes
+                // {
+                //     path: 'geodata/:id',
+                //     name: 'geodata',
+                //     component: , // TODO
+                //     meta: {
+                //         auth: true
+                //     }
+                // },
+                {
+                    path: '/editor/layer',
+                    name: 'layeredit',
+                    component: LayerEditor,
+                    children: [
+                        {
+                            path: 'l/:id',
+                            name: 'ldetail',
+                            component: LayerEditorDetail,
+                        }
+                    ],
+                    meta: {
+                        auth: true
+                    }
+                },
+                {
+                    path: '/tool/gis',
+                    name: 'gis',
+                    component: Gis,
+                    meta: {
+                        auth: true
+                    }
+                },
+            ]);
+        }
         if(!Vue.prototype.$spacialistPluginsEnabled) {
             console.error("Spacialist Plugin System not found!");
             return;
@@ -20,13 +92,17 @@ const SpacialistPluginMap = {
         Vue.prototype.$registerSpacialistPlugin({
             label: 'prefs.extension.layer-editor',
             icon: 'fa-atlas',
-            href: '/editor/layer'
+            href: {
+                name: 'layeredit'
+            }
         }, 'settings');
         // GIS View
         Vue.prototype.$registerSpacialistPlugin({
             label: 'prefs.extension.gis-view',
             icon: 'fa-globe-africa',
-            href: '/tool/gis'
+            href: {
+                name: 'gis'
+            }
         }, 'tools');
     }
 };

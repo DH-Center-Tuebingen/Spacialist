@@ -123,18 +123,6 @@ const router = new VueRouter({
                     }
                 },
                 {
-                    path: 'g/:id',
-                    redirect: to => {
-                        return {
-                            // TODO not home
-                            name: 'home',
-                            params: {
-                                id: to.params.id
-                            }
-                        }
-                    }
-                },
-                {
                     path: 'user',
                     redirect: { name: 'users' },
                     // TODO user edit route (redirect to users or add it)
@@ -151,40 +139,18 @@ const router = new VueRouter({
                         path: 'contexttype/:id',
                         redirect: to => {
                             return {
-                                // TODO not dme
-                                name: 'dme',
+                                name: 'dmdetail',
                                 params: {
                                     id: to.params.id
                                 }
                             }
                         }
                     }]
-                },
-                {
-                    path: 'editor/layer',
-                    redirect: { name: 'home' }, // TODO not home
-                    children: [{
-                        path: 'layer/:id',
-                        redirect: to => {
-                            return {
-                                // TODO not home
-                                name: 'home',
-                                params: {
-                                    id: to.params.id
-                                }
-                            }
-                        }
-                    }]
-                },
-                {
-                    path: 'editor/gis',
-                    redirect: { name: 'home' } // TODO not home
                 },
                 {
                     path: 'preferences/:id',
                     redirect: to => {
                         return {
-                            // TODO not home
                             name: 'userpreferences',
                             params: {
                                 id: to.params.id
@@ -311,16 +277,13 @@ Vue.component('csv-table', require('./components/CsvTable.vue'));
 Vue.component('attributes', require('./components/AttributeList.vue'));
 Vue.component('context-tree', require('./components/ContextTree.vue'));
 Vue.component('context-types', require('./components/ContextTypeList.vue'));
-Vue.component('layer', require('./components/LayerList.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 
 // Page Components
 Vue.component('entity-reference-modal', require('./components/EntityReferenceModal.vue'));
-Vue.component('layer-editor', require('./components/LayerEditor.vue'));
 Vue.component('about-dialog', require('./components/About.vue'));
 Vue.component('error-modal', require('./components/Error.vue'));
 
-Vue.component('gis', require('./components/plugins/Gis.vue')); // TODO
 Vue.component('data-analysis', require('./components/plugins/DataAnalysis.vue'));
 
 // Filter

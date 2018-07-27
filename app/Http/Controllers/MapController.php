@@ -50,6 +50,62 @@ class MapController extends Controller
         ]);
     }
 
+    public function getLayers() {
+        $user = auth()->user();
+        if(!$user->can('view_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add geometric data'
+            ], 403);
+        }
+        $baselayers = AvailableLayer::where('is_overlay', false)
+            ->orderBy('id')
+            ->select('id', 'name')
+            ->get();
+        $overlays = AvailableLayer::with('context_type')
+            ->where('is_overlay', true)
+            ->orderBy('id')
+            ->get();
+
+        return response()->json([
+            'baselayers' => $baselayers,
+            'overlays' => $overlays
+        ]);
+    }
+
+    public function getEntityTypeLayers() {
+        $user = auth()->user();
+        if(!$user->can('view_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add geometric data'
+            ], 403);
+        }
+        $entityLayers = AvailableLayer::with(['context_type'])
+            ->whereNotNull('context_type_id')
+            ->orWhere('type', 'unlinked')
+            ->orderBy('id')
+            ->get();
+
+        return response()->json($entityLayers);
+    }
+
+    public function getLayer($id) {
+        $user = auth()->user();
+        if(!$user->can('view_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add geometric data'
+            ], 403);
+        }
+        try {
+            $layer = AvailableLayer::with('context_type')->findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This layer does not exist'
+            ], 400);
+        }
+
+        return response()->json($layer);
+    }
+
     // POST
 
     public function addGeometry(Request $request) {

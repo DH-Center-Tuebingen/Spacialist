@@ -133,3 +133,15 @@ Vue.prototype.$getPreference = function(pref) {
 Vue.prototype.$getTabPlugins = function() {
     return this.$root.$data.plugins.tab;
 }
+
+Vue.prototype.$getToolPlugins = function() {
+    return this.$root.$data.plugins.tools;
+}
+
+Vue.prototype.$getSettingsPlugins = function() {
+    return this.$root.$data.plugins.settings;
+}
+
+Vue.prototype.$getPlugins = function() {
+    return this.$root.$data.plugins;
+}

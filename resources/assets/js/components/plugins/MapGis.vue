@@ -8,13 +8,8 @@
                 <div class="col of-hidden d-flex flex-column">
                     <h4>Available Layers</h4>
                     <div class="list-group scroll-y-auto col">
-                        <a href="#" class="list-group-item list-group-item-action" v-for="l in layers" @dblclick="addLayerToSelection(l)">
-                            <span v-if="l.thesaurus_url">
-                                {{ $translateConcept(l.thesaurus_url) }}
-                            </span>
-                            <span v-else>
-                                {{ l.name }}
-                            </span>
+                        <a href="#" class="list-group-item list-group-item-action" v-for="l in layers" @click.prevent="" @dblclick.prevent="addLayerToSelection(l)">
+                            {{ getName(l) }}
                         </a>
                     </div>
                 </div>
@@ -24,44 +19,53 @@
                         Use <kbd>Double Click</kbd> to add an <i>Available Layer</i> and again to remove it.
                     </p>
                     <div class="list-group scroll-y-auto col">
-                        <a href="#" class="list-group-item list-group-item-action" v-for="(l, i) in selectedLayers" @dblclick="removeLayerFromSelection(i)">
-                            <span v-if="l.thesaurus_url">
-                                {{ $translateConcept(l.thesaurus_url) }}
-                            </span>
-                            <span v-else>
-                                {{ l.name }}
-                            </span>
+                        <a href="#" class="list-group-item list-group-item-action" v-for="l in selectedLayers" @click.prevent="" @dblclick.prevent="removeLayerFromSelection(l)">
+                            {{ getName(l) }}
                         </a>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-10">
-            <ol-map></ol-map>
+            <ol-map
+                :layers="selectedLayers">
+            </ol-map>
         </div>
     </div>
 </template>
 
 <script>
     export default {
-        props: {
-            layers: {
-                type: Array,
-                required: true
-            }
+        beforeRouteEnter(to, from, next) {
+            $http.get('map/layer/entity').then(response => {
+                next(vm => vm.init(response.data));
+            });
         },
         mounted() {},
         methods: {
-            addLayerToSelection(layer) {
-                this.selectedLayers.push(Object.assign({}, layer));
+            init(layers) {
+                this.layers = layers;
             },
-            removeLayerFromSelection(index) {
-                this.selectedLayers.splice(index, 1);
+            getName(layer) {
+                if(layer.name) {
+                    return layer.name
+                }
+                if(layer.context_type) {
+                    return this.$translateConcept(layer.context_type.thesaurus_url);
+                }
+                return 'No Title';
+            },
+            addLayerToSelection(layer) {
+                Vue.set(this.selectedLayers, layer.id, Object.assign({}, layer));
+            },
+            removeLayerFromSelection(layer) {
+                Vue.delete(this.selectedLayers, layer.id);
             }
         },
         data() {
             return {
-                selectedLayers: []
+                layers: [],
+                selectedLayers: {}
             }
         }
     }

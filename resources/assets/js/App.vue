@@ -46,9 +46,9 @@
                             <i class="fas fa-fw fa-cogs"></i> Tools
                         </a>
                         <div class="dropdown-menu" aria-labelledby="tools-navbar">
-                            <a class="dropdown-item" v-for="plugin in plugins.tools" :href="plugin.href">
+                            <router-link class="dropdown-item" v-for="plugin in $getToolPlugins()" :to="plugin.href" :key="plugin.key">
                                 <i class="fas fa-fw" :class="plugin.icon"></i> {{ plugin.label }}
-                            </a>
+                            </router-link>
                             <router-link :to="{name: 'bibliography'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-book"></i> Bibliography
                             </router-link>
@@ -93,9 +93,9 @@
                             <router-link :to="{name: 'preferences'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-cog"></i> System Preferences
                             </router-link>
-                            <a class="dropdown-item" v-for="plugin in plugins.settings" :href="plugin.href">
-                                <i class="fas fa-fw" :class="plugin.icon"></i> @{{ plugin.label }}
-                            </a>
+                            <router-link class="dropdown-item" v-for="plugin in $getSettingsPlugins()" :to="plugin.href" :key="plugin.key">
+                                <i class="fas fa-fw" :class="plugin.icon"></i> {{ plugin.label }}
+                            </router-link>
                             <a class="dropdown-item" href="">
                                 <i class="fas fa-fw fa-pencil-alt"></i> Toggle Edit Mode
                             </a>
@@ -141,9 +141,6 @@
         data() {
             return {
                 plugins: {},
-                prefs: {},
-                concepts: {},
-                contextTypes: {}
             }
         }
     }

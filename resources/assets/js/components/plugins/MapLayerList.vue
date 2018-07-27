@@ -3,7 +3,7 @@
         <ul class="ml-3 list-unstyled">
             <li v-for="l in layer" class="pb-1">
                 <i class="fas fa-fw fa-map-marked-alt"></i>
-                <a href="#" @click="onSelect(l)">{{ getTitle(l) }}</a>
+                <a href="#" @click.prevent="onSelect(l)">{{ getTitle(l) }}</a>
             </li>
             <li v-if="addNew">
                 <i class="fas fa-fw fa-plus"></i>
