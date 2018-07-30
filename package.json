@@ -23,10 +23,10 @@
         "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
     },
     "devDependencies": {
-        "@fortawesome/fontawesome-svg-core": "^1.2.0",
-        "@fortawesome/free-brands-svg-icons": "^5.1.0",
-        "@fortawesome/free-regular-svg-icons": "^5.1.0",
-        "@fortawesome/free-solid-svg-icons": "^5.1.0",
+        "@fortawesome/fontawesome-svg-core": "^1.2.2",
+        "@fortawesome/free-brands-svg-icons": "^5.2.0",
+        "@fortawesome/free-regular-svg-icons": "^5.2.0",
+        "@fortawesome/free-solid-svg-icons": "^5.2.0",
         "@websanova/vue-auth": "^2.21.14-beta",
         "axios": "^0.17",
         "babel-helper-vue-jsx-merge-props": "^2.0.3",
@@ -40,15 +40,15 @@
         "vue-router": "^3.0.1"
     },
     "dependencies": {
-        "bootstrap": "^4.1.0",
+        "bootstrap": "^4.1.3",
         "cornerstone-core": "^2.2.0",
         "cornerstone-tools": "^2.3.0",
         "cornerstone-wado-image-loader": "^2.1.0",
         "d3-dsv": "^1.0.8",
         "debounce": "^1.1.0",
         "moment": "^2.20.1",
-        "ol": "^4.6.4",
-        "ol-ext": "^2.0.1",
+        "ol": "^5.1.0",
+        "ol-ext": "^3.0.0",
         "plotly.js": "^1.38.3",
         "popper.js": "^1.14.3",
         "proj4": "^2.4.4",
@@ -68,7 +68,7 @@
         "vue-notification": "^1.3.7",
         "vue-pdf": "^3.3.1",
         "vue-typeahead": "^2.3.2",
-        "vue-upload-component": "^2.8.5",
+        "vue-upload-component": "^2.8.11",
         "vuedraggable": "^2.16.0"
     }
 }

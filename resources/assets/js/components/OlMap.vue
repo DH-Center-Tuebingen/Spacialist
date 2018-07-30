@@ -9,7 +9,7 @@
                     <i class="fas fa-fw fa-road"></i>
                 </button>
                 <button type="button" class="btn btn-sm" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" @click="toggleDrawType('Polygon')">
-                    <i class="fas fa-fw fa-object-ungroup"></i>
+                    <i class="fas fa-fw fa-draw-polygon"></i>
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-info" v-show="interactionMode != 'modify'" @click="setInteractionMode('modify')">
                     <i class="fas fa-fw fa-edit"></i>
@@ -49,50 +49,50 @@
 
 <script>
     import 'ol/ol.css';
-    import Collection from 'ol/collection';
-    import control from 'ol/control';
-    import Coordinate from 'ol/coordinate';
-    import extent from 'ol/extent';
-    import Feature from 'ol/feature';
-    import Graticule from 'ol/graticule';
-    import interaction from 'ol/interaction';
-    import Map from 'ol/map';
-    import Overlay from 'ol/overlay';
-    import proj from 'ol/proj';
-    import View from 'ol/view';
+    import Collection from 'ol/Collection';
+    import {defaults as defaultControls} from 'ol/control.js';
+    import { getCenter as getExtentCenter, extend as extendExtent} from 'ol/extent';
+    import Feature from 'ol/Feature';
+    import Graticule from 'ol/Graticule';
+    import { defaults as defaultInteractions } from 'ol/interaction';
+    import Map from 'ol/Map';
+    import Overlay from 'ol/Overlay';
+    import { get as getProjection, addProjection, transform as transformProj } from 'ol/proj';
+    import { register as registerProj } from 'ol/proj/proj4';
+    import View from 'ol/View';
 
-    import FullScreen from 'ol/control/fullscreen';
-    import OverviewMap from 'ol/control/overviewmap';
-    import Rotate from 'ol/control/rotate';
-    import ScaleLine from 'ol/control/scaleline';
+    import FullScreen from 'ol/control/FullScreen';
+    import OverviewMap from 'ol/control/OverviewMap';
+    import Rotate from 'ol/control/Rotate';
+    import ScaleLine from 'ol/control/ScaleLine';
 
-    import condition from 'ol/events/condition';
+    import {never as neverCond, shiftKeyOnly, platformModifierKeyOnly} from 'ol/events/condition';
 
-    import WKT from 'ol/format/wkt';
-    import GeoJSON from 'ol/format/geojson';
+    import WKT from 'ol/format/WKT';
+    import GeoJSON from 'ol/format/GeoJSON';
 
-    import DragRotate from 'ol/interaction/dragrotate';
-    import DragZoom from 'ol/interaction/dragzoom';
-    import Draw from 'ol/interaction/draw';
-    import Modify from 'ol/interaction/modify';
-    import PinchRotate from 'ol/interaction/pinchrotate';
-    import PinchZoom from 'ol/interaction/pinchzoom';
-    import Select from 'ol/interaction/select';
-    import Snap from 'ol/interaction/snap';
+    import DragRotate from 'ol/interaction/DragRotate';
+    import DragZoom from 'ol/interaction/DragZoom';
+    import Draw from 'ol/interaction/Draw';
+    import Modify from 'ol/interaction/Modify';
+    import PinchRotate from 'ol/interaction/PinchRotate';
+    import PinchZoom from 'ol/interaction/PinchZoom';
+    import Select from 'ol/interaction/Select';
+    import Snap from 'ol/interaction/Snap';
 
-    import Group from 'ol/layer/group';
-    import TileLayer from 'ol/layer/tile';
-    import VectorLayer from 'ol/layer/vector';
+    import Group from 'ol/layer/Group';
+    import TileLayer from 'ol/layer/Tile';
+    import VectorLayer from 'ol/layer/Vector';
 
-    import OSM from 'ol/source/osm';
-    import TileImage from 'ol/source/tileimage';
-    import TileWMS from 'ol/source/tilewms';
-    import Vector from 'ol/source/vector';
+    import OSM from 'ol/source/OSM';
+    import TileImage from 'ol/source/TileImage';
+    import TileWMS from 'ol/source/TileWMS';
+    import Vector from 'ol/source/Vector';
 
-    import Circle from 'ol/style/circle';
-    import Fill from 'ol/style/fill';
-    import Stroke from 'ol/style/stroke';
-    import Style from 'ol/style/style';
+    import CircleStyle from 'ol/style/Circle';
+    import Fill from 'ol/style/Fill';
+    import Stroke from 'ol/style/Stroke';
+    import Style from 'ol/style/Style';
 
     import proj4 from 'proj4';
 
@@ -148,7 +148,6 @@
         mounted() {
             const vm = this;
 
-            proj.setProj4(proj4);
             vm.initMapProjection();
 
             if(vm.initWkt.length && vm.initGeojson.length) {
@@ -290,7 +289,7 @@
                     init: function() {
                         this.select = new Select({
                             hitTolerance: 5,
-                            toggleCondition: condition.never,
+                            toggleCondition: neverCond,
                             wrapX: false
                         });
                         vm.map.addInteraction(this.select);
@@ -367,7 +366,7 @@
                     init: function() {
                         this.select = new Select({
                             hitTolerance: 5,
-                            toggleCondition: condition.never,
+                            toggleCondition: neverCond,
                             wrapX: false
                         });
                         vm.map.addInteraction(this.select);
@@ -433,19 +432,19 @@
                 vm.extent = vm.getEntityExtent();
 
                 vm.map = new Map({
-                    controls: control.defaults().extend([
+                    controls: defaultControls().extend([
                         new FullScreen(),
                         new LayerSwitcher(),
                         new OverviewMap(),
                         new Rotate(),
                         new ScaleLine()
                     ]),
-                    interactions: interaction.defaults().extend([
+                    interactions: defaultInteractions().extend([
                         new DragRotate({
-                            condition: condition.platformModifierKeyOnly
+                            condition: platformModifierKeyOnly
                         }),
                         new DragZoom({
-                            condition: condition.shiftKeyOnly
+                            condition: shiftKeyOnly
                         }),
                         new PinchRotate(),
                         new PinchZoom(),
@@ -490,7 +489,7 @@
                         vm.lastHoveredFeature = feature;
                         const geometry = feature.getGeometry();
                         const props = feature.getProperties();
-                        const coords = extent.getCenter(geometry.getExtent());
+                        const coords = getExtentCenter(geometry.getExtent());
                         vm.hoverPopup.setPosition(coords);
 
                         const geomName = `Geometry #${props.id}`;
@@ -530,7 +529,7 @@
                     if(feature) {
                         const geometry = feature.getGeometry();
                         const props = feature.getProperties();
-                        const coords = extent.getCenter(geometry.getExtent());
+                        const coords = getExtentCenter(geometry.getExtent());
                         vm.overlay.setPosition(coords);
 
                         vm.selectedFeature = feature;
@@ -559,7 +558,7 @@
                         lineDash: [0.5, 4]
                     })
                 });
-                vm.options.graticule.setMap(vm.map);
+                // vm.options.graticule.setMap(vm.map);
 
                 // Event Listeners
                 vm.draw.Point.on('drawend', function(event) {
@@ -582,8 +581,9 @@
                 }
                 const name = `EPSG:${vm.epsg.epsg}`;
                 proj4.defs(name, vm.epsg.proj4);
-                const projection = proj.get(name);
-                proj.addProjection(projection);
+                registerProj(proj4);
+                const projection = getProjection(name);
+                addProjection(projection);
             },
             createNewLayer(l) {
                 let source;
@@ -668,7 +668,7 @@
                         if(!entityExtent) {
                             entityExtent = sourceExtent;
                         } else {
-                            entityExtent = extent.extend(entityExtent, sourceExtent);
+                            entityExtent = extendExtent(entityExtent, sourceExtent);
                         }
                     }
                 });
@@ -743,7 +743,7 @@
                         color: color || activeColor,
                         width: 2
                     }),
-                    image: new Circle({
+                    image: new CircleStyle({
                         radius: 7,
                         fill: new Fill({
                             color: color || activeColor
@@ -852,7 +852,7 @@
             },
             coordinateToTableRow(c) {
                 if(!c[0] || !c[1]) return;
-                const transCoord = proj.transform(c, 'EPSG:3857', `EPSG:${this.epsg.epsg}`);
+                const transCoord = transformProj(c, 'EPSG:3857', `EPSG:${this.epsg.epsg}`);
                 const row = `<tr>
                     <td class="text-left">${transCoord[0].toFixed(4)}</td>
                     <td class="text-right">${transCoord[1].toFixed(4)}</td>

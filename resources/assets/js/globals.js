@@ -24,7 +24,6 @@ Vue.directive('can', {
         }
     },
     unbind: function(el) {
-        console.log(el.children);
         if(!el.children) return;
         for(let i=0; i<el.children.length; i++) {
             let c = el.children[i];

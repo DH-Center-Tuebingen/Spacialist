@@ -17,7 +17,7 @@
 </template>
 
 <script>
-    import GeoJSON from 'ol/format/geojson';
+    import GeoJSON from 'ol/format/GeoJSON';
 
     export default {
         props: {
