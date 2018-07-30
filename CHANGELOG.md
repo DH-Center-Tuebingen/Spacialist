@@ -10,21 +10,27 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - Replace single files
   - Rendering of HTML files
   - DICOM Support
+  - Rename files
+  - 3D-Viewer can now load all 3D files of sub-entities into same scene
 - Added Welcome Page
   - Maintainer (Name and E-Mail-Address), Project Description and Access (Public/Private) can be configured in settings
 - Reference Modal
   - Options (Edit/Delete) to reference list
 - BibTeX export
 - SQL Attribute Type
-  - Rendered as Table
+  - Rendered as Table or single value
   - Supports translations (Use `concept_url` as header/content)
   - Supports `:entity_id` as placeholder for current selected entity
+- Geometry Preference (EPSG-Code). E.g. to display coordinates in popups different from EPSG:4326
+- Attribute Dependencies
+  - Attributes can now depend (are visible/invisible) on values of other attributes
 ### Changed
 - Moved from Lumen (5.3) to Laravel (5.6)
 - Moved from AngularJS (1.5) to Vue.js (2.5)
-- Moved from Bootstrap 3.3 to 4.0
+- Moved from LeafletJS (1.0) to OpenLayers (5.1)
+- Updated Bootstrap 3.3 to 4.1
 - Switched from Material Design back to original Bootstrap
-- Switched from Material Icons to new FontAwesome 5
+- Switched from Material Icons to new FontAwesome 5.2
 - Moved Plugin-like parts to real Plugins
 - Certainty Modal now has 3 icons to view information without opening the modal
   - !-Icon: Always displayed. Color based on certainty level
@@ -32,10 +38,18 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - Bookmark-Icon: Displayed if there is at least one reference
 - User/Role Management bundle several actions (Save, Edit, Delete, ...) in single dropdown (...-menu)
 - Adding/Reorder attributes in Context-Type tab in Data-Model-Editor is now done using Drag&Drop.
-- File Viewer now loads files as chunk (15)
+- File Viewer
+  - Load files as chunk of 15
+  - Filter by ... for each tab (Linked, Unlinked, All Files)
+    - Filetype
+    - Camera
+    - Date
 - Tree View now loads root elements only. Sub-elements are loaded on request
+- Bibliography View loads only the first 20 entries. More entries are loaded on scroll
 ### Fixed
 - 3D-File-Viewer: Mouse Controls now work even if WebVR is available (but not active)
+### Removed/Deprecated
+- Links: The links have changed, but they will continue to work. We recommend to update your bookmarks, because the old link structure is now deprecated
 
 ## 0.5.1
 ### Added
