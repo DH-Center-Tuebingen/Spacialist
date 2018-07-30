@@ -164,6 +164,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('layer', 'MapController@getLayers');
     Route::get('layer/entity', 'MapController@getEntityTypeLayers');
     Route::get('layer/{id}', 'MapController@getLayer')->where('id', '[0-9]+');
+    Route::get('epsg/{srid}', 'MapController@getEpsg')->where('srid', '[0-9]+');
 
     Route::post('', 'MapController@addGeometry');
     Route::post('/layer', 'MapController@addLayer');

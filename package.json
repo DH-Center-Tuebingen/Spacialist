@@ -44,6 +44,7 @@
         "cornerstone-core": "^2.2.0",
         "cornerstone-tools": "^2.3.0",
         "cornerstone-wado-image-loader": "^2.1.0",
+        "csv2geojson": "^5.0.2",
         "d3-dsv": "^1.0.8",
         "debounce": "^1.1.0",
         "moment": "^2.20.1",

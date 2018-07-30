@@ -3,6 +3,7 @@
         <ol-map
             :epsg="epsg"
             :init-geojson="geojson"
+            :init-projection="'EPSG:4326'"
             :layers="layers"
             :on-deleteend="deleteFeatures"
             :on-drawend="addFeature"

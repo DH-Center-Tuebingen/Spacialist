@@ -1,6 +1,6 @@
 <template>
     <div class="table-responsive">
-        <table class="table table-striped table-hover">
+        <table class="table table-striped table-hover" :class="{ 'table-sm': small }">
             <thead class="thead-light sticky-top">
                 <tr>
                     <th v-for="header in rows.header">
@@ -42,6 +42,10 @@
                 required: false,
                 type: Number,
                 default: 10
+            },
+            small: {
+                required: false,
+                type: Boolean
             }
         },
         mounted() {},

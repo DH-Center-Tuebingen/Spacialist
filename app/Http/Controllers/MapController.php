@@ -50,21 +50,33 @@ class MapController extends Controller
         ]);
     }
 
-    public function getLayers() {
+    public function getLayers(Request $request) {
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
                 'error' => 'You do not have the permission to add geometric data'
             ], 403);
         }
+        $basic = $request->query('basic');
+        $dict = $request->query('d');
+        $basicOnly = isset($basic);
+        $asDict = isset($dict);
         $baselayers = AvailableLayer::where('is_overlay', false)
             ->orderBy('id')
-            ->select('id', 'name')
             ->get();
-        $overlays = AvailableLayer::with('context_type')
+        $overlayQuery = AvailableLayer::with('context_type')
             ->where('is_overlay', true)
-            ->orderBy('id')
-            ->get();
+            ->orderBy('id');
+        if($basicOnly) {
+            $overlayQuery->whereNull('context_type_id')
+                ->where('type', '!=', 'unlinked');
+        }
+        $overlays = $overlayQuery->get();
+
+        if($asDict) {
+            $baselayers = $baselayers->getDictionary();
+            $overlays = $overlays->getDictionary();
+        }
 
         return response()->json([
             'baselayers' => $baselayers,
@@ -104,6 +116,13 @@ class MapController extends Controller
         }
 
         return response()->json($layer);
+    }
+
+    public function getEpsg($srid) {
+        $epsg = \DB::table('spatial_ref_sys')
+            ->where('srid', $srid)
+            ->first();
+        return response()->json($epsg);
     }
 
     // POST
