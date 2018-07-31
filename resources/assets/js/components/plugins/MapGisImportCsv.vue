@@ -121,9 +121,10 @@
                 if(files.length) {
                     this.selectedFile = files[0];
                     this.readContent();
+                } else {
+                    this.selectedFile = {};
+                    this.fileContent = '';
                 }
-                this.selectedFile = {};
-                this.fileContent = '';
             },
             parse() {
                 if(this.infoMissing) return;
