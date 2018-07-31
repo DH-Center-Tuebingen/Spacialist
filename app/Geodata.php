@@ -36,7 +36,9 @@ class Geodata extends Model
     public function updateGeometry($feature, $srid, $user) {
         $geom = json_encode($feature->geometry);
         $wkt = \DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geom')), $srid), 4326)) AS wkt")[0]->wkt;
-        $this->geom = self::parseWkt($wkt);
+        $parsedWkt = self::parseWkt($wkt);
+        if(!isset($parsedWkt)) return;
+        $this->geom = $parsedWkt;
         $this->lasteditor = $user->name;
         $this->save();
     }
@@ -47,8 +49,10 @@ class Geodata extends Model
             $geom = json_encode($feature->geometry);
             // ST_GeomFromGeoJSON doesn't support srid...
             $wkt = \DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geom')), $srid), 4326)) AS wkt")[0]->wkt;
+            $parsedWkt = self::parseWkt($wkt);
+            if(!isset($parsedWkt)) continue;
             $geodata = new self();
-            $geodata->geom = self::parseWkt($wkt);
+            $geodata->geom = $parsedWkt;
             $geodata->lasteditor = $user->name;
             $geodata->save();
             $objs[] = $geodata;
@@ -62,7 +66,7 @@ class Geodata extends Model
             $parsed = $geom::fromWKT($wkt);
             return $parsed;
         } catch(UnknownWKTTypeException $e) {
-            return -1;
+            return null;
         }
     }
 
