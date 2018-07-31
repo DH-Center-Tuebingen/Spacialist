@@ -80,7 +80,7 @@ Vue.prototype.$throwError = function(error) {
     } else if(error.request) {
         this.$showErrorModal(error.request);
     } else {
-        this.$showErrorModal(error.message);
+        this.$showErrorModal(error.message || error);
     }
 };
 

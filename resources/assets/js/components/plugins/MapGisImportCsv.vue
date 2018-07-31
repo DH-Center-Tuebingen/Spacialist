@@ -48,7 +48,7 @@
                 <multiselect
                     label="label"
                     track-by="id"
-                    v-model="wkt"
+                    v-model="wktColumn"
                     :allowEmpty="false"
                     :closeOnSelect="true"
                     :hideSelected="true"
@@ -86,7 +86,8 @@
 
 <script>
     import csv2geojson from 'csv2geojson';
-    let d3 = require('d3-dsv');
+    const d3 = require('d3-dsv');
+    const wkx = require('wkx');
 
     export default {
         props: {
@@ -134,20 +135,39 @@
                     let header = this.selectionColumns.join(this.delimiter);
                     content = `${header}\n${content}`;
                 }
-                csv2geojson.csv2geojson(content, {
-                    lonfield: this.longitude.label,
-                    latfield: this.latitude.label,
-                    delimiter: this.delimiter
-                }, (error, data) => {
-                    if(error) {
-                        // TODO throw
-                        console.log("todo...");
-                        return;
-                    }
+                if(this.pointType == 'point') {
+                    csv2geojson.csv2geojson(content, {
+                        lonfield: this.longitude.label,
+                        latfield: this.latitude.label,
+                        delimiter: this.delimiter
+                    }, (error, data) => {
+                        if(error) {
+                            this.$throwError(error);
+                            return;
+                        }
+                        if(this.afterParse) {
+                            this.afterParse(data, this.epsgCode);
+                        }
+                    });
+                } else if(this.pointType == 'wkt') {
+                    let features = [];
+                    const rows = this.dsv.parse(content);
+                    const srid = this.epsgCode.split(':')[1];
+                    rows.forEach(r => {
+                        const wktString = r[this.wktColumn.label];
+                        const geometry = wkx.Geometry.parse(`SRID=${srid};${wktString}`);
+                        features.push({
+                            type: 'Feature',
+                            geometry: geometry.toGeoJSON()
+                        });
+                    });
                     if(this.afterParse) {
-                        this.afterParse(data, this.epsgCode);
+                        this.afterParse({
+                            type: 'FeatureCollection',
+                            features: features
+                        }, this.epsgCode);
                     }
-                });
+                }
             }
         },
         data() {
@@ -159,6 +179,7 @@
                 pointType: 'point',
                 longitude: {},
                 latitude: {},
+                wktColumn: {},
                 epsgCode: 'EPSG:3857',
                 showDataPreview: false
             }
@@ -169,16 +190,14 @@
                 return d3.dsvFormat(delimiter);
             },
             infoMissing: function() {
-                return !this.delimiter ||
-                    !this.epsgCode ||
-                    (
-                        this.pointType == 'point' &&
-                        (!this.longitude || !this.longitude.id) || (!this.latitude || !this.latitude.id)
-                    ) ||
-                    (
-                        this.pointType == 'wkt' &&
-                        (!this.wkt || !this.wkt.id)
-                    );
+                if(!this.delimiter || !this.epsgCode) return true;
+                if(this.pointType == 'point') {
+                    return !this.longitude || !this.longitude.id || !this.latitude || !this.latitude.id;
+                }
+                if(this.pointType == 'wkt') {
+                    return !this.wktColumn || !this.wktColumn.id;
+                }
+                return false;
             },
             selectionColumns: function() {
                 if(!this.fileContent.length) return [];

@@ -70,6 +70,7 @@
         "vue-pdf": "^3.3.1",
         "vue-typeahead": "^2.3.2",
         "vue-upload-component": "^2.8.11",
-        "vuedraggable": "^2.16.0"
+        "vuedraggable": "^2.16.0",
+        "wkx": "^0.4.5"
     }
 }
