@@ -11,16 +11,16 @@
                 <div class="col-md-2">
                     <ul class="nav nav-pills flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" :class="{active: activeTab == 'csv'}" @click.prevent="activeTab = 'csv'" href="#">CSV</a>
+                            <a class="nav-link" :class="{active: activeTab == 'csv'}" @click.prevent="setActiveTab('csv')" href="#">CSV</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" :class="{active: activeTab == 'kml'}" @click.prevent="activeTab = 'kml'" href="#">KML/KMZ</a>
+                            <a class="nav-link" :class="{active: activeTab == 'kml'}" @click.prevent="setActiveTab('kml')" href="#">KML/KMZ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" :class="{active: activeTab == 'shape'}" @click.prevent="activeTab = 'shape'" href="#">Shape</a>
+                            <a class="nav-link" :class="{active: activeTab == 'shape'}" @click.prevent="setActiveTab('shape')" href="#">Shape</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" :class="{active: activeTab == 'geojson'}" @click.prevent="activeTab = 'geojson'" href="#">GeoJSON</a>
+                            <a class="nav-link" :class="{active: activeTab == 'geojson'}" @click.prevent="setActiveTab('geojson')" href="#">GeoJSON</a>
                         </li>
                     </ul>
                 </div>
@@ -168,6 +168,14 @@
                 $http.post('map', data).then(reponse => {
                     this.$showToast('Import finished', `${collection.features.length} features added.`, 'success');
                 });
+            },
+            setActiveTab(id) {
+                if(this.activeTab != id) {
+                    this.featureCollection = {};
+                    this.files = [];
+                    this.parsed = false;
+                    this.activeTab = id;
+                }
             }
         },
         data() {
