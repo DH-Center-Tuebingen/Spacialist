@@ -30,7 +30,7 @@ class ContextController extends Controller {
         if(!$user->can('view_concepts')) {
             return response()->json([], 204);
         }
-        $roots = Context::getEntitiesByParent(null, $user);
+        $roots = Context::getEntitiesByParent(null);
 
         return response()->json($roots);
     }
@@ -151,8 +151,8 @@ class ContextController extends Controller {
         return response()->json($children);
     }
 
-    public function getEntitiesByParent($id, $user) {
-        return Context::getEntitiesByParent($id, $user);
+    public function getEntitiesByParent($id) {
+        return Context::getEntitiesByParent($id);
     }
 
     // POST
