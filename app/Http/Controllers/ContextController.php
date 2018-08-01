@@ -133,6 +133,24 @@ class ContextController extends Controller {
         return response()->json($data);
     }
 
+    public function getPath($id) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to get an entity\'s path'
+            ], 403);
+        }
+
+        try {
+            $context = Context::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context does not exist'
+            ], 400);
+        }
+        return response()->json($context->path);
+    }
+
     public function getChildren($id) {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {

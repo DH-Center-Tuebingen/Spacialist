@@ -109,4 +109,20 @@ class Context extends Model
     public function files() {
         return $this->belongsToMany('App\File', 'context_photos', 'context_id', 'photo_id');
     }
+
+    private function path() {
+        $ancestors = $this->where('id', '=', $this->id)->get();
+
+        while ($ancestors->last() && $ancestors->last()->root_context_id !== null) {
+                $parent = $this->where('id', '=', $ancestors->last()->root_context_id)->get();
+                $ancestors = $ancestors->merge($parent);
+            }
+        return $ancestors->reverse()->pluck('rank')->map(function($item, $key) {
+            return $item - 1;
+        })->all();
+    }
+
+    public function getPathAttribute() {
+        return $this->path();
+    }
 }

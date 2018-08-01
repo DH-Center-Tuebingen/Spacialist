@@ -1,6 +1,7 @@
 <template>
     <div class="d-flex flex-column">
         <h3>Entities <small class="badge badge-secondary font-weight-light align-middle font-size-50">{{topLevelCount}} Top-Level Entities</small></h3>
+        <tree-search class="mb-2" :on-select="onSearchSelect"></tree-search>
         <div class="d-flex flex-column col px-0">
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAdd)">
                 <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
@@ -27,6 +28,7 @@
     import { transliterate as tr, slugify } from 'transliteration';
     Vue.component('tree-node', require('./TreeNode.vue'));
     Vue.component('tree-contextmenu', require('./TreeContextmenu.vue'));
+    Vue.component('tree-search', require('./TreeSearch.vue'));
 
     class Node {
         constructor(data, vm) {
@@ -253,6 +255,41 @@
                 }
                 // In any other cases allow drop
                 return true;
+            },
+            onSearchSelect(item) {
+                const vm = this;
+                $http.get(`/context/${item.id}/path`).then(function(response) {
+                    vm.openPath(response.data);
+                })
+            },
+            openPath(path, tree = this.tree) {
+                const vm = this;
+                if (path.length <= 1) {
+                    // terminate recursion
+                    return;
+                } else {
+                    // recurse further
+                    const idx = path[0];
+                    const rest = path.slice(1);
+                    const curNode = tree[idx];
+                    if(curNode.children.length < curNode.children_count) {
+                        //async load children
+                        curNode.state.loading = true;
+                        vm.fetchChildren(curNode.id).then(response => {
+                            curNode.children =  response;
+                            curNode.state.loading = false;
+                            curNode.childrenLoaded = true;
+                            curNode.state.opened = true;
+                            vm.openPath(rest, curNode.children);
+                        });
+                    } else {
+                        if(!curNode.state.opened) {
+                            // open node
+                            curNode.state.opened = true;
+                        }
+                        vm.openPath(rest, curNode.children);
+                    }
+                }
             }
         },
         data() {

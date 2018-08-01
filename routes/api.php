@@ -38,6 +38,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/{id}/data', 'ContextController@getData')->where('id', '[0-9]+');
     Route::get('/{id}/children', 'ContextController@getChildren')->where('id', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByContext')->where('id', '[0-9]+');
+    Route::get('/{id}/path', 'ContextController@getPath')->where('id', '[0-9]+');
     Route::get('/byParent/{id}', 'ContextController@getEntitiesByParent')->where('id', '[0-9]+');
 
     Route::post('', 'ContextController@addEntity');
