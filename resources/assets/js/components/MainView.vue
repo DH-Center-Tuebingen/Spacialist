@@ -7,12 +7,14 @@
                 :on-context-menu-duplicate="duplicateEntity"
                 :on-context-menu-delete="requestDeleteEntity"
                 :roots="roots"
-                :selection-callback="onSetSelectedElement">
+                :selection-callback="onSetSelectedElement"
+                :event-bus="eventBus">
             </context-tree>
         </div>
         <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100" v-can="'view_concepts|view_concept_props'">
             <router-view class="h-100"
-                :bibliography="bibliography">
+                :bibliography="bibliography"
+                :event-bus="eventBus">
             </router-view>
         </div>
         <div :class="'col-md-'+$getPreference('prefs.columns').right" id="addon-container" class="d-flex flex-column">
@@ -355,7 +357,8 @@
                 dataLoaded: false,
                 defaultKey: undefined,
                 plugins: this.$getTabPlugins(),
-                activePlugin: ''
+                activePlugin: '',
+                eventBus: new Vue()
             }
         },
         computed: {

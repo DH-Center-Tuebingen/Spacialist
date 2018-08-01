@@ -31,7 +31,14 @@
         beforeRouteEnter(to, from, next) {
             const entityId = to.params.id;
             $http.get(`context/${entityId}`).then(response => {
-                next(vm => vm.init(response.data));
+                next(vm => {
+                    vm.init(response.data)
+                    vm.eventBus.$emit('entity-change', {
+                        type: 'enter',
+                        from: from,
+                        to: to
+                    });
+                });
             }).catch(error => {
                 $throwError(error);
             });
@@ -49,29 +56,45 @@
                     }).catch(error => {
                         $throwError(error);
                     });
+                    vm.eventBus.$emit('entity-change', {
+                        type: 'update',
+                        from: from,
+                        to: to
+                    });
                 };
-                if (this.isFormDirty) {
+                if (vm.isFormDirty) {
                     let discardAndContinue = function() {
                         loadNext();
                     };
                     let saveAndContinue = function() {
-                        this.saveEntity(this.entity).then(loadNext);
+                        vm.saveEntity(vm.entity).then(loadNext);
                     };
-                    this.$modal.show(this.discardModal, {entityName: this.entity.name, onDiscard: discardAndContinue, onSave: saveAndContinue})
+                    vm.$modal.show(vm.discardModal, {entityName: vm.entity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
                 } else {
                     loadNext();
                 }
             }
         },
         beforeRouteLeave: function(to, from, next) {
-            if (this.isFormDirty) {
+            const vm = this;
+            let loadNext = function() {
+                next();
+                vm.eventBus.$emit('entity-change', {
+                    type: 'leave',
+                    from: from,
+                    to: to
+                })
+            }
+            if (vm.isFormDirty) {
                 let discardAndContinue = function() {
-                    next();
+                    loadNext();
                 };
                 let saveAndContinue = function() {
-                    this.saveEntity(this.entity).then(_ => next());
+                    vm.saveEntity(this.entity).then(loadNext);
                 };
-                this.$modal.show(this.discardModal, {entityName: this.entity.name, onDiscard: discardAndContinue, onSave: saveAndContinue})
+                vm.$modal.show(vm.discardModal, {entityName: vm.entity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+            } else {
+                loadNext();
             }
         },
         props: {
@@ -79,6 +102,10 @@
                 required: false,
                 type: Array,
                 default: () => []
+            },
+            eventBus: {
+                required: true,
+                type: Object
             }
         },
         mounted() {},

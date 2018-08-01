@@ -26,6 +26,7 @@
     import * as treeUtility from 'tree-vue-component';
     import { VueContext } from 'vue-context';
     import { transliterate as tr, slugify } from 'transliteration';
+    import { bus } from './MainView.vue';
     Vue.component('tree-node', require('./TreeNode.vue'));
     Vue.component('tree-contextmenu', require('./TreeContextmenu.vue'));
     Vue.component('tree-search', require('./TreeSearch.vue'));
@@ -95,28 +96,22 @@
                 required: false,
                 type: Number,
                 default: 500
+            },
+            eventBus: {
+                required: true,
+                type: Object
             }
         },
         mounted() {
             this.init();
+            this.eventBus.$on('entity-change', this.handleEntityChange);
         },
         methods: {
             itemClick(eventData) {
                 const item = eventData.data;
                 if(this.selectedItem.id == item.id) {
-                    this.selectedItem = {};
-                    item.state.selected = false;
                     this.selectionCallback();
                 } else {
-                    if(this.selectedItem.path) {
-                        let oldItem = treeUtility.getNodeFromPath(this.tree, this.selectedItem.path);
-                        if(oldItem) {
-                            oldItem.state.selected = false;
-                        }
-                    }
-                    item.state.selected = true;
-                    this.selectedItem = item;
-                    this.selectedItem.path = eventData.path;
                     this.selectionCallback(item);
                 }
             },
@@ -264,12 +259,12 @@
             },
             openPath(path, tree = this.tree) {
                 const vm = this;
+                const idx = path[0];
                 if (path.length <= 1) {
-                    // terminate recursion
-                    return;
+                    // terminate recursion, return target node
+                    return tree[idx];
                 } else {
                     // recurse further
-                    const idx = path[0];
                     const rest = path.slice(1);
                     const curNode = tree[idx];
                     if(curNode.children.length < curNode.children_count) {
@@ -289,6 +284,42 @@
                         }
                         vm.openPath(rest, curNode.children);
                     }
+                }
+            },
+            selectNodeById(id) {
+                const vm = this;
+                $http.get(`/context/${id}/path`).then(response => {
+                    const targetNode = vm.openPath(response.data);
+                    targetNode.state.selected = true;
+                    vm.selectedItem = targetNode;
+                    vm.selectedItem.path = response.data;
+                });
+            },
+            deselectNodeById(id) {
+                const vm = this;
+                $http.get(`/context/${id}/path`).then(response => {
+                    const targetNode = vm.openPath(response.data);
+                    targetNode.state.selected = false;
+                });
+                vm.selectedItem = {};
+            },
+            handleEntityChange(e) {
+                const vm = this;
+                const from = e.from;
+                const to = e.to;
+                switch (e.type) {
+                    case 'enter':
+                        vm.selectNodeById(to.params.id);
+                    break;
+                    case 'update':
+                        vm.deselectNodeById(from.params.id);
+                        vm.selectNodeById(to.params.id);
+                    break;
+                    case 'leave':
+                        vm.deselectNodeById(from.params.id);
+                    break;
+                    default:
+                        vm.$throwError({message: `Unknown event type ${e.type} received.`});
                 }
             }
         },
