@@ -48,6 +48,7 @@
         "csv2geojson": "^5.0.2",
         "d3-dsv": "^1.0.8",
         "debounce": "^1.1.0",
+        "jszip": "^3.1.5",
         "moment": "^2.20.1",
         "ol": "^5.1.0",
         "ol-ext": "^3.0.0",
@@ -72,7 +73,6 @@
         "vue-typeahead": "^2.3.2",
         "vue-upload-component": "^2.8.11",
         "vuedraggable": "^2.16.0",
-        "wkx": "^0.4.5",
-        "zipjs-browserify": "^1.0.1"
+        "wkx": "^0.4.5"
     }
 }
