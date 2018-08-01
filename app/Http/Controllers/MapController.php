@@ -143,6 +143,14 @@ class MapController extends Controller
         return response()->json($objs);
     }
 
+    public function getEpsgByText(Request $request) {
+        $srtext = $request->get('srtext');
+        $epsg = \DB::table('spatial_ref_sys')
+            ->where('srtext', $srtext)
+            ->first();
+        return response()->json($epsg);
+    }
+
     public function addLayer(Request $request) {
         $user = auth()->user();
         if(!$user->can('create_edit_geodata')) {

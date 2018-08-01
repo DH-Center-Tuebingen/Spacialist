@@ -92,6 +92,7 @@
         },
         data() {
             return {
+                selectedFile: {},
                 fileContent: '',
                 isKmz: false,
                 fileReader: new FileReader(),

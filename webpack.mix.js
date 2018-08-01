@@ -58,6 +58,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'popper.js',
        'proj4',
        'screenfull',
+       'shpjs',
        'three-full',
        'transliteration',
        'tree-vue-component',

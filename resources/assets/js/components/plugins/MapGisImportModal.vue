@@ -35,22 +35,32 @@
                         :directory="false"
                         :drop="true"
                         :extensions="allowedExtensions"
-                        :multiple="hasMultipleFiles"
+                        :multiple="true"
                         @input-file="onFileInput">
                         <span class="btn btn-outline-primary text-center">
                             <i class="fas fa-fw fa-file-import"></i> Select files or drop here
                         </span>
                     </file-upload>
-                    <div v-if="files.length" class="text-left">
-                        <h5>Selected Files</h5>
-                        <div class="d-flex flex-row flex-justify-between" v-for="file in files">
-                            <span class="col">
-                                {{ file.name }}
-                            </span>
-                            <span>
-                                {{ file.size | bytes }}
-                            </span>
-                        </div>
+                    <div v-if="files.length" class="text-left col-md-3">
+                        <h5>
+                            Selected Files
+                            <small class="clickable" @click="showFileList = !showFileList">
+                                <span v-show="showFileList">
+                                    <i class="fas fa-fw fa-caret-up"></i>
+                                </span>
+                                <span v-show="!showFileList">
+                                    <i class="fas fa-fw fa-caret-down"></i>
+                                </span>
+                            </small>
+                        </h5>
+                        <ul class="list-group" v-show="showFileList">
+                            <li class="list-group-item px-2 py-1" v-for="file in files">
+                                <span>{{ file.name }}</span>
+                                <button type="button" class="close" aria-label="Remove File" @click="onFileRemove(file)">
+                                    <span aria-hidden="true" style="vertical-align: text-top;">&times;</span>
+                                </button>
+                            </li>
+                        </ul>
                     </div>
                     <hr v-if="files.length" />
                     <component v-if="files.length"
@@ -143,13 +153,14 @@
                 this.$modal.hide(this.id);
             },
             onFileInput(newFile, oldFile) {
-                this.parsed = false;
-                // Wait for response
-                if(newFile && oldFile && newFile.success && !oldFile.success) {
-                    Vue.set(this, 'selectedFile', newFile.response);
-                    this.replaceFiles = [];
-                    this.$refs.replace.active = false;
+                if(!this.hasMultipleFiles && newFile && !oldFile) {
+                    this.files = [];
+                    this.files.push(newFile);
                 }
+                this.parsed = false;
+            },
+            onFileRemove(file) {
+                this.$refs.upload.remove(file);
             },
             onParsedResults(result, epsg) {
                 this.parsed = false;
@@ -184,6 +195,7 @@
                 featureCollection: {},
                 featureProjection: 'EPSG:3857',
                 files: [],
+                showFileList: true,
                 mapEpsg: {},
                 mapLayers: {},
                 parsed: false

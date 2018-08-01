@@ -56,6 +56,7 @@
         "popper.js": "^1.14.3",
         "proj4": "^2.4.4",
         "screenfull": "^3.3.2",
+        "shpjs": "^3.4.2",
         "three-full": "^6.0.0",
         "transliteration": "^1.6.2",
         "tree-vue-component": "^5.3.3",

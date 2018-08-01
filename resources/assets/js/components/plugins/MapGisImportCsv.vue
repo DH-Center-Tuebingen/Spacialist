@@ -115,7 +115,7 @@
         },
         methods: {
             readContent() {
-                this.fileContent = this.fileReader.readAsText(this.selectedFile.file);
+                this.fileReader.readAsText(this.selectedFile.file);
             },
             updateContent(files) {
                 if(files.length) {
@@ -173,6 +173,7 @@
         },
         data() {
             return {
+                selectedFile: {},
                 fileContent: '',
                 fileReader: new FileReader(),
                 delimiter: ',',

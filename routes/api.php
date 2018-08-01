@@ -168,6 +168,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('epsg/{srid}', 'MapController@getEpsg')->where('srid', '[0-9]+');
 
     Route::post('', 'MapController@addGeometry');
+    Route::post('epsg/text', 'MapController@getEpsgByText');
     Route::post('/layer', 'MapController@addLayer');
     Route::post('/link/{gid}/{eid}', 'MapController@link')->where('gid', '[0-9]+')->where('eid', '[0-9]+');
 

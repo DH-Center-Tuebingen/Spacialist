@@ -59,6 +59,7 @@
         },
         data() {
             return {
+                selectedFile: {},
                 fileContent: '',
                 fileReader: new FileReader(),
                 epsgCode: 'EPSG:3857'
