@@ -22,6 +22,7 @@
         </attributes>
 
         <entity-reference-modal v-can="'view_concept_props'"></entity-reference-modal>
+        <discard-changes-modal :name="discardModal"/>
     </div>
 </template>
 
@@ -39,13 +40,38 @@
             if(to.params.id == from.params.id && to.name == from.name) {
                 next();
             } else {
+                const vm = this;
                 const entityId = to.params.id;
-                $http.get(`context/${entityId}`).then(response => {
-                    this.init(response.data);
+                let loadNext = function() {
+                    $http.get(`context/${entityId}`).then(response => {
+                        vm.init(response.data);
+                        next();
+                    }).catch(error => {
+                        $throwError(error);
+                    });
+                };
+                if (this.isFormDirty) {
+                    let discardAndContinue = function() {
+                        loadNext();
+                    };
+                    let saveAndContinue = function() {
+                        this.saveEntity(this.entity).then(loadNext);
+                    };
+                    this.$modal.show(this.discardModal, {entityName: this.entity.name, onDiscard: discardAndContinue, onSave: saveAndContinue})
+                } else {
+                    loadNext();
+                }
+            }
+        },
+        beforeRouteLeave: function(to, from, next) {
+            if (this.isFormDirty) {
+                let discardAndContinue = function() {
                     next();
-                }).catch(error => {
-                    $throwError(error);
-                });
+                };
+                let saveAndContinue = function() {
+                    this.saveEntity(this.entity).then(_ => next());
+                };
+                this.$modal.show(this.discardModal, {entityName: this.entity.name, onDiscard: discardAndContinue, onSave: saveAndContinue})
             }
         },
         props: {
@@ -169,7 +195,7 @@
                         }
                     }
                 }
-                vm.$http.patch('/context/'+cid+'/attributes', patches).then(function(response) {
+                return vm.$http.patch('/context/'+cid+'/attributes', patches).then(function(response) {
                     vm.resetFlags();
                     vm.$showToast('Entity updated', `Data of ${entity.name} successfully updated.`, 'success');
                 }).catch(function(error) {
@@ -279,12 +305,13 @@
                 this.$validator.fields.items.forEach(field => {
                     field.reset();
                 });
-            }
+            },
         },
         data() {
             return {
                 entity: {},
-                dataLoaded: false
+                dataLoaded: false,
+                discardModal: 'discard-changes-modal'
             }
         },
         computed: {

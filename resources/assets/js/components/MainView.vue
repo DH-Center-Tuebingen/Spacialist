@@ -133,33 +133,6 @@
                 </div>
             </div>
         </modal>
-
-        <modal name="discard-changes-modal" height="auto" :scrollable="true">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Unsaved Changes</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideDiscardModal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="alert alert-info">
-                        There are unsaved changes in {{ selectedContext.name }}. Do you really want to continue and discard these changes?
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" @click="discardCallback">
-                        <i class="fas fa-fw fa-undo"></i> Yes, Discard Changes
-                    </button>
-                    <button type="button" class="btn btn-success" @click="saveAndContinueCallback">
-                        <i class="fas fa-fw fa-check"></i> No, Save and continue
-                    </button>
-                    <button type="button" class="btn btn-secondary" @click="hideDiscardModal">
-                        <i class="fas fa-fw fa-times"></i> Cancel
-                    </button>
-                </div>
-            </div>
-        </modal>
     </div>
 </template>
 
@@ -206,30 +179,7 @@
                 }
                 this.initFinished = true;
             },
-            hideDiscardModal() {
-                this.$modal.hide('discard-changes-modal');
-            },
             onSetSelectedElement(element) {
-                // Check if there is a previous selected element
-                // and if there is at least one modified attribute
-                if(this.selectedContext.id && this.isFormDirty) {
-                    this.saveAndContinueCallback = _ => {
-                        this.saveEntity(this.selectedContext);
-                        this.hideDiscardModal();
-                        // TODO wait for async saveEntity
-                        this.setSelectedElement(element);
-                    };
-                    this.discardCallback = _ => {
-                        this.resetFlags();
-                        this.hideDiscardModal();
-                        this.setSelectedElement(element);
-                    };
-                    this.$modal.show('discard-changes-modal');
-                } else {
-                    this.setSelectedElement(element);
-                }
-            },
-            setSelectedElement(element) {
                 this.attributesLoaded = false;
                 this.dataLoaded = false;
                 if(!element) {
@@ -402,8 +352,6 @@
                 referenceModal: {},
                 references: [],
                 newEntity: {},
-                saveAndContinueCallback: _ => {},
-                discardCallback: _ => {},
                 dataLoaded: false,
                 defaultKey: undefined,
                 plugins: this.$getTabPlugins(),

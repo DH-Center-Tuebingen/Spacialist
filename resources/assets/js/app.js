@@ -281,6 +281,7 @@ Vue.component('ol-map', require('./components/OlMap.vue'));
 
 // Page Components
 Vue.component('entity-reference-modal', require('./components/EntityReferenceModal.vue'));
+Vue.component('discard-changes-modal', require('./components/DiscardChangesModal.vue'));
 Vue.component('about-dialog', require('./components/About.vue'));
 Vue.component('error-modal', require('./components/Error.vue'));
 
