@@ -275,33 +275,35 @@
                             curNode.state.loading = false;
                             curNode.childrenLoaded = true;
                             curNode.state.opened = true;
-                            vm.openPath(rest, curNode.children);
+                            return vm.openPath(rest, curNode.children);
                         });
                     } else {
                         if(!curNode.state.opened) {
                             // open node
                             curNode.state.opened = true;
                         }
-                        vm.openPath(rest, curNode.children);
+                        return vm.openPath(rest, curNode.children);
                     }
                 }
             },
             selectNodeById(id) {
                 const vm = this;
                 $http.get(`/context/${id}/path`).then(response => {
-                    const targetNode = vm.openPath(response.data);
+                    const path = response.data;
+                    const targetNode = vm.openPath(path);
                     targetNode.state.selected = true;
                     vm.selectedItem = targetNode;
-                    vm.selectedItem.path = response.data;
+                    vm.selectedItem.path = path;
                 });
             },
             deselectNodeById(id) {
                 const vm = this;
                 $http.get(`/context/${id}/path`).then(response => {
-                    const targetNode = vm.openPath(response.data);
+                    const path = response.data;
+                    const targetNode = vm.openPath(path);
                     targetNode.state.selected = false;
+                    vm.selectedItem = {};
                 });
-                vm.selectedItem = {};
             },
             handleEntityChange(e) {
                 const vm = this;
