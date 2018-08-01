@@ -38,6 +38,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
        '@fortawesome/free-brands-svg-icons',
        '@fortawesome/free-regular-svg-icons',
        '@fortawesome/free-solid-svg-icons',
+       '@mapbox/togeojson',
        '@websanova/vue-auth',
        'axios',
        'bootstrap',
@@ -45,12 +46,15 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'cornerstone-math',
        'cornerstone-tools',
        'cornerstone-wado-image-loader',
+       'csv2geojson',
        'd3-dsv',
        'debounce',
        'jquery',
+       'jszip',
        'lodash',
        'moment',
        'ol',
+       'plotly.js',
        'popper.js',
        'proj4',
        'screenfull',
@@ -71,5 +75,6 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'vue-router',
        'vue-typeahead',
        'vue-upload-component',
-       'vuedraggable'
+       'vuedraggable',
+       'wkx'
    ]);

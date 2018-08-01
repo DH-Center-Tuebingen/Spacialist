@@ -13,10 +13,8 @@
 </template>
 
 <script>
-    // const toGeoJSON = require('togeojson');
-    // const zip = require('zipjs-browserify');
     import toGeoJSON from '@mapbox/togeojson';
-    import zip from 'zipjs-browserify/vendor/zip.js';
+    const JSZip = require("jszip");
 
     export default {
         props: {
@@ -34,7 +32,6 @@
             }
         },
         mounted() {
-            zip.zip.workerScriptsPath = 'node_modules/zipjs-browserify/vendor/';
             if(this.epsg) {
                 this.epsgCode = this.epsg;
             }
@@ -47,7 +44,7 @@
             readContent() {
                 // KMZ is zip, thus read as Data URL
                 if(this.isKmz) {
-                    this.fileReader.readAsDataURL(this.selectedFile.file);
+                    this.fileContent = this.selectedFile.file;
                 } else {
                     this.fileReader.readAsText(this.selectedFile.file);
                 }
@@ -70,27 +67,20 @@
             parse() {
                 if(this.infoMissing) return;
                 if(this.isKmz) {
-                    // TODO unzip, then parseKmlContent
-                    let reader = new zip.zip.Data64URIReader(this.fileContent);
-                    zip.zip.createReader(reader, reader => {
-                        reader.getEntries(entries => {
-                            if(entries.length) {
-                                entries.forEach(e => {
-                                    if(e.directory) return;
-                                    if(e.filename.endsWith('.kml')) {
-                                        e.getData(new zip.zip.TextWriter(), content => {
-                                            const collection = this.parseKmlContent(content);
-                                            if(this.afterParse) {
-                                                this.afterParse(collection, this.epsgCode);
-                                            }
-                                        });
+                    this.zip.loadAsync(this.fileContent).then(zipInstance => {
+                        for(let k in zipInstance.files) {
+                            const file = zipInstance.files[k];
+                            if(file.dir) continue;
+                            if(file.name.endsWith('.kml')) {
+                                file.async('string').then(content => {
+                                    const collection = this.parseKmlContent(content);
+                                    if(this.afterParse) {
+                                        this.afterParse(collection, this.epsgCode);
                                     }
                                 });
+                                break;
                             }
-                        });
-                    }, error => {
-                        console.log(error);
-                        this.$throwError(error);
+                        }
                     });
                 } else {
                     const collection = this.parseKmlContent(this.fileContent);
@@ -105,6 +95,7 @@
                 fileContent: '',
                 isKmz: false,
                 fileReader: new FileReader(),
+                zip: new JSZip(),
                 epsgCode: 'EPSG:3857'
             }
         },

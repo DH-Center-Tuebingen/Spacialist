@@ -60,8 +60,8 @@
                         :after-parse="onParsedResults">
                     </component>
                     <hr v-if="mapLayers && parsed" />
-                    <div class="row" style="height: 400px;" v-if="mapLayers && parsed">
-                        <div class="col-md-6">
+                    <div class="row modal-map" v-if="mapLayers && parsed">
+                        <div class="col-md-8">
                             <ol-map
                                 :draw-disabled="true"
                                 :epsg="mapEpsg"
@@ -70,7 +70,7 @@
                                 :layers="mapLayers">
                             </ol-map>
                         </div>
-                        <div class="col-md-6 d-flex flex-column justify-content-center">
+                        <div class="col-md-4 d-flex flex-column justify-content-center">
                             <dl class="row my-2">
                                 <dt class="col-md-6 text-right"># of Features</dt>
                                 <dd class="col-md-6">
