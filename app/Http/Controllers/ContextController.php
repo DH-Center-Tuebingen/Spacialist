@@ -364,7 +364,7 @@ class ContextController extends Controller {
 
         $rank = $request->get('rank');
         $parent_id = $request->get('parent_id');
-        Context::patchRanks($rank, $id, $parent_id);
+        Context::patchRanks($rank, $id, $parent_id, $user);
         return response()->json(null, 204);
     }
 

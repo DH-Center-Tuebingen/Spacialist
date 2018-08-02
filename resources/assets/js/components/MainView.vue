@@ -326,7 +326,7 @@
                 this.$modal.hide('delete-entity-modal');
             },
             duplicateEntity(callback, entity, parent) {
-                if(!vm.$can('duplicate_edit_concepts')) return;
+                if(!this.$can('duplicate_edit_concepts')) return;
                 let duplicate = {
                     name: entity.name,
                     type: {

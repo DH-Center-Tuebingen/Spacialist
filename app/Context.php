@@ -43,7 +43,7 @@ class Context extends Model
         return $entities->orderBy('rank')->get();
     }
 
-    public static function patchRanks($rank, $id, $parent = null) {
+    public static function patchRanks($rank, $id, $parent = null, $user) {
         $context = Context::find($id);
 
         $hasParent = isset($parent);
