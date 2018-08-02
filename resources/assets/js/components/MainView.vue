@@ -301,9 +301,9 @@
                 const id = entity.id;
                 vm.$http.delete(`/context/${id}`).then(function(response) {
                     // if deleted entity is currently selected entity...
-                    if(entity == vm.selectedContext) {
+                    if(id == vm.selectedContext.id) {
                         // ...unset it
-                        vm.setSelectedElement(undefined);
+                        vm.onSetSelectedElement(undefined);
                     }
                     vm.$showToast('Entity deleted', `${entity.name} successfully deleted.`, 'success');
                     if (entity.callback) {
