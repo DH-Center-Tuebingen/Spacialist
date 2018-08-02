@@ -30,6 +30,7 @@
             <ol-map
                 init-projection="EPSG:4326"
                 :draw-disabled="true"
+                :epsg="epsg"
                 :init-geojson="geometries"
                 :layers="mergedLayers">
             </ol-map>
@@ -131,6 +132,7 @@
         data() {
             return {
                 initFinished: false,
+                epsg: this.$getPreference('prefs.map-projection'),
                 layers: [],
                 selectedLayers: {},
                 mapLayers: {},
@@ -141,7 +143,7 @@
                         label: 'Zoom to layer',
                         iconClasses: 'fas fa-fw fa-search-plus',
                         iconContent: '',
-                        callback: function(layer) {
+                        callback: layer => {
                             //
                         }
                     },
@@ -149,15 +151,18 @@
                         label: 'Export layer',
                         iconClasses: 'fas fa-fw fa-download',
                         iconContent: '',
-                        callback: function(layer) {
-                            //
+                        callback: layer => {
+                            const srid = this.epsg.epsg;
+                            $http.get(`map/export/${layer.id}?srid=${srid}`).then(response => {
+                                this.$createDownloadLink(response.data, `export-${srid}.json`, true, response.headers['content-type']);
+                            });
                         }
                     },
                     {
                         label: 'Toggle feature count',
                         iconClasses: 'fas fa-fw fa-calculator',
                         iconContent: '',
-                        callback: function(layer) {
+                        callback: layer => {
                             //
                         }
                     },
@@ -165,7 +170,7 @@
                         label: 'Properties',
                         iconClasses: 'fas fa-fw fa-sliders-h',
                         iconContent: '',
-                        callback: function(layer) {
+                        callback: layer => {
                             //
                         }
                     },

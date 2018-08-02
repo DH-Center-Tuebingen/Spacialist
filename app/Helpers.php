@@ -24,6 +24,16 @@ class Helpers {
         return array_key_exists($rootKey, $exif) && array_key_exists($dataKey, $exif[$rootKey]);
     }
 
+    public static function parseSql($builder) {
+        $sql = $builder->toSql();
+        $bindings = $builder->getBindings();
+        foreach($bindings as $binding) {
+            $value = is_numeric($binding) ? $binding : "'".$binding."'";
+            $sql = preg_replace('/\?/', $value, $sql, 1);
+        }
+        return $sql;
+    }
+
     public static function getColumnNames($table) {
         switch($table) {
             case 'attributes':
