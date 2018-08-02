@@ -9,3 +9,12 @@
     box-shadow: none !important;
     font-weight: $font-weight-bold !important;
 }
+
+.tree-search {
+    font-style: normal !important;
+    font-weight: 300 !important;
+    // color: $white !important;
+    background-color: rgba(red($yellow), green($yellow), blue($yellow), 0.5) !important;
+
+    border-radius: $border-radius;
+}

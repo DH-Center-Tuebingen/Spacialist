@@ -2,7 +2,7 @@
     <div class="row h-100 of-hidden" v-if="initFinished">
         <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100" v-can="'view_concepts'">
             <context-tree
-                class="col px-0 scroll-y-auto"
+                class="col px-0"
                 :on-entity-add="requestAddNewEntity"
                 :on-context-menu-duplicate="duplicateEntity"
                 :on-context-menu-delete="requestDeleteEntity"

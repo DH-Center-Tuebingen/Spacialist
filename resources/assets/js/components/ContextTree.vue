@@ -1,16 +1,22 @@
 <template>
     <div class="d-flex flex-column">
         <h3>Entities <small class="badge badge-secondary font-weight-light align-middle font-size-50">{{topLevelCount}} Top-Level Entities</small></h3>
-        <tree-search class="mb-2" :on-select="onSearchSelect"></tree-search>
+        <tree-search
+            class="mb-2"
+            :on-select="selectionCallback"
+            :on-multiselect="onSearchMultiSelect"
+            :on-clear="resetHighlighting">
+        </tree-search>
         <div class="d-flex flex-column col px-0">
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAdd)">
                 <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
             </button>
             <tree
-                class="col px-0"
+                class="col px-0 scroll-y-auto"
                 :data="tree"
                 :draggable="true"
                 :drop-allowed="isDropAllowed"
+                size="small"
                 @change="itemClick"
                 @drop="itemDrop"
                 @toggle="itemToggle">
@@ -251,9 +257,30 @@
                 // In any other cases allow drop
                 return true;
             },
-            onSearchSelect(item) {
-                if(this.selectedItem.state) this.deselectNode();
-                this.selectNodeById(item.id);
+            onSearchMultiSelect(items) {
+                this.resetHighlighting();
+                this.highlightItems(items);
+            },
+            onSearchClear() {
+                this.resetHighlighting();
+            },
+            highlightItems(items) {
+                const vm = this;
+                let p = new Promise((resolve, reject) => resolve(0));
+                items.forEach(i => {
+                    p = p.then(_ => $http.get(`/context/${i.id}/path`))
+                    .then(response => {
+                        return vm.openPath(response.data)
+                    })
+                    .then(targetNode => {
+                            targetNode.state.highlighted = true;
+                            vm.highlightedItems.push(targetNode);
+                    })
+                })
+            },
+            resetHighlighting() {
+                this.highlightedItems.forEach(i => i.state.highlighted = false);
+                this.highlightedItems = [];
             },
             openPath(path) {
                 const vm = this;
@@ -264,31 +291,33 @@
                             // terminate recursion
                             resolve(tree[idx]);
                         }
-                        // recurse further
-                        const rest = path.slice(1);
-                        const curNode = tree[idx];
-                        if(curNode.children.length < curNode.children_count) {
-                            //async load children
-                            curNode.state.loading = true;
-                            resolve(
-                                vm.fetchChildren(curNode.id).then(children => {
-                                    curNode.children = children;
-                                    curNode.state.loading = false;
-                                    curNode.childrenLoaded = true;
+                        else {
+                            // recurse further
+                            const rest = path.slice(1);
+                            const curNode = tree[idx];
+                            if(curNode.children.length < curNode.children_count) {
+                                //async load children
+                                curNode.state.loading = true;
+                                resolve(
+                                    vm.fetchChildren(curNode.id).then(children => {
+                                        curNode.children = children;
+                                        curNode.state.loading = false;
+                                        curNode.childrenLoaded = true;
+                                        curNode.state.opened = true;
+                                        return openRecursive(rest, children).then(targetNode => {
+                                            return targetNode;
+                                        });
+                                    })
+                                );
+                            } else {
+                                if(!curNode.state.opened) {
+                                    // open node
                                     curNode.state.opened = true;
-                                    return openRecursive(rest, children).then(targetNode => {
-                                        return targetNode;
-                                    });
-                                })
-                            );
-                        } else {
-                            if(!curNode.state.opened) {
-                                // open node
-                                curNode.state.opened = true;
+                                }
+                                resolve(
+                                    openRecursive(rest, curNode.children).then(targetNode => targetNode)
+                                );
                             }
-                            resolve(
-                                openRecursive(rest, curNode.children).then(targetNode => targetNode)
-                            );
                         }
                     });
                 };
@@ -333,6 +362,7 @@
             return {
                 tree: [],
                 selectedItem: {},
+                highlightedItems: [],
             }
         },
         computed: {

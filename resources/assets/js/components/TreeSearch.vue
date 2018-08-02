@@ -8,11 +8,11 @@
         class="form-control"
         v-model="query"
         :placeholder="placeholder"
-        @blur="closeSelect"
+        @blur="blur"
         @input="debounce"
         @keydown.down="down"
         @keydown.enter="hit"
-        @keydown.esc="reset"
+        @keydown.esc="clearItem"
         @keydown.up="up"/>
         <div class="input-group-append">
             <button class="btn btn-outline-secondary" type="button" @click="clearItem">
@@ -49,6 +49,14 @@
                 type: Function,
                 required: false
             },
+            onMultiselect: {
+                type: Function,
+                required: false
+            },
+            onClear: {
+                type: Function,
+                required: false
+            },
             value: {
                 type: String,
                 required: false
@@ -72,16 +80,27 @@
         methods: {
             onHit(item) {
                 const vm = this;
-                vm.onSelect(item);
-                this.closeSelect();
+                if (vm.onSelect) vm.onSelect(item);
+                this.reset();
             },
             clearItem() {
-                this.onHit();
+                if (this.onClear) this.onClear();
+                this.reset();
             },
-            closeSelect() {
-                this.items = [];
-                this.loading = false;
-                this.query="";
+            hit() {
+                if (this.current !== -1) {
+                    this.onHit(this.items[this.current]);
+                } else {
+                    if (this.onMultiselect) {
+                        this.onMultiselect(this.items);
+                        this.items = [];
+                    }
+                }
+            },
+            blur() {
+                if (this.current !== -1) {
+                    this.reset();
+                }
             }
         }
     }
