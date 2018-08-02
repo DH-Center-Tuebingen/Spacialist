@@ -161,9 +161,204 @@
         },
         beforeMount() {
             this.initMapProjection();
+            this.setDraw();
         },
         methods: {
-            init() {
+            setDraw() {
+                if(this.drawDisabled) return;
+                const vm = this;
+
+                vm.vector = new VectorLayer({
+                    baseLayer: false,
+                    displayInLayerSwitcher: false,
+                    title: 'Draw Layer',
+                    visible: true,
+                    layer: 'draw',
+                    source: new Vector({
+                        wrapX: false
+                    }),
+                    style: vm.createStyle()
+                });
+
+                vm.draw = {
+                    init: function() {
+                        vm.map.addInteraction(this.Point);
+                        this.Point.setActive(false);
+                        vm.map.addInteraction(this.LineString);
+                        this.LineString.setActive(false);
+                        vm.map.addInteraction(this.Polygon);
+                        this.Polygon.setActive(false);
+                    },
+                    Point: new Draw({
+                        source: vm.vector.getSource(),
+                        type: 'Point'
+                    }),
+                    LineString: new Draw({
+                        source: vm.vector.getSource(),
+                        type: 'LineString'
+                    }),
+                    Polygon: new Draw({
+                        source: vm.vector.getSource(),
+                        type: 'Polygon'
+                    }),
+                    getActive: function() {
+                        return this.activeType ? this[this.activeType].getActive() : false;
+                    },
+                    setActive: function(active, type) {
+                        if(active) {
+                            this.activeType && this[this.activeType].setActive(false);
+                            this[type].setActive(true, type);
+                            this.activeType = type;
+                        } else {
+                            this.activeType && this[this.activeType].setActive(false);
+                            this.activeType = null;
+                        }
+                    }
+                };
+                vm.modify = {
+                    init: function() {
+                        this.select = new Select({
+                            hitTolerance: 5,
+                            toggleCondition: neverCond,
+                            wrapX: false
+                        });
+                        vm.map.addInteraction(this.select);
+
+                        this.modify = new Modify({
+                            features: this.select.getFeatures(),
+                            wrapX: false
+                        });
+                        vm.map.addInteraction(this.modify);
+
+                        this.modifiedFeatures = {};
+                        this.setEvents();
+                        this.modifyActive = false;
+                        this.originalFeatures = [];
+                        this.selectedFeature = undefined;
+                    },
+                    setEvents: function() {
+                        let selectedFeatures = this.select.getFeatures();
+
+                        this.select.on('change:active', function(event) {
+                            selectedFeatures.forEach(selectedFeatures.remove, selectedFeatures);
+                        }, this);
+                        this.select.on('select', function(event) {
+                            // config allows only one selected feature
+                            if(event.selected.length) {
+                                this.selectedFeature = event.selected[0];
+                            } else {
+                                this.selectedFeature = undefined;
+                            }
+                        }, this);
+                        this.modify.on('change:active', function(event) {
+                            this.modifyActive = !event.oldValue;
+                            if(this.modifyActive) {
+                                let source = vm.vector.getSource()
+                                let features = source.getFeatures();
+                                features.forEach(feature => {
+                                    this.originalFeatures.push(feature.clone());
+                                });
+                            } else {
+                                this.modifiedFeatures = {};
+                            }
+                        }, this);
+                        this.modify.on('modifyend', function(event) {
+                            let newFeature = event.features.getArray()[0];
+                            this.modifiedFeatures[newFeature.ol_uid] = newFeature;
+                        }, this);
+                    },
+                    getActive: function() {
+                        return this.select.getActive() || this.modify.getActive();
+                    },
+                    setActive: function(active, cancelled) {
+                        this.select.setActive(active);
+                        this.modify.setActive(active);
+                        if(!active) {
+                            if(cancelled && this.originalFeatures.length) {
+                                // If modify was cancelled, reset features to state before modify start
+                                let source = vm.vector.getSource();
+                                source.clear();
+                                source.addFeatures(this.originalFeatures);
+                            }
+                            this.originalFeatures = [];
+                        }
+                    },
+                    getModifiedFeatures: function() {
+                        // return list of cloned features
+                        let features = [];
+                        for(let k in this.modifiedFeatures) {
+                            features.push(this.modifiedFeatures[k].clone());
+                        }
+                        return features;
+                    }
+                };
+                vm.delete = {
+                    init: function() {
+                        this.select = new Select({
+                            hitTolerance: 5,
+                            toggleCondition: neverCond,
+                            wrapX: false
+                        });
+                        vm.map.addInteraction(this.select);
+
+                        this.setEvents();
+                        vm.delete.deletedFeatures = [];
+                    },
+                    setEvents: function() {
+                        this.select.on('select', function(event) {
+                            // config allows only one selected feature
+                            if(event.selected.length) {
+                                let feature = event.selected[0];
+                                vm.delete.deletedFeatures.push(feature);
+                                let source = vm.vector.getSource();
+                                source.removeFeature(feature);
+                            }
+                        }, this);
+                    },
+                    getActive: function() {
+                        return this.select.getActive();
+                    },
+                    setActive: function(active, cancelled) {
+                        this.select.setActive(active);
+                        if(!active) {
+                            if(cancelled && vm.delete.deletedFeatures.length) {
+                                // If delete was cancelled, readd deleted features
+                                let source = vm.vector.getSource();
+                                source.addFeatures(vm.delete.deletedFeatures);
+                            }
+                            vm.delete.deletedFeatures = [];
+                        }
+                    },
+                    getDeletedFeatures: function() {
+                        // return list of cloned features
+                        let features = [];
+                        vm.delete.deletedFeatures.forEach(feature => {
+                            features.push(feature.clone());
+                        });
+                        return features;
+                    }
+                };
+            },
+            resetLayers() {
+                this.overlays = {};
+                this.baselayers = {};
+            },
+            initLayers() {
+                for(let k in this.layers) {
+                    const l = this.layers[k];
+                    if(l.is_overlay) {
+                        this.overlays[k] = l;
+                    } else {
+                        this.baselayers[k] = l;
+                    }
+                }
+            },
+            resetLayerData() {
+                this.baselayerLayers = [];
+                this.overlayLayers = [];
+                this.entityLayers = [];
+            },
+            initLayerData() {
                 const vm = this;
 
                 if(vm.initWkt.length && vm.initGeojson.length) {
@@ -171,281 +366,134 @@
                     return;
                 }
 
-                for(let k in vm.layers) {
-                    const l = vm.layers[k];
-                    if(l.is_overlay) {
-                        vm.overlays[k] = l;
-                    } else {
-                        vm.baselayers[k] = l;
-                    }
-                }
-
-                // wait for DOM to be rendered
-                vm.$nextTick(function() {
-                    let geojsonLayers = {};
-                    for(let k in vm.overlays) {
-                        const l = vm.overlays[k];
-                        if(!l.context_type_id && l.type != 'unlinked') {
-                            vm.overlayLayers.push(vm.createNewLayer(l));
-                            continue;
-                        };
-                        const layerId = l.id;
-                        let layerName;
-                        if(l.context_type_id) {
-                            const ct = vm.getContextTypeById(l.context_type_id);
-                            if(ct) {
-                                layerName = vm.$translateConcept(ct.thesaurus_url);
-                            }
-                        } else {
-                            layerName = 'Unlinked';
+                let geojsonLayers = {};
+                for(let k in vm.overlays) {
+                    const l = vm.overlays[k];
+                    if(!l.context_type_id && l.type != 'unlinked') {
+                        vm.overlayLayers.push(vm.createNewLayer(l));
+                        continue;
+                    };
+                    const layerId = l.id;
+                    let layerName;
+                    if(l.context_type_id) {
+                        const ct = vm.getContextTypeById(l.context_type_id);
+                        if(ct) {
+                            layerName = vm.$translateConcept(ct.thesaurus_url);
                         }
-                        geojsonLayers[layerId] = new VectorLayer({
-                            baseLayer: false,
-                            displayInLayerSwitcher: true,
-                            title: layerName,
-                            visible: l.visible,
-                            opacity: l.opacity,
-                            layer: 'entity',
-                            source: new Vector({
-                                wrapX: false
-                            }),
-                            style: vm.createStyle(l.color)
-                        });
+                    } else {
+                        layerName = 'Unlinked';
                     }
-                    vm.vector = new VectorLayer({
+                    geojsonLayers[layerId] = new VectorLayer({
                         baseLayer: false,
-                        displayInLayerSwitcher: false,
-                        title: 'Draw Layer',
+                        displayInLayerSwitcher: true,
+                        title: layerName,
+                        visible: l.visible,
+                        opacity: l.opacity,
+                        layer: 'entity',
+                        source: new Vector({
+                            wrapX: false
+                        }),
+                        style: vm.createStyle(l.color)
+                    });
+                }
+                if(vm.initWkt.length) {
+                    // TODO Support several layers for WKT
+                    let layer = new VectorLayer({
+                        baseLayer: false,
+                        displayInLayerSwitcher: true,
+                        title: 'All Entities',
                         visible: true,
-                        layer: 'draw',
+                        layer: 'entity',
                         source: new Vector({
                             wrapX: false
                         }),
                         style: vm.createStyle()
                     });
-                    if(vm.initWkt.length) {
-                        // TODO Support several layers for WKT
-                        let layer = new VectorLayer({
-                            baseLayer: false,
-                            displayInLayerSwitcher: true,
-                            title: 'All Entities',
-                            visible: true,
-                            layer: 'entity',
-                            source: new Vector({
-                                wrapX: false
-                            }),
-                            style: vm.createStyle()
-                        });
-                        vm.entityLayers.push(layer);
-                        let source = layer.getSource();
-                        vm.initWkt.forEach(wkt => {
-                            const geom = vm.wktFormat.readGeometry(wkt, {
-                                featureProjection: 'EPSG:3857',
-                                dataProjection: vm.initProjection
-                            });
-                            source.addFeature(new Feature({geometry: geom}));
-                        });
-                    } else if(vm.initGeojson.length) {
-                        vm.initGeojson.forEach(geojson => {
-                            let feature = vm.geoJsonFormat.readFeature(geojson.geom, {
-                                featureProjection: 'EPSG:3857',
-                                dataProjection: vm.initProjection
-                            });
-                            feature.setProperties(geojson.props);
-                            let layer;
-                            if(geojson.props.entity) {
-                                layer = vm.getLayer(geojson.props.entity.context_type_id);
-                            } else {
-                                layer = vm.getUnlinkedLayer();
-                            }
-                            const layerId = layer.id;
-                            let source = geojsonLayers[layerId].getSource();
-                            source.addFeature(feature);
-                        });
-                    } else if(vm.initCollection) {
-                        let layer = vm.getUnlinkedLayer();
-                        let source = geojsonLayers[layer.id].getSource();
-                        let features = vm.geoJsonFormat.readFeatures(vm.initCollection, {
+                    vm.entityLayers.push(layer);
+                    let source = layer.getSource();
+                    vm.initWkt.forEach(wkt => {
+                        const geom = vm.wktFormat.readGeometry(wkt, {
                             featureProjection: 'EPSG:3857',
                             dataProjection: vm.initProjection
                         });
-                        source.addFeatures(features);
-                        // vm.initCollection.features.forEach(f => {
-                        //     let feature = vm.geoJsonFormat.readFeature(f.geometry, {
-                        //         featureProjection: 'EPSG:3857'
-                        //     });
-                        //     feature.setProperties(f.properties);
-                        //     source.addFeature(feature);
-                        // });
-                    }
-                    for(let k in geojsonLayers) {
-                        vm.entityLayers.push(geojsonLayers[k]);
-                    }
-                    vm.entityLayers.push(vm.vector);
-
-                    vm.draw = {
-                        init: function() {
-                            vm.map.addInteraction(this.Point);
-                            this.Point.setActive(false);
-                            vm.map.addInteraction(this.LineString);
-                            this.LineString.setActive(false);
-                            vm.map.addInteraction(this.Polygon);
-                            this.Polygon.setActive(false);
-                        },
-                        Point: new Draw({
-                            source: vm.vector.getSource(),
-                            type: 'Point'
-                        }),
-                        LineString: new Draw({
-                            source: vm.vector.getSource(),
-                            type: 'LineString'
-                        }),
-                        Polygon: new Draw({
-                            source: vm.vector.getSource(),
-                            type: 'Polygon'
-                        }),
-                        getActive: function() {
-                            return this.activeType ? this[this.activeType].getActive() : false;
-                        },
-                        setActive: function(active, type) {
-                            if(active) {
-                                this.activeType && this[this.activeType].setActive(false);
-                                this[type].setActive(true, type);
-                                this.activeType = type;
-                            } else {
-                                this.activeType && this[this.activeType].setActive(false);
-                                this.activeType = null;
-                            }
+                        source.addFeature(new Feature({geometry: geom}));
+                    });
+                } else if(vm.initGeojson.length) {
+                    vm.initGeojson.forEach(geojson => {
+                        let feature = vm.geoJsonFormat.readFeature(geojson.geom, {
+                            featureProjection: 'EPSG:3857',
+                            dataProjection: vm.initProjection
+                        });
+                        feature.setProperties(geojson.props);
+                        let layer;
+                        if(geojson.props.entity) {
+                            layer = vm.getLayer(geojson.props.entity.context_type_id);
+                        } else {
+                            layer = vm.getUnlinkedLayer();
                         }
-                    };
-                    vm.modify = {
-                        init: function() {
-                            this.select = new Select({
-                                hitTolerance: 5,
-                                toggleCondition: neverCond,
-                                wrapX: false
-                            });
-                            vm.map.addInteraction(this.select);
+                        const layerId = layer.id;
+                        let source = geojsonLayers[layerId].getSource();
+                        source.addFeature(feature);
+                    });
+                } else if(vm.initCollection) {
+                    let layer = vm.getUnlinkedLayer();
+                    let source = geojsonLayers[layer.id].getSource();
+                    let features = vm.geoJsonFormat.readFeatures(vm.initCollection, {
+                        featureProjection: 'EPSG:3857',
+                        dataProjection: vm.initProjection
+                    });
+                    source.addFeatures(features);
+                }
+                for(let k in geojsonLayers) {
+                    vm.entityLayers.push(geojsonLayers[k]);
+                }
 
-                            this.modify = new Modify({
-                                features: this.select.getFeatures(),
-                                wrapX: false
-                            });
-                            vm.map.addInteraction(this.modify);
+                for(let k in vm.baselayers) {
+                    const l = vm.baselayers[k];
+                    vm.baselayerLayers.push(vm.createNewLayer(l));
+                }
+            },
+            updateLayerGroups() {
+                this.baselayersGroup.setLayers(new Collection(this.baselayerLayers));
+                this.overlaysGroup.setLayers(new Collection(this.overlayLayers));
+                this.entityLayersGroup.setLayers(new Collection(this.entityLayers));
+            },
+            initDraw() {
+                if(this.drawDisabled) return;
+                this.draw.init();
+                this.modify.init();
+                this.delete.init();
+                this.draw.setActive(false);
+                this.modify.setActive(false);
+                this.delete.setActive(false);
 
-                            this.modifiedFeatures = {};
-                            this.setEvents();
-                            this.modifyActive = false;
-                            this.originalFeatures = [];
-                            this.selectedFeature = undefined;
-                        },
-                        setEvents: function() {
-                            let selectedFeatures = this.select.getFeatures();
+                // TODO add draw layer to map
+                // this.entityLayers.push(vm.vector);
 
-                            this.select.on('change:active', function(event) {
-                                selectedFeatures.forEach(selectedFeatures.remove, selectedFeatures);
-                            }, this);
-                            this.select.on('select', function(event) {
-                                // config allows only one selected feature
-                                if(event.selected.length) {
-                                    this.selectedFeature = event.selected[0];
-                                } else {
-                                    this.selectedFeature = undefined;
-                                }
-                            }, this);
-                            this.modify.on('change:active', function(event) {
-                                this.modifyActive = !event.oldValue;
-                                if(this.modifyActive) {
-                                    let source = vm.vector.getSource()
-                                    let features = source.getFeatures();
-                                    features.forEach(feature => {
-                                        this.originalFeatures.push(feature.clone());
-                                    });
-                                } else {
-                                    this.modifiedFeatures = {};
-                                }
-                            }, this);
-                            this.modify.on('modifyend', function(event) {
-                                let newFeature = event.features.getArray()[0];
-                                this.modifiedFeatures[newFeature.ol_uid] = newFeature;
-                            }, this);
-                        },
-                        getActive: function() {
-                            return this.select.getActive() || this.modify.getActive();
-                        },
-                        setActive: function(active, cancelled) {
-                            this.select.setActive(active);
-                            this.modify.setActive(active);
-                            if(!active) {
-                                if(cancelled && this.originalFeatures.length) {
-                                    // If modify was cancelled, reset features to state before modify start
-                                    let source = vm.vector.getSource();
-                                    source.clear();
-                                    source.addFeatures(this.originalFeatures);
-                                }
-                                this.originalFeatures = [];
-                            }
-                        },
-                        getModifiedFeatures: function() {
-                            // return list of cloned features
-                            let features = [];
-                            for(let k in this.modifiedFeatures) {
-                                features.push(this.modifiedFeatures[k].clone());
-                            }
-                            return features;
-                        }
-                    };
-                    vm.delete = {
-                        init: function() {
-                            this.select = new Select({
-                                hitTolerance: 5,
-                                toggleCondition: neverCond,
-                                wrapX: false
-                            });
-                            vm.map.addInteraction(this.select);
+                this.snap = new Snap({
+                    features: this.getSnapFeatures()
+                });
+                this.map.addInteraction(this.snap);
 
-                            this.setEvents();
-                            this.deletedFeatures = [];
-                        },
-                        setEvents: function() {
-                            this.select.on('select', function(event) {
-                                // config allows only one selected feature
-                                if(event.selected.length) {
-                                    let feature = event.selected[0];
-                                    this.deletedFeatures.push(feature);
-                                    let source = vm.vector.getSource();
-                                    source.removeFeature(feature);
-                                }
-                            }, this);
-                        },
-                        getActive: function() {
-                            return this.select.getActive();
-                        },
-                        setActive: function(active, cancelled) {
-                            this.select.setActive(active);
-                            if(!active) {
-                                if(cancelled && this.deletedFeatures.length) {
-                                    // If delete was cancelled, readd deleted features
-                                    let source = vm.vector.getSource();
-                                    source.addFeatures(this.deletedFeatures);
-                                }
-                                this.deletedFeatures = [];
-                            }
-                        },
-                        getDeletedFeatures: function() {
-                            // return list of cloned features
-                            let features = [];
-                            this.deletedFeatures.forEach(feature => {
-                                features.push(feature.clone());
-                            });
-                            return features;
-                        }
-                    };
+                // Event Listeners
+                this.draw.Point.on('drawend', event => {
+                    this.drawFeature(event.feature);
+                });
+                this.draw.LineString.on('drawend', event => {
+                    this.drawFeature(event.feature);
+                });
+                this.draw.Polygon.on('drawend', event => {
+                    this.drawFeature(event.feature);
+                });
+            },
+            init() {
+                const vm = this;
 
-                    for(let k in vm.baselayers) {
-                        const l = vm.baselayers[k];
-                        vm.baselayerLayers.push(vm.createNewLayer(l));
-                    }
+                vm.initLayers();
+
+                // wait for DOM to be rendered
+                vm.$nextTick(function() {
+                    vm.initLayerData();
 
                     vm.baselayersGroup = new Group({
                         title: 'Base Layers',
@@ -462,7 +510,6 @@
                         openInLayerSwitcher: true,
                         layers: vm.entityLayers
                     });
-                    vm.extent = vm.getEntityExtent();
 
                     vm.map = new Map({
                         controls: defaultControls().extend([
@@ -490,9 +537,7 @@
                             zoom: 2
                         })
                     });
-                    if(vm.extent.length) {
-                        vm.map.getView().fit(vm.extent);
-                    }
+                    vm.setExtent();
 
                     vm.overlay = new Overlay({
                         element: document.getElementById(`${vm.id}-popup`)
@@ -506,7 +551,7 @@
 
                     vm.map.on('pointermove', function(e) {
                         if(e.dragging) return;
-                        if(vm.draw.getActive()) return;
+                        if(!vm.drawDisabled && vm.draw.getActive()) return;
 
                         const element = vm.hoverPopup.getElement();
                         const feature = vm.getFeatureForEvent(e);
@@ -555,7 +600,7 @@
                         $(element).popover('dispose');
                         vm.selectedFeature = {};
                         // if one mode is active, do not open popup
-                        if(vm.draw.getActive() || vm.modify.getActive() || vm.delete.getActive()) {
+                        if(!vm.drawDisabled && (vm.draw.getActive() || vm.modify.getActive() || vm.delete.getActive())) {
                             return;
                         }
                         const feature = vm.getFeatureForEvent(e);
@@ -571,17 +616,7 @@
                         }
                     });
 
-                    vm.draw.init();
-                    vm.modify.init();
-                    vm.delete.init();
-                    vm.draw.setActive(false);
-                    vm.modify.setActive(false);
-                    vm.delete.setActive(false);
-
-                    vm.snap = new Snap({
-                        features: vm.getSnapFeatures()
-                    });
-                    vm.map.addInteraction(vm.snap);
+                    vm.initDraw();
 
                     vm.options.graticule = new Graticule({
                         showLabels: true,
@@ -592,17 +627,6 @@
                         })
                     });
                     // vm.options.graticule.setMap(vm.map);
-
-                    // Event Listeners
-                    vm.draw.Point.on('drawend', function(event) {
-                        vm.drawFeature(event.feature);
-                    }, vm);
-                    vm.draw.LineString.on('drawend', function(event) {
-                        vm.drawFeature(event.feature);
-                    }, vm);
-                    vm.draw.Polygon.on('drawend', function(event) {
-                        vm.drawFeature(event.feature);
-                    }, vm);
                 });
             },
             initMapProjection() {
@@ -702,6 +726,13 @@
                 });
                 return new Collection(features);
             },
+            setExtent(extent = null) {
+                if(!extent) extent = this.getEntityExtent();
+                this.extent = extent;
+                if(this.extent.length) {
+                    this.map.getView().fit(this.extent);
+                }
+            },
             getEntityExtent() {
                 const layers = this.entityLayersGroup.getLayers();
                 let entityExtent;
@@ -716,6 +747,10 @@
                         }
                     }
                 });
+                if(!entityExtent) {
+                    // EPSG:3857 bounds (taken from epsg.io/3857)
+                    entityExtent = [-20026376.39, -20048966.10, 20026376.39, 20048966.10];
+                }
                 if(entityExtent[0] == Infinity) {
                     entityExtent[0] = -20026376.39;
                 }
@@ -727,10 +762,6 @@
                 }
                 if(entityExtent[3] == -Infinity) {
                     entityExtent[3] = 20048966.10;
-                }
-                if(!entityExtent) {
-                    // EPSG:3857 bounds (taken from epsg.io/3857)
-                    entityExtent = [-20026376.39, -20048966.10, 20026376.39, 20048966.10];
                 }
                 return entityExtent;
             },
@@ -1018,7 +1049,26 @@
             },
             selectedEntity: function(newEntity, oldEntity) {
                 this.updatePopup(this.selectedFeature);
-            }
+            },
+            layers: function(newLayers, oldLayers) {
+                this.resetLayers();
+                this.initLayers();
+            },
+            initWkt: function(newWkt, oldWkt) {
+                this.resetLayerData();
+                this.initLayerData();
+                this.updateLayerGroups();
+            },
+            initGeojson: function(newGeojson, oldGeojson) {
+                this.resetLayerData();
+                this.initLayerData();
+                this.updateLayerGroups();
+            },
+            initCollection: function(newCollection, oldCollection) {
+                this.resetLayerData();
+                this.initLayerData();
+                this.updateLayerGroups();
+            },
         }
     }
 </script>

@@ -176,6 +176,38 @@ class MapController extends Controller
         return response()->json($layer);
     }
 
+    public function getGeometriesByLayers(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to add layers'
+            ], 403);
+        }
+        $this->validate($request, [
+            'layers' => 'nullable|array'
+        ]);
+
+        $layers = $request->get('layers');
+        if(isset($layers)) {
+            $entityTypeIds = AvailableLayer::whereIn('id', $layers)->pluck('context_type_id')->all();
+            $unlinkedLayer = AvailableLayer::where('type', 'unlinked')
+                ->whereIn('id', $layers)
+                ->count() > 0;
+            $query = Geodata::with(['context'])
+                ->whereHas('context', function($q) use ($entityTypeIds) {
+                    $q->whereIn('context_type_id', $entityTypeIds);
+                });
+            if($unlinkedLayer) {
+                $query->orDoesntHave('context');
+            }
+        } else {
+            $query = Geodata::with(['context']);
+        }
+        $geodata = $query->get();
+
+        return response()->json($geodata);
+    }
+
     public function link(Request $request, $gid, $eid) {
         $user = auth()->user();
         if(!$user->can('link_geodata')) {

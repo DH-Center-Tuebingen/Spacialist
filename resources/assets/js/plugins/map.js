@@ -91,7 +91,7 @@ const SpacialistPluginMap = {
         // Layer Editor
         Vue.prototype.$registerSpacialistPlugin({
             label: 'prefs.extension.layer-editor',
-            icon: 'fa-atlas',
+            icon: 'fa-layer-group',
             href: {
                 name: 'layeredit'
             }
