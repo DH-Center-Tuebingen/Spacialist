@@ -252,7 +252,7 @@
                 return true;
             },
             onSearchSelect(item) {
-                this.deselectNode();
+                if(this.selectedItem.state) this.deselectNode();
                 this.selectNodeById(item.id);
             },
             openPath(path) {
