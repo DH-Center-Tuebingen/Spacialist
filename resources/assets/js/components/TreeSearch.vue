@@ -28,7 +28,11 @@
 
         <div class="dropdown-menu" style="display: flex; flex-direction: column;" v-show="hasItems">
             <a href="#" class="dropdown-item" v-for="(item, $item) in items" :class="activeClass($item)" @mousedown="hit" @mousemove="setActive($item)">
-                <span v-text="item.name"></span>
+                <span> {{item.name}}</span>
+                <ol class="breadcrumb mb-0 p-1 bg-none small">
+                  <li class="breadcrumb-item" v-for="a in item.ancestors">{{ a }}</li>
+                  <!-- <li class="breadcrumb-item font-weight-bold">{{ item.name }}</li> -->
+              </ol>
             </a>
         </div>
     </div>

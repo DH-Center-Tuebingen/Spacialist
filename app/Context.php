@@ -125,4 +125,18 @@ class Context extends Model
     public function getPathAttribute() {
         return $this->path();
     }
+
+    private function ancestors() {
+        $ancestors = $this->where('id', '=', $this->root_context_id)->get();
+
+        while ($ancestors->last() && $ancestors->last()->root_context_id !== null) {
+                $parent = $this->where('id', '=', $ancestors->last()->root_context_id)->get();
+                $ancestors = $ancestors->merge($parent);
+            }
+        return $ancestors->reverse()->pluck('name')->all();
+    }
+
+    public function getAncestorsAttribute() {
+        return $this->ancestors();
+    }
 }
