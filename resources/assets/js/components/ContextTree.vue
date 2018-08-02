@@ -252,58 +252,62 @@
                 return true;
             },
             onSearchSelect(item) {
-                const vm = this;
-                $http.get(`/context/${item.id}/path`).then(function(response) {
-                    vm.openPath(response.data);
-                })
+                this.deselectNode();
+                this.selectNodeById(item.id);
             },
-            openPath(path, tree = this.tree) {
+            openPath(path) {
                 const vm = this;
-                const idx = path[0];
-                if (path.length <= 1) {
-                    // terminate recursion, return target node
-                    return tree[idx];
-                } else {
-                    // recurse further
-                    const rest = path.slice(1);
-                    const curNode = tree[idx];
-                    if(curNode.children.length < curNode.children_count) {
-                        //async load children
-                        curNode.state.loading = true;
-                        vm.fetchChildren(curNode.id).then(response => {
-                            curNode.children =  response;
-                            curNode.state.loading = false;
-                            curNode.childrenLoaded = true;
-                            curNode.state.opened = true;
-                            return vm.openPath(rest, curNode.children);
-                        });
-                    } else {
-                        if(!curNode.state.opened) {
-                            // open node
-                            curNode.state.opened = true;
+                let openRecursive = (path, tree) => {
+                    const idx = path[0];
+                    return new Promise((resolve, reject) => {
+                        if (path.length <= 1) {
+                            // terminate recursion
+                            resolve(tree[idx]);
                         }
-                        return vm.openPath(rest, curNode.children);
-                    }
-                }
+                        // recurse further
+                        const rest = path.slice(1);
+                        const curNode = tree[idx];
+                        if(curNode.children.length < curNode.children_count) {
+                            //async load children
+                            curNode.state.loading = true;
+                            resolve(
+                                vm.fetchChildren(curNode.id).then(children => {
+                                    curNode.children = children;
+                                    curNode.state.loading = false;
+                                    curNode.childrenLoaded = true;
+                                    curNode.state.opened = true;
+                                    return openRecursive(rest, children).then(targetNode => {
+                                        return targetNode;
+                                    });
+                                })
+                            );
+                        } else {
+                            if(!curNode.state.opened) {
+                                // open node
+                                curNode.state.opened = true;
+                            }
+                            resolve(
+                                openRecursive(rest, curNode.children).then(targetNode => targetNode)
+                            );
+                        }
+                    });
+                };
+                return openRecursive(path, this.tree);
             },
             selectNodeById(id) {
                 const vm = this;
                 $http.get(`/context/${id}/path`).then(response => {
                     const path = response.data;
-                    const targetNode = vm.openPath(path);
-                    targetNode.state.selected = true;
-                    vm.selectedItem = targetNode;
-                    vm.selectedItem.path = path;
+                    vm.openPath(path).then(targetNode => {
+                        targetNode.state.selected = true;
+                        vm.selectedItem = targetNode;
+                        vm.selectedItem.path = path;
+                    });
                 });
             },
-            deselectNodeById(id) {
-                const vm = this;
-                $http.get(`/context/${id}/path`).then(response => {
-                    const path = response.data;
-                    const targetNode = vm.openPath(path);
-                    targetNode.state.selected = false;
-                    vm.selectedItem = {};
-                });
+            deselectNode() {
+                this.selectedItem.state.selected = false;
+                this.selectedItem = {};
             },
             handleEntityChange(e) {
                 const vm = this;
@@ -314,11 +318,11 @@
                         vm.selectNodeById(to.params.id);
                     break;
                     case 'update':
-                        vm.deselectNodeById(from.params.id);
+                        vm.deselectNode();
                         vm.selectNodeById(to.params.id);
                     break;
                     case 'leave':
-                        vm.deselectNodeById(from.params.id);
+                        vm.deselectNode();
                     break;
                     default:
                         vm.$throwError({message: `Unknown event type ${e.type} received.`});
