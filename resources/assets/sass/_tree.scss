@@ -12,7 +12,7 @@
 
 .tree-search {
     font-style: normal !important;
-    font-weight: 300 !important;
+    font-weight: $font-weight-normal;
     // color: $white !important;
     background-color: rgba(red($yellow), green($yellow), blue($yellow), 0.5) !important;
 
