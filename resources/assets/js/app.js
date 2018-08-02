@@ -258,6 +258,15 @@ const router = new VueRouter({
 Vue.router = router;
 App.router = Vue.router;
 
+Axios.interceptors.response.use(response => {
+    return response;
+}, error => {
+    if(error.response.status == 401) {
+        router.push({name: 'login'});
+    }
+    return Promise.reject(error);
+});
+
 Vue.use(require('@websanova/vue-auth'), {
    auth: require('@websanova/vue-auth/drivers/auth/bearer.js'),
    http: require('@websanova/vue-auth/drivers/http/axios.1.x.js'),

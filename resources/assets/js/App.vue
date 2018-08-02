@@ -36,12 +36,12 @@
                         </a>
                     </li>
                     <!-- Authentication Links -->
-                    <li class="nav-item" v-if="!$auth.check()">
+                    <li class="nav-item" v-if="!loggedIn">
                         <router-link :to="{name: 'login'}" class="nav-link">
                             Login
                         </router-link>
                     </li>
-                    <li class="nav-item dropdown" v-if="$auth.check()">
+                    <li class="nav-item dropdown" v-if="loggedIn">
                         <a href="#" class="nav-link dropdown-toggle" id="tools-navbar" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
                             <i class="fas fa-fw fa-cogs"></i> Tools
                         </a>
@@ -76,7 +76,7 @@
                             </template>
                         </div>
                     </li>
-                    <li class="nav-item dropdown" v-if="$auth.check()">
+                    <li class="nav-item dropdown" v-if="loggedIn">
                         <a href="#" class="nav-link dropdown-toggle" id="settings-dropdown" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
                             <i class="fas fa-fw fa-sliders-h"></i> Settings <span class="caret"></span>
                         </a>
@@ -104,7 +104,7 @@
                             </a>
                         </div>
                     </li>
-                    <li class="nav-item dropdown" v-if="$auth.check()">
+                    <li class="nav-item dropdown" v-if="loggedIn">
                         <a href="#" class="nav-link dropdown-toggle" id="user-dropdown" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
                             <i class="fas fa-fw fa-user"></i> {{ $auth.user().name }}
                         </a>
@@ -132,7 +132,11 @@
 
 <script>
     export default {
-        mounted() {},
+        mounted() {
+            this.$auth.ready(_ => {
+                this.loggedIn = this.$auth.check();
+            });
+        },
         methods: {
             showAboutModal() {
                 this.$modal.show('about-modal');
@@ -141,6 +145,7 @@
         data() {
             return {
                 plugins: {},
+                loggedIn: false
             }
         }
     }
