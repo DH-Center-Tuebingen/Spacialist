@@ -85,7 +85,7 @@
 
         <vue-context ref="fileMenu" class="context-menu-wrapper">
             <ul class="list-group list-group-vue-context" slot-scope="fileScope">
-                <li class="list-group-item list-group-item-vue-context" v-for="entry in contextMenu" @click="entry.callback(fileScope.data.file)">
+                <li class="list-group-item list-group-item-vue-context" v-for="entry in contextMenu" @click.prevent="entry.callback(fileScope.data.file)">
                     <i :class="entry.iconClasses">{{entry.iconContent}}</i> {{entry.label}}
                 </li>
             </ul>
