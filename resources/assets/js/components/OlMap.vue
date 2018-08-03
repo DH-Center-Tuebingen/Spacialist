@@ -157,6 +157,10 @@
                 type: Object,
                 required: false,
                 default: _ => new Object()
+            },
+            zoomTo: {
+                type: Number,
+                required: false
             }
         },
         beforeMount() {
@@ -390,6 +394,7 @@
                         visible: l.visible,
                         opacity: l.opacity,
                         layer: 'entity',
+                        layer_id: l.id,
                         source: new Vector({
                             wrapX: false
                         }),
@@ -457,6 +462,7 @@
                 this.baselayersGroup.setLayers(new Collection(this.baselayerLayers));
                 this.overlaysGroup.setLayers(new Collection(this.overlayLayers));
                 this.entityLayersGroup.setLayers(new Collection(this.entityLayers));
+                this.setExtent();
             },
             initDraw() {
                 if(this.drawDisabled) return;
@@ -1069,6 +1075,15 @@
                 this.initLayerData();
                 this.updateLayerGroups();
             },
+            zoomTo: function(newZoomLayerId, oldZoomLayerId) {
+                if(!newZoomLayerId) return;
+                const layers = this.entityLayersGroup.getLayers().getArray();
+                const zoomLayer = layers.find(l => l.get('layer_id') == newZoomLayerId);
+                if(!zoomLayer) return;
+                const zoomLayerSource = zoomLayer.getSource();
+                if(!zoomLayerSource) return;
+                this.setExtent(zoomLayerSource.getExtent());
+            }
         }
     }
 </script>

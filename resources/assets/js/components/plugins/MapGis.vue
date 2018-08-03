@@ -37,7 +37,8 @@
                 :draw-disabled="true"
                 :epsg="epsg"
                 :init-geojson="geometries"
-                :layers="mergedLayers">
+                :layers="mergedLayers"
+                :zoom-to="zoomLayerId">
             </ol-map>
         </div>
 
@@ -171,6 +172,7 @@
                 showFeatureCounts: {},
                 mapLayers: {},
                 layerGeometries: {},
+                zoomLayerId: 0,
                 importModalId: 'map-gis-import-modal',
                 contextMenu: [
                     {
@@ -178,7 +180,7 @@
                         iconClasses: 'fas fa-fw fa-search-plus',
                         iconContent: '',
                         callback: layer => {
-                            //
+                            this.zoomLayerId = layer.id;
                         }
                     },
                     {
