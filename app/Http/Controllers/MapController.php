@@ -122,6 +122,34 @@ class MapController extends Controller
         return response()->json($layer);
     }
 
+    public function getGeometriesByLayer($id) {
+        $user = auth()->user();
+        if(!$user->can('view_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to get layers'
+            ], 403);
+        }
+
+        try {
+            $layer = AvailableLayer::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This layer does not exist'
+            ]);
+        }
+        $query = Geodata::with(['context']);
+        if($layer->type == 'unlinked') {
+            $query->doesntHave('context');
+        } else if(isset($layer->context_type_id)) {
+            $query->whereHas('context', function($q) use ($layer) {
+                $q->where('context_type_id', $layer->context_type_id);
+            });
+        }
+        $geodata = $query->get();
+
+        return response()->json($geodata);
+    }
+
     public function getEpsg($srid) {
         $epsg = \DB::table('spatial_ref_sys')
             ->where('srid', $srid)
@@ -278,38 +306,6 @@ class MapController extends Controller
         $layer->save();
 
         return response()->json($layer);
-    }
-
-    public function getGeometriesByLayers(Request $request) {
-        $user = auth()->user();
-        if(!$user->can('view_geodata')) {
-            return response()->json([
-                'error' => 'You do not have the permission to add layers'
-            ], 403);
-        }
-        $this->validate($request, [
-            'layers' => 'nullable|array'
-        ]);
-
-        $layers = $request->get('layers');
-        if(isset($layers)) {
-            $entityTypeIds = AvailableLayer::whereIn('id', $layers)->pluck('context_type_id')->all();
-            $unlinkedLayer = AvailableLayer::where('type', 'unlinked')
-                ->whereIn('id', $layers)
-                ->count() > 0;
-            $query = Geodata::with(['context'])
-                ->whereHas('context', function($q) use ($entityTypeIds) {
-                    $q->whereIn('context_type_id', $entityTypeIds);
-                });
-            if($unlinkedLayer) {
-                $query->orDoesntHave('context');
-            }
-        } else {
-            $query = Geodata::with(['context']);
-        }
-        $geodata = $query->get();
-
-        return response()->json($geodata);
     }
 
     public function link(Request $request, $gid, $eid) {

@@ -19,8 +19,13 @@
                         Use <kbd>Double Click</kbd> to add an <i>Available Layer</i> and again to remove it.
                     </p>
                     <div class="list-group scroll-y-auto col">
-                        <a href="#" class="list-group-item list-group-item-action" v-for="l in selectedLayers" @click.prevent="" @dblclick.prevent="removeLayerFromSelection(l)" @contextmenu.prevent="$refs.layerMenu.open($event, {layer: l})">
-                            {{ getName(l) }}
+                        <a href="#" class="list-group-item list-group-item-action d-flex flex-row justify-content-between align-items-center" v-for="l in selectedLayers" @click.prevent="" @dblclick.prevent="removeLayerFromSelection(l)" @contextmenu.prevent="$refs.layerMenu.open($event, {layer: l})">
+                            <span>
+                                {{ getName(l) }}
+                            </span>
+                            <span class="badge badge-primary" v-if="showFeatureCounts[l.id]">
+                                {{ getFeatureCount(l) }}
+                            </span>
                         </a>
                     </div>
                 </div>
@@ -85,12 +90,53 @@
                 }
                 return 'No Title';
             },
+            getFeatureCount(layer) {
+                const lg = this.layerGeometries[layer.id];
+                return lg ? lg.length : 0;
+            },
+            toggleFeatureCount(layer) {
+                if(this.showFeatureCounts[layer.id]) {
+                    Vue.delete(this.showFeatureCounts, layer.id);
+                } else {
+                    Vue.set(this.showFeatureCounts, layer.id, true);
+                }
+            },
+            exportLayer(layer, type) {
+                const srid = this.epsg.epsg;
+                let url = `map/export/${layer.id}?srid=${srid}`;
+                if(type) {
+                    url += `&type=${type}`;
+                }
+                $http.get(url).then(response => {
+                    let ext;
+                    switch(type) {
+                        case 'csv':
+                        case 'wkt':
+                            ext = 'csv';
+                            break;
+                        case 'kml':
+                            ext = 'kml';
+                            break;
+                        case 'kmz':
+                            ext = 'kmz';
+                            break;
+                        case 'gml':
+                            ext = 'gml';
+                            break;
+                        case 'geojson':
+                            ext = 'json';
+                            break;
+                        default:
+                            ext = 'json';
+                            break;
+                    }
+                    this.$createDownloadLink(response.data, `export-${srid}.${ext}`, true, response.headers['content-type']);
+                });
+            },
             addLayerToSelection(layer) {
                 Vue.set(this.selectedLayers, layer.id, Object.assign({}, layer));
-                const data = {
-                    layers: Object.keys(this.selectedLayers)
-                };
-                $http.post('map/geometry/layer', data).then(response => {
+
+                $http.get(`map/layer/${layer.id}/geometry`).then(response => {
                     let newGeometries = [];
                     response.data.forEach(g => {
                         const geoObject = {
@@ -99,25 +145,12 @@
                         };
                         newGeometries.push(geoObject);
                     });
-                    this.geometries = newGeometries;
+                    Vue.set(this.layerGeometries, layer.id, newGeometries);
                 });
             },
             removeLayerFromSelection(layer) {
                 Vue.delete(this.selectedLayers, layer.id);
-                const data = {
-                    layers: Object.keys(this.selectedLayers)
-                };
-                $http.post('map/geometry/layer', data).then(response => {
-                    let newGeometries = [];
-                    response.data.forEach(g => {
-                        const geoObject = {
-                            geom: g.geom,
-                            props: this.getProperties(g)
-                        };
-                        newGeometries.push(geoObject);
-                    });
-                    this.geometries = newGeometries;
-                });
+                Vue.delete(this.layerGeometries, layer.id);
             },
             getProperties(geodata) {
                 return {
@@ -135,8 +168,9 @@
                 epsg: this.$getPreference('prefs.map-projection'),
                 layers: [],
                 selectedLayers: {},
+                showFeatureCounts: {},
                 mapLayers: {},
-                geometries: [],
+                layerGeometries: {},
                 importModalId: 'map-gis-import-modal',
                 contextMenu: [
                     {
@@ -151,20 +185,13 @@
                         label: 'Export layer',
                         iconClasses: 'fas fa-fw fa-download',
                         iconContent: '',
-                        callback: layer => {
-                            const srid = this.epsg.epsg;
-                            $http.get(`map/export/${layer.id}?srid=${srid}`).then(response => {
-                                this.$createDownloadLink(response.data, `export-${srid}.json`, true, response.headers['content-type']);
-                            });
-                        }
+                        callback: layer => this.exportLayer(layer)
                     },
                     {
                         label: 'Toggle feature count',
                         iconClasses: 'fas fa-fw fa-calculator',
                         iconContent: '',
-                        callback: layer => {
-                            //
-                        }
+                        callback: layer => this.toggleFeatureCount(layer)
                     },
                     {
                         label: 'Properties',
@@ -180,6 +207,9 @@
         computed: {
             mergedLayers: function() {
                 return { ...this.selectedLayers, ...this.mapLayers };
+            },
+            geometries: function() {
+                return Object.values(this.layerGeometries).flat();
             }
         }
     }
