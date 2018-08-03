@@ -55,6 +55,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
 // SEARCH
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/search')->group(function() {
+    Route::get('', 'SearchController@searchGlobal');
     Route::get('/context', 'SearchController@searchContextByName');
     Route::get('/label', 'SearchController@searchInThesaurus');
 });

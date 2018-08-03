@@ -121,6 +121,50 @@ class Bibliography extends Model
         return $key;
     }
 
+    public static function search($term) {
+        $term = "%$term%";
+        $query = self::query();
+        $query = self::searchBuilder($term, $query);
+        return $query->get();
+    }
+
+    public static function searchBuilder($term, $builder) {
+        $keys = [
+            'author',
+            'editor',
+            'title',
+            'journal',
+            'year',
+            'pages',
+            'volume',
+            'number',
+            'booktitle',
+            'publisher',
+            'address',
+            'misc',
+            'howpublished',
+            'type',
+            'annote',
+            'chapter',
+            'crossref',
+            'edition',
+            'institution',
+            'key',
+            'month',
+            'note',
+            'organization',
+            'school',
+            'series',
+            'citekey'
+        ];
+        $firstKey = array_shift($keys);
+        $builder = self::where($firstKey, 'ILIKE', $term);
+        foreach($keys as $key) {
+            $builder->orWhere($key, 'ILIKE', $term);
+        }
+        return $builder;
+    }
+
     public function contexts() {
         return $this->belongsToMany('App\Context', 'sources')->withPivot('description', 'attribute_id');
     }

@@ -278,6 +278,7 @@ Vue.component('multiselect', Multiselect);
 Vue.component('file-upload', VueUploadComponent);
 
 // Extended Components
+Vue.component('global-search', require('./components/GlobalSearch.vue'));
 Vue.component('context-search', require('./components/ContextSearch.vue'));
 Vue.component('label-search', require('./components/LabelSearch.vue'));
 Vue.component('csv-table', require('./components/CsvTable.vue'));

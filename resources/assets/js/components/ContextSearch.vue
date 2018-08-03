@@ -56,7 +56,7 @@
         },
         data () {
             return {
-                src: '/api/search/context',
+                src: 'search/context',
                 limit: 5,
                 minChars: 3,
                 selectFirst: false
@@ -73,7 +73,7 @@
         methods: {
             onHit(item) {
                 this.query = item ? item.name : undefined;
-                this.onSelect(item);
+                if(this.onSelect) this.onSelect(item);
                 this.closeSelect();
             },
             clearItem() {

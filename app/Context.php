@@ -82,6 +82,34 @@ class Context extends Model
         $context->save();
     }
 
+    public static function search($term) {
+        $cleanTerm = $term;
+        $term = "%$term%";
+        $matches = self::with(['geodata', 'literatures'])
+            ->where('name', 'ILIKE', $term)
+            ->orWhereHas('geodata', function($q) use ($term) {
+                $q = Geodata::searchBuilder($term, $q);
+            })
+            ->orWhereHas('literatures', function($q) use ($term) {
+                $q = Bibliography::searchBuilder($term, $q);
+            })
+            // TODO error
+            // ->orWhereHas('files', function($q) use ($term) {
+            //     $q = File::searchBuilder($term, $q);
+            // })
+            ->get();
+        $alreadyMatched = $matches->pluck('id')->toArray();
+        $withAttributes = self::with(['attributes'])
+            ->whereHas('attributes')
+            ->whereNotIn('id', $alreadyMatched);
+        foreach($withAttributes as $e) {
+            if(str_contains($e->attributes->pivot->value, $cleanTerm)) {
+                $matches->push($e);
+            }
+        }
+        return $matches;
+    }
+
     public function child_contexts() {
         return $this->hasMany('App\Context', 'root_context_id');
     }

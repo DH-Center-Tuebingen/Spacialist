@@ -33,6 +33,21 @@ class Geodata extends Model
         return self::$availableGeometryTypes;
     }
 
+    public static function search($term, $unlinkedOnly = false) {
+        $term = "%$term%";
+        $query = self::query();
+        $query = self::searchBuilder($term, $query, $unlinkedOnly);
+        return $query->get();
+    }
+
+    public static function searchBuilder($term, $builder, $unlinkedOnly = false) {
+        $builder->whereRaw("ST_AsText(geom) ILIKE ?", $term);
+        if($unlinkedOnly) {
+            $builder->doesntHave('context');
+        }
+        return $builder;
+    }
+
     public function updateGeometry($feature, $srid, $user) {
         $geom = json_encode($feature->geometry);
         $wkt = \DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geom')), $srid), 4326)) AS wkt")[0]->wkt;

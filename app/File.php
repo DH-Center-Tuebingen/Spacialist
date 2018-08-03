@@ -362,6 +362,22 @@ class File extends Model
         }
     }
 
+    public static function search($term) {
+        $term = "%$term%";
+        $query = self::query();
+        $query = self::searchBuilder($term, $query);
+        return $query->get();
+    }
+
+    public static function searchBuilder($term, $builder) {
+        $builder->where('name', 'ILIKE', $term)
+            ->orWhere('cameraname', 'ILIKE', $term)
+            ->orWhere('copyright', 'ILIKE', $term)
+            ->orWhere('description', 'ILIKE', $term)
+            ->get();
+        return $builder;
+    }
+
     public function setContent($fileObject) {
         $filehandle = fopen($fileObject->getRealPath(), 'r');
         Storage::put(

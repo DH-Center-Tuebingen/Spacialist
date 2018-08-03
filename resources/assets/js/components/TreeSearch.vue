@@ -15,9 +15,9 @@
         @keydown.esc="clearItem"
         @keydown.up="up"/>
         <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" @click="clearItem">
+            <span class="input-group-text clickable" @click="clearItem">
                 <i class="fas fa-fw fa-times"></i>
-            </button>
+            </span>
             <span class="input-group-text multiselect-search">
                 <i class="fas fa-spinner fa-spin" v-if="loading"></i>
                 <template v-else>

@@ -2,13 +2,57 @@
 
 namespace App\Http\Controllers;
 
+use App\Bibliography;
 use App\Context;
+use App\File;
+use App\Geodata;
 use App\ThConceptLabel;
 use App\ThLanguage;
 use Illuminate\Http\Request;
 
 
 class SearchController extends Controller {
+    private static $shebangPrefix = [
+        'bibliography' => '!b ',
+        'entities' => '!e ',
+        'files' => '!f ',
+        'geodata' => '!g ',
+    ];
+
+    public function searchGlobal(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to search global'
+            ], 403);
+        }
+        $q = $request->query('q');
+        if(starts_with($q, self::$shebangPrefix['bibliography'])) {
+            $matches = [
+                'bibliography' => Bibliography::search(str_after($q, self::$shebangPrefix['bibliography']))
+            ];
+        } else if(starts_with($q, self::$shebangPrefix['entities'])) {
+            $matches = [
+                'entities' => Context::search(str_after($q, self::$shebangPrefix['entities']))
+            ];
+        } else if(starts_with($q, self::$shebangPrefix['files'])) {
+            $matches = [
+                'files' => File::search(str_after($q, self::$shebangPrefix['files']))
+            ];
+        } else if(starts_with($q, self::$shebangPrefix['geodata'])) {
+            $matches = [
+                'geodata' => Geodata::search(str_after($q, self::$shebangPrefix['geodata']))
+            ];
+        } else {
+            $matches = [
+                'bibliography' => Bibliography::search($q),
+                'entities' => Context::search($q),
+                'files' => File::search($q),
+                'geodata' => Geodata::search($q, true)
+            ];
+        }
+        return response()->json($matches);
+    }
 
     public function searchContextByName(Request $request) {
         $user = auth()->user();

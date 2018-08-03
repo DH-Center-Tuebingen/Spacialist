@@ -49,7 +49,7 @@
         },
         data () {
             return {
-                src: '/api/search/label',
+                src: 'search/label',
                 limit: 5,
                 minChars: 3,
                 selectFirst: false
@@ -63,7 +63,7 @@
         methods: {
             onHit(item) {
                 this.query = item.label;
-                this.onSelect(item);
+                if(this.onSelect) this.onSelect(item);
                 this.closeSelect();
             },
             closeSelect() {

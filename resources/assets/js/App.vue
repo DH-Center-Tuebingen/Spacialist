@@ -15,14 +15,7 @@
                     <li class="nav-item">
                         <form class="form-inline mr-auto">
                             <div class="form-group">
-                                <div class="input-group">
-                                    <input class="form-control global-search" type="text" id="global-search" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-fw fa-search" aria-hidden="true"></i>
-                                        </span>
-                                    </div>
-                                </div>
+                                <global-search></global-search>
                             </div>
                         </form>
                     </li>
