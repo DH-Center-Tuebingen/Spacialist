@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
 use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
+use Nicolaslopezj\Searchable\SearchableTrait;
 
 class Geodata extends Model
 {
     use PostgisTrait;
+    use SearchableTrait;
 
     protected $table = 'geodata';
     /**
@@ -25,27 +27,18 @@ class Geodata extends Model
         'geom',
     ];
 
+    protected $searchable = [
+        'columns' => [
+            'ST_AsText(geom)' => 10,
+        ]
+    ];
+
     protected static $availableGeometryTypes = [
         'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon'
     ];
 
     public static function getAvailableGeometryTypes() {
         return self::$availableGeometryTypes;
-    }
-
-    public static function search($term, $unlinkedOnly = false) {
-        $term = "%$term%";
-        $query = self::query();
-        $query = self::searchBuilder($term, $query, $unlinkedOnly);
-        return $query->get();
-    }
-
-    public static function searchBuilder($term, $builder, $unlinkedOnly = false) {
-        $builder->whereRaw("ST_AsText(geom) ILIKE ?", $term);
-        if($unlinkedOnly) {
-            $builder->doesntHave('context');
-        }
-        return $builder;
     }
 
     public function updateGeometry($feature, $srid, $user) {
