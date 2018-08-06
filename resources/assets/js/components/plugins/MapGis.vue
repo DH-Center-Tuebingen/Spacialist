@@ -211,7 +211,7 @@
                 return { ...this.selectedLayers, ...this.mapLayers };
             },
             geometries: function() {
-                return Object.values(this.layerGeometries).flat();
+                return [].concat(...Object.values(this.layerGeometries));
             }
         }
     }
