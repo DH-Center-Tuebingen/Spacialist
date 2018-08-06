@@ -39,7 +39,7 @@
                 </button>
             </div>
         </div>
-        <div class="mt-2 col px-0">
+        <div class="col px-0" :class="{'mt-2': !drawDisabled}">
             <div :id="id" class="map w-100 h-100"></div>
             <div :id="id+'-popup'" :data-title="overlayTitle" :data-content="overlayContent"></div>
             <div :id="id+'-hover-popup'" class="tooltip"></div>
