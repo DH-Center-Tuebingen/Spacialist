@@ -36,18 +36,26 @@ class SearchController extends Controller {
                 'entities' => Context::search(str_after($q, self::$shebangPrefix['entities']))
             ];
         } else if(starts_with($q, self::$shebangPrefix['files'])) {
+            $files = File::search(str_after($q, self::$shebangPrefix['files']));
+            foreach($files as $file) {
+                $file->setFileInfo();
+            }
             $matches = [
-                'files' => File::search(str_after($q, self::$shebangPrefix['files']))
+                'files' => $files
             ];
         } else if(starts_with($q, self::$shebangPrefix['geodata'])) {
             $matches = [
                 'geodata' => Geodata::search(str_after($q, self::$shebangPrefix['geodata']))
             ];
         } else {
+            $files = File::search($q);
+            foreach($files as $file) {
+                $file->setFileInfo();
+            }
             $matches = [
                 'bibliography' => Bibliography::search($q),
                 'entities' => Context::search($q),
-                'files' => File::search($q),
+                'files' => $files,
                 'geodata' => Geodata::search($q, true)
             ];
         }

@@ -24,26 +24,8 @@
         </div>
 
         <div class="dropdown-menu" style="display: flex; flex-direction: column; max-height: 50vh; overflow-y: auto;" v-show="hasItems">
-            <a href="#" class="dropdown-item" v-for="(item, k) in items" :class="activeClass(k)" @mousedown="hit" @mousemove="setActive(k)">
-                <span v-if="item.group == 'bibliography'">
-                    <i class="fas fa-fw fa-book"></i>
-                    {{ item.title }} - {{ item.author }}
-                </span>
-                <span v-else-if="item.group == 'entities'">
-                    <i class="fas fa-fw fa-monument"></i>
-                    {{ item.name }}
-                </span>
-                <span v-else-if="item.group == 'files'">
-                    <i class="fas fa-fw fa-file"></i>
-                    {{ item.name }} - {{ item.mime_type }}
-                </span>
-                <span v-else-if="item.group == 'geodata'">
-                    <i class="fas fa-fw fa-map-marker-alt"></i>
-                    {{ item }}: {{ item.group }}
-                </span>
-                <span v-else>
-                    Unknown group: {{ item.group }}
-                </span>
+            <a href="#" class="dropdown-item px-1" v-for="(item, k) in items" :class="activeClass(k)" @mousedown="hit" @mousemove="setActive(k)">
+                <component :is="'search-result-'+item.group" :data="item"></component>
             </a>
         </div>
     </div>
@@ -52,6 +34,11 @@
 <script>
     import VueTypeahead from 'vue-typeahead';
     import debounce from 'debounce';
+
+    Vue.component('search-result-bibliography', require('./SearchResultBibliography.vue'));
+    Vue.component('search-result-entities', require('./SearchResultEntity.vue'));
+    Vue.component('search-result-files', require('./SearchResultFile.vue'));
+    Vue.component('search-result-geodata', require('./SearchResultGeodata.vue'));
 
     export default {
         extends: VueTypeahead,
@@ -121,8 +108,8 @@
                 this.onHit();
             },
             closeSelect() {
-                this.items = [];
-                this.loading = false;
+                // this.items = [];
+                // this.loading = false;
             }
         },
         data () {
@@ -139,7 +126,6 @@
                 return debounce(this.update, 250)
             },
             hasShebang() {
-                console.log(this.query);
                 if(!this.query.length) {
                     return false;
                 }

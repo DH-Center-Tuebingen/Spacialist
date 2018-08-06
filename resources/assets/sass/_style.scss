@@ -44,6 +44,16 @@ body, #app {
     text-align: center;
 }
 
+.media-image {
+    max-width: 64px;
+    max-height: 64px;
+}
+
+.media-image-placeholder {
+    width: 64px;
+    height: 64px;
+}
+
 .btn-fab {
     padding: 0;
     height: 1.8rem;
