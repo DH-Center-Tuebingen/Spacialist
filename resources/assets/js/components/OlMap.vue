@@ -734,10 +734,17 @@
             },
             setExtent(extent = null) {
                 if(!extent) extent = this.getEntityExtent();
-                this.extent = extent;
-                if(this.extent.length) {
-                    this.map.getView().fit(this.extent);
+                if(!extent) {
+                    extent = this.defaultExtent;
+                } else {
+                    for(let i=0; i<extent.length; i++) {
+                        if(extent[i] == Infinity || extent[i] == -Infinity) {
+                            extent[i] = this.defaultExtent[i];
+                        }
+                    }
                 }
+                this.extent = extent;
+                this.map.getView().fit(this.extent);
             },
             getEntityExtent() {
                 const layers = this.entityLayersGroup.getLayers();
@@ -753,22 +760,6 @@
                         }
                     }
                 });
-                if(!entityExtent) {
-                    // EPSG:3857 bounds (taken from epsg.io/3857)
-                    entityExtent = [-20026376.39, -20048966.10, 20026376.39, 20048966.10];
-                }
-                if(entityExtent[0] == Infinity) {
-                    entityExtent[0] = -20026376.39;
-                }
-                if(entityExtent[1] == Infinity) {
-                    entityExtent[1] = -20048966.10;
-                }
-                if(entityExtent[2] == -Infinity) {
-                    entityExtent[2] = 20026376.39;
-                }
-                if(entityExtent[3] == -Infinity) {
-                    entityExtent[3] = 20048966.10;
-                }
                 return entityExtent;
             },
             getFeatureForEvent(e) {
@@ -1003,7 +994,9 @@
                 extent: [],
                 selectedFeature: {},
                 wktFormat: new WKT(),
-                geoJsonFormat: new GeoJSON()
+                geoJsonFormat: new GeoJSON(),
+                // EPSG:3857 bounds (taken from epsg.io/3857)
+                defaultExtent: [-20026376.39, -20048966.10, 20026376.39, 20048966.10]
             }
         },
         computed: {
