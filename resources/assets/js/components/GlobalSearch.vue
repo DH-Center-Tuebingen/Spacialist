@@ -108,8 +108,8 @@
                 this.onHit();
             },
             closeSelect() {
-                // this.items = [];
-                // this.loading = false;
+                this.items = [];
+                this.loading = false;
             }
         },
         data () {

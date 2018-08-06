@@ -30,14 +30,14 @@
                 <h4 class="mt-3">References</h4>
                 <table class="table table-hover">
                     <tbody>
-                        <tr v-for="reference in references">
-                            <td class="text-left py-2">
+                        <tr class="d-flex flex-row" v-for="reference in references">
+                            <td class="text-left py-2 col px-0 pl-1">
                                 <h6>{{ reference.bibliography.title }}</h6>
                                 <p class="mb-0">
                                     {{ reference.bibliography.author }}, <span class="text-muted font-weight-light">{{ reference.bibliography.year}}</span>
                                 </p>
                             </td>
-                            <td class="text-right py-2">
+                            <td class="text-right p-2 col">
                                 <p class="font-weight-light font-italic mb-0" v-if="editReference.id != reference.id">
                                     {{ reference.description }}
                                 </p>
@@ -51,7 +51,7 @@
                                     </button>
                                 </div>
                             </td>
-                            <td>
+                            <td class="px-0 pr-1">
                                 <div class="dropdown">
                                     <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fas fa-fw fa-ellipsis-h"></i>
