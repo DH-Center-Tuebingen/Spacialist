@@ -104,6 +104,14 @@ Vue.prototype.$createDownloadLink = function(content, filename, base64 = false, 
     link.click();
 }
 
+Vue.prototype.$rgb2hex = function(rgb) {
+    let colors = rgb.substring(1);
+    let r = parseInt(colors.substring(0, 2), 16);
+    let g = parseInt(colors.substring(2, 4), 16);
+    let b = parseInt(colors.substring(4, 6), 16);
+    return [r, g, b];
+}
+
 Vue.prototype.$hasConcept = function(url) {
     if(!url) return false;
     return !!this.$root.$data.concepts[url];

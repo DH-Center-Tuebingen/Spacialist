@@ -38,6 +38,8 @@
                 :epsg="epsg"
                 :init-geojson="geometries"
                 :layers="mergedLayers"
+                :layer-labels="labels"
+                :layer-styles="styles"
                 :zoom-to="zoomLayerId">
             </ol-map>
         </div>
@@ -46,6 +48,11 @@
             :id="importModalId"
             :layers="mapLayers">
         </map-gis-import-modal>
+
+        <map-gis-properties-modal
+            :id="propertiesModalId"
+            :on-update="applyPropertyModifications">
+        </map-gis-properties-modal>
 
         <vue-context ref="layerMenu" class="context-menu-wrapper">
             <ul class="list-group list-group-vue-context" slot-scope="_">
@@ -59,6 +66,7 @@
 
 <script>
     Vue.component('map-gis-import-modal', require('./MapGisImportModal.vue'));
+    Vue.component('map-gis-properties-modal', require('./MapGisPropertiesModal.vue'));
     import { VueContext } from 'vue-context';
 
     export default {
@@ -134,6 +142,26 @@
                     this.$createDownloadLink(response.data, `export-${srid}.${ext}`, true, response.headers['content-type']);
                 });
             },
+            applyPropertyModifications(layer, options) {
+                switch(options.type) {
+                    case 'labeling':
+                        if(!Object.keys(options.data).length) {
+                            delete this.tmpLabels[layer.id];
+                        } else {
+                            this.tmpLabels[layer.id] = options.data;
+                        }
+                        break;
+                    case 'styling':
+                        if(!Object.keys(options.data).length) {
+                            delete this.tmpStyles[layer.id];
+                        } else {
+                            this.tmpStyles[layer.id] = options.data;
+                        }
+                        break;
+                }
+                Vue.set(this, 'labels', {...this.tmpLabels});
+                Vue.set(this, 'styles', {...this.tmpStyles});
+            },
             addLayerToSelection(layer) {
                 Vue.set(this.selectedLayers, layer.id, Object.assign({}, layer));
 
@@ -152,6 +180,8 @@
             removeLayerFromSelection(layer) {
                 Vue.delete(this.selectedLayers, layer.id);
                 Vue.delete(this.layerGeometries, layer.id);
+                delete this.tmpLabels[layer.id];
+                delete this.tmpStyles[layer.id];
             },
             getProperties(geodata) {
                 return {
@@ -161,6 +191,11 @@
             },
             openImportModal() {
                 this.$modal.show(this.importModalId);
+            },
+            openPropertiesModal(layer) {
+                this.$modal.show(this.propertiesModalId, {
+                    layer: layer
+                });
             }
         },
         data() {
@@ -172,8 +207,13 @@
                 showFeatureCounts: {},
                 mapLayers: {},
                 layerGeometries: {},
+                labels: {},
+                tmpLabels: {},
+                styles: {},
+                tmpStyles: {},
                 zoomLayerId: 0,
                 importModalId: 'map-gis-import-modal',
+                propertiesModalId: 'map-gis-properties-modal',
                 contextMenu: [
                     {
                         label: 'Zoom to layer',
@@ -199,9 +239,7 @@
                         label: 'Properties',
                         iconClasses: 'fas fa-fw fa-sliders-h',
                         iconContent: '',
-                        callback: layer => {
-                            //
-                        }
+                        callback: layer => this.openPropertiesModal(layer)
                     },
                 ]
             }

@@ -93,6 +93,7 @@
     import Fill from 'ol/style/Fill';
     import Stroke from 'ol/style/Stroke';
     import Style from 'ol/style/Style';
+    import Text from 'ol/style/Text';
 
     import proj4 from 'proj4';
 
@@ -131,6 +132,14 @@
             },
             layers: {
                 required: true,
+                type: Object
+            },
+            layerStyles: {
+                required: false,
+                type: Object
+            },
+            layerLabels: {
+                required: false,
                 type: Object
             },
             drawDisabled: {
@@ -393,12 +402,12 @@
                         title: layerName,
                         visible: l.visible,
                         opacity: l.opacity,
+                        color: l.color,
                         layer: 'entity',
                         layer_id: l.id,
                         source: new Vector({
                             wrapX: false
-                        }),
-                        style: vm.createStyle(l.color)
+                        })
                     });
                 }
                 if(vm.initWkt.length) {
@@ -437,16 +446,22 @@
                             layer = vm.getUnlinkedLayer();
                         }
                         const layerId = layer.id;
+                        const color = geojsonLayers[layerId].getProperties().color;
                         let source = geojsonLayers[layerId].getSource();
+                        feature.setStyle(vm.createStyle(color));
                         source.addFeature(feature);
                     });
                 } else if(vm.initCollection) {
                     let layer = vm.getUnlinkedLayer();
+                    const color = geojsonLayers[layer.id].getProperties().color;
                     let source = geojsonLayers[layer.id].getSource();
                     let features = vm.geoJsonFormat.readFeatures(vm.initCollection, {
                         featureProjection: 'EPSG:3857',
                         dataProjection: vm.initProjection
                     });
+                    features.forEach(f => {
+                        f.setStyle(vm.createStyle(color));
+                    })
                     source.addFeatures(features);
                 }
                 for(let k in geojsonLayers) {
@@ -697,6 +712,27 @@
                     source: source
                 });
             },
+            getEntityLayers() {
+                return this.entityLayersGroup.getLayers().getArray();
+            },
+            getEntityLayerFeatures(id) {
+                let features = [];
+                let layers;
+                if(!id) {
+                    layers = this.getEntityLayers();
+                } else {
+                    layers = [this.getEntityLayerById(id)];
+                }
+                layers.forEach(l => {
+                    const src = l.getSource();
+                    features = features.concat(src.getFeatures());
+                });
+                return features;
+            },
+            getEntityLayerById(id) {
+                const layers = this.entityLayersGroup.getLayers().getArray();
+                return layers.find(l => l.get('layer_id') == id);
+            },
             getLayer(ctid) {
                 for(let k in this.layers) {
                     if(this.layers[k].context_type_id == ctid) {
@@ -731,6 +767,162 @@
                     }
                 });
                 return new Collection(features);
+            },
+            resetStyle(element) {
+                let style = element.getStyle();
+                // If more than one style is active, remove all
+                // beside the first/original
+                if(style && Array.isArray(style) && style.length > 1) {
+                    element.setStyle(style[0]);
+                }
+            },
+            parseAndApplyStyle(options, feature) {
+                let style = {};
+                let text = {};
+                let r, g, b, a;
+                if(options.font) {
+                    const fontSize = options.font.size || 12;
+                    let fontTrans;
+                    let fontStyle, fontWeight;
+                    switch(options.font.transform) {
+                        case 'capitalize':
+                            fontTrans = 'small-caps';
+                            break;
+                        default:
+                            fontTrans = '';
+                            break;
+                    }
+                    switch(options.font.style) {
+                        case 'bold':
+                            fontStyle = '';
+                            fontWeight = 'bold';
+                            break;
+                        case 'italic':
+                            fontStyle = 'italic';
+                            fontWeight = '';
+                            break;
+                        case 'oblique':
+                            fontStyle = 'oblique';
+                            fontWeight = '';
+                            break;
+                        case 'bold-italic':
+                            fontStyle = 'italic';
+                            fontWeight = 'bold';
+                            break;
+                        case 'bold-oblique':
+                            fontStyle = 'oblique';
+                            fontWeight = 'bold';
+                            break;
+                        default:
+                            fontStyle = '';
+                            fontWeight = '';
+                            break;
+                    }
+                    text.font = `${fontStyle} ${fontTrans} ${fontWeight} ${fontSize}px sans-serif`;
+                    [r, g, b] = this.$rgb2hex(options.font.color);
+                    a = 1 - options.font.transparency;
+                    text.fill = new Fill({
+                        color: `rgba(${r}, ${g}, ${b}, ${a})`
+                    });
+                }
+                if(options.buffer) {
+                    [r, g, b] = this.$rgb2hex(options.buffer.color);
+                    a = 1 - options.buffer.transparency;
+                    text.stroke = new Stroke({
+                        color: `rgba(${r}, ${g}, ${b}, ${a})`,
+                        width: options.buffer.size
+                    });
+                }
+                if(options.background) {
+                    [r, g, b] = this.$rgb2hex(options.background.colors.fill);
+                    a = 1 - options.background.transparency;
+                    text.backgroundFill = new Fill({
+                        color: `rgba(${r}, ${g}, ${b}, ${a})`
+                    });
+                    [r, g, b] = this.$rgb2hex(options.background.colors.border);
+                    text.backgroundStroke = new Stroke({
+                        color: `rgba(${r}, ${g}, ${b}, ${a})`,
+                        width: options.background.borderSize
+                    });
+                    let x = options.background.sizes.x || 0;
+                    let y = options.background.sizes.y || 0;
+                    text.padding = [y, x, y, x];
+                }
+                if(options.position) {
+                    text.offsetX = options.position.offsets.x || 0;
+                    text.offsetY = options.position.offsets.y || 0;
+                    let align;
+                    let baseline;
+                    switch(options.position.placement) {
+                        case 'top':
+                            align = 'center';
+                            baseline = 'bottom';
+                            break;
+                        case 'right':
+                            align = 'right';
+                            baseline = 'middle';
+                            break;
+                        case 'bottom':
+                            align = 'center';
+                            baseline = 'top';
+                            break;
+                        case 'left':
+                            align = 'left';
+                            baseline = 'middle';
+                            break;
+                        case 'center':
+                            align = 'center';
+                            baseline = 'bottom';
+                            break;
+                        case 'top-right':
+                            align = 'right';
+                            baseline = 'bottom';
+                            break;
+                        case 'top-left':
+                            align = 'left';
+                            baseline = 'bottom';
+                            break;
+                        case 'bottom-right':
+                            align = 'right';
+                            baseline = 'top';
+                            break;
+                        case 'bottom-left':
+                            align = 'left';
+                            baseline = 'top';
+                            break;
+                        default:
+                            align = 'center';
+                            baseline = 'middle';
+                            break;
+                    }
+                    text.textAlign = align;
+                    text.textBaseline = baseline;
+                }
+                options.getText(feature).then(featureText => {
+                    text.text = featureText;
+                    style.text = new Text(text);
+                    let newStyle = new Style(style);
+                    let newStyles = [];
+                    const oldStyle = feature.getStyle();
+                    if(oldStyle) {
+                        newStyles.push(oldStyle);
+                    }
+                    newStyles.push(newStyle);
+                    feature.setStyle(newStyles);
+                });
+            },
+            applyLabels() {
+                // Reset all styles
+                let features = this.getEntityLayerFeatures();
+                features.forEach(l => {
+                    this.resetStyle(l);
+                });
+                for(let i in this.layerLabels) {
+                    let features = this.getEntityLayerFeatures(i);
+                    features.forEach(f => {
+                        this.parseAndApplyStyle(this.layerLabels[i], f);
+                    });
+                }
             },
             setExtent(extent = null) {
                 if(!extent) extent = this.getEntityExtent();
@@ -804,21 +996,19 @@
                     this.modify.setActive(false, cancelled);
                 }
             },
-            createStyle(color) {
-                const defaultColor = '#ffcc33';
-                const activeColor = color || defaultColor;
+            createStyle(color = '#ffcc33') {
                 return new Style({
                     fill: new Fill({
                         color: 'rgba(255, 255, 255, 0.2)'
                     }),
                     stroke: new Stroke({
-                        color: color || activeColor,
+                        color: color,
                         width: 2
                     }),
                     image: new CircleStyle({
                         radius: 7,
                         fill: new Fill({
-                            color: color || activeColor
+                            color: color
                         }),
                         stroke: new Stroke({
                             color: 'rgba(0, 0, 0, 0.2)',
@@ -1068,10 +1258,15 @@
                 this.initLayerData();
                 this.updateLayerGroups();
             },
+            layerLabels: function(newLabels, oldLabels) {
+                this.applyLabels();
+            },
+            layerStyles: function(newStyle, oldStyles) {
+
+            },
             zoomTo: function(newZoomLayerId, oldZoomLayerId) {
                 if(!newZoomLayerId) return;
-                const layers = this.entityLayersGroup.getLayers().getArray();
-                const zoomLayer = layers.find(l => l.get('layer_id') == newZoomLayerId);
+                const zoomLayer = this.getEntityLayerById(newZoomLayerId);
                 if(!zoomLayer) return;
                 const zoomLayerSource = zoomLayer.getSource();
                 if(!zoomLayerSource) return;

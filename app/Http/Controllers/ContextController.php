@@ -53,7 +53,7 @@ class ContextController extends Controller {
         return response()->json($context);
     }
 
-    public function getData($id) {
+    public function getData($id, $aid = null) {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
@@ -67,8 +67,14 @@ class ContextController extends Controller {
                 'error' => 'This context does not exist'
             ], 400);
         }
+        if(isset($aid)) {
+            $attributes = AttributeValue::where('context_id', $id)
+                ->where('attribute_id', $aid)
+                ->get();
+        } else {
+            $attributes = AttributeValue::where('context_id', $id)->get();
+        }
 
-        $attributes = AttributeValue::where('context_id', $id)->get();
         $data = [];
         foreach($attributes as $a) {
             $datatype = Attribute::find($a->attribute_id)->datatype;
