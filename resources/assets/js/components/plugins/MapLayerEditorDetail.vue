@@ -174,8 +174,6 @@
                 // TODO only patch modified/allowed values
                 vm.$http.patch(`map/layer/${lid}`, data).then(function(response) {
                     vm.$showToast('Layer updated', `Layer ${layer.name} successfully updated.`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             }
         },

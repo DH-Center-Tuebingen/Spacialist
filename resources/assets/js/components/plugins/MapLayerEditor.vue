@@ -46,8 +46,6 @@
                 vm.$http.post('/map/layer', data).then(function(response) {
                     if(is_overlay) vm.overlays.push(response.data);
                     else vm.baselayer.push(response.data);
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             onLayerSelect(layer) {

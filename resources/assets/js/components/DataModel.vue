@@ -215,8 +215,6 @@
         beforeRouteEnter(to, from, next) {
             $http.get('editor/dm/attribute').then(response => {
                 next(vm => vm.init(response.data));
-            }).catch(error => {
-                $throwError(error);
             });
         },
         mounted() {},
@@ -244,8 +242,6 @@
                 vm.$http.post('/editor/dm/attribute', data).then(function(response) {
                     vm.attributeList.push(response.data);
                     vm.hideNewAttributeModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             deleteAttribute(attribute) {
@@ -259,8 +255,6 @@
                         vm.attributeList.splice(index, 1);
                     }
                     vm.hideDeleteAttributeModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             createContextType(contextType) {
@@ -275,8 +269,6 @@
                 vm.$http.post('/editor/dm/context_type', data).then(function(response) {
                     vm.localContextTypes.push(response.data);
                     vm.hideNewContextTypeModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             deleteContextType(contextType) {
@@ -290,8 +282,6 @@
                         vm.localContextTypes.splice(index, 1);
                     }
                     vm.hideDeleteContextTypeModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             onCreateAttribute() {
@@ -301,8 +291,6 @@
                         vm.attributeTypes.push(response.data[i]);
                     }
                     vm.$modal.show('new-attribute-modal');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             onDeleteAttribute(attribute) {
@@ -313,8 +301,6 @@
                     vm.setModalSelectedAttribute(attribute);
                     vm.openedModal = 'delete-attribute-modal';
                     vm.$modal.show('delete-attribute-modal');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             hideNewAttributeModal() {
@@ -357,8 +343,6 @@
                     vm.setModalSelectedContextType(contextType);
                     vm.openedModal = 'delete-context-type-modal';
                     vm.$modal.show('delete-context-type-modal');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             hideNewContextTypeModal() {

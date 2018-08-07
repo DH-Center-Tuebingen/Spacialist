@@ -49,8 +49,6 @@
                     }
                     vm.htmlContent = data;
                     vm.htmlLoaded = true;
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             }
         },

@@ -148,8 +148,6 @@
                 const users = response.data.users;
                 const roles = response.data.roles;
                 next(vm => vm.init(users, roles));
-            }).catch(error => {
-                $throwError(error);
             });
         },
         mounted() {},
@@ -172,8 +170,6 @@
                 vm.$http.post('/api/user', newUser).then(function(response) {
                     vm.userList.push(response.data);
                     vm.hideNewUserModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             onPatchUser(id) {
@@ -191,8 +187,6 @@
                     vm.$http.patch(`/api/user/${id}/role`, data).then(function(response) {
                         vm.setPristine(`roles_${id}`);
                         vm.$showToast('User updated', `${user.name} successfully updated.`, 'success');
-                    }).catch(function(error) {
-                        vm.$throwError(error);
                     });
                 }
             },
@@ -217,8 +211,6 @@
                     const index = vm.userList.findIndex(u => u.id == id);
                     if(index > -1) vm.userList.splice(index, 1);
                     vm.hideDeleteUserModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             updatePassword(id) {

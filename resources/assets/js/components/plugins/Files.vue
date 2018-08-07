@@ -531,20 +531,14 @@
                 vm.$http.get('/file/filter/category').then(function(response) {
                     vm.filterTypeList = [];
                     vm.filterTypeList = response.data;
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
                 vm.$http.get('/file/filter/camera').then(function(response) {
                     vm.filterCameraList = [];
                     vm.filterCameraList = response.data;
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
                 vm.$http.get('/file/filter/date').then(function(response) {
                     vm.filterDateList = [];
                     vm.filterDateList = response.data;
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             toggleFilters() {
@@ -600,8 +594,6 @@
                         vm.selectedFile[k] = filedata[k];
                     }
                     vm.selectedFile.editing = false;
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             cancelUpdateFilename() {
@@ -719,8 +711,6 @@
                     Vue.set(filesObj, 'pagination', resp);
                     filesObj.fetchingFiles = false;
                     vm.updateFileState(filesObj);
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             updateFileState(filesObj) {
@@ -821,8 +811,6 @@
                     vm.onFileDeleted(file, vm.allFiles);
                     vm.hideDeleteFileModal();
                     vm.$showToast('File deleted', `${file.name} successfully deleted.`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             hideDeleteFileModal() {
@@ -837,8 +825,6 @@
                 vm.$http.get(`/file/${id}/link_count`).then(function(response) {
                     vm.linkCount = response.data;
                     vm.$modal.show('unlink-file-modal');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             unlinkFile(file, context) {
@@ -851,8 +837,6 @@
                     vm.onFileUnlinked(file, vm.unlinkedFiles, vm.linkCount);
                     vm.hideUnlinkFileModal();
                     vm.$showToast('File unlinked', `${file.name} successfully unlinked from ${context.name}.`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             hideUnlinkFileModal() {
@@ -871,8 +855,6 @@
                     vm.onFileLinked(file, vm.linkedFiles);
                     vm.onFileDeleted(file, vm.unlinkedFiles);
                     vm.$showToast('File linked', `${file.name} successfully linked to ${context.name}.`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             enablePropertyEditing(property) {
@@ -888,8 +870,6 @@
                 data[p.key] = vm.selectedFile[p.key];
                 vm.$http.patch(`/file/${id}/property`, data).then(function(response) {
                     vm.resetEditingProperty();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             cancelPropertyEditing() {

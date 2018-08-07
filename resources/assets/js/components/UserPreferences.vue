@@ -236,8 +236,6 @@
         beforeRouteEnter(to, from, next) {
             $http.get(`preference/${to.params.id}`).then(response => {
                 next(vm => vm.init(response.data));
-            }).catch(error => {
-                $throwError(error);
             });
         },
         mounted() {},
@@ -257,8 +255,6 @@
                 vm.$http.patch('/api/preference/' + pref.id, data).then(function(response) {
                     const label = pref.label; // TODO translation
                     vm.$showToast('Preference updated', `${label} successfully updated.`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             }
         },

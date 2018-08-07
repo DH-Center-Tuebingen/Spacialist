@@ -1059,8 +1059,6 @@
                     feature.setProperties({
                         entity: Object.assign({}, entity)
                     });
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             unlink(feature, entity) {
@@ -1073,8 +1071,6 @@
                     feature.setProperties({
                         entity: {}
                     });
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             geometryToTable(g) {

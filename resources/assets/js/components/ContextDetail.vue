@@ -39,8 +39,6 @@
                         to: to
                     });
                 });
-            }).catch(error => {
-                $throwError(error);
             });
         },
         beforeRouteUpdate(to, from, next) {
@@ -53,8 +51,6 @@
                     $http.get(`context/${entityId}`).then(response => {
                         vm.init(response.data);
                         next();
-                    }).catch(error => {
-                        $throwError(error);
                     });
                     vm.eventBus.$emit('entity-change', {
                         type: 'update',
@@ -182,8 +178,6 @@
                     }
                     Vue.set(vm.entity, 'references', data);
                     Vue.set(vm, 'dataLoaded', true);
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             saveEntity(entity) {
@@ -225,8 +219,6 @@
                 return vm.$http.patch('/context/'+cid+'/attributes', patches).then(function(response) {
                     vm.resetFlags();
                     vm.$showToast('Entity updated', `Data of ${entity.name} successfully updated.`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             showMetadata(attribute) {
@@ -262,8 +254,6 @@
                     oldData.possibility_description = newData.possibility_description;
                     const attributeName = vm.$translateConcept(reference.attribute.thesaurus_url);
                     vm.$showToast('Certainty updated', `Certainty of ${attributeName} successfully set to ${newData.possibility}% (${newData.possibility_description}).`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             addReference(item, reference) {
@@ -283,8 +273,6 @@
                     }
                     refs.push(response.data);
                     return response.data;
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             deleteReference(reference, referenceModal) {
@@ -298,8 +286,6 @@
                         refs.splice(index, 1);
                         return index;
                     }
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             updateReference(referenceClone, referenceModal) {
@@ -317,8 +303,6 @@
                 return vm.$http.patch(`/context/reference/${id}`, data).then(function(response) {
                     ref.description = referenceClone.description;
                     // Vue.set(referenceModal, 'references', refs.slice());
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             hasReferenceGroup: function(group) {

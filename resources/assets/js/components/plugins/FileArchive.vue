@@ -55,8 +55,6 @@
                         vm.addNodeProperties(entry);
                         vm.fileList.push(entry);
                     });
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             onSelect(eventData) {
@@ -69,8 +67,6 @@
                 const url = '/file/'+id+'/archive/download?p='+p;
                 vm.$http.get(url).then(function(response) {
                     vm.$createDownloadLink(response.data, selectedFile.clean_filename, true);
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             itemToggle(eventData) {

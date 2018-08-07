@@ -48,8 +48,6 @@
                         vm.geojson.push(geo);
                     }
                     vm.dataInitialized = true;
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             getProperties(geodata) {
@@ -63,8 +61,6 @@
                 features.forEach(f => {
                     vm.$http.delete(`/map/${f.getProperties().id}`).then(function(response) {
 
-                    }).catch(function(error) {
-                        vm.$throwError(error);
                     });
                 });
             },
@@ -82,8 +78,6 @@
                         // TODO update feature
                         feature.setProperties(vm.getProperties(geodata));
                     }
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             updateFeatures(features, wkt) {
@@ -95,8 +89,6 @@
                     };
                     vm.$http.patch(`/map/${f.getProperties().id}`, data).then(function(response) {
 
-                    }).catch(function(error) {
-                        vm.$throwError(error);
                     });
                 });
             }

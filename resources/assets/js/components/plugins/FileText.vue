@@ -108,8 +108,6 @@
                         data = response.data;
                     }
                     vm.content = data;
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             updateFile(file, content) {
@@ -123,8 +121,6 @@
                 }).then(function(response) {
                     Vue.set(vm.file, 'modified', response.data.modified);
                     vm.setPristine();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             setPristine() {

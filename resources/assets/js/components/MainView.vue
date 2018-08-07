@@ -151,8 +151,6 @@
             }).then(response => {
                 roots = response.data;
                 next(vm => vm.init(roots, bibliography, to.query.tab, to.params.id));
-            }).catch(error => {
-                $throwError(error);
             });
         },
         beforeRouteUpdate(to, from, next) {
@@ -269,8 +267,6 @@
                     if (entity.callback) {
                         entity.callback(response.data, entity.parent);
                     }
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             requestAddNewEntity(callback, parent) {
@@ -311,8 +307,6 @@
                         entity.callback(entity);
                     }
                     vm.hideDeleteEntityModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             requestDeleteEntity(cb, entity, path) {

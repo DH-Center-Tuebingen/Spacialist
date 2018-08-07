@@ -192,14 +192,14 @@
                         oldParent.children_count--;
                         oldParent.state.openable = oldParent.children_count > 0;
                     }
-                }).catch(error => this.$throwError(error));
+                });
             },
             fetchChildren(id) {
                 const vm = this;
                 return $http.get('/context/byParent/'+id)
                 .then(response => {
                     return response.data.map(n => new Node(n, vm));
-                }).catch(error => this.$throwError(error));
+                });
             },
             onAdd(entity, parent) {
                 const node = new Node(entity, this);

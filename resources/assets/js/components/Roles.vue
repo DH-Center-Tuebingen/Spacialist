@@ -152,8 +152,6 @@
                 const roles = response.data.roles;
                 const permissions = response.data.permissions;
                 next(vm => vm.init(roles, permissions));
-            }).catch(error => {
-                $throwError(error);
             });
         },
         mounted() {},
@@ -176,8 +174,6 @@
                 vm.$http.post('/api/role', newRole).then(function(response) {
                     vm.roleList.push(response.data);
                     vm.hideNewRoleModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             onPatchRole(id) {
@@ -195,8 +191,6 @@
                     vm.$http.patch(`/api/role/${id}/permission`, data).then(function(response) {
                         vm.setPristine(`perms_${id}`);
                         vm.$showToast('Role updated', `${role.display_name} successfully updated.`, 'success');
-                    }).catch(function(error) {
-                        vm.$throwError(error);
                     });
                 }
             },
@@ -221,8 +215,6 @@
                     const index = vm.roleList.findIndex(r => r.id == id);
                     if(index > -1) vm.roleList.splice(index, 1);
                     vm.hideDeleteRoleModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             isDirty(fieldname) {

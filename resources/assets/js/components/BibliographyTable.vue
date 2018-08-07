@@ -390,8 +390,6 @@
         beforeRouteEnter(to, from, next) {
             $http.get('bibliography').then(response => {
                 next(vm => vm.init(response.data));
-            }).catch(error => {
-                $throwError(error);
             });
         },
         created() {
@@ -472,15 +470,11 @@
                             entry[k] = item.fields[k];
                         }
                         vm.hideNewItemModal();
-                    }).catch(function(error) {
-                        vm.$throwError(error);
                     });
                 } else {
                     vm.$http.post('/api/bibliography', data).then(function(response) {
                         vm.localEntries.push(response.data);
                         vm.hideNewItemModal();
-                    }).catch(function(error) {
-                        vm.$throwError(error);
                     });
                 }
             },
@@ -513,8 +507,6 @@
                         vm.localEntries.splice(index, 1);
                     }
                     vm.hideDeleteEntryModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             requestDeleteEntry(entry) {
@@ -524,8 +516,6 @@
                     vm.deleteItem = Object.assign({}, entry);
                     vm.deleteItem.count = response.data;
                     vm.$modal.show('delete-bibliography-item-modal');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             hideDeleteEntryModal() {

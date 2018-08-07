@@ -218,8 +218,6 @@
                             let index = this.entityAttributes.findIndex(a => a.id == id);
                             this.attributes[i].isDisabled = index > -1;
                         }
-                    }).catch(error => {
-                        this.$throwError(error);
                     });
             },
             updateContextType() {
@@ -233,8 +231,6 @@
                 vm.$http.post('/editor/dm/'+id+'/relation', data).then(function(response) {
                     const name = vm.$translateConcept(vm.entityType.thesaurus_url);
                     vm.$showToast('Entity-Type updated', `${name} successfully updated.`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             addAttributeToContextType(oldIndex, index) {
@@ -257,8 +253,6 @@
                     const attrName = vm.$translateConcept(response.data.thesaurus_url);
                     const etName = vm.$translateConcept(vm.entityType.thesaurus_url);
                     vm.$showToast('Attribute added', `${attrName} successfully added to ${etName}.`, 'success');
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
 
             },
@@ -274,8 +268,6 @@
                 data.d_value = vm.getDependencyValue(options.value, options.attribute.datatype);
                 vm.$http.patch(`/editor/dm/context_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
                     vm.hideEditContextAttributeModal();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             onEditContextAttribute(attribute) {
@@ -323,8 +315,6 @@
                         }
                     }
                     this.hideRemoveAttributeModal();
-                }).catch(error => {
-                    this.$throwError(error);
                 });
             },
             reorderContextAttribute(oldIndex, index) {
@@ -351,8 +341,6 @@
                             this.entityAttributes[i].position++;
                         }
                     }
-                }).catch(function(error) {
-                    this.$throwError(error);
                 });
             },
             dependencyAttributeSelected(attribute) {
@@ -373,8 +361,6 @@
                                     vm.depends.values.push(selections[i]);
                                 }
                             }
-                        }).catch(function(error) {
-                            vm.$throwError(error);
                         });
                         break;
                     default:
@@ -401,8 +387,6 @@
                     this.setAttributeValueCount(response.data);
                     this.openedModal = 'remove-attribute-from-ct-modal';
                     this.$modal.show('remove-attribute-from-ct-modal');
-                }).catch(function(error) {
-                    this.$throwError(error);
                 });
             },
             hideRemoveAttributeModal() {

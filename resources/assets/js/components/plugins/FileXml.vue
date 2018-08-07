@@ -62,8 +62,6 @@
                 const vm = this;
                 vm.$http.get(vm.file.url, vm.storageConfig).then(function(response) {
                     vm.content = response.data;
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             updateFile(file, content) {
@@ -77,8 +75,6 @@
                 }).then(function(response) {
                     Vue.set(vm.file, 'modified', response.data.modified);
                     vm.setPristine();
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             setPristine() {

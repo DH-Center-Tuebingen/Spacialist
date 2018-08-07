@@ -267,6 +267,8 @@ Axios.interceptors.response.use(response => {
                 name: 'login'
             }
         });
+    } else {
+        Vue.prototype.$throwError(error);
     }
     return Promise.reject(error);
 });
