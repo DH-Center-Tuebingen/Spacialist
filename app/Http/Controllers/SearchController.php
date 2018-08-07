@@ -41,12 +41,10 @@ class SearchController extends Controller {
             });
         } else if(starts_with($q, self::$shebangPrefix['files'])) {
             $files = File::search(str_after($q, self::$shebangPrefix['files']));
-            foreach($files as $file) {
-                $file->setFileInfo();
-            }
             $matches = $files->get();
             $matches->map(function($m) {
                 $m->group = 'files';
+                $m->setFileInfo();
                 return $m;
             });
         } else if(starts_with($q, self::$shebangPrefix['geodata'])) {
@@ -57,12 +55,10 @@ class SearchController extends Controller {
             });
         } else {
             $files = File::search($q);
-            foreach($files as $file) {
-                $file->setFileInfo();
-            }
             $files = $files->get();
             $files->map(function($f) {
                 $f->group = 'files';
+                $f->setFileInfo();
                 return $f;
             });
             $entities = Context::search($q)->get();
@@ -80,7 +76,12 @@ class SearchController extends Controller {
                 $b->group = 'bibliography';
                 return $b;
             });
-            $matches = $files->concat($entities)->concat($geodata)->concat($bibliography)->sortByDesc('relevance')->values()->all();
+            $matches = $files->concat($entities)
+                ->concat($geodata)
+                ->concat($bibliography)
+                ->sortByDesc('relevance')
+                ->values()
+                ->all();
         }
         return response()->json($matches);
     }
