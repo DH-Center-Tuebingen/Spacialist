@@ -505,6 +505,10 @@
                 required: false,
                 type: Boolean,
                 default: false
+            },
+            params: {
+                required: false,
+                type: Object
             }
         },
         activated() {
@@ -512,10 +516,7 @@
                 this.linkedFilesChanged();
             }
             if(this.$router.history.current.query.f) {
-                const fileId = this.$router.history.current.query.f;
-                $http.get(`/file/${fileId}`).then(response => {
-                    this.showFileModal(response.data);
-                });
+                this.openFile(this.$router.history.current.query.f);
             }
         },
         mounted() {
@@ -619,6 +620,11 @@
                 this.linkedFiles.apiUrl = '/file/linked/' + this.context.id;
                 this.resetFiles('linkedFiles');
                 this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
+            },
+            openFile(id) {
+                $http.get(`/file/${id}`).then(response => {
+                    this.showFileModal(response.data);
+                });
             },
             setAction(id) {
                 // disable linked tab if no context is selected
@@ -1098,6 +1104,12 @@
             context: function(newContextDataLoaded, oldContextDataLoaded) {
                 if(newContextDataLoaded) {
                     this.linkedFilesChanged();
+                }
+            },
+            params: function(newParams, oldParams) {
+                // check if (different) file route is activated
+                if(newParams.f && oldParams.f != newParams.f) {
+                    this.openFile(newParams.f);
                 }
             }
         }

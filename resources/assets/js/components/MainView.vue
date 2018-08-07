@@ -35,7 +35,8 @@
                     <component
                         :context="selectedContext"
                         :context-data-loaded="dataLoaded"
-                        :is="activePlugin">
+                        :is="activePlugin"
+                        :params="$router.history.current.query">
                     </component>
                 </keep-alive>
                 <div v-show="tab == 'references'" class="h-100 scroll-y-auto">

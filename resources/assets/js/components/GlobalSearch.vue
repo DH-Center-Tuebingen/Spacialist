@@ -93,14 +93,38 @@
                     this.query = item.name;
                     switch (item.group) {
                         case 'entities':
-                            this.$router.push({name: 'contextdetail', params: {id: item.id}});
+                            this.$router.push({
+                                name: 'contextdetail',
+                                params: {
+                                    id: item.id
+                                }
+                            });
                             break;
                         case 'files':
-                            this.$router.push({name: 'files', params: {id: item.id}});
+                            const currRoute = this.$router.history.current;
+                            const query = {
+                                tab: 'files',
+                                f: item.id
+                            };
+                            // Only append, if current route is one of the
+                            // MainView routes
+                            const append = currRoute.name == 'home' || currRoute.name == 'contextdetail';
+                            this.$router.push({
+                                append: append,
+                                query: query
+                            });
+                            break;
                         case 'bibliography':
-                            //TODO
+                            this.$router.push({
+                                name: 'bibedit',
+                                params: {
+                                    id: item.id
+                                }
+                            });
+                            break;
                         case 'geodata':
                             //TODO
+                            break;
                         default:
                             this.$throwError({message: `Action is not yet implemented for items of type ${item.group}.`});
                     }
