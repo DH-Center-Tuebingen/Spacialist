@@ -443,7 +443,9 @@
                 }
             },
             onModalClose() {
-                this.$router.go(-1);
+                this.$router.push({
+                    name: 'bibliography'
+                });
             },
             addBibliographyItem(item) {
                 if(!this.$can('add_remove_literature')) return;
