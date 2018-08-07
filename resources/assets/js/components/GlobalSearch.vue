@@ -78,15 +78,7 @@
                     if(response && this.query) {
                         let data = response.data;
                         data = this.prepareResponseData ? this.prepareResponseData(data) : data;
-                        for(let k in data) {
-                            if(this.limit) {
-                                data[k] = data[k].slice(0, this.limit).map(d => {
-                                    d.group = k;
-                                    return d;
-                                });
-                            }
-                        }
-                        this.items = Object.values(data).flat();
+                        this.items = data;
                         this.current = -1;
                         this.loading = false;
 
@@ -99,6 +91,19 @@
             onHit(item) {
                 if(item) {
                     this.query = item.name;
+                    switch (item.group) {
+                        case 'entities':
+                            this.$router.push({name: 'contextdetail', params: {id: item.id}});
+                            break;
+                        case 'files':
+                            this.$router.push({name: 'files', params: {id: item.id}});
+                        case 'bibliography':
+                            //TODO
+                        case 'geodata':
+                            //TODO
+                        default:
+                            this.$throwError({message: `Action is not yet implemented for items of type ${item.group}.`});
+                    }
                 } else {
                     this.query = '';
                 }
@@ -115,7 +120,6 @@
         data () {
             return {
                 src: 'search',
-                limit: 5,
                 minChars: 3,
                 shebangLength: 3, // is always '!' + letter + space
                 selectFirst: false

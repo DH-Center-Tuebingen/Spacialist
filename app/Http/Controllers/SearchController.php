@@ -28,36 +28,59 @@ class SearchController extends Controller {
         }
         $q = $request->query('q');
         if(starts_with($q, self::$shebangPrefix['bibliography'])) {
-            $matches = [
-                'bibliography' => Bibliography::search(str_after($q, self::$shebangPrefix['bibliography']))
-            ];
+            $matches = Bibliography::search(str_after($q, self::$shebangPrefix['bibliography']))->get();
+            $matches->map(function($m) {
+                $m->group = 'bibliography';
+                return $m;
+            });
         } else if(starts_with($q, self::$shebangPrefix['entities'])) {
-            $matches = [
-                'entities' => Context::search(str_after($q, self::$shebangPrefix['entities']))
-            ];
+            $matches = Context::search(str_after($q, self::$shebangPrefix['entities']))->get();
+            $matches->map(function($m) {
+                $m->group = 'entities';
+                return $m;
+            });
         } else if(starts_with($q, self::$shebangPrefix['files'])) {
             $files = File::search(str_after($q, self::$shebangPrefix['files']));
             foreach($files as $file) {
                 $file->setFileInfo();
             }
-            $matches = [
-                'files' => $files
-            ];
+            $matches = $files->get();
+            $matches->map(function($m) {
+                $m->group = 'files';
+                return $m;
+            });
         } else if(starts_with($q, self::$shebangPrefix['geodata'])) {
-            $matches = [
-                'geodata' => Geodata::search(str_after($q, self::$shebangPrefix['geodata']))
-            ];
+            $matches = Geodata::search(str_after($q, self::$shebangPrefix['geodata']))->get();
+            $matches->map(function($m) {
+                $m->group = 'geodata';
+                return $m;
+            });
         } else {
             $files = File::search($q);
             foreach($files as $file) {
                 $file->setFileInfo();
             }
-            $matches = [
-                'bibliography' => Bibliography::search($q),
-                'entities' => Context::search($q),
-                'files' => $files,
-                'geodata' => Geodata::search($q, true)
-            ];
+            $files = $files->get();
+            $files->map(function($f) {
+                $f->group = 'files';
+                return $f;
+            });
+            $entities = Context::search($q)->get();
+            $entities->map(function($e) {
+                $e->group = 'entities';
+                return $e;
+            });
+            $geodata = Geodata::search($q)->get();
+            $geodata->map(function($g) {
+                $g->group = 'geodata';
+                return $g;
+            });
+            $bibliography = Bibliography::search($q)->get();
+            $bibliography->map(function($b) {
+                $b->group = 'bibliography';
+                return $b;
+            });
+            $matches = $files->concat($entities)->concat($geodata)->concat($bibliography)->sortByDesc('relevance')->values()->all();
         }
         return response()->json($matches);
     }

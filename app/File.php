@@ -16,9 +16,12 @@ use lsolesen\pel\PelDataWindow;
 use lsolesen\pel\PelDataWindowOffsetException;
 use lsolesen\pel\PelJpegInvalidMarkerException;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
+use Nicolaslopezj\Searchable\SearchableTrait;
 
 class File extends Model
 {
+    use SearchableTrait;
+
     protected $table = 'photos';
     /**
      * The attributes that are assignable.
@@ -41,6 +44,15 @@ class File extends Model
     protected $appends = [
         'category',
         'exif'
+    ];
+
+    protected $searchable = [
+        'columns' => [
+            'name' => 10,
+            'description' => 8,
+            'cameraname' => 1,
+            'copyright' => 1,
+        ],
     ];
 
 
@@ -360,22 +372,6 @@ class File extends Model
             }
             $file->save();
         }
-    }
-
-    public static function search($term) {
-        $term = "%$term%";
-        $query = self::query();
-        $query = self::searchBuilder($term, $query);
-        return $query->get();
-    }
-
-    public static function searchBuilder($term, $builder) {
-        $builder->where('name', 'ILIKE', $term)
-            ->orWhere('cameraname', 'ILIKE', $term)
-            ->orWhere('copyright', 'ILIKE', $term)
-            ->orWhere('description', 'ILIKE', $term)
-            ->get();
-        return $builder;
     }
 
     public function setContent($fileObject) {

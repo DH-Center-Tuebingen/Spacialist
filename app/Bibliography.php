@@ -3,9 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Nicolaslopezj\Searchable\SearchableTrait;
 
 class Bibliography extends Model
 {
+    use SearchableTrait;
 
     protected $table = 'literature';
     /**
@@ -40,6 +42,37 @@ class Bibliography extends Model
         'school',
         'series',
         'citekey'
+    ];
+
+    protected $searchable = [
+        'columns' => [
+            'author' => 10,
+            'editor' => 10,
+            'title' => 10,
+            'journal' => 10,
+            'year' => 10,
+            'pages' => 5,
+            'volume' => 5,
+            'number' => 5,
+            'booktitle' => 10,
+            'publisher' => 10,
+            'address' => 5,
+            'misc' => 8,
+            'howpublished' => 5,
+            'type' => 5,
+            'annote' => 5,
+            'chapter' => 5,
+            'crossref' => 5,
+            'edition' => 5,
+            'institution' => 5,
+            'key' => 5,
+            'month' => 5,
+            'note' => 5,
+            'organization' => 5,
+            'school' => 5,
+            'series' => 5,
+            'citekey' => 5
+        ]
     ];
 
     const patchRules = [
@@ -119,50 +152,6 @@ class Bibliography extends Model
             $key = $initalKey . $suffixes[$i++];
         }
         return $key;
-    }
-
-    public static function search($term) {
-        $term = "%$term%";
-        $query = self::query();
-        $query = self::searchBuilder($term, $query);
-        return $query->get();
-    }
-
-    public static function searchBuilder($term, $builder) {
-        $keys = [
-            'author',
-            'editor',
-            'title',
-            'journal',
-            'year',
-            'pages',
-            'volume',
-            'number',
-            'booktitle',
-            'publisher',
-            'address',
-            'misc',
-            'howpublished',
-            'type',
-            'annote',
-            'chapter',
-            'crossref',
-            'edition',
-            'institution',
-            'key',
-            'month',
-            'note',
-            'organization',
-            'school',
-            'series',
-            'citekey'
-        ];
-        $firstKey = array_shift($keys);
-        $builder = self::where($firstKey, 'ILIKE', $term);
-        foreach($keys as $key) {
-            $builder->orWhere($key, 'ILIKE', $term);
-        }
-        return $builder;
     }
 
     public function contexts() {
