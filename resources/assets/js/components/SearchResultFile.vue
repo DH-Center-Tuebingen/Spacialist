@@ -22,9 +22,7 @@
                 type: Object
             },
         },
-        mounted () {
-            console.log(this.data);
-        },
+        mounted () {},
         methods: {
         },
         data () {
