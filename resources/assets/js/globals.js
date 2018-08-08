@@ -117,6 +117,13 @@ Vue.prototype.$hasConcept = function(url) {
     return !!this.$root.$data.concepts[url];
 }
 
+
+Vue.prototype.$translateLabel = function(element, prop) {
+    const value = element[prop];
+    if(!value) return element;
+    return this.$translateConcept(value);
+}
+
 Vue.prototype.$translateConcept = function(url) {
     const concepts = this.$root.$data.concepts;
     if(!url || !concepts) return url;

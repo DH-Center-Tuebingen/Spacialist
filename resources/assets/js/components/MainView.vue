@@ -333,10 +333,8 @@
                 };
                 this.addNewEntity(duplicate);
             },
-            translateLabel(element, label) {
-                let value = element[label];
-                if(!value) return element;
-                return this.$translateConcept(element[label]);
+            translateLabel(element, prop) {
+                return this.$translateLabel(element, prop);
             }
         },
         data() {

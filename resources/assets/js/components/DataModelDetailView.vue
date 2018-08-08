@@ -437,9 +437,7 @@
                 this.modalSelectedEntityType = Object.assign({}, contextType);
             },
             translateLabel(element, prop) {
-                const value = element[prop];
-                if(!value) return element;
-                return this.$translateConcept(value);
+                return this.$translateLabel(element, prop);
             }
         },
         data() {
