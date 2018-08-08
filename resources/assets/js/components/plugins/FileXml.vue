@@ -1,5 +1,5 @@
 <template>
-    <div class="modal-content-80-fix d-flex flex-column justify-content-start align-items-center">
+    <div class="h-100 d-flex flex-column justify-content-start align-items-center">
         <div>
             <button class="btn btn-outline-secondary" @click="toggleEditMode()">
                 <i class="fas fa-fw fa-edit"></i> Toggle Edit mode
@@ -14,7 +14,7 @@
                 <i class="fab fa-fw fa-html5"></i> Toggle HTML-Rendering
             </button>
         </div>
-        <div class="d-flex mt-2 w-100 h-100 w-100">
+        <div class="d-flex mt-2 w-100 col px-0">
             <div class="col px-1" v-if="editMode">
                 <textarea v-validate="" name="editTextarea" class="w-100 h-100 p-2" v-model="content"></textarea>
             </div>

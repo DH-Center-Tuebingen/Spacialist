@@ -159,7 +159,7 @@
             </ul>
         </div>
 
-        <modal name="file-modal" width="80%" height="auto" :scrollable="true" @closed="hideFileModal">
+        <modal name="file-modal" width="80%" height="80%" :scrollable="true" @closed="hideFileModal">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" @mouseenter="onFileHeaderHover(true)" @mouseleave="onFileHeaderHover(false)">
@@ -183,237 +183,235 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body text-center">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <component id="file-container" :is="fileCategoryComponent" :file="selectedFile" :storage-config="storageConfig" :context="localContext"></component>
+                <div class="modal-body row col text-center">
+                    <div class="col-md-6 h-100">
+                        <component id="file-container" :is="fileCategoryComponent" :file="selectedFile" :storage-config="storageConfig" :context="localContext"></component>
+                    </div>
+                    <div class="col-md-6 h-100 d-flex flex-column">
+                        <ul class="nav nav-tabs nav-fill">
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: modalTab == 'properties'}" @click="modalTab = 'properties'">
+                                    <i class="fas fa-fw fa-sliders-h"></i> Properties
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{active: modalTab == 'links'}" @click="modalTab = 'links'">
+                                    <i class="fas fa-fw fa-link"></i> Links
+                                </a>
+                            </li>
+                            <li class="nav-item" v-if="selectedFile.exif">
+                                <a class="nav-link" :class="{active: modalTab == 'exif'}" @click="modalTab = 'exif'">
+                                    <i class="fas fa-fw fa-camera"></i> Exif
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="ml-4 mr-4" v-show="modalTab == 'properties'">
+                            <h5 class="mt-3">Properties</h5>
+                            <table class="table table-striped table-hover table-sm mb-0">
+                                <tbody>
+                                    <tr v-for="p in fileProperties" class="d-flex justify-content-between">
+                                        <td class="text-left font-weight-bold">
+                                            {{p}}
+                                        </td>
+                                        <td class="col text-right">
+                                            <span class="text-muted" v-if="editingProperty.key != p">
+                                                {{selectedFile[p]}}
+                                            </span>
+                                            <div class="d-flex" v-else>
+                                                <input type="text" class="form-control mr-1" v-model="selectedFile[p]" />
+                                                <button type="button" class="btn btn-sm btn-outline-success mr-1" @click="updateProperty()">
+                                                    <i class="fas fa-fw fa-check"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" @click="cancelPropertyEditing()">
+                                                    <i class="fas fa-fw fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                                                </span>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    <a class="dropdown-item" href="#" @click="enablePropertyEditing(p)">
+                                                        <i class="fas fa-fw fa-edit text-info"></i> Edit
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h5 class="mt-3">File Properties</h5>
+                            <table class="table table-striped table-hover table-sm mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td class="text-left font-weight-bold">
+                                            Created
+                                        </td>
+                                        <td class="text-right text-muted">
+                                            {{selectedFile.created_unix|date}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left font-weight-bold">
+                                            Last Modified
+                                        </td>
+                                        <td class="text-right text-muted">
+                                            {{selectedFile.modified_unix|date}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left font-weight-bold">
+                                            File size
+                                        </td>
+                                        <td class="text-right text-muted">
+                                            {{selectedFile.size|bytes}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left font-weight-bold">
+                                            <file-upload
+                                                class="mb-0"
+                                                v-show="!replaceFiles.length"
+                                                ref="replace"
+                                                v-model="replaceFiles"
+                                                :directory="false"
+                                                :drop="true"
+                                                :multiple="false"
+                                                :post-action="replaceFileUrl"
+                                                @input-file="onReplaceFileSet">
+                                                    <span class="text-primary clickable hover-underline">
+                                                        <i class="fas fa-fw fa-file-import text-muted"></i> Replace File
+                                                    </span>
+                                            </file-upload>
+                                            <div class="d-flex flex-column align-items-start font-weight-normal" v-if="replaceFiles.length">
+                                                <span>
+                                                    Do you want to replace {{selectedFile.name}} ({{selectedFile.size | bytes}}) with {{replaceFiles[0].name}} ({{replaceFiles[0].size | bytes}})?
+                                                </span>
+                                                <div class="d-flex mt-1">
+                                                    <button type="button" class="btn btn-outline-success" @click="doReplaceFile">
+                                                        <i class="fas fa-fw fa-check"></i>
+                                                        Replace
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-danger ml-2" @click="cancelReplaceFile">
+                                                        <i class="fas fa-fw fa-ban"></i>
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-right font-weight-bold">
+                                            <a :href="selectedFile.url" :download="selectedFile.name" target="_blank">
+                                                Download
+                                                <i class="fas fa-fw fa-file-download text-muted"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h5 class="mt-3">Tags</h5>
                         </div>
-                        <div class="col-md-6">
-                            <ul class="nav nav-tabs nav-fill">
-                                <li class="nav-item">
-                                    <a class="nav-link" :class="{active: modalTab == 'properties'}" @click="modalTab = 'properties'">
-                                        <i class="fas fa-fw fa-sliders-h"></i> Properties
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" :class="{active: modalTab == 'links'}" @click="modalTab = 'links'">
-                                        <i class="fas fa-fw fa-link"></i> Links
-                                    </a>
-                                </li>
-                                <li class="nav-item" v-if="selectedFile.exif">
-                                    <a class="nav-link" :class="{active: modalTab == 'exif'}" @click="modalTab = 'exif'">
-                                        <i class="fas fa-fw fa-camera"></i> Exif
-                                    </a>
+                        <div v-show="modalTab == 'links'">
+                            <ul class="list-group mt-3 ml-4 mr-4">
+                                <li class="list-group-item" v-for="link in selectedFile.contexts">
+                                    {{link.name}}
                                 </li>
                             </ul>
-                            <div class="ml-4 mr-4" v-show="modalTab == 'properties'">
-                                <h5 class="mt-3">Properties</h5>
-                                <table class="table table-striped table-hover table-sm mb-0">
-                                    <tbody>
-                                        <tr v-for="p in fileProperties" class="d-flex justify-content-between">
-                                            <td class="text-left font-weight-bold">
-                                                {{p}}
-                                            </td>
-                                            <td class="col text-right">
-                                                <span class="text-muted" v-if="editingProperty.key != p">
-                                                    {{selectedFile[p]}}
-                                                </span>
-                                                <div class="d-flex" v-else>
-                                                    <input type="text" class="form-control mr-1" v-model="selectedFile[p]" />
-                                                    <button type="button" class="btn btn-sm btn-outline-success mr-1" @click="updateProperty()">
-                                                        <i class="fas fa-fw fa-check"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger" @click="cancelPropertyEditing()">
-                                                        <i class="fas fa-fw fa-times"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="dropdown">
-                                                    <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                        <i class="fas fa-fw fa-ellipsis-h"></i>
-                                                    </span>
-                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                        <a class="dropdown-item" href="#" @click="enablePropertyEditing(p)">
-                                                            <i class="fas fa-fw fa-edit text-info"></i> Edit
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <h5 class="mt-3">File Properties</h5>
-                                <table class="table table-striped table-hover table-sm mb-0">
-                                    <tbody>
-                                        <tr>
-                                            <td class="text-left font-weight-bold">
-                                                Created
-                                            </td>
-                                            <td class="text-right text-muted">
-                                                {{selectedFile.created_unix|date}}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-left font-weight-bold">
-                                                Last Modified
-                                            </td>
-                                            <td class="text-right text-muted">
-                                                {{selectedFile.modified_unix|date}}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-left font-weight-bold">
-                                                File size
-                                            </td>
-                                            <td class="text-right text-muted">
-                                                {{selectedFile.size|bytes}}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-left font-weight-bold">
-                                                <file-upload
-                                                    class="mb-0"
-                                                    v-show="!replaceFiles.length"
-                                                    ref="replace"
-                                                    v-model="replaceFiles"
-                                                    :directory="false"
-                                                    :drop="true"
-                                                    :multiple="false"
-                                                    :post-action="replaceFileUrl"
-                                                    @input-file="onReplaceFileSet">
-                                                        <span class="text-primary clickable hover-underline">
-                                                            <i class="fas fa-fw fa-file-import text-muted"></i> Replace File
-                                                        </span>
-                                                </file-upload>
-                                                <div class="d-flex flex-column align-items-start font-weight-normal" v-if="replaceFiles.length">
-                                                    <span>
-                                                        Do you want to replace {{selectedFile.name}} ({{selectedFile.size | bytes}}) with {{replaceFiles[0].name}} ({{replaceFiles[0].size | bytes}})?
-                                                    </span>
-                                                    <div class="d-flex mt-1">
-                                                        <button type="button" class="btn btn-outline-success" @click="doReplaceFile">
-                                                            <i class="fas fa-fw fa-check"></i>
-                                                            Replace
-                                                        </button>
-                                                        <button type="button" class="btn btn-outline-danger ml-2" @click="cancelReplaceFile">
-                                                            <i class="fas fa-fw fa-ban"></i>
-                                                            Cancel
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-right font-weight-bold">
-                                                <a :href="selectedFile.url" :download="selectedFile.name" target="_blank">
-                                                    Download
-                                                    <i class="fas fa-fw fa-file-download text-muted"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <h5 class="mt-3">Tags</h5>
-                            </div>
-                            <div v-show="modalTab == 'links'">
-                                <ul class="list-group mt-3 ml-4 mr-4">
-                                    <li class="list-group-item" v-for="link in selectedFile.contexts">
-                                        {{link.name}}
-                                    </li>
-                                </ul>
-                            </div>
-                            <div v-show="modalTab == 'exif'">
-                                <p class="alert alert-info" v-if="!selectedFile.exif">
-                                </p>
-                                <table class="table table-striped" v-else>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <i class="fas fa-fw fa-camera"></i>
-                                            </td>
-                                            <td>
-                                                {{ selectedFile.exif.Model }}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <i class="far fa-fw fa-circle"></i>
-                                            </td>
-                                            <td>
-                                                {{ selectedFile.exif.Exif.FNumber }}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <i class="fas fa-fw fa-circle"></i>
-                                            </td>
-                                            <td>
-                                                <span>
-                                                    {{ selectedFile.exif.Exif.FocalLength }} <span v-if="selectedFile.exif.MakMakerNotes">({{    selectedFile.exif.MakerNotes.LensModel }})</span>
-                                                </span>
-                                                <span v-if="selectedFile.exif.MakerNotes" style="display: block;font-size: 90%;color: gray;">
-                                                    {{     selectedFile.exif.MakerNotes.LensType }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <i class="fas fa-fw fa-stopwatch"></i>
-                                            </td>
-                                            <td>
-                                                {{ selectedFile.exif.Exif.ExposureTime }}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <i class="fas fa-fw fa-plus"></i>
-                                            </td>
-                                            <td>
-                                                {{ selectedFile.exif.Exif.ISOSpeedRatings }}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <!-- EXIF.Flash is hex, trailing 0 means no flash -->
-                                                <i class="fas fa-fw fa-bolt"></i>
-                                            </td>
-                                            <td>
-                                                {{ selectedFile.exif.Exif.Flash }}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <i class="fas fa-fw fa-clock"></i>
-                                            </td>
-                                            <td>
-                                                {{ selectedFile.exif.Exif.DateTimeOriginal }}
-                                            </td>
-                                        </tr>
-                                        <tr v-if="selectedFile.exif.Makernotes">
-                                            <td>
-                                                <i class="fas fa-fw fa-sun"></i>
-                                            </td>
-                                            <td>
-                                                {{ selectedFile.exif.MakerNotes.WhiteBalanceSetting }}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <i class="fas fa-fw fa-copyright"></i>
-                                            </td>
-                                            <td>
-                                                {{ selectedFile.exif.Copyright }}
-                                            </td>
-                                        </tr>
-                                        <tr v-if="selectedFile.exif.Makernotes">
-                                            <td>
-                                                <i class="fas fa-fw fa-microchip"></i>
-                                            </td>
-                                            <td>
-                                                {{ selectedFile.exif.MakerNotes.FirmwareVersion }}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                        </div>
+                        <div v-show="modalTab == 'exif'">
+                            <p class="alert alert-info" v-if="!selectedFile.exif">
+                            </p>
+                            <table class="table table-striped" v-else>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-fw fa-camera"></i>
+                                        </td>
+                                        <td>
+                                            {{ selectedFile.exif.Model }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="far fa-fw fa-circle"></i>
+                                        </td>
+                                        <td>
+                                            {{ selectedFile.exif.Exif.FNumber }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-fw fa-circle"></i>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                {{ selectedFile.exif.Exif.FocalLength }} <span v-if="selectedFile.exif.MakMakerNotes">({{    selectedFile.exif.MakerNotes.LensModel }})</span>
+                                            </span>
+                                            <span v-if="selectedFile.exif.MakerNotes" style="display: block;font-size: 90%;color: gray;">
+                                                {{     selectedFile.exif.MakerNotes.LensType }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-fw fa-stopwatch"></i>
+                                        </td>
+                                        <td>
+                                            {{ selectedFile.exif.Exif.ExposureTime }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-fw fa-plus"></i>
+                                        </td>
+                                        <td>
+                                            {{ selectedFile.exif.Exif.ISOSpeedRatings }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <!-- EXIF.Flash is hex, trailing 0 means no flash -->
+                                            <i class="fas fa-fw fa-bolt"></i>
+                                        </td>
+                                        <td>
+                                            {{ selectedFile.exif.Exif.Flash }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-fw fa-clock"></i>
+                                        </td>
+                                        <td>
+                                            {{ selectedFile.exif.Exif.DateTimeOriginal }}
+                                        </td>
+                                    </tr>
+                                    <tr v-if="selectedFile.exif.Makernotes">
+                                        <td>
+                                            <i class="fas fa-fw fa-sun"></i>
+                                        </td>
+                                        <td>
+                                            {{ selectedFile.exif.MakerNotes.WhiteBalanceSetting }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-fw fa-copyright"></i>
+                                        </td>
+                                        <td>
+                                            {{ selectedFile.exif.Copyright }}
+                                        </td>
+                                    </tr>
+                                    <tr v-if="selectedFile.exif.Makernotes">
+                                        <td>
+                                            <i class="fas fa-fw fa-microchip"></i>
+                                        </td>
+                                        <td>
+                                            {{ selectedFile.exif.MakerNotes.FirmwareVersion }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

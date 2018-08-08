@@ -1,5 +1,5 @@
 <template>
-    <div class="modal-content-80-fix d-flex flex-column justify-content-start align-items-center">
+    <div class="h-100 d-flex flex-column justify-content-start align-items-center">
         <div>
             <button class="btn btn-outline-secondary" @click="toggleEditMode()">
                 <i class="fas fa-fw fa-edit"></i> Toggle Edit mode

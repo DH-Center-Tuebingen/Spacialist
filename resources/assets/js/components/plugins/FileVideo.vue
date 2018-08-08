@@ -1,5 +1,5 @@
 <template>
-    <video controls class="w-100">
+    <video controls class="h-100">
         <source :src="file.url" :type="file.mime_type">
     </video>
 </template>

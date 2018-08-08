@@ -1,9 +1,9 @@
 <template>
-    <div class="modal-content-80 pr-2">
+    <div class="h-100 d-flex flex-column">
         <p class="alert alert-info">
             Click on files to download them without downloading the whole archive first. Download of folders is currently not supported.
         </p>
-        <tree class="text-left"
+        <tree class="text-left col px-0 scroll-y-auto"
             :data="fileList"
             :draggable="false"
             @change="onSelect"

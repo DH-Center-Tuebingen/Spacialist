@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column modal-content-80-fix">
+    <div class="d-flex flex-column h-100">
         <div class="d-flex flex-row col pl-0">
             <div id="dicom-wrapper" class="col pl-0">
                 <div id="dicom-image" class="h-100" oncontextmenu="return false;">

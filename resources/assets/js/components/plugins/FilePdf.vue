@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="h-100 d-flex flex-column">
         <div>
             <button type="button" class="btn btn-link" :disabled="isFirstPage" @click="gotoFirstPage()">
                 <i class="fas fa-fw fa-angle-double-left"></i>
@@ -19,10 +19,10 @@
             <button type="button" class="btn btn-link" @click="rotateCw()">
                 <i class="fas fa-fw fa-redo-alt"></i>
             </button>
-            <input type="text" style="max-width: 100px;" v-model.number="page" />/{{totalPages}}
+            <input type="number" style="max-width: 100px;" min="1" :max="totalPages" step="1" v-model.number="page" />/{{totalPages}}
         </div>
-        <pdf class="modal-content-80"
-            :page="page || 1"
+        <pdf class="col px-0 scroll-y-auto scroll-x-hidden"
+            :page="page"
             :rotate="rotation"
             :src="file.url"
             @num-pages="setNumberOfPages">

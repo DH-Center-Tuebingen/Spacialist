@@ -1,5 +1,5 @@
 <template>
-    <div class="modal-content-80-fix d-flex flex-column justify-content-start align-items-center">
+    <div class="h-100 d-flex flex-column justify-content-start align-items-center">
         <p class="alert alert-info">
             Filetype of <span class="font-italic">{{file.name}}</span> is currently not supported by Spacialist.
             If you need support for this kind of filetype, please create an <a href="https://github.com/eScienceCenter/Spacialist/issues/new">issue on GitHub<sup><i class="fas fa-fw fa-external-link-alt"></i></sup></a>
