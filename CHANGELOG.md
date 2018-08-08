@@ -24,6 +24,8 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
 - Geometry Preference (EPSG-Code). E.g. to display coordinates in popups different from EPSG:4326
 - Attribute Dependencies
   - Attributes can now depend (are visible/invisible) on values of other attributes
+- GIS View
+  - QGIS-like styling (categorized and graduated (equal interval and quantile)) and labeling
 ### Changed
 - Moved from Lumen (5.3) to Laravel (5.6)
 - Moved from AngularJS (1.5) to Vue.js (2.5)
@@ -46,6 +48,12 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
     - Date
 - Tree View now loads root elements only. Sub-elements are loaded on request
 - Bibliography View loads only the first 20 entries. More entries are loaded on scroll
+- Tree Search is now async and matching entities can be selected from a list (and expanded/highlighted)
+- Global search based on relevance. Also supports bangs for different categories:
+  - `!e ` + Search term: Entities
+  - `!f ` + Search term: Files
+  - `!g ` + Search term: Geodata
+  - `!b ` + Search term: Bibliography
 ### Fixed
 - 3D-File-Viewer: Mouse Controls now work even if WebVR is available (but not active)
 ### Removed/Deprecated
