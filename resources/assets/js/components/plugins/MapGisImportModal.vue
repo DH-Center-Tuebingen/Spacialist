@@ -1,5 +1,5 @@
 <template>
-    <modal :name="id" width="80%" height="auto" :scrollable="true" classes="of-visible">
+    <modal :name="id" width="80%" height="90%" :scrollable="true" classes="of-visible">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Import Geodata</h5>
@@ -7,8 +7,8 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body row">
-                <div class="col-md-2">
+            <div class="modal-body row col">
+                <div class="col-md-2 h-100">
                     <ul class="nav nav-pills flex-column">
                         <li class="nav-item">
                             <a class="nav-link" :class="{active: activeTab == 'csv'}" @click.prevent="setActiveTab('csv')" href="#">CSV</a>
@@ -24,7 +24,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="col-md-10">
+                <div class="col-md-10 h-100 d-flex flex-column">
                     <file-upload
                         class="w-100"
                         id="map-gis-file-upload"
@@ -41,7 +41,7 @@
                             <i class="fas fa-fw fa-file-import"></i> Select files or drop here
                         </span>
                     </file-upload>
-                    <div v-if="files.length" class="text-left col-md-3">
+                    <div v-if="files.length" class="text-left w-25">
                         <h5>
                             Selected Files
                             <small class="clickable" @click="showFileList = !showFileList">
@@ -62,15 +62,19 @@
                             </li>
                         </ul>
                     </div>
-                    <hr v-if="files.length" />
+                    <div v-if="files.length">
+                        <hr />
+                    </div>
                     <component v-if="files.length"
                         :epsg="'EPSG:'+mapEpsg.epsg"
                         :is="activeImportType"
                         :files="files"
                         :after-parse="onParsedResults">
                     </component>
-                    <hr v-if="mapLayers && parsed" />
-                    <div class="row modal-map" v-if="mapLayers && parsed">
+                    <div v-if="mapLayers && parsed">
+                        <hr />
+                    </div>
+                    <div class="row modal-map col" v-if="mapLayers && parsed">
                         <div class="col-md-8">
                             <ol-map
                                 :draw-disabled="true"
