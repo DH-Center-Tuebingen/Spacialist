@@ -35,6 +35,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/context')->group(function() {
     Route::get('/top', 'ContextController@getTopEntities')->where('id', '[0-9]+');
     Route::get('/{id}', 'ContextController@getContext')->where('id', '[0-9]+');
+    Route::get('/entity_type/{ctid}/data/{aid}', 'ContextController@getDataForEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/data', 'ContextController@getData')->where('id', '[0-9]+');
     Route::get('/{id}/data/{aid}', 'ContextController@getData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/children', 'ContextController@getChildren')->where('id', '[0-9]+');

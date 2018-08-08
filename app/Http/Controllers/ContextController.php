@@ -53,6 +53,44 @@ class ContextController extends Controller {
         return response()->json($context);
     }
 
+    public function getDataForEntityType($ctid, $aid) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to get an entity\'s data'
+            ], 403);
+        }
+        try {
+            $contextType = ContextType::findOrFail($ctid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This context type does not exist'
+            ], 400);
+        }
+        $contexts = Context::where('context_type_id', $ctid)->get();
+        $contextIds = $contexts->pluck('id')->toArray();
+        $values = AttributeValue::with(['attribute'])
+            ->whereIn('context_id', $contextIds)
+            ->get();
+        $data = [];
+        foreach($values as $value) {
+            switch($value->attribute->datatype) {
+                case 'string-sc':
+                    $value->thesaurus_val = ThConcept::where('concept_url', $value->thesaurus_val)->first();
+                    break;
+                case 'context':
+                    $value->name = Context::find($value->context_val)->name;
+                    break;
+                default:
+                    break;
+            }
+            $value->value = $value->getValue();
+            $data[$value->context_id] = $value;
+        }
+
+        return response()->json($data);
+    }
+
     public function getData($id, $aid = null) {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
@@ -68,17 +106,19 @@ class ContextController extends Controller {
             ], 400);
         }
         if(isset($aid)) {
-            $attributes = AttributeValue::where('context_id', $id)
+            $attributes = AttributeValue::with(['attribute'])
+                ->where('context_id', $id)
                 ->where('attribute_id', $aid)
                 ->get();
         } else {
-            $attributes = AttributeValue::where('context_id', $id)->get();
+            $attributes = AttributeValue::with(['attribute'])
+                ->where('context_id', $id)
+                ->get();
         }
 
         $data = [];
         foreach($attributes as $a) {
-            $datatype = Attribute::find($a->attribute_id)->datatype;
-            switch($datatype) {
+            switch($a->attribute->datatype) {
                 case 'string-sc':
                     $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
                     break;

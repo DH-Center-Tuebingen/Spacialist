@@ -299,7 +299,7 @@
 
         <button type="submit" form="layerLabelingForm" class="btn btn-outline-success mt-2">
             <i class="fas fa-fw fa-check"></i>
-            Apply Styling
+            Apply Labels
         </button>
     </div>
 </template>
@@ -307,6 +307,14 @@
 <script>
     export default {
         props: {
+            attributes: {
+                required: true,
+                type: Array
+            },
+            isEntityLayer: {
+                required: true,
+                type: Boolean
+            },
             layer: {
                 required: true,
                 type: Object
@@ -316,18 +324,8 @@
                 type: Function
             }
         },
-        beforeMount() {
-            this.init();
-        },
         mounted() {},
         methods: {
-            init() {
-                if(this.isEntityLayer) {
-                    $http.get(`editor/context_type/${this.layer.context_type.id}/attribute`).then(response => {
-                        this.attributes = response.data.attributes;
-                    });
-                }
-            },
             toggle(section) {
                 this.displays[section] = !this.displays[section];
             },
@@ -374,14 +372,11 @@
                 }
             },
             translateLabel(element, prop) {
-                const value = element[prop];
-                if(!value) return element;
-                return this.$translateConcept(value);
+                return this.$translateLabel(element, prop);
             }
         },
         data() {
             return {
-                attributes: [],
                 selectedAttribute: null,
                 label: 'Text',
                 displays: {
@@ -460,13 +455,7 @@
                         'bottom-left'
                     ],
                     placement: 'top'
-                },
-
-            }
-        },
-        computed: {
-            isEntityLayer: function() {
-                return !!this.layer.context_type;
+                }
             }
         }
     }

@@ -1,5 +1,5 @@
 <template>
-    <modal :name="id" width="60%" height="80%" :scrollable="true" :draggable="true" classes="of-visible" @before-open="init">
+    <modal :name="id" width="60%" height="80%" :draggable="true" classes="of-visible" @before-open="init">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Layer Properties</h5>
@@ -30,6 +30,8 @@
                 <div class="col-md-10 h-100">
                     <keep-alive>
                         <component
+                            :attributes="attributes"
+                            :is-entity-layer="isEntityLayer"
                             :is="activeTabComponent"
                             :layer="layer"
                             :on-update="onUpdate">
@@ -68,6 +70,11 @@
         methods: {
             init(event) {
                 this.layer = event.params.layer;
+                if(this.isEntityLayer) {
+                    $http.get(`editor/context_type/${this.layer.context_type.id}/attribute`).then(response => {
+                        this.attributes = response.data.attributes;
+                    });
+                }
             },
             setActiveTab(id) {
                 this.activeTab = id;
@@ -79,12 +86,16 @@
         data() {
             return {
                 activeTab: 'style',
-                layer: {}
+                layer: {},
+                attributes: []
             }
         },
         computed: {
             activeTabComponent: function() {
                 return `map-gis-properties-${this.activeTab}`;
+            },
+            isEntityLayer: function() {
+                return !!this.layer.context_type;
             }
         }
     }

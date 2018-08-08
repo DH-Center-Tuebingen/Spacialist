@@ -924,6 +924,130 @@
                     });
                 }
             },
+            applyStyles() {
+                // Reset all styles
+                let features = this.getEntityLayerFeatures();
+                features.forEach(l => {
+                    this.resetStyle(l);
+                });
+                for(let i in this.layerStyles) {
+                    const opts = this.layerStyles[i];
+                    let features = this.getEntityLayerFeatures(i);
+                    let equalBucketSize = 0;
+                    let buckets = {};
+                    let categories = 0;
+                    let index = 0;
+                    let nullValueFound = false;
+                    if(!features.length) continue;
+                    const ctid = features[0].getProperties().entity.context_type_id;
+                    $http.get(`context/entity_type/${ctid}/data/${opts.attribute_id}`).then(response => {
+                        const data = response.data;
+                        let values = [];
+                        features.forEach(f => {
+                            const eid = f.getProperties().entity.id;
+                            const value = data[eid] ? data[eid].value : null;
+                            if(!value && value !== 0 && !nullValueFound) {
+                                nullValueFound = true;
+                                categories++;
+                            } else {
+                                if(opts.style.id == 'categorized') {
+                                    if(!buckets[value] && buckets[value] !== 0) {
+                                        buckets[value] = index;
+                                        index++;
+                                        categories++;
+                                    }
+                                }
+                            }
+                            values.push({
+                                value: value,
+                                feature: f
+                            });
+                        });
+
+                        if(opts.style.id == 'categorized') {
+                            values.sort((a, b) => a.value < b.value);
+                        } else if(opts.style.id == 'graduated') {
+                            categories = opts.classes;
+                            values.sort((a, b)  => a.value-b.value);
+                            const min = values[0].value;
+                            const max = values[values.length-1].value;
+                            if(opts.mode.id == 'equal_interval') {
+                                const bucketSize = (max-min)/categories;
+                                buckets = [];
+                                for(let i=1; i<=categories; i++) {
+                                    buckets.push(min + bucketSize*i);
+                                }
+                            } else if(opts.mode.id == 'quantile') {
+                                 equalBucketSize = Math.floor(values.length/categories);
+                            }
+                        }
+                        let fr, fg, fb;
+                        let tr, tg, tb;
+                        [fr, fg, fb] = this.$rgb2hex(opts.color.from);
+                        [tr, tg, tb] = this.$rgb2hex(opts.color.to);
+                        const from = { r: fr, g: fg, b: fb };
+                        const to = { r: tr, g: tg, b: tb };
+                        const gradients = this.getGradients(from, to, categories);
+                        let currentGradient;
+                        let currentBucket = 0;
+                        let currentBucketCount = 0;
+                        values.forEach(v => {
+                            if(opts.style.id == 'categorized') {
+                                if(!v.value && v.value !== 0) {
+                                    currentGradient = gradients[gradients.length-1];
+                                } else {
+                                    currentGradient = gradients[buckets[v.value]];
+                                }
+                            } else if(opts.style.id == 'graduated') {
+                                if(opts.mode.id == 'equal_interval') {
+                                    for(let i=0; i<buckets.length; i++) {
+                                        if(v.value < buckets[i]) {
+                                            currentGradient = gradients[i];
+                                            break;
+                                        }
+                                    }
+                                } else if(opts.mode.id == 'quantile') {
+                                    if(currentBucketCount == equalBucketSize && currentBucket < gradients.length-1) {
+                                        currentBucketCount = 0;
+                                        currentBucket++;
+                                    }
+                                    currentGradient = gradients[currentBucket];
+                                    currentBucketCount++;
+                                }
+                            }
+                            const color = `rgba(${currentGradient.r}, ${currentGradient.g}, ${currentGradient.b}, ${1-opts.transparency})`;
+                            let style = new Style({
+                                fill: new Fill({
+                                    color: color
+                                }),
+                                stroke: new Stroke({
+                                    color: color,
+                                    width: 40
+                                })
+                            });
+                            let oldStyle = v.feature.getStyle();
+                            let newStyles = [];
+                            if(oldStyle) {
+                                newStyles.push(oldStyle);
+                            }
+                            newStyles.push(style);
+                            v.feature.setStyle(newStyles);
+                        });
+                    });
+                }
+            },
+            getGradients(from, to, classes) {
+                const stepWeight = classes > 1 ? 1/(classes-1) : 0;
+                let colors = [];
+                for(let i=0; i<classes; i++) {
+                    let current = {...from};
+                    for(let k of ['r', 'g', 'b']) {
+                        current[k] = Math.round(current[k] + ( (stepWeight*i) * (to[k] - from[k]) ) );
+                    }
+                    colors.push(current);
+                }
+                return colors;
+            },
             setExtent(extent = null) {
                 if(!extent) extent = this.getEntityExtent();
                 if(!extent) {
@@ -1258,7 +1382,7 @@
                 this.applyLabels();
             },
             layerStyles: function(newStyle, oldStyles) {
-
+                this.applyStyles();
             },
             zoomTo: function(newZoomLayerId, oldZoomLayerId) {
                 if(!newZoomLayerId) return;

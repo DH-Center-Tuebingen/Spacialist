@@ -181,7 +181,7 @@ class MapController extends Controller
             $geodataBuilder = Geodata::doesntHave('context');
         } else {
             $geodataBuilder = Geodata::with(['context'])
-                ->whereHas('context', function($query, $layer) {
+                ->whereHas('context', function($query) use($layer) {
                     $query->where('context_type_id', $layer->context_type_id);
                 });
         }

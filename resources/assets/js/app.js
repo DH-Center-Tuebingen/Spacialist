@@ -300,6 +300,7 @@ Vue.component('attributes', require('./components/AttributeList.vue'));
 Vue.component('context-tree', require('./components/ContextTree.vue'));
 Vue.component('context-types', require('./components/ContextTypeList.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
+Vue.component('color-gradient', require('./components/Gradient.vue'));
 
 // Page Components
 Vue.component('entity-reference-modal', require('./components/EntityReferenceModal.vue'));
