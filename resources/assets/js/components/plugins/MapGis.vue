@@ -150,6 +150,7 @@
                         } else {
                             this.tmpLabels[layer.id] = options.data;
                         }
+                        Vue.set(this, 'labels', {...this.tmpLabels});
                         break;
                     case 'styling':
                         if(!Object.keys(options.data).length) {
@@ -157,10 +158,9 @@
                         } else {
                             this.tmpStyles[layer.id] = options.data;
                         }
+                        Vue.set(this, 'styles', {...this.tmpStyles});
                         break;
                 }
-                Vue.set(this, 'labels', {...this.tmpLabels});
-                Vue.set(this, 'styles', {...this.tmpStyles});
             },
             addLayerToSelection(layer) {
                 Vue.set(this.selectedLayers, layer.id, Object.assign({}, layer));

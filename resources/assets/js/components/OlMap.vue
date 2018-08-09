@@ -920,10 +920,10 @@
             },
             applyLabels() {
                 // Reset all label styles
-                let allLayers = this.getEntityLayers();
-                let labelIds = Object.keys(this.layerLabels);
+                const allLayers = this.getEntityLayers();
                 allLayers.forEach(l => {
-                    if(labelIds.indexOf(l.get('layer_id')) == -1) {
+                    const layerId = l.get('layer_id');
+                    if(!this.layerLabels[layerId]) {
                         let features = l.getSource().getFeatures();
                         features.forEach(f => {
                             const id = f.getProperties().id;
@@ -942,10 +942,10 @@
             },
             applyStyles() {
                 // Reset all style styles
-                let allLayers = this.getEntityLayers();
-                let labelIds = Object.keys(this.layerLabels);
+                const allLayers = this.getEntityLayers();
                 allLayers.forEach(l => {
-                    if(labelIds.indexOf(l.get('layer_id')) == -1) {
+                    const layerId = l.get('layer_id');
+                    if(!this.layerStyles[layerId]) {
                         let features = l.getSource().getFeatures();
                         features.forEach(f => {
                             const id = f.getProperties().id;
@@ -1042,25 +1042,7 @@
                             }
                             const color = `rgba(${currentGradient.r}, ${currentGradient.g}, ${currentGradient.b}, ${1-opts.transparency})`;
                             const id = v.feature.getProperties().id;
-                            this.featureStyles[id].style = new Style({
-                                fill: new Fill({
-                                    color: color
-                                }),
-                                stroke: new Stroke({
-                                    color: color,
-                                    width: opts.size
-                                }),
-                                image: new CircleStyle({
-                                    radius: opts.size*3,
-                                    fill: new Fill({
-                                        color: color
-                                    }),
-                                    stroke: new Stroke({
-                                        color: color,
-                                        width: opts.size
-                                    })
-                                })
-                            });
+                            this.featureStyles[id].style = this.createStyle(color, opts.size);
                             this.updateStyles(v.feature);
                         });
                     });
@@ -1150,17 +1132,29 @@
                     this.modify.setActive(false, cancelled);
                 }
             },
-            createStyle(color = '#ffcc33') {
+            createStyle(color = '#ffcc33', width = 2) {
+                let polygonFillColor;
+                let r, g, b, a;
+                const fillAlphaMultiplier = 0.2;
+                if(color.startsWith('#')) {
+                    [r, g, b] = this.$rgb2hex(color);
+                    a = 1 * fillAlphaMultiplier;
+                } else if(color.startsWith('rgba')) {
+                    // cut off rgba and () and get alpha value
+                    [r, g, b, a] = color.substring(5, color.length-1).split(',');
+                    a *= fillAlphaMultiplier;
+                }
+                polygonFillColor = `rgba(${r}, ${g}, ${b}, ${a})`;
                 return new Style({
                     fill: new Fill({
-                        color: 'rgba(255, 255, 255, 0.2)'
+                        color: polygonFillColor
                     }),
                     stroke: new Stroke({
                         color: color,
-                        width: 2
+                        width: width
                     }),
                     image: new CircleStyle({
-                        radius: 7,
+                        radius: width*3,
                         fill: new Fill({
                             color: color
                         }),
@@ -1412,7 +1406,7 @@
             layerLabels: function(newLabels, oldLabels) {
                 this.applyLabels();
             },
-            layerStyles: function(newStyle, oldStyles) {
+            layerStyles: function(newStyles, oldStyles) {
                 this.applyStyles();
             },
             zoomTo: function(newZoomLayerId, oldZoomLayerId) {
