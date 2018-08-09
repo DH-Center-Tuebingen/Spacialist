@@ -910,13 +910,12 @@
                     text.textAlign = align;
                     text.textBaseline = baseline;
                 }
-                options.getText(feature).then(featureText => {
-                    text.text = featureText;
-                    style.text = new Text(text);
-                    const id = feature.getProperties().id;
-                    this.featureStyles[id].label = new Style(style);
-                    this.updateStyles(feature);
-                });
+                const featureText = options.getText(feature);
+                text.text = featureText;
+                style.text = new Text(text);
+                const id = feature.getProperties().id;
+                this.featureStyles[id].label = new Style(style);
+                this.updateStyles(feature);
             },
             applyLabels() {
                 // Reset all label styles

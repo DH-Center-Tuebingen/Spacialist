@@ -265,7 +265,7 @@
                             Offset (X):
                         </label>
                         <div class="col-md-6">
-                            <input class="form-control" type="number" id="position-offset-x" name="position-offset-x" min="0" v-model.number="position.offsets.x" />
+                            <input class="form-control" type="number" id="position-offset-x" name="position-offset-x" v-model.number="position.offsets.x" />
                         </div>
                     </div>
                     <div class="form-group row">
@@ -273,7 +273,7 @@
                             Offset (Y):
                         </label>
                         <div class="col-md-6">
-                            <input class="form-control" type="number" id="position-offset-y" name="position-offset-y" min="0" v-model.number="position.offsets.y" />
+                            <input class="form-control" type="number" id="position-offset-y" name="position-offset-y" v-model.number="position.offsets.y" />
                         </div>
                     </div>
                     <div class="form-group row">
@@ -350,28 +350,39 @@
                     }
                     let callback;
                     if(this.isEntityLayer) {
-                        callback = feature => {
-                            const props = feature.getProperties();
-                            if(props.entity) {
-                                const id = props.entity.id;
-                                const aid = this.selectedAttribute.attribute_id;
-                                return $http.get(`context/${id}/data/${aid}`).then(response => {
-                                    return response.data[aid].value;
+                        const id = this.layer.context_type_id;
+                        const aid = this.selectedAttribute.attribute_id;
+                        $http.get(`context/entity_type/${id}/data/${aid}`).then(response => {
+                            options.getText = feature => {
+                                const eid = feature.get('entity').id;
+                                const data = response.data[eid];
+                                return data ? data.value : '';
+                            };
+                            if(this.onUpdate) {
+                                this.onUpdate(this.layer, {
+                                    type: 'labeling',
+                                    data: options
                                 });
                             }
-                        };
+                        });
                     } else {
-                        callback = feature => {
-                            return new Promise((resolve, reject) => resolve(this.label));
+                        options.getText = feature => {
+                            return this.label;
                         };
+                        if(this.onUpdate) {
+                            this.onUpdate(this.layer, {
+                                type: 'labeling',
+                                data: options
+                            });
+                        }
                     }
-                    options.getText = callback;
-                }
-                if(this.onUpdate) {
-                    this.onUpdate(this.layer, {
-                        type: 'labeling',
-                        data: options
-                    });
+                } else {
+                    if(this.onUpdate) {
+                        this.onUpdate(this.layer, {
+                            type: 'labeling',
+                            data: options
+                        });
+                    }
                 }
             },
             translateLabel(element, prop) {
