@@ -1049,6 +1049,16 @@
                                 stroke: new Stroke({
                                     color: color,
                                     width: opts.size
+                                }),
+                                image: new CircleStyle({
+                                    radius: opts.size*3,
+                                    fill: new Fill({
+                                        color: color
+                                    }),
+                                    stroke: new Stroke({
+                                        color: color,
+                                        width: opts.size
+                                    })
                                 })
                             });
                             this.updateStyles(v.feature);
