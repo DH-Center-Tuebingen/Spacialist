@@ -60,6 +60,7 @@
         "three-full": "^6.0.0",
         "transliteration": "^1.6.2",
         "tree-vue-component": "^5.3.3",
+        "typeface-raleway": "0.0.54",
         "v-calendar": "^0.9.7",
         "v-tooltip": "^2.0.0-rc.33",
         "vee-validate": "^2.0.8",

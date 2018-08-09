@@ -39,6 +39,7 @@ dom.watch(); // search for <i> tags to replace with <svg>
  * building robust, powerful web applications using Vue and Laravel.
  */
 
+require('typeface-raleway');
 require('popper.js');
 require('bootstrap');
 window.Vue = require('vue');
