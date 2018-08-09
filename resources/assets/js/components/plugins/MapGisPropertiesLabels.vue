@@ -13,7 +13,7 @@
                             track-by="id"
                             v-else
                             v-model="selectedAttribute"
-                            :allowEmpty="false"
+                            :allowEmpty="true"
                             :closeOnSelect="true"
                             :customLabel="translateLabel"
                             :hideSelected="false"
@@ -331,39 +331,42 @@
             },
             apply() {
                 let options = {};
-                if(this.font.active) {
-                    options.font = this.font;
+                // Only set options (set active) if attribute is selected
+                if(this.selectedAttribute) {
+                    if(this.font.active) {
+                        options.font = this.font;
+                    }
+                    if(this.buffer.active) {
+                        options.buffer = this.buffer;
+                    }
+                    if(this.background.active) {
+                        options.background = this.background;
+                    }
+                    if(this.shadow.active) {
+                        options.shadow = this.shadow;
+                    }
+                    if(this.position.active) {
+                        options.position = this.position;
+                    }
+                    let callback;
+                    if(this.isEntityLayer) {
+                        callback = feature => {
+                            const props = feature.getProperties();
+                            if(props.entity) {
+                                const id = props.entity.id;
+                                const aid = this.selectedAttribute.attribute_id;
+                                return $http.get(`context/${id}/data/${aid}`).then(response => {
+                                    return response.data[aid].value;
+                                });
+                            }
+                        };
+                    } else {
+                        callback = feature => {
+                            return new Promise((resolve, reject) => resolve(this.label));
+                        };
+                    }
+                    options.getText = callback;
                 }
-                if(this.buffer.active) {
-                    options.buffer = this.buffer;
-                }
-                if(this.background.active) {
-                    options.background = this.background;
-                }
-                if(this.shadow.active) {
-                    options.shadow = this.shadow;
-                }
-                if(this.position.active) {
-                    options.position = this.position;
-                }
-                let callback;
-                if(this.isEntityLayer) {
-                    callback = feature => {
-                        const props = feature.getProperties();
-                        if(props.entity) {
-                            const id = props.entity.id;
-                            const aid = this.selectedAttribute.attribute_id;
-                            return $http.get(`context/${id}/data/${aid}`).then(response => {
-                                return response.data[aid].value;
-                            });
-                        }
-                    };
-                } else {
-                    callback = feature => {
-                        return new Promise((resolve, reject) => resolve(this.label));
-                    };
-                }
-                options.getText = callback;
                 if(this.onUpdate) {
                     this.onUpdate(this.layer, {
                         type: 'labeling',

@@ -1,5 +1,5 @@
 <template>
-    <modal :name="id" width="60%" height="80%" :draggable="true" classes="of-visible" @before-open="init">
+    <modal :name="id" width="60%" height="80%" :draggable="true" :resizable="true" classes="of-visible" @before-open="init">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Layer Properties</h5>

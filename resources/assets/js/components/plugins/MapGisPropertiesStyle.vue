@@ -1,9 +1,18 @@
 <template>
     <div class="col-md-6 px-0 h-100 d-flex flex-column" v-if="initFinished">
         <div class="col scroll-y-auto">
-            <div v-for="g in gradients" :style="`background-color: rgba(${g.r}, ${g.g}, ${g.b}, 1); width: 200px; height: 20px;`">
-            </div>
             <form role="form" name="layerStylingForm" id="layerStylingForm" @submit.prevent="apply">
+                <div class="form-group row">
+                    <label class="col-form-label col-md-6 text-right">
+                        Active:
+                    </label>
+                    <div class="col-md-6">
+                        <label class="cb-toggle mx-0 my-auto align-middle">
+                            <input type="checkbox" id="font-active-toggle" v-model="isActive" />
+                            <span class="slider slider-rounded slider-primary"></span>
+                        </label>
+                    </div>
+                </div>
                 <div class="form-group row">
                     <label class="col-form-label col-md-6 text-right" for="style-style">
                         Style:
@@ -100,6 +109,14 @@
                     </div>
                 </div>
                 <div class="form-group row">
+                    <label class="col-form-label col-md-6 text-right" for="style-size">
+                        Size:
+                    </label>
+                    <div class="col-md-6">
+                        <input class="form-control" type="number" id="style-size" name="style-size" min="1" v-model.number="size" />
+                    </div>
+                </div>
+                <div class="form-group row">
                     <label class="col-form-label col-md-6 text-right" for="style-transparency">
                         Transparency:
                     </label>
@@ -150,14 +167,18 @@
                 this.initFinished = true;
             },
             apply() {
-                const options = {
-                    attribute_id: this.selectedAttribute.id,
-                    style: this.selectedStyle,
-                    classes: this.numberOfClasses,
-                    mode: this.selectedMode,
-                    color: this.selectedColorRamp,
-                    transparency: this.transparency
-                };
+                let options = {};
+                if(this.isActive) {
+                    options = {
+                        attribute_id: this.selectedAttribute.id,
+                        style: this.selectedStyle,
+                        classes: this.numberOfClasses,
+                        mode: this.selectedMode,
+                        color: this.selectedColorRamp,
+                        size: this.size,
+                        transparency: this.transparency
+                    };
+                }
                 if(this.onUpdate) {
                     this.onUpdate(this.layer, {
                         type: 'styling',
@@ -171,8 +192,8 @@
         },
         data() {
             return {
-                gradients: [],
                 initFinished: false,
+                isActive: false,
                 styles: [
                     {
                         label: 'Categorized',
@@ -220,6 +241,7 @@
                     }
                 ],
                 selectedMode: {},
+                size: 2,
                 transparency: 0
             }
         },

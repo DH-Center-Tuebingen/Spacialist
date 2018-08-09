@@ -448,7 +448,13 @@
                         const layerId = layer.id;
                         const color = geojsonLayers[layerId].getProperties().color;
                         let source = geojsonLayers[layerId].getSource();
-                        feature.setStyle(vm.createStyle(color));
+                        const defaultStyle = vm.createStyle(color);
+                        vm.featureStyles[geojson.props.id] = {
+                            default: defaultStyle,
+                            label: null,
+                            style: null
+                        };
+                        feature.setStyle(vm.featureStyles[geojson.props.id].default);
                         source.addFeature(feature);
                     });
                 } else if(vm.initCollection) {
@@ -768,13 +774,19 @@
                 });
                 return new Collection(features);
             },
-            resetStyle(element) {
-                let style = element.getStyle();
-                // If more than one style is active, remove all
-                // beside the first/original
-                if(style && Array.isArray(style) && style.length > 1) {
-                    element.setStyle(style[0]);
+            updateStyles(feature) {
+                const id = feature.getProperties().id;
+                let styles = this.featureStyles[id];
+                let appliedStyles = [];
+                if(styles.style) {
+                    appliedStyles.push(styles.style);
+                } else {
+                    appliedStyles.push(styles.default);
                 }
+                if(styles.label) {
+                    appliedStyles.push(styles.label);
+                }
+                feature.setStyle(appliedStyles)
             },
             parseAndApplyStyle(options, feature) {
                 let style = {};
@@ -901,21 +913,25 @@
                 options.getText(feature).then(featureText => {
                     text.text = featureText;
                     style.text = new Text(text);
-                    let newStyle = new Style(style);
-                    let newStyles = [];
-                    const oldStyle = feature.getStyle();
-                    if(oldStyle) {
-                        newStyles.push(oldStyle);
-                    }
-                    newStyles.push(newStyle);
-                    feature.setStyle(newStyles);
+                    const id = feature.getProperties().id;
+                    this.featureStyles[id].label = new Style(style);
+                    this.updateStyles(feature);
                 });
             },
             applyLabels() {
-                // Reset all styles
-                let features = this.getEntityLayerFeatures();
-                features.forEach(l => {
-                    this.resetStyle(l);
+                // Reset all label styles
+                let allLayers = this.getEntityLayers();
+                let labelIds = Object.keys(this.layerLabels);
+                allLayers.forEach(l => {
+                    if(labelIds.indexOf(l.get('layer_id')) == -1) {
+                        let features = l.getSource().getFeatures();
+                        features.forEach(f => {
+                            const id = f.getProperties().id;
+                            let styles = this.featureStyles[id];
+                            styles.label = null;
+                            this.updateStyles(f);
+                        });
+                    }
                 });
                 for(let i in this.layerLabels) {
                     let features = this.getEntityLayerFeatures(i);
@@ -925,10 +941,19 @@
                 }
             },
             applyStyles() {
-                // Reset all styles
-                let features = this.getEntityLayerFeatures();
-                features.forEach(l => {
-                    this.resetStyle(l);
+                // Reset all style styles
+                let allLayers = this.getEntityLayers();
+                let labelIds = Object.keys(this.layerLabels);
+                allLayers.forEach(l => {
+                    if(labelIds.indexOf(l.get('layer_id')) == -1) {
+                        let features = l.getSource().getFeatures();
+                        features.forEach(f => {
+                            const id = f.getProperties().id;
+                            let styles = this.featureStyles[id];
+                            styles.style = null;
+                            this.updateStyles(f);
+                        });
+                    }
                 });
                 for(let i in this.layerStyles) {
                     const opts = this.layerStyles[i];
@@ -1016,22 +1041,17 @@
                                 }
                             }
                             const color = `rgba(${currentGradient.r}, ${currentGradient.g}, ${currentGradient.b}, ${1-opts.transparency})`;
-                            let style = new Style({
+                            const id = v.feature.getProperties().id;
+                            this.featureStyles[id].style = new Style({
                                 fill: new Fill({
                                     color: color
                                 }),
                                 stroke: new Stroke({
                                     color: color,
-                                    width: 40
+                                    width: opts.size
                                 })
                             });
-                            let oldStyle = v.feature.getStyle();
-                            let newStyles = [];
-                            if(oldStyle) {
-                                newStyles.push(oldStyle);
-                            }
-                            newStyles.push(style);
-                            v.feature.setStyle(newStyles);
+                            this.updateStyles(v.feature);
                         });
                     });
                 }
@@ -1302,6 +1322,7 @@
                 snap: {},
                 options: {},
                 extent: [],
+                featureStyles: {},
                 selectedFeature: {},
                 wktFormat: new WKT(),
                 geoJsonFormat: new GeoJSON(),
