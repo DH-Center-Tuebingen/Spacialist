@@ -71,6 +71,7 @@ class ContextController extends Controller {
         $contextIds = $contexts->pluck('id')->toArray();
         $values = AttributeValue::with(['attribute'])
             ->whereIn('context_id', $contextIds)
+            ->where('attribute_id', $aid)
             ->get();
         $data = [];
         foreach($values as $value) {
