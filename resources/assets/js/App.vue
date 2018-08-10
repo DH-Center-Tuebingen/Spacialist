@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex flex-column h-100">
-        <nav class="navbar navbar-dark bg-dark sticky-top navbar-expand-lg">
+        <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
             <!-- Branding Image -->
             <router-link :to="{name: 'home'}" class="navbar-brand">
                 <img src="favicon.png" class="logo" alt="spacialist logo" />
