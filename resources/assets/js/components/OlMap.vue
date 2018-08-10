@@ -1001,8 +1001,6 @@
                                 for(let i=1; i<=categories; i++) {
                                     buckets.push(min + bucketSize*i);
                                 }
-                            } else if(opts.mode.id == 'quantile') {
-                                 equalBucketSize = Math.floor(values.length/categories);
                             }
                         }
                         let fr, fg, fb;
@@ -1013,8 +1011,12 @@
                         const to = { r: tr, g: tg, b: tb };
                         const gradients = this.getGradients(from, to, categories);
                         let currentGradient;
+                        let overallBucketCount = 0;
                         let currentBucket = 0;
                         let currentBucketCount = 0;
+                        let currentBucketSize =  Math.floor(
+                            (currentBucket+1)*(1/categories) * values.length
+                        );
                         values.forEach(v => {
                             if(opts.style.id == 'categorized') {
                                 if(!v.value && v.value !== 0) {
@@ -1031,12 +1033,16 @@
                                         }
                                     }
                                 } else if(opts.mode.id == 'quantile') {
-                                    if(currentBucketCount == equalBucketSize && currentBucket < gradients.length-1) {
+                                    if(currentBucketCount == currentBucketSize && currentBucket < gradients.length-1) {
                                         currentBucketCount = 0;
                                         currentBucket++;
+                                        currentBucketSize = Math.floor(
+                                            (currentBucket+1)*(1/categories) * values.length
+                                        ) - overallBucketCount;
                                     }
                                     currentGradient = gradients[currentBucket];
                                     currentBucketCount++;
+                                    overallBucketCount++;
                                 }
                             }
                             const color = `rgba(${currentGradient.r}, ${currentGradient.g}, ${currentGradient.b}, ${1-opts.transparency})`;
