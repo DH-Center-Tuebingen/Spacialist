@@ -22,17 +22,19 @@
             </li>
             <li class="list-inline-item">
                 <file-upload
-                ref="upload"
-                v-model="files"
-                post-action="/api/bibliography/import"
-                :directory="false"
-                :disabled="!$can('add_remove_literature|edit_literature')"
-                :multiple="false"
-                :drop="true"
-                @input-file="inputFile">
-                    <span class="btn btn-outline-primary">
-                        <i class="fas fa-fw fa-file-import"></i> Import BibTex File
-                    </span>
+                    accept="text/x-bibtex,text/plain"
+                    extensions="bib,bibtex"
+                    ref="upload"
+                    v-model="files"
+                    post-action="/api/bibliography/import"
+                    :directory="false"
+                    :disabled="!$can('add_remove_literature|edit_literature')"
+                    :multiple="false"
+                    :drop="true"
+                    @input-file="inputFile">
+                        <span class="btn btn-outline-primary">
+                            <i class="fas fa-fw fa-file-import"></i> Import BibTex File
+                        </span>
                 </file-upload>
             </li>
             <li class="list-inline-item">
@@ -523,7 +525,7 @@
                 this.$modal.hide('delete-bibliography-item-modal');
             },
             showNewItemModal() {
-                if(!vm.$can('add_remove_literature')) return;
+                if(!this.$can('add_remove_literature')) return;
                 this.newItem = {
                     fields: {}
                 };
