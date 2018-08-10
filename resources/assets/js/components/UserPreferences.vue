@@ -23,7 +23,7 @@
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.gui-language'])" :disabled="!preferences['prefs.gui-language'].allow_override">
+                    <button type="button" class="btn btn-success" @click.prevent="savePreference(preferences['prefs.gui-language'])" :disabled="!preferences['prefs.gui-language'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -55,7 +55,7 @@
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.columns'])" :disabled="!preferences['prefs.columns'].allow_override">
+                    <button type="button" class="btn btn-success" @click.prevent="savePreference(preferences['prefs.columns'])" :disabled="!preferences['prefs.columns'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -77,7 +77,7 @@
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.show-tooltips'])" :disabled="!preferences['prefs.show-tooltips'].allow_override">
+                    <button type="button" class="btn btn-success" @click.prevent="savePreference(preferences['prefs.show-tooltips'])" :disabled="!preferences['prefs.show-tooltips'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -97,7 +97,7 @@
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.tag-root'])" :disabled="!preferences['prefs.tag-root'].allow_override">
+                    <button type="button" class="btn btn-success" @click.prevent="savePreference(preferences['prefs.tag-root'])" :disabled="!preferences['prefs.tag-root'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -122,7 +122,7 @@
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.load-extensions'])" :disabled="!preferences['prefs.load-extensions'].allow_override">
+                    <button type="button" class="btn btn-success" @click.prevent="savePreference(preferences['prefs.load-extensions'])" :disabled="!preferences['prefs.load-extensions'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -142,7 +142,7 @@
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.link-to-thesaurex'])" :disabled="!preferences['prefs.link-to-thesaurex'].allow_override">
+                    <button type="button" class="btn btn-success" @click.prevent="savePreference(preferences['prefs.link-to-thesaurex'])" :disabled="!preferences['prefs.link-to-thesaurex'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -162,7 +162,7 @@
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.project-name'])" :disabled="!preferences['prefs.project-name'].allow_override">
+                    <button type="button" class="btn btn-success" @click.prevent="savePreference(preferences['prefs.project-name'])" :disabled="!preferences['prefs.project-name'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -202,7 +202,7 @@
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.project-maintainer'])" :disabled="!preferences['prefs.project-maintainer'].allow_override">
+                    <button type="button" class="btn btn-success" @click.prevent="savePreference(preferences['prefs.project-maintainer'])" :disabled="!preferences['prefs.project-maintainer'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -222,7 +222,7 @@
                     </form>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" @click="savePreference(preferences['prefs.map-projection'])" :disabled="!preferences['prefs.map-projection'].allow_override">
+                    <button type="button" class="btn btn-success" @click.prevent="savePreference(preferences['prefs.map-projection'])" :disabled="!preferences['prefs.map-projection'].allow_override">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -252,7 +252,7 @@
                 data.value = pref.value;
                 if(typeof data.value === 'object') data.value = JSON.stringify(data.value);
                 data.user_id = this.$auth.user().id;
-                vm.$http.patch('/api/preference/' + pref.id, data).then(function(response) {
+                vm.$http.patch('preference/' + pref.id, data).then(function(response) {
                     const label = pref.label; // TODO translation
                     vm.$showToast('Preference updated', `${label} successfully updated.`, 'success');
                 });

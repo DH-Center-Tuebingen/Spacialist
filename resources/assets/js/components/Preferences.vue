@@ -27,7 +27,7 @@
                     <input type="checkbox"  v-model="preferences['prefs.gui-language'].allow_override" />
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click="savePreference(preferences['prefs.gui-language'])">
+                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.gui-language'])">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -62,7 +62,7 @@
                     <input type="checkbox" v-model="preferences['prefs.columns'].allow_override" />
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click="savePreference(preferences['prefs.columns'])">
+                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.columns'])">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -87,7 +87,7 @@
                     <input type="checkbox" v-model="preferences['prefs.show-tooltips'].allow_override" />
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click="savePreference(preferences['prefs.show-tooltips'])">
+                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.show-tooltips'])">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -110,7 +110,7 @@
                     <input type="checkbox" v-model="preferences['prefs.tag-root'].allow_override" />
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click="savePreference(preferences['prefs.tag-root'])">
+                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.tag-root'])">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -138,7 +138,7 @@
                     <input type="checkbox" v-model="preferences['prefs.load-extensions'].allow_override" />
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click="savePreference(preferences['prefs.load-extensions'])">
+                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.load-extensions'])">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -161,7 +161,7 @@
                     <input type="checkbox" v-model="preferences['prefs.link-to-thesaurex'].allow_override" />
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click="savePreference(preferences['prefs.link-to-thesaurex'])">
+                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.link-to-thesaurex'])">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -184,7 +184,7 @@
                     <input type="checkbox" v-model="preferences['prefs.project-name'].allow_override" />
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click="savePreference(preferences['prefs.project-name'])">
+                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.project-name'])">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -227,7 +227,7 @@
                     <input type="checkbox" v-model="preferences['prefs.project-maintainer'].allow_override" />
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click="savePreference(preferences['prefs.project-maintainer'])">
+                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.project-maintainer'])">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -250,7 +250,7 @@
                     <input type="checkbox" v-model="preferences['prefs.map-projection'].allow_override" />
                 </td>
                 <td>
-                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click="savePreference(preferences['prefs.map-projection'])">
+                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.map-projection'])">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                 </td>
@@ -284,7 +284,7 @@
                 data.value = pref.value;
                 if(typeof data.value === 'object') data.value = JSON.stringify(data.value);
                 data.allow_override = pref.allow_override;
-                vm.$http.patch(`/api/preference/${pref.id}`, data).then(function(response) {
+                vm.$http.patch(`preference/${pref.id}`, data).then(function(response) {
                     const label = pref.label; // TODO translation
                     vm.$showToast('Preference updated', `${label} successfully updated.`, 'success');
                 });
