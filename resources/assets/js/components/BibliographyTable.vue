@@ -22,7 +22,7 @@
             </li>
             <li class="list-inline-item">
                 <file-upload
-                    accept="text/x-bibtex,text/plain"
+                    accept="application/x-bibtex,text/x-bibtex,text/plain"
                     extensions="bib,bibtex"
                     ref="upload"
                     v-model="files"
@@ -38,9 +38,9 @@
                 </file-upload>
             </li>
             <li class="list-inline-item">
-                <a type="button" class="btn btn-outline-primary" href="/api/bibliography/export">
+                <button type="button" class="btn btn-outline-primary" @click="exportFile">
                     <i class="fas fa-fw fa-file-export"></i> Export BibTex File
-                </a>
+                </button>
             </li>
         </ul>
         <div class="table-responsive">
@@ -441,6 +441,12 @@
                         this.$refs.upload.active = true
                     }
                 }
+            },
+            exportFile() {
+                $http.get('bibliography/export').then(response => {
+                    const filename = this.$getPreference('prefs.project-name') + '.bibtex';
+                    this.$createDownloadLink(response.data, filename, false, response.headers['content-type']);
+                });
             },
             onModalClose() {
                 this.$router.push({
