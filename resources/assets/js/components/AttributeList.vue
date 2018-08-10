@@ -31,20 +31,15 @@
                     </span>
                     <sup class="clickable" v-if="onMetadata" @click="onMetadata(attribute)">
                         <span>
-                            <i class="fas fa-fw fa-exclamation"
-                            :class="{
-                                'text-danger': localValues[attribute.id].possibility <= 25,
-                                'text-warning': localValues[attribute.id].possibility <= 50,
-                                'text-info': localValues[attribute.id].possibility <= 75,
-                                'text-success': localValues[attribute.id].possibility > 75 || (!localValues[attribute.id].possibility && localValues[attribute.id].possibility !== 0)
-                                }"></i>
-                            </span>
-                            <span v-if="localValues[attribute.id].possibility_description">
-                                <i class="fas fa-fw fa-comment"></i>
-                            </span>
-                            <span v-if="metadataAddon(attribute.thesaurus_url)">
-                                <i class="fas fa-fw fa-bookmark"></i>
-                            </span>
+                        <i class="fas fa-fw fa-exclamation"
+                        :class="getPossibilityClass(localValues[attribute.id].possibility)"></i>
+                        </span>
+                        <span v-if="localValues[attribute.id].possibility_description">
+                            <i class="fas fa-fw fa-comment"></i>
+                        </span>
+                        <span v-if="metadataAddon(attribute.thesaurus_url)">
+                            <i class="fas fa-fw fa-bookmark"></i>
+                        </span>
                     </sup>
                 </label>
                 <div class="col-md-9">
@@ -318,6 +313,19 @@
                 }
                 this.fields[`attribute-${aid}`].dirty = true;
                 this.checkDependency(aid);
+            },
+            getPossibilityClass(certainty, aid) {
+                let activeClasses = [];
+                if(certainty <= 25) {
+                    activeClasses.push('text-danger');
+                } else if(certainty <= 50) {
+                    activeClasses.push('text-warning');
+                } else if(certainty <= 75) {
+                    activeClasses.push('text-info');
+                } else {
+                    activeClasses.push('text-success');
+                }
+                return activeClasses;
             },
             checkDependency(aid) {
                 if(!this.dependencies) return;

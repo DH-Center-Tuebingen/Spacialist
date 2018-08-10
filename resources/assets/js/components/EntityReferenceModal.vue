@@ -1,5 +1,5 @@
 <template>
-    <modal name="entity-references-modal" width="50%" :scrollable="true" :draggable="true" :resizable="true" @before-open="initModal">
+    <modal name="entity-references-modal" width="50%" :scrollable="true" :draggable="true" :resizable="true" @closed="routeBack">
         <div class="modal-content h-100">
             <div class="modal-header">
                 <h5 class="modal-title">References</h5>
@@ -7,19 +7,19 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body col col-md-8 offset-md-2 scroll-y-auto" v-if="active">
+            <div class="modal-body col col-md-8 offset-md-2 scroll-y-auto">
                 <h4>Certainty</h4>
                 <div class="progress" @click="setCertainty">
-                    <div class="progress-bar" role="progressbar" :class="{'bg-danger': attributeValue.possibility <= 25, 'bg-warning': attributeValue.possibility <= 50, 'bg-info': attributeValue.possibility <= 75, 'bg-success': attributeValue.possibility > 75}" :aria-valuenow="attributeValue.possibility" aria-valuemin="0" aria-valuemax="100" :style="{width: attributeValue.possibility+'%'}">
+                    <div class="progress-bar" role="progressbar" :class="{'bg-danger': refs.value.possibility <= 25, 'bg-warning': refs.value.possibility <= 50, 'bg-info': refs.value.possibility <= 75, 'bg-success': refs.value.possibility > 75}" :aria-valuenow="refs.value.possibility" aria-valuemin="0" aria-valuemax="100" :style="{width: refs.value.possibility+'%'}">
                         <span class="sr-only">
-                            {{ attributeValue.possibility }}% certainty
+                            {{ refs.value.possibility }}% certainty
                         </span>
-                        {{ attributeValue.possibility }}%
+                        {{ refs.value.possibility }}%
                     </div>
                 </div>
                 <form role="form" class="mt-2" @submit.prevent="onUpdateCertainty">
                     <div class="form-group">
-                        <textarea class="form-control" v-model="attributeValue.possibility_description" placeholder="Certainty Comment"></textarea>
+                        <textarea class="form-control" v-model="refs.value.possibility_description" placeholder="Certainty Comment"></textarea>
                     </div>
                     <div class="text-center">
                         <button type="submit" class="btn btn-outline-success">
@@ -30,7 +30,7 @@
                 <h4 class="mt-3">References</h4>
                 <table class="table table-hover">
                     <tbody>
-                        <tr class="d-flex flex-row" v-for="reference in references">
+                        <tr class="d-flex flex-row" v-for="reference in refs.refs">
                             <td class="text-left py-2 col px-0 pl-1">
                                 <h6>{{ reference.bibliography.title }}</h6>
                                 <p class="mb-0">
@@ -120,16 +120,43 @@
 
 <script>
     export default {
+        props: {
+            bibliography: {
+                required: true,
+                type: Array
+            },
+            refs: {
+                required: true,
+                type: Object
+            }
+        },
+        beforeRouteEnter(to, from, next) {
+            next(vm => {
+                vm.init();
+            });
+        },
+        beforeRouteUpdate(to, from, next) {
+            vm.init();
+            next();
+        },
+        beforeRouteLeave(to, from, next) {
+            this.$modal.hide('entity-references-modal');
+            next();
+        },
         methods: {
-            initModal(event) {
-                for(let p in event.params) {
-                    this[p] = event.params[p];
+            init() {
+                if(!this.refs.value.possibility) {
+                    Vue.set(this.refs.value, 'possibility', 100);
                 }
+                const curr = this.$router.history.current;
+                this.entityId = curr.params.id;
+                this.attributeId = curr.params.aid;
+                this.$modal.show('entity-references-modal');
             },
             setCertainty(event) {
                 const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
                 const clickPos = event.layerX; // in px
-                const currentValue = this.attributeValue.possibility;
+                const currentValue = this.refs.value.possibility;
                 let value = parseInt(clickPos/maxSize*100);
                 const diff = Math.abs(value-currentValue);
                 if(diff < 10) {
@@ -141,23 +168,54 @@
                 } else {
                     value = parseInt((value+5)/10)*10;
                 }
-                Vue.set(this.attributeValue, 'possibility', value);
+                Vue.set(this.refs.value, 'possibility', value);
             },
             onUpdateCertainty() {
-                this.updateCertainty(this);
+                if(!this.$can('duplicate_edit_concepts')) return;
+                const data = {
+                    certainty: this.refs.value.possibility,
+                    certainty_description: this.refs.value.possibility_description
+                };
+                $http.patch(`/context/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
+                    const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
+                    this.$showToast('Certainty updated', `Certainty of ${attributeName} successfully set to ${this.refs.value.possibility}% (${this.refs.value.possibility_description}).`, 'success');
+                });
             },
             onAddReference(item) {
-                this.addReference(item, this).then(newItem => {
-                    this.references.push(newItem);
-                })
+                if(!this.$can('add_remove_literature')) return;
+                const data = {
+                    bibliography_id: item.bibliography.id,
+                    description: item.description
+                };
+                $http.post(`/context/${this.entityId}/reference/${this.attributeId}`, data).then(response => {
+                    if(!this.refs.refs) {
+                        this.refs.refs = [];
+                    }
+                    this.refs.refs.push(response.data);
+                });
             },
             onDeleteReference(reference) {
-                this.deleteReference(reference, this).then(index => {
-                    this.references.splice(index, 1);
+                if(!this.$can('add_remove_literature')) return;
+                const id = reference.id;
+                $http.delete(`/context/reference/${id}`).then(response => {
+                    const index = this.refs.refs.findIndex(r => r.id == reference.id);
+                    if(index > -1) {
+                        this.refs.refs.splice(index, 1);
+                    }
                 });
             },
             onUpdateReference(editedReference) {
-                this.updateReference(editedReference, this).then(_ => {
+                if(!this.$can('edit_literature')) return;
+                const id = editedReference.id;
+                let ref = this.refs.refs.find(r => r.id == editedReference.id);
+                if(ref.description == editedReference.description) {
+                    return;
+                }
+                const data = {
+                    description: editedReference.description
+                };
+                $http.patch(`/context/reference/${id}`, data).then(response => {
+                    ref.description = editedReference.description;
                     this.cancelEditReference();
                 });
             },
@@ -169,23 +227,27 @@
             },
             hideModal() {
                 this.$modal.hide('entity-references-modal');
+            },
+            routeBack() {
+                const curr = this.$router.history.current;
+                this.$router.push({
+                    name: 'contextdetail',
+                    params: {
+                        id: curr.params.id
+                    },
+                    query: curr.query
+                });
             }
         },
         data() {
             return {
-                attribute: {},
-                attributeValue: {},
-                references: [],
-                active: false,
+                entityId: 0,
+                attributeId: 0,
                 editReference: {},
                 newItem: {
                     bibliography: {},
                     description: ''
                 },
-                updateCertainty: undefined,
-                addReference: undefined,
-                deleteReference: undefined,
-                updateReference: undefined
             }
         },
         computed: {

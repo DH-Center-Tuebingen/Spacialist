@@ -21,7 +21,11 @@
             :values="entity.data">
         </attributes>
 
-        <entity-reference-modal v-can="'view_concept_props'"></entity-reference-modal>
+        <router-view
+            v-can="'view_concept_props'"
+            :bibliography="bibliography"
+            :refs="ref">
+        </router-view>
         <discard-changes-modal :name="discardModal"/>
     </div>
 </template>
@@ -44,6 +48,18 @@
         beforeRouteUpdate(to, from, next) {
             if(to.params.id == from.params.id && to.name == from.name) {
                 next();
+            } else if(to.params.aid) { // do not reload data if reference modal is opened
+                this.setModalValues(to.params.aid);
+                next();
+            } else if(!to.params.aid && from.params.aid) {
+                $http.get(`/context/${to.params.id}/data/${from.params.aid}`).then(response => {
+                    // if result is empty, php returns [] instead of {}
+                    if(response.data instanceof Array) {
+                        response.data = {};
+                    }
+                    Vue.set(this.entity.data, from.params.aid, response.data[from.params.aid]);
+                    next();
+                });
             } else {
                 const vm = this;
                 const entityId = to.params.id;
@@ -177,6 +193,12 @@
                         data = {};
                     }
                     Vue.set(vm.entity, 'references', data);
+
+                    const aid = vm.$router.history.current.params.aid;
+                    if(aid) {
+                        setModalValues(aid)
+                    }
+
                     Vue.set(vm, 'dataLoaded', true);
                 });
             },
@@ -221,88 +243,20 @@
                     vm.$showToast('Entity updated', `Data of ${entity.name} successfully updated.`, 'success');
                 });
             },
+            setModalValues(aid) {
+                const attribute = this.entity.attributes.find(a => a.id == aid);
+                this.ref.refs = this.entity.references[attribute.thesaurus_url];
+                this.ref.value = this.entity.data[aid];
+                this.ref.attribute = attribute;
+            },
             showMetadata(attribute) {
-                const refs = this.entity.references[attribute.thesaurus_url];
-                this.$modal.show('entity-references-modal', {
-                    attribute: attribute,
-                    attributeValue: {...this.entity.data[attribute.id]},
-                    bibliography: this.bibliography,
-                    references: refs ? refs.slice() : [],
-                    active: true,
-                    updateCertainty: this.updateCertainty,
-                    addReference: this.addReference,
-                    deleteReference: this.deleteReference,
-                    updateReference: this.updateReference
-                });
-            },
-            updateCertainty(reference) {
-                if(!vm.$can('duplicate_edit_concepts')) return;
-                const vm = this;
-                const cid = vm.entity.id;
-                const aid = reference.attribute.id;
-                const oldData = vm.entity.data[aid];
-                const newData = reference.attributeValue;
-                if(newData.possibility == oldData.possibility && newData.possibility_description == oldData.possibility_description) {
-                    return;
-                }
-                const data = {
-                    certainty: newData.possibility,
-                    certainty_description: newData.possibility_description
-                };
-                return vm.$http.patch(`/context/${cid}/attribute/${aid}`, data).then(function(response) {
-                    oldData.possibility = newData.possibility;
-                    oldData.possibility_description = newData.possibility_description;
-                    const attributeName = vm.$translateConcept(reference.attribute.thesaurus_url);
-                    vm.$showToast('Certainty updated', `Certainty of ${attributeName} successfully set to ${newData.possibility}% (${newData.possibility_description}).`, 'success');
-                });
-            },
-            addReference(item, reference) {
-                const vm = this;
-                if(!vm.$can('add_remove_literature')) return;
-                const cid = vm.entity.id;
-                const aid = reference.attribute.id;
-                const data = {
-                    bibliography_id: item.bibliography.id,
-                    description: item.description
-                };
-                return vm.$http.post(`/context/${cid}/reference/${aid}`, data).then(function(response) {
-                    const refUrl = reference.attribute.thesaurus_url;
-                    let refs = vm.entity.references[refUrl];
-                    if(!refs) {
-                        refs = vm.entity.references[refUrl] = [];
-                    }
-                    refs.push(response.data);
-                    return response.data;
-                });
-            },
-            deleteReference(reference, referenceModal) {
-                const vm = this;
-                if(!vm.$can('add_remove_literature')) return;
-                const id = reference.id;
-                return vm.$http.delete(`/context/reference/${id}`).then(function(response) {
-                    let refs = vm.entity.references[referenceModal.attribute.thesaurus_url];
-                    const index = refs.findIndex(r => r.id == reference.id);
-                    if(index > -1) {
-                        refs.splice(index, 1);
-                        return index;
-                    }
-                });
-            },
-            updateReference(referenceClone, referenceModal) {
-                const vm = this;
-                if(!vm.$can('edit_literature')) return;
-                const id = referenceClone.id;
-                let refs = vm.entity.references[referenceModal.attribute.thesaurus_url];
-                let ref = refs.find(r => r.id == referenceClone.id);
-                if(ref.description == referenceClone.description) {
-                    return;
-                }
-                const data = {
-                    description: referenceClone.description
-                };
-                return vm.$http.patch(`/context/reference/${id}`, data).then(function(response) {
-                    ref.description = referenceClone.description;
-                    // Vue.set(referenceModal, 'references', refs.slice());
+                this.$router.push({
+                    append: true,
+                    name: 'contextrefs',
+                    params: {
+                        aid: attribute.id
+                    },
+                    query: this.$router.history.current.query
                 });
             },
             hasReferenceGroup: function(group) {
@@ -322,6 +276,11 @@
             return {
                 entity: {},
                 dataLoaded: false,
+                ref: {
+                    refs: {},
+                    value: {},
+                    attribute: {}
+                },
                 discardModal: 'discard-changes-modal'
             }
         },

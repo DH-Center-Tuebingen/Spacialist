@@ -10,6 +10,7 @@ import VueRouter from 'vue-router';
 import App from './App.vue';
 import MainView from './components/MainView.vue';
 import ContextDetail from './components/ContextDetail.vue';
+import ReferenceModal from './components/EntityReferenceModal.vue';
 import Login from './components/Login.vue';
 // Tools
 import Bibliography from './components/BibliographyTable.vue';
@@ -102,8 +103,7 @@ const router = new VueRouter({
                         path: 'sources/:aid',
                         redirect: to => {
                             return {
-                                // TODO not contextdetail
-                                name: 'contextdetail',
+                                name: 'contextrefs',
                                 params: {
                                     id: to.params.id,
                                     aid: to.params.aid,
@@ -169,7 +169,14 @@ const router = new VueRouter({
                 {
                     path: 'e/:id',
                     name: 'contextdetail',
-                    component: ContextDetail
+                    component: ContextDetail,
+                    children: [
+                        {
+                            path: 'refs/:aid',
+                            name: 'contextrefs',
+                            component: ReferenceModal
+                        }
+                    ]
                 }
             ],
             meta: {

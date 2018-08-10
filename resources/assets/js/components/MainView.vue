@@ -45,7 +45,7 @@
                     </p>
                     <div v-else v-for="(referenceGroup, key) in references" class="mb-2">
                         <h5 class="mb-1">
-                            <a href="#" @click="showMetadataForReferenceGroup(referenceGroup)">{{ $translateConcept(key) }}</a>
+                            <a href="#" @click.prevent="showMetadataForReferenceGroup(referenceGroup)">{{ $translateConcept(key) }}</a>
                         </h5>
                         <div class="list-group">
                             <a class="list-group-item list-group-item-action" v-for="reference in referenceGroup">
@@ -242,9 +242,14 @@
                 if(!referenceGroup) return;
                 if(!this.selectedContext) return;
                 const aid = referenceGroup[0].attribute_id;
-                const attribute = this.selectedContext.attributes.find(a => a.id == aid);
-                if(!attribute) return;
-                // this.showMetadata(attribute); TODO
+                this.$router.push({
+                    name: 'contextrefs',
+                    params: {
+                        aid: aid
+                    },
+                    query: this.$router.history.current.query,
+                    append: true
+                });
             },
             addEntityDisabled(entity) {
                 return !entity.name || !entity.type;
