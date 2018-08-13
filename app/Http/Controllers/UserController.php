@@ -133,6 +133,10 @@ class UserController extends Controller
         return response()->json($role);
     }
 
+    public function logout(Request $request) {
+        auth()->logout();
+    }
+
     // PATCH
 
     public function setRoles(Request $request, $id) {

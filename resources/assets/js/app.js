@@ -362,35 +362,51 @@ Vue.filter('bibtexify', function(value, type) {
 const app = new Vue({
     el: '#app',
     router: router,
-    render: app => app(App),
-    beforeMount: function() {
-        Axios.get('pre').then(response =>  {
-            this.preferences = response.data.preferences;
-            this.concepts = response.data.concepts;
-            this.contextTypes = response.data.contextTypes;
-            const extensions = this.preferences['prefs.load-extensions'];
-            for(let k in extensions) {
-                if(!extensions[k] || (k != 'map' && k != 'files')) {
-                    console.log("Skipping plugin " + k);
-                    continue;
+    render: h => {
+        return h(App, {
+            props: {
+                onInit: _ => {
+                    app.init();
                 }
-                let name = k;
-                let nameExt = name + '.js';
-                System.import('./plugins/' + nameExt).then(function(data) {
-                    Vue.use(data.default);
-                });
             }
-            this.$getSpacialistPlugins('plugins');
-        });
+        })
     },
-    data: {
-        selectedContext: {},
-        onSelectContext: function(selection) {
-            app.$data.selectedContext = Object.assign({}, selection);
-        },
-        preferences: {},
-        concepts: {},
-        contextTypes: {},
-        plugins: {}
+    beforeMount: function() {
+        this.init();
+    },
+    methods: {
+        init() {
+            Axios.get('pre').then(response =>  {
+                this.preferences = response.data.preferences;
+                this.concepts = response.data.concepts;
+                this.contextTypes = response.data.contextTypes;
+                const extensions = this.preferences['prefs.load-extensions'];
+                for(let k in extensions) {
+                    if(!extensions[k] || (k != 'map' && k != 'files')) {
+                        console.log("Skipping plugin " + k);
+                        continue;
+                    }
+                    let name = k;
+                    let nameExt = name + '.js';
+                    System.import('./plugins/' + nameExt).then(function(data) {
+                        Vue.use(data.default);
+                    });
+                }
+                this.$getSpacialistPlugins('plugins');
+            });
+        }
+    },
+    data() {
+        return {
+            selectedContext: {},
+            onSelectContext: function(selection) {
+                app.$data.selectedContext = Object.assign({}, selection);
+            },
+            preferences: {},
+            concepts: {},
+            contextTypes: {},
+            plugins: {},
+            onInit: null
+        }
     }
 });

@@ -117,7 +117,6 @@ Vue.prototype.$hasConcept = function(url) {
     return !!this.$root.$data.concepts[url];
 }
 
-
 Vue.prototype.$translateLabel = function(element, prop) {
     const value = element[prop];
     if(!value) return element;
@@ -139,8 +138,10 @@ Vue.prototype.$getEntityTypes = function() {
     return this.$root.$data.contextTypes;
 }
 
-Vue.prototype.$getPreference = function(pref) {
-    return this.$root.$data.preferences[pref];
+Vue.prototype.$getPreference = function(prefKey) {
+    const pref = this.$root.$data.preferences[prefKey];
+    if(!pref) return {};
+    return pref;
 }
 
 Vue.prototype.$getTabPlugins = function() {

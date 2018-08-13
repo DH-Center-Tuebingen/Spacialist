@@ -65,6 +65,12 @@
 
 <script>
     export default {
+        props: {
+            onLogin: {
+                required: false,
+                type: Function
+            }
+        },
         mounted() {},
         methods: {
             login() {
@@ -85,6 +91,11 @@
                     },
                     rememberMe: vm.user.remember,
                     redirect: to,
+                    success: _ => {
+                        if(vm.onLogin) {
+                            vm.onLogin();
+                        }
+                    },
                     fetchUser: true
                 });
             }

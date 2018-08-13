@@ -101,6 +101,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
     Route::post('/user', 'UserController@addUser');
     Route::post('/role', 'UserController@addRole');
+    Route::post('/auth/logout', 'UserController@logout');
 
     Route::patch('/user/{id}/role', 'UserController@setRoles');
     Route::patch('/role/{id}/permission', 'UserController@setPermissions');

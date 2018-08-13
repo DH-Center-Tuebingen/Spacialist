@@ -12,7 +12,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Left Side Of Navbar -->
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
+                    <li class="nav-item" v-if="loggedIn">
                         <form class="form-inline mr-auto">
                             <div class="form-group">
                                 <global-search></global-search>
@@ -106,7 +106,7 @@
                                 <i class="fas fa-fw fa-cog"></i> Preferences
                             </router-link>
                             <a class="dropdown-item" href="#"
-                                @click="$auth.logout()">
+                                @click="logout">
                                 <i class="fas fa-fw fa-sign-out-alt"></i> Logout
                             </a>
                         </ul>
@@ -115,7 +115,7 @@
             </div>
         </nav>
         <div class="container-fluid mt-3 mb-3 col">
-            <router-view></router-view>
+            <router-view :on-login="onInit"></router-view>
             <about-dialog></about-dialog>
             <error-modal></error-modal>
         </div>
@@ -125,20 +125,32 @@
 
 <script>
     export default {
-        mounted() {
-            this.$auth.ready(_ => {
-                this.loggedIn = this.$auth.check();
-            });
+        props: {
+            onInit: {
+                required: false,
+                type: Function
+            }
         },
+        mounted() {},
         methods: {
+            logout() {
+                this.$auth.logout({
+                    makeRequest: true,
+                    redirect: '/login'
+                });
+            },
             showAboutModal() {
                 this.$modal.show('about-modal');
             }
         },
         data() {
             return {
-                plugins: {},
-                loggedIn: false
+                plugins: {}
+            }
+        },
+        computed: {
+            loggedIn: function() {
+                return this.$auth.check();
             }
         }
     }
