@@ -55,8 +55,9 @@
                                 label="label"
                                 track-by="key"
                                 v-model="filterTypes[selectedTopAction]"
-                                :closeOnSelect="false"
-                                :hideSelected="true"
+                                :allow-empty="true"
+                                :close-on-select="false"
+                                :hide-selected="true"
                                 :multiple="true"
                                 :options="filterTypeList">
                             </multiselect>
@@ -69,8 +70,9 @@
                         <div class="col-md-9">
                             <multiselect
                                 v-model="filterCameras[selectedTopAction]"
-                                :closeOnSelect="false"
-                                :hideSelected="true"
+                                :allow-empty="true"
+                                :close-on-select="false"
+                                :hide-selected="true"
                                 :multiple="true"
                                 :options="filterCameraList">
                             </multiselect>
@@ -82,9 +84,12 @@
                         </label>
                         <div class="col-md-9">
                             <multiselect
+                                label="value"
+                                track-by="id"
                                 v-model="filterDates[selectedTopAction]"
-                                :closeOnSelect="false"
-                                :hideSelected="true"
+                                :allow-empty="true"
+                                :close-on-select="false"
+                                :hide-selected="true"
                                 :multiple="true"
                                 :options="filterDateList">
                             </multiselect>
@@ -536,7 +541,12 @@
                 });
                 vm.$http.get('/file/filter/date').then(function(response) {
                     vm.filterDateList = [];
-                    vm.filterDateList = response.data;
+                    let cnt = 0;
+                    vm.filterDateList = response.data.map(d => {
+                        cnt++;
+                        d.id = cnt;
+                        return d;
+                    });
                 });
             },
             toggleFilters() {

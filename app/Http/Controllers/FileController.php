@@ -168,7 +168,24 @@ class FileController extends Controller
             ->select(\DB::raw("DATE(created) AS created_date"))
             ->orderBy('created_date', 'asc')
             ->pluck('created_date');
-        return response()->json($dates);
+        $years = File::distinct()
+            ->select(\DB::raw("EXTRACT(year from created) AS created_year"))
+            ->orderBy('created_year', 'asc')
+            ->pluck('created_year');
+        $dates = $dates->map(function($d) {
+            return [
+                'is' => 'date',
+                'value' => $d
+            ];
+        });
+        $years = $years->map(function($y) {
+            return [
+                'is' => 'year',
+                'value' => $y
+            ];
+        });
+        $res = $dates->concat($years);
+        return response()->json($res);
     }
 
     // POST
