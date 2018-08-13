@@ -36,7 +36,8 @@
                         :context="selectedContext"
                         :context-data-loaded="dataLoaded"
                         :is="activePlugin"
-                        :params="$router.history.current.query">
+                        :params="$router.history.current.query"
+                        v-on:update:link="updateLink">
                     </component>
                 </keep-alive>
                 <div v-show="tab == 'references'" class="h-100 scroll-y-auto">
@@ -169,21 +170,25 @@
         mounted() {},
         methods: {
             init(roots, bibliography, openTab, initialSelectedId) {
+                const vm = this;
                 this.initFinished = false;
                 this.roots = roots;
                 this.bibliography = bibliography;
                 if(initialSelectedId) {
-                    this.selectedContext.id = initialSelectedId;
+                    $http.get(`/context/${initialSelectedId}`).then(response => {
+                        vm.selectedContext = response.data;
+                    });
                 }
                 if(openTab) {
                     this.setTabOrPlugin(openTab);
                 }
                 this.initFinished = true;
             },
-            onSetSelectedElement(element) {
+            onSetSelectedElement(id) {
+                const vm = this;
                 this.attributesLoaded = false;
                 this.dataLoaded = false;
-                if(!element) {
+                if(!id) {
                     this.selectedContext = {};
                     this.$router.push({
                         name: 'home',
@@ -191,19 +196,21 @@
                     });
                     this.dataLoaded = true;
                 } else {
-                    this.selectedContext = Object.assign({}, element);
-                    // if all extensions are disabled, auto-load references on select
-                    if(this.tab == '') {
-                        this.tab = 'references';
-                    }
-                    this.$requestHooks(this.selectedContext);
-                    this.dataLoaded = true;
-                    this.$router.push({
-                        name: 'contextdetail',
-                        params: {
-                            id: this.selectedContext.id
-                        },
-                        query: this.$router.history.current.query
+                    $http.get(`/context/${id}`).then(response => {
+                        vm.selectedContext = response.data;
+                        // if all extensions are disabled, auto-load references on select
+                        if(this.tab == '') {
+                            this.tab = 'references';
+                        }
+                        this.$requestHooks(this.selectedContext);
+                        this.dataLoaded = true;
+                        this.$router.push({
+                            name: 'contextdetail',
+                            params: {
+                                id: this.selectedContext.id
+                            },
+                            query: this.$router.history.current.query
+                        });
                     });
                 }
             },
@@ -340,6 +347,12 @@
             },
             translateLabel(element, prop) {
                 return this.$translateLabel(element, prop);
+            },
+            updateLink(geoId, entityId) {
+                if (entityId != this.selectedContext.id) {
+                    return;
+                }
+                this.selectedContext.geodata_id = geoId;
             }
         },
         data() {

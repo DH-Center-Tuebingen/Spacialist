@@ -118,7 +118,7 @@
                 if(this.selectedItem.id == item.id) {
                     this.selectionCallback();
                 } else {
-                    this.selectionCallback(item);
+                    this.selectionCallback(item.id);
                 }
             },
             itemToggle(eventData) {

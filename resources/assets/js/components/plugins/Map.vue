@@ -9,7 +9,8 @@
             :on-drawend="addFeature"
             :on-modifyend="updateFeatures"
             :reset="false"
-            :selected-entity="context">
+            :selected-entity="context"
+            v-on:update:link="(geoId, entityId) => $emit('update:link', geoId, entityId)">
         </ol-map>
     </div>
     <div v-else>

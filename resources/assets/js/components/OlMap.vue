@@ -456,6 +456,7 @@
                         };
                         feature.setStyle(vm.featureStyles[geojson.props.id].default);
                         source.addFeature(feature);
+                        vm.features[geojson.props.id] = feature;
                     });
                 } else if(vm.initCollection) {
                     let layer = vm.getUnlinkedLayer();
@@ -623,21 +624,24 @@
                     });
 
                     vm.map.on('click', function(e) {
-                        const element = vm.overlay.getElement();
-                        $(element).popover('dispose');
-                        vm.selectedFeature = {};
-                        // if one mode is active, do not open popup
                         if(!vm.drawDisabled && (vm.draw.getActive() || vm.modify.getActive() || vm.delete.getActive())) {
                             return;
                         }
+                        const element = vm.overlay.getElement();
                         const feature = vm.getFeatureForEvent(e);
                         if(feature) {
-                            const geometry = feature.getGeometry();
-                            const props = feature.getProperties();
-                            const coords = getExtentCenter(geometry.getExtent());
-                            vm.overlay.setPosition(coords);
-
                             vm.selectedFeature = feature;
+                            let props = feature.getProperties();
+                            if (props.entity) {
+                                vm.$router.push({
+                                    append: true,
+                                    name: 'contextdetail',
+                                    params: {
+                                        id: props.entity.id
+                                    },
+                                    query: vm.$router.history.current.query
+                                });
+                            }
                         } else {
                             vm.selectedFeature = {};
                         }
@@ -654,6 +658,11 @@
                         })
                     });
                     // vm.options.graticule.setMap(vm.map);
+                    console.log(vm.selectedEntity);
+                    if (vm.selectedEntity && vm.selectedEntity.geodata_id) {
+                        vm.selectedFeature = vm.features[vm.selectedEntity.geodata_id];
+                    }
+                    vm.updatePopup(vm.selectedFeature);
                 });
             },
             initMapProjection() {
@@ -1212,6 +1221,7 @@
                     feature.setProperties({
                         entity: Object.assign({}, entity)
                     });
+                    vm.$emit('update:link', gid, eid);
                 });
             },
             unlink(feature, entity) {
@@ -1224,6 +1234,7 @@
                     feature.setProperties({
                         entity: {}
                     });
+                    vm.$emit('update:link', gid, eid);
                 });
             },
             geometryToTable(g) {
@@ -1272,10 +1283,16 @@
             },
             updatePopup(f) {
                 const vm = this;
-                if(!f.getId) return;
+                const element = vm.overlay.getElement();
+                if(!f.getId) {
+                    $(element).popover('dispose');
+                    return;
+                };
                 const props = f.getProperties();
                 const geometry = f.getGeometry();
                 const geomName = `Geometry #${props.id}`;
+                const coords = getExtentCenter(geometry.getExtent());
+                vm.overlay.setPosition(coords);
 
                 if(props.entity) {
                     vm.overlayTitle = `${geomName} (${props.entity.name})`;
@@ -1294,7 +1311,6 @@
 
                 // Wait for variables to be updated
                 vm.$nextTick(function() {
-                    const element = vm.overlay.getElement();
                     $(element).popover({
                         'placement': 'top',
                         'animation': true,
@@ -1319,6 +1335,7 @@
                 overlaysGroup: {},
                 entityLayersGroup: {},
                 entityLayers: [],
+                features: {},
                 vector: {}, // TODO replace
                 overlay: {},
                 overlayTitle: '',
@@ -1387,7 +1404,19 @@
                 this.updatePopup(this.selectedFeature);
             },
             selectedEntity: function(newEntity, oldEntity) {
-                this.updatePopup(this.selectedFeature);
+                    if (newEntity.geodata_id) {
+                        this.selectedFeature = this.features[newEntity.geodata_id];
+                    } else {
+                        // new entity is not linked to any geodata
+                        if (oldEntity.geodata_id) {
+                            // old entity was linked to geodata
+                            // therefore we want to deselect the (linked) feature
+                            this.selectedFeature = {};
+                        }
+                    }
+            },
+            'selectedEntity.geodata_id': function(newId, oldId) {
+                this.updatePopup(this.selectedFeature)
             },
             layers: function(newLayers, oldLayers) {
                 this.resetLayers();
