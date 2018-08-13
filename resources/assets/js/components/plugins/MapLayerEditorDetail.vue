@@ -7,7 +7,7 @@
             </button>
         </div>
         <form role="form" id="layer-form" class="col pl-0 scroll-y-auto scroll-x-hidden" @submit.prevent="updateLayer(layer)">
-            <div v-if="layer.context_type_id || layer.type == 'unlinked'">
+            <div v-if="isEntityLayer">
                 <div class="form-group row">
                     <label for="color" class="col-md-4 col-form-label">
                         Color:
@@ -169,9 +169,11 @@
                 const lid = tmpLayer.id;
                 delete tmpLayer.id;
                 for(let k in tmpLayer) {
+                    if(this.isEntityLayer && k != 'color' && k != 'visible' && k != 'opacity') {
+                        continue;
+                    }
                     data[k] = tmpLayer[k];
                 }
-                // TODO only patch modified/allowed values
                 vm.$http.patch(`map/layer/${lid}`, data).then(function(response) {
                     vm.$showToast('Layer updated', `Layer ${layer.name} successfully updated.`, 'success');
                 });
@@ -191,6 +193,9 @@
                     return this.$translateConcept(this.layer.context_type.thesaurus_url);
                 }
                 return 'No Title';
+            },
+            isEntityLayer: function() {
+                return this.layer.context_type_id || this.layer.type == 'unlinked';
             }
         }
     }
