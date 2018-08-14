@@ -85,25 +85,25 @@
         methods: {
             onHit(item) {
                 const vm = this;
-                if (vm.onSelect) vm.onSelect(item);
+                if(vm.onSelect) vm.onSelect(item.id);
                 this.reset();
             },
             clearItem() {
-                if (this.onClear) this.onClear();
+                if(this.onClear) this.onClear();
                 this.reset();
             },
             hit() {
-                if (this.current !== -1) {
+                if(this.current !== -1) {
                     this.onHit(this.items[this.current]);
                 } else {
-                    if (this.onMultiselect) {
+                    if(this.onMultiselect) {
                         this.onMultiselect(this.items);
                         this.items = [];
                     }
                 }
             },
             blur() {
-                if (this.current !== -1) {
+                if(this.current !== -1) {
                     this.reset();
                 }
             }
