@@ -3,12 +3,24 @@
         Displaying {{fileState.from}}-{{fileState.to}} of {{fileState.total}} files
         <div class="row col px-0 scroll-y-auto" infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk">
             <div class="col-sm-6 col-md-4 mb-3" v-for="file in files">
-                <div class="card text-center" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
+                <div class="card text-center clickable" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
+                    <div class="card-hover-overlay">
+                        <div class="text-white">
+                            <i class="fas fa-fw fa-binoculars fa-5x"></i>
+                        </div>
+                    </div>
                     <div class="card-hover">
                         <img class="card-img" v-if="file.category == 'image'" :src="file.url" style="height: 200px;">
                         <div class="card-img" v-else style="width: 100%; height: 200px;"></div>
                         <div class="card-img-overlay">
-                            <h4 class="card-title text-truncate">{{file.name}}</h4>
+                            <h4 class="card-title text-truncate">
+                                <small v-if="showLinks && getFileLinks(file).length" title="Is linked">
+                                    <sup>
+                                        <i class="fas fa-fw fa-link text-info"></i>
+                                    </sup>
+                                </small>
+                                {{ file.name }}
+                            </h4>
                             <div class="card-text pt-4">
                                 <div v-if="file.category == 'xml'">
                                     <i class="fas fa-fw fa-file-code fa-5x"></i>
@@ -61,11 +73,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-hover-overlay bg-info">
-                        <div class="text-white">
-                            <i class="fas fa-fw fa-binoculars fa-5x"></i>
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="col-sm-6 col-md-4 mb-3" v-if="fileState.toLoad">
@@ -84,9 +91,12 @@
         </div>
 
         <vue-context ref="fileMenu" class="context-menu-wrapper">
-            <ul class="list-group list-group-vue-context" slot-scope="fileScope">
+            <ul class="list-group list-group-vue-context" slot-scope="fileScope" v-if="fileScope.data">
                 <li class="list-group-item list-group-item-vue-context" v-for="entry in contextMenu" @click.prevent="entry.callback(fileScope.data.file)">
-                    <i :class="entry.iconClasses">{{entry.iconContent}}</i> {{entry.label}}
+                    <i :class="entry.getIconClasses(fileScope.data.file)">
+                        {{ entry.getIconContent(fileScope.data.file) }}
+                    </i>
+                    {{ entry.getLabel(fileScope.data.file) }}
                 </li>
             </ul>
         </vue-context>
@@ -125,6 +135,10 @@
                 required: true,
                 type: Boolean
             },
+            showLinks: {
+                required: false,
+                type: Boolean,
+            },
             contextMenu: {
                 required: false,
                 type: Array
@@ -133,6 +147,13 @@
         mounted() {
         },
         methods: {
+            getFileLinks(file) {
+                if(!this.showLinks) return [];
+                if(!file.contexts) {
+                    return [];
+                }
+                return file.contexts;
+            }
         },
         data() {
             return {

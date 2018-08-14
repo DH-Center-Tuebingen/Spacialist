@@ -68,13 +68,19 @@ body, #app {
     height: 500px;
 }
 
+.card-title {
+    text-shadow:  1px  1px 1px #ffffff,
+                  1px -1px 1px #ffffff,
+                 -1px  1px 1px #ffffff,
+                 -1px -1px 1px #ffffff;
+}
+
 .card-hover {
     transition: .5s ease;
 }
 
 .card-hover-overlay {
     border-radius: $card-border-radius !important;
-    cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -91,6 +97,10 @@ body, #app {
 
 .card:hover .card-hover-overlay {
     opacity: .5;
+}
+
+.card:hover .card-title {
+    opacity: 1;
 }
 
 .text-wrap {

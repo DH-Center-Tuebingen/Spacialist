@@ -132,13 +132,35 @@
                     </label>
                 </div>
             </form>
-            <file-list :files="linkedFiles.files" :on-click="showFileModal" :on-load-chunk="linkedFiles.loadChunk" :file-state="linkedFiles.fileState" :is-fetching="linkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
+            <file-list
+                :context-menu="contextMenu"
+                :files="linkedFiles.files"
+                :file-state="linkedFiles.fileState"
+                :is-fetching="linkedFiles.fetchingFiles"
+                :on-click="showFileModal"
+                :on-load-chunk="linkedFiles.loadChunk">
+            </file-list>
         </div>
         <div class="col px-0" v-show="isAction('unlinkedFiles')">
-            <file-list :files="unlinkedFiles.files" :on-click="showFileModal" :on-load-chunk="unlinkedFiles.loadChunk" :file-state="unlinkedFiles.fileState" :is-fetching="unlinkedFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
+            <file-list
+                :context-menu="contextMenu"
+                :files="unlinkedFiles.files"
+                :file-state="unlinkedFiles.fileState"
+                :is-fetching="unlinkedFiles.fetchingFiles"
+                :on-click="showFileModal"
+                :on-load-chunk="unlinkedFiles.loadChunk">
+            </file-list>
         </div>
         <div class="col px-0" v-show="isAction('allFiles')">
-            <file-list :files="allFiles.files" :on-click="showFileModal" :on-load-chunk="allFiles.loadChunk" :file-state="allFiles.fileState" :is-fetching="allFiles.fetchingFiles" :context-menu="contextMenu"></file-list>
+            <file-list
+                :context-menu="contextMenu"
+                :files="allFiles.files"
+                :file-state="allFiles.fileState"
+                :is-fetching="allFiles.fetchingFiles"
+                :on-click="showFileModal"
+                :on-load-chunk="allFiles.loadChunk"
+                :show-links="true">
+            </file-list>
         </div>
         <div v-if="isAction('upload')">
             <file-upload class="w-100"
@@ -186,7 +208,7 @@
             </ul>
         </div>
 
-        <modal name="file-modal" width="80%" height="80%" :scrollable="true" @closed="hideFileModal">
+        <modal name="file-modal" width="80%" height="80%" @closed="hideFileModal">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" @mouseenter="onFileHeaderHover(true)" @mouseleave="onFileHeaderHover(false)">
@@ -206,7 +228,7 @@
                             </button>
                         </form>
                     </h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideFileModal">
+                    <button type="button" class="close" aria-label="Close" @click="closeFileModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -217,17 +239,17 @@
                     <div class="col-md-6 h-100 d-flex flex-column">
                         <ul class="nav nav-tabs nav-fill">
                             <li class="nav-item">
-                                <a class="nav-link" :class="{active: modalTab == 'properties'}" @click="modalTab = 'properties'">
+                                <a href="#" class="nav-link" :class="{active: modalTab == 'properties'}" @click.prevent="modalTab = 'properties'">
                                     <i class="fas fa-fw fa-sliders-h"></i> Properties
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" :class="{active: modalTab == 'links'}" @click="modalTab = 'links'">
+                                <a href="#" class="nav-link" :class="{active: modalTab == 'links'}" @click.prevent="modalTab = 'links'">
                                     <i class="fas fa-fw fa-link"></i> Links
                                 </a>
                             </li>
                             <li class="nav-item" v-if="selectedFile.exif">
-                                <a class="nav-link" :class="{active: modalTab == 'exif'}" @click="modalTab = 'exif'">
+                                <a href="#" class="nav-link" :class="{active: modalTab == 'exif'}" @click.prevent="modalTab = 'exif'">
                                     <i class="fas fa-fw fa-camera"></i> Exif
                                 </a>
                             </li>
@@ -369,7 +391,9 @@
                         <div v-show="modalTab == 'links'">
                             <ul class="list-group mt-3 ml-4 mr-4">
                                 <li class="list-group-item" v-for="link in selectedFile.contexts">
-                                    {{link.name}}
+                                    <a href="#" @click.prevent="routeToEntity(link)">
+                                        <i class="fas fa-fw fa-monument"></i> {{ link.name }}
+                                    </a>
                                 </li>
                             </ul>
                         </div>
@@ -470,7 +494,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary"     @click="hideFileModal">
+                    <button type="button" class="btn btn-outline-secondary"     @click="closeFileModal">
                         Close
                     </button>
                 </div>
@@ -564,9 +588,7 @@
             }
         },
         activated() {
-            if(this.contextDataLoaded) {
-                this.linkedFilesChanged();
-            }
+            this.linkedFilesChanged();
             if(this.$route.query.f) {
                 this.openFile(this.$route.query.f);
             }
@@ -1001,15 +1023,34 @@
                 });
                 this.$modal.show('file-modal');
             },
+            routeToEntity(entity) {
+                this.routeOnFileClose = {
+                    to: 'contextdetail',
+                    params: {
+                        id: entity.id
+                    }
+                };
+                this.closeFileModal();
+            },
+            closeFileModal() {
+                this.$modal.hide('file-modal');
+            },
             hideFileModal() {
                 let query = { ...this.$route.query };
                 delete query.f;
-                this.$router.push({
-                    append: true,
-                    query: query
-                });
-                this.$modal.hide('file-modal');
                 this.selectedFile = {};
+                if(!this.routeOnFileClose.to) {
+                    this.$router.push({
+                        append: true,
+                        query: query
+                    });
+                } else {
+                    this.$router.push({
+                        to: this.routeOnFileClose.to,
+                        params: this.routeOnFileClose.params,
+                        query: {...query, ...this.routeOnFileClose.query }
+                    });
+                }
             },
             translateLabel(element, prop) {
                 return this.$translateLabel(element, prop);
@@ -1116,6 +1157,7 @@
                     unlinkedFiles: 0,
                     allFiles: 0
                 },
+                routeOnFileClose: {}
                 // filterMatching: {
                 //     linkedFiles: 'any',
                 //     unlinkedFiles: 'any',
@@ -1135,31 +1177,39 @@
                 const vm = this;
                 let menu = [];
                 if(vm.context.id) {
-                    if(vm.isAction('linkedFiles')) {
-                        menu.push({
-                            label: `Unlink from ${vm.context.name}`,
-                            iconClasses: 'fas fa-fw fa-unlink text-info',
-                            iconContent: '',
-                            callback: function(file) {
-                                vm.requestUnlinkFile(file, vm.context);
+                    menu.push({
+                        getLabel: file => {
+                            const isLinkedTo = file.contexts.some(c => vm.context.id == c.id);
+                            if(isLinkedTo) {
+                                return `Unlink from ${vm.context.name}`;
+                            } else {
+                                return `Link to ${vm.context.name}`;
                             }
-                        });
-                    } else {
-                        menu.push({
-                            label: `Link to ${vm.context.name}`,
-                            iconClasses: 'fas fa-fw fa-link text-success',
-                            iconContent: '',
-                            callback: function(file) {
+                        },
+                        getIconClasses: file => {
+                            const isLinkedTo = file.contexts.some(c => vm.context.id == c.id);
+                            if(isLinkedTo) {
+                                return 'fas fa-fw fa-unlink text-warning';
+                            } else {
+                                return 'fas fa-fw fa-link text-success';
+                            }
+                        },
+                        getIconContent: file => '',
+                        callback: file => {
+                            const isLinkedTo = file.contexts.some(c => vm.context.id == c.id);
+                            if(isLinkedTo) {
+                                vm.requestUnlinkFile(file, vm.context);
+                            } else {
                                 vm.linkFile(file, vm.context);
                             }
-                        });
-                    }
+                        }
+                    });
                 }
                 menu.push({
-                    label: 'Delete',
-                    iconClasses: 'fas fa-fw fa-trash text-danger',
-                    iconContent: '',
-                    callback: function(file) {
+                    getLabel: file => 'Delete',
+                    getIconClasses: file => 'fas fa-fw fa-trash text-danger',
+                    getIconContent: file => '',
+                    callback: file => {
                         vm.requestDeleteFile(file);
                     }
                 });

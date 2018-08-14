@@ -211,7 +211,7 @@ class File extends Model
     }
 
     public static function getFileById($id) {
-        $file = self::with(['tags'])->findOrFail($id);
+        $file = self::with(['contexts', 'tags'])->findOrFail($id);
         $file->setFileInfo();
         return $file;
     }
