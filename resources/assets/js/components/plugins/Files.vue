@@ -47,11 +47,12 @@
                         </label>
                     </div> -->
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3" for="name">
+                        <label class="col-form-label col-md-3" for="filetypes">
                             Filetype:
                         </label>
                         <div class="col-md-9">
                             <multiselect
+                                id="filetypes"
                                 label="label"
                                 track-by="key"
                                 v-model="filterTypes[selectedTopAction]"
@@ -64,11 +65,12 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3" for="name">
+                        <label class="col-form-label col-md-3" for="cameras">
                             Camera:
                         </label>
                         <div class="col-md-9">
                             <multiselect
+                                id="cameras"
                                 v-model="filterCameras[selectedTopAction]"
                                 :allow-empty="true"
                                 :close-on-select="false"
@@ -79,11 +81,12 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-3" for="name">
+                        <label class="col-form-label col-md-3" for="dates">
                             Date:
                         </label>
                         <div class="col-md-9">
                             <multiselect
+                                id="dates"
                                 label="value"
                                 track-by="id"
                                 v-model="filterDates[selectedTopAction]"

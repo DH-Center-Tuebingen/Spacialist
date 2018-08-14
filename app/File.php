@@ -123,7 +123,15 @@ class File extends Model
                 case 'dates':
                     $builder->where(function($query) use($fs) {
                         foreach($fs as $f) {
-                            $query->orWhereDate('created', $f);
+                            $f = (object) $f;
+                            switch($f->is) {
+                                case 'date':
+                                    $query->orWhereDate('created', $f->value);
+                                    break;
+                                case 'year':
+                                    $query->orWhereYear('created', $f->value);
+                                    break;
+                            }
                         }
                     });
                     break;
