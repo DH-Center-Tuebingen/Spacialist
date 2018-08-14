@@ -325,6 +325,35 @@ Vue.filter('date', function(value, format) {
         return moment.unix(Number(value)).utc().format(format);
     }
 });
+Vue.filter('time', function(value, withHours) {
+    if(value) {
+        let hours = 0;
+        let rHours = 0;
+        if(withHours) {
+            hours = parseInt(Math.floor(value / 3600));
+            rHours = hours * 3600;
+        }
+        const minutes = parseInt(Math.floor((value-rHours) / 60));
+        const rMin = minutes * 60;
+        const seconds = parseInt(Math.floor(value - rHours - rMin));
+
+        const paddedH = hours > 9 ? hours : `0${hours}`;
+        const paddedM = minutes > 9 ? minutes : `0${minutes}`;
+        const paddedS = seconds > 9 ? seconds : `0${seconds}`;
+
+        if(withHours) {
+            return `${paddedH}:${paddedM}:${paddedS}`;
+        } else {
+            return `${paddedM}:${paddedS}`;
+        }
+    } else {
+        if(withHours) {
+            return '00:00:00';
+        } else {
+            return '00:00';
+        }
+    }
+});
 Vue.filter('bytes', function(value, precision) {
     if(!value) return value;
     precision = precision || 2;
