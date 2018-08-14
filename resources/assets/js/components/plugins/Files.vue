@@ -567,8 +567,8 @@
             if(this.contextDataLoaded) {
                 this.linkedFilesChanged();
             }
-            if(this.$router.history.current.query.f) {
-                this.openFile(this.$router.history.current.query.f);
+            if(this.$route.query.f) {
+                this.openFile(this.$route.query.f);
             }
         },
         mounted() {
@@ -997,12 +997,12 @@
                 }
                 this.$router.push({
                     append: true,
-                    query: { ...this.$router.history.current.query, f: file.id }
+                    query: { ...this.$route.query, f: file.id }
                 });
                 this.$modal.show('file-modal');
             },
             hideFileModal() {
-                let query = { ...this.$router.history.current.query };
+                let query = { ...this.$route.query };
                 delete query.f;
                 this.$router.push({
                     append: true,

@@ -36,7 +36,7 @@
                         :context="selectedContext"
                         :context-data-loaded="dataLoaded"
                         :is="activePlugin"
-                        :params="$router.history.current.query"
+                        :params="$route.query"
                         v-on:update:link="updateLink">
                     </component>
                 </keep-alive>
@@ -192,7 +192,7 @@
                     this.selectedContext = {};
                     this.$router.push({
                         name: 'home',
-                        query: this.$router.history.current.query
+                        query: this.$route.query
                     });
                     this.dataLoaded = true;
                 } else {
@@ -209,7 +209,7 @@
                             params: {
                                 id: this.selectedContext.id
                             },
-                            query: this.$router.history.current.query
+                            query: this.$route.query
                         });
                     });
                 }
@@ -254,7 +254,7 @@
                     params: {
                         aid: aid
                     },
-                    query: this.$router.history.current.query,
+                    query: this.$route.query,
                     append: true
                 });
             },

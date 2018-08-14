@@ -194,7 +194,7 @@
                     }
                     Vue.set(vm.entity, 'references', data);
 
-                    const aid = vm.$router.history.current.params.aid;
+                    const aid = vm.$route.params.aid;
                     if(aid) {
                         setModalValues(aid)
                     }
@@ -256,7 +256,7 @@
                     params: {
                         aid: attribute.id
                     },
-                    query: this.$router.history.current.query
+                    query: this.$route.query
                 });
             },
             hasReferenceGroup: function(group) {

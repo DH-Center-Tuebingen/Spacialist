@@ -101,7 +101,7 @@
                             });
                             break;
                         case 'files':
-                            const currRoute = this.$router.history.current;
+                            const currRoute = this.$route;
                             const query = {
                                 tab: 'files',
                                 f: item.id

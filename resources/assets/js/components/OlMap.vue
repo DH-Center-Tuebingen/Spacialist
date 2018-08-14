@@ -639,7 +639,7 @@
                                     params: {
                                         id: props.entity.id
                                     },
-                                    query: vm.$router.history.current.query
+                                    query: vm.$route.query
                                 });
                             }
                         } else {

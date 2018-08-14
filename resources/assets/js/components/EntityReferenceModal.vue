@@ -148,7 +148,7 @@
                 if(!this.refs.value.possibility) {
                     Vue.set(this.refs.value, 'possibility', 100);
                 }
-                const curr = this.$router.history.current;
+                const curr = this.$route;
                 this.entityId = curr.params.id;
                 this.attributeId = curr.params.aid;
                 this.$modal.show('entity-references-modal');
@@ -229,7 +229,7 @@
                 this.$modal.hide('entity-references-modal');
             },
             routeBack() {
-                const curr = this.$router.history.current;
+                const curr = this.$route;
                 this.$router.push({
                     name: 'contextdetail',
                     params: {
