@@ -146,6 +146,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/filter/category', 'FileController@getCategories');
     Route::get('/filter/camera', 'FileController@getCameraNames');
     Route::get('/filter/date', 'FileController@getDates');
+    Route::get('/tags', 'FileController@getTags');
 
 
     Route::post('', 'FileController@getFiles');
@@ -156,6 +157,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('/{id}/patch', 'FileController@patchContent')->where('id', '[0-9]+');
 
     Route::patch('/{id}/property', 'FileController@patchProperty')->where('id', '[0-9]+');
+    Route::patch('/{id}/tag', 'FileController@patchTags')->where('id', '[0-9]+');
 
     Route::put('/{id}/link', 'FileController@linkToEntity')->where('id', '[0-9]+');
 

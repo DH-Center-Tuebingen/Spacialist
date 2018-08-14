@@ -98,6 +98,25 @@
                             </multiselect>
                         </div>
                     </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="tags">
+                            Tags:
+                        </label>
+                        <div class="col-md-9">
+                            <multiselect
+                                id="tags"
+                                label="concept_url"
+                                track-by="id"
+                                v-model="filterTags[selectedTopAction]"
+                                :allow-empty="true"
+                                :close-on-select="false"
+                                :custom-label="translateLabel"
+                                :hide-selected="true"
+                                :multiple="true"
+                                :options="tags">
+                            </multiselect>
+                        </div>
+                    </div>
                     <button type="submit" class="btn btn-outline-success">
                         Apply Filter
                     </button>
@@ -319,6 +338,33 @@
                                 </tbody>
                             </table>
                             <h5 class="mt-3">Tags</h5>
+                            <form role="form" class="row" @submit.prevent="updateTags(selectedFile)">
+                                <div class="col-md-9">
+                                    <multiselect
+                                        id="tags"
+                                        label="concept_url"
+                                        track-by="id"
+                                        v-model="selectedFile.tags"
+                                        :allow-empty="true"
+                                        :close-on-select="false"
+                                        :custom-label="translateLabel"
+                                        :hide-selected="true"
+                                        :multiple="true"
+                                        :options="tags">
+                                    </multiselect>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-outline-success">
+                                        <span class="fa-stack d-inline">
+                                            <i class="fas fa-tags"></i>
+                                            <i class="fas fa-check" data-fa-transform="shrink-4 left-13 down-4"></i>
+                                        </span>
+                                        <span style="margin-left: -0.5rem;">
+                                            Save Tags
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                         <div v-show="modalTab == 'links'">
                             <ul class="list-group mt-3 ml-4 mr-4">
@@ -530,8 +576,26 @@
                 window.addEventListener('keydown', this.toggleFullscreen, false);
             }
             this.initFilters();
+            this.initTags();
         },
         methods: {
+            initTags() {
+                $http.get('file/tags').then(response => {
+                    this.tags = response.data;
+                });
+            },
+            updateTags(file) {
+                const data = {
+                    tags: file.tags.map(t => {
+                        return {
+                            id: t.id
+                        };
+                    })
+                };
+                $http.patch(`file/${file.id}/tag`, data).then(response => {
+
+                });
+            },
             initFilters() {
                 const vm = this;
                 vm.$http.get('/file/filter/category').then(function(response) {
@@ -562,6 +626,7 @@
                 count += vm.filterTypes[action].length;
                 count += vm.filterCameras[action].length;
                 count += vm.filterDates[action].length;
+                count += vm.filterTags[action].length;
                 vm.filterCounts[action] = count;
                 vm.resetFiles(action);
                 vm.getNextFiles(action, filters);
@@ -573,6 +638,7 @@
                     categories: vm.filterTypes[action].map(f => f.key),
                     cameras: vm.filterCameras[action],
                     dates: vm.filterDates[action],
+                    tags: vm.filterTags[action]
                     // strategy: vm.filterMatching[action]
                 };
                 if(action == 'linkedFiles') {
@@ -944,6 +1010,9 @@
                 });
                 this.$modal.hide('file-modal');
                 this.selectedFile = {};
+            },
+            translateLabel(element, prop) {
+                return this.$translateLabel(element, prop);
             }
         },
         data() {
@@ -1018,6 +1087,7 @@
                     'description'
                 ],
                 includeSubEntities: false,
+                tags: [],
                 filterTypeList: [],
                 filterCameraList: [],
                 filterDateList: [],
@@ -1032,6 +1102,11 @@
                     allFiles: []
                 },
                 filterDates: {
+                    linkedFiles: [],
+                    unlinkedFiles: [],
+                    allFiles: []
+                },
+                filterTags: {
                     linkedFiles: [],
                     unlinkedFiles: [],
                     allFiles: []

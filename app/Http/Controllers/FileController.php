@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\File;
 use App\Context;
+use App\FileTag;
+use App\Preference;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -188,6 +190,30 @@ class FileController extends Controller
         return response()->json($res);
     }
 
+    public function getTags() {
+        $tagObj = Preference::where('label', 'prefs.tag-root')
+            ->value('default_value');
+        $tagUri = json_decode($tagObj)->uri;
+        $tags = \DB::select("
+            WITH RECURSIVE
+            top AS (
+                SELECT br.narrower_id as id, c2.concept_url
+                FROM th_broaders br
+                JOIN th_concept c ON c.id = br.broader_id
+                JOIN th_concept c2 ON c2.id = br.narrower_id
+                WHERE c.concept_url = '$tagUri'
+                UNION
+                SELECT br.narrower_id as id, c.concept_url
+                FROM top t, th_broaders br
+                JOIN th_concept c ON c.id = br.narrower_id
+                WHERE t.id = br.broader_id
+            )
+            SELECT *
+            FROM top
+        ");
+        return response()->json($tags);
+    }
+
     // POST
 
     public function getFiles(Request $request, $page = 1) {
@@ -309,6 +335,53 @@ class FileController extends Controller
             $file->setFileInfo();
         }
         return response()->json($file);
+    }
+
+    public function patchTags(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('manage_photos')) {
+            return response()->json([
+                'error' => 'You do not have the permission to modify file properties'
+            ], 403);
+        }
+        $this->validate($request, [
+            'tags' => 'array'
+        ]);
+
+        try {
+            $file = File::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This file does not exist'
+            ], 400);
+        }
+
+        $tags = $request->input('tags', []);
+        $tags = array_map(function($t) {
+            return $t['id'];
+        }, $tags);
+
+        // Delete all entries where tags no longer set
+        FileTag::where('photo_id', $file->id)
+            ->whereNotIn('concept_id', $tags)
+            ->delete();
+
+        // Get current tags...
+        $currentTags = FileTag::where('photo_id', $file->id)
+            ->pluck('concept_id')->toArray();
+
+        // ... and remove them from requested tags...
+        $newTags = array_diff($tags, $currentTags);
+
+        // ... so we can set all new tags
+        foreach($newTags as $t) {
+            $pt = new FileTag();
+            $pt->photo_id = $file->id;
+            $pt->concept_id = $t;
+            $pt->save();
+        }
+
+        return response()->json(null, 204);
     }
 
     // PUT

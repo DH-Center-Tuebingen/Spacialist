@@ -67,6 +67,10 @@ class File extends Model
             unset($filters['strategy']);
         }
         foreach($filters as $col => $fs) {
+            // Do not parse empty filters
+            if(!isset($fs) || empty($fs)) {
+                continue;
+            }
             switch($col) {
                 case 'categories':
                     foreach($fs as $f) {
@@ -135,13 +139,23 @@ class File extends Model
                         }
                     });
                     break;
+                case 'tags':
+                    $builder->whereHas('tags', function($query) use ($fs) {
+                        $query->where(function($subquery) use ($fs) {
+                            foreach($fs as $f) {
+                                $f = (object) $f;
+                                $subquery->orWhere('concept_id', $f->id);
+                            }
+                        });
+                    });
+                    break;
             }
         }
         return $builder;
     }
 
     public static function getAllPaginate($page, $filters) {
-        $files = self::with(['contexts'])
+        $files = self::with(['contexts', 'tags'])
             ->orderBy('id', 'asc');
         $files->where(function($subQuery) use ($filters) {
             self::applyFilters($subQuery, $filters);
@@ -157,7 +171,7 @@ class File extends Model
     }
 
     public static function getUnlinkedPaginate($page, $filters) {
-        $files = self::with(['contexts'])
+        $files = self::with(['contexts', 'tags'])
             ->orderBy('id', 'asc')
             ->doesntHave('contexts');
         $files->where(function($subQuery) use ($filters) {
@@ -174,7 +188,7 @@ class File extends Model
     }
 
     public static function getLinkedPaginate($cid, $page, $filters) {
-        $files = self::with(['contexts'])
+        $files = self::with(['contexts', 'tags'])
             ->whereHas('contexts', function($query) use($cid, $filters) {
                 $query->where('context_id', $cid);
                 $subs = $filters['sub_entities'];
@@ -197,13 +211,13 @@ class File extends Model
     }
 
     public static function getFileById($id) {
-        $file = self::findOrFail($id);
+        $file = self::with(['tags'])->findOrFail($id);
         $file->setFileInfo();
         return $file;
     }
 
     public static function getSubFiles($id, $category) {
-        $subFiles = self::whereHas('contexts', function($query) use ($id) {
+        $subFiles = self::with(['tags'])->whereHas('contexts', function($query) use ($id) {
             $query->where('root_context_id', $id);
         });
 
@@ -739,10 +753,8 @@ class File extends Model
         return $this->belongsToMany('App\Context', 'context_photos', 'photo_id', 'context_id');
     }
 
-    //TODO: this relationship is not working right now due to not referencing the id on ThConcept
-    // as soon as id's are referenced this needs to be fixed
     public function tags() {
-        return $this->belongsToMany('App\ThConcept', 'photo_tags', 'photo_id', 'concept_url');
+        return $this->belongsToMany('App\ThConcept', 'photo_tags', 'photo_id', 'concept_id');
     }
 
     private function extractFromIfd($ifd, &$values) {

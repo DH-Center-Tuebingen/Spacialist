@@ -82,9 +82,7 @@ class ThConcept extends Model
         return $this->belongsToMany('App\ThConcept', 'th_broaders', 'narrower_id', 'broader_id');
     }
 
-    //TODO: this relationship is not working right now due to not referencing the id on ThConcept
-    // as soon as id's are referenced this needs to be fixed
     public function files() {
-        return $this->belongsToMany('App\File', 'photo_tags', 'concept_url', 'photo_id');
+        return $this->belongsToMany('App\File', 'photo_tags', 'concept_id', 'photo_id');
     }
 }
