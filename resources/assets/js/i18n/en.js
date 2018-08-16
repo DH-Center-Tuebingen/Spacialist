@@ -116,7 +116,7 @@ const en = {
                     title: 'Entität gelöscht',
                     msg: '{name} wurde erfolgreich gelöscht.'
                 }
-            }
+            },
             tree: {
                 add: 'Add new Top-Level-Entity'
             },
@@ -161,7 +161,7 @@ const en = {
                     title: 'User updated',
                     msg: '{name} successfully updated.'
                 }
-            }
+            },
             modal: {
                 new: {
                     title: 'New User'
