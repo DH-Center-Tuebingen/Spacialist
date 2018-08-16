@@ -26,7 +26,7 @@
                     extensions="bib,bibtex"
                     ref="upload"
                     v-model="files"
-                    post-action="/api/bibliography/import"
+                    post-action="/api/v1/bibliography/import"
                     :directory="false"
                     :disabled="!$can('add_remove_literature|edit_literature')"
                     :multiple="false"
@@ -477,7 +477,7 @@
                 data.type = item.type.name;
 
                 if(item.id) {
-                    vm.$http.patch(`/api/bibliography/${item.id}`, data).then(function(response) {
+                    vm.$http.patch(`bibliography/${item.id}`, data).then(function(response) {
                         let entry = vm.localEntries.find(e => e.id == item.id);
                         for(let k in item.fields) {
                             entry[k] = item.fields[k];
@@ -485,7 +485,7 @@
                         vm.hideNewItemModal();
                     });
                 } else {
-                    vm.$http.post('/api/bibliography', data).then(function(response) {
+                    vm.$http.post('bibliography', data).then(function(response) {
                         vm.localEntries.push(response.data);
                         vm.hideNewItemModal();
                     });
@@ -514,7 +514,7 @@
             deleteEntry(entry) {
                 const vm = this;
                 if(!vm.$can('add_remove_literature')) return;
-                vm.$http.delete(`/api/bibliography/${entry.id}`).then(function(response) {
+                vm.$http.delete(`bibliography/${entry.id}`).then(function(response) {
                     const index = vm.localEntries.findIndex(e => e.id == entry.id);
                     if(index > -1) {
                         vm.localEntries.splice(index, 1);

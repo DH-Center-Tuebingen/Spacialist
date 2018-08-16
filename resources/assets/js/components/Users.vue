@@ -167,7 +167,7 @@
             onAddUser(newUser) {
                 const vm = this;
                 if(!vm.$can('create_users')) return;
-                vm.$http.post('/api/user', newUser).then(function(response) {
+                vm.$http.post('user', newUser).then(function(response) {
                     vm.userList.push(response.data);
                     vm.hideNewUserModal();
                 });
@@ -212,7 +212,7 @@
                 const vm = this;
                 if(!vm.$can('delete_users')) return;
                 if(!id) return;
-                vm.$http.delete(`/api/user/${id}`).then(function(response) {
+                vm.$http.delete(`user/${id}`).then(function(response) {
                     const index = vm.userList.findIndex(u => u.id == id);
                     if(index > -1) vm.userList.splice(index, 1);
                     vm.hideDeleteUserModal();

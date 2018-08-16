@@ -171,7 +171,7 @@
             onAddRole(newRole) {
                 const vm = this;
                 if(!vm.$can('add_edit_role')) return;
-                vm.$http.post('/api/role', newRole).then(function(response) {
+                vm.$http.post('role', newRole).then(function(response) {
                     vm.roleList.push(response.data);
                     vm.hideNewRoleModal();
                 });
@@ -216,7 +216,7 @@
                 const vm = this;
                 if(!vm.$can('delete_role')) return;
                 if(!id) return;
-                vm.$http.delete(`/api/role/${id}`).then(function(response) {
+                vm.$http.delete(`role/${id}`).then(function(response) {
                     const index = vm.roleList.findIndex(r => r.id == id);
                     if(index > -1) vm.roleList.splice(index, 1);
                     vm.hideDeleteRoleModal();
