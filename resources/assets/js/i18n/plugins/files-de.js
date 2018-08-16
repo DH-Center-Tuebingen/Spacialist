@@ -18,6 +18,20 @@ const de = {
                     active: 'keine Filter aktiv | ein Filter aktiv | {cnt} Filter aktiv'
                 }
             },
+            toasts: {
+                deleted: {
+                    title: 'Datei gelöscht',
+                    msg: '{name} wurde erfolgreich gelöscht.'
+                },
+                unlinked: {
+                    title: 'Verknüpfung entfernt',
+                    msg: 'Verknüpfung von {name} zu {eName} wurde erfolgreich entfernt.'
+                },
+                linked: {
+                    title: 'Verknüpfung erstellt',
+                    msg: 'Verknüpfung von {name} zu {eName} wurde erfolgreich erstellt.'
+                }
+            },
             'include-sub-files': 'Dateien von Unter-Entitäten anzeigen',
             upload: {
                 title: 'Drop Zone',

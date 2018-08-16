@@ -18,6 +18,20 @@ const en = {
                     active: 'no filter active | one filter active | {cnt} filters active'
                 }
             },
+            toasts: {
+                deleted: {
+                    title: 'File deleted',
+                    msg: '{name} successfully deleted.'
+                },
+                unlinked: {
+                    title: 'Link removed',
+                    msg: 'Link from {name} to {eName} successfully removed.'
+                },
+                linked: {
+                    title: 'Link added',
+                    msg: 'Link from {name} to {eName} successfully added.'
+                }
+            },
             'include-sub-files': 'Show files from Sub-Entities',
             upload: {
                 title: 'Drop Zone',

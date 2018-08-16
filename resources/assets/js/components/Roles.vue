@@ -52,7 +52,7 @@
                                 </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="isDirty('perms_'+role.id)" :disabled="!$can('add_remove_permission')" @click="onPatchRole(role.id)">
+                                <a class="dropdown-item" href="#" v-if="isDirty('perms_'+role.id)" :disabled="!$can('add_remove_permission')" @click.prevent="onPatchRole(role.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> {{ $t('global.save') }}
                                 </a>
                                 <!-- <a class="dropdown-item" href="#">
@@ -177,10 +177,9 @@
                 });
             },
             onPatchRole(id) {
-                const vm = this;
-                if(!vm.$can('add_edit_role')) return;
-                if(vm.isDirty(`perms_${id}`)) {
-                    let role = vm.roleList.find(r => r.id == id);
+                if(!this.$can('add_edit_role')) return;
+                if(this.isDirty(`perms_${id}`)) {
+                    let role = this.roleList.find(r => r.id == id);
                     let permissions = [];
                     for(let i=0; i<role.permissions.length; i++) {
                         permissions.push(role.permissions[i].id);
@@ -188,9 +187,15 @@
                     const data = {
                         permissions: JSON.stringify(permissions)
                     };
-                    vm.$http.patch(`/api/role/${id}/permission`, data).then(function(response) {
-                        vm.setPristine(`perms_${id}`);
-                        vm.$showToast('Role updated', `${role.display_name} successfully updated.`, 'success');
+                    $http.patch(`role/${id}/permission`, data).then(response => {
+                        this.setPristine(`perms_${id}`);
+                        this.$showToast(
+                            this.$t('main.role.toasts.updated.title'),
+                            this.$t('main.role.toasts.updated.msg', {
+                                name: role.display_name
+                            }),
+                            'success'
+                        );
                     });
                 }
             },

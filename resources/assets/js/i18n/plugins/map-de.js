@@ -11,6 +11,12 @@ const de = {
                 title: 'Ebenen-Editor',
                 'unnamed-layer': 'Unbenannte Ebene',
                 'properties-of': 'Eigenschaften von {name}',
+                toasts: {
+                    updated: {
+                        title: 'Ebene aktualisiert',
+                        msg: '{name} wurde erfolgreich aktualisiert.'
+                    }
+                },
                 properties: {
                     subdomains: 'Subdomains',
                     attribution: 'Attribuierung',
@@ -25,6 +31,12 @@ const de = {
                 'available-layers': 'Verfügbare Ebenen',
                 'selected-layers': 'Ausgewählte Ebenen',
                 info: 'Benutze <kbd>Doppelklick</kbd> um eine verfügbare Ebene zu den ausgewählten Ebenen hinzuzufügen, und um sie wieder so entfernen.',
+                toasts: {
+                    imported: {
+                        title: 'Import abgeschlossen',
+                        msg: '{cnt} Objekte hinzugefügt.'
+                    }
+                },
                 props: {
                     title: 'Ebenen-Eigenschaften',
                     style: {

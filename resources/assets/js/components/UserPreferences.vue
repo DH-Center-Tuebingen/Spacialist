@@ -252,11 +252,17 @@
                 if(typeof data.value === 'object') data.value = JSON.stringify(data.value);
                 data.user_id = this.$auth.user().id;
                 $http.patch('preference/' + pref.id, data).then(response => {
-                    const label = pref.label; // TODO translation
-                    this.$showToast('Preference updated', `${label} successfully updated.`, 'success');
                     if(pref.label == 'prefs.gui-language') {
                         Vue.i18n.locale = pref.value;
                     }
+                    const label = this.$t(`main.preference.labels.${pref.label}`);
+                    this.$showToast(
+                        this.$t('main.preference.toasts.updated.title'),
+                        this.$t('main.preference.toasts.updated.msg', {
+                            name: label
+                        }),
+                        'success'
+                    );
                 });
             }
         },

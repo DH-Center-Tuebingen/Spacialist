@@ -926,14 +926,20 @@
                 this.$modal.show('delete-file-modal');
             },
             deleteFile(file) {
-                const vm = this;
                 let id = file.id;
-                vm.$http.delete('/file/'+id).then(function(response) {
-                    vm.onFileDeleted(file, vm.linkedFiles);
-                    vm.onFileDeleted(file, vm.unlinkedFiles);
-                    vm.onFileDeleted(file, vm.allFiles);
-                    vm.hideDeleteFileModal();
-                    vm.$showToast('File deleted', `${file.name} successfully deleted.`, 'success');
+                $http.delete('/file/'+id).then(response => {
+                    this.onFileDeleted(file, this.linkedFiles);
+                    this.onFileDeleted(file, this.unlinkedFiles);
+                    this.onFileDeleted(file, this.allFiles);
+                    this.hideDeleteFileModal();
+
+                    this.$showToast(
+                        this.$t('plugins.files.toasts.deleted.title'),
+                        this.$t('plugins.files.toasts.deleted.msg', {
+                            name: file.name
+                        }),
+                        'success'
+                    );
                 });
             },
             hideDeleteFileModal() {
@@ -959,7 +965,14 @@
                     vm.onFileDeleted(file, vm.linkedFiles);
                     vm.onFileUnlinked(file, vm.unlinkedFiles, vm.linkCount);
                     vm.hideUnlinkFileModal();
-                    vm.$showToast('File unlinked', `${file.name} successfully unlinked from ${context.name}.`, 'success');
+                    this.$showToast(
+                        this.$t('plugins.files.toasts.unlinked.title'),
+                        this.$t('plugins.files.toasts.unlinked.msg', {
+                            name: file.name,
+                            eName: context.name
+                        }),
+                        'success'
+                    );
                 });
             },
             hideUnlinkFileModal() {
@@ -977,7 +990,14 @@
                 vm.$http.put(`/file/${id}/link`, data).then(function(response) {
                     vm.onFileLinked(file, vm.linkedFiles);
                     vm.onFileDeleted(file, vm.unlinkedFiles);
-                    vm.$showToast('File linked', `${file.name} successfully linked to ${context.name}.`, 'success');
+                    this.$showToast(
+                        this.$t('plugins.files.toasts.linked.title'),
+                        this.$t('plugins.files.toasts.linked.msg', {
+                            name: file.name,
+                            eName: context.name
+                        }),
+                        'success'
+                    );
                 });
             },
             enablePropertyEditing(property) {

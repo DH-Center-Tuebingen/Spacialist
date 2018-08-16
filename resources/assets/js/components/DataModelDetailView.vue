@@ -223,38 +223,49 @@
                     });
             },
             updateContextType() {
-                const vm = this;
-                if(!vm.entityType.id) return;
-                const id = vm.entityType.id;
+                if(!this.entityType.id) return;
+                const id = this.entityType.id;
                 const data = {
-                    'is_root': vm.entityType.is_root,
-                    'sub_context_types': vm.entityType.sub_context_types.map(t => t.id)
+                    'is_root': this.entityType.is_root,
+                    'sub_context_types': this.entityType.sub_context_types.map(t => t.id)
                 };
-                vm.$http.post('/editor/dm/'+id+'/relation', data).then(function(response) {
-                    const name = vm.$translateConcept(vm.entityType.thesaurus_url);
-                    vm.$showToast('Entity-Type updated', `${name} successfully updated.`, 'success');
+                $http.post(`/editor/dm/${id}/relation`, data).then(response => {
+                    const name = this.$translateConcept(this.entityType.thesaurus_url);
+                    this.$showToast(
+                        this.$t('main.datamodel.toasts.updated-type.title'),
+                        this.$t('main.datamodel.toasts.updated-type.msg', {
+                            name: name
+                        }),
+                        'success'
+                    );
                 });
             },
             addAttributeToContextType(oldIndex, index) {
-                const vm = this;
-                const ctid = vm.entityType.id;
-                const attribute = vm.attributes[oldIndex];
-                let attributes = vm.entityAttributes;
+                const ctid = this.entityType.id;
+                const attribute = this.attributes[oldIndex];
+                let attributes = this.entityAttributes;
                 let data = {};
                 data.attribute_id = attribute.id;
                 data.position = index + 1;
-                vm.$http.post(`/editor/dm/context_type/${ctid}/attribute`, data).then(function(response) {
+                $http.post(`/editor/dm/context_type/${ctid}/attribute`, data).then(response => {
                     // Add element to attribute list
                     attributes.splice(index, 0, response.data);
                     attribute.isDisabled = true;
-                    Vue.set(vm.entityValues, response.data.id, '');
+                    Vue.set(this.entityValues, response.data.id, '');
                     // Update position attribute of successors
                     for(let i=index+1; i<attributes.length; i++) {
                         attributes[i].position++;
                     }
-                    const attrName = vm.$translateConcept(response.data.thesaurus_url);
-                    const etName = vm.$translateConcept(vm.entityType.thesaurus_url);
-                    vm.$showToast('Attribute added', `${attrName} successfully added to ${etName}.`, 'success');
+                    const attrName = this.$translateConcept(response.data.thesaurus_url);
+                    const etName = this.$translateConcept(this.entityType.thesaurus_url);
+                    this.$showToast(
+                        this.$t('main.datamodel.toasts.added-attribute.title'),
+                        this.$t('main.datamodel.toasts.added-attribute.msg', {
+                            name: attrName,
+                            etName: etName
+                        }),
+                        'success'
+                    );
                 });
 
             },

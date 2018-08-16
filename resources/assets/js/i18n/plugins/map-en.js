@@ -11,6 +11,12 @@ const en = {
                 title: 'Layer-Editor',
                 'unnamed-layer': 'Unnamed Layer',
                 'properties-of': 'Properties of {name}',
+                toasts: {
+                    updated: {
+                        title: 'Layer updated',
+                        msg: '{name} successfully updated.'
+                    }
+                },
                 properties: {
                     subdomains: 'Subdomains',
                     attribution: 'Attribution',
@@ -25,6 +31,12 @@ const en = {
                 'available-layers': 'Available Layers',
                 'selected-layers': 'Selected Layers',
                 info: 'Use <kbd>Double Click</kbd> to add an available layer to selected layers, and again to remove it.',
+                toasts: {
+                    imported: {
+                        title: 'Import finished',
+                        msg: '{cnt} features added.'
+                    }
+                },
                 props: {
                     title: 'Layer Properties',
                     style: {

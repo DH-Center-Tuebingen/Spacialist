@@ -203,12 +203,11 @@
                 });
             },
             saveEntity(entity) {
-                const vm = this;
-                if(!vm.$can('duplicate_edit_concepts')) return;
+                if(!this.$can('duplicate_edit_concepts')) return;
                 let cid = entity.id;
                 var patches = [];
-                for(let f in vm.fields) {
-                    if(vm.fields.hasOwnProperty(f) && f.startsWith('attribute-')) {
+                for(let f in this.fields) {
+                    if(this.fields.hasOwnProperty(f) && f.startsWith('attribute-')) {
                         if(this.fields[f].dirty) {
                             let aid = Number(f.replace(/^attribute-/, ''));
                             let data = entity.data[aid];
@@ -238,9 +237,15 @@
                         }
                     }
                 }
-                return vm.$http.patch('/context/'+cid+'/attributes', patches).then(function(response) {
-                    vm.resetFlags();
-                    vm.$showToast('Entity updated', `Data of ${entity.name} successfully updated.`, 'success');
+                return $http.patch('/context/'+cid+'/attributes', patches).then(response => {
+                    this.resetFlags();
+                    this.$showToast(
+                        this.$t('main.entity.toasts.updated.title'),
+                        this.$t('main.entity.toasts.updated.msg', {
+                            name: entity.name
+                        }),
+                        'success'
+                    );
                 });
             },
             setModalValues(aid) {

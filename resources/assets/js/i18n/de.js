@@ -107,6 +107,16 @@ const de = {
         entity: {
             title: 'Entitäten',
             count: 'Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten',
+            toasts: {
+                updated: {
+                    title: 'Entität aktualisiert',
+                    msg: 'Daten von {name} wurden erfolgreich aktualisiert.'
+                },
+                deleted: {
+                    title: 'Entität gelöscht',
+                    msg: '{name} wurde erfolgreich gelöscht.'
+                }
+            },
             tree: {
                 add: 'Neue Top-Level Entität hinzufügen'
             },
@@ -129,6 +139,12 @@ const de = {
                     comment: 'Kommentar',
                     'add-button': 'Quelle hinzufügen'
                 },
+                toasts: {
+                    'updated-certainty': {
+                        title: 'Sicherheit aktualisiert',
+                        msg: 'Sicherheit von {name} erfolgreich auf {i}% ({desc}) gesetzt.'
+                    }
+                }
             },
             attributes: {
                 'open-map': 'Karte öffnen',
@@ -140,6 +156,12 @@ const de = {
         },
         user: {
             'add-button': 'Neuen Benutzer hinzufügen',
+            toasts: {
+                updated: {
+                    title: 'Benutzer aktualisiert',
+                    msg: '{name} wurde erfolgreich aktualisiert.'
+                }
+            },
             modal: {
                 new: {
                     title: 'Neuer Benutzer'
@@ -148,6 +170,12 @@ const de = {
         },
         role: {
             'add-button': 'Neue Rolle hinzufügen',
+            toasts: {
+                updated: {
+                    title: 'Rolle aktualisiert',
+                    msg: '{name} wurde erfolgreich aktualisiert.'
+                }
+            },
             modal: {
                 new: {
                     title: 'Neue Rolle'
@@ -155,6 +183,16 @@ const de = {
             }
         },
         datamodel: {
+            toasts: {
+                'updated-type': {
+                    title: 'Entitätstyp aktualisiert',
+                    msg: '{name} erfolgreich aktualisiert.'
+                },
+                'added-attribute': {
+                    title: 'Attribut hinzugefügt',
+                    msg: '{name} erfolgreich zu {etName} hinzugefügt.'
+                }
+            },
             attribute: {
                 title: 'Verfügbare Attribute',
                 'add-button': 'Attribut hinzufügen',
@@ -192,6 +230,12 @@ const de = {
             }
         },
         preference: {
+            toasts: {
+                updated: {
+                    title: 'Einstellung aktualisiert',
+                    msg: '{name} wurde erfolgreich aktualisiert.'
+                }
+            },
             key: {
                 language: 'Sprache',
                 columns: {
@@ -212,6 +256,19 @@ const de = {
                 map: {
                     projection: 'Kartenprojektion',
                     epsg: 'EPSG-Code'
+                }
+            },
+            labels: {
+                prefs: {
+                    'gui-language': '@:main.preference.key.language',
+                    'columns': '@:main.preference.key.columns.title',
+                    'show-tooltips': '@:main.preference.key.tooltips',
+                    'tag-root': '@:main.preference.key.tag-root',
+                    'load-extensions': '@:main.preference.key.extensions',
+                    'link-to-thesaurex': '@:main.preference.key.link-thesaurex',
+                    'project-name': '@:main.preference.key.project.name',
+                    'project-maintainer': '@:main.preference.key.project.maintainer',
+                    'map-projection': '@:main.preference.key.map.projection',
                 }
             }
         },

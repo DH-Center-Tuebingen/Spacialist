@@ -173,9 +173,8 @@
                 });
             },
             onPatchUser(id) {
-                const vm = this;
-                if(!vm.$can('add_remove_role')) return;
-                if(vm.isDirty(`roles_${id}`)) {
+                if(!this.$can('add_remove_role')) return;
+                if(this.isDirty(`roles_${id}`)) {
                     let user = this.userList.find(u => u.id == id);
                     let roles = [];
                     for(let i=0; i<user.roles.length; i++) {
@@ -184,9 +183,15 @@
                     const data = {
                         roles: JSON.stringify(roles)
                     };
-                    vm.$http.patch(`/api/user/${id}/role`, data).then(function(response) {
-                        vm.setPristine(`roles_${id}`);
-                        vm.$showToast('User updated', `${user.name} successfully updated.`, 'success');
+                    $http.patch(`user/${id}/role`, data).then(response => {
+                        this.setPristine(`roles_${id}`);
+                        this.$showToast(
+                            this.$t('main.user.toasts.updated.title'),
+                            this.$t('main.user.toasts.updated.msg', {
+                                name: user.name
+                            }),
+                            'success'
+                        );
                     });
                 }
             },

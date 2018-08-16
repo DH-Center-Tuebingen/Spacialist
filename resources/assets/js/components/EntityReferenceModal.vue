@@ -178,7 +178,15 @@
                 };
                 $http.patch(`/context/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
                     const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
-                    this.$showToast('Certainty updated', `Certainty of ${attributeName} successfully set to ${this.refs.value.possibility}% (${this.refs.value.possibility_description}).`, 'success');
+                    this.$showToast(
+                        this.$t('main.entity.references.toasts.updated-certainty.title'),
+                        this.$t('main.entity.references.toasts.updated-certainty.msg', {
+                            name: attributeName,
+                            i: this.refs.value.possibility,
+                            desc: this.refs.value.possibility_description
+                        }),
+                        'success'
+                    );
                 });
             },
             onAddReference(item) {

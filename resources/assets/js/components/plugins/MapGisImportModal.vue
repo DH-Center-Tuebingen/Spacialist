@@ -181,7 +181,13 @@
                     srid: srid
                 };
                 $http.post('map', data).then(reponse => {
-                    this.$showToast('Import finished', `${collection.features.length} features added.`, 'success');
+                    this.$showToast(
+                        this.$t('plugins.map.gis.toasts.imported.title'),
+                        this.$t('plugins.map.gis.toasts.imported.msg', {
+                            cnt: collection.features.length
+                        }),
+                        'success'
+                    );
                 });
             },
             setActiveTab(id) {

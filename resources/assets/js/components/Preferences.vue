@@ -277,16 +277,21 @@
                 this.initFinished = true;
             },
             savePreference(pref) {
-                const vm = this;
-                if(!vm.$can('edit_preferences')) return;
+                if(!this.$can('edit_preferences')) return;
                 let data = {};
                 data.label = pref.label;
                 data.value = pref.value;
                 if(typeof data.value === 'object') data.value = JSON.stringify(data.value);
                 data.allow_override = pref.allow_override;
-                vm.$http.patch(`preference/${pref.id}`, data).then(function(response) {
-                    const label = pref.label; // TODO translation
-                    vm.$showToast('Preference updated', `${label} successfully updated.`, 'success');
+                $http.patch(`preference/${pref.id}`, data).then(response => {
+                    const label = this.$t(`main.preference.labels.${pref.label}`);
+                    this.$showToast(
+                        this.$t('main.preference.toasts.updated.title'),
+                        this.$t('main.preference.toasts.updated.msg', {
+                            name: label
+                        }),
+                        'success'
+                    );
                 });
             }
         },

@@ -8,6 +8,8 @@ const en = {
         add: 'Add',
         edit: 'Edit',
         update: 'Update',
+        replace: 'Replace',
+        clear: 'Clear',
         confirm: 'OK',
         'select-all': 'Select All',
         'select-none': 'Deselect All',
@@ -105,6 +107,16 @@ const en = {
         entity: {
             title: 'Entities',
             count: 'No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities',
+            toasts: {
+                updated: {
+                    title: 'Entity updated',
+                    msg: 'Data of {name} successfully updated.'
+                },
+                deleted: {
+                    title: 'Entität gelöscht',
+                    msg: '{name} wurde erfolgreich gelöscht.'
+                }
+            }
             tree: {
                 add: 'Add new Top-Level-Entity'
             },
@@ -127,6 +139,12 @@ const en = {
                     comment: 'Comment',
                     'add-button': 'Add Source'
                 },
+                toasts: {
+                    'updated-certainty': {
+                        title: 'Certainty updated',
+                        msg: 'Certainty of {name} successfully set to {i}% ({desc}).'
+                    }
+                }
             },
             attributes: {
                 'open-map': 'Open Map',
@@ -138,6 +156,12 @@ const en = {
         },
         user: {
             'add-button': 'Add new User',
+            toasts: {
+                updated: {
+                    title: 'User updated',
+                    msg: '{name} successfully updated.'
+                }
+            }
             modal: {
                 new: {
                     title: 'New User'
@@ -146,6 +170,12 @@ const en = {
         },
         role: {
             'add-button': 'Add new Role',
+            toasts: {
+                updated: {
+                    title: 'Role updated',
+                    msg: '{name} successfully updated.'
+                }
+            },
             modal: {
                 new: {
                     title: 'New Role'
@@ -153,6 +183,16 @@ const en = {
             }
         },
         datamodel: {
+            toasts: {
+                'updated-type': {
+                    title: 'Entity-Type updated',
+                    msg: '{name} successfully updated.'
+                },
+                'added-attribute': {
+                    title: 'Attribut hinzugefügt',
+                    msg: '{name} erfolgreich zu {etName} hinzugefügt.'
+                }
+            },
             attribute: {
                 title: 'Available Attributes',
                 'add-button': 'Add Attribute',
@@ -190,6 +230,12 @@ const en = {
             }
         },
         preference: {
+            toasts: {
+                updated: {
+                    title: 'Preference updated',
+                    msg: '{name} successfully updated.'
+                }
+            },
             key: {
                 language: 'Language',
                 columns: {
@@ -210,6 +256,19 @@ const en = {
                 map: {
                     projection: 'Map Projection',
                     epsg: 'EPSG-Code'
+                }
+            },
+            labels: {
+                prefs: {
+                    'gui-language': '@:main.preference.key.language',
+                    'columns': '@:main.preference.key.columns.title',
+                    'show-tooltips': '@:main.preference.key.tooltips',
+                    'tag-root': '@:main.preference.key.tag-root',
+                    'load-extensions': '@:main.preference.key.extensions',
+                    'link-to-thesaurex': '@:main.preference.key.link-thesaurex',
+                    'project-name': '@:main.preference.key.project.name',
+                    'project-maintainer': '@:main.preference.key.project.maintainer',
+                    'map-projection': '@:main.preference.key.map.projection',
                 }
             }
         },

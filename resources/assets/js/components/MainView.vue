@@ -305,20 +305,25 @@
                 this.$modal.hide('add-entity-modal');
             },
             deleteEntity(entity) {
-                const vm = this;
-                if(!vm.$can('delete_move_concepts')) return;
+                if(!this.$can('delete_move_concepts')) return;
                 const id = entity.id;
-                vm.$http.delete(`/context/${id}`).then(function(response) {
+                $http.delete(`/context/${id}`).then(response => {
                     // if deleted entity is currently selected entity...
-                    if(id == vm.selectedContext.id) {
+                    if(id == this.selectedContext.id) {
                         // ...unset it
-                        vm.onSetSelectedElement(undefined);
+                        this.onSetSelectedElement(undefined);
                     }
-                    vm.$showToast('Entity deleted', `${entity.name} successfully deleted.`, 'success');
+                    this.$showToast(
+                        this.$t('main.entity.toasts.deleted.title'),
+                        this.$t('main.entity.toasts.deleted.msg', {
+                            name: entity.name
+                        }),
+                        'success'
+                    );
                     if (entity.callback) {
                         entity.callback(entity);
                     }
-                    vm.hideDeleteEntityModal();
+                    this.hideDeleteEntityModal();
                 });
             },
             requestDeleteEntity(cb, entity, path) {

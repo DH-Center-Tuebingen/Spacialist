@@ -165,7 +165,6 @@
                 this.layer = layer;
             },
             updateLayer(layer, orgLayer) {
-                const vm = this;
                 let tmpLayer = Object.assign({}, layer);
                 let data = {};
                 const lid = tmpLayer.id;
@@ -176,8 +175,14 @@
                     }
                     data[k] = tmpLayer[k];
                 }
-                vm.$http.patch(`map/layer/${lid}`, data).then(function(response) {
-                    vm.$showToast('Layer updated', `Layer ${layer.name} successfully updated.`, 'success');
+                $http.patch(`map/layer/${lid}`, data).then(function(response) {
+                    this.$showToast(
+                        this.$t('plugins.map.layer-editor.toasts.updated.title'),
+                        this.$t('plugins.map.layer-editor.toasts.updated.msg', {
+                            name: layer.name
+                        }),
+                        'success'
+                    );
                 });
             }
         },
