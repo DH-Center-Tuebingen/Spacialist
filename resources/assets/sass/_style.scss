@@ -18,6 +18,10 @@ body, #app {
     display: none !important;
 }
 
+.overlay-all {
+    z-index: 2000;
+}
+
 .drag-container:empty {
     height: 100%;
     width: 100%;
