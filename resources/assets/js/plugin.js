@@ -45,6 +45,18 @@ const SpacialistPluginSystem = {
                     return;
             }
         };
+        Vue.prototype.$spacialistAddPluginLanguage = function(locale, messages) {
+            if(!Vue.i18n) {
+                console.error("i18n module not found! Aborting...");
+                return;
+            }
+            let currentMessages = Vue.i18n.getLocaleMessage(locale, messages);
+            if(!currentMessages.plugins) {
+                currentMessages.plugins = {};
+            }
+            currentMessages.plugins = {...currentMessages.plugins, ...messages.plugins};
+            Vue.i18n.setLocaleMessage(locale, currentMessages);
+        };
     }
 };
 

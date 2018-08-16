@@ -4,7 +4,7 @@
             <form role="form" name="layerLabelingForm" id="layerLabelingForm" @submit.prevent="apply">
                 <div class="form-group row">
                     <label class="col-form-label col-md-6 text-right" for="label-text">
-                        Text:
+                        {{ $t('global.text') }}:
                     </label>
                     <div class="col-md-6">
                         <input v-if="!isEntityLayer" class="form-control" type="text" id="label-text" name="label-text" v-model="label" />
@@ -24,7 +24,7 @@
                 </div>
                 <h6 class="d-flex flex-row justify-content-between">
                     <div>
-                        Font
+                        {{ $t('global.font') }}
                         <span class="clickable" @click.prevent="toggle('font')">
                             <span v-show="displays.font">
                                 <i class="fas fa-fw fa-caret-up"></i>
@@ -42,7 +42,7 @@
                 <div v-show="displays.font">
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="font-size">
-                            Size:
+                            {{ $t('global.size') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="number" id="font-size" name="font-size" min="1" v-model.number="font.size" />
@@ -50,7 +50,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="font-color">
-                            Color:
+                            {{ $t('global.color') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="color" id="font-color" name="font-color" min="1" v-model="font.color" />
@@ -58,12 +58,13 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="font-style">
-                            Style:
+                            {{ $t('plugins.map.gis.props.labels.style') }}:
                         </label>
                         <div class="col-md-6">
                             <multiselect
                                 id="font-style"
                                 name="font-style"
+                                label="label"
                                 v-model="font.style"
                                 :allowEmpty="true"
                                 :closeOnSelect="true"
@@ -75,12 +76,13 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="font-transform">
-                            Transform:
+                            {{ $t('plugins.map.gis.props.labels.transform') }}:
                         </label>
                         <div class="col-md-6">
                             <multiselect
                                 id="font-transform"
                                 name="font-transform"
+                                label="label"
                                 v-model="font.transform"
                                 :allowEmpty="true"
                                 :closeOnSelect="true"
@@ -92,7 +94,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="font-transparency">
-                            Transparency:
+                            {{ $t('global.transparency') }}:
                         </label>
                         <div class="col-md-6 d-flex">
                             <input class="form-control" type="range" id="font-transparency" name="font-transparency" min="0" max="1" step="0.01" v-model="font.transparency" />
@@ -103,7 +105,7 @@
                 <hr />
                 <h6 class="d-flex flex-row justify-content-between">
                     <div>
-                        Buffer
+                        {{ $t('plugins.map.gis.props.labels.buffer') }}
                         <span class="clickable" @click.prevent="toggle('buffer')">
                             <span v-show="displays.buffer">
                                 <i class="fas fa-fw fa-caret-up"></i>
@@ -121,7 +123,7 @@
                 <div v-show="displays.buffer">
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="buffer-size">
-                            Size:
+                            {{ $t('global.size') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="number" id="buffer-size" name="buffer-size" min="1" v-model.number="buffer.size" />
@@ -129,7 +131,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="buffer-color">
-                            Color:
+                            {{ $t('global.color') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="color" id="buffer-color" name="buffer-color" min="1" v-model="buffer.color" />
@@ -137,7 +139,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="buffer-transparency">
-                            Transparency:
+                            {{ $t('global.transparency') }}:
                         </label>
                         <div class="col-md-6 d-flex">
                             <input class="form-control" type="range" id="buffer-transparency" name="buffer-transparency" min="0" max="1" step="0.01" v-model="buffer.transparency" />
@@ -148,7 +150,7 @@
                 <hr />
                 <h6 class="d-flex flex-row justify-content-between">
                     <div>
-                        Background
+                        {{ $t('plugins.map.gis.props.labels.background.title') }}
                         <span class="clickable" @click.prevent="toggle('background')">
                             <span v-show="displays.background">
                                 <i class="fas fa-fw fa-caret-up"></i>
@@ -166,7 +168,7 @@
                 <div v-show="displays.background">
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="background-size-x">
-                            Padding (X):
+                            {{ $t('plugins.map.gis.props.labels.background.padding-x') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="number" id="background-size-x" name="background-size-x" min="0" v-model.number="background.sizes.x" />
@@ -174,7 +176,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="background-size-y">
-                            Padding (Y):
+                            {{ $t('plugins.map.gis.props.labels.background.padding-y') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="number" id="background-size-y" name="background-size-y" min="0" v-model.number="background.sizes.y" />
@@ -182,7 +184,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="background-color-fill">
-                            Fill Color:
+                            {{ $t('plugins.map.gis.props.labels.fill-color') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="color" id="background-color-fill" name="background-color-fill" min="1" v-model="background.colors.fill" />
@@ -190,7 +192,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="background-color-border">
-                            Border Color:
+                            {{ $t('plugins.map.gis.props.labels.border-color') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="color" id="background-color-border" name="background-color-border" min="1" v-model="background.colors.border" />
@@ -198,7 +200,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="background-size-border">
-                            Border Size:
+                            {{ $t('plugins.map.gis.props.labels.border-size') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="number" id="background-size-border" name="background-size-border" min="1" v-model.number="background.borderSize" />
@@ -206,7 +208,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="background-transparency">
-                            Transparency:
+                            {{ $t('global.transparency') }}:
                         </label>
                         <div class="col-md-6 d-flex">
                             <input class="form-control" type="range" id="background-transparency" name="background-transparency" min="0" max="1" step="0.01" v-model="background.transparency" />
@@ -217,34 +219,7 @@
                 <hr />
                 <h6 class="d-flex flex-row justify-content-between">
                     <div>
-                        Shadow
-                        <span class="clickable" @click.prevent="toggle('shadow')">
-                            <span v-show="displays.shadow">
-                                <i class="fas fa-fw fa-caret-up"></i>
-                            </span>
-                            <span v-show="!displays.shadow">
-                                <i class="fas fa-fw fa-caret-down"></i>
-                            </span>
-                        </span>
-                    </div>
-                    <label class="cb-toggle mx-0 my-auto align-middle">
-                        <input type="checkbox" id="shadow-active-toggle" v-model="shadow.active" />
-                        <span class="slider slider-rounded slider-primary"></span>
-                    </label>
-                </h6>
-                <div v-show="displays.shadow">
-                    <input type="checkbox" v-model="shadow.active" />
-                    <input type="number" v-model.number="shadow.offsets.x" />
-                    <input type="number" v-model.number="shadow.offsets.y" />
-                    <input type="number" v-model.number="shadow.blur" />
-                    <input type="number" v-model.number="shadow.spread" />
-                    <input type="color" v-model="shadow.color" />
-                    <input type="number" step="0.01" min="0" max="1" v-model.number="shadow.transparency" />
-                </div>
-                <hr />
-                <h6 class="d-flex flex-row justify-content-between">
-                    <div>
-                        Position
+                        {{ $t('plugins.map.gis.props.labels.position.title') }}
                         <span class="clickable" @click.prevent="toggle('position')">
                             <span v-show="displays.position">
                                 <i class="fas fa-fw fa-caret-up"></i>
@@ -262,7 +237,7 @@
                 <div v-show="displays.position">
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="position-offset-x">
-                            Offset (X):
+                            {{ $t('plugins.map.gis.props.labels.position.offset-x') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="number" id="position-offset-x" name="position-offset-x" v-model.number="position.offsets.x" />
@@ -270,7 +245,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="position-offset-y">
-                            Offset (Y):
+                            {{ $t('plugins.map.gis.props.labels.position.offset-y') }}:
                         </label>
                         <div class="col-md-6">
                             <input class="form-control" type="number" id="position-offset-y" name="position-offset-y" v-model.number="position.offsets.y" />
@@ -278,12 +253,13 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-6 text-right" for="position-placement">
-                            Placement:
+                            {{ $t('plugins.map.gis.props.labels.position.placement') }}:
                         </label>
                         <div class="col-md-6">
                             <multiselect
                                 id="position-placement"
                                 name="position-placement"
+                                label="label"
                                 v-model="position.placement"
                                 :allowEmpty="true"
                                 :closeOnSelect="true"
@@ -299,7 +275,7 @@
 
         <button type="submit" form="layerLabelingForm" class="btn btn-outline-success mt-2">
             <i class="fas fa-fw fa-check"></i>
-            Apply Labels
+            {{ $t('plugins.map.gis.props.labels.apply') }}
         </button>
     </div>
 </template>
@@ -324,7 +300,10 @@
                 type: Function
             }
         },
-        mounted() {},
+        mounted() {
+            this.font.style = this.font.styles[0];
+            this.position.placement = this.position.placements[0];
+        },
         methods: {
             toggle(section) {
                 this.displays[section] = !this.displays[section];
@@ -405,20 +384,47 @@
                     size: 12,
                     color: '#000000',
                     styles: [
-                        'normal',
-                        'bold',
-                        'italic',
-                        'oblique',
-                        'bold-italic',
-                        'bold-oblique'
+                        {
+                            id: 'normal',
+                            label: this.$t('plugins.map.gis.props.labels.normal')
+                        },
+                        {
+                            id: 'bold',
+                            label: this.$t('plugins.map.gis.props.labels.bold')
+                        },
+                        {
+                            id: 'italic',
+                            label: this.$t('plugins.map.gis.props.labels.italic')
+                        },
+                        {
+                            id: 'oblique',
+                            label: this.$t('plugins.map.gis.props.labels.oblique')
+                        },
+                        {
+                            id: 'bold-italic',
+                            label: this.$t('plugins.map.gis.props.labels.bold-italic')
+                        },
+                        {
+                            id: 'bold-oblique',
+                            label: this.$t('plugins.map.gis.props.labels.bold-oblique')
+                        }
                     ],
-                    style: 'normal',
+                    style: {},
                     transforms: [
-                        'uppercase',
-                        'lowercase',
-                        'capitalize'
+                        {
+                            id: 'uppercase',
+                            label: this.$t('plugins.map.gis.props.labels.uppercase')
+                        },
+                        {
+                            id: 'lowercase',
+                            label: this.$t('plugins.map.gis.props.labels.lowercase')
+                        },
+                        {
+                            id: 'capitalize',
+                            label: this.$t('plugins.map.gis.props.labels.capitalize')
+                        }
                     ],
-                    transform: '',
+                    transform: {},
                     transparency: 0
                 },
                 buffer: {
@@ -458,17 +464,44 @@
                         y: 0
                     },
                     placements: [
-                        'top',
-                        'right',
-                        'bottom',
-                        'left',
-                        'center',
-                        'top-right',
-                        'top-left',
-                        'bottom-right',
-                        'bottom-left'
+                        {
+                            id: 'top',
+                            label: this.$t('plugins.map.gis.props.labels.top')
+                        },
+                        {
+                            id: 'right',
+                            label: this.$t('plugins.map.gis.props.labels.right')
+                        },
+                        {
+                            id: 'bottom',
+                            label: this.$t('plugins.map.gis.props.labels.bottom')
+                        },
+                        {
+                            id: 'left',
+                            label: this.$t('plugins.map.gis.props.labels.left')
+                        },
+                        {
+                            id: 'center',
+                            label: this.$t('plugins.map.gis.props.labels.center')
+                        },
+                        {
+                            id: 'top-right',
+                            label: this.$t('plugins.map.gis.props.labels.top-right')
+                        },
+                        {
+                            id: 'top-left',
+                            label: this.$t('plugins.map.gis.props.labels.top-left')
+                        },
+                        {
+                            id: 'bottom-right',
+                            label: this.$t('plugins.map.gis.props.labels.bottom-right')
+                        },
+                        {
+                            id: 'bottom-left',
+                            label: this.$t('plugins.map.gis.props.labels.bottom-left')
+                        }
                     ],
-                    placement: 'top'
+                    placement: {}
                 }
             }
         }

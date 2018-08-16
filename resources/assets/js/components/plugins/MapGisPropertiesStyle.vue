@@ -4,7 +4,7 @@
             <form role="form" name="layerStylingForm" id="layerStylingForm" @submit.prevent="apply">
                 <div class="form-group row">
                     <label class="col-form-label col-md-6 text-right">
-                        Active:
+                        {{ $t('global.active') }}:
                     </label>
                     <div class="col-md-6">
                         <label class="cb-toggle mx-0 my-auto align-middle">
@@ -15,7 +15,7 @@
                 </div>
                 <div class="form-group row">
                     <label class="col-form-label col-md-6 text-right" for="style-style">
-                        Style:
+                        {{ $t('plugins.map.gis.props.style.title') }}:
                     </label>
                     <div class="col-md-6">
                         <multiselect
@@ -33,7 +33,7 @@
                 </div>
                 <div class="form-group row">
                     <label class="col-form-label col-md-6 text-right" for="style-attribute">
-                        Attribute:
+                        {{ $t('global.attribute') }}:
                     </label>
                     <div class="col-md-6">
                         <multiselect
@@ -52,7 +52,7 @@
                 </div>
                 <div class="form-group row">
                     <label class="col-form-label col-md-6 text-right" for="style-colors">
-                        Color Ramp:
+                        {{ $t('plugins.map.gis.props.style.color-ramp') }}:
                     </label>
                     <div class="col-md-6">
                         <multiselect
@@ -84,7 +84,7 @@
                 </div>
                 <div class="form-group row" v-if="selectedStyle.id == 'graduated'">
                     <label class="col-form-label col-md-6 text-right" for="style-classes">
-                        Classes:
+                        {{ $t('plugins.map.gis.props.style.classes') }}:
                     </label>
                     <div class="col-md-6">
                         <input class="form-control" type="number" id="style-classes" name="style-classes" min="1" v-model.number="numberOfClasses" />
@@ -92,7 +92,7 @@
                 </div>
                 <div class="form-group row" v-if="selectedStyle.id == 'graduated'">
                     <label class="col-form-label col-md-6 text-right" for="style-graduated-mode">
-                        Mode:
+                        {{ $t('global.mode') }}:
                     </label>
                     <div class="col-md-6">
                         <multiselect
@@ -110,7 +110,7 @@
                 </div>
                 <div class="form-group row">
                     <label class="col-form-label col-md-6 text-right" for="style-size">
-                        Size:
+                        {{ $t('global.size') }}:
                     </label>
                     <div class="col-md-6">
                         <input class="form-control" type="number" id="style-size" name="style-size" min="1" v-model.number="size" />
@@ -118,7 +118,7 @@
                 </div>
                 <div class="form-group row">
                     <label class="col-form-label col-md-6 text-right" for="style-transparency">
-                        Transparency:
+                        {{ $t('global.transparency') }}:
                     </label>
                     <div class="col-md-6 d-flex">
                         <input class="form-control" type="range" id="style-transparency" name="style-transparency" min="0" max="1" step="0.01" v-model="transparency" />
@@ -130,7 +130,7 @@
 
         <button type="submit" form="layerStylingForm" class="btn btn-outline-success mt-2">
             <i class="fas fa-fw fa-check"></i>
-            Apply Styling
+            {{ $t('plugins.map.gis.props.style.apply') }}
         </button>
     </div>
 </template>
@@ -196,32 +196,32 @@
                 isActive: false,
                 styles: [
                     {
-                        label: 'Categorized',
+                        label: this.$t('plugins.map.gis.props.style.categorized'),
                         id: 'categorized'
                     },
                     {
-                        label: 'Graduated',
+                        label: this.$t('plugins.map.gis.props.style.graduated'),
                         id: 'graduated'
                     }
                 ],
                 colorRamps: [
                     {
-                        label: 'Blues',
+                        label: this.$t('plugins.map.gis.props.style.colors.blues'),
                         from: '#FFFFFF',
                         to: '#0000FF'
                     },
                     {
-                        label: 'Greens',
+                        label: this.$t('plugins.map.gis.props.style.colors.greens'),
                         from: '#FFFFFF',
                         to: '#00FF00'
                     },
                     {
-                        label: 'Reds',
+                        label: this.$t('plugins.map.gis.props.style.colors.reds'),
                         from: '#FFFFFF',
                         to: '#FF0000'
                     },
                     {
-                        label: 'GreenBlue',
+                        label: this.$t('plugins.map.gis.props.style.colors.blue-green'),
                         from: '#0000FF',
                         to: '#00FF00'
                     }
@@ -232,11 +232,11 @@
                 numberOfClasses: 5,
                 graduatedModes: [
                     {
-                        label: 'Equal Interval',
+                        label: this.$t('plugins.map.gis.props.style.equal-interval'),
                         id: 'equal_interval'
                     },
                     {
-                        label: 'Quantile (Equal Count)',
+                        label: this.$t('plugins.map.gis.props.style.quantile'),
                         id: 'quantile'
                     }
                 ],

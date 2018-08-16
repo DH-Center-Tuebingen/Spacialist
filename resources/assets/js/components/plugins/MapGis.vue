@@ -2,11 +2,13 @@
     <div class="h-100 row of-hidden" v-if="initFinished">
         <div class="col-md-2 h-100 d-flex flex-column">
             <button type="button" class="btn btn-default" @click.prevent="openImportModal">
-                <i class="fas fa-fw fa-download"></i> Import Geodata
+                <i class="fas fa-fw fa-download"></i> {{ $t('plugins.map.gis.import-button') }}
             </button>
             <div class="col d-flex flex-column h-100 pt-2">
                 <div class="col of-hidden d-flex flex-column">
-                    <h4>Available Layers</h4>
+                    <h4>
+                        {{ $t('plugins.map.gis.available-layers') }}
+                    </h4>
                     <div class="list-group scroll-y-auto col">
                         <a href="#" class="list-group-item list-group-item-action" v-for="l in layers" @click.prevent="" @dblclick.prevent="addLayerToSelection(l)" @contextmenu.prevent="">
                             {{ getName(l) }}
@@ -14,9 +16,9 @@
                     </div>
                 </div>
                 <div class="col of-hidden d-flex flex-column pt-2">
-                    <h4>Selected Layers</h4>
-                    <p class="alert alert-info" v-show="!selectedLayers.length">
-                        Use <kbd>Double Click</kbd> to add an <i>Available Layer</i> and again to remove it.
+                    <h4>{{ $t('plugins.map.gis.selected-layers') }}</h4>
+                    <p class="alert alert-info" v-show="!selectedLayers.length" v-html="$t('plugins.map.gis.info')">
+
                     </p>
                     <div class="list-group scroll-y-auto col">
                         <a href="#" class="list-group-item list-group-item-action d-flex flex-row justify-content-between align-items-center" v-for="l in selectedLayers" @click.prevent="" @dblclick.prevent="removeLayerFromSelection(l)" @contextmenu.prevent="$refs.layerMenu.open($event, {layer: l})">
@@ -97,7 +99,7 @@
                 if(layer.context_type) {
                     return this.$translateConcept(layer.context_type.thesaurus_url);
                 }
-                return 'No Title';
+                return this.$t('plugins.map.untitled');
             },
             getFeatureCount(layer) {
                 const lg = this.layerGeometries[layer.id];
@@ -216,7 +218,7 @@
                 propertiesModalId: 'map-gis-properties-modal',
                 contextMenu: [
                     {
-                        label: 'Zoom to layer',
+                        label: this.$t('plugins.map.gis.menu.zoom-to'),
                         iconClasses: 'fas fa-fw fa-search-plus',
                         iconContent: '',
                         callback: layer => {
@@ -224,19 +226,19 @@
                         }
                     },
                     {
-                        label: 'Export layer',
+                        label: this.$t('plugins.map.gis.menu.export-layer'),
                         iconClasses: 'fas fa-fw fa-download',
                         iconContent: '',
                         callback: layer => this.exportLayer(layer)
                     },
                     {
-                        label: 'Toggle feature count',
+                        label: this.$t('plugins.map.gis.menu.toggle-feature'),
                         iconClasses: 'fas fa-fw fa-calculator',
                         iconContent: '',
                         callback: layer => this.toggleFeatureCount(layer)
                     },
                     {
-                        label: 'Properties',
+                        label: this.$t('plugins.map.gis.menu.properties'),
                         iconClasses: 'fas fa-fw fa-sliders-h',
                         iconContent: '',
                         callback: layer => this.openPropertiesModal(layer)

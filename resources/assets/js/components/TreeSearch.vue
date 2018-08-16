@@ -7,7 +7,7 @@
         autocomplete="off"
         class="form-control"
         v-model="query"
-        :placeholder="placeholder"
+        :placeholder="$t(placeholder)"
         @blur="blur"
         @input="debounce"
         @keydown.down="down"
@@ -48,7 +48,7 @@
         props: {
             placeholder: {
                 type: String,
-                default: 'Search...'
+                default: 'global.search'
             },
             onSelect: {
                 type: Function,

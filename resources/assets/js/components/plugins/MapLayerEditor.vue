@@ -1,14 +1,14 @@
 <template>
     <div class="row h-100" v-if="initFinished">
         <div class="col-md-3 h-100 d-flex flex-column">
-            <h5>Baselayer</h5>
+            <h5>{{ $tc('main.map.baselayer', 2) }}</h5>
             <layer-list
                 class="flex-grow-1 scroll-y-auto"
                 :add-new="_ => onAddNewLayer(false)"
                 :layer="baselayer"
                 :on-select="onLayerSelect">
             </layer-list>
-            <h5 class="mt-3">Overlays</h5>
+            <h5 class="mt-3">{{ $t('main.map.overlays') }}</h5>
             <layer-list
                 class="flex-grow-1 scroll-y-auto"
                 :add-new="_ => onAddNewLayer(true)"
@@ -40,7 +40,7 @@
             onAddNewLayer(is_overlay) {
                 const vm = this;
                 const data = {
-                    name: 'Unnamed Layer',
+                    name: vm.$t('plugins.map.layer-editor.unnamed-layer'),
                     is_overlay: is_overlay
                 };
                 vm.$http.post('/map/layer', data).then(function(response) {

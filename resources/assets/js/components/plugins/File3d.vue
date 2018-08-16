@@ -9,7 +9,7 @@
         </transition>
         <div :id="containerId" class="w-100 h-100">
             <button type="button" class="btn btn-outline-info position-fixed m-2" v-if="context.id" @click="loadAllSubModels">
-                Load Sub-Models into scene
+                {{ $t('plugins.files.modal.detail.threed.load-sub-models') }}
             </button>
         </div>
     </div>

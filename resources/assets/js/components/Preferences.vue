@@ -2,16 +2,16 @@
     <table class="table table-striped table-hover" v-if="initFinished" v-can="'edit_preferences'">
         <thead class="thead-light">
             <tr>
-                <th>Preference</th>
-                <th>Value</th>
-                <th>Allow Override?</th>
-                <th>Save</th>
+                <th>{{ $t('global.preference') }}</th>
+                <th>{{ $t('global.value') }}</th>
+                <th>{{ $t('global.allow-override') }}</th>
+                <th>{{ $t('global.save') }}</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>
-                    <strong>Language</strong>
+                    <strong>{{ $t('main.preference.key.language') }}</strong>
                 </td>
                 <td>
                     <form>
@@ -34,24 +34,24 @@
             </tr>
             <tr>
                 <td>
-                    <strong>Columns in Main View</strong>
+                    <strong>{{ $t('main.preference.key.columns.title') }}</strong>
                 </td>
                 <td>
                     <form>
                         <div class="form-group row">
-                            <label for="left-column" class="col-md-2 col-form-label">Left-Hand Column:</label>
+                            <label for="left-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.left') }}:</label>
                             <div class="col-md-10">
                                 <input class="form-control" id="left-column" type="number" v-model="preferences['prefs.columns'].value.left" />
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="center-column" class="col-md-2 col-form-label">Center Column:</label>
+                            <label for="center-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.center') }}:</label>
                             <div class="col-md-10">
                                 <input class="form-control" id="left-column" type="number" v-model="preferences['prefs.columns'].value.center" />
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="right-column" class="col-md-2 col-form-label">Right-Hand Column:</label>
+                            <label for="right-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.right') }}:</label>
                             <div class="col-md-10">
                                 <input class="form-control" id="left-column" type="number" v-model="preferences['prefs.columns'].value.right" />
                             </div>
@@ -69,7 +69,7 @@
             </tr>
             <tr>
                 <td>
-                    <strong>Show Tooltips</strong>
+                    <strong>{{ $t('main.preference.key.tooltips') }}</strong>
                 </td>
                 <td>
                     <form>
@@ -94,7 +94,7 @@
             </tr>
             <tr>
                 <td>
-                    <strong>Thesaurus-Element for Tags</strong>
+                    <strong>{{ $t('main.preference.key.tag-root') }}</strong>
                 </td>
                 <td>
                     <form>
@@ -117,7 +117,7 @@
             </tr>
             <tr>
                 <td>
-                    <strong>Loaded Extensions</strong>
+                    <strong>{{ $t('main.preference.key.extensions') }}</strong>
                 </td>
                 <td>
                     <form>
@@ -145,7 +145,7 @@
             </tr>
             <tr>
                 <td>
-                    <strong>Show Link To ThesauRex</strong>
+                    <strong>{{ $t('main.preference.key.link-thesaurex') }}</strong>
                 </td>
                 <td>
                     <form>
@@ -168,7 +168,7 @@
             </tr>
             <tr>
                 <td>
-                    <strong>Project Name</strong>
+                    <strong>{{ $t('main.preference.key.project.name') }}</strong>
                 </td>
                 <td>
                     <form>
@@ -191,30 +191,30 @@
             </tr>
             <tr>
                 <td>
-                    <strong>Project Maintainer</strong>
+                    <strong>{{ $t('main.preference.key.project.maintainer') }}</strong>
                 </td>
                 <td>
                     <form>
                         <div class="form-group row">
-                            <label class="col-md-2 col-form-label">Name:</label>
+                            <label class="col-md-2 col-form-label">{{ $t('global.name') }}:</label>
                             <div class="col-md-10">
                                 <input class="form-control" type="text" v-model="preferences['prefs.project-maintainer'].value.name" />
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-md-2 col-form-label">E-Mail-Address:</label>
+                            <label class="col-md-2 col-form-label">{{ $t('global.email') }}:</label>
                             <div class="col-md-10">
                                 <input class="form-control" type="text" v-model="preferences['prefs.project-maintainer'].value.email" />
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-md-2 col-form-label">Description:</label>
+                            <label class="col-md-2 col-form-label">{{ $t('global.description') }}:</label>
                             <div class="col-md-10">
                                 <input class="form-control" type="text" v-model="preferences['prefs.project-maintainer'].value.description" />
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-md-2 col-form-label" for="public">Public?</label>
+                            <label class="col-md-2 col-form-label" for="public">{{ $t('main.preference.key.project.public') }}</label>
                             <div class="col-md-10">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="public" v-model="preferences['prefs.project-maintainer'].value.public" />
@@ -234,12 +234,12 @@
             </tr>
             <tr v-if="preferences['prefs.load-extensions'].value.map">
                 <td>
-                    <strong>Map Projection</strong>
+                    <strong>{{ $t('main.preference.key.map.projection') }}</strong>
                 </td>
                 <td>
                     <form>
                         <div class="form-group row">
-                            <label class="col-md-2 col-form-label">EPSG-Code:</label>
+                            <label class="col-md-2 col-form-label">{{ $t('main.preference.key.map.epsg') }}:</label>
                             <div class="col-md-10">
                                 <input class="form-control" type="text" v-model="preferences['prefs.map-projection'].value.epsg" />
                             </div>

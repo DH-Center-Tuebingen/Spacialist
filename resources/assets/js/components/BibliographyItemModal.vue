@@ -2,8 +2,8 @@
     <modal :name="id" height="auto" :scrollable="true" @closed="hide">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" v-if="data.id">Edit Item</h5>
-                <h5 class="modal-title" v-else>Add new Item</h5>
+                <h5 class="modal-title" v-if="data.id">{{ $t('main.bibliography.modal.edit.title') }}</h5>
+                <h5 class="modal-title" v-else>{{ $t('main.bibliography.modal.new.title') }}</h5>
                 <button type="button" class="close" aria-label="Close" @click="hide">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -11,7 +11,7 @@
             <div class="modal-body">
                 <form role="form" id="newBibliographyItemForm" name="newBibliographyItemForm" @submit.prevent="success(data)">
                     <div class="form-group">
-                        <label class="col-form-label col-md-3" for="type">Type:</label>
+                        <label class="col-form-label col-md-3" for="type">{{ $t('global.type') }}:</label>
                         <div class="col-md-9">
                             <multiselect
                                 v-model="data.type"
@@ -38,18 +38,18 @@
                         </div>
                     </div>
                 </form>
-                <h4 class="mt-3">BibTeX-Code</h4>
+                <h4 class="mt-3">{{ $t('main.bibliography.modal.new.bibtex-code') }}</h4>
                 <span v-if="data.type" v-html="this.$options.filters.bibtexify(data.fields, data.type.name)"></span>
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-success" form="newBibliographyItemForm" v-if="data.id">
-                    <i class="fas fa-fw fa-save"></i> Update
+                    <i class="fas fa-fw fa-save"></i> {{ $t('global.update') }}
                 </button>
                 <button type="submit" class="btn btn-success" form="newBibliographyItemForm" v-else>
-                    <i class="fas fa-fw fa-plus"></i> Add
+                    <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
                 </button>
                 <button type="button" class="btn btn-danger" @click="hide">
-                    <i class="fas fa-fw fa-ban"></i> Cancel
+                    <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
                 </button>
             </div>
         </div>

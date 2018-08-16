@@ -3,12 +3,12 @@
         <table class="table table-striped table-hover" v-can="'view_users'">
             <thead class="thead-light">
                 <tr>
-                    <th>Name</th>
-                    <th>E-Mail-Address</th>
-                    <th>Roles</th>
-                    <th>Added</th>
-                    <th>Updated</th>
-                    <th>Options</th>
+                    <th>{{ $t('global.name') }}</th>
+                    <th>{{ $t('global.email') }}</th>
+                    <th>{{ $t('global.roles') }}</th>
+                    <th>{{ $t('global.added-at') }}</th>
+                    <th>{{ $t('global.created-at') }}</th>
+                    <th>{{ $t('global.options') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -49,13 +49,13 @@
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <a class="dropdown-item" href="#" v-if="isDirty('roles_'+user.id)" :disabled="!$can('add_remove_role')" @click="onPatchUser(user.id)">
-                                    <i class="fas fa-fw fa-check text-success"></i> Save
+                                    <i class="fas fa-fw fa-check text-success"></i> {{ $t('global.save') }}
                                 </a>
                                 <a class="dropdown-item" href="#" :disabled="!$can('change_password')" @click="updatePassword(user.id)">
                                     <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
                                 </a>
                                 <a class="dropdown-item" href="#" :disabled="!$can('delete_users')" @click="requestDeleteUser(user.id)">
-                                    <i class="fas fa-fw fa-trash text-danger"></i> Delete
+                                    <i class="fas fa-fw fa-trash text-danger"></i> {{ $t('global.delete') }}
                                 </a>
                             </div>
                         </div>
@@ -65,13 +65,13 @@
         </table>
 
         <button type="button" class="btn btn-success" @click="showNewUserModal" :disabled="!$can('create_users')">
-            <i class="fas fa-fw fa-plus"></i> Add New User
+            <i class="fas fa-fw fa-plus"></i> {{ $t('main.user.add-button') }}
         </button>
 
         <modal name="new-user-modal" height="auto" :scrollable="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add new User</h5>
+                    <h5 class="modal-title">{{ $t('main.user.modal.new.title') }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideNewUserModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -80,7 +80,7 @@
                     <form id="newUserForm" name="newUserForm" role="form" v-on:submit.prevent="onAddUser(newUser)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
-                                Username:
+                                {{ $t('global.name') }}:
                             </label>
                             <div class="col-md-9">
                                 <input class="form-control" type="text" id="name" v-model="newUser.name" required />
@@ -88,7 +88,7 @@
                         </div>
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="display_name">
-                                E-Mail Address:
+                                {{ $t('global.email') }}:
                             </label>
                             <div class="col-md-9">
                                 <input class="form-control" type="email" id="display_name" v-model="newUser.email" required />
@@ -96,7 +96,7 @@
                         </div>
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="description">
-                                Password:
+                                {{ $t('global.password') }}:
                             </label>
                             <div class="col-md-9">
                                 <input class="form-control" type="password" id="description" v-model="newUser.password" required />
@@ -106,10 +106,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" form="newUserForm">
-                        <i class="fas fa-fw fa-plus"></i> Add
+                        <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
                     </button>
                     <button type="button" class="btn btn-danger"     @click="hideNewUserModal">
-                        <i class="fas fa-fw fa-ban"></i> Cancel
+                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>
@@ -118,20 +118,20 @@
         <modal name="confirm-delete-user-modal" height="auto" :scrollable="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete User {{ selectedUser.name }}</h5>
+                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: selectedUser.name}) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteUserModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    Do you really want to delete User <strong>{{ selectedUser.name }}</strong> (<i>{{ selectedUser.email }}</i>)?
+                    {{ $t('global.delete-name.desc', {name: selectedUser.name}) }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" @click="deleteUser(selectedUser.id)">
-                        <i class="fas fa-fw fa-check"></i> Delete
+                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
                     </button>
                     <button type="button" class="btn btn-danger" @click="hideDeleteUserModal">
-                        <i class="fas fa-fw fa-ban"></i> Cancel
+                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>

@@ -1,6 +1,12 @@
 <template>
     <div class="h-100 d-flex flex-column">
-        Displaying {{fileState.from}}-{{fileState.to}} of {{fileState.total}} files
+        {{
+            $t('plugins.files.list.display', {
+                from: fileState.from,
+                to: fileState.to,
+                total: fileState.total
+            })
+        }}
         <div class="row col px-0 scroll-y-auto" infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk">
             <div class="col-sm-6 col-md-4 mb-3" v-for="file in files">
                 <div class="card text-center clickable" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">

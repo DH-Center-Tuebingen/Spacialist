@@ -32,10 +32,12 @@
             </div>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-primary" v-show="linkPossible" @click="link(selectedFeature, selectedEntity)">
-                    <i class="fas fa-fw fa-link"></i> Link to {{ selectedEntity.name }}
+                    <i class="fas fa-fw fa-link"></i> {{ $t('global.link-to', {name: selectedEntity.name}) }}
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-primary" v-show="unlinkPossible" @click="unlink(selectedFeature, linkedEntity)">
-                    <i class="fas fa-fw fa-unlink"></i> <span v-if="linkedEntity">Unlink from {{ linkedEntity.name }}</span>
+                    <i class="fas fa-fw fa-unlink"></i> <span v-if="linkedEntity">
+                        {{ $t('global.unlink-from', {name: linkedEntity.name}) }}
+                    </span>
                 </button>
             </div>
         </div>
@@ -375,7 +377,7 @@
                 const vm = this;
 
                 if(vm.initWkt.length && vm.initGeojson.length) {
-                    vm.$showErrorModal('init-wkt and init-geojson provided. They are not allowed at once.');
+                    vm.$showErrorModal(vm.$t('main.map.init-error'));
                     return;
                 }
 
@@ -394,7 +396,7 @@
                             layerName = vm.$translateConcept(ct.thesaurus_url);
                         }
                     } else {
-                        layerName = 'Unlinked';
+                        layerName = vm.$t('global.unlinked');
                     }
                     geojsonLayers[layerId] = new VectorLayer({
                         baseLayer: false,
@@ -415,7 +417,7 @@
                     let layer = new VectorLayer({
                         baseLayer: false,
                         displayInLayerSwitcher: true,
-                        title: 'All Entities',
+                        title: vm.$t('global.all-entities'),
                         visible: true,
                         layer: 'entity',
                         source: new Vector({
@@ -524,17 +526,17 @@
                     vm.initLayerData();
 
                     vm.baselayersGroup = new Group({
-                        title: 'Base Layers',
+                        title: vm.$tc('main.map.baselayer', 2),
                         openInLayerSwitcher: true,
                         layers: vm.baselayerLayers
                     });
                     vm.overlaysGroup = new Group({
-                        title: 'Overlays',
+                        title: vm.$t('main.map.overlays'),
                         openInLayerSwitcher: true,
                         layers: vm.overlayLayers
                     });
                     vm.entityLayersGroup = new Group({
-                        title: 'Entity Layers',
+                        title: vm.$t('main.map.entity-layers'),
                         openInLayerSwitcher: true,
                         layers: vm.entityLayers
                     });
@@ -598,7 +600,7 @@
                             const coords = getExtentCenter(geometry.getExtent());
                             vm.hoverPopup.setPosition(coords);
 
-                            const geomName = `Geometry #${props.id}`;
+                            const geomName = vm.$t('main.map.geometry-name', {id: props.id});
                             const title = props.entity ?
                                 `${geomName} (${props.entity.name})` :
                                 geomName;
@@ -658,7 +660,6 @@
                         })
                     });
                     // vm.options.graticule.setMap(vm.map);
-                    console.log(vm.selectedEntity);
                     if (vm.selectedEntity && vm.selectedEntity.geodata_id) {
                         vm.selectedFeature = vm.features[vm.selectedEntity.geodata_id];
                     }
@@ -802,10 +803,10 @@
                 let text = {};
                 let r, g, b, a;
                 if(options.font) {
-                    const fontSize = options.font.size || 12;
+                    const fontSize = options.font.size || 11;
                     let fontTrans;
                     let fontStyle, fontWeight;
-                    switch(options.font.transform) {
+                    switch(options.font.transform.id) {
                         case 'capitalize':
                             fontTrans = 'small-caps';
                             break;
@@ -813,7 +814,7 @@
                             fontTrans = '';
                             break;
                     }
-                    switch(options.font.style) {
+                    switch(options.font.style.id) {
                         case 'bold':
                             fontStyle = '';
                             fontWeight = 'bold';
@@ -874,7 +875,7 @@
                     text.offsetY = options.position.offsets.y || 0;
                     let align;
                     let baseline;
-                    switch(options.position.placement) {
+                    switch(options.position.placement.id) {
                         case 'top':
                             align = 'center';
                             baseline = 'bottom';
@@ -1290,7 +1291,7 @@
                 };
                 const props = f.getProperties();
                 const geometry = f.getGeometry();
-                const geomName = `Geometry #${props.id}`;
+                const geomName = vm.$t('main.map.geometry-name', {id: props.id});
                 const coords = getExtentCenter(geometry.getExtent());
                 vm.overlay.setPosition(coords);
 
@@ -1303,9 +1304,9 @@
                 const coordHtml = vm.geometryToTable(geometry);
                 vm.overlayContent =
                     `<dl class="mb-0">
-                        <dt>Type</dt>
+                        <dt>${vm.$t('global.type')}</dt>
                         <dd>${geometry.getType()}</dd>
-                        <dt>Coordinates in EPSG:${this.epsg.epsg}</dt>
+                        <dt>${vm.$t('main.map.coords-in-epsg', {epsg: vm.epsg.epsg})}</dt>
                         <dd>${coordHtml}</dd>
                     </dl>`;
 

@@ -2,16 +2,16 @@
     <div class="h-100 d-flex flex-column justify-content-start align-items-center">
         <div>
             <button class="btn btn-outline-secondary" @click="toggleEditMode()">
-                <i class="fas fa-fw fa-edit"></i> Toggle Edit mode
+                <i class="fas fa-fw fa-edit"></i> {{ $t('plugins.files.modal.detail.toggle-edit') }}
             </button>
             <button class="btn btn-outline-success" @click="updateFile(file, content)" v-if="fileEdited">
-                <i class="fas fa-fw fa-save"></i> Save
+                <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
             </button>
             <button class="btn btn-outline-secondary" v-show="!renderHtml" @click="toggleCodeHighlighting()">
-                <i class="fas fa-fw fa-underline"></i> Toggle Highlighting
+                <i class="fas fa-fw fa-underline"></i> {{ $t('plugins.files.modal.detail.toggle-highlight') }}
             </button>
             <button class="btn btn-outline-secondary" v-if="isHtml" @click="toggleHtmlRendering()">
-                <i class="fab fa-fw fa-html5"></i> Toggle HTML-Rendering
+                <i class="fab fa-fw fa-html5"></i> {{ $t('plugins.files.modal.detail.toggle-html') }}
             </button>
         </div>
         <div class="d-flex mt-2 w-100 col px-0">

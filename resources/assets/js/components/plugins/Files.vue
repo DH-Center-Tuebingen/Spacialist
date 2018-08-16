@@ -3,27 +3,27 @@
         <ul class="nav nav-pills nav-fill mb-2">
             <li class="nav-item">
                 <a class="nav-link" href="#" :class="{active: isAction('linkedFiles'), disabled: !context.id}" @click.prevent="setAction('linkedFiles')">
-                    <i class="fas fa-fw fa-link"></i> Linked Files <span class="badge" :class="[isAction('linkedFiles') ? 'badge-light' : 'badge-primary']" v-show="context.id">{{linkedFiles.files.length}}</span>
+                    <i class="fas fa-fw fa-link"></i> {{ $t('plugins.files.header.linked') }} <span class="badge" :class="[isAction('linkedFiles') ? 'badge-light' : 'badge-primary']" v-show="context.id">{{linkedFiles.files.length}}</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#" :class="{active: isAction('unlinkedFiles')}" @click.prevent="setAction('unlinkedFiles')">
-                    <i class="fas fa-fw fa-unlink"></i> Unlinked Files
+                    <i class="fas fa-fw fa-unlink"></i> {{ $t('plugins.files.header.unlinked') }}
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#" :class="{active: isAction('allFiles')}" @click.prevent="setAction('allFiles')">
-                    <i class="fas fa-fw fa-copy"></i> All Files
+                    <i class="fas fa-fw fa-copy"></i> {{ $t('plugins.files.header.all') }}
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#" :class="{active: isAction('upload')}" @click.prevent="setAction('upload')">
-                    <i class="fas fa-fw fa-file-upload"></i> Upload Files
+                    <i class="fas fa-fw fa-file-upload"></i> {{ $t('plugins.files.header.upload') }}
                 </a>
             </li>
         </ul>
         <div v-if="!this.isAction('upload')">
-            <h5 class="clickable" @click="toggleFilters">Filter Rules
+            <h5 class="clickable" @click="toggleFilters">{{ $t('plugins.files.header.rules.title') }}
                 <small>
                     <span v-show="!showFilters">
                         <i class="fas fa-fw fa-angle-down"></i>
@@ -32,7 +32,13 @@
                         <i class="fas fa-fw fa-angle-up"></i>
                     </span>
                 </small>
-                <small class="badge" :class="[filterCounts[selectedTopAction] ? 'badge-primary' : 'badge-secondary']">{{ filterCounts[selectedTopAction] }} active</small>
+                <small class="badge" :class="[filterCounts[selectedTopAction] ? 'badge-primary' : 'badge-secondary']">
+                    {{
+                        $tc('plugins.files.header.rules.active', filterCounts[selectedTopAction], {
+                            cnt: filterCounts[selectedTopAction]
+                        })
+                    }}
+                </small>
             </h5>
             <div class="mb-2" v-show="showFilters">
                 <form v-on:submit.prevent="applyFilters(selectedTopAction)">
@@ -48,7 +54,7 @@
                     </div> -->
                     <div class="form-group row">
                         <label class="col-form-label col-md-3" for="filetypes">
-                            Filetype:
+                            {{ $t('plugins.files.header.rules.types.file') }}:
                         </label>
                         <div class="col-md-9">
                             <multiselect
@@ -66,7 +72,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-3" for="cameras">
-                            Camera:
+                            {{ $t('plugins.files.header.rules.types.camera') }}:
                         </label>
                         <div class="col-md-9">
                             <multiselect
@@ -82,7 +88,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-3" for="dates">
-                            Date:
+                            {{ $t('plugins.files.header.rules.types.date') }}:
                         </label>
                         <div class="col-md-9">
                             <multiselect
@@ -100,7 +106,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-form-label col-md-3" for="tags">
-                            Tags:
+                            {{ $tc('global.tag', 2) }}:
                         </label>
                         <div class="col-md-9">
                             <multiselect
@@ -118,7 +124,7 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-outline-success">
-                        Apply Filter
+                        {{ $t('plugins.files.header.rules.apply') }}
                     </button>
                 </form>
             </div>
@@ -128,7 +134,7 @@
                 <div class="form-check">
                     <input type="checkbox" id="sub-entities-check" class="form-check-input" v-model="includeSubEntities" @change="applyFilters('linkedFiles')"/>
                     <label class="form-check-label" for="sub-entities-check">
-                        Include Files of Sub-Entities
+                        {{ $t('plugins.files.include-sub-files') }}
                     </label>
                 </div>
             </form>
@@ -164,7 +170,7 @@
         </div>
         <div v-if="isAction('upload')">
             <file-upload class="w-100"
-                post-action="/file/new"
+                post-action="/api/v1/file/new"
                 ref="upload"
                 v-model="uploadFiles"
                 :multiple="true"
@@ -172,9 +178,9 @@
                 :drop="true"
                 @input-file="inputFile">
                     <div class="text-center rounded text-light bg-dark px-2 py-5">
-                        <h3>Drop Zone</h3>
+                        <h3>{{ $t('plugins.files.upload.title') }}</h3>
                         <p>
-                            Please drop files here or click on this item.
+                            {{ $t('plugins.files.upload.desc') }}
                         </p>
                     </div>
             </file-upload>
@@ -189,10 +195,10 @@
                                 </span>
                             </div>
                             <button v-show="file.active" type="button" class="btn btn-outline-danger" @click.prevent="abortFileUpload(file)">
-                                <i class="fas fa-fw fa-times"></i> Abort
+                                <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                             </button>
                             <a href="#" v-show="file.error" @click="abortFileUpload(file)">
-                                <i class="fas fa-fw fa-times"></i> Clear
+                                <i class="fas fa-fw fa-times"></i> {{ $t('global.clear') }}
                             </a>
                         </div>
                         <div class="progress" style="height: 2px;" v-if="!file.error">
@@ -201,19 +207,19 @@
                             </div>
                         </div>
                         <p class="alert alert-danger" v-if="file.error">
-                            Error while uploading your file.
+                            {{ $t('plugins.files.upload.error') }}
                         </p>
                     </li>
                 </transition-group>
             </ul>
         </div>
 
-        <modal name="file-modal" width="80%" height="80%" @closed="hideFileModal">
+        <modal name="file-modal" width="80%" height="80%" @closed="hideFileModal" classes="of-visible">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" @mouseenter="onFileHeaderHover(true)" @mouseleave="onFileHeaderHover(false)">
                         <span v-if="!selectedFile.editing">
-                            {{ selectedFile.name }} - Details
+                            {{ $t('plugins.files.modal.detail.title', {name: selectedFile.name}) }}
                             <a href="#" v-if="fileHeaderHovered" class="text-dark" @click="enableFilenameEditing()">
                                 <i class="fas fa-fw fa-edit"></i>
                             </a>
@@ -240,22 +246,22 @@
                         <ul class="nav nav-tabs nav-fill">
                             <li class="nav-item">
                                 <a href="#" class="nav-link" :class="{active: modalTab == 'properties'}" @click.prevent="modalTab = 'properties'">
-                                    <i class="fas fa-fw fa-sliders-h"></i> Properties
+                                    <i class="fas fa-fw fa-sliders-h"></i> {{ $t('plugins.files.modal.detail.properties') }}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="#" class="nav-link" :class="{active: modalTab == 'links'}" @click.prevent="modalTab = 'links'">
-                                    <i class="fas fa-fw fa-link"></i> Links
+                                    <i class="fas fa-fw fa-link"></i> {{ $t('plugins.files.modal.detail.links') }}
                                 </a>
                             </li>
-                            <li class="nav-item" v-if="selectedFile.exif">
+                            <li class="nav-item" v-if="selectedFile.exif && hasExif">
                                 <a href="#" class="nav-link" :class="{active: modalTab == 'exif'}" @click.prevent="modalTab = 'exif'">
-                                    <i class="fas fa-fw fa-camera"></i> Exif
+                                    <i class="fas fa-fw fa-camera"></i> {{ $t('plugins.files.modal.detail.exif') }}
                                 </a>
                             </li>
                         </ul>
                         <div class="ml-4 mr-4" v-show="modalTab == 'properties'">
-                            <h5 class="mt-3">Properties</h5>
+                            <h5 class="mt-3">{{ $t('plugins.files.modal.detail.properties') }}</h5>
                             <table class="table table-striped table-hover table-sm mb-0">
                                 <tbody>
                                     <tr v-for="p in fileProperties" class="d-flex justify-content-between">
@@ -283,7 +289,7 @@
                                                 </span>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                                     <a class="dropdown-item" href="#" @click="enablePropertyEditing(p)">
-                                                        <i class="fas fa-fw fa-edit text-info"></i> Edit
+                                                        <i class="fas fa-fw fa-edit text-info"></i> {{ $t('global.edit') }}
                                                     </a>
                                                 </div>
                                             </div>
@@ -291,12 +297,12 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <h5 class="mt-3">File Properties</h5>
+                            <h5 class="mt-3">{{ $t('plugins.files.modal.detail.metadata.title') }}</h5>
                             <table class="table table-striped table-hover table-sm mb-0">
                                 <tbody>
                                     <tr>
                                         <td class="text-left font-weight-bold">
-                                            Created
+                                            {{ $t('plugins.files.modal.detail.metadata.created') }}
                                         </td>
                                         <td class="text-right text-muted">
                                             {{selectedFile.created_unix|date}}
@@ -304,7 +310,7 @@
                                     </tr>
                                     <tr>
                                         <td class="text-left font-weight-bold">
-                                            Last Modified
+                                            {{ $t('plugins.files.modal.detail.metadata.lastmodified') }}
                                         </td>
                                         <td class="text-right text-muted">
                                             {{selectedFile.modified_unix|date}}
@@ -312,7 +318,7 @@
                                     </tr>
                                     <tr>
                                         <td class="text-left font-weight-bold">
-                                            File size
+                                            {{ $t('plugins.files.modal.detail.metadata.filesize') }}
                                         </td>
                                         <td class="text-right text-muted">
                                             {{selectedFile.size|bytes}}
@@ -331,35 +337,41 @@
                                                 :post-action="replaceFileUrl"
                                                 @input-file="onReplaceFileSet">
                                                     <span class="text-primary clickable hover-underline">
-                                                        <i class="fas fa-fw fa-file-import text-muted"></i> Replace File
+                                                        <i class="fas fa-fw fa-file-import text-muted"></i> {{ $t('plugins.files.modal.detail.replace.button') }}
                                                     </span>
                                             </file-upload>
                                             <div class="d-flex flex-column align-items-start font-weight-normal" v-if="replaceFiles.length">
                                                 <span>
-                                                    Do you want to replace {{selectedFile.name}} ({{selectedFile.size | bytes}}) with {{replaceFiles[0].name}} ({{replaceFiles[0].size | bytes}})?
+                                                    {{
+                                                        $t('plugins.files.modal.detail.replace.confirm', {
+                                                            size: $options.filters.bytes(selectedFile.size),
+                                                            name: replaceFiles[0].name,
+                                                            size2: $options.filters.bytes(replaceFiles[0].size)
+                                                        })
+                                                    }}
                                                 </span>
                                                 <div class="d-flex mt-1">
                                                     <button type="button" class="btn btn-outline-success" @click="doReplaceFile">
                                                         <i class="fas fa-fw fa-check"></i>
-                                                        Replace
+                                                        {{ $t('global.replace') }}
                                                     </button>
                                                     <button type="button" class="btn btn-outline-danger ml-2" @click="cancelReplaceFile">
                                                         <i class="fas fa-fw fa-ban"></i>
-                                                        Cancel
+                                                        {{ $t('global.cancel') }}
                                                     </button>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="text-right font-weight-bold">
                                             <a :href="selectedFile.url" :download="selectedFile.name" target="_blank">
-                                                Download
+                                                {{ $t('global.download') }}
                                                 <i class="fas fa-fw fa-file-download text-muted"></i>
                                             </a>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
-                            <h5 class="mt-3">Tags</h5>
+                            <h5 class="mt-3">{{ $tc('global.tag', 2) }}</h5>
                             <form role="form" class="row" @submit.prevent="updateTags(selectedFile)">
                                 <div class="col-md-9">
                                     <multiselect
@@ -382,7 +394,7 @@
                                             <i class="fas fa-check" data-fa-transform="shrink-4 left-13 down-4"></i>
                                         </span>
                                         <span style="margin-left: -0.5rem;">
-                                            Save Tags
+                                            {{ $t('global.update') }}
                                         </span>
                                     </button>
                                 </div>
@@ -495,58 +507,70 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary"     @click="closeFileModal">
-                        Close
+                        {{ $t('global.close') }}
                     </button>
                 </div>
             </div>
         </modal>
 
-        <modal name="delete-file-modal" width="80%" height="auto" :scrollable="true">
+        <modal name="delete-file-modal" width="50%" height="50%">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete {{ contextMenuFile.name }}</h5>
+                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: contextMenuFile.name}) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteFileModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to delete <i>{{ contextMenuFile.name }}</i>?
+                        {{ $t('global.delete-name.desc', {name: contextMenuFile.name}) }}
                     </p>
                     <p class="alert alert-danger">
-                        Please note: If you delete <i>{{ contextMenuFile.name }}</i>, {{ linkCount }} links to entities will be deleted as well.
+                        {{
+                            $tc('plugins.files.modal.delete.alert', linkCount, {
+                                name: contextMenuFile.name,
+                                cnt: linkCount
+                            })
+                        }}
                     </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" @click="deleteFile(contextMenuFile)">
-                        <i class="fas fa-fw fa-check"></i> Delete
+                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
                     </button>
                     <button type="button" class="btn btn-outline-secondary"     @click="hideDeleteFileModal">
-                        Close
+                        {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>
         </modal>
 
-        <modal name="unlink-file-modal" width="80%" height="auto" :scrollable="true">
+        <modal name="unlink-file-modal" width="50%" height="50%">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Unlink {{ contextMenuFile.name }}</h5>
+                    <h5 class="modal-title">
+                        {{ $t('global.unlink-name.title', {name: contextMenuFile.name}) }}
+                    </h5>
                     <button type="button" class="close" aria-label="Close" @click="hideUnlinkFileModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to unlink <i>{{ contextMenuFile.name }}</i> from <i>{{ contextMenuContext.name }}</i>?
+                        {{
+                            $t('global.unlink-name.desc', {
+                                file: contextMenuFile.name,
+                                ent: contextMenuContext.name
+                            })
+                        }}
                     </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" @click="unlinkFile(contextMenuFile, contextMenuContext)">
-                        <i class="fas fa-fw fa-check"></i> Unlink
+                        <i class="fas fa-fw fa-check"></i> {{ $t('global.unlink')}}
                     </button>
                     <button type="button" class="btn btn-outline-secondary"     @click="hideUnlinkFileModal">
-                        Close
+                        {{ $t('global.cancel')}}
                     </button>
                 </div>
             </div>
@@ -1171,7 +1195,13 @@
             },
             replaceFileUrl: function() {
                 if(!this.selectedFile.id) return '';
-                return '/file/'+this.selectedFile.id+'/patch';
+                return '/api/v1/file/'+this.selectedFile.id+'/patch';
+            },
+            hasExif: function() {
+                if(!this.selectedFile || !Object.keys(this.selectedFile).length) {
+                    return false;
+                }
+                return this.selectedFile.category == 'image';
             },
             contextMenu: function() {
                 const vm = this;
@@ -1181,9 +1211,13 @@
                         getLabel: file => {
                             const isLinkedTo = file.contexts.some(c => vm.context.id == c.id);
                             if(isLinkedTo) {
-                                return `Unlink from ${vm.context.name}`;
+                                return vm.$t('global.unlink-from', {
+                                    name: vm.context.name
+                                });
                             } else {
-                                return `Link to ${vm.context.name}`;
+                                return vm.$t('global.link-to', {
+                                    name: vm.context.name
+                                });
                             }
                         },
                         getIconClasses: file => {
@@ -1206,7 +1240,7 @@
                     });
                 }
                 menu.push({
-                    getLabel: file => 'Delete',
+                    getLabel: file => vm.$t('global.delete'),
                     getIconClasses: file => 'fas fa-fw fa-trash text-danger',
                     getIconContent: file => '',
                     callback: file => {

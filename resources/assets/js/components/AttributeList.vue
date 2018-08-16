@@ -53,9 +53,9 @@
                         <span class="ml-3">{{ localValues[attribute.id].value }}%</span>
                     </div>
                     <div v-else-if="attribute.datatype == 'geography'">
-                        <input class="form-control" :disabled="attribute.isDisabled" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" placeholder="Add WKT" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
+                        <input class="form-control" :disabled="attribute.isDisabled" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" :placeholder="$t('main.entity.attributes.add-wkt')" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
                         <button type="button" class="btn btn-outline-secondary mt-2" :disabled="attribute.isDisabled" @click="openGeographyModal(attribute.id)">
-                            <i class="fas fa-fw fa-map-marker-alt"></i> Open Map
+                            <i class="fas fa-fw fa-map-marker-alt"></i> {{ $t('main.entity.attributes.open-map') }}
                         </button>
                     </div>
                     <!-- TODO: dirty checking -->
@@ -163,7 +163,7 @@
         <modal :name="'geography-place-modal-'+uniqueId" width="80%" height="80%">
             <div class="modal-content h-100">
                 <div class="modal-header">
-                    <h5 class="modal-title">Set Geolocation</h5>
+                    <h5 class="modal-title">{{ $t('main.entity.attributes.set-location') }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideGeographyModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -182,10 +182,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-success"     @click="setGeography('attribute-'+selectedAttribute)">
-                        Set
+                        {{ $t('global.set') }}
                     </button>
                     <button type="button" class="btn btn-outline-secondary"     @click="hideGeographyModal">
-                        Close
+                        {{ $t('global.close') }}
                     </button>
                 </div>
             </div>

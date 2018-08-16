@@ -1,22 +1,24 @@
 <template>
     <div class="h-100 d-flex flex-column justify-content-start align-items-center">
-        <p class="alert alert-info">
-            Filetype of <span class="font-italic">{{file.name}}</span> is currently not supported by Spacialist.
-            If you need support for this kind of filetype, please create an <a href="https://github.com/eScienceCenter/Spacialist/issues/new">issue on GitHub<sup><i class="fas fa-fw fa-external-link-alt"></i></sup></a>
+        <p class="alert alert-info" v-html="$t('plugins.files.modal.detail.undef.info', {mime: file.mime_type, name: file.name})">
         </p>
         <a :href="file.url" :download="file.name" target="_blank">
             <i class="fas fa-fw fa-file-download fa-5x mb-2"></i>
-            <h4>Download {{file.name}}</h4>
+            <h4>
+                {{ $t('global.download-name', {name: file.name}) }}
+            </h4>
         </a>
         <div v-if="supportsHtmlRendering && !htmlLoaded">
             <hr />
             <button type="button" class="btn btn-outline-secondary my-2" @click="loadAsHtml">
-                Load Content as HTML
+                {{ $t('plugins.files.modal.undef.as-html') }}
             </button>
             <div>
-                <h5>What's this?</h5>
+                <h5>
+                    {{ $t('plugins.files.modal.undef.html-info.title') }}
+                </h5>
                 <p class="alert font-italic mx-5">
-                    Since this filetype is unsupported, there is no native way in Spacialist to display it's content. Though, it supports simple text rendering to (at least) view the content without downloading it.
+                    {{ $t('plugins.files.modal.undef.html-info.desc') }}
                 </p>
             </div>
         </div>

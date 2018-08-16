@@ -7,7 +7,7 @@
             </li>
             <li v-if="addNew">
                 <i class="fas fa-fw fa-plus"></i>
-                <a href="#" @click="addNew" class="text-secondary">New Layer...</a>
+                <a href="#" @click="addNew" class="text-secondary" v-html="$t('plugins.map.new-item')"></a>
             </li>
         </ul>
     </div>
@@ -39,7 +39,7 @@
                 if(layer.context_type) {
                     return this.$translateConcept(layer.context_type.thesaurus_url);
                 }
-                return 'No Title';
+                return this.$t('plugins.map.untitled');
             }
         },
         data() {

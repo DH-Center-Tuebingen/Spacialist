@@ -1,16 +1,16 @@
 <template>
     <div class="h-100 d-flex flex-column">
-        <h4>Properties</h4>
+        <h4>{{ $t('main.datamodel.detail.properties.title') }}</h4>
         <div v-if="entityType.id" class="col d-flex flex-column">
             <form role="form" v-on:submit.prevent="updateContextType">
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right">Top-Level Context-Type</label>
+                    <label class="col-form-label col-md-3 text-right">{{ $t('main.datamodel.detail.properties.top-level') }}</label>
                     <div class="col-md-9">
                         <input type="checkbox" v-model="entityType.is_root" />
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-form-label col-md-3 text-right">Allowed Sub Context-Types</label>
+                    <label class="col-form-label col-md-3 text-right">{{ $t('main.datamodel.detail.properties.sub-types') }}</label>
                     <div class="col-md-9">
                         <multiselect
                             label="thesaurus_url"
@@ -25,10 +25,10 @@
                         </multiselect>
                         <div class="pt-2">
                             <button type="button" class="btn btn-outline-success mr-2" @click="addAllContextTypes">
-                                <i class="fas fa-fw fa-tasks"></i> Select all
+                                <i class="fas fa-fw fa-tasks"></i> {{ $t('global.select-all') }}
                             </button>
                             <button type="button" class="btn btn-outline-danger" @click="removeAllContextTypes">
-                                <i class="fas fa-fw fa-times"></i> Deselect all
+                                <i class="fas fa-fw fa-times"></i> {{ $t('global.select-none') }}
                             </button>
                         </div>
                     </div>
@@ -37,13 +37,13 @@
                     <label class="col-form-label col-md-3"></label>
                     <div class="col-md-9">
                         <button type="submit" class="btn btn-success">
-                            <i class="fas fa-fw fa-save"></i> Save
+                            <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
                         </button>
                     </div>
                 </div>
                 <hr />
             </form>
-            <h4>Added Attributes</h4>
+            <h4>{{ $t('main.datamodel.detail.attribute.title') }}</h4>
             <attributes
                 class="col scroll-y-auto"
                 group="attributes"
@@ -57,15 +57,11 @@
                 :show-info="true">
             </attributes>
         </div>
-        <p v-else class="alert alert-info">
-            Select a Entity-Type to edit it and add/remove attributes.
-        </p>
-
 
         <modal name="edit-context-attribute-modal" height="auto" :scrollable="true">
             <div class="modal-content" v-if="openedModal == 'edit-context-attribute-modal'">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit {{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</h5>
+                    <h5 class="modal-title">{{ $t('global.edit-name.title', {name: $translateConcept(modalSelectedAttribute.thesaurus_url)}) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideEditContextAttributeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -74,7 +70,7 @@
                     <form id="editContextAttributeForm" name="editContextAttributeForm" role="form" v-on:submit.prevent="editContextAttribute(modalSelectedAttribute, selectedDependency)">
                         <div class="form-group row">
                             <label class="col-form-label col-md-3">
-                                Label:
+                                {{ $t('global.label') }}:
                             </label>
                             <div class="col-md-9">
                                 <input type="text" class="form-control-plaintext" :value="$translateConcept(modalSelectedAttribute.thesaurus_url)" readonly />
@@ -82,7 +78,7 @@
                         </div>
                         <div class="form-group row">
                             <label class="col-form-label col-md-3">
-                                Type:
+                                {{ $t('global.type') }}:
                             </label>
                             <div class="col-md-9">
                                 <input type="text" class="form-control-plaintext" :value="modalSelectedAttribute.datatype" readonly />
@@ -90,7 +86,7 @@
                         </div>
                         <div class="form-group row">
                             <label class="col-form-label col-md-3">
-                                Depends On:
+                                {{ $t('global.depends-on') }}:
                             </label>
                             <div class="col-md-9">
                                 <multiselect
@@ -142,10 +138,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" form="editContextAttributeForm" class="btn btn-success" :disabled="editContextAttributeDisabled">
-                        <i class="fas fa-fw fa-save"></i> Update
+                        <i class="fas fa-fw fa-save"></i> {{ $t('global.update') }}
                     </button>
                     <button type="button" class="btn btn-secondary" @click="hideEditContextAttributeModal">
-                        <i class="fas fa-fw fa-times"></i> Cancel
+                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>
@@ -154,25 +150,31 @@
         <modal name="remove-attribute-from-ct-modal" height="auto" :scrollable="true">
             <div class="modal-content" v-if="openedModal == 'remove-attribute-from-ct-modal'">
                 <div class="modal-header">
-                    <h5 class="modal-title">Remove {{ $translateConcept(modalSelectedAttribute.thesaurus_url) }} from {{ $translateConcept(modalSelectedEntityType.thesaurus_url) }}</h5>
+                    <h5 class="modal-title">{{ $t('global.remove-name.title', {name: $translateConcept(modalSelectedAttribute.thesaurus_url)}) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideRemoveAttributeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to remove Attribute <i>{{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</i> from Context-Type <i>{{ $translateConcept(modalSelectedEntityType.thesaurus_url) }}</i>?
+                        {{ $t('global.remove-name.desc', {name: $translateConcept(modalSelectedAttribute.thesaurus_url)}) }}
                     </p>
                     <p class="alert alert-danger">
-                        Please note: If you delete <i>{{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</i>, {{ attributeValueCount }} values of this attribute in the contexts of type <i>{{ $translateConcept(modalSelectedEntityType.thesaurus_url) }}</i> are deleted as well.
+                        {{
+                            $tc('main.datamodel.detail.attribute.alert', attributeValueCount, {
+                                name: $translateConcept(modalSelectedAttribute.thesaurus_url),
+                                cnt: attributeValueCount,
+                                refname: $translateConcept(modalSelectedEntityType.thesaurus_url)
+                            })
+                        }}
                     </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" @click="removeAttributeFromContextType(modalSelectedAttribute)">
-                        <i class="fas fa-fw fa-check"></i> Delete
+                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
                     </button>
                     <button type="button" class="btn btn-secondary" @click="hideRemoveAttributeModal">
-                        <i class="fas fa-fw fa-times"></i> Cancel
+                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>

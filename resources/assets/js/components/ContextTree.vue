@@ -1,6 +1,11 @@
 <template>
     <div class="d-flex flex-column">
-        <h3>Entities <small class="badge badge-secondary font-weight-light align-middle font-size-50">{{topLevelCount}} Top-Level Entities</small></h3>
+        <h3>
+            {{ $t('main.entity.title') }}
+            <small class="badge badge-secondary font-weight-light align-middle font-size-50">
+                {{ $tc('main.entity.count', topLevelCount, {cnt: topLevelCount}) }}
+            </small>
+        </h3>
         <tree-search
             class="mb-2"
             :on-select="selectionCallback"
@@ -9,7 +14,7 @@
         </tree-search>
         <div class="d-flex flex-column col px-0">
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAdd)">
-                <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
+                <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
             <tree
                 class="col px-0 scroll-y-auto"
@@ -22,7 +27,7 @@
                 @toggle="itemToggle">
             </tree>
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAdd)">
-                <i class="fas fa-fw fa-plus"></i> Add new Top-Level Entity
+                <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
         </div>
     </div>

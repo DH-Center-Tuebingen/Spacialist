@@ -1,16 +1,18 @@
 <template>
     <div class="h-100 d-flex flex-column">
         <div class="d-flex flex-row justify-content-between mb-2">
-            <h5>Properties of {{ title }}</h5>
+            <h5>
+                {{ $t('plugins.map.layer-editor.properties-of', {name: title}) }}
+            </h5>
             <button type="submit" form="layer-form" class="btn btn-success">
-                <i class="fas fa-fw fa-save"></i> Save
+                <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
             </button>
         </div>
         <form role="form" id="layer-form" class="col pl-0 scroll-y-auto scroll-x-hidden" @submit.prevent="updateLayer(layer)">
             <div v-if="isEntityLayer">
                 <div class="form-group row">
                     <label for="color" class="col-md-4 col-form-label">
-                        Color:
+                        {{ $t('global.color') }}:
                     </label>
                     <div class="col-md-8">
                         <input type="color" id="color" class="form-control" v-model="layer.color" />
@@ -20,7 +22,7 @@
             <div v-else>
                 <div class="form-group row">
                     <label for="name" class="col-md-4 col-form-label">
-                        Name:
+                        {{ $t('global.name') }}:
                     </label>
                     <div class="col-md-8">
                         <input type="text" id="name" class="form-control" v-model="layer.name" />
@@ -28,7 +30,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="url" class="col-md-4 col-form-label">
-                        URL:
+                        {{ $t('global.url') }}:
                     </label>
                     <div class="col-md-8">
                         <input type="text" id="url" class="form-control" v-model="layer.url" />
@@ -36,7 +38,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="type" class="col-md-4 col-form-label">
-                        Type:
+                        {{ $t('global.type') }}:
                     </label>
                     <div class="col-md-8">
                         <input type="text" id="type" class="form-control" v-model="layer.type" />
@@ -44,7 +46,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="subdomains" class="col-md-4 col-form-label">
-                        Subdomains:
+                        {{ $t('plugins.map.layer-editor.properties.subdomains') }}:
                     </label>
                     <div class="col-md-8">
                         <input type="text" id="subdomains" class="form-control" v-model="layer.subdomains" />
@@ -52,7 +54,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="attribution" class="col-md-4 col-form-label">
-                        Attribution:
+                        {{ $t('plugins.map.layer-editor.properties.attribution') }}:
                     </label>
                     <div class="col-md-8">
                         <textarea id="attribution" class="form-control" v-model="layer.attribution"></textarea>
@@ -60,7 +62,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="layers" class="col-md-4 col-form-label">
-                        Layers:
+                        {{ $tc('main.map.layer', 2) }}:
                     </label>
                     <div class="col-md-8">
                         <input type="text" id="layers" class="form-control" v-model="layer.layers" />
@@ -68,7 +70,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="styles" class="col-md-4 col-form-label">
-                        Styles:
+                        {{ $t('plugins.map.layer-editor.properties.styles') }}:
                     </label>
                     <div class="col-md-8">
                         <textarea id="styles" class="form-control" v-model="layer.styles"></textarea>
@@ -76,7 +78,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="format" class="col-md-4 col-form-label">
-                        Format:
+                        {{ $t('global.format') }}:
                     </label>
                     <div class="col-md-8">
                         <textarea id="format" class="form-control" v-model="layer.format"></textarea>
@@ -84,7 +86,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="version" class="col-md-4 col-form-label">
-                        Version:
+                        {{ $t('global.version') }}:
                     </label>
                     <div class="col-md-8">
                         <input type="text" id="version" class="form-control" v-model="layer.version" />
@@ -92,7 +94,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="overlay" class="col-md-4 col-form-label">
-                        Overlay:
+                        {{ $tc('main.map.overlay', 1) }}:
                     </label>
                     <div class="col-md-8">
                         <input type="checkbox" id="overlay" class="form-control" v-model="layer.is_overlay" />
@@ -100,7 +102,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="api-key" class="col-md-4 col-form-label">
-                        API-Key:
+                        {{ $t('plugins.map.layer-editor.properties.api-key') }}:
                     </label>
                     <div class="col-md-8">
                         <input type="text" id="api-key" class="form-control" v-model="layer.api_key" />
@@ -108,7 +110,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="layer-type" class="col-md-4 col-form-label">
-                        Layer Type:
+                        {{ $t('plugins.map.layer-editor.properties.layer-type') }}:
                     </label>
                     <div class="col-md-8">
                         <input type="text" id="layer-type" class="form-control" v-model="layer.layer_type" />
@@ -116,7 +118,7 @@
                 </div>
                 <div class="form-group row">
                     <label for="color" class="col-md-4 col-form-label">
-                        Color:
+                        {{ $t('global.color') }}:
                     </label>
                     <div class="col-md-8">
                         <input type="color" id="color" class="form-control" v-model="layer.color" />
@@ -125,7 +127,7 @@
             </div>
             <div class="form-group row">
                 <label for="visible" class="col-md-4 col-form-label">
-                    Visible:
+                    {{ $t('global.visible') }}:
                 </label>
                 <div class="col-md-8">
                     <input type="checkbox" id="visible" class="form-control" v-model="layer.visible" />
@@ -133,7 +135,7 @@
             </div>
             <div class="form-group row">
                 <label for="opacity" class="col-md-4 col-form-label">
-                    Opacity:
+                    {{ $t('global.opacity') }}:
                 </label>
                 <div class="col-md-8 d-flex">
                     <input type="range" id="opacity" class="form-control" step="0.01" min="0" max="1" value="0" v-model="layer.opacity"/>
@@ -192,7 +194,7 @@
                 if(this.layer.context_type) {
                     return this.$translateConcept(this.layer.context_type.thesaurus_url);
                 }
-                return 'No Title';
+                return this.$t('plugins.map.untitled');
             },
             isEntityLayer: function() {
                 return this.layer.context_type_id || this.layer.type == 'unlinked';

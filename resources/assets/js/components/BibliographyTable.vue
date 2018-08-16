@@ -17,7 +17,7 @@
             </li>
             <li class="list-inline-item">
                 <button type="button" class="btn btn-success" id="literature-add-button" @click="showNewItemModal" :disabled="!$can('add_remove_literature')">
-                    <i class="fas fa-fw fa-plus"></i> New Bibliography Item
+                    <i class="fas fa-fw fa-plus"></i> {{ $t('main.bibliography.add') }}
                 </button>
             </li>
             <li class="list-inline-item">
@@ -33,13 +33,13 @@
                     :drop="true"
                     @input-file="inputFile">
                         <span class="btn btn-outline-primary">
-                            <i class="fas fa-fw fa-file-import"></i> Import BibTex File
+                            <i class="fas fa-fw fa-file-import"></i> {{ $t('main.bibliography.import') }}
                         </span>
                 </file-upload>
             </li>
             <li class="list-inline-item">
                 <button type="button" class="btn btn-outline-primary" @click="exportFile">
-                    <i class="fas fa-fw fa-file-export"></i> Export BibTex File
+                    <i class="fas fa-fw fa-file-export"></i> {{ $t('main.bibliography.export') }}
                 </button>
             </li>
         </ul>
@@ -49,7 +49,7 @@
                     <tr>
                         <th>
                             <a href="#" @click="setOrderColumn('type')">
-                                Type
+                                {{ $t('global.type') }}
                                 <span v-show="orderColumn == 'type'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -62,7 +62,7 @@
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('citekey')">
-                                Citation Key
+                                {{ $t('main.bibliography.column.cite-key') }}
                                 <span v-show="orderColumn == 'citekey'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -75,7 +75,7 @@
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('author')">
-                                Author
+                                {{ $t('main.bibliography.column.auhtor') }}
                                 <span v-show="orderColumn == 'author'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -88,7 +88,7 @@
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('editor')">
-                                Editor
+                                {{ $t('main.bibliography.column.editor') }}
                                 <span v-show="orderColumn == 'editor'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -101,7 +101,7 @@
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('title')">
-                                Title
+                                {{ $t('main.bibliography.column.title') }}
                                 <span v-show="orderColumn == 'title'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -114,7 +114,7 @@
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('journal')">
-                                Journal
+                                {{ $t('main.bibliography.column.journal') }}
                                 <span v-show="orderColumn == 'journal'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -127,7 +127,7 @@
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('year')">
-                                Year
+                                {{ $t('main.bibliography.column.year') }}
                                 <span v-show="orderColumn == 'year'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -139,29 +139,29 @@
                             </a>
                         </th>
                         <th>
-                            literature.bibtex.month
+                            {{ $t('main.bibliography.column.month') }}
                         </th>
                         <th>
-                            literature.bibtex.pages
+                            {{ $t('main.bibliography.column.pages') }}
                         </th>
                         <th>
-                            literature.bibtex.volume
+                            {{ $t('main.bibliography.column.volume') }}
                         </th>
                         <th>
-                            literature.bibtex.number
+                            {{ $t('main.bibliography.column.number') }}
                         </th>
                         <th>
-                            literature.bibtex.chapter
+                            {{ $t('main.bibliography.column.chapter') }}
                         </th>
                         <th>
-                            literature.bibtex.edition
+                            {{ $t('main.bibliography.column.edition') }}
                         </th>
                         <th>
-                            literature.bibtex.series
+                            {{ $t('main.bibliography.column.series') }}
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('booktitle')">
-                                Book Title
+                                {{ $t('main.bibliography.column.booktitle') }}
                                 <span v-show="orderColumn == 'booktitle'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -174,7 +174,7 @@
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('publisher')">
-                                Publisher
+                                {{ $t('main.bibliography.column.publisher') }}
                                 <span v-show="orderColumn == 'publisher'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -187,7 +187,7 @@
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('address')">
-                                Address
+                                {{ $t('main.bibliography.column.address') }}
                                 <span v-show="orderColumn == 'address'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -199,17 +199,11 @@
                             </a>
                         </th>
                         <th>
-                            literature.bibtex.note
-                        </th>
-                        <th>
-                            literature.created-at
-                        </th>
-                        <th>
-                            literature.updated-at
+                            {{ $t('main.bibliography.column.note') }}
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('misc')">
-                                misc
+                                {{ $t('main.bibliography.column.misc') }}
                                 <span v-show="orderColumn == 'misc'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -222,7 +216,7 @@
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('howpublished')">
-                                howpublished
+                                {{ $t('main.bibliography.column.howpublished') }}
                                 <span v-show="orderColumn == 'howpublished'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
@@ -234,16 +228,22 @@
                             </a>
                         </th>
                         <th>
-                            literature.bibtex.institution
+                            {{ $t('main.bibliography.column.institution') }}
                         </th>
                         <th>
-                            literature.bibtex.organization
+                            {{ $t('main.bibliography.column.organization') }}
                         </th>
                         <th>
-                            literature.bibtex.school
+                            {{ $t('main.bibliography.column.school') }}
                         </th>
                         <th>
-                            literature.options
+                            {{ $t('global.created-at') }}
+                        </th>
+                        <th>
+                            {{ $t('global.updated-at') }}
+                        </th>
+                        <th>
+                            {{ $t('global.options') }}
                         </th>
                     </tr>
                 </thead>
@@ -304,12 +304,6 @@
                             {{ entry.note }}
                         </td>
                         <td>
-                            {{ entry.created_at }}
-                        </td>
-                        <td>
-                            {{ entry.updated_at }}
-                        </td>
-                        <td>
                             {{ entry.misc }}
                         </td>
                         <td>
@@ -325,16 +319,22 @@
                             {{ entry.school }}
                         </td>
                         <td>
+                            {{ entry.created_at }}
+                        </td>
+                        <td>
+                            {{ entry.updated_at }}
+                        </td>
+                        <td>
                             <div class="dropdown">
                                 <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                     <a class="dropdown-item" href="#" @click.prevent="editEntry(entry)" :disabled="!$can('edit_literature')">
-                                        <i class="fas fa-fw fa-edit text-info"></i> Edit
+                                        <i class="fas fa-fw fa-edit text-info"></i> {{ $t('global.edit') }}
                                     </a>
                                     <a class="dropdown-item" href="#" @click.prevent="requestDeleteEntry(entry)" :disabled="!$can('add_remove_literature')">
-                                        <i class="fas fa-fw fa-trash text-danger"></i> Delete
+                                        <i class="fas fa-fw fa-trash text-danger"></i> {{ $t('global.delete') }}
                                     </a>
                                 </div>
                             </div>
@@ -355,25 +355,30 @@
         <modal name="delete-bibliography-item-modal" height="auto" :scrollable="true" v-can="'add_remove_literature'">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete Entry</h5>
+                    <h5 class="modal-title">{{ $t('main.bibliography.modal.delete.title') }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteEntryModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to delete <i>{{ deleteItem.title }}</i> by {{ deleteItem.author }}?
+                        {{ $t('global.delete-name.desc', {name: deleteItem.title}) }}
                     </p>
                     <p class="alert alert-danger">
-                        Please note: If you delete it, {{ deleteItem.count }} references to this item are deleted as well.
+                        {{
+                            $tc('main.bibliography.modal.delete.alert', deleteItem.count, {
+                                name: deleteItem.title,
+                                cnt: deleteItem.count
+                            })
+                        }}
                     </p>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-danger" @click="deleteEntry(deleteItem)">
-                        <i class="fas fa-fw fa-trash"></i> Delete
+                        <i class="fas fa-fw fa-trash"></i> {{ $t('global.delete') }}
                     </button>
                     <button type="button" class="btn btn-outline-secondary" @click="hideDeleteEntryModal">
-                        <i class="fas fa-fw fa-ban"></i> Cancel
+                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>
@@ -520,7 +525,7 @@
             requestDeleteEntry(entry) {
                 const vm = this;
                 if(!vm.$can('add_remove_literature')) return;
-                vm.$http.get(`/api/bibliography/${entry.id}/ref_count`).then(function(response) {
+                vm.$http.get(`bibliography/${entry.id}/ref_count`).then(function(response) {
                     vm.deleteItem = Object.assign({}, entry);
                     vm.deleteItem.count = response.data;
                     vm.$modal.show('delete-bibliography-item-modal');

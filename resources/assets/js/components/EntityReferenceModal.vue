@@ -2,13 +2,13 @@
     <modal name="entity-references-modal" width="50%" :scrollable="true" :draggable="true" :resizable="true" @closed="routeBack">
         <div class="modal-content h-100">
             <div class="modal-header">
-                <h5 class="modal-title">References</h5>
+                <h5 class="modal-title">{{ $t('main.entity.references.title') }}</h5>
                 <button type="button" class="close" aria-label="Close" @click="hideModal">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body col col-md-8 offset-md-2 scroll-y-auto">
-                <h4>Certainty</h4>
+                <h4>{{ $t('main.entity.references.certainty') }}</h4>
                 <div class="progress" @click="setCertainty">
                     <div class="progress-bar" role="progressbar" :class="{'bg-danger': refs.value.possibility <= 25, 'bg-warning': refs.value.possibility <= 50, 'bg-info': refs.value.possibility <= 75, 'bg-success': refs.value.possibility > 75}" :aria-valuenow="refs.value.possibility" aria-valuemin="0" aria-valuemax="100" :style="{width: refs.value.possibility+'%'}">
                         <span class="sr-only">
@@ -19,15 +19,15 @@
                 </div>
                 <form role="form" class="mt-2" @submit.prevent="onUpdateCertainty">
                     <div class="form-group">
-                        <textarea class="form-control" v-model="refs.value.possibility_description" placeholder="Certainty Comment"></textarea>
+                        <textarea class="form-control" v-model="refs.value.possibility_description" :placeholder="$t('main.entity.references.certaintyc')"></textarea>
                     </div>
                     <div class="text-center">
                         <button type="submit" class="btn btn-outline-success">
-                            <i class="fas fa-fw fa-save"></i> Update Certainty
+                            <i class="fas fa-fw fa-save"></i> {{ $t('main.entity.references.certaintyu') }}
                         </button>
                     </div>
                 </form>
-                <h4 class="mt-3">References</h4>
+                <h4 class="mt-3">{{ $t('main.entity.references.bibliography.title') }}</h4>
                 <table class="table table-hover">
                     <tbody>
                         <tr class="d-flex flex-row" v-for="reference in refs.refs">
@@ -58,10 +58,10 @@
                                     </span>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                         <a class="dropdown-item" href="#" @click="enableEditReference(reference)">
-                                            <i class="fas fa-fw fa-edit text-info"></i> Edit
+                                            <i class="fas fa-fw fa-edit text-info"></i> {{ $t('global.edit') }}
                                         </a>
                                         <a class="dropdown-item" href="#" @click="onDeleteReference(reference)">
-                                            <i class="fas fa-fw fa-trash text-danger"></i> Delete
+                                            <i class="fas fa-fw fa-trash text-danger"></i> {{ $t('global.delete') }}
                                         </a>
                                     </div>
                                 </div>
@@ -69,7 +69,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <h5>Add new Reference</h5>
+                <h5>{{ $t('main.entity.references.bibliography.add') }}</h5>
                 <form role="form" @submit.prevent="onAddReference(newItem)">
                     <div class="row">
                         <div class="col-md-6">
@@ -101,17 +101,17 @@
                             </multiselect>
                         </div>
                         <div class="col-md-6">
-                            <textarea class="form-control" v-model="newItem.description" placeholder="Reference Comment"></textarea>
+                            <textarea class="form-control" v-model="newItem.description" :placeholder="$t('main.entity.references.bibliography.comment')"></textarea>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-outline-success col-md-12 mt-2" :disabled="addReferenceDisabled">
-                        <i class="fas fa-fw fa-plus"></i> Add Reference
+                        <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.references.bibliography.add-button') }}
                     </button>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click="hideModal">
-                    <i class="fas fa-fw fa-times"></i> Close
+                    <i class="fas fa-fw fa-times"></i> {{ $t('global.close') }}
                 </button>
             </div>
         </div>

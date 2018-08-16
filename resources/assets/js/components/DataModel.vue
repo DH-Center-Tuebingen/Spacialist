@@ -1,9 +1,9 @@
 <template>
     <div class="row d-flex flex-row of-hidden h-100" v-can="'duplicate_edit_concepts|view_concept_props'">
         <div class="col-md-5 h-100 d-flex flex-column">
-            <h4>Available Attributes</h4>
+            <h4>{{ $t('main.datamodel.attribute.title') }}</h4>
             <button type="button" class="btn btn-success mb-2" @click="onCreateAttribute">
-                <i class="fas fa-fw fa-plus"></i> Add Attribute
+                <i class="fas fa-fw fa-plus"></i> {{ $t('main.datamodel.attribute.add-button') }}
             </button>
             <attributes
                 class="col scroll-y-auto"
@@ -17,7 +17,7 @@
             </attributes>
         </div>
         <div class="col-md-2 d-flex flex-column">
-            <h4>Available Context-Types</h4>
+            <h4>{{ $t('main.datamodel.entity.title') }}</h4>
             <context-types
                 class="col px-0 h-100 scroll-y-auto"
                 :data="localContextTypes"
@@ -33,7 +33,7 @@
         <modal name="new-context-type-modal" height="auto" :scrollable="true" classes="of-visible">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Create Context-Type</h5>
+                    <h5 class="modal-title">{{ $t('main.datamodel.entity.modal.new.title') }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideNewContextTypeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -42,7 +42,7 @@
                     <form name="newContextTypeForm" id="newContextTypeForm" role="form" v-on:submit.prevent="createContextType(newContextType)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
-                                Label:
+                                {{ $t('global.label') }}:
                             </label>
                             <div class="col-md-9">
                                 <label-search
@@ -53,12 +53,12 @@
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" id="isRoot" v-model="newContextType.is_root" />
                             <label class="form-check-label" for="isRoot">
-                                Top-Level Context-Type?
+                                {{ $t('main.datamodel.detail.properties.top-level') }}
                             </label>
                         </div>
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
-                                Geometry Type:
+                                {{ $t('global.geometry-type') }}:
                             </label>
                             <div class="col-md-9">
                                 <multiselect
@@ -77,10 +77,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" form="newContextTypeForm" :disabled="newContextTypeDisabled">
-                        <i class="fas fa-fw fa-plus"></i> Add
+                        <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
                     </button>
                     <button type="button" class="btn btn-danger" @click="hideNewContextTypeModal">
-                        <i class="fas fa-fw fa-ban"></i> Cancel
+                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>
@@ -89,7 +89,7 @@
         <modal name="new-attribute-modal" height="auto" :scrollable="true" classes="of-visible">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Create Attribute</h5>
+                    <h5 class="modal-title">{{ $t('main.datamodel.attribute.modal.new.title') }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideNewAttributeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -98,7 +98,7 @@
                     <form id="newAttributeForm" name="newAttributeForm" role="form" v-on:submit.prevent="createAttribute(newAttribute)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3">
-                                Label:
+                                {{ $t('global.label') }}:
                             </label>
                             <div class="col-md-9">
                                 <label-search
@@ -108,7 +108,7 @@
                         </div>
                         <div class="form-group">
                             <label class="col-form-label col-md-3">
-                                Type:
+                                {{ $t('global.type') }}:
                             </label>
                             <div class="col-md-9">
                                 <multiselect
@@ -125,7 +125,7 @@
                         </div>
                         <div class="form-group" v-show="needsRootElement">
                             <label class="col-form-label col-md-3">
-                                Root Element:
+                                {{ $t('global.root-element') }}:
                             </label>
                             <div class="col-md-9">
                                 <label-search
@@ -135,7 +135,7 @@
                         </div>
                         <div class="form-group" v-show="needsTextElement">
                             <label class="col-form-label col-md-3">
-                                Content:
+                                {{ $t('global.content') }}:
                             </label>
                             <div class="col-md-9">
                                 <textarea class="form-control" v-model="newAttribute.textContent"></textarea>
@@ -145,10 +145,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" form="newAttributeForm" :disabled="!validated">
-                        <i class="fas fa-fw fa-plus"></i> Add
+                        <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
                     </button>
                     <button type="button" class="btn btn-danger" @click="hideNewAttributeModal">
-                        <i class="fas fa-fw fa-ban"></i> Cancel
+                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>
@@ -157,25 +157,30 @@
         <modal name="delete-context-type-modal" height="auto" :scrollable="true">
             <div class="modal-content" v-if="openedModal == 'delete-context-type-modal'">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete {{ $translateConcept(modalSelectedContextType.thesaurus_url)}}</h5>
+                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: $translateConcept(modalSelectedContextType.thesaurus_url)}) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteContextTypeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to delete Context-Type <i>{{ $translateConcept(modalSelectedContextType.thesaurus_url) }}</i>?
+                        {{ $t('global.delete-name.desc', {name: $translateConcept(modalSelectedContextType.thesaurus_url)}) }}
                     </p>
                     <p class="alert alert-danger">
-                        Please note: If you delete <i>{{ $translateConcept(modalSelectedContextType.thesaurus_url) }}</i>, {{ contextCount }} contexts of this type are deleted as well.
+                        {{
+                            $tc('main.datamodel.entity.modal.delete.alert', contextCount, {
+                                name: $translateConcept(modalSelectedContextType.thesaurus_url),
+                                cnt: contextCount
+                            })
+                        }}
                     </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" @click="deleteContextType(modalSelectedContextType)">
-                        <i class="fas fa-fw fa-check"></i> Delete
+                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
                     </button>
                     <button type="button" class="btn btn-secondary" @click="hideDeleteContextTypeModal">
-                        <i class="fas fa-fw fa-times"></i> Cancel
+                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>
@@ -184,25 +189,30 @@
         <modal name="delete-attribute-modal" height="auto" :scrollable="true">
             <div class="modal-content" v-if="openedModal == 'delete-attribute-modal'">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete {{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</h5>
+                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: $translateConcept(modalSelectedAttribute.thesaurus_url)}) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteAttributeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to delete Attribute <i>{{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</i>?
+                        {{ $t('global.delete-name.desc', {name: $translateConcept(modalSelectedAttribute.thesaurus_url)}) }}
                     </p>
                     <p class="alert alert-danger">
-                        Please note: If you delete <i>{{ $translateConcept(modalSelectedAttribute.thesaurus_url) }}</i>, {{ attributeValueCount }} values of this attribute in the contexts are deleted as well.
+                        {{
+                            $tc('main.datamodel.attribute.modal.delete.alert', attributeValueCount, {
+                                name: $translateConcept(modalSelectedAttribute.thesaurus_url),
+                                cnt: attributeValueCount
+                            })
+                        }}
                     </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" @click="deleteAttribute(modalSelectedAttribute)">
-                        <i class="fas fa-fw fa-check"></i> Delete
+                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
                     </button>
                     <button type="button" class="btn btn-secondary" @click="hideDeleteAttributeModal">
-                        <i class="fas fa-fw fa-times"></i> Cancel
+                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>

@@ -21,12 +21,12 @@
             <ul class="nav nav-tabs">
                 <li class="nav-item" v-for="plugin in $getTabPlugins()">
                     <router-link class="nav-link" :class="{active: tab == plugin.key}" :to="{ query: { tab: plugin.key }}" append>
-                        <i class="fas fa-fw" :class="plugin.icon"></i> {{ plugin.label }}
+                        <i class="fas fa-fw" :class="plugin.icon"></i> {{ $t(plugin.label) }}
                     </router-link>
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link" :class="{active: tab == 'references', disabled: !selectedContext.id}" @click.prevent="setReferencesTab()">
-                        <i class="fas fa-fw fa-bookmark"></i> References
+                        <i class="fas fa-fw fa-bookmark"></i> {{ $t('main.entity.references.title') }}
                     </a>
                 </li>
             </ul>
@@ -42,7 +42,7 @@
                 </keep-alive>
                 <div v-show="tab == 'references'" class="h-100 scroll-y-auto">
                     <p class="alert alert-info" v-if="!hasReferences">
-                        No references found.
+                        {{ $t('main.entity.references.empty') }}
                     </p>
                     <div v-else v-for="(referenceGroup, key) in references" class="mb-2">
                         <h5 class="mb-1">
@@ -70,7 +70,7 @@
         <modal name="add-entity-modal" height="auto" :scrollable="true" classes="of-visible" v-can="'create_concepts'">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add new Entity</h5>
+                    <h5 class="modal-title">{{ $t('main.entity.modal.title') }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideNewEntityModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -79,7 +79,7 @@
                     <form id="newEntityForm" name="newEntityForm" role="form" v-on:submit.prevent="addNewEntity(newEntity)">
                         <div class="form-group row">
                             <label class="col-form-label col-md-3" for="name">
-                                Name:
+                                {{ $t('global.name') }}:
                             </label>
                             <div class="col-md-9">
                                 <input type="text" id="name" class="form-control" required v-model="newEntity.name" />
@@ -87,7 +87,7 @@
                         </div>
                         <div class="form-group row">
                             <label class="col-form-label col-md-3" for="type">
-                                Type:
+                                {{ $t('global.type') }}:
                             </label>
                             <multiselect class="col-md-9" style="box-sizing: border-box;"
                                 :customLabel="translateLabel"
@@ -105,10 +105,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" :disabled="addEntityDisabled(newEntity)" form="newEntityForm">
-                        <i class="fas fa-fw fa-plus"></i> Add
+                        <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
                     </button>
                     <button type="button" class="btn btn-secondary" @click="hideNewEntityModal">
-                        <i class="fas fa-fw fa-times"></i> Cancel
+                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>
@@ -117,22 +117,22 @@
         <modal name="delete-entity-modal" height="auto" :scrollable="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete {{ toDeleteEntity.name }}</h5>
+                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: toDeleteEntity.name}) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteEntityModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        Do you really want to delete Entity <i>{{ toDeleteEntity.name }}</i>?
+                        {{ $t('global.delete-name.desc', {name: toDeleteEntity.name}) }}</i>?
                     </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" @click="deleteEntity(toDeleteEntity)">
-                        <i class="fas fa-fw fa-check"></i> Delete
+                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
                     </button>
                     <button type="button" class="btn btn-secondary" @click="hideDeleteEntityModal">
-                        <i class="fas fa-fw fa-times"></i> Cancel
+                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>

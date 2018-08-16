@@ -3,11 +3,11 @@
         <div class="input-group">
             <div class="input-group-prepend" uib-dropdown>
                 <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{ startLabel }}
+                    {{ $t(`main.entity.attributes.${startLabel}`) }}
                 </button>
                 <ul class="dropdown-menu">
-                    <a class="dropdown-item" href="#" v-for="label in labels" @click="setLabel('startLabel', label)">
-                        {{ label }}
+                    <a class="dropdown-item" href="#" v-for="label in labels" @click.prevent="setLabel('startLabel', label)">
+                        {{ $t(`main.entity.attributes.${label}`) }}
                     </a>
                 </ul>
             </div>
@@ -18,11 +18,11 @@
             <input type="number" step="1" min="1" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('end', $event.target.value)" v-model="end">
             <div class="input-group-append">
                 <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{ endLabel }}
+                    {{ $t(`main.entity.attributes.${endLabel}`) }}
                 </button>
                 <ul uib-dropdown-menu class="dropdown-menu">
-                    <a class="dropdown-item" href="#" v-for="label in labels" @click="setLabel('endLabel', label)">
-                        {{ label }}
+                    <a class="dropdown-item" href="#" v-for="label in labels" @click.prevent="setLabel('endLabel', label)">
+                        {{ $t(`main.entity.attributes.${label}`) }}
                     </a>
                 </ul>
             </div>

@@ -4,10 +4,10 @@
             <h1>{{ entity.name }}</h1>
             <span>
                 <button type="button" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(entity)">
-                    <i class="fas fa-fw fa-save"></i> Save
+                    <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
                 </button>
                 <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="requestDeleteEntity(entity)">
-                    <i class="fas fa-fw fa-trash"></i> Delete
+                    <i class="fas fa-fw fa-trash"></i> {{ $t('global.delete') }}
                 </button>
             </span>
         </div>

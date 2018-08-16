@@ -2,25 +2,25 @@
     <modal :name="name" height="auto" :scrollable="true" @before-open="init">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Unsaved Changes</h5>
+                <h5 class="modal-title">{{ $t('global.discard.title') }}</h5>
                 <button type="button" class="close" aria-label="Close" @click="cancel">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <p class="alert alert-info">
-                    There are unsaved changes in {{ entityName }}. Do you really want to continue and discard these changes?
+                    {{ $t('global.discard.msg', {name: entityName}) }}
                 </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-warning" @click="discard">
-                    <i class="fas fa-fw fa-undo"></i> Yes, Discard Changes
+                    <i class="fas fa-fw fa-undo"></i> {{ $t('global.discard.confirm') }}
                 </button>
                 <button type="button" class="btn btn-success" @click="save">
-                    <i class="fas fa-fw fa-check"></i> No, Save and continue
+                    <i class="fas fa-fw fa-check"></i> {{ $t('global.discard.confirmpos') }}
                 </button>
                 <button type="button" class="btn btn-secondary" @click="cancel">
-                    <i class="fas fa-fw fa-times"></i> Cancel
+                    <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                 </button>
             </div>
         </div>

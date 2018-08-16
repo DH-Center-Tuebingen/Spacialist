@@ -2,7 +2,7 @@
     <modal :name="id" width="60%" height="80%" :draggable="true" :resizable="true" classes="of-visible" @before-open="init">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Layer Properties</h5>
+                <h5 class="modal-title">{{ $t('plugins.map.gis.props.title') }}</h5>
                 <button type="button" class="close" aria-label="Close" @click.prevent="hide">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -12,17 +12,17 @@
                     <ul class="nav nav-pills flex-column">
                         <li class="nav-item">
                             <a class="nav-link" :class="{active: activeTab == 'style'}" @click.prevent="setActiveTab('style')" href="#">
-                                <i class="fas fa-fw fa-palette"></i> Style
+                                <i class="fas fa-fw fa-palette"></i> {{ $t('plugins.map.gis.props.style.title') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" :class="{active: activeTab == 'labels'}" @click.prevent="setActiveTab('labels')" href="#">
-                                <i class="fas fa-fw fa-tags"></i> Labels
+                                <i class="fas fa-fw fa-tags"></i> {{ $t('plugins.map.gis.props.labels.title') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" :class="{active: activeTab == 'diagrams'}" @click.prevent="setActiveTab('diagrams')" href="#">
-                                <i class="fas fa-fw fa-chart-pie"></i> Diagrams
+                                <i class="fas fa-fw fa-chart-pie"></i> {{ $t('plugins.map.gis.props.diagrams.title') }}
                             </a>
                         </li>
                     </ul>
@@ -41,7 +41,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click="hide">
-                    <i class="fas fa-fw fa-times"></i> Cancel
+                    <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                 </button>
             </div>
         </div>

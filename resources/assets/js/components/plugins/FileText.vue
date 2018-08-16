@@ -2,19 +2,19 @@
     <div class="h-100 d-flex flex-column justify-content-start align-items-center">
         <div>
             <button class="btn btn-outline-secondary" @click="toggleEditMode()">
-                <i class="fas fa-fw fa-edit"></i> Toggle Edit mode
+                <i class="fas fa-fw fa-edit"></i> {{ $t('plugins.files.modal.detail.toggle-edit') }}
             </button>
             <button class="btn btn-outline-success" @click="updateFile(file, content)" v-if="fileEdited">
-                <i class="fas fa-fw fa-save"></i> Save
+                <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
             </button>
             <button class="btn btn-outline-secondary" v-show="!csv.render && !markdown.render" @click="toggleCodeHighlighting()">
-                <i class="fas fa-fw fa-underline"></i> Toggle Highlighting
+                <i class="fas fa-fw fa-underline"></i> {{ $t('plugins.files.modal.detail.toggle-highlight') }}
             </button>
             <button class="btn btn-outline-secondary" v-if="isCsv" @click="toggleCsvRendering()">
-                <i class="fas fa-fw fa-table"></i> Toggle CSV-Rendering
+                <i class="fas fa-fw fa-table"></i> {{ $t('plugins.files.modal.detail.toggle-csv') }}
             </button>
             <button class="btn btn-outline-secondary" v-if="isMarkdown" @click="toggleMarkdownRendering()">
-                <i class="fas fa-fw fa-exchange-alt"></i> Toggle Markdown-Rendering
+                <i class="fas fa-fw fa-exchange-alt"></i> {{ $t('plugins.files.modal.detail.toggle-md') }}
             </button>
         </div>
         <div class="d-flex mt-2 col px-0">
@@ -26,17 +26,21 @@
                 <div class="mt-2 h-100 d-flex flex-column" v-if="isCsv && csv.render">
                     <form class="form-inline">
                         <div class="form-group mx-2">
-                            <label for="delimiter" class="col-form-label mr-1">Delimiter</label>
+                            <label for="delimiter" class="col-form-label mr-1">
+                                {{ $t('plugins.files.modal.detail.csv.delimiter') }}
+                            </label>
                             <input type="text" class="form-control" id="delimiter" v-model="csv.delimiter" placeholder="Delimiter (',', ';', '|', ...)" />
                         </div>
                         <div class="form-check mx-2">
                             <input type="checkbox" class="form-check-input" id="has-header" v-model="csv.hasHeader" />
                             <label class="form-check-label" for="has-header">
-                                Header?
+                                {{ $t('plugins.files.modal.detail.csv.header') }}
                             </label>
                         </div>
                         <div class="form-group mx-2">
-                            <label for="row-count" class="col-form-label mr-1">Display rows</label>
+                            <label for="row-count" class="col-form-label mr-1">
+                                {{ $t('plugins.files.modal.detail.csv.rows') }}
+                            </label>
                             <input type="text" class="form-control" id="row-count" v-model.number="csv.rows" placeholder="Row Count" />
                         </div>
                     </form>

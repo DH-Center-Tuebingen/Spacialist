@@ -7,34 +7,34 @@
             </div>
             <div class="text-left col d-flex flex-column">
                 <div id="dicom-controls">
-                    <h4>Controls</h4>
+                    <h4>
+                        {{ $t('plugins.files.modal.detail.dicom.controls.title') }}
+                    </h4>
                     <dl class="alert alert-info">
                         <dt>
-                            Zoom
+                            {{ $t('plugins.files.modal.detail.dicom.controls.zoom') }}
                         </dt>
-                        <dd>
-                            Use <kbd><kbd>Right Click</kbd> + <kbd>Drag</kbd></kbd> up/down to zoom out/in.
+                        <dd v-html="$t('plugins.files.modal.detail.dicom.controls.zoom-desc')">
                         </dd>
                         <dt>
-                            Move
+                            {{ $t('plugins.files.modal.detail.dicom.controls.move') }}
                         </dt>
-                        <dd>
-                            Use <kbd><kbd>Middle Click</kbd> + <kbd>Drag</kbd></kbd> to move the image.
+                        <dd v-html="$t('plugins.files.modal.detail.dicom.controls.move-desc')">
                         </dd>
                         <dt>
+                            {{ $t('plugins.files.modal.detail.dicom.controls.voi') }}
                             VOI (Values of Interest)
                         </dt>
-                        <dd>
-                            Use <kbd><kbd>Left Click</kbd> + <kbd>Drag</kbd></kbd> to change window width (up/down) and window center (left/right).
+                        <dd v-html="$t('plugins.files.modal.detail.dicom.controls.voi-desc')">
                         </dd>
                     </dl>
                 </div>
                 <div id="dicom-metadata" class="col scroll-y-auto">
-                    <h4>Metadata</h4>
+                    <h4>{{ $t('plugins.files.modal.detail.dicom.metadata.title') }}</h4>
                     <form>
                         <div class="form-group">
                             <div class="input-group">
-                                <input type="search" class="form-control" placeholder="Search metadata tag..." v-model="metadataQuery"/>
+                                <input type="search" class="form-control" :placeholder="$t('plugins.files.modal.detail.dicom.metadata.search-placeholder')" v-model="metadataQuery"/>
                                 <div class="input-group-append">
                                     <span class="input-group-text">
                                         <i class="fas fa-fw fa-search" aria-hidden="true"></i>
@@ -53,13 +53,13 @@
         </div>
         <div class="d-flex justify-content-between mt-2">
             <span>
-                Zoom: {{ zoom }}%
+                {{ $t('plugins.files.modal.detail.dicom.controls.zoom') }}: {{ zoom }}%
             </span>
             <button type="button" class="btn btn-outline-secondary" @click="saveAsImage">
-                Save Image
+                {{ $t('plugins.files.modal.detail.dicom.save') }}
             </button>
             <span>
-                WW/WC: {{ ww }}/{{ wc }}
+                {{ $t('plugins.files.modal.detail.dicom.wwwc') }}: {{ ww }}/{{ wc }}
             </span>
         </div>
     </div>

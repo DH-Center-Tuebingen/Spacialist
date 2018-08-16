@@ -7,6 +7,10 @@ import VModal from 'vue-js-modal';
 import Axios from 'axios';
 import VueRouter from 'vue-router';
 
+import VueI18n from 'vue-i18n';
+import en from './i18n/en';
+import de from './i18n/de';
+
 import App from './App.vue';
 import MainView from './components/MainView.vue';
 import ContextDetail from './components/ContextDetail.vue';
@@ -61,6 +65,7 @@ Vue.use(VueRouter);
 
 Vue.use(SpacialistPluginSystem);
 
+Vue.use(VueI18n);
 Vue.use(VModal);
 Vue.use(VeeValidate);
 Vue.use(Notifications);
@@ -281,6 +286,18 @@ Axios.interceptors.response.use(response => {
     return Promise.reject(error);
 });
 
+const messages = {
+    en: en,
+    de: de
+};
+
+const i18n = new VueI18n({
+    locale: navigator.language,
+    fallbackLocale: 'en',
+    messages
+});
+Vue.i18n = i18n;
+
 Vue.use(require('@websanova/vue-auth'), {
    auth: require('@websanova/vue-auth/drivers/auth/bearer.js'),
    http: require('@websanova/vue-auth/drivers/http/axios.1.x.js'),
@@ -390,6 +407,7 @@ Vue.filter('bibtexify', function(value, type) {
 
 const app = new Vue({
     el: '#app',
+    i18n: i18n,
     router: router,
     render: h => {
         return h(App, {

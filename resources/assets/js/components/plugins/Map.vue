@@ -13,8 +13,7 @@
             v-on:update:link="(geoId, entityId) => $emit('update:link', geoId, entityId)">
         </ol-map>
     </div>
-    <div v-else>
-        Loading map data&hellip;
+    <div v-else v-html="$t('plugins.map.tab.loading')">
     </div>
 </template>
 

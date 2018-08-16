@@ -2,7 +2,7 @@
     <modal name="about-modal" height="auto" :scrollable="true">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">About Spacialist</h5>
+                <h5 class="modal-title">{{ $t('main.about.title') }}</h5>
                 <button type="button" class="close" aria-label="Close" @click="hideAboutModal">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -12,27 +12,26 @@
                     <img class="mr-3" src="/img/logo.png" alt="spacialist logo" width="64px" />
                     <div class="media-body">
                         <h4>Spacialist</h4>
-                        Development of Spacialist is co-funded by the Ministry of Science, Research and the Arts Baden-Württemberg in the <i>E-Science</i> funding programme.
+                        {{ $t('main.about.desc') }}
                     </div>
                 </div>
                 <hr />
                 <dl class="row">
-                    <dt class="col-md-6 text-right">Release Name</dt>
+                    <dt class="col-md-6 text-right">{{ $t('main.about.release.name') }}</dt>
                     <dd class="col-md-6">
                         {{ version.name }}
                     </dd>
-                    <dt class="col-md-6 text-right">Time of Release</dt>
+                    <dt class="col-md-6 text-right">{{ $t('main.about.release.time') }}</dt>
                     <dd class="col-md-6">
                         {{ version.time | date }}
                     </dd>
-                    <dt class="col-md-6 text-right">Full Release Name</dt>
+                    <dt class="col-md-6 text-right">{{ $t('main.about.release.full-name') }}</dt>
                     <dd class="col-md-6">
                         {{ version.full }}
                     </dd>
                 </dl>
                 <div class="d-flex flex-row justify-content-between">
-                    <span>
-                        Built with <i class="fab fa-fw fa-laravel"></i> & <i class="fab fa-fw fa-vuejs"></i>!
+                    <span v-html="$t('main.about.build-info')">
                     </span>
                     <div>
                         <a href="https://www.facebook.com/esciencecenter" target="_blank">

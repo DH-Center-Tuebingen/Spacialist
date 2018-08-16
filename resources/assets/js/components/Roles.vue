@@ -3,13 +3,13 @@
         <table class="table table-striped table-hover">
             <thead class="thead-light">
                 <tr>
-                    <th>Name</th>
-                    <th>Display Name</th>
-                    <th>Description</th>
-                    <th>Permissions</th>
-                    <th>Created</th>
-                    <th>Updated</th>
-                    <th>Options</th>
+                    <th>{{ $t('global.name') }}</th>
+                    <th>{{ $t('global.display-name') }}</th>
+                    <th>{{ $t('global.description') }}</th>
+                    <th>{{ $t('global.permissions') }}</th>
+                    <th>{{ $t('global.created-at') }}</th>
+                    <th>{{ $t('global.updated-at') }}</th>
+                    <th>{{ $t('global.options') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,13 +53,13 @@
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <a class="dropdown-item" href="#" v-if="isDirty('perms_'+role.id)" :disabled="!$can('add_remove_permission')" @click="onPatchRole(role.id)">
-                                    <i class="fas fa-fw fa-check text-success"></i> Save
+                                    <i class="fas fa-fw fa-check text-success"></i> {{ $t('global.save') }}
                                 </a>
                                 <!-- <a class="dropdown-item" href="#">
                                     <i class="fas fa-fw fa-edit text-info"></i> Edit
                                 </a> -->
                                 <a class="dropdown-item" href="#" @click.prevent="requestDeleteRole(role.id)" :disabled="!$can('delete_role')">
-                                    <i class="fas fa-fw fa-trash text-danger"></i> Delete
+                                    <i class="fas fa-fw fa-trash text-danger"></i> {{ $t('global.delete') }}
                                 </a>
                             </div>
                         </div>
@@ -69,13 +69,13 @@
         </table>
 
         <button type="button" class="btn btn-success" @click="showNewRoleModal" :disabled="!$can('add_edit_role')">
-            <i class="fas fa-fw fa-plus"></i> Add New Role
+            <i class="fas fa-fw fa-plus"></i> {{ $t('main.role.add-button') }}
         </button>
 
         <modal name="new-role-modal" height="auto" :scrollable="true" v-can="'add_edit_role'">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="newRoleModalLabel">Add new Role</h5>
+                    <h5 class="modal-title" id="newRoleModalLabel">{{ $t('main.role.modal.new.title') }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideNewRoleModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -84,7 +84,7 @@
                     <form id="newRoleForm" name="newRoleForm" role="form" v-on:submit.prevent="onAddRole(newRole)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
-                                Role Name:
+                                {{ $t('global.name') }}:
                             </label>
                             <div class="col-md-9">
                                 <input class="form-control" type="text" id="name" v-model="newRole.name" required />
@@ -92,7 +92,7 @@
                         </div>
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="display_name">
-                                Display Name:
+                                {{ $t('global.display-name') }}:
                             </label>
                             <div class="col-md-9">
                                 <input class="form-control" type="text" id="display_name" v-model="newRole.display_name" required />
@@ -100,7 +100,7 @@
                         </div>
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="description">
-                                Role Description:
+                                {{ $t('global.description') }}:
                             </label>
                             <div class="col-md-9">
                                 <input class="form-control" type="text" id="description" v-model="newRole.description" required />
@@ -110,10 +110,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" form="newRoleForm">
-                        <i class="fas fa-fw fa-plus"></i> Add
+                        <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
                     </button>
                     <button type="button" class="btn btn-danger" @click="hideNewRoleModal">
-                        <i class="fas fa-fw fa-ban"></i> Cancel
+                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>
@@ -122,20 +122,20 @@
         <modal name="confirm-delete-role-modal" height="auto" :scrollable="true" v-can="'delete_role'">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete Role {{ selectedRole.name }}</h5>
+                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: selectedRole.display_name}) }}</h5>
                     <button type="button" class="close" aria-label="Close" @click="hideDeleteRoleModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    Do you really want to delete Role <strong>{{ selectedRole.display_name }}</strong> (<i>{{ selectedRole.name }}</i>)?
+                    {{ $t('global.delete-name.desc', {name: selectedRole.display_name}) }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" @click="deleteRole(selectedRole.id)">
-                        <i class="fas fa-fw fa-check"></i> Delete
+                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
                     </button>
                     <button type="button" class="btn btn-danger" @click="hideDeleteRoleModal">
-                        <i class="fas fa-fw fa-ban"></i> Cancel
+                        <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
             </div>

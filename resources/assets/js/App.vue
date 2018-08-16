@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex flex-column h-100">
-        <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+        <nav class="navbar navbar-dark bg-dark navbar-expand-lg overlay-all">
             <!-- Branding Image -->
             <router-link :to="{name: 'home'}" class="navbar-brand">
                 <img src="favicon.png" class="logo" alt="spacialist logo" />
@@ -31,69 +31,70 @@
                     <!-- Authentication Links -->
                     <li class="nav-item" v-if="!loggedIn">
                         <router-link :to="{name: 'login'}" class="nav-link">
-                            Login
+                            {{ $t('global.login') }}
                         </router-link>
                     </li>
                     <li class="nav-item dropdown" v-if="loggedIn">
                         <a href="#" class="nav-link dropdown-toggle" id="tools-navbar" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
-                            <i class="fas fa-fw fa-cogs"></i> Tools
+                            <i class="fas fa-fw fa-cogs"></i> {{ $t('global.tools.title') }}
                         </a>
                         <div class="dropdown-menu" aria-labelledby="tools-navbar">
                             <router-link class="dropdown-item" v-for="plugin in $getToolPlugins()" :to="plugin.href" :key="plugin.key">
-                                <i class="fas fa-fw" :class="plugin.icon"></i> {{ plugin.label }}
+                                <i class="fas fa-fw" :class="plugin.icon"></i> {{ $t(plugin.label) }}
                             </router-link>
                             <router-link :to="{name: 'bibliography'}" class="dropdown-item">
-                                <i class="fas fa-fw fa-book"></i> Bibliography
+                                <i class="fas fa-fw fa-book"></i> {{ $t('global.tools.bibliography') }}
                             </router-link>
                             <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="/analysis">
-                                    <i class="far fa-fw fa-chart-bar"></i> Data Analysis <sup>(BETA)</sup>
+                                    <i class="far fa-fw fa-chart-bar"></i> {{ $t('global.tools.analysis') }}
                                 </a>
                             </template>
                             <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
                                 <div class="dropdown-divider"></div>
                                 <h6 class="dropdown-header">
-                                    External Tools <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
+                                    {{ $t('global.tools.external') }} <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
                                 </h6>
                             </template>
                             <template v-if="$getPreference('prefs.link-to-thesaurex')">
                                 <a class="dropdown-item" :href="$getPreference('prefs.link-to-thesaurex')" target="_blank">
-                                    <i class="fas fa-fw fa-paw"></i> ThesauRex
+                                    <i class="fas fa-fw fa-paw"></i> {{ $t('global.tools.thesaurex') }}
                                 </a>
                             </template>
                             <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
                                 <a class="dropdown-item" href="/db" target="_blank">
-                                    <i class="fas fa-fw fa-chart-bar"></i> dbWebGen
+                                    <i class="fas fa-fw fa-chart-bar"></i> {{ $t('global.tools.dbwebgen') }}
                                 </a>
                             </template>
                         </div>
                     </li>
                     <li class="nav-item dropdown" v-if="loggedIn">
                         <a href="#" class="nav-link dropdown-toggle" id="settings-dropdown" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
-                            <i class="fas fa-fw fa-sliders-h"></i> Settings <span class="caret"></span>
+                            <i class="fas fa-fw fa-sliders-h"></i> {{ $t('global.settings.title') }} <span class="caret"></span>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="settings-dropdown">
                             <router-link :to="{name: 'users'}" class="dropdown-item">
-                                <i class="fas fa-fw fa-users"></i> User Management
+                                <i class="fas fa-fw fa-users"></i> {{ $t('global.settings.users') }}
                             </router-link>
                             <router-link :to="{name: 'roles'}" class="dropdown-item">
-                                <i class="fas fa-fw fa-shield-alt"></i> Role Management
+                                <i class="fas fa-fw fa-shield-alt"></i> {{ $t('global.settings.roles') }}
                             </router-link>
                             <router-link :to="{name: 'dme'}" class="dropdown-item">
-                                <i class="fas fa-fw fa-sitemap"></i> Data Model Editor
+                                <i class="fas fa-fw fa-sitemap"></i> {{ $t('global.settings.datamodel') }}
                             </router-link>
                             <router-link :to="{name: 'preferences'}" class="dropdown-item">
-                                <i class="fas fa-fw fa-cog"></i> System Preferences
+                                <i class="fas fa-fw fa-cog"></i> {{ $t('global.settings.system') }}
                             </router-link>
                             <router-link class="dropdown-item" v-for="plugin in $getSettingsPlugins()" :to="plugin.href" :key="plugin.key">
-                                <i class="fas fa-fw" :class="plugin.icon"></i> {{ plugin.label }}
+                                <i class="fas fa-fw" :class="plugin.icon"></i> {{ $t(plugin.label) }}
                             </router-link>
                             <a class="dropdown-item" href="">
-                                <i class="fas fa-fw fa-pencil-alt"></i> Toggle Edit Mode
+                                <i class="fas fa-fw fa-pencil-alt"></i> {{ $t('global.settings.editmode') }}
                             </a>
+                            <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#" @click="showAboutModal">
-                                <i class="fas fa-fw fa-info-circle"></i> About
+                                <i class="fas fa-fw fa-info-circle"></i> {{ $t('global.settings.about') }}
                             </a>
                         </div>
                     </li>
@@ -103,11 +104,11 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="user-dropdown">
                             <router-link :to="{name: 'userpreferences', params: { id: $auth.user().id }}" class="dropdown-item">
-                                <i class="fas fa-fw fa-cog"></i> Preferences
+                                <i class="fas fa-fw fa-cog"></i> {{ $t('global.user.settings') }}
                             </router-link>
                             <a class="dropdown-item" href="#"
                                 @click="logout">
-                                <i class="fas fa-fw fa-sign-out-alt"></i> Logout
+                                <i class="fas fa-fw fa-sign-out-alt"></i> {{ $t('global.user.logout') }}
                             </a>
                         </ul>
                     </li>

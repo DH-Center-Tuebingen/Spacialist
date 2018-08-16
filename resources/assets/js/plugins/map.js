@@ -1,3 +1,5 @@
+import de from '../i18n/plugins/map-de.js';
+import en from '../i18n/plugins/map-en.js';
 import LayerEditor from '../components/plugins/MapLayerEditor.vue';
 import LayerEditorDetail from '../components/plugins/MapLayerEditorDetail.vue';
 import Gis from '../components/plugins/MapGis.vue';
@@ -8,6 +10,10 @@ Vue.component('layer-list', require('../components/plugins/MapLayerList.vue'));
 const SpacialistPluginMap = {
     name: 'SpacialistPluginMap',
     install(Vue, options) {
+        if(Vue.i18n) {
+            Vue.prototype.$spacialistAddPluginLanguage('de', de);
+            Vue.prototype.$spacialistAddPluginLanguage('en', en);
+        }
         if(Vue.router) {
             Vue.router.addRoutes([
                 // deprecated pre-0.6 routes
@@ -81,7 +87,7 @@ const SpacialistPluginMap = {
         }
         // Map
         Vue.prototype.$registerSpacialistPlugin({
-            label: 'prefs.extension.map',
+            label: 'plugins.map.tab.title',
             icon: 'fa-map-marker-alt',
             key: 'map',
             tag: 'map-plugin',
@@ -90,7 +96,7 @@ const SpacialistPluginMap = {
         }, 'tab');
         // Layer Editor
         Vue.prototype.$registerSpacialistPlugin({
-            label: 'prefs.extension.layer-editor',
+            label: 'plugins.map.layer-editor.title',
             icon: 'fa-layer-group',
             href: {
                 name: 'layeredit'
@@ -98,7 +104,7 @@ const SpacialistPluginMap = {
         }, 'settings');
         // GIS View
         Vue.prototype.$registerSpacialistPlugin({
-            label: 'prefs.extension.gis-view',
+            label: 'plugins.map.gis.title',
             icon: 'fa-globe-africa',
             href: {
                 name: 'gis'

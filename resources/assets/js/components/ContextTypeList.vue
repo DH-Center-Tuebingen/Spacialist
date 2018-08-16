@@ -13,7 +13,9 @@
         </li>
         <li v-if="onAdd">
             <i class="fas fa-fw fa-plus"></i>
-            <a href="#" @click="onAdd()" class="text-secondary">New Context-Type...</a>
+            <a href="#" @click.prevent="onAdd()" class="text-secondary">
+                {{ $t('main.datamodel.entity.add-button') }}
+            </a>
         </li>
     </ul>
 </template>
