@@ -1,5 +1,5 @@
 <template>
-    <modal name="entity-references-modal" width="50%" :scrollable="true" :draggable="true" :resizable="true" @closed="routeBack">
+    <modal name="entity-references-modal" width="50%" height="80%" :scrollable="true" :draggable="true" :resizable="true" @closed="routeBack">
         <div class="modal-content h-100">
             <div class="modal-header">
                 <h5 class="modal-title">{{ $t('main.entity.references.title') }}</h5>
