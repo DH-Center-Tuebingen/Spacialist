@@ -141,7 +141,12 @@ class FileController extends Controller
                 'error' => 'You do not have the permission to get the file categories'
             ], 403);
         }
-        return response()->json(File::getCategories());
+        if(auth()->check()) {
+            $locale = Preference::getUserPreference($user['id'], 'prefs.gui-language')->value;
+        } else {
+            $locale = \App::getLocale();
+        }
+        return response()->json(File::getCategories($locale));
     }
 
     public function getCameraNames() {

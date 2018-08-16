@@ -214,7 +214,7 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-md-2 col-form-label" for="public">{{ $t('main.preference.key.project.public') }}</label>
+                            <label class="col-md-2 col-form-label" for="public">{{ $t('main.preference.key.project.public') }}:</label>
                             <div class="col-md-10">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="public" v-model="preferences['prefs.project-maintainer'].value.public" />

@@ -1,0 +1,15 @@
+{
+    "Image": "Image",
+    "Audio File": "Audio File",
+    "Video File": "Video File",
+    "PDF": "PDF",
+    "XML": "XML",
+    "HTML": "HTML",
+    "3D File": "3D File",
+    "DICOM File": "DICOM File",
+    "Archive": "Archive",
+    "Text File": "Text File",
+    "Office Documents": "Office Documents",
+    "Spreadsheets": "Spreadsheets",
+    "Presentation Files": "Presentation Files"
+}

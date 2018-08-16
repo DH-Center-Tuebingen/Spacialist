@@ -699,21 +699,22 @@ class File extends Model
         return 'undefined';
     }
 
-    public static function getCategories() {
+    public static function getCategories($locale = 'en') {
+        \App::setLocale($locale);
         return [
-            ['key' => 'image', 'label' => 'Image'],
-            ['key' => 'audio', 'label' => 'Audio File'],
-            ['key' => 'video', 'label' => 'Video File'],
-            ['key' => 'pdf', 'label' => 'PDF'],
-            ['key' => 'xml', 'label' => 'XML'],
-            ['key' => 'html', 'label' => 'HTML'],
-            ['key' => '3d', 'label' => '3D File'],
-            ['key' => 'dicom', 'label' => 'DICOM File'],
-            ['key' => 'archive', 'label' => 'Archive'],
-            ['key' => 'text', 'label' => 'Text File'],
-            ['key' => 'document', 'label' => 'Office Documents'],
-            ['key' => 'spreadsheet', 'label' => 'Spreadsheets'],
-            ['key' => 'presentation', 'label' => 'Presentation Files'],
+            ['key' => 'image', 'label' => __('Image')],
+            ['key' => 'audio', 'label' => __('Audio File')],
+            ['key' => 'video', 'label' => __('Video File')],
+            ['key' => 'pdf', 'label' => __('PDF')],
+            ['key' => 'xml', 'label' => __('XML')],
+            ['key' => 'html', 'label' => __('HTML')],
+            ['key' => '3d', 'label' => __('3D File')],
+            ['key' => 'dicom', 'label' => __('DICOM File')],
+            ['key' => 'archive', 'label' => __('Archive')],
+            ['key' => 'text', 'label' => __('Text File')],
+            ['key' => 'document', 'label' => __('Office Documents')],
+            ['key' => 'spreadsheet', 'label' => __('Spreadsheets')],
+            ['key' => 'presentation', 'label' => __('Presentation Files')],
         ];
     }
 

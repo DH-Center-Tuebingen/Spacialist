@@ -31,10 +31,18 @@ class HomeController extends Controller
     }
 
     public function getGlobalData() {
-        $preferences = Preference::all();
-        $preferenceValues = [];
-        foreach($preferences as $p) {
-            $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
+        if(auth()->check()) {
+            $preferences = Preference::getUserPreferences(auth()->id());
+            $preferenceValues = [];
+            foreach($preferences as $k => $p) {
+                $preferenceValues[$k] = $p->value;
+            }
+        } else {
+            $preferences = Preference::all();
+            $preferenceValues = [];
+            foreach($preferences as $p) {
+                $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
+            }
         }
 
         $concepts = ThConcept::getMap();
