@@ -17,7 +17,7 @@
                 </div>
                 <div class="col of-hidden d-flex flex-column pt-2">
                     <h4>{{ $t('plugins.map.gis.selected-layers') }}</h4>
-                    <p class="alert alert-info" v-show="!selectedLayers.length" v-html="$t('plugins.map.gis.info')">
+                    <p class="alert alert-info" v-show="!Object.keys(selectedLayers).length" v-html="$t('plugins.map.gis.info')">
 
                     </p>
                     <div class="list-group scroll-y-auto col">
