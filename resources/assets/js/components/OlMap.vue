@@ -605,6 +605,7 @@
                                 `${geomName} (${props.entity.name})` :
                                 geomName;
                             $(element).tooltip({
+                                container: vm.viewport || '#map',
                                 placement: 'bottom',
                                 animation: true,
                                 html: true,
@@ -1313,10 +1314,10 @@
                 // Wait for variables to be updated
                 vm.$nextTick(function() {
                     $(element).popover({
-                        'placement': 'top',
-                        'animation': true,
-                        'html': true,
-                        'container': vm.viewport || '#map'
+                        placement: 'top',
+                        animation: true,
+                        html: true,
+                        container: vm.viewport || '#map'
                     });
                     $(element).popover('show');
                 });
