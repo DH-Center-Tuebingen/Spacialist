@@ -46,7 +46,7 @@
         </div>
         <div class="col px-0" :class="{'mt-2': !drawDisabled}">
             <div :id="id" class="map w-100 h-100"></div>
-            <div :id="id+'-popup'" :data-title="overlayTitle" :data-content="overlayContent"></div>
+            <div :id="id+'-popup'"></div>
             <div :id="id+'-hover-popup'" class="tooltip"></div>
             <div :id="id+'-measure-popup'" class="tooltip tooltip-measure"></div>
         </div>
@@ -626,7 +626,7 @@
 
                             const geomName = vm.$t('main.map.geometry-name', {id: props.id});
                             const title = props.entity ?
-                                `${geomName} (${props.entity.name})` :
+                                `${props.entity.name} (${geomName})` :
                                 geomName;
                             $(element).tooltip({
                                 container: vm.viewport || '#map',
@@ -1433,7 +1433,7 @@
                 vm.overlay.setPosition(coords);
 
                 if(props.entity) {
-                    vm.overlayTitle = `${geomName} (${props.entity.name})`;
+                    vm.overlayTitle = `${props.entity.name} (${geomName})`;
                 } else {
                     vm.overlayTitle = geomName;
                 }
@@ -1449,11 +1449,14 @@
 
                 // Wait for variables to be updated
                 vm.$nextTick(function() {
+                    $(element).popover('dispose');
                     $(element).popover({
                         placement: 'top',
                         animation: true,
                         html: true,
-                        container: vm.viewport || '#map'
+                        container: vm.viewport || '#map',
+                        content: vm.overlayContent,
+                        title: vm.overlayTitle
                     });
                     $(element).popover('show');
                 });
