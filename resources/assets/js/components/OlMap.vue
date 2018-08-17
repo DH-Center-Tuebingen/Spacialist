@@ -241,125 +241,155 @@
                     }
                 };
                 vm.modify = {
+                    modifiedFeatures: {},
+                    modifyActive: {},
+                    originalFeatures: [],
+                    selectedFeature: undefined,
+                    select: {},
+                    modify: {},
                     init: function() {
-                        this.select = new Select({
+                        vm.modify.select = new Select({
                             hitTolerance: 5,
                             toggleCondition: neverCond,
                             wrapX: false
                         });
-                        vm.map.addInteraction(this.select);
+                        vm.map.addInteraction(vm.modify.select);
 
-                        this.modify = new Modify({
-                            features: this.select.getFeatures(),
+                        vm.modify.modify = new Modify({
+                            features: vm.modify.select.getFeatures(),
                             wrapX: false
                         });
-                        vm.map.addInteraction(this.modify);
+                        vm.map.addInteraction(vm.modify.modify);
 
-                        this.modifiedFeatures = {};
-                        this.setEvents();
-                        this.modifyActive = false;
-                        this.originalFeatures = [];
-                        this.selectedFeature = undefined;
+                        vm.modify.modifiedFeatures = {};
+                        vm.modify.setEvents();
+                        vm.modify.modifyActive = false;
+                        vm.modify.originalFeatures = {};
+                        vm.modify.selectedFeature = undefined;
                     },
                     setEvents: function() {
-                        let selectedFeatures = this.select.getFeatures();
-
-                        this.select.on('change:active', function(event) {
-                            selectedFeatures.forEach(selectedFeatures.remove, selectedFeatures);
-                        }, this);
-                        this.select.on('select', function(event) {
+                        vm.modify.select.on('change:active', function(event) {
+                        });
+                        vm.modify.select.on('select', function(event) {
                             // config allows only one selected feature
                             if(event.selected.length) {
-                                this.selectedFeature = event.selected[0];
+                                const f = event.selected[0];
+                                vm.modify.modifiedFeatures[f.ol_uid] = f;
+                                vm.modify.selectedFeature = f;
+                                let layer;
+                                const ent = f.get('entity');
+                                if(ent) {
+                                    layer = vm.getLayer(ent.context_type_id)
+                                } else {
+                                    layer = vm.getUnlinkedLayer();
+                                }
+                                if(!vm.modify.originalFeatures[f.ol_uid]) {
+                                    vm.modify.originalFeatures[f.ol_uid] = {
+                                        feature: f.clone(),
+                                        layer: layer.id
+                                    };
+                                }
                             } else {
-                                this.selectedFeature = undefined;
+                                vm.modify.selectedFeature = undefined;
                             }
-                        }, this);
-                        this.modify.on('change:active', function(event) {
-                            this.modifyActive = !event.oldValue;
-                            if(this.modifyActive) {
-                                let source = vm.vector.getSource()
-                                let features = source.getFeatures();
-                                features.forEach(feature => {
-                                    this.originalFeatures.push(feature.clone());
-                                });
-                            } else {
-                                this.modifiedFeatures = {};
+                        });
+                        vm.modify.modify.on('change:active', function(event) {
+                            vm.modify.modifyActive = !event.oldValue;
+                            if(!vm.modify.modifyActive) {
+                                for(let k in vm.modify.modifiedFeatures) {
+                                    const org = vm.modify.originalFeatures[k];
+                                    vm.modify.modifiedFeatures[k].setGeometry(org.feature.getGeometry());
+                                }
+                                vm.modify.modifiedFeatures = {};
+                                vm.modify.originalFeatures = {};
+                                vm.modify.selectedFeature = undefined;
                             }
-                        }, this);
-                        this.modify.on('modifyend', function(event) {
-                            let newFeature = event.features.getArray()[0];
-                            this.modifiedFeatures[newFeature.ol_uid] = newFeature;
-                        }, this);
+                        });
+                        vm.modify.modify.on('modifyend', function(event) {
+                        });
                     },
                     getActive: function() {
-                        return this.select.getActive() || this.modify.getActive();
+                        return vm.modify.select.getActive() || vm.modify.modify.getActive();
                     },
                     setActive: function(active, cancelled) {
-                        this.select.setActive(active);
-                        this.modify.setActive(active);
+                        vm.modify.select.setActive(active);
+                        vm.modify.modify.setActive(active);
                         if(!active) {
-                            if(cancelled && this.originalFeatures.length) {
+                            if(cancelled && vm.modify.originalFeatures.length) {
                                 // If modify was cancelled, reset features to state before modify start
                                 let source = vm.vector.getSource();
                                 source.clear();
-                                source.addFeatures(this.originalFeatures);
+                                source.addFeatures(vm.modify.originalFeatures);
                             }
-                            this.originalFeatures = [];
+                            vm.modify.originalFeatures = [];
                         }
                     },
                     getModifiedFeatures: function() {
                         // return list of cloned features
                         let features = [];
-                        for(let k in this.modifiedFeatures) {
-                            features.push(this.modifiedFeatures[k].clone());
+                        for(let k in vm.modify.modifiedFeatures) {
+                            features.push(vm.modify.modifiedFeatures[k].clone());
                         }
                         return features;
                     }
                 };
                 vm.delete = {
+                    deletedFeatures: {},
                     init: function() {
-                        this.select = new Select({
+                        vm.delete.select = new Select({
                             hitTolerance: 5,
                             toggleCondition: neverCond,
                             wrapX: false
                         });
-                        vm.map.addInteraction(this.select);
+                        vm.map.addInteraction(vm.delete.select);
 
-                        this.setEvents();
-                        vm.delete.deletedFeatures = [];
+                        vm.delete.setEvents();
+                        vm.delete.deletedFeatures = {};
                     },
                     setEvents: function() {
-                        this.select.on('select', function(event) {
+                        vm.delete.select.on('select', function(event) {
                             // config allows only one selected feature
                             if(event.selected.length) {
-                                let feature = event.selected[0];
-                                vm.delete.deletedFeatures.push(feature);
-                                let source = vm.vector.getSource();
-                                source.removeFeature(feature);
+                                const f = event.selected[0];
+                                let layer;
+                                const ent = f.get('entity');
+                                if(ent) {
+                                    layer = vm.getLayer(ent.context_type_id)
+                                } else {
+                                    layer = vm.getUnlinkedLayer();
+                                }
+                                let olLayer = vm.getEntityLayerById(layer.id);
+                                vm.delete.deletedFeatures[f.ol_uid] = {
+                                    feature: f.clone(),
+                                    layer: olLayer.get('layer_id')
+                                };
+                                olLayer.getSource().removeFeature(f);
                             }
-                        }, this);
+                        });
                     },
                     getActive: function() {
-                        return this.select.getActive();
+                        return vm.delete.select.getActive();
                     },
                     setActive: function(active, cancelled) {
-                        this.select.setActive(active);
+                        vm.delete.select.setActive(active);
                         if(!active) {
-                            if(cancelled && vm.delete.deletedFeatures.length) {
+                            if(cancelled) {
                                 // If delete was cancelled, readd deleted features
-                                let source = vm.vector.getSource();
-                                source.addFeatures(vm.delete.deletedFeatures);
+                                for(let k in vm.delete.deletedFeatures) {
+                                    const org = vm.delete.deletedFeatures[k];
+                                    let layer = vm.getEntityLayerById(org.layer);
+                                    layer.getSource().addFeature(org.feature);
+                                }
                             }
-                            vm.delete.deletedFeatures = [];
+                            vm.delete.deletedFeatures = {};
                         }
                     },
                     getDeletedFeatures: function() {
                         // return list of cloned features
                         let features = [];
-                        vm.delete.deletedFeatures.forEach(feature => {
-                            features.push(feature.clone());
-                        });
+                        for(let k in vm.delete.deletedFeatures) {
+                            features.push(vm.delete.deletedFeatures[k].feature);
+                        }
                         return features;
                     }
                 };
@@ -1218,7 +1248,7 @@
             },
             updateFeatures() {
                 const features = this.modify.getModifiedFeatures();
-                let wktFeatures = features.map(f => this.wktFormat.writeFeature(f), this);
+                let wktFeatures = features.map(f => this.wktFormat.writeFeature(f));
                 this.onModifyend(features, wktFeatures);
                 this.setInteractionMode('');
             },
