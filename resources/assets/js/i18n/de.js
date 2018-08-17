@@ -351,6 +351,9 @@ const de = {
                     desc: 'Geometrien löschen',
                     'pos-desc': 'Löschen bestätigen',
                     'neg-desc': 'Löschen verwerfen'
+                },
+                measure: {
+                    desc: 'Maßband umschalten'
                 }
             }
         }

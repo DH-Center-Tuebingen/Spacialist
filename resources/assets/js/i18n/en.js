@@ -351,6 +351,9 @@ const en = {
                     desc: 'Delete geometries',
                     'pos-desc': 'Confirm delete',
                     'neg-desc': 'Discard delete'
+                },
+                measure: {
+                    desc: 'Toggle measuring tape'
                 }
             }
         }

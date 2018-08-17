@@ -29,6 +29,9 @@
                 <button type="button" class="btn btn-sm btn-outline-danger" v-show="interactionMode == 'delete'" data-toggle="popover" :data-content="$t('main.map.draw.delete.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
                     <i class="fas fa-fw fa-times"></i>
                 </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="popover" :data-content="$t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements">
+                    <i class="fas fa-fw fa-ruler-combined"></i>
+                </button>
             </div>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-primary" v-show="linkPossible" @click="link(selectedFeature, selectedEntity)">
@@ -45,6 +48,7 @@
             <div :id="id" class="map w-100 h-100"></div>
             <div :id="id+'-popup'" :data-title="overlayTitle" :data-content="overlayContent"></div>
             <div :id="id+'-hover-popup'" class="tooltip"></div>
+            <div :id="id+'-measure-popup'" class="tooltip tooltip-measure"></div>
         </div>
     </div>
 </template>
@@ -58,9 +62,11 @@
     import Graticule from 'ol/Graticule';
     import { defaults as defaultInteractions } from 'ol/interaction';
     import Map from 'ol/Map';
+    import {unByKey} from 'ol/Observable.js';
     import Overlay from 'ol/Overlay';
     import { get as getProjection, addProjection, transform as transformProj } from 'ol/proj';
     import { register as registerProj } from 'ol/proj/proj4';
+    import {getArea, getLength} from 'ol/sphere.js';
     import View from 'ol/View';
 
     import FullScreen from 'ol/control/FullScreen';
@@ -509,6 +515,11 @@
                 });
                 this.map.addInteraction(this.snap);
 
+                this.initMeasureInteraction();
+                if(this.measurementActive) {
+                    this.addMeasureInteraction();
+                }
+
                 // Event Listeners
                 this.draw.Point.on('drawend', event => {
                     this.drawFeature(event.feature);
@@ -574,18 +585,27 @@
                     vm.setExtent();
 
                     vm.overlay = new Overlay({
-                        element: document.getElementById(`${vm.id}-popup`)
+                        element: document.getElementById(`${vm.id}-popup`),
+                        offset: [0, -5]
                     });
                     vm.hoverPopup = new Overlay({
                         element: document.getElementById(`${vm.id}-hover-popup`),
-                        offset: [8, 0] // it's a kind of magic!
+                        offset: [0, 5] // it's a kind of magic!
                     });
                     vm.map.addOverlay(vm.overlay);
                     vm.map.addOverlay(vm.hoverPopup);
 
                     vm.map.on('pointermove', function(e) {
                         if(e.dragging) return;
-                        if(!vm.drawDisabled && vm.draw.getActive()) return;
+                        if(
+                            !vm.drawDisabled &&
+                            (
+                                vm.draw.getActive() ||
+                                vm.modify.getActive() ||
+                                vm.delete.getActive()
+                            )
+                        ) return;
+                        if(vm.measurementActive) return;
 
                         const element = vm.hoverPopup.getElement();
                         const feature = vm.getFeatureForEvent(e);
@@ -634,6 +654,7 @@
                         if(!vm.drawDisabled && (vm.draw.getActive() || vm.modify.getActive() || vm.delete.getActive())) {
                             return;
                         }
+                        if(vm.measurementActive) return;
                         const element = vm.overlay.getElement();
                         const feature = vm.getFeatureForEvent(e);
                         if(feature) {
@@ -1217,6 +1238,117 @@
             cancelDeleteFeatures() {
                 this.setInteractionMode('', true);
             },
+            initMeasureInteraction() {
+                this.measureSource = new Vector();
+                this.measureLayer = new VectorLayer({
+                    source: this.measureSource,
+                    style: new Style({
+                        fill: new Fill({
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        }),
+                        stroke: new Stroke({
+                            color: 'rgba(0, 0, 0, 0.5)',
+                            width: 2
+                        }),
+                        image: new CircleStyle({
+                            radius: 5,
+                            stroke: new Stroke({
+                                color: 'rgba(0, 0, 0, 0.2)'
+                            }),
+                            fill: new Fill({
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            })
+                        })
+                    })
+                });
+                this.map.addLayer(this.measureLayer);
+            },
+            addMeasureInteraction() {
+                this.measureDraw = new Draw({
+                    source: this.measureSource,
+                    type: 'LineString',
+                    style: new Style({
+                        fill: new Fill({
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        }),
+                        stroke: new Stroke({
+                            color: 'rgba(0, 0, 0, 0.5)',
+                            lineDash: [10, 10],
+                            width: 2
+                        }),
+                        image: new CircleStyle({
+                            radius: 5,
+                            stroke: new Stroke({
+                                color: 'rgba(0, 0, 0, 0.2)'
+                            }),
+                            fill: new Fill({
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            })
+                        })
+                    })
+                });
+                this.map.addInteraction(this.measureDraw);
+
+                this.measureTooltipElement = document.getElementById(`${this.id}-measure-popup`);
+                this.measureTooltip = new Overlay({
+                    element: this.measureTooltipElement,
+                    offset: [0, 5]
+                });
+                this.map.addOverlay(this.measureTooltip);
+
+                let measureListener;
+                this.measureDraw.on('drawstart', event => {
+                    // Remove existing measures
+                    this.measureSource.clear();
+                    this.drawFeature = event.feature;
+                    let coords = event.coordinate;
+                    measureListener = this.drawFeature.getGeometry().on('change', ce => {
+                        let geom = ce.target;
+                        coords = geom.getLastCoordinate();
+                        $(this.measureTooltipElement).tooltip('dispose');
+                        this.measureTooltip.setPosition(coords);
+                        $(this.measureTooltipElement).tooltip({
+                            container: this.viewport || '#map',
+                            placement: 'bottom',
+                            title: this.getLineLength(geom)
+                        });
+                        $(this.measureTooltipElement).tooltip('show');
+                    });
+                });
+                this.measureDraw.on('drawend', event => {
+                    this.measureTooltipElement.className = 'tooltip tooltip-static';
+                    this.measureFeature = null;
+                    unByKey(measureListener);
+                });
+            },
+            removeMeasureInteraction() {
+                $(this.measureTooltipElement).tooltip('dispose');
+                this.measureSource.clear();
+                this.map.removeInteraction(this.measureDraw);
+                this.measureDraw = null;
+                this.measureFeature = null;
+                this.measureTooltip = null;
+                this.measureTooltipElement = null;
+            },
+            toggleMeasurements() {
+                this.measurementActive = !this.measurementActive;
+
+                if(this.measurementActive) {
+                    this.addMeasureInteraction();
+                } else {
+                    this.removeMeasureInteraction();
+                }
+            },
+            getLineLength(geom) {
+                const length = getLength(geom);
+                let str;
+                if(length >= 100) {
+                    str = `${(length / 1000).toFixed(2)} km`;
+                } else {
+                    str = `${length.toFixed(2)} m`;
+                }
+                return str;
+            },
             link(feature, entity) {
                 const vm = this;
                 if(!vm.linkPossible) return;
@@ -1350,6 +1482,13 @@
                 lastHoveredFeature: {},
                 modify: {},
                 draw: {},
+                measurementActive: false,
+                measureDraw: {},
+                measureFeature: {},
+                measureSource: {},
+                measureLayer: {},
+                measureTooltip: {},
+                measureTooltipElement: {},
                 delete: {},
                 snap: {},
                 options: {},
