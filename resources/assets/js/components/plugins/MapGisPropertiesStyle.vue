@@ -3,17 +3,6 @@
         <div class="col scroll-y-auto">
             <form role="form" name="layerStylingForm" id="layerStylingForm" @submit.prevent="apply">
                 <div class="form-group row">
-                    <label class="col-form-label col-md-6 text-right">
-                        {{ $t('global.active') }}:
-                    </label>
-                    <div class="col-md-6">
-                        <label class="cb-toggle mx-0 my-auto align-middle">
-                            <input type="checkbox" id="font-active-toggle" v-model="isActive" />
-                            <span class="slider slider-rounded slider-primary"></span>
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group row">
                     <label class="col-form-label col-md-6 text-right" for="style-style">
                         {{ $t('plugins.map.gis.props.style.title') }}:
                     </label>
@@ -31,98 +20,100 @@
                         </multiselect>
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label class="col-form-label col-md-6 text-right" for="style-attribute">
-                        {{ $t('global.attribute') }}:
-                    </label>
-                    <div class="col-md-6">
-                        <multiselect
-                            id="style-attribute"
-                            name="style-attribute"
-                            label="thesaurus_url"
-                            v-model="selectedAttribute"
-                            :allowEmpty="false"
-                            :closeOnSelect="true"
-                            :custom-label="translateLabel"
-                            :hideSelected="false"
-                            :multiple="false"
-                            :options="attributeList">
-                        </multiselect>
+                <div v-if="styleActive">
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-6 text-right" for="style-attribute">
+                            {{ $t('global.attribute') }}:
+                        </label>
+                        <div class="col-md-6">
+                            <multiselect
+                                id="style-attribute"
+                                name="style-attribute"
+                                label="thesaurus_url"
+                                v-model="selectedAttribute"
+                                :allowEmpty="false"
+                                :closeOnSelect="true"
+                                :custom-label="translateLabel"
+                                :hideSelected="false"
+                                :multiple="false"
+                                :options="attributeList">
+                            </multiselect>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-form-label col-md-6 text-right" for="style-colors">
-                        {{ $t('plugins.map.gis.props.style.color-ramp') }}:
-                    </label>
-                    <div class="col-md-6">
-                        <multiselect
-                            id="style-colors"
-                            name="style-colors"
-                            v-model="selectedColorRamp"
-                            :allowEmpty="false"
-                            :closeOnSelect="true"
-                            :hideSelected="false"
-                            :multiple="false"
-                            :options="colorRamps"
-                            :show-labels="false">
-                            <template slot="singleLabel" slot-scope="props">
-                                <color-gradient
-                                    :from="props.option.from"
-                                    :to="props.option.to"
-                                    :label="props.option.label">
-                                </color-gradient>
-                            </template>
-                            <template slot="option" slot-scope="props">
-                                <color-gradient
-                                    :from="props.option.from"
-                                    :to="props.option.to"
-                                    :label="props.option.label">
-                                </color-gradient>
-                            </template>
-                        </multiselect>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-6 text-right" for="style-colors">
+                            {{ $t('plugins.map.gis.props.style.color-ramp') }}:
+                        </label>
+                        <div class="col-md-6">
+                            <multiselect
+                                id="style-colors"
+                                name="style-colors"
+                                v-model="selectedColorRamp"
+                                :allowEmpty="false"
+                                :closeOnSelect="true"
+                                :hideSelected="false"
+                                :multiple="false"
+                                :options="colorRamps"
+                                :show-labels="false">
+                                <template slot="singleLabel" slot-scope="props">
+                                    <color-gradient
+                                        :from="props.option.from"
+                                        :to="props.option.to"
+                                        :label="props.option.label">
+                                    </color-gradient>
+                                </template>
+                                <template slot="option" slot-scope="props">
+                                    <color-gradient
+                                        :from="props.option.from"
+                                        :to="props.option.to"
+                                        :label="props.option.label">
+                                    </color-gradient>
+                                </template>
+                            </multiselect>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group row" v-if="selectedStyle.id == 'graduated'">
-                    <label class="col-form-label col-md-6 text-right" for="style-classes">
-                        {{ $t('plugins.map.gis.props.style.classes') }}:
-                    </label>
-                    <div class="col-md-6">
-                        <input class="form-control" type="number" id="style-classes" name="style-classes" min="1" v-model.number="numberOfClasses" />
+                    <div class="form-group row" v-if="selectedStyle.id == 'graduated'">
+                        <label class="col-form-label col-md-6 text-right" for="style-classes">
+                            {{ $t('plugins.map.gis.props.style.classes') }}:
+                        </label>
+                        <div class="col-md-6">
+                            <input class="form-control" type="number" id="style-classes" name="style-classes" min="1" v-model.number="numberOfClasses" />
+                        </div>
                     </div>
-                </div>
-                <div class="form-group row" v-if="selectedStyle.id == 'graduated'">
-                    <label class="col-form-label col-md-6 text-right" for="style-graduated-mode">
-                        {{ $t('global.mode') }}:
-                    </label>
-                    <div class="col-md-6">
-                        <multiselect
-                            id="style-graduated-mode"
-                            label="label"
-                            name="style-graduated-mode"
-                            v-model="selectedMode"
-                            :allowEmpty="false"
-                            :closeOnSelect="true"
-                            :hideSelected="false"
-                            :multiple="false"
-                            :options="graduatedModes">
-                        </multiselect>
+                    <div class="form-group row" v-if="selectedStyle.id == 'graduated'">
+                        <label class="col-form-label col-md-6 text-right" for="style-graduated-mode">
+                            {{ $t('global.mode') }}:
+                        </label>
+                        <div class="col-md-6">
+                            <multiselect
+                                id="style-graduated-mode"
+                                label="label"
+                                name="style-graduated-mode"
+                                v-model="selectedMode"
+                                :allowEmpty="false"
+                                :closeOnSelect="true"
+                                :hideSelected="false"
+                                :multiple="false"
+                                :options="graduatedModes">
+                            </multiselect>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-form-label col-md-6 text-right" for="style-size">
-                        {{ $t('global.size') }}:
-                    </label>
-                    <div class="col-md-6">
-                        <input class="form-control" type="number" id="style-size" name="style-size" min="1" v-model.number="size" />
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-6 text-right" for="style-size">
+                            {{ $t('global.size') }}:
+                        </label>
+                        <div class="col-md-6">
+                            <input class="form-control" type="number" id="style-size" name="style-size" min="1" v-model.number="size" />
+                        </div>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-form-label col-md-6 text-right" for="style-transparency">
-                        {{ $t('global.transparency') }}:
-                    </label>
-                    <div class="col-md-6 d-flex">
-                        <input class="form-control" type="range" id="style-transparency" name="style-transparency" min="0" max="1" step="0.01" v-model="transparency" />
-                        <span class="ml-3">{{ transparency }}</span>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-6 text-right" for="style-transparency">
+                            {{ $t('global.transparency') }}:
+                        </label>
+                        <div class="col-md-6 d-flex">
+                            <input class="form-control" type="range" id="style-transparency" name="style-transparency" min="0" max="1" step="0.01" v-model="transparency" />
+                            <span class="ml-3">{{ transparency }}</span>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -168,7 +159,7 @@
             },
             apply() {
                 let options = {};
-                if(this.isActive) {
+                if(this.styleActive) {
                     options = {
                         attribute_id: this.selectedAttribute.id,
                         style: this.selectedStyle,
@@ -193,8 +184,11 @@
         data() {
             return {
                 initFinished: false,
-                isActive: false,
                 styles: [
+                    {
+                        label: this.$t('plugins.map.gis.props.style.none'),
+                        id: 'none'
+                    },
                     {
                         label: this.$t('plugins.map.gis.props.style.categorized'),
                         id: 'categorized'
@@ -265,6 +259,12 @@
                     default:
                         return [];
                 }
+            },
+            styleActive: function() {
+                if(!this.selectedStyle || this.selectedStyle.id == 'none') {
+                    return false;
+                }
+                return true;
             }
         }
     }
