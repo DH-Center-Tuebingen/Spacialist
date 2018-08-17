@@ -1,5 +1,5 @@
 <template>
-    <modal :name="id" height="auto" :scrollable="true" @closed="hide">
+    <modal :name="id" height="auto" :scrollable="true" @closed="hide" :click-to-close="!!data.id">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" v-if="data.id">{{ $t('main.bibliography.modal.edit.title') }}</h5>
