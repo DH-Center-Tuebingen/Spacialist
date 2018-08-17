@@ -299,6 +299,7 @@ const de = {
             add: 'Neuen Literatur-Eintrag anlegen',
             import: 'BibTeX-Datei importieren',
             export: 'BibTeX-Datei exportieren',
+            'show-all-fields': 'Alle Felder anzeigen',
             column: {
                 'cite-key': 'Zitations-Schlüssel',
                 author: 'Autor',

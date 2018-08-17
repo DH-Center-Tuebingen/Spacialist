@@ -299,6 +299,7 @@ const en = {
             add: 'Add new Bibliography-Entry',
             import: 'Import BibTeX-File',
             export: 'Export BibTeX-File',
+            'show-all-fields': 'Show all fields',
             column: {
                 'cite-key': 'Citation-Key',
                 author: 'Author',

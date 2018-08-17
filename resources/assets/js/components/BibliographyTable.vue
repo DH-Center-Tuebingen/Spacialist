@@ -42,6 +42,17 @@
                     <i class="fas fa-fw fa-file-export"></i> {{ $t('main.bibliography.export') }}
                 </button>
             </li>
+            <li class="list-inline-item">
+                <div class="clickable" @click="showAllFields = !showAllFields">
+                    <span class="align-middle">
+                        {{ $t('main.bibliography.show-all-fields') }}
+                    </span>
+                    <label class="cb-toggle mx-0 my-auto align-middle">
+                        <input type="checkbox" id="apply-changes-toggle" v-model="showAllFields" />
+                        <span class="slider slider-rounded slider-primary"></span>
+                    </label>
+                </div>
+            </li>
         </ul>
         <div class="table-responsive">
             <table class="table table-sm table-striped table-hover">
@@ -75,47 +86,8 @@
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('author')">
-                                {{ $t('main.bibliography.column.auhtor') }}
+                                {{ $t('main.bibliography.column.author') }}
                                 <span v-show="orderColumn == 'author'">
-                                    <span v-show="orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
-                                    </span>
-                                    <span v-show="orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
-                                    </span>
-                                </span>
-                            </a>
-                        </th>
-                        <th>
-                            <a href="#" @click="setOrderColumn('editor')">
-                                {{ $t('main.bibliography.column.editor') }}
-                                <span v-show="orderColumn == 'editor'">
-                                    <span v-show="orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
-                                    </span>
-                                    <span v-show="orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
-                                    </span>
-                                </span>
-                            </a>
-                        </th>
-                        <th>
-                            <a href="#" @click="setOrderColumn('title')">
-                                {{ $t('main.bibliography.column.title') }}
-                                <span v-show="orderColumn == 'title'">
-                                    <span v-show="orderType == 'asc'">
-                                        <i class="fas fa-fw fa-sort-down"></i>
-                                    </span>
-                                    <span v-show="orderType == 'desc'">
-                                        <i class="fas fa-fw fa-sort-up"></i>
-                                    </span>
-                                </span>
-                            </a>
-                        </th>
-                        <th>
-                            <a href="#" @click="setOrderColumn('journal')">
-                                {{ $t('main.bibliography.column.journal') }}
-                                <span v-show="orderColumn == 'journal'">
                                     <span v-show="orderType == 'asc'">
                                         <i class="fas fa-fw fa-sort-down"></i>
                                     </span>
@@ -139,25 +111,17 @@
                             </a>
                         </th>
                         <th>
-                            {{ $t('main.bibliography.column.month') }}
-                        </th>
-                        <th>
-                            {{ $t('main.bibliography.column.pages') }}
-                        </th>
-                        <th>
-                            {{ $t('main.bibliography.column.volume') }}
-                        </th>
-                        <th>
-                            {{ $t('main.bibliography.column.number') }}
-                        </th>
-                        <th>
-                            {{ $t('main.bibliography.column.chapter') }}
-                        </th>
-                        <th>
-                            {{ $t('main.bibliography.column.edition') }}
-                        </th>
-                        <th>
-                            {{ $t('main.bibliography.column.series') }}
+                            <a href="#" @click="setOrderColumn('title')">
+                                {{ $t('main.bibliography.column.title') }}
+                                <span v-show="orderColumn == 'title'">
+                                    <span v-show="orderType == 'asc'">
+                                        <i class="fas fa-fw fa-sort-down"></i>
+                                    </span>
+                                    <span v-show="orderType == 'desc'">
+                                        <i class="fas fa-fw fa-sort-up"></i>
+                                    </span>
+                                </span>
+                            </a>
                         </th>
                         <th>
                             <a href="#" @click="setOrderColumn('booktitle')">
@@ -186,6 +150,53 @@
                             </a>
                         </th>
                         <th>
+                            {{ $t('main.bibliography.column.pages') }}
+                        </th>
+                        <th>
+                            <a href="#" @click="setOrderColumn('editor')">
+                                {{ $t('main.bibliography.column.editor') }}
+                                <span v-show="orderColumn == 'editor'">
+                                    <span v-show="orderType == 'asc'">
+                                        <i class="fas fa-fw fa-sort-down"></i>
+                                    </span>
+                                    <span v-show="orderType == 'desc'">
+                                        <i class="fas fa-fw fa-sort-up"></i>
+                                    </span>
+                                </span>
+                            </a>
+                        </th>
+                        <th>
+                            <a href="#" @click="setOrderColumn('journal')">
+                                {{ $t('main.bibliography.column.journal') }}
+                                <span v-show="orderColumn == 'journal'">
+                                    <span v-show="orderType == 'asc'">
+                                        <i class="fas fa-fw fa-sort-down"></i>
+                                    </span>
+                                    <span v-show="orderType == 'desc'">
+                                        <i class="fas fa-fw fa-sort-up"></i>
+                                    </span>
+                                </span>
+                            </a>
+                        </th>
+                        <th v-if="showAllFields">
+                            {{ $t('main.bibliography.column.month') }}
+                        </th>
+                        <th v-if="showAllFields">
+                            {{ $t('main.bibliography.column.volume') }}
+                        </th>
+                        <th v-if="showAllFields">
+                            {{ $t('main.bibliography.column.number') }}
+                        </th>
+                        <th v-if="showAllFields">
+                            {{ $t('main.bibliography.column.chapter') }}
+                        </th>
+                        <th v-if="showAllFields">
+                            {{ $t('main.bibliography.column.edition') }}
+                        </th>
+                        <th v-if="showAllFields">
+                            {{ $t('main.bibliography.column.series') }}
+                        </th>
+                        <th>
                             <a href="#" @click="setOrderColumn('address')">
                                 {{ $t('main.bibliography.column.address') }}
                                 <span v-show="orderColumn == 'address'">
@@ -198,7 +209,7 @@
                                 </span>
                             </a>
                         </th>
-                        <th>
+                        <th v-if="showAllFields">
                             {{ $t('main.bibliography.column.note') }}
                         </th>
                         <th>
@@ -227,19 +238,19 @@
                                 </span>
                             </a>
                         </th>
-                        <th>
+                        <th v-if="showAllFields">
                             {{ $t('main.bibliography.column.institution') }}
                         </th>
-                        <th>
+                        <th v-if="showAllFields">
                             {{ $t('main.bibliography.column.organization') }}
                         </th>
-                        <th>
+                        <th v-if="showAllFields">
                             {{ $t('main.bibliography.column.school') }}
                         </th>
-                        <th>
+                        <th v-if="showAllFields">
                             {{ $t('global.created-at') }}
                         </th>
-                        <th>
+                        <th v-if="showAllFields">
                             {{ $t('global.updated-at') }}
                         </th>
                         <th>
@@ -259,37 +270,10 @@
                             {{ entry.author }}
                         </td>
                         <td>
-                            {{ entry.editor }}
-                        </td>
-                        <td>
-                            {{ entry.title }}
-                        </td>
-                        <td>
-                            {{ entry.journal }}
-                        </td>
-                        <td>
                             {{ entry.year }}
                         </td>
                         <td>
-                            {{ entry.month }}
-                        </td>
-                        <td>
-                            {{ entry.pages }}
-                        </td>
-                        <td>
-                            {{ entry.volume }}
-                        </td>
-                        <td>
-                            {{ entry.number }}
-                        </td>
-                        <td>
-                            {{ entry.chapter }}
-                        </td>
-                        <td>
-                            {{ entry.edition }}
-                        </td>
-                        <td>
-                            {{ entry.series }}
+                            {{ entry.title }}
                         </td>
                         <td>
                             {{ entry.booktitle }}
@@ -298,9 +282,36 @@
                             {{ entry.publisher }}
                         </td>
                         <td>
-                            {{ entry.address }}
+                            {{ entry.pages }}
                         </td>
                         <td>
+                            {{ entry.editor }}
+                        </td>
+                        <td>
+                            {{ entry.journal }}
+                        </td>
+                        <td v-if="showAllFields">
+                            {{ entry.month }}
+                        </td>
+                        <td v-if="showAllFields">
+                            {{ entry.volume }}
+                        </td>
+                        <td v-if="showAllFields">
+                            {{ entry.number }}
+                        </td>
+                        <td v-if="showAllFields">
+                            {{ entry.chapter }}
+                        </td>
+                        <td v-if="showAllFields">
+                            {{ entry.edition }}
+                        </td>
+                        <td v-if="showAllFields">
+                            {{ entry.series }}
+                        </td>
+                        <td>
+                            {{ entry.address }}
+                        </td>
+                        <td v-if="showAllFields">
                             {{ entry.note }}
                         </td>
                         <td>
@@ -309,19 +320,19 @@
                         <td>
                             {{ entry.howpublished }}
                         </td>
-                        <td>
+                        <td v-if="showAllFields">
                             {{ entry.institution }}
                         </td>
-                        <td>
+                        <td v-if="showAllFields">
                             {{ entry.organization }}
                         </td>
-                        <td>
+                        <td v-if="showAllFields">
                             {{ entry.school }}
                         </td>
-                        <td>
+                        <td v-if="showAllFields">
                             {{ entry.created_at }}
                         </td>
-                        <td>
+                        <td v-if="showAllFields">
                             {{ entry.updated_at }}
                         </td>
                         <td>
@@ -562,6 +573,7 @@
                 debouncedSearch: undefined,
                 debounceTimeout: 1000,
                 files: [],
+                showAllFields: false,
                 newItem: {
                     fields: {}
                 },
