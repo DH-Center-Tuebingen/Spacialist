@@ -531,7 +531,7 @@
                         layers: vm.baselayerLayers
                     });
                     vm.overlaysGroup = new Group({
-                        title: vm.$t('main.map.overlays'),
+                        title: vm.$tc('main.map.overlay', 2),
                         openInLayerSwitcher: true,
                         layers: vm.overlayLayers
                     });

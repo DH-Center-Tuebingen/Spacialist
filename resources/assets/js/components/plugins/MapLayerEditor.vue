@@ -8,7 +8,7 @@
                 :layer="baselayer"
                 :on-select="onLayerSelect">
             </layer-list>
-            <h5 class="mt-3">{{ $t('main.map.overlays') }}</h5>
+            <h5 class="mt-3">{{ $tc('main.map.overlay', 2) }}</h5>
             <layer-list
                 class="flex-grow-1 scroll-y-auto"
                 :add-new="_ => onAddNewLayer(true)"
