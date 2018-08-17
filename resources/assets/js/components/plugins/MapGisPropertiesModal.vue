@@ -41,7 +41,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click="hide">
-                    <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
+                    <i class="fas fa-fw fa-times"></i> {{ $t('global.close') }}
                 </button>
             </div>
         </div>
