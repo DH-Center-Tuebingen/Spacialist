@@ -133,6 +133,7 @@
                         vm.selections = Object.values(vm.$getEntityTypes());
                         break;
                     case 'entity':
+                    case 'context':
                         vm.filter.comp = c.equals;
                         newTypes = [
                             c.is,
@@ -193,6 +194,15 @@
                             c.notEqual
                         ];
                         break;
+                    case 'double':
+                        vm.filter.comp = c.equals;
+                        newTypes = [
+                            c.lessThan,
+                            c.greaterThan,
+                            c.equals,
+                            c.notEqual
+                        ];
+                        break;
                     case 'color':
                         vm.filter.comp = c.equals;
                         newTypes = [
@@ -202,6 +212,17 @@
                             c.notEqual
                         ];
                         break;
+                    case 'string-sc':
+                    case 'string-mc':
+                    case 'epoch':
+                    case 'dimension':
+                    case 'list':
+                    case 'geography':
+                    case 'boolean':
+                    case 'table':
+                        vm.filter.comp = null;
+                        newTypes = [];
+                        break;
                     case 'list.bibliography':
                     case 'list.entity':
                         vm.filter.comp = c.is;
@@ -210,6 +231,8 @@
                             c.isNull
                         ];
                         break;
+                    case 'string':
+                    case 'stringf':
                     default: // strings
                         vm.filter.comp = c.equals;
                         newTypes = [
@@ -223,6 +246,12 @@
                             c.notEqual
                         ];
                         break;
+                }
+                if(vm.column.supports_aggregate) {
+                    const a = vm.aggregates;
+                    for(let k in a) {
+                        newTypes.push(a[k]);
+                    }
                 }
                 vm.typeComparisons = [];
                 newTypes.forEach(t => vm.typeComparisons.push(t));
@@ -335,10 +364,8 @@
                 }
                 return false;
             },
-            translateLabel(element, label) {
-                let value = element[label];
-                if(!value) return element;
-                return this.$translateConcept(element[label]);
+            translateLabel(element, prop) {
+                return this.$translateLabel(element, prop);
             }
         },
         data() {
@@ -471,6 +498,20 @@
                         is_dropdown: true,
                         on_relation: true
                     }
+                },
+                aggregates: {
+                    unique: {
+                        label: 'Unique Values',
+                        id: 'unique',
+                        comp: 'GROUP BY',
+                        is_aggregate: true
+                    },
+                    count: {
+                        label: 'Count Uniques',
+                        id: 'count',
+                        comp: 'COUNT',
+                        is_aggregate: true
+                    },
                 },
                 functions: {
                     geoDistance: {

@@ -200,8 +200,11 @@
                         <analysis-table
                             :columns="resultColumns"
                             :data="results"
+                            :split-data="splitData"
                             :show-hidden="showAmbiguous"
-                            :on-add-filter="addFilter">
+                            :on-add-filter="addFilter"
+                            :on-add-split="addSplit"
+                            :on-order-by="orderBy">
                         </analysis-table>
                     </div>
                 </div>
@@ -254,21 +257,22 @@
                                 </div>
                             </div>
                         </form>
-                        <component
-                            v-if="visualizationSelected"
-                            :is="plotAddon"
-                            :options="plotOptions"
-                            :layout="plotLayout"
-                            :selections="resultColumns"
-                            :on-selection="getColumnValues">
-                        </component>
+                        <div v-if="visualizationSelected">
+                            <component
+                                :is="plotAddon"
+                                :options="plotOptions"
+                                :layout="plotLayout"
+                                :selections="resultColumns"
+                                :on-selection="getColumnValues">
+                            </component>
+                            <button type="button" class="btn btn-outline-primary col" @click="visualize(plotOptions)">
+                                <i class="fas fa-fw fa-eye"></i>
+                                Visualize
+                            </button>
+                        </div>
                         <p class="alert alert-info" v-else>
                             Please select a visualization from the list above. For a detailed explanation of their options, please refer to <a href="https://plot.ly/javascript/" target="_blank">plotly.js</a> API.
                         </p>
-                        <button type="button" class="btn btn-outline-primary col" @click="visualize(plotOptions)">
-                            <i class="fas fa-fw fa-eye"></i>
-                            Visualize
-                        </button>
                     </div>
                     <div class="col-md-6 border-left border-secondary" :id="plotContainer"></div>
                 </div>
@@ -345,7 +349,7 @@
             draggable
         },
         mounted() {
-            this.origin = this.origins[1]; // Use entity table as default
+            this.origin = this.origins[0]; // Use attribute table as default
         },
         methods: {
             toggleExpertMode() {
@@ -453,10 +457,7 @@
                     vm.results = [];
                     vm.filteredOrigin = vm.origin;
                     vm.query = data.query;
-                    vm.splitResults = Object.assign({});
-                    vm.splitType = Object.assign({});
-                    // Reset splitResults
-                    // Reset splitType
+                    vm.splitData = Object.assign({});
                     if(data.length) {
                         vm.availableColumns = [];
                         if(vm.expertMode) {
@@ -480,14 +481,11 @@
                             }
                             const splits = response.data.splits;
                             for(let k in splits) {
-                                vm.splitResults[k] = splits[k].values;
-                                vm.splitType[k] = splits[k].type;
+                                Vue.set(vm.splitData, k, splits[k]);
                             }
                         }
                         vm.activeResultTab = vm.expertMode ? 'raw' : 'simple';
                     }
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             addSplit(relation, column, value, name) {
@@ -509,6 +507,28 @@
                 this.splits.splice(index, 1);
                 this.applyOnlyInstantFilter();
             },
+            orderBy(column, dir) {
+                console.log(column);
+                if(this.expertMode) {
+                    const index = this.orders.findIndex(o => o.col == column.key);
+                    if(index > -1) { // order column exists, replace
+                        this.orders[index].dir = dir;
+                    } else { // new order column, add
+                        this.orders.push({
+                            col: column.key,
+                            dir: dir
+                        });
+                    }
+                } else {
+                    this.orders = [];
+                    this.orders.push({
+                        // col: column.key,
+                        col: 'attribute.name',
+                        dir: dir
+                    });
+                }
+                this.applyOnlyInstantFilter();
+            },
             exportRows(type, all) {
                 const vm = this;
                 type = type || 'csv';
@@ -527,8 +547,6 @@
                 vm.$http.post(`/api/analysis/export/${type}`, data).then(function(response) {
                     const filename = `${vm.origin.label}.${type}`;
                     vm.$createDownloadLink(response.data, filename, true, response.headers['content-type']);
-                }).catch(function(error) {
-                    vm.$throwError(error);
                 });
             },
             visualize(options) {
@@ -572,6 +590,7 @@
             return {
                 activeResultTab: '',
                 results: [],
+                splitData: {},
                 splitResults: {},
                 splitType: {},
                 query: '',
@@ -708,7 +727,8 @@
                                 label: 'Value',
                                 key: 'value',
                                 hidden: false,
-                                type: 'value'
+                                type: 'value',
+                                supports_aggregate: true
                             },
                             {
                                 label: 'Certainty',
@@ -753,7 +773,8 @@
                                 key: 'attributes',
                                 hidden: false,
                                 type: 'list.attribute',
-                                is_relation: true
+                                is_relation: true,
+                                split_prop: 'id'
                             },
                             // TODO split results
                             {

@@ -285,47 +285,15 @@ class AnalysisController extends Controller {
                     // if so, loop over all items
                     foreach($rel->all() as $r) {
                         if($r->{$s['column']} == $s['value']) {
-                            $value = null;
-                            if(isset($r->pivot->str_val)) {
-                                $value = $r->pivot->str_val;
-                            } else if(isset($r->pivot->int_val)) {
-                                $value = $r->pivot->int_val;
-                            } else if(isset($r->pivot->dbl_val)) {
-                                $value = $r->pivot->dbl_val;
-                            } else if(isset($r->pivot->thesaurus_val)) {
-                                $value = $r->pivot->thesaurus_val;
-                            } else if(isset($r->pivot->dt_val)) {
-                                $value = $r->pivot->dt_val;
-                            } else if(isset($r->pivot->geography_val)) {
-                                $value = [
-                                    'wkt' => Geometry::fromWKB($r->pivot->geography_val)->toWKT(),
-                                    'geom' => Geometry::fromWKB($r->pivot->geography_val)
-                                ];
-                            }
                             $type = $r->datatype;
+                            $value = $r;
                         }
                     }
                     // otherwise, should be object
                 } else if(is_object($rel)) {
                     if($rel->{$s['column']} == $s['value']) {
-                        $value = null;
-                        if(isset($rel->pivot->str_val)) {
-                            $value = $rel->pivot->str_val;
-                        } else if(isset($rel->pivot->int_val)) {
-                            $value = $rel->pivot->int_val;
-                        } else if(isset($rel->pivot->dbl_val)) {
-                            $value = $rel->pivot->dbl_val;
-                        } else if(isset($rel->pivot->thesaurus_val)) {
-                            $value = $rel->pivot->thesaurus_val;
-                        } else if(isset($rel->pivot->dt_val)) {
-                            $value = $rel->pivot->dt_val;
-                        } else if(isset($r->pivot->geography_val)) {
-                            $value = [
-                                'wkt' => Geometry::fromWKB($rel->pivot->geography_val)->toWKT(),
-                                'geom' => Geometry::fromWKB($rel->pivot->geography_val)
-                            ];
-                        }
                         $type = $rel->datatype;
+                        $value = $rel;
                     }
                 } else {
                     // should not happen ;)
@@ -486,6 +454,7 @@ class AnalysisController extends Controller {
                         $f = (object) $fArray;
                         $f->and = false; // all filters in a group are OR
                         $applied = $this->applyFilter($subQuery, $f);
+                        // TODO
                         // check if it was a valid filter and a agg function
                         if($applied && isset($f->func) && $this->isAggregateFunction($f->func)) {
                             $hasGroupBy = true;
@@ -499,7 +468,7 @@ class AnalysisController extends Controller {
 
         if(!empty($orders)) {
             foreach($orders as $o) {
-                $query->orderBy($o->col, $o->dir);
+                $query->orderBy($o['col'], $o['dir']);
             }
         }
 
@@ -516,7 +485,7 @@ class AnalysisController extends Controller {
                     } else {
                         $groups[$c->col] = 1;
                     }
-                    $select =  $this->getAsRaw($c->func, $c->col, $c->func_values, $c->as);
+                    $select = $this->getAsRaw($c->func, $c->col, $c->func_values, $c->as);
                 } else {
                     $groups[$c->col] = 1;
                     $select = '';
@@ -581,12 +550,12 @@ class AnalysisController extends Controller {
                 return false;
             }
         }
-        $isAgg = $usesFunc && $this->isAggregateFunction($func);
+        $isAggregate = $usesFunc && $this->isAggregateFunction($func);
         if($usesFunc) {
             $col = $this->getAsRaw($func, $col, $funcValues);
         }
         if($isRelationFilter) {
-            if($isAgg) {
+            if($isAggregate) {
                 if($and) {
                     $query->whereHas($relation->name, function($q) use($col, $comp, $compValue, $relation) {
                         $q->where('id', '=', $relation->id);
@@ -633,7 +602,7 @@ class AnalysisController extends Controller {
                 }
             }
         } else {
-            if($isAgg) {
+            if($isAggregate) {
                 if($and) $query->having($col, $comp, $compValue);
                 else $query->orHaving($col, $comp, $compValue);
             } else {

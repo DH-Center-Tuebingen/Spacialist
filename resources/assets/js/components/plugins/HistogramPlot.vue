@@ -89,7 +89,7 @@
         },
         beforeMount() {
             const defaults = {
-                x: [1, 2, 3, 4],
+                x: [],
                 type: 'histogram'
             };
             for(let k in defaults) {
@@ -100,11 +100,9 @@
             toggleHorizontal() {
                 this.isHorizontal = !this.isHorizontal;
                 if(this.isHorizontal) {
-                    console.log("is now");
                     Vue.set(this.options, 'y', this.options.x);
                     Vue.delete(this.options, 'x');
                 } else {
-                    console.log("is not");
                     Vue.set(this.options, 'x', this.options.y);
                     Vue.delete(this.options, 'y');
                 }
@@ -112,10 +110,8 @@
             toggleBins() {
                 this.autoBins = !this.autoBins;
                 if(this.autoBins) {
-                    console.log("using auto bins");
                     Vue.delete(this.options, 'xbins');
                 } else {
-                    console.log("removing auto bins");
                     Vue.set(this.options, 'xbins', {
                         start: this.start,
                         end: this.end,

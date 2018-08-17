@@ -90,10 +90,10 @@
         beforeMount() {
             // Options
             const defaults = {
-                a: [1, 2, 3, 4],
-                b: [10, 15, 13, 17],
-                c: [23, 32, 32, 1],
-                text: ['1', '2', '3', '4'],
+                a: [],
+                b: [],
+                c: [],
+                text: [],
                 marker: {
                     size: 6
                 },

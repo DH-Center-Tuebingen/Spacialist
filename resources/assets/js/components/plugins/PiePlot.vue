@@ -55,8 +55,8 @@
         },
         beforeMount() {
             const defaults = {
-                values: [1, 2, 3, 4],
-                labels: [10, 15, 13, 17],
+                values: [],
+                labels: [],
                 type: 'pie'
             };
             for(let k in defaults) {
