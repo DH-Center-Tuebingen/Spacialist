@@ -35,6 +35,16 @@ const en = {
                     imported: {
                         title: 'Import finished',
                         msg: '{cnt} features added.'
+                    },
+                    updated: {
+                        style: {
+                            title: 'Style applied',
+                            msg: 'Style for {name} successfully applied.'
+                        },
+                        labels: {
+                            title: 'Labels applied',
+                            msg: 'Labels for {name} successfully applied.'
+                        },
                     }
                 },
                 props: {
@@ -44,6 +54,7 @@ const en = {
                         'color-ramp': 'Color Ramp',
                         classes: 'Classes',
                         apply: 'Apply Style',
+                        none: 'None',
                         categorized: 'Categorized',
                         graduated: 'Graduated',
                         colors: {

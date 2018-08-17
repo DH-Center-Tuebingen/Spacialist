@@ -363,6 +363,19 @@
                         });
                     }
                 }
+                let name;
+                if(this.layer.context_type) {
+                    name = this.$translateConcept(this.layer.context_type.thesaurus_url)
+                } else {
+                    name = this.layer.name;
+                }
+                this.$showToast(
+                    this.$t('plugins.map.gis.toasts.updated.labels.title'),
+                    this.$t('plugins.map.gis.toasts.updated.labels.msg', {
+                        name: name
+                    }),
+                    'success'
+                );
             },
             translateLabel(element, prop) {
                 return this.$translateLabel(element, prop);

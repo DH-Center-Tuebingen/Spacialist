@@ -176,6 +176,19 @@
                         data: options
                     });
                 }
+                let name;
+                if(this.layer.context_type) {
+                    name = this.$translateConcept(this.layer.context_type.thesaurus_url)
+                } else {
+                    name = this.layer.name;
+                }
+                this.$showToast(
+                    this.$t('plugins.map.gis.toasts.updated.style.title'),
+                    this.$t('plugins.map.gis.toasts.updated.style.msg', {
+                        name: name
+                    }),
+                    'success'
+                );
             },
             translateLabel(element, prop) {
                 return this.$translateLabel(element, prop);

@@ -35,6 +35,16 @@ const de = {
                     imported: {
                         title: 'Import abgeschlossen',
                         msg: '{cnt} Objekte hinzugefügt.'
+                    },
+                    updated: {
+                        style: {
+                            title: 'Stil angewendet',
+                            msg: 'Stil für {name} erfolgreich angewendet.'
+                        },
+                        labels: {
+                            title: 'Beschriftungen angewendet',
+                            msg: 'Beschriftungen für {name} erfolgreich angewendet.'
+                        },
                     }
                 },
                 props: {
@@ -44,6 +54,7 @@ const de = {
                         'color-ramp': 'Farbverlauf',
                         classes: 'Klassen',
                         apply: 'Stil anwenden',
+                        none: 'Kein Stil',
                         categorized: 'Kategorisiert',
                         graduated: 'Abgestuft',
                         colors: {
