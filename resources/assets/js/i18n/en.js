@@ -331,7 +331,28 @@ const en = {
             overlay:'Overlay | Overlays',
             'entity-layers': 'Entity-Layer',
             'geometry-name': 'Geometry #{id}',
-            'coords-in-epsg': 'Coordinates in EPSG:{epsg}'
+            'coords-in-epsg': 'Coordinates in EPSG:{epsg}',
+            draw: {
+                point: {
+                    desc: 'Draw Point',
+                },
+                linestring: {
+                    desc: 'Draw Line',
+                },
+                polygon: {
+                    desc: 'Draw Polygon',
+                },
+                modify: {
+                    desc: 'Modify geometries',
+                    'pos-desc': 'Save modifications',
+                    'neg-desc': 'Discard modifications'
+                },
+                delete: {
+                    desc: 'Delete geometries',
+                    'pos-desc': 'Confirm delete',
+                    'neg-desc': 'Discard delete'
+                }
+            }
         }
     }
 };
