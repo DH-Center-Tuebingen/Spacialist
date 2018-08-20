@@ -63,6 +63,7 @@ class Geodata extends Model
             $geodata->geom = $parsedWkt;
             $geodata->lasteditor = $user->name;
             $geodata->save();
+            $geodata->context;
             $objs[] = $geodata;
         }
         return $objs;

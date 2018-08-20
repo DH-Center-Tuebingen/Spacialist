@@ -1244,7 +1244,27 @@
                     }
                 }
                 this.snap.addFeature(feature);
-                this.onDrawend(feature, this.wktFormat.writeFeature(feature));
+                this.onDrawend(feature, this.wktFormat.writeFeature(feature)).then(newFeature => {
+                    if(!newFeature) return;
+                    this.vector.getSource().removeFeature(feature);
+                    let layer;
+                    const ent = newFeature.get('entity');
+                    if(ent) {
+                        layer = this.getLayer(ent.context_type_id)
+                    } else {
+                        layer = this.getUnlinkedLayer();
+                    }
+                    const entLayer = this.getEntityLayerById(layer.id);
+                    const fid = newFeature.get('id');
+                    const defaultStyle = this.createStyle(layer.color);
+                    this.featureStyles[fid] = {
+                        default: defaultStyle,
+                        label: null,
+                        style: null
+                    };
+                    newFeature.setStyle(this.featureStyles[fid].default);
+                    entLayer.getSource().addFeature(newFeature);
+                });
             },
             updateFeatures() {
                 const features = this.modify.getModifiedFeatures();
@@ -1330,9 +1350,9 @@
                 this.measureDraw.on('drawstart', event => {
                     // Remove existing measures
                     this.measureSource.clear();
-                    this.drawFeature = event.feature;
+                    this.drawnFeature = event.feature;
                     let coords = event.coordinate;
-                    measureListener = this.drawFeature.getGeometry().on('change', ce => {
+                    measureListener = this.drawnFeature.getGeometry().on('change', ce => {
                         let geom = ce.target;
                         coords = geom.getLastCoordinate();
                         $(this.measureTooltipElement).tooltip('dispose');

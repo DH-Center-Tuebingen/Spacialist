@@ -65,18 +65,20 @@
                 });
             },
             addFeature(feature, wkt) {
-                const vm = this;
-                const collection = vm.geoJsonFormat.writeFeatures([feature]);
+                const collection = this.geoJsonFormat.writeFeatures([feature]);
                 const srid = 3857;
                 const data = {
                     collection: collection,
                     srid: srid
                 };
-                vm.$http.post('/map', data).then(function(response) {
+                return $http.post('/map', data).then(response => {
                     if(response.data.length) {
                         const geodata = response.data[0];
                         // TODO update feature
-                        feature.setProperties(vm.getProperties(geodata));
+                        feature.setProperties(this.getProperties(geodata));
+                        return feature;
+                    } else {
+                        return;
                     }
                 });
             },
