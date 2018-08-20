@@ -10,15 +10,15 @@
         </a>
         <div v-if="supportsHtmlRendering && !htmlLoaded">
             <hr />
-            <button type="button" class="btn btn-outline-secondary my-2" @click="loadAsHtml">
-                {{ $t('plugins.files.modal.undef.as-html') }}
+            <button type="button" class="btn btn-outline-secondary mt-2 mb-3" @click="loadAsHtml">
+                {{ $t('plugins.files.modal.detail.undef.as-html') }}
             </button>
             <div>
                 <h5>
-                    {{ $t('plugins.files.modal.undef.html-info.title') }}
+                    {{ $t('plugins.files.modal.detail.undef.html-info.title') }}
                 </h5>
-                <p class="alert font-italic mx-5">
-                    {{ $t('plugins.files.modal.undef.html-info.desc') }}
+                <p class="alert font-italic mx-5 pt-0">
+                    {{ $t('plugins.files.modal.detail.undef.html-info.desc') }}
                 </p>
             </div>
         </div>
