@@ -184,6 +184,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::patch('/layer/{id}', 'MapController@updateLayer')->where('id', '[0-9]+');
 
     Route::delete('/{id}', 'MapController@delete')->where('id', '[0-9]+');
+    Route::delete('layer/{id}', 'MapController@deleteLayer')->where('id', '[0-9]+');
     Route::delete('/link/{gid}/{eid}', 'MapController@unlink')->where('gid', '[0-9]+')->where('eid', '[0-9]+');
 });
 

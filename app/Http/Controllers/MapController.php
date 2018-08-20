@@ -452,6 +452,31 @@ class MapController extends Controller
         return response()->json(null, 204);
     }
 
+    public function deleteLayer($id) {
+        $user = auth()->user();
+        if(!$user->can('upload_remove_geodata')) {
+            return response()->json([
+                'error' => 'You do not have the permission to delete layers'
+            ], 403);
+        }
+        try {
+            $layer = AvailableLayer::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This layer does not exist'
+            ], 400);
+        }
+        if(isset($layer->context_type_id) || $layer->type == 'unlinked') {
+            return response()->json([
+                'error' => 'This layer can not be deleted'
+            ], 400);
+        }
+
+        $layer->delete();
+
+        return response()->json(null, 204);
+    }
+
     public function unlink(Request $request, $gid, $eid) {
         $user = auth()->user();
         if(!$user->can('link_geodata')) {
