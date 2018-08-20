@@ -280,7 +280,8 @@ const de = {
                 time: 'Datum der Veröffentlichung',
                 'full-name': 'Vollständiger Name'
             },
-            'build-info': 'Mit <i class="fab fa-fw fa-laravel"></i> & <i class="fab fa-fw fa-vuejs"></i> erstellt!'
+            'build-info': 'Mit <i class="fab fa-fw fa-laravel"></i> & <i class="fab fa-fw fa-vuejs"></i> erstellt!',
+            contributor: 'Mitwirkender | Mitwirkende'
         },
         bibliography: {
             modal: {

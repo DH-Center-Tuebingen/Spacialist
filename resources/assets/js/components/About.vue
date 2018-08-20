@@ -42,10 +42,16 @@
                         </a>
                     </div>
                 </div>
+                <h5>{{ $tc('main.about.contributor', 2) }}</h5>
+                <div class="row">
+                    <div v-for="contributor in contributors" class="col-md-6">
+                        {{ contributor.name }}
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary"     @click="hideAboutModal">
-                    Close
+                    {{ $t('global.close')}}
                 </button>
             </div>
         </div>
@@ -62,7 +68,27 @@
         },
         data() {
             return {
-                version: {}
+                version: {},
+                contributors: [
+                    {
+                        name: 'Vinzenz Rosenkranz'
+                    },
+                    {
+                        name: 'Benjamin Mitzkus'
+                    },
+                    {
+                        name: 'Dirk Seidensticker'
+                    },
+                    {
+                        name: 'Benjamin Glissmann'
+                    },
+                    {
+                        name: 'Michael Derntl'
+                    },
+                    {
+                        name: 'Matthias Lang'
+                    }
+                ]
             }
         },
         created() {
