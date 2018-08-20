@@ -18,7 +18,10 @@
                             :customLabel="translateLabel"
                             :hideSelected="false"
                             :multiple="false"
-                            :options="attributes">
+                            :options="attributes"
+                            :placeholder="$t('global.select.select')"
+                            :select-label="$t('global.select.select')"
+                            :deselect-label="$t('global.select.deselect')">
                         </multiselect>
                     </div>
                 </div>
@@ -70,7 +73,10 @@
                                 :closeOnSelect="true"
                                 :hideSelected="false"
                                 :multiple="false"
-                                :options="font.styles">
+                                :options="font.styles"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </div>
@@ -88,7 +94,10 @@
                                 :closeOnSelect="true"
                                 :hideSelected="false"
                                 :multiple="false"
-                                :options="font.transforms">
+                                :options="font.transforms"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </div>
@@ -265,7 +274,10 @@
                                 :closeOnSelect="true"
                                 :hideSelected="false"
                                 :multiple="false"
-                                :options="position.placements">
+                                :options="position.placements"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </div>

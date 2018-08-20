@@ -66,7 +66,10 @@
                                 :close-on-select="false"
                                 :hide-selected="true"
                                 :multiple="true"
-                                :options="filterTypeList">
+                                :options="filterTypeList"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </div>
@@ -82,7 +85,10 @@
                                 :close-on-select="false"
                                 :hide-selected="true"
                                 :multiple="true"
-                                :options="filterCameraList">
+                                :options="filterCameraList"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </div>
@@ -100,7 +106,10 @@
                                 :close-on-select="false"
                                 :hide-selected="true"
                                 :multiple="true"
-                                :options="filterDateList">
+                                :options="filterDateList"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </div>
@@ -119,7 +128,10 @@
                                 :custom-label="translateLabel"
                                 :hide-selected="true"
                                 :multiple="true"
-                                :options="tags">
+                                :options="tags"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </div>
@@ -384,7 +396,10 @@
                                         :custom-label="translateLabel"
                                         :hide-selected="true"
                                         :multiple="true"
-                                        :options="tags">
+                                        :options="tags"
+                                        :placeholder="$t('global.select.select')"
+                                        :select-label="$t('global.select.select')"
+                                        :deselect-label="$t('global.select.deselect')">
                                     </multiselect>
                                 </div>
                                 <div class="col-md-3">

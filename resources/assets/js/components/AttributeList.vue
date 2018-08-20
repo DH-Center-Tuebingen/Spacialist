@@ -99,6 +99,9 @@
                             :multiple="true"
                             :options="localSelections[attribute.id] || []"
                             :name="'attribute-'+attribute.id"
+                            :placeholder="$t('global.select.select')"
+                            :select-label="$t('global.select.select')"
+                            :deselect-label="$t('global.select.deselect')"
                             @input="(value, id) => checkDependency(attribute.id)">
                         </multiselect>
                     </div>
@@ -116,6 +119,9 @@
                             :multiple="false"
                             :options="localSelections[attribute.id] || []"
                             :name="'attribute-'+attribute.id"
+                            :placeholder="$t('global.select.select')"
+                            :select-label="$t('global.select.select')"
+                            :deselect-label="$t('global.select.deselect')"
                             @input="(value, id) => checkDependency(attribute.id)">
                         </multiselect>
                     </div>

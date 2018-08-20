@@ -98,7 +98,10 @@
                                 :closeOnSelect="true"
                                 :hideSelected="true"
                                 :multiple="false"
-                                :options="newEntity.selection">
+                                :options="newEntity.selection"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </form>
@@ -124,7 +127,7 @@
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        {{ $t('global.delete-name.desc', {name: toDeleteEntity.name}) }}</i>?
+                        {{ $t('global.delete-name.desc', {name: toDeleteEntity.name}) }}</i>
                     </p>
                 </div>
                 <div class="modal-footer">

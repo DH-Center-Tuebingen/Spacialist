@@ -30,7 +30,10 @@
                             :hideSelected="true"
                             :multiple="true"
                             :name="'roles_'+user.id"
-                            :options="roles">
+                            :options="roles"
+                            :placeholder="$t('main.user.add-role-placeholder')"
+                            :select-label="$t('global.select.select')"
+                            :deselect-label="$t('global.select.deselect')">
                         </multiselect>
                     </td>
                     <td>
@@ -48,13 +51,13 @@
                                 </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="isDirty('roles_'+user.id)" :disabled="!$can('add_remove_role')" @click="onPatchUser(user.id)">
+                                <a class="dropdown-item" href="#" v-if="isDirty('roles_'+user.id)" :disabled="!$can('add_remove_role')" @click.prevent="onPatchUser(user.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> {{ $t('global.save') }}
                                 </a>
-                                <a class="dropdown-item" href="#" :disabled="!$can('change_password')" @click="updatePassword(user.id)">
+                                <a class="dropdown-item" href="#" :disabled="!$can('change_password')" @click.prevent="updatePassword(user.id)">
                                     <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
                                 </a>
-                                <a class="dropdown-item" href="#" :disabled="!$can('delete_users')" @click="requestDeleteUser(user.id)">
+                                <a class="dropdown-item" href="#" :disabled="!$can('delete_users')" @click.prevent="requestDeleteUser(user.id)">
                                     <i class="fas fa-fw fa-trash text-danger"></i> {{ $t('global.delete') }}
                                 </a>
                             </div>

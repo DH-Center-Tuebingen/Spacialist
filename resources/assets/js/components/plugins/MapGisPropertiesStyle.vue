@@ -16,7 +16,10 @@
                             :closeOnSelect="true"
                             :hideSelected="false"
                             :multiple="false"
-                            :options="styles">
+                            :options="styles"
+                            :placeholder="$t('global.select.select')"
+                            :select-label="$t('global.select.select')"
+                            :deselect-label="$t('global.select.deselect')">
                         </multiselect>
                     </div>
                 </div>
@@ -36,7 +39,10 @@
                                 :custom-label="translateLabel"
                                 :hideSelected="false"
                                 :multiple="false"
-                                :options="attributeList">
+                                :options="attributeList"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </div>
@@ -54,7 +60,10 @@
                                 :hideSelected="false"
                                 :multiple="false"
                                 :options="colorRamps"
-                                :show-labels="false">
+                                :show-labels="false"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                                 <template slot="singleLabel" slot-scope="props">
                                     <color-gradient
                                         :from="props.option.from"
@@ -94,7 +103,10 @@
                                 :closeOnSelect="true"
                                 :hideSelected="false"
                                 :multiple="false"
-                                :options="graduatedModes">
+                                :options="graduatedModes"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </div>

@@ -66,6 +66,11 @@ const en = {
             settings: 'Preferences',
             logout: 'Logout'
         },
+        select: {
+            placehoder: 'Select option',
+            select: 'Press enter to select',
+            deselect: 'Press enter to remove'
+        },
         attribute: 'Attribute',
         active: 'Active',
         visible: 'Visible',
@@ -166,7 +171,8 @@ const en = {
                 new: {
                     title: 'New User'
                 }
-            }
+            },
+            'add-role-placeholder': 'Add roles'
         },
         role: {
             'add-button': 'Add new Role',
@@ -180,7 +186,8 @@ const en = {
                 new: {
                     title: 'New Role'
                 }
-            }
+            },
+            'add-permission-placeholder': 'Add permissions'
         },
         datamodel: {
             toasts: {

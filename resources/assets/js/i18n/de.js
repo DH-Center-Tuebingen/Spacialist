@@ -66,6 +66,11 @@ const de = {
             settings: 'Einstellungen',
             logout: 'Ausloggen'
         },
+        select: {
+            placehoder: 'Option auswählen',
+            select: 'Drücke Enter zum hinzufügen',
+            deselect: 'Drücke Enter zum entfernen'
+        },
         attribute: 'Attribut',
         active: 'Aktiviert',
         visible: 'Sichtbar',
@@ -166,7 +171,8 @@ const de = {
                 new: {
                     title: 'Neuer Benutzer'
                 }
-            }
+            },
+            'add-role-placeholder': 'Rollen hinzufügen'
         },
         role: {
             'add-button': 'Neue Rolle hinzufügen',
@@ -180,7 +186,8 @@ const de = {
                 new: {
                     title: 'Neue Rolle'
                 }
-            }
+            },
+            'add-permission-placeholder': 'Berechtigungen hinzufügen'
         },
         datamodel: {
             toasts: {

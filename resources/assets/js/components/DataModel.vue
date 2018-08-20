@@ -69,7 +69,10 @@
                                     :closeOnSelect="false"
                                     :hideSelected="true"
                                     :multiple="false"
-                                    :options="availableGeometries">
+                                    :options="availableGeometries"
+                                    :placeholder="$t('global.select.select')"
+                                    :select-label="$t('global.select.select')"
+                                    :deselect-label="$t('global.select.deselect')">
                                 </multiselect>
                             </div>
                         </div>
@@ -119,7 +122,10 @@
                                     :closeOnSelect="true"
                                     :hideSelected="true"
                                     :multiple="false"
-                                    :options="attributeTypes">
+                                    :options="attributeTypes"
+                                    :placeholder="$t('global.select.select')"
+                                    :select-label="$t('global.select.select')"
+                                    :deselect-label="$t('global.select.deselect')">
                                 </multiselect>
                             </div>
                         </div>

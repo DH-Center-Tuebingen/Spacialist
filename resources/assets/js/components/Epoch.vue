@@ -38,7 +38,10 @@
             :disabled="disabled"
             :hideSelected="true"
             :multiple="false"
-            :options="epochs">
+            :options="epochs"
+            :placeholder="$t('global.select.select')"
+            :select-label="$t('global.select.select')"
+            :deselect-label="$t('global.select.deselect')">
         </multiselect>
     </div>
 </template>

@@ -29,6 +29,9 @@
                             :hideSelected="true"
                             :multiple="false"
                             :options="selections[column.id] || []"
+                            :placeholder="$t('global.select.select')"
+                            :select-label="$t('global.select.select')"
+                            :deselect-label="$t('global.select.deselect')"
                             @input="onInput($index, $event.target.value)">
                         </multiselect>
                     </div>
@@ -58,7 +61,9 @@
                             :hideSelected="true"
                             :multiple="false"
                             :options="selections[column.id] || []"
-                           >
+                            :placeholder="$t('global.select.select')"
+                            :select-label="$t('global.select.select')"
+                            :deselect-label="$t('global.select.deselect')">
                         </multiselect>
                     </div>
                 </td>

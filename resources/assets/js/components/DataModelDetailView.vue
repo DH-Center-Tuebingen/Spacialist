@@ -21,7 +21,10 @@
                             :customLabel="translateLabel"
                             :hideSelected="true"
                             :multiple="true"
-                            :options="minimalContextTypes">
+                            :options="minimalContextTypes"
+                            :placeholder="$t('global.select.select')"
+                            :select-label="$t('global.select.select')"
+                            :deselect-label="$t('global.select.deselect')">
                         </multiselect>
                         <div class="pt-2">
                             <button type="button" class="btn btn-outline-success mr-2" @click="addAllContextTypes">
@@ -100,6 +103,9 @@
                                     :hideSelected="false"
                                     :multiple="false"
                                     :options="depends.attributes"
+                                    :placeholder="$t('global.select.select')"
+                                    :select-label="$t('global.select.select')"
+                                    :deselect-label="$t('global.select.deselect')"
                                     @input="dependencyAttributeSelected">
                                 </multiselect>
                                 <multiselect
@@ -112,7 +118,10 @@
                                     :closeOnSelect="true"
                                     :hideSelected="false"
                                     :multiple="false"
-                                    :options="dependencyOperators">
+                                    :options="dependencyOperators"
+                                    :placeholder="$t('global.select.select')"
+                                    :select-label="$t('global.select.select')"
+                                    :deselect-label="$t('global.select.deselect')">
                                 </multiselect>
                                 <div v-if="selectedDependency.attribute && selectedDependency.attribute.id">
                                     <input type="checkbox" class="form-check-input" v-if="dependencyType == 'boolean'" v-model="selectedDependency.value" />
@@ -128,7 +137,10 @@
                                         :customLabel="translateLabel"
                                         :hideSelected="false"
                                         :multiple="false"
-                                        :options="depends.values">
+                                        :options="depends.values"
+                                        :placeholder="$t('global.select.select')"
+                                        :select-label="$t('global.select.select')"
+                                        :deselect-label="$t('global.select.deselect')">
                                     </multiselect>
                                     <input type="text" class="form-control" v-else v-model="selectedDependency.value" />
                                 </div>

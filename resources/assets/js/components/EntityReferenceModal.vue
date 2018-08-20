@@ -80,7 +80,10 @@
                                 :closeOnSelect="true"
                                 :hideSelected="true"
                                 :multiple="false"
-                                :options="bibliography">
+                                :options="bibliography"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                                 <template slot="singleLabel" slot-scope="props">
                                     <span class="option__desc">
                                         <span class="option__title">

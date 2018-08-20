@@ -34,7 +34,10 @@
                             :hideSelected="true"
                             :multiple="true"
                             :name="'perms_'+role.id"
-                            :options="permissions">
+                            :options="permissions"
+                            :placeholder="$t('main.role.add-permission-placeholder')"
+                            :select-label="$t('global.select.select')"
+                            :deselect-label="$t('global.select.deselect')">
                         </multiselect>
                     </td>
                     <td>

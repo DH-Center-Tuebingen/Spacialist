@@ -21,7 +21,10 @@
                                 :closeOnSelect="true"
                                 :hideSelected="true"
                                 :multiple="false"
-                                :options="availableTypes">
+                                :options="availableTypes"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
                             </multiselect>
                         </div>
                     </div>
