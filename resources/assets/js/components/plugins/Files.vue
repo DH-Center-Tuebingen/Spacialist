@@ -639,7 +639,9 @@
                     })
                 };
                 $http.patch(`file/${file.id}/tag`, data).then(response => {
-
+                    const title = this.$t('plugins.files.modal.detail.toasts.tags-updated.title');
+                    const msg = this.$t('plugins.files.modal.detail.toasts.tags-updated.msg', {name: file.name});
+                    this.$showToast(title, msg, 'success');
                 });
             },
             initFilters() {

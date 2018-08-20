@@ -49,6 +49,12 @@ const en = {
                     'toggle-csv': 'Toggle CSV-Rendering',
                     'toggle-md': 'Toggle Markdown-Rendering',
                     'toggle-html': 'Toggle HTML-Rendering',
+                    toasts: {
+                        'tags-updated': {
+                            title: 'Tags updated',
+                            msg: 'Tags of {name} successfully updated.'
+                        }
+                    },
                     csv: {
                         delimiter: 'Delimiter',
                         header: 'Header Row?',

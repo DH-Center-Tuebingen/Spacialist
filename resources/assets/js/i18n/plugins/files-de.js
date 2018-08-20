@@ -49,6 +49,12 @@ const de = {
                     'toggle-csv': 'CSV-Anzeige umschalten',
                     'toggle-md': 'Markdown-Anzeige umschalten',
                     'toggle-html': 'HTML-Anzeige umschalten',
+                    toasts: {
+                        'tags-updated': {
+                            title: 'Schlagworte aktualisiert',
+                            msg: 'Schlagworte für {name} wurden erfolgreich aktualisiert.'
+                        }
+                    },
                     csv: {
                         delimiter: 'Trennzeichen',
                         header: 'Kopfzeile?',
