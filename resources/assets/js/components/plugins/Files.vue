@@ -401,13 +401,24 @@
                             </form>
                         </div>
                         <div v-show="modalTab == 'links'">
-                            <ul class="list-group mt-3 ml-4 mr-4">
-                                <li class="list-group-item" v-for="link in selectedFile.contexts">
-                                    <a href="#" @click.prevent="routeToEntity(link)">
-                                        <i class="fas fa-fw fa-monument"></i> {{ link.name }}
-                                    </a>
-                                </li>
-                            </ul>
+                            <div class="d-flex flex-column">
+                                <ul class="list-group mt-3 mx-4">
+                                    <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.contexts">
+                                        <a href="#" @click.prevent="routeToEntity(link)">
+                                            <i class="fas fa-fw fa-monument"></i> {{ link.name }}
+                                        </a>
+                                        <a href="#" class="text-body" @click.prevent="requestUnlinkFile(selectedFile, link)">
+                                            <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                                <button type="button" class="btn btn-outline-success mx-4 mt-2" @click.prevent="linkFile(selectedFile, context)" v-if="!linkedToCurrentEntity">
+                                    <span class="fa-stack d-inline">
+                                        <i class="fas fa-monument"></i>
+                                        <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i> {{ $t('global.link-to', {name: context.name})}}
+                                    </span>
+                                </button>
+                            </div>
                         </div>
                         <div v-show="modalTab == 'exif'">
                             <p class="alert alert-info" v-if="!selectedFile.exif">
@@ -959,14 +970,17 @@
                 });
             },
             unlinkFile(file, context) {
-                const vm = this;
                 const id = file.id;
                 const cid = context.id;
-                vm.$http.delete(`/file/${id}/link/${cid}`).then(function(response) {
-                    vm.linkCount--;
-                    vm.onFileDeleted(file, vm.linkedFiles);
-                    vm.onFileUnlinked(file, vm.unlinkedFiles, vm.linkCount);
-                    vm.hideUnlinkFileModal();
+                $http.delete(`/file/${id}/link/${cid}`).then(response => {
+                    this.linkCount--;
+                    this.onFileDeleted(file, this.linkedFiles);
+                    this.onFileUnlinked(file, this.unlinkedFiles, this.linkCount);
+                    const index = file.contexts.findIndex(c => c.id == cid);
+                    if(index > -1) {
+                        file.contexts.splice(index, 1);
+                    }
+                    this.hideUnlinkFileModal();
                     this.$showToast(
                         this.$t('plugins.files.toasts.unlinked.title'),
                         this.$t('plugins.files.toasts.unlinked.msg', {
@@ -984,14 +998,17 @@
                 this.linkCount = 0;
             },
             linkFile(file, context) {
-                const vm = this;
-                let id = file.id;
-                let data = {
+                const id = file.id;
+                const data = {
                     'context_id': context.id
                 };
-                vm.$http.put(`/file/${id}/link`, data).then(function(response) {
-                    vm.onFileLinked(file, vm.linkedFiles);
-                    vm.onFileDeleted(file, vm.unlinkedFiles);
+                $http.put(`/file/${id}/link`, data).then(response => {
+                    this.onFileLinked(file, this.linkedFiles);
+                    this.onFileDeleted(file, this.unlinkedFiles);
+                    if(!file.contexts) {
+                        file.contexts = [];
+                    }
+                    file.contexts.push(context);
                     this.$showToast(
                         this.$t('plugins.files.toasts.linked.title'),
                         this.$t('plugins.files.toasts.linked.msg', {
@@ -1224,6 +1241,13 @@
                     return false;
                 }
                 return this.selectedFile.category == 'image';
+            },
+            linkedToCurrentEntity: function() {
+                if(!this.context.id || !this.selectedFile.id) {
+                    return false;
+                }
+
+                return !!this.selectedFile.contexts.find(c => c.id == this.context.id);
             },
             contextMenu: function() {
                 const vm = this;
