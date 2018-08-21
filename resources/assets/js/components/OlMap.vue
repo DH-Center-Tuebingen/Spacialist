@@ -1235,7 +1235,7 @@
                             width: 2
                         })
                     })
-                })
+                });
             },
             drawFeature(feature) {
                 if(this.reset) {
@@ -1290,27 +1290,17 @@
                 this.setInteractionMode('', true);
             },
             initMeasureInteraction() {
-                this.measureSource = new Vector();
+                this.measureSource = new Vector({
+                    wrapX: false
+                });
                 this.measureLayer = new VectorLayer({
+                    baseLayer: false,
+                    displayInLayerSwitcher: false,
+                    title: 'Measure Layer',
+                    visible: true,
+                    layer: 'measure',
                     source: this.measureSource,
-                    style: new Style({
-                        fill: new Fill({
-                            color: 'rgba(255, 255, 255, 0.2)'
-                        }),
-                        stroke: new Stroke({
-                            color: 'rgba(0, 0, 0, 0.5)',
-                            width: 2
-                        }),
-                        image: new CircleStyle({
-                            radius: 5,
-                            stroke: new Stroke({
-                                color: 'rgba(0, 0, 0, 0.2)'
-                            }),
-                            fill: new Fill({
-                                color: 'rgba(255, 255, 255, 0.2)'
-                            })
-                        })
-                    })
+                    style: this.createStyle('#000')
                 });
                 this.map.addLayer(this.measureLayer);
             },
