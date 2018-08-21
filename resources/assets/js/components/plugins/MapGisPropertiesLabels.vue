@@ -3,26 +3,37 @@
         <div class="col scroll-y-auto">
             <form role="form" name="layerLabelingForm" id="layerLabelingForm" @submit.prevent="apply">
                 <div class="form-group row">
-                    <label class="col-form-label col-md-6 text-right" for="label-text">
+                    <label class="col-form-label col-md-6 text-right my-auto" for="label-text">
                         {{ $t('global.text') }}:
                     </label>
                     <div class="col-md-6">
                         <input v-if="!isEntityLayer" class="form-control" type="text" id="label-text" name="label-text" v-model="label" />
-                        <multiselect
-                            label="thesaurus_url"
-                            track-by="id"
-                            v-else
-                            v-model="selectedAttribute"
-                            :allowEmpty="true"
-                            :closeOnSelect="true"
-                            :customLabel="translateLabel"
-                            :hideSelected="false"
-                            :multiple="false"
-                            :options="attributes"
-                            :placeholder="$t('global.select.select')"
-                            :select-label="$t('global.select.select')"
-                            :deselect-label="$t('global.select.deselect')">
-                        </multiselect>
+                        <div v-else>
+                            <div class="d-flex flex-row justify-content-between form-group clickable mb-2" @click="useEntityName = !useEntityName">
+                                <span class="align-middle">
+                                    {{ $t('plugins.map.gis.props.labels.use-entity-name') }}
+                                </span>
+                                <label class="cb-toggle mx-0 my-auto align-middle">
+                                    <input type="checkbox" id="apply-changes-toggle" v-model="useEntityName" />
+                                    <span class="slider slider-rounded slider-primary"></span>
+                                </label>
+                            </div>
+                            <multiselect
+                                label="thesaurus_url"
+                                track-by="id"
+                                v-model="selectedAttribute"
+                                :allowEmpty="true"
+                                :closeOnSelect="true"
+                                :customLabel="translateLabel"
+                                :disabled="useEntityName"
+                                :hideSelected="false"
+                                :multiple="false"
+                                :options="attributes"
+                                :placeholder="$t('global.select.select')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
+                            </multiselect>
+                        </div>
                     </div>
                 </div>
                 <h6 class="d-flex flex-row justify-content-between">
@@ -323,7 +334,11 @@
             apply() {
                 let options = {};
                 // Only set options (set active) if attribute is selected
-                if(this.selectedAttribute) {
+                if(
+                    (this.selectedAttribute && this.isEntityLayer) ||
+                    (!this.selectedAttribute && this.label.length) ||
+                    this.useEntityName
+                ) {
                     if(this.font.active) {
                         options.font = this.font;
                     }
@@ -340,7 +355,7 @@
                         options.position = this.position;
                     }
                     let callback;
-                    if(this.isEntityLayer) {
+                    if(this.selectedAttribute && this.isEntityLayer) {
                         const id = this.layer.context_type_id;
                         const aid = this.selectedAttribute.attribute_id;
                         $http.get(`context/entity_type/${id}/data/${aid}`).then(response => {
@@ -356,6 +371,16 @@
                                 });
                             }
                         });
+                    } else if(this.useEntityName) {
+                        options.getText = feature => {
+                            return feature.get('entity').name;
+                        };
+                        if(this.onUpdate) {
+                            this.onUpdate(this.layer, {
+                                type: 'labeling',
+                                data: options
+                            });
+                        }
                     } else {
                         options.getText = feature => {
                             return this.label;
@@ -395,6 +420,7 @@
         },
         data() {
             return {
+                useEntityName: false,
                 selectedAttribute: null,
                 label: 'Text',
                 displays: {

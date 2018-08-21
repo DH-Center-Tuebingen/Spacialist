@@ -978,7 +978,7 @@
                     text.textBaseline = baseline;
                 }
                 const featureText = options.getText(feature);
-                text.text = featureText;
+                text.text = featureText.toString();
                 style.text = new Text(text);
                 const id = feature.getProperties().id;
                 this.featureStyles[id].label = new Style(style);

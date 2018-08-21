@@ -68,6 +68,7 @@ const de = {
                     },
                     labels: {
                         title: 'Beschriftung',
+                        'use-entity-name': 'Verwende die Namen der Entitäten',
                         style: 'Stil',
                         transform: 'Transform',
                         'fill-color': 'Füllfarbe',

@@ -68,6 +68,7 @@ const en = {
                     },
                     labels: {
                         title: 'Label',
+                        'use-entity-name': 'Use Entity Names',
                         style: 'Style',
                         transform: 'Transform',
                         'fill-color': 'Fill Color',
