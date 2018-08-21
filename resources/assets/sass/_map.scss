@@ -1,0 +1,19 @@
+.ol-bar {
+    position: absolute;
+    z-index: 2;
+}
+
+.ol-right {
+    left: auto;
+    right: 0.5rem;
+}
+
+.ol-bottom {
+    top: auto;
+    bottom: 2.5rem;
+}
+
+.ol-bar button {
+    margin-bottom: 0.25rem;
+    background-color: rgba(255, 255, 255, 0.75);
+}
