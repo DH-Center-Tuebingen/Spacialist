@@ -37,19 +37,19 @@
                         <div class="form-group row">
                             <label for="left-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.left') }}:</label>
                             <div class="col-md-10">
-                                <input id="left-column" type="number" :readonly="!preferences['prefs.columns'].allow_override" :class="[preferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.columns'].value.left" />
+                                <input id="left-column" type="number" min="0" :max="getMax('left')" :readonly="!preferences['prefs.columns'].allow_override" :class="[preferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.columns'].value.left" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="center-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.center') }}:</label>
                             <div class="col-md-10">
-                                <input id="center-column" type="number" :readonly="!preferences['prefs.columns'].allow_override" :class="[preferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.columns'].value.center" />
+                                <input id="center-column" type="number" min="0" :max="getMax('center')" :readonly="!preferences['prefs.columns'].allow_override" :class="[preferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.columns'].value.center" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="right-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.right') }}:</label>
                             <div class="col-md-10">
-                                <input id="right-column" type="number" :readonly="!preferences['prefs.columns'].allow_override" :class="[preferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.columns'].value.right" />
+                                <input id="right-column" type="number" min="0" :max="getMax('right')" :readonly="!preferences['prefs.columns'].allow_override" :class="[preferences['prefs.columns'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.columns'].value.right" />
                             </div>
                         </div>
                     </form>
@@ -244,6 +244,22 @@
                 this.initFinished = false;
                 this.preferences = preferences;
                 this.initFinished = true;
+            },
+            getMax(column) {
+                let columns = ['left', 'center', 'right'];
+                const index = columns.findIndex(c => c == column);
+                // if column is not in columns,
+                // it is invalid
+                if(index == -1) {
+                    return;
+                }
+                columns.splice(index, 1);
+                // Max width is 12 (grid size) - size of all other columns
+                let max = 12;
+                columns.forEach(c => {
+                    max -= this.preferences['prefs.columns'].value[c];
+                });
+                return max;
             },
             savePreference(pref) {
                 let data = {};

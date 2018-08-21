@@ -41,19 +41,19 @@
                         <div class="form-group row">
                             <label for="left-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.left') }}:</label>
                             <div class="col-md-10">
-                                <input class="form-control" id="left-column" type="number" v-model="preferences['prefs.columns'].value.left" />
+                                <input class="form-control" id="left-column" type="number" min="0" :max="getMax('left')" v-model="preferences['prefs.columns'].value.left" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="center-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.center') }}:</label>
                             <div class="col-md-10">
-                                <input class="form-control" id="left-column" type="number" v-model="preferences['prefs.columns'].value.center" />
+                                <input class="form-control" id="left-column" type="number" min="0" :max="getMax('center')" v-model="preferences['prefs.columns'].value.center" />
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="right-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.right') }}:</label>
                             <div class="col-md-10">
-                                <input class="form-control" id="left-column" type="number" v-model="preferences['prefs.columns'].value.right" />
+                                <input class="form-control" id="left-column" type="number" min="0" :max="getMax('right')" v-model="preferences['prefs.columns'].value.right" />
                             </div>
                         </div>
                     </form>
@@ -275,6 +275,22 @@
                 this.initFinished = false;
                 this.preferences = preferences;
                 this.initFinished = true;
+            },
+            getMax(column) {
+                let columns = ['left', 'center', 'right'];
+                const index = columns.findIndex(c => c == column);
+                // if column is not in columns,
+                // it is invalid
+                if(index == -1) {
+                    return;
+                }
+                columns.splice(index, 1);
+                // Max width is 12 (grid size) - size of all other columns
+                let max = 12;
+                columns.forEach(c => {
+                    max -= this.preferences['prefs.columns'].value[c];
+                });
+                return max;
             },
             savePreference(pref) {
                 if(!this.$can('edit_preferences')) return;
