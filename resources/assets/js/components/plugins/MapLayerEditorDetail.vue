@@ -25,7 +25,7 @@
                         {{ $t('global.name') }}:
                     </label>
                     <div class="col-md-8">
-                        <input type="text" id="name" class="form-control" v-model="layer.name" />
+                        <input type="text" id="name" class="form-control" v-model="layer.name" required />
                     </div>
                 </div>
                 <div class="form-group row">
@@ -33,7 +33,7 @@
                         {{ $t('global.url') }}:
                     </label>
                     <div class="col-md-8">
-                        <input type="text" id="url" class="form-control" v-model="layer.url" />
+                        <input type="text" id="url" class="form-control" v-model="layer.url" required />
                     </div>
                 </div>
                 <div class="form-group row">
@@ -41,7 +41,7 @@
                         {{ $t('global.type') }}:
                     </label>
                     <div class="col-md-8">
-                        <input type="text" id="type" class="form-control" v-model="layer.type" />
+                        <input type="text" id="type" class="form-control" v-model="layer.type" required />
                     </div>
                 </div>
                 <div class="form-group row">
@@ -163,14 +163,21 @@
         methods: {
             init(layer) {
                 this.layer = layer;
+                this.originalLayer = {...layer};
             },
-            updateLayer(layer, orgLayer) {
-                let tmpLayer = Object.assign({}, layer);
+            isEntityKey(k) {
+                return k == 'color' || k == 'visible' || k == 'opacity';
+            },
+            updateLayer(layer) {
+                let tmpLayer = {...layer};
                 let data = {};
                 const lid = tmpLayer.id;
                 delete tmpLayer.id;
                 for(let k in tmpLayer) {
-                    if(this.isEntityLayer && k != 'color' && k != 'visible' && k != 'opacity') {
+                    if(this.isEntityLayer && !this.isEntityKey(k)) {
+                        continue;
+                    }
+                    if(tmpLayer[k] == this.originalLayer[k]) {
                         continue;
                     }
                     data[k] = tmpLayer[k];
@@ -188,7 +195,8 @@
         },
         data() {
             return {
-                layer: {}
+                layer: {},
+                originalLayer: {}
             }
         },
         computed: {
