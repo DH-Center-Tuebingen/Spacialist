@@ -182,12 +182,12 @@
         </div>
         <div v-if="isAction('upload')">
             <file-upload class="w-100"
-                post-action="/api/v1/file/new"
                 ref="upload"
                 v-model="uploadFiles"
-                :multiple="true"
+                :custom-action="uploadFile"
                 :directory="false"
                 :drop="true"
+                :multiple="true"
                 @input-file="inputFile">
                     <div class="text-center rounded text-light bg-dark px-2 py-5">
                         <h3>{{ $t('plugins.files.upload.title') }}</h3>
@@ -763,6 +763,11 @@
                 this.linkedFiles.apiUrl = '/file/linked/' + this.context.id;
                 this.resetFiles('linkedFiles');
                 this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
+            },
+            uploadFile(file, component) {
+                let formData = new FormData();
+                formData.append('file', file.file);
+                return $http.post('file/new', formData);
             },
             openFile(id) {
                 $http.get(`/file/${id}`).then(response => {
