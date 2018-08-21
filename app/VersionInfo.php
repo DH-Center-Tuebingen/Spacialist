@@ -22,6 +22,17 @@ class VersionInfo {
             $content = [
                 $tag[0], $ts[0]
             ];
+            $parts = explode('-', $content[0]);
+            $this->release = $parts[0];
+            $this->releaseName = ucfirst($parts[1]);
+            if(count($parts) >= 4) $this->releaseHash = $parts[3];
+            // cut off 'v' for semantic versioning
+            $semVer = explode('.', substr($this->release, 1));
+            $this->major = $semVer[0];
+            $this->minor = $semVer[1];
+            $this->patch = $semVer[2];
+
+            $this->time = $content[1];
         } else {
             $this->major = 'x';
             $this->minor = 'y';
@@ -32,17 +43,6 @@ class VersionInfo {
             $this->time = time();
             return;
         }
-        $parts = explode('-', $content[0]);
-        $this->release = $parts[0];
-        $this->releaseName = ucfirst($parts[1]);
-        if(count($parts) >= 4) $this->releaseHash = $parts[3];
-        // cut off 'v' for semantic versioning
-        $semVer = explode('.', substr($this->release, 1));
-        $this->major = $semVer[0];
-        $this->minor = $semVer[1];
-        $this->patch = $semVer[2];
-
-        $this->time = $content[1];
     }
 
     public function getRelease() {

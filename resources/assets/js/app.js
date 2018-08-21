@@ -336,10 +336,22 @@ Vue.component('error-modal', require('./components/Error.vue'));
 Vue.component('data-analysis', require('./components/plugins/DataAnalysis.vue'));
 
 // Filter
-Vue.filter('date', function(value, format) {
-    if(!format) format = 'DD.MM.YYYY hh:mm';
+Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm', useLocale = false) {
     if(value) {
-        return moment.unix(Number(value)).utc().format(format);
+        let mom = moment.unix(Number(value));
+        if(!useLocale) {
+            mom = mom.utc();
+        }
+        return mom.format(format);
+    }
+});
+Vue.filter('datestring', function(value, useLocale = true) {
+    if(value) {
+        let mom = moment.unix(Number(value));
+        if(useLocale) {
+            return mom.toLocaleString();
+        }
+        return mom.utc().toString();
     }
 });
 Vue.filter('time', function(value, withHours) {
