@@ -72,11 +72,15 @@ body, #app {
     height: 500px;
 }
 
-.card-title {
-    text-shadow:  1px  1px 1px #ffffff,
-                  1px -1px 1px #ffffff,
-                 -1px  1px 1px #ffffff,
-                 -1px -1px 1px #ffffff;
+.shadowed {
+    text-shadow:  1px  1px rgba(255, 255, 255, 0.75),
+                  1px -1px rgba(255, 255, 255, 0.75),
+                 -1px  1px rgba(255, 255, 255, 0.75),
+                 -1px -1px rgba(255, 255, 255, 0.75) !important;
+}
+
+.card-title.shadowed {
+    color: $black !important;
 }
 
 .card-hover {

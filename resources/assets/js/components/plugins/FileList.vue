@@ -19,7 +19,7 @@
                         <img class="card-img" v-if="file.category == 'image'" :src="file.url" style="height: 200px;">
                         <div class="card-img" v-else style="width: 100%; height: 200px;"></div>
                         <div class="card-img-overlay">
-                            <h4 class="card-title text-truncate">
+                            <h4 class="card-title text-truncate" :class="{shadowed: file.category == 'image'}">
                                 <small v-if="showLinks && getFileLinks(file).length" title="Is linked">
                                     <sup>
                                         <i class="fas fa-fw fa-link text-info"></i>
