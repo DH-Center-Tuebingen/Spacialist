@@ -37,8 +37,10 @@ class Preference extends Model
             ->select('preferences.*')
             ->selectRaw(\DB::raw('COALESCE(up.value, default_value) AS default_value'))
             ->where('label', $label)
-            ->where('up.user_id', $uid)
-            ->orWhereNull('up.user_id')
+            ->where(function($query) use ($uid) {
+                $query->where('up.user_id', $uid)
+                    ->orWhereNull('up.user_id');
+            })
             ->first();
         $pref->value = self::decodePreference($pref->label, json_decode($pref->default_value));
         unset($pref->default_value);
