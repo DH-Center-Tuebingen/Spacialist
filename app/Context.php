@@ -22,6 +22,8 @@ class Context extends Model
         'geodata_id',
     ];
 
+    protected $appends = ['path'];
+
     protected $searchable = [
         'columns' => [
             'contexts.name' => 10,

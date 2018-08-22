@@ -6,7 +6,7 @@
                 <button type="button" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(entity)">
                     <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
                 </button>
-                <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="requestDeleteEntity(entity)">
+                <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="deleteEntity(entity)">
                     <i class="fas fa-fw fa-trash"></i> {{ $t('global.delete') }}
                 </button>
             </span>
@@ -118,6 +118,10 @@
             eventBus: {
                 required: true,
                 type: Object
+            },
+            onDelete: {
+                required: true,
+                type: Function
             }
         },
         mounted() {},
@@ -246,6 +250,14 @@
                         }),
                         'success'
                     );
+                });
+            },
+            deleteEntity(entity) {
+                this.onDelete(this.afterDelete, entity, entity.path);
+            },
+            afterDelete(entity) {
+                this.eventBus.$emit('entity-delete', {
+                    entity: entity
                 });
             },
             setModalValues(aid) {

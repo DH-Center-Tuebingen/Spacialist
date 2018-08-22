@@ -14,7 +14,8 @@
         <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100" v-can="'view_concepts|view_concept_props'">
             <router-view class="h-100"
                 :bibliography="bibliography"
-                :event-bus="eventBus">
+                :event-bus="eventBus"
+                :on-delete="requestDeleteEntity">
             </router-view>
         </div>
         <div :class="'col-md-'+$getPreference('prefs.columns').right" id="addon-container" class="d-flex flex-column">

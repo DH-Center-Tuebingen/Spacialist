@@ -116,6 +116,7 @@
         mounted() {
             this.init();
             this.eventBus.$on('entity-change', this.handleEntityChange);
+            this.eventBus.$on('entity-delete', this.handleEntityDelete);
         },
         methods: {
             itemClick(eventData) {
@@ -270,18 +271,15 @@
                 this.resetHighlighting();
             },
             highlightItems(items) {
-                const vm = this;
                 let p = new Promise((resolve, reject) => resolve(0));
                 items.forEach(i => {
-                    p = p.then(_ => $http.get(`/context/${i.id}/path`))
-                    .then(response => {
-                        return vm.openPath(response.data)
-                    })
-                    .then(targetNode => {
+                    p = p.then(_ => {
+                        return this.openPath(i.path).then(targetNode => {
                             targetNode.state.highlighted = true;
-                            vm.highlightedItems.push(targetNode);
-                    })
-                })
+                            this.highlightedItems.push(targetNode);
+                        });
+                    });
+                });
             },
             resetHighlighting() {
                 this.highlightedItems.forEach(i => i.state.highlighted = false);
@@ -361,6 +359,9 @@
                     default:
                         vm.$throwError({message: `Unknown event type ${e.type} received.`});
                 }
+            },
+            handleEntityDelete(e) {
+                this.onDelete(e.entity)
             }
         },
         data() {
