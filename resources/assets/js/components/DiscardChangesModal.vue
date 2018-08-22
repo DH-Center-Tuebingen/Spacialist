@@ -1,5 +1,5 @@
 <template>
-    <modal :name="name" height="auto" :scrollable="true" @before-open="init">
+    <modal :name="name" width="40%" height="auto" :scrollable="true" @before-open="init">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ $t('global.discard.title') }}</h5>
