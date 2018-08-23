@@ -1,7 +1,7 @@
 <template>
     <div class="h-100 w-100">
         <img :src="file.url" id="file-container-image" class="modal-image" />
-        <button type="button" class="btn btn-sm btn-info position-absolute m-2" v-if="fullscreenHandler" @click="toggleFullscreen">
+        <button type="button" class="btn btn-sm btn-info position-absolute m-2" style="right: 0;" v-if="fullscreenHandler" @click="toggleFullscreen">
             <i class="fas fa-fw fa-expand"></i>
         </button>
     </div>
