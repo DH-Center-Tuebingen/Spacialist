@@ -324,7 +324,7 @@
                                             {{ $t('plugins.files.modal.detail.metadata.created') }}
                                         </td>
                                         <td class="text-right text-muted">
-                                            {{selectedFile.created_unix|date}}
+                                            {{selectedFile.created_unix|date(undefined, true)}}
                                         </td>
                                     </tr>
                                     <tr>
@@ -332,7 +332,7 @@
                                             {{ $t('plugins.files.modal.detail.metadata.lastmodified') }}
                                         </td>
                                         <td class="text-right text-muted">
-                                            {{selectedFile.modified_unix|date}}
+                                            {{selectedFile.modified_unix|date(undefined, true)}}
                                         </td>
                                     </tr>
                                     <tr>
@@ -353,7 +353,7 @@
                                                 :directory="false"
                                                 :drop="true"
                                                 :multiple="false"
-                                                :post-action="replaceFileUrl"
+                                                :custom-action="replaceFile"
                                                 @input-file="onReplaceFileSet">
                                                     <span class="text-primary clickable hover-underline">
                                                         <i class="fas fa-fw fa-file-import text-muted"></i> {{ $t('plugins.files.modal.detail.replace.button') }}
@@ -814,6 +814,15 @@
                     }
                 }
             },
+            replaceFile(file, vm) {
+                if(!this.replaceFileUrl) return;
+                let formData = new FormData();
+                formData.append('file', file.file);
+                return $http.post(this.replaceFileUrl, formData).then(response => {
+                    Vue.set(this, 'selectedFile', response.data);
+                    return response;
+                });
+            },
             doReplaceFile() {
                 this.$refs.replace.active = true;
             },
@@ -823,10 +832,8 @@
             },
             onReplaceFileSet(newFile, oldFile) {
                 // Wait for response
-                if(newFile && oldFile && newFile.success && !oldFile.success) {
-                    Vue.set(this, 'selectedFile', newFile.response);
-                    this.replaceFiles = [];
-                    this.$refs.replace.active = false;
+                if(newFile && oldFile && newFile.success !== oldFile.success) {
+                    this.cancelReplaceFile();
                 }
             },
             resetFiles(fileType) {
@@ -1256,7 +1263,7 @@
             },
             replaceFileUrl: function() {
                 if(!this.selectedFile.id) return '';
-                return '/api/v1/file/'+this.selectedFile.id+'/patch';
+                return `file/${this.selectedFile.id}/patch`;
             },
             hasExif: function() {
                 if(!this.selectedFile || !Object.keys(this.selectedFile).length) {

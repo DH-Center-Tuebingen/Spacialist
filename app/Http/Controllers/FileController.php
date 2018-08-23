@@ -293,6 +293,7 @@ class FileController extends Controller
         }
 
         $file->setContent($request->file('file'));
+        $file->setFileInfo();
 
         return response()->json($file);
     }
