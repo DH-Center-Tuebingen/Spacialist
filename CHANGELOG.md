@@ -12,20 +12,25 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - DICOM Support
   - Rename files
   - 3D-Viewer can now load all 3D files of sub-entities into same scene
+  - New audio plugin (visualization and EQ)
 - Added Welcome Page
   - Maintainer (Name and E-Mail-Address), Project Description and Access (Public/Private) can be configured in settings
 - Reference Modal
   - Options (Edit/Delete) to reference list
 - BibTeX export
+- Add 'Hide BibTeX metadata fields' toggle to Bibliography view
 - SQL Attribute Type
   - Rendered as Table or single value
   - Supports translations (Use `concept_url` as header/content)
   - Supports `:entity_id` as placeholder for current selected entity
 - Geometry Preference (EPSG-Code). E.g. to display coordinates in popups different from EPSG:4326
+- Measurement tool for map
+- 'Unlink/Link from/to entity' button in file link tab
 - Attribute Dependencies
   - Attributes can now depend (are visible/invisible) on values of other attributes
 - GIS View
   - QGIS-like styling (categorized and graduated (equal interval and quantile)) and labeling
+- Contributors in about modal
 ### Changed
 - Moved from Lumen (5.3) to Laravel (5.6)
 - Moved from AngularJS (1.5) to Vue.js (2.5)
