@@ -8,9 +8,14 @@
             </div>
         </transition>
         <div :id="containerId" class="w-100 h-100">
-            <button type="button" class="btn btn-outline-info position-fixed m-2" v-if="context.id" @click="loadAllSubModels">
-                {{ $t('plugins.files.modal.detail.threed.load-sub-models') }}
-            </button>
+            <div class="position-relative">
+                <button type="button" class="btn btn-outline-info position-absolute m-2" v-if="context.id" @click="loadAllSubModels" style="left: 0;">
+                    {{ $t('plugins.files.modal.detail.threed.load-sub-models') }}
+                </button>
+                <button type="button" class="btn btn-outline-info position-absolute m-2" v-if="fullscreenHandler" @click="toggleFullscreen" style="right: 0;">
+                    <i class="fas fa-fw fa-expand"></i>
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -65,6 +70,10 @@
             context: {
                 required: false,
                 type: Object
+            },
+            fullscreenHandler: {
+                required: false,
+                type: Function
             }
         },
         mounted() {
@@ -162,6 +171,11 @@
                         this.loadProteinDb(file);
                         break;
                 }
+            },
+            toggleFullscreen() {
+                if(!this.fullscreenHandler) return;
+                const element = document.getElementById(this.containerId);
+                this.fullscreenHandler(element)
             },
             animate: function() {
                 this.animationId = requestAnimationFrame(this.animate);

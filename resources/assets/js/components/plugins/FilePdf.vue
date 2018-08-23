@@ -20,6 +20,9 @@
                 <i class="fas fa-fw fa-redo-alt"></i>
             </button>
             <input type="number" style="max-width: 100px;" min="1" :max="totalPages" step="1" v-model.number="page" />/{{totalPages}}
+            <button type="button" class="btn btn-link" v-if="fullscreenHandler" @click="toggleFullscreen">
+                <i class="fas fa-fw fa-expand"></i>
+            </button>
         </div>
         <pdf class="col px-0 scroll-y-auto scroll-x-hidden"
             :page="page"
@@ -41,6 +44,10 @@
             file: {
                 required: true,
                 type: Object
+            },
+            fullscreenHandler: {
+                required: false,
+                type: Function
             }
         },
         mounted() {
@@ -78,6 +85,11 @@
                 } else {
                     this.rotationIndex++;
                 }
+            },
+            toggleFullscreen() {
+                if(!this.fullscreenHandler) return;
+                const element = document.getElementById('file-container');
+                this.fullscreenHandler(element)
             }
         },
         data() {

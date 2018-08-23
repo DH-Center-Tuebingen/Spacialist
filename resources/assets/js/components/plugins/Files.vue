@@ -252,7 +252,14 @@
                 </div>
                 <div class="modal-body row col text-center">
                     <div class="col-md-6 h-100">
-                        <component id="file-container" :is="fileCategoryComponent" :file="selectedFile" :storage-config="storageConfig" :context="localContext"></component>
+                        <component
+                            id="file-container"
+                            :context="localContext"
+                            :file="selectedFile"
+                            :fullscreen-handler="toggleFullscreen"
+                            :is="fileCategoryComponent"
+                            :storage-config="storageConfig">
+                        </component>
                     </div>
                     <div class="col-md-6 h-100 d-flex flex-column">
                         <ul class="nav nav-tabs nav-fill">
@@ -644,9 +651,6 @@
             }
         },
         mounted() {
-            if(screenfull.enabled) {
-                window.addEventListener('keydown', this.toggleFullscreen, false);
-            }
             this.initFilters();
             this.initTags();
         },
@@ -751,12 +755,10 @@
                 this.newFilename = '';
                 this.selectedFile.editing = false;
             },
-            toggleFullscreen: function(event) {
-                let elem = document.getElementById('file-container');
-                if(!elem) return;
-                let k = event.keyCode;
-                if(k != 70) return; // 70 = 'f' key
-                screenfull.toggle(elem);
+            toggleFullscreen(element) {
+                if(!screenfull.enabled) return;
+                if(!element) return;
+                screenfull.toggle(element);
             },
             linkedFilesChanged() {
                 if(!this.context.id) return;
