@@ -226,7 +226,7 @@
             </ul>
         </div>
 
-        <modal name="file-modal" width="80%" height="80%" @closed="hideFileModal" classes="of-visible">
+        <modal name="file-modal" id="file-modal" width="80%" height="80%" @closed="hideFileModal" classes="of-visible" @opened="onFileModalCreate" @before-close="onFileModalDestroy" tabindex="0">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" @mouseenter="onFileHeaderHover(true)" @mouseleave="onFileHeaderHover(false)">
@@ -251,7 +251,7 @@
                     </button>
                 </div>
                 <div class="modal-body row col text-center">
-                    <div class="col-md-6 h-100 d-flex flex-column">
+                    <div class="col-md-6 d-flex flex-column">
                         <component
                             class="col px-0"
                             id="file-container"
@@ -262,10 +262,10 @@
                             :storage-config="storageConfig">
                         </component>
                         <div class="d-flex flex-row justify-content-between mt-2">
-                            <button type="button" class="btn btn-outline-secondary" @click="gotoPreviousFile(selectedFile)">
+                            <button type="button" class="btn btn-outline-secondary" :disabled="isFirstFile" @click="gotoPreviousFile(selectedFile)">
                                 <i class="fas fa-fw fa-angle-left"></i> {{ $t('plugins.files.modal.detail.previous') }}
                             </button>
-                            <button type="button" class="btn btn-outline-secondary" @click="gotoNextFile(selectedFile)">
+                            <button type="button" class="btn btn-outline-secondary" :disabled="isLastFile" @click="gotoNextFile(selectedFile)">
                                 {{ $t('plugins.files.modal.detail.next') }} <i class="fas fa-fw fa-angle-right"></i>
                             </button>
                         </div>
@@ -733,8 +733,29 @@
                 }
                 return filters;
             },
+            onFileModalCreate() {
+                let modal = document.getElementById('file-modal');
+                modal.addEventListener('keydown', this.fileShortcuts, false);
+            },
+            onFileModalDestroy() {
+                let modal = document.getElementById('file-modal');
+                modal.removeEventListener('keydown', this.fileShortcuts, false);
+            },
+            fileShortcuts(event) {
+                if(event.keyCode != 37 && event.keyCode != 39) return;
+                if(event.target.tagName.toUpperCase() == 'INPUT') return;
+                if(event.target.tagName.toUpperCase() == 'TEXTAREA') return;
+                if(event.keyCode == 37) {
+                    this.gotoPreviousFile(this.selectedFile);
+                } else {
+                    this.gotoNextFile(this.selectedFile);
+                }
+            },
             gotoPreviousFile(file) {
                 if(this.isAction('upload')) {
+                    return;
+                }
+                if(this.isFirstFile) {
                     return;
                 }
                 const type = this.selectedTopAction;
@@ -751,6 +772,9 @@
             },
             gotoNextFile(file) {
                 if(this.isAction('upload')) {
+                    return;
+                }
+                if(this.isLastFile) {
                     return;
                 }
                 const type = this.selectedTopAction;
@@ -1332,6 +1356,26 @@
                 }
 
                 return !!this.selectedFile.contexts.find(c => c.id == this.context.id);
+            },
+            isFirstFile: function() {
+                if(!this.selectedFile && !this.selectedFile.id) {
+                    return false;
+                }
+                const type = this.selectedTopAction;
+                if(!this[type].files.length) {
+                    return true;
+                }
+                return this[type].files.findIndex(f => f.id == this.selectedFile.id) <= 0;
+            },
+            isLastFile: function() {
+                if(!this.selectedFile && !this.selectedFile.id) {
+                    return false;
+                }
+                const type = this.selectedTopAction;
+                if(!this[type].files.length) {
+                    return true;
+                }
+                return this[type].files.findIndex(f => f.id == this.selectedFile.id) == this[type].fileState.total-1;
             },
             contextMenu: function() {
                 const vm = this;
