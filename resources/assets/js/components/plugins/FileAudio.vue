@@ -59,44 +59,47 @@
             this.wavesurfer.destroy();
         },
         mounted() {
-            this.initFinished = false;
-            const colorIndex =  Math.floor(Math.random()*this.colors.length);
-            const activeColor = this.colors[colorIndex];
-            this.wavesurfer = WaveSurfer.create({
-                container: '#waveform',
-                waveColor: activeColor.wave,
-                progressColor: activeColor.progress,
-                closeAudioContext: true,
-                responsive: true
-            });
-
-            this.filters = this.EQs.map(band => {
-                let filter = this.wavesurfer.backend.ac.createBiquadFilter();
-                filter.type = band.type;
-                filter.gain.value = 0;
-                filter.Q.value = 1;
-                filter.frequency.value = band.f;
-                return filter;
-            });
-
-            this.wavesurfer.load(this.file.url);
-
-            this.wavesurfer.on('ready', _ => {
-                this.wavesurfer.backend.setFilters(this.filters);
-                this.wavesurfer.filters = this.filters;
-
-                this.progress = this.wavesurfer.getCurrentTime();
-                this.duration = this.wavesurfer.getDuration();
-                this.currentVolume = this.wavesurfer.getVolume();
-                this.isPlaying = this.wavesurfer.isPlaying();
-                this.isMute = this.wavesurfer.getMute();
-            });
-            this.wavesurfer.on('audioprocess', _ => {
-                this.progress = this.wavesurfer.getCurrentTime();
-            });
-            this.initFinished = true;
+            this.init();
         },
         methods: {
+            init() {
+                this.initFinished = false;
+                const colorIndex =  Math.floor(Math.random()*this.colors.length);
+                const activeColor = this.colors[colorIndex];
+                this.wavesurfer = WaveSurfer.create({
+                    container: '#waveform',
+                    waveColor: activeColor.wave,
+                    progressColor: activeColor.progress,
+                    closeAudioContext: true,
+                    responsive: true
+                });
+
+                this.filters = this.EQs.map(band => {
+                    let filter = this.wavesurfer.backend.ac.createBiquadFilter();
+                    filter.type = band.type;
+                    filter.gain.value = 0;
+                    filter.Q.value = 1;
+                    filter.frequency.value = band.f;
+                    return filter;
+                });
+
+                this.wavesurfer.load(this.file.url);
+
+                this.wavesurfer.on('ready', _ => {
+                    this.wavesurfer.backend.setFilters(this.filters);
+                    this.wavesurfer.filters = this.filters;
+
+                    this.progress = this.wavesurfer.getCurrentTime();
+                    this.duration = this.wavesurfer.getDuration();
+                    this.currentVolume = this.wavesurfer.getVolume();
+                    this.isPlaying = this.wavesurfer.isPlaying();
+                    this.isMute = this.wavesurfer.getMute();
+                });
+                this.wavesurfer.on('audioprocess', _ => {
+                    this.progress = this.wavesurfer.getCurrentTime();
+                });
+                this.initFinished = true;
+            },
             playPause() {
                 this.wavesurfer.playPause();
                 this.isPlaying = this.wavesurfer.isPlaying();
@@ -193,6 +196,11 @@
                         progress: '#990066'
                     }
                 ]
+            }
+        },
+        watch: {
+            file(newFile, oldFile) {
+                this.init();
             }
         }
     }

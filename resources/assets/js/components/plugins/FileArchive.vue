@@ -78,6 +78,11 @@
             return {
                 fileList: []
             }
+        },
+        watch: {
+            file(newFile, oldFile) {
+                this.setArchiveFileList();
+            }
         }
     }
 </script>

@@ -616,6 +616,11 @@
                 hemisphereIntensity: 1,
                 directionalIntensity: 1
             }
+        },
+        watch: {
+            file(newFile, oldFile) {
+                this.loadModel();
+            }
         }
     }
 </script>

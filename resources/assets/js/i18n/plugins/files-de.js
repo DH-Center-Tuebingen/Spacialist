@@ -55,6 +55,8 @@ const de = {
                             msg: 'Schlagworte für {name} wurden erfolgreich aktualisiert.'
                         }
                     },
+                    previous: 'Vorherige Datei',
+                    next: 'Nächste Datei',
                     csv: {
                         delimiter: 'Trennzeichen',
                         header: 'Kopfzeile?',

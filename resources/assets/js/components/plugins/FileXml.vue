@@ -114,6 +114,11 @@
                 }
                 return false;
             }
+        },
+        watch: {
+            file(newFile, oldFile) {
+                this.setFileContent();
+            }
         }
     }
 </script>

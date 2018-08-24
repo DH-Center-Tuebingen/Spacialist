@@ -251,8 +251,9 @@
                     </button>
                 </div>
                 <div class="modal-body row col text-center">
-                    <div class="col-md-6 h-100">
+                    <div class="col-md-6 h-100 d-flex flex-column">
                         <component
+                            class="col px-0"
                             id="file-container"
                             :context="localContext"
                             :file="selectedFile"
@@ -260,6 +261,14 @@
                             :is="fileCategoryComponent"
                             :storage-config="storageConfig">
                         </component>
+                        <div class="d-flex flex-row justify-content-between mt-2">
+                            <button type="button" class="btn btn-outline-secondary" @click="gotoPreviousFile(selectedFile)">
+                                <i class="fas fa-fw fa-angle-left"></i> {{ $t('plugins.files.modal.detail.previous') }}
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" @click="gotoNextFile(selectedFile)">
+                                {{ $t('plugins.files.modal.detail.next') }} <i class="fas fa-fw fa-angle-right"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="col-md-6 h-100 d-flex flex-column">
                         <ul class="nav nav-tabs nav-fill">
@@ -724,6 +733,53 @@
                 }
                 return filters;
             },
+            gotoPreviousFile(file) {
+                if(this.isAction('upload')) {
+                    return;
+                }
+                const type = this.selectedTopAction;
+                const index = this[type].files.findIndex(f => f.id == file.id);
+                if(index > 0) {
+                    const prevFile = this[type].files[index-1];
+                    let query = {...this.$route.query};
+                    query.f = prevFile.id;
+                    this.$router.push({
+                        params: this.$route.params,
+                        query: query
+                    });
+                }
+            },
+            gotoNextFile(file) {
+                if(this.isAction('upload')) {
+                    return;
+                }
+                const type = this.selectedTopAction;
+                const index = this[type].files.findIndex(f => f.id == file.id);
+                // Load next chunk if last file
+                if(index == this[type].files.length-1) {
+                    // Return if we are on last page
+                    if(this[type].pagination.last_page == this[type].pagination.current_page) {
+                        return;
+                    }
+                    this[type].loadChunk().then(response => {
+                        const nextFile = this[type].files[index+1];
+                        let query = {...this.$route.query};
+                        query.f = nextFile.id;
+                        this.$router.push({
+                            params: this.$route.params,
+                            query: query
+                        });
+                    });
+                } else {
+                    const nextFile = this[type].files[index+1];
+                    let query = {...this.$route.query};
+                    query.f = nextFile.id;
+                    this.$router.push({
+                        params: this.$route.params,
+                        query: query
+                    });
+                }
+            },
             onFileHeaderHover(active) {
                 // If edit mode is enabled, do not disable it on hover
                 if(this.selectedFile.editing) return;
@@ -859,15 +915,14 @@
                 } else {
                     url += arr.pagination.next_page_url;
                 }
-                this.getPage(url, arr, filters);
+                return this.getPage(url, arr, filters);
             },
             getPage(pageUrl, filesObj, filters) {
-                const vm = this;
                 let data = {};
                 if(filters) {
                     data.filters = filters;
                 }
-                this.$http.post(pageUrl, data).then(function(response) {
+                return $http.post(pageUrl, data).then(response => {
                     let resp = response.data;
                     for(let i=0; i<resp.data.length; i++) {
                         filesObj.files.push(resp.data[i]);
@@ -875,7 +930,7 @@
                     delete resp.data;
                     Vue.set(filesObj, 'pagination', resp);
                     filesObj.fetchingFiles = false;
-                    vm.updateFileState(filesObj);
+                    this.updateFileState(filesObj);
                 });
             },
             updateFileState(filesObj) {
@@ -1173,7 +1228,7 @@
                     apiPageParam: 'page',
                     loadChunk: () => {
                         if(!this.isAction('linkedFiles')) return;
-                        this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
+                        return this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
                     }
                 },
                 unlinkedFiles: {
@@ -1186,7 +1241,7 @@
                     apiPageParam: 'page',
                     loadChunk: () => {
                         if(!this.isAction('unlinkedFiles')) return;
-                        this.getNextFiles('unlinkedFiles', this.getFilters('unlinkedFiles'));
+                        return this.getNextFiles('unlinkedFiles', this.getFilters('unlinkedFiles'));
                     }
                 },
                 allFiles: {
@@ -1199,7 +1254,7 @@
                     apiPageParam: 'page',
                     loadChunk: () => {
                         if(!this.isAction('allFiles')) return;
-                        this.getNextFiles('allFiles', this.getFilters('allFiles'));
+                        return this.getNextFiles('allFiles', this.getFilters('allFiles'));
                     }
                 },
                 editingProperty: {

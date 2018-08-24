@@ -254,6 +254,11 @@
                 }
                 return filtered;
             }
+        },
+        watch: {
+            file(newFile, oldFile) {
+                this.loadImage(`wadouri:${this.newFile.url}`);
+            }
         }
     }
 </script>

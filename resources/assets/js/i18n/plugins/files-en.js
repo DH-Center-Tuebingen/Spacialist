@@ -55,6 +55,8 @@ const en = {
                             msg: 'Tags of {name} successfully updated.'
                         }
                     },
+                    previous: 'Previous File',
+                    next: 'Next File',
                     csv: {
                         delimiter: 'Delimiter',
                         header: 'Header Row?',
