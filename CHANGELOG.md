@@ -12,7 +12,8 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - DICOM Support
   - Rename files
   - 3D-Viewer can now load all 3D files of sub-entities into same scene
-  - New audio plugin (visualization and EQ)
+  - New audio plugin (based on [wavesurfer](https://wavesurfer-js.org), visualization and EQ)
+  - Simple navigation to jump to previous/next file right from the modal
 - Added Welcome Page
   - Maintainer (Name and E-Mail-Address), Project Description and Access (Public/Private) can be configured in settings
 - Reference Modal
