@@ -23,6 +23,7 @@
         },
         methods: {
             onDragEnter() {
+                if(!this.data.dragAllowed()) return;
                 this.asyncToggle.clear();
                 this.asyncToggle();
             },

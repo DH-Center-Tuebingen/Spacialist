@@ -16,10 +16,30 @@
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAdd)">
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
+            <div class="mb-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'asc')">
+                    <i class="fas fa-fw fa-sort-numeric-down"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'desc')">
+                    <i class="fas fa-fw fa-sort-numeric-up"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'asc')">
+                    <i class="fas fa-fw fa-sort-alpha-down"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'desc')">
+                    <i class="fas fa-fw fa-sort-alpha-up"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'asc')">
+                    <i class="fas fa-fw fa-sort-amount-down"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'desc')">
+                    <i class="fas fa-fw fa-sort-amount-up"></i>
+                </button>
+            </div>
             <tree
                 class="col px-0 scroll-y-auto"
                 :data="tree"
-                :draggable="true"
+                :draggable="isDragAllowed"
                 :drop-allowed="isDropAllowed"
                 size="small"
                 @change="itemClick"
@@ -60,6 +80,7 @@
             this.childrenLoaded = this.children.length < this.children_count;
             this.component = 'tree-node';
             this.dragDelay = vm.dragDelay;
+            this.dragAllowed = _ => vm.isDragAllowed;
             this.onToggle = vm.itemToggle;
             this.contextmenu = 'tree-contextmenu';
             this.onContextMenuAdd = function(parent) {
@@ -119,6 +140,58 @@
             this.eventBus.$on('entity-delete', this.handleEntityDelete);
         },
         methods: {
+            setSort(by, dir) {
+                this.sort.by = by;
+                this.sort.dir = dir;
+                this.sortTree(by, dir, this.tree);
+            },
+            sortTree(by, dir = 'asc', tree = this.tree) {
+                if(dir != 'asc' && dir != 'desc') {
+                    return;
+                }
+                let sortFn;
+                switch(by) {
+                    case 'rank':
+                        sortFn = (a, b) => {
+                            let value = a.rank - b.rank;
+                            if(dir == 'desc') {
+                                value = -value;
+                            }
+                            return value;
+                        };
+                        break;
+                    case 'alpha':
+                        sortFn = (a, b) => {
+                            let value = 0;
+                            if(a.name < b.name) value = -1;
+                            if(a.name > b.name) value = 1;
+                            if(dir == 'desc') {
+                                value = -value;
+                            }
+                            return value;
+                        };
+                        break;
+                    case 'children':
+                        sortFn = (a, b) => {
+                            let value = a.children_count - b.children_count;
+                            if(dir == 'desc') {
+                                value = -value;
+                            }
+                            return value;
+                        };
+                        break;
+                }
+                this.sortTreeLevel(tree, sortFn);
+            },
+            sortTreeLevel(nodes, sortFn) {
+                if(!nodes) return;
+                nodes.sort(sortFn);
+                nodes.forEach(n => {
+                    if(n.childrenLoaded) {
+                        this.sortTreeLevel(n.children, sortFn);
+                    }
+                });
+            },
             itemClick(eventData) {
                 const item = eventData.data;
                 if(this.selectedItem.id == item.id) {
@@ -135,7 +208,8 @@
                         item.children =  response;
                         item.state.loading = false;
                         item.childrenLoaded = true;
-                    })
+                        this.sortTree(this.sort.by, this.sort.dir, item.children);
+                    });
                 }
                 item.state.opened = !item.state.opened;
             },
@@ -148,7 +222,7 @@
                     down: 3,
                 };
 
-                if(!this.isDropAllowed(dropData)) {
+                if(!this.isDragAllowed || !this.isDropAllowed(dropData)) {
                     return;
                 }
 
@@ -232,6 +306,7 @@
             },
             init() {
                 this.roots.forEach(n => this.tree.push(new Node(n, this)))
+                this.sortTree(this.sort.by, this.sort.dir, this.tree);
             },
             isDropAllowed(dropData) {
                 //TODO check if it works with tree-vue-component
@@ -369,12 +444,19 @@
                 tree: [],
                 selectedItem: {},
                 highlightedItems: [],
+                sort: {
+                    by: 'rank',
+                    dir: 'asc'
+                }
             }
         },
         computed: {
             topLevelCount: function() {
                 return this.tree.length || 0;
             },
+            isDragAllowed: function() {
+                return this.sort.by == 'rank' && this.sort.dir == 'asc';
+            }
         }
     }
 </script>
