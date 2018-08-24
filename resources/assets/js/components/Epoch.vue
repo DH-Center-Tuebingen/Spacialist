@@ -47,7 +47,7 @@
             :hideSelected="true"
             :multiple="false"
             :options="epochs"
-            :placeholder="$t('global.select.select')"
+            :placeholder="$t('global.select.placehoder')"
             :select-label="$t('global.select.select')"
             :deselect-label="$t('global.select.deselect')">
         </multiselect>

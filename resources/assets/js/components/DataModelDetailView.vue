@@ -22,7 +22,7 @@
                             :hideSelected="true"
                             :multiple="true"
                             :options="minimalContextTypes"
-                            :placeholder="$t('global.select.select')"
+                            :placeholder="$t('global.select.placehoder')"
                             :select-label="$t('global.select.select')"
                             :deselect-label="$t('global.select.deselect')">
                         </multiselect>
@@ -103,7 +103,7 @@
                                     :hideSelected="false"
                                     :multiple="false"
                                     :options="depends.attributes"
-                                    :placeholder="$t('global.select.select')"
+                                    :placeholder="$t('global.select.placehoder')"
                                     :select-label="$t('global.select.select')"
                                     :deselect-label="$t('global.select.deselect')"
                                     @input="dependencyAttributeSelected">
@@ -119,7 +119,7 @@
                                     :hideSelected="false"
                                     :multiple="false"
                                     :options="dependencyOperators"
-                                    :placeholder="$t('global.select.select')"
+                                    :placeholder="$t('global.select.placehoder')"
                                     :select-label="$t('global.select.select')"
                                     :deselect-label="$t('global.select.deselect')">
                                 </multiselect>
@@ -138,7 +138,7 @@
                                         :hideSelected="false"
                                         :multiple="false"
                                         :options="depends.values"
-                                        :placeholder="$t('global.select.select')"
+                                        :placeholder="$t('global.select.placehoder')"
                                         :select-label="$t('global.select.select')"
                                         :deselect-label="$t('global.select.deselect')">
                                     </multiselect>

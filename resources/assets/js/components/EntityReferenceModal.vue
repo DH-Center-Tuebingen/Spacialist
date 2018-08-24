@@ -81,7 +81,7 @@
                                 :hideSelected="true"
                                 :multiple="false"
                                 :options="bibliography"
-                                :placeholder="$t('global.select.select')"
+                                :placeholder="$t('global.select.placehoder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
                                 <template slot="singleLabel" slot-scope="props">

@@ -17,7 +17,7 @@
                             :hideSelected="false"
                             :multiple="false"
                             :options="styles"
-                            :placeholder="$t('global.select.select')"
+                            :placeholder="$t('global.select.placehoder')"
                             :select-label="$t('global.select.select')"
                             :deselect-label="$t('global.select.deselect')">
                         </multiselect>
@@ -40,7 +40,7 @@
                                 :hideSelected="false"
                                 :multiple="false"
                                 :options="attributeList"
-                                :placeholder="$t('global.select.select')"
+                                :placeholder="$t('global.select.placehoder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
                             </multiselect>
@@ -61,7 +61,7 @@
                                 :multiple="false"
                                 :options="colorRamps"
                                 :show-labels="false"
-                                :placeholder="$t('global.select.select')"
+                                :placeholder="$t('global.select.placehoder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
                                 <template slot="singleLabel" slot-scope="props">
@@ -104,7 +104,7 @@
                                 :hideSelected="false"
                                 :multiple="false"
                                 :options="graduatedModes"
-                                :placeholder="$t('global.select.select')"
+                                :placeholder="$t('global.select.placehoder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
                             </multiselect>
