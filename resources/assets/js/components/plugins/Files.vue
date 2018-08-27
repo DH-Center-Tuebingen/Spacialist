@@ -1368,6 +1368,9 @@
                     return false;
                 }
                 const type = this.selectedTopAction;
+                if(this.isAction('upload')) {
+                    return false;
+                }
                 if(!this[type].files.length) {
                     return true;
                 }
@@ -1378,6 +1381,9 @@
                     return false;
                 }
                 const type = this.selectedTopAction;
+                if(this.isAction('upload')) {
+                    return false;
+                }
                 if(!this[type].files.length) {
                     return true;
                 }
