@@ -325,7 +325,7 @@ const de = {
                 series: 'Reihe',
                 booktitle: 'Buchtitel',
                 publisher: 'Verlag',
-                address: 'Adresse',
+                address: 'Ort',
                 note: 'Notiz',
                 misc: 'Diverse',
                 howpublished: 'Verweis',

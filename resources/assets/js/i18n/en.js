@@ -325,7 +325,7 @@ const en = {
                 series: 'Series',
                 booktitle: 'Book title',
                 publisher: 'Publisher',
-                address: 'Address',
+                address: 'Place',
                 note: 'Note',
                 misc: 'Misc',
                 howpublished: 'How Published',
