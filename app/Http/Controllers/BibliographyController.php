@@ -78,7 +78,7 @@ class BibliographyController extends Controller
         ]);
 
         $bib = new Bibliography();
-        $bib->fieldsFromRequest($request);
+        $bib->fieldsFromRequest($request, $user);
 
         return response()->json($bib, 201);
     }

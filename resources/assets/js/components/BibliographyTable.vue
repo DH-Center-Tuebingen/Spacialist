@@ -449,7 +449,7 @@
                 if(!this.$can('add_remove_literature|edit_literature')) return;
                 // Wait for response
                 if(newFile && oldFile && newFile.success && !oldFile.success) {
-                    this.localEntries.push(newFile.response);
+                    this.allEntries.push(newFile.response);
                 }
                 // Enable automatic upload
                 if(Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
@@ -473,32 +473,24 @@
                 if(!this.$can('add_remove_literature')) return;
                 if(!item.type) return;
                 if(!item.fields) return;
-                const vm = this;
                 let data = {};
-                // check if all mandatory fields are set
-                for(let i=0; i<item.type.mandatoryFields.length; i++) {
-                    let k = item.type.mandatoryFields[i];
-                    if(item.fields[k] == null || item.fields[k] == '') {
-                        return;
-                    }
-                }
                 for(let k in item.fields) {
                     data[k] = item.fields[k];
                 }
                 data.type = item.type.name;
 
                 if(item.id) {
-                    vm.$http.patch(`bibliography/${item.id}`, data).then(function(response) {
-                        let entry = vm.localEntries.find(e => e.id == item.id);
+                    $http.patch(`bibliography/${item.id}`, data).then(response => {
+                        let entry = this.localEntries.find(e => e.id == item.id);
                         for(let k in item.fields) {
                             entry[k] = item.fields[k];
                         }
-                        vm.hideNewItemModal();
+                        this.hideNewItemModal();
                     });
                 } else {
-                    vm.$http.post('bibliography', data).then(function(response) {
-                        vm.localEntries.push(response.data);
-                        vm.hideNewItemModal();
+                    $http.post('bibliography', data).then(response => {
+                        this.allEntries.push(response.data);
+                        this.hideNewItemModal();
                     });
                 }
             },
@@ -507,11 +499,11 @@
                 const type = this.availableTypes.find(t => t.name == entry.type);
                 if(!type) return;
                 let fields = {};
-                for(let k in entry) {
-                    if(type.mandatoryFields.includes(k) || type.optionalFields.includes(k)) {
-                        fields[k] = entry[k];
+                type.fields.forEach(f => {
+                    if(entry[f]) {
+                        fields[f] = entry[f];
                     }
-                }
+                });
                 Vue.set(this.newItem, 'fields', fields);
                 Vue.set(this.newItem, 'type', type);
                 Vue.set(this.newItem, 'id', entry.id);
@@ -582,140 +574,98 @@
                     {
                         name: 'article',
                         id: 0,
-                        mandatoryFields: [
-                            'author', 'title', 'journal', 'year'
-                        ],
-                        optionalFields: [
-                            'volume', 'number', 'pages', 'month', 'note'
+                        fields: [
+                            'author', 'title', 'journal', 'year', 'volume', 'number', 'pages', 'month', 'note'
                         ]
                     },
                     {
                         name: 'book',
                         id: 1,
-                        mandatoryFields: [
-                            'title', 'publisher', 'year'
-                        ],
-                        optionalFields: [
-                            'author', 'editor', 'volume', 'number', 'address', 'series', 'edition', 'month', 'note'
+                        fields: [
+                            'title', 'publisher', 'year', 'author', 'editor', 'volume', 'number', 'address', 'series', 'edition', 'month', 'note'
                         ]
                     },
                     {
                         name: 'incollection',
                         id: 2,
-                        mandatoryFields: [
-                            'author', 'title', 'booktitle', 'publisher', 'year'
-                        ],
-                        optionalFields: [
-                            'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
+                        fields: [
+                            'author', 'title', 'booktitle', 'publisher', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
                         ]
                     },
                     {
                         name: 'misc',
                         id: 3,
-                        mandatoryFields: [
-                        ],
-                        optionalFields: [
-                            'author', 'title', 'howpublished', 'month', 'year', 'note'
+                        fields: ['author', 'title', 'howpublished', 'month', 'year', 'note'
                         ]
                     },
                     {
                         name: 'booklet',
                         id: 4,
-                        mandatoryFields: [
-                            'title'
-                        ],
-                        optionalFields: [
-                            'author', 'howpublished', 'address', 'month', 'year', 'note'
+                        fields: [
+                            'title', 'author', 'howpublished', 'address', 'month', 'year', 'note'
                         ]
                     },
                     {
                         name: 'conference',
                         id: 5,
-                        mandatoryFields: [
-                             'author', 'title', 'booktitle', 'year'
-                        ],
-                        optionalFields: [
-                            'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
+                        fields: [
+                             'author', 'title', 'booktitle', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
                         ]
                     },
                     {
                         name: 'inbook',
                         id: 6,
-                        mandatoryFields: [
-                            'title', 'publisher', 'year'
-                        ],
-                        optionalFields: [
-                            'author', 'editor', 'chapter', 'pages', 'volume', 'number', 'series', 'address', 'edition', 'month', 'note'
+                        fields: [
+                            'title', 'publisher', 'year', 'author', 'editor', 'chapter', 'pages', 'volume', 'number', 'series', 'address', 'edition', 'month', 'note'
                         ]
                     },
                     {
                         name: 'inproceedings',
                         id: 7,
-                        mandatoryFields: [
-                             'author', 'title', 'booktitle', 'year'
-                        ],
-                        optionalFields: [
-                            'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
+                        fields: [
+                             'author', 'title', 'booktitle', 'year', 'editor', 'volume', 'number', 'series', 'pages', 'address', 'month', 'organization', 'publisher', 'note'
                         ]
                     },
                     {
                         name: 'manual',
                         id: 8,
-                        mandatoryFields: [
-                            'title'
-                        ],
-                        optionalFields: [
-                            'author', 'organization', 'address', 'edition', 'month', 'year', 'note'
+                        fields: [
+                            'title', 'author', 'organization', 'address', 'edition', 'month', 'year', 'note'
                         ]
                     },
                     {
                         name: 'mastersthesis',
                         id: 9,
-                        mandatoryFields: [
-                            'author', 'title', 'school', 'year'
-                        ],
-                        optionalFields: [
-                            'address', 'month', 'note'
+                        fields: [
+                            'author', 'title', 'school', 'year', 'address', 'month', 'note'
                         ]
                     },
                     {
                         name: 'phdthesis',
                         id: 10,
-                        mandatoryFields: [
-                            'author', 'title', 'school', 'year'
-                        ],
-                        optionalFields: [
-                            'address', 'month', 'note'
+                        fields: [
+                            'author', 'title', 'school', 'year', 'address', 'month', 'note'
                         ]
                     },
                     {
                         name: 'proceedings',
                         id: 11,
-                        mandatoryFields: [
-                            'title', 'year'
-                        ],
-                        optionalFields: [
-                            'editor', 'volume', 'number', 'series', 'address', 'month', 'organization', 'publisher', 'note'
+                        fields: [
+                            'title', 'year', 'editor', 'volume', 'number', 'series', 'address', 'month', 'organization', 'publisher', 'note'
                         ]
                     },
                     {
                         name: 'techreport',
                         id: 12,
-                        mandatoryFields: [
-                            'author', 'title', 'institution', 'year'
-                        ],
-                        optionalFields: [
-                            'number', 'address', 'month', 'note'
+                        fields: [
+                            'author', 'title', 'institution', 'year', 'number', 'address', 'month', 'note'
                         ]
                     },
                     {
                         name: 'unpublished',
                         id: 13,
-                        mandatoryFields: [
-                            'author', 'title', 'note'
-                        ],
-                        optionalFields: [
-                            'month', 'year'
+                        fields: [
+                            'author', 'title', 'note', 'month', 'year'
                         ]
                     }
                 ]

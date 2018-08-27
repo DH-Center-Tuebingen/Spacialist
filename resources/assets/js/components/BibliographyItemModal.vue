@@ -1,5 +1,5 @@
 <template>
-    <modal :name="id" height="auto" :scrollable="true" @closed="hide" :click-to-close="!!data.id">
+    <modal :name="id" height="80%" @closed="hide" :click-to-close="!!data.id">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" v-if="data.id">{{ $t('main.bibliography.modal.edit.title') }}</h5>
@@ -8,8 +8,8 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <form role="form" id="newBibliographyItemForm" name="newBibliographyItemForm" @submit.prevent="success(data)">
+            <div class="modal-body col d-flex flex-column">
+                <form role="form" id="newBibliographyItemForm" class="col px-0 scroll-y-auto" name="newBibliographyItemForm" @submit.prevent="success(data)">
                     <div class="form-group">
                         <label class="col-form-label col-md-3" for="type">{{ $t('global.type') }}:</label>
                         <div class="col-md-9">
@@ -28,16 +28,12 @@
                             </multiselect>
                         </div>
                     </div>
-                    <div class="form-group" v-for="mandatory in mandatoryFields">
-                        <label class="col-form-label col-md-3">{{ mandatory }}:<span style="color: red;">*</span></label>
+                    <div class="form-group" v-for="field in typeFields">
+                        <label class="col-form-label col-md-3">
+                            {{ field }}:
+                        </label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" v-model="data.fields[mandatory]" required/>
-                        </div>
-                    </div>
-                    <div class="form-group" v-for="optional in optionalFields">
-                        <label class="col-form-label col-md-3">{{ optional }}:</label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" v-model="data.fields[optional]"/>
+                            <input type="text" class="form-control" v-model="data.fields[field]"/>
                         </div>
                     </div>
                 </form>
@@ -109,18 +105,12 @@
             }
         },
         computed: {
-            mandatoryFields: function() {
+            typeFields: function() {
                 if(this.data.type) {
-                    return this.data.type.mandatoryFields;
+                    return this.data.type.fields;
                 }
-                return this.availableTypes[0].mandatoryFields;
-            },
-            optionalFields: function() {
-                if(this.data.type) {
-                    return this.data.type.optionalFields;
-                }
-                return this.availableTypes[0].optionalFields;
-            },
+                return this.availableTypes[0].fields;
+            }
         }
     }
 </script>
