@@ -34,6 +34,7 @@ const de = {
         link: 'Verknüpfen',
         'unlink-from': 'Verknüpfung mit {name} entfernen',
         'link-to': 'Mit {name} verknüpfen',
+        'has-links': 'Hat keine Verknüpfungen | Hat eine Verknüpfung | Hat {cnt} Verknüpfungen',
         discard: {
             title: 'Ungespeicherte Änderungen',
             msg: 'Ungespeicherte Änderungen in {name}. Willst du wirklich fortfahren und die Änderungen verwerfen?',
@@ -106,7 +107,8 @@ const de = {
         value: 'Wert',
         'allow-override': 'Überschreibbar?',
         tag: 'Schlagwort | Schlagworte',
-        set: 'Setzen'
+        set: 'Setzen',
+        'has-tags': 'Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte'
     },
     main: {
         entity: {

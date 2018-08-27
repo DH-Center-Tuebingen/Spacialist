@@ -288,7 +288,7 @@
                                 </a>
                             </li>
                         </ul>
-                        <div class="ml-4 mr-4" v-show="modalTab == 'properties'">
+                        <div class="col mx-0 scroll-y-auto" v-show="modalTab == 'properties'">
                             <h5 class="mt-3">{{ $t('plugins.files.modal.detail.properties') }}</h5>
                             <table class="table table-striped table-hover table-sm mb-0">
                                 <tbody>
@@ -296,19 +296,19 @@
                                         <td class="text-left font-weight-bold">
                                             {{p}}
                                         </td>
-                                        <td class="col text-right">
-                                            <span class="text-muted" v-if="editingProperty.key != p">
+                                        <td class="col text-left">
+                                            <div class="text-muted text-line" v-if="editingProperty.key != p">
                                                 {{selectedFile[p]}}
-                                            </span>
-                                            <div class="d-flex" v-else>
-                                                <input type="text" class="form-control mr-1" v-model="selectedFile[p]" />
-                                                <button type="button" class="btn btn-sm btn-outline-success mr-1" @click="updateProperty()">
+                                            </div>
+                                            <form role="form" class="form-inline" v-else @submit.prevent="updateProperty()">
+                                                <textarea class="form-control mr-1 col" :id="`edit-property-${p}`" v-model="selectedFile[p]"></textarea>
+                                                <button type="submit" class="btn btn-sm btn-outline-success mr-1">
                                                     <i class="fas fa-fw fa-check"></i>
                                                 </button>
                                                 <button type="button" class="btn btn-sm btn-outline-danger" @click="cancelPropertyEditing()">
                                                     <i class="fas fa-fw fa-times"></i>
                                                 </button>
-                                            </div>
+                                            </form>
                                         </td>
                                         <td>
                                             <div class="dropdown">
@@ -316,7 +316,7 @@
                                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                                 </span>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                    <a class="dropdown-item" href="#" @click="enablePropertyEditing(p)">
+                                                    <a class="dropdown-item" href="#" @click.prevent="enablePropertyEditing(p)">
                                                         <i class="fas fa-fw fa-edit text-info"></i> {{ $t('global.edit') }}
                                                     </a>
                                                 </div>
@@ -431,9 +431,9 @@
                                 </div>
                             </form>
                         </div>
-                        <div v-show="modalTab == 'links'">
-                            <div class="d-flex flex-column">
-                                <ul class="list-group mt-3 mx-4">
+                        <div v-show="modalTab == 'links'" class="h-100">
+                            <div class="d-flex flex-column h-100 mx-4">
+                                <ul class="list-group mt-3 mx-0 col p-0">
                                     <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.contexts">
                                         <a href="#" @click.prevent="routeToEntity(link)">
                                             <i class="fas fa-fw fa-monument"></i> {{ link.name }}
@@ -443,12 +443,20 @@
                                         </a>
                                     </li>
                                 </ul>
-                                <button type="button" class="btn btn-outline-success mx-4 mt-2" @click.prevent="linkFile(selectedFile, context)" v-if="!linkedToCurrentEntity">
+                                <button type="button" class="btn btn-outline-success mt-2" @click.prevent="linkFile(selectedFile, context)" v-if="!linkedToCurrentEntity && context.id">
                                     <span class="fa-stack d-inline">
                                         <i class="fas fa-monument"></i>
                                         <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i> {{ $t('global.link-to', {name: context.name})}}
                                     </span>
                                 </button>
+                                <context-search
+                                    class="mt-2"
+                                    id="link-entity-search"
+                                    name="link-entity-search"
+                                    :filters="selectedFile.contexts ? selectedFile.contexts.map(c => c.id) : []"
+                                    :on-select="selection => linkFile(selectedFile, selection)"
+                                    :reset-input="true">
+                                </context-search>
                             </div>
                         </div>
                         <div v-show="modalTab == 'exif'">
@@ -1106,6 +1114,7 @@
                 this.linkCount = 0;
             },
             linkFile(file, context) {
+                if(!file || !context) return;
                 const id = file.id;
                 const data = {
                     'context_id': context.id
@@ -1128,25 +1137,22 @@
                 });
             },
             enablePropertyEditing(property) {
-                const vm = this;
-                vm.editingProperty.key = property;
-                vm.editingProperty.value = vm.selectedFile[property];
+                this.editingProperty.key = property;
+                this.editingProperty.value = this.selectedFile[property];
             },
             updateProperty() {
-                const vm = this;
-                const p = vm.editingProperty;
-                const id = vm.selectedFile.id;
+                const p = this.editingProperty;
+                const id = this.selectedFile.id;
                 let data = {};
-                data[p.key] = vm.selectedFile[p.key];
-                vm.$http.patch(`/file/${id}/property`, data).then(function(response) {
-                    vm.resetEditingProperty();
+                data[p.key] = this.selectedFile[p.key];
+                $http.patch(`/file/${id}/property`, data).then(response => {
+                    this.resetEditingProperty();
                 });
             },
             cancelPropertyEditing() {
-                const vm = this;
-                const p = vm.editingProperty;
-                vm.selectedFile[p.key] = p.value;
-                vm.resetEditingProperty();
+                const p = this.editingProperty;
+                this.selectedFile[p.key] = p.value;
+                this.resetEditingProperty();
             },
             resetEditingProperty() {
                 this.editingProperty.key = '';

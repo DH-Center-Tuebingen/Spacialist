@@ -34,6 +34,7 @@ const en = {
         link: 'Link',
         'unlink-from': 'Unlink from {name}',
         'link-to': 'Link to {name}',
+        'has-links': 'Has no links | Has one link | Has {cnt} links',
         discard: {
             title: 'Unsaved Changes',
             msg: 'Unsaved changes in {name}. Do you really want to continue and discard changes?',
@@ -106,7 +107,8 @@ const en = {
         value: 'Value',
         'allow-override': 'Allow Override?',
         tag: 'Tag | Tags',
-        set: 'Set'
+        set: 'Set',
+        'has-tags': 'Has no tags | Has one tag | Has {cnt} tags'
     },
     main: {
         entity: {

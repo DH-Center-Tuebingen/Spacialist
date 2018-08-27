@@ -49,6 +49,14 @@
                 type: Function,
                 required: false
             },
+            filters: {
+                required: false,
+                type: Array
+            },
+            resetInput: {
+                required: false,
+                type: Boolean
+            },
             value: {
                 type: String,
                 required: false
@@ -75,9 +83,21 @@
                 this.query = item ? item.name : undefined;
                 if(this.onSelect) this.onSelect(item);
                 this.closeSelect();
+                if(this.resetInput) this.reset();
+            },
+            prepareResponseData(data) {
+                if(this.filters.length) {
+                    // remove all results with id in filters
+                    // from result items
+                    return data.filter(i => {
+                        return this.filters.indexOf(i.id) == -1;
+                    });
+                } else {
+                    return data;
+                }
             },
             clearItem() {
-                this.onHit();
+                this.reset();
             },
             closeSelect() {
                 this.items = [];

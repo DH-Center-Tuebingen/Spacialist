@@ -20,11 +20,6 @@
                         <div class="card-img" v-else style="width: 100%; height: 200px;"></div>
                         <div class="card-img-overlay">
                             <h4 class="card-title text-truncate" :class="{shadowed: file.category == 'image'}">
-                                <small v-if="showLinks && getFileLinks(file).length" title="Is linked">
-                                    <sup>
-                                        <i class="fas fa-fw fa-link text-info"></i>
-                                    </sup>
-                                </small>
                                 {{ file.name }}
                             </h4>
                             <div class="card-text pt-4">
@@ -77,6 +72,14 @@
                                     data-fa-mask="fas fa-fw fa-file"></i>
                                 </div>
                             </div>
+                        </div>
+                        <div class="position-absolute top-0 right-0 m-2">
+                            <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has-links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
+                                <i class="fas fa-fw fa-link text-info"></i>
+                            </span>
+                            <span v-if="getFileTags(file).length" :title="$tc('global.has-tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
+                                <i class="fas fa-fw fa-tags text-info"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -159,6 +162,9 @@
                     return [];
                 }
                 return file.contexts;
+            },
+            getFileTags(file) {
+                return file.tags;
             }
         },
         data() {

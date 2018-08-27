@@ -95,7 +95,6 @@ class SearchController extends Controller {
         }
         $q = $request->query('q');
         $matches = Context::where('name', 'ilike', '%'.$q.'%')
-            ->select('name', 'id', 'root_context_id')
             ->orderBy('name')
             ->get();
         $matches->each->append('ancestors');
