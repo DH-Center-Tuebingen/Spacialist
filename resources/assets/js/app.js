@@ -45,6 +45,7 @@ dom.watch(); // search for <i> tags to replace with <svg>
  */
 
 require('typeface-raleway');
+require('typeface-source-code-pro');
 require('popper.js');
 require('bootstrap');
 window.Vue = require('vue');

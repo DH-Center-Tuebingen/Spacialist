@@ -22,10 +22,6 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'public/js/cornerstoneWADOImageLoaderCodecs.min.js'
    )
    .copy(
-       'node_modules/highlight.js/styles/github.css',
-       'public/css/highlightjs.css'
-   )
-   .copy(
        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
        'public/css'
    )
