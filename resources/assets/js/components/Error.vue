@@ -1,5 +1,5 @@
 <template>
-    <modal name="error-modal" height="auto" :scrollable="true" @before-open="receiveErrorMessage">
+    <modal name="error-modal" height="80%" @before-open="receiveErrorMessage">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Error occured</h5>
@@ -7,11 +7,11 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body col d-flex flex-column">
                 <p v-if="hasRequest">
                     <code>{{ request.method }}</code> Request <a :href="request.url">{{ request.url }}</a> failed with status <span class="font-weight-bold">{{ request.status }}</span>.
                 </p>
-                <p class="alert alert-danger">
+                <p class="alert alert-danger col scroll-y-auto">
                     Error Message: <span class="font-weight-light font-italic">{{ msg.error || msg }}</span>
                 </p>
                 <p class="alert alert-info">
