@@ -89,9 +89,6 @@
                             <router-link class="dropdown-item" v-for="plugin in $getSettingsPlugins()" :to="plugin.href" :key="plugin.key">
                                 <i class="fas fa-fw" :class="plugin.icon"></i> {{ $t(plugin.label) }}
                             </router-link>
-                            <a class="dropdown-item" href="">
-                                <i class="fas fa-fw fa-pencil-alt"></i> {{ $t('global.settings.editmode') }}
-                            </a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#" @click="showAboutModal">
                                 <i class="fas fa-fw fa-info-circle"></i> {{ $t('global.settings.about') }}

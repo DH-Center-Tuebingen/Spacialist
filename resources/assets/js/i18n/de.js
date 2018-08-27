@@ -60,7 +60,6 @@ const de = {
             roles: 'Rollenverwaltung',
             datamodel: 'Datenmodell-Editor',
             system: 'System-Einstellungen',
-            editmode: 'Editiermodus umschalten',
             about: 'Über'
         },
         user: {

@@ -60,7 +60,6 @@ const en = {
             roles: 'Role Management',
             datamodel: 'Data-Model-Editor',
             system: 'System Preferences',
-            editmode: 'Toggle Edit Mode',
             about: 'About'
         },
         user: {
