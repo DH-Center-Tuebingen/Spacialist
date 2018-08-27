@@ -13,13 +13,15 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - Rename files
   - 3D-Viewer can now load all 3D files of sub-entities into same scene
   - New audio plugin (based on [wavesurfer](https://wavesurfer-js.org), visualization and EQ)
-  - Simple navigation to jump to previous/next file right from the modal
+  - Simple navigation to jump to previous/next file right from the modal (using buttons or left/right arrow key)
+  - Icons in the upper right corner to indicate whether this file is linked and has tags
 - Added Welcome Page
   - Maintainer (Name and E-Mail-Address), Project Description and Access (Public/Private) can be configured in settings
 - Reference Modal
   - Options (Edit/Delete) to reference list
-- BibTeX export
-- Add 'Hide BibTeX metadata fields' toggle to Bibliography view
+- Bibliography
+  - Export BibTeX
+  - 'Hide BibTeX metadata fields' toggle in Bibliography view
 - SQL Attribute Type
   - Rendered as Table or single value
   - Supports translations (Use `concept_url` as header/content)
@@ -53,7 +55,9 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
     - Camera
     - Date
 - Tree View now loads root elements only. Sub-elements are loaded on request
-- Bibliography View loads only the first 20 entries. More entries are loaded on scroll
+- Bibliography
+  - Only loads the first 20 entries. More entries are loaded on scroll.
+  - Dropped differentiation between mandatory and optional fields (all are optional now).
 - Tree Search is now async and matching entities can be selected from a list (and expanded/highlighted)
 - Global search based on relevance. Also supports bangs for different categories:
   - `!e ` + Search term: Entities
@@ -64,6 +68,7 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
 - 3D-File-Viewer: Mouse Controls now work even if WebVR is available (but not active)
 ### Removed/Deprecated
 - Links: The links have changed, but they will continue to work. We recommend to update your bookmarks, because the old link structure is now deprecated
+- Edit Mode (Column sizes can still be modified in preferences)
 
 ## 0.5.1
 ### Added
