@@ -49,6 +49,8 @@ const de = {
                     'toggle-csv': 'CSV-Anzeige umschalten',
                     'toggle-md': 'Markdown-Anzeige umschalten',
                     'toggle-html': 'HTML-Anzeige umschalten',
+                    'no-links': 'Keine Verknüpfungen. Wähle eine Entität aus oder benutze die Suche hier drunter, um Entitäten zu verknüpfen.',
+                    'link-further-entities': 'Mit weiteren Entitäten verknüpfen',
                     toasts: {
                         'tags-updated': {
                             title: 'Schlagworte aktualisiert',

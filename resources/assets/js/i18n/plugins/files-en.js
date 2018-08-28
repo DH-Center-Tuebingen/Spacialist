@@ -49,6 +49,8 @@ const en = {
                     'toggle-csv': 'Toggle CSV-Rendering',
                     'toggle-md': 'Toggle Markdown-Rendering',
                     'toggle-html': 'Toggle HTML-Rendering',
+                    'no-links': 'No links. Select a entity first or use the search below to link to entities.',
+                    'link-further-entities': 'Link to further entities',
                     toasts: {
                         'tags-updated': {
                             title: 'Tags updated',

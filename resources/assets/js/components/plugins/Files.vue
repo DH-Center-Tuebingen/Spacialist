@@ -475,22 +475,30 @@
                         </div>
                         <div v-show="modalTab == 'links'" class="h-100">
                             <div class="d-flex flex-column h-100 mx-4">
-                                <ul class="list-group mt-3 mx-0 col p-0">
-                                    <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.contexts">
-                                        <a href="#" @click.prevent="routeToEntity(link)">
-                                            <i class="fas fa-fw fa-monument"></i> {{ link.name }}
-                                        </a>
-                                        <a href="#" class="text-body" @click.prevent="requestUnlinkFile(selectedFile, link)">
-                                            <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                                <button type="button" class="btn btn-outline-success mt-2" @click.prevent="linkFile(selectedFile, context)" v-if="!linkedToCurrentEntity && context.id">
+                                <div class="my-3 col p-0 scroll-y-auto">
+                                    <ul class="list-group mx-0" v-if="selectedFile.contexts && selectedFile.contexts.length">
+                                        <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.contexts">
+                                            <a href="#" @click.prevent="routeToEntity(link)">
+                                                <i class="fas fa-fw fa-monument"></i> {{ link.name }}
+                                            </a>
+                                            <a href="#" class="text-body" @click.prevent="requestUnlinkFile(selectedFile, link)">
+                                                <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <p class="alert alert-info" v-else>
+                                        {{ $t('plugins.files.modal.detail.no-links') }}
+                                    </p>
+                                </div>
+                                <button type="button" class="btn btn-outline-success mb-3" @click.prevent="linkFile(selectedFile, context)" v-if="!linkedToCurrentEntity && context.id">
                                     <span class="fa-stack d-inline">
                                         <i class="fas fa-monument"></i>
                                         <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i> {{ $t('global.link-to', {name: context.name})}}
                                     </span>
                                 </button>
+                                <h5>
+                                    {{ $t('plugins.files.modal.detail.link-further-entities') }}
+                                </h5>
                                 <context-search
                                     class="mt-2"
                                     id="link-entity-search"
