@@ -59,7 +59,7 @@
                 <thead class="thead-light sticky-top">
                     <tr>
                         <th>
-                            <a href="#" @click="setOrderColumn('type')">
+                            <a href="#" @click.prevent="setOrderColumn('type')">
                                 {{ $t('global.type') }}
                                 <span v-show="orderColumn == 'type'">
                                     <span v-show="orderType == 'asc'">
@@ -72,7 +72,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('citekey')">
+                            <a href="#" @click.prevent="setOrderColumn('citekey')">
                                 {{ $t('main.bibliography.column.cite-key') }}
                                 <span v-show="orderColumn == 'citekey'">
                                     <span v-show="orderType == 'asc'">
@@ -85,7 +85,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('author')">
+                            <a href="#" @click.prevent="setOrderColumn('author')">
                                 {{ $t('main.bibliography.column.author') }}
                                 <span v-show="orderColumn == 'author'">
                                     <span v-show="orderType == 'asc'">
@@ -98,7 +98,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('year')">
+                            <a href="#" @click.prevent="setOrderColumn('year')">
                                 {{ $t('main.bibliography.column.year') }}
                                 <span v-show="orderColumn == 'year'">
                                     <span v-show="orderType == 'asc'">
@@ -111,7 +111,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('title')">
+                            <a href="#" @click.prevent="setOrderColumn('title')">
                                 {{ $t('main.bibliography.column.title') }}
                                 <span v-show="orderColumn == 'title'">
                                     <span v-show="orderType == 'asc'">
@@ -124,7 +124,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('booktitle')">
+                            <a href="#" @click.prevent="setOrderColumn('booktitle')">
                                 {{ $t('main.bibliography.column.booktitle') }}
                                 <span v-show="orderColumn == 'booktitle'">
                                     <span v-show="orderType == 'asc'">
@@ -137,7 +137,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('publisher')">
+                            <a href="#" @click.prevent="setOrderColumn('publisher')">
                                 {{ $t('main.bibliography.column.publisher') }}
                                 <span v-show="orderColumn == 'publisher'">
                                     <span v-show="orderType == 'asc'">
@@ -153,7 +153,7 @@
                             {{ $t('main.bibliography.column.pages') }}
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('editor')">
+                            <a href="#" @click.prevent="setOrderColumn('editor')">
                                 {{ $t('main.bibliography.column.editor') }}
                                 <span v-show="orderColumn == 'editor'">
                                     <span v-show="orderType == 'asc'">
@@ -166,7 +166,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('journal')">
+                            <a href="#" @click.prevent="setOrderColumn('journal')">
                                 {{ $t('main.bibliography.column.journal') }}
                                 <span v-show="orderColumn == 'journal'">
                                     <span v-show="orderType == 'asc'">
@@ -197,7 +197,7 @@
                             {{ $t('main.bibliography.column.series') }}
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('address')">
+                            <a href="#" @click.prevent="setOrderColumn('address')">
                                 {{ $t('main.bibliography.column.address') }}
                                 <span v-show="orderColumn == 'address'">
                                     <span v-show="orderType == 'asc'">
@@ -213,7 +213,7 @@
                             {{ $t('main.bibliography.column.note') }}
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('misc')">
+                            <a href="#" @click.prevent="setOrderColumn('misc')">
                                 {{ $t('main.bibliography.column.misc') }}
                                 <span v-show="orderColumn == 'misc'">
                                     <span v-show="orderType == 'asc'">
@@ -226,7 +226,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click="setOrderColumn('howpublished')">
+                            <a href="#" @click.prevent="setOrderColumn('howpublished')">
                                 {{ $t('main.bibliography.column.howpublished') }}
                                 <span v-show="orderColumn == 'howpublished'">
                                     <span v-show="orderType == 'asc'">
@@ -419,19 +419,10 @@
         methods: {
             init(entries) {
                 this.allEntries = entries;
-                const start = this.entriesLoaded;
-                const end = Math.min(start + this.chunkSize, this.allEntries.length);
-                this.localEntries = this.allEntries.slice(start, end);
-                this.entriesLoaded = this.localEntries.length;
             },
             getNextEntries() {
                 if(this.entriesLoaded == this.allEntries.length) return;
-                const start = this.entriesLoaded;
-                const end = Math.min(start + this.chunkSize, this.allEntries.length);
-                this.allEntries.slice(start, end).forEach(e => {
-                    this.localEntries.push(e);
-                });
-                this.entriesLoaded = this.localEntries.length;
+                this.entriesLoaded = Math.min(this.entriesLoaded + this.chunkSize, this.allEntries.length);
             },
             setOrderColumn(column) {
                 if(this.orderColumn == column) {
@@ -676,7 +667,7 @@
                 const query = this.query.toLowerCase();
                 let filteredEntries;
                 if(!query.length) {
-                    filteredEntries = this.localEntries;
+                    filteredEntries = this.allEntries;
                 } else {
                     filteredEntries = this.allEntries.filter(function(e) {
                         for(let k in e) {
@@ -691,7 +682,8 @@
                         return false;
                     });
                 }
-                return _.orderBy(filteredEntries, this.orderColumn, this.orderType);
+                const size = Math.min(this.entriesLoaded, this.allEntries.length);
+                return _.orderBy(filteredEntries, this.orderColumn, this.orderType).slice(0, size);
             }
         }
     }
