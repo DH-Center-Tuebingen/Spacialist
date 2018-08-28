@@ -54,7 +54,7 @@
                 </div>
             </li>
         </ul>
-        <div class="table-responsive">
+        <div class="table-responsive col p-0">
             <table class="table table-sm table-striped table-hover">
                 <thead class="thead-light sticky-top">
                     <tr>
@@ -340,7 +340,7 @@
                                 <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <div class="dropdown-menu overlay-all" aria-labelledby="dropdownMenuButton">
                                     <a class="dropdown-item" href="#" @click.prevent="editEntry(entry)" :disabled="!$can('edit_literature')">
                                         <i class="fas fa-fw fa-edit text-info"></i> {{ $t('global.edit') }}
                                     </a>
