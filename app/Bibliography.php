@@ -104,7 +104,11 @@ class Bibliography extends Model
     ];
 
     public function fieldsFromRequest($request, $user) {
-        foreach($request->toArray() as $key => $value){
+        $fields = $request->toArray();
+        if(!isset($fields['title'])) {
+            $fields['title'] = 'No Title';
+        }
+        foreach($fields as $key => $value){
             $this->{$key} = $value;
         }
 
@@ -131,7 +135,7 @@ class Bibliography extends Model
         }
         // Use first two letters of author/title as key with only first letter uppercase
         $key = ucwords(mb_strtolower(substr($key, 0, 2))) . ':';
-        if($fields['year'] != null) {
+        if(isset($fields['year'])) {
             $key .= $fields['year'];
         } else {
             $key .= '0000';
