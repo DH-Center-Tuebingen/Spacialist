@@ -35,6 +35,9 @@
             <tr>
                 <td>
                     <strong>{{ $t('main.preference.key.columns.title') }}</strong>
+                    <p class="alert alert-info mt-3">
+                        {{ $t('main.preference.info.columns') }}
+                    </p>
                 </td>
                 <td>
                     <form>

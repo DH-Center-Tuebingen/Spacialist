@@ -244,6 +244,9 @@ const de = {
                     msg: '{name} wurde erfolgreich aktualisiert.'
                 }
             },
+            info: {
+                columns: 'Die Summe der Werte der Spalten darf 12 nicht überschreiten.'
+            },
             key: {
                 language: 'Sprache',
                 columns: {

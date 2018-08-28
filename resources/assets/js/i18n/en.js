@@ -244,6 +244,9 @@ const en = {
                     msg: '{name} successfully updated.'
                 }
             },
+            info: {
+                columns: 'The sum of the column values must not be higher than 12.'
+            },
             key: {
                 language: 'Language',
                 columns: {
