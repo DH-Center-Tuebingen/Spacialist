@@ -196,7 +196,49 @@
                         </p>
                     </div>
             </file-upload>
-            <ul class="list-group list-group-flush">
+            <div v-show="!uploadFiles.length">
+                <form role="form">
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="upload-property-copyright">
+                            {{ $t('plugins.files.modal.detail.props.copyright') }}:
+                        </label>
+                        <div class="col-md-9">
+                            <textarea class="form-control" id="upload-property-copyright" v-model="toUpload.copyright"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="upload-property-description">
+                            {{ $t('plugins.files.modal.detail.props.description') }}:
+                        </label>
+                        <div class="col-md-9">
+                            <textarea class="form-control" id="upload-property-description" v-model="toUpload.description"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="upload-property-tags">
+                            {{ $tc('global.tag', 2) }}:
+                        </label>
+                        <div class="col-md-9">
+                            <multiselect
+                                id="upload-property-tags"
+                                label="concept_url"
+                                track-by="id"
+                                v-model="toUpload.tags"
+                                :allow-empty="true"
+                                :close-on-select="false"
+                                :custom-label="translateLabel"
+                                :hide-selected="true"
+                                :multiple="true"
+                                :options="tags"
+                                :placeholder="$t('global.select.placehoder')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
+                            </multiselect>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <ul class="list-group list-group-flush" v-show="uploadFiles.length">
                 <transition-group name="fade">
                     <li class="list-group-item" v-for="file in uploadFiles" :key="file.id" v-if="!file.success">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -294,7 +336,7 @@
                                 <tbody>
                                     <tr v-for="p in fileProperties" class="d-flex justify-content-between">
                                         <td class="text-left font-weight-bold">
-                                            {{p}}
+                                            {{ $t(`plugins.files.modal.detail.props.${p}`) }}
                                         </td>
                                         <td class="col text-left">
                                             <div class="text-muted text-line" v-if="editingProperty.key != p">
@@ -857,6 +899,15 @@
             uploadFile(file, component) {
                 let formData = new FormData();
                 formData.append('file', file.file);
+                if(this.toUpload.copyright.length) {
+                    formData.append('copyright', this.toUpload.copyright);
+                }
+                if(this.toUpload.description.length) {
+                    formData.append('description', this.toUpload.description);
+                }
+                if(this.toUpload.tags.length) {
+                    formData.append('tags', JSON.stringify(this.toUpload.tags.map(t => t.id)));
+                }
                 return $http.post('file/new', formData);
             },
             openFile(id) {
@@ -1246,6 +1297,11 @@
                 },
                 selectedTopAction: 'unlinkedFiles',
                 uploadFiles: [],
+                toUpload: {
+                    tags: [],
+                    copyright: '',
+                    description: ''
+                },
                 filesUploaded: 0,
                 filesErrored: 0,
                 linkedFiles: {

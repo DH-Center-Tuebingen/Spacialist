@@ -3,7 +3,9 @@
 namespace App;
 
 use App\ContextFile;
+use App\FileTag;
 use App\Helpers;
+use App\ThConcept;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -275,7 +277,7 @@ class File extends Model
         return $subFiles;
     }
 
-    public static function createFromUpload($input, $user) {
+    public static function createFromUpload($input, $user, $metadata) {
         $filename = $input->getClientOriginalName();
         $ext = $input->getClientOriginalExtension();
         // filename without extension, but with trailing '.'
@@ -303,7 +305,33 @@ class File extends Model
         $file->name = $filename;
         $file->created = $lastModified;
 
+        if(isset($metadata)) {
+            if(isset($metadata['copyright'])) {
+                $file->copyright = $metadata['copyright'];
+            }
+            if(isset($metadata['description'])) {
+                $file->description = $metadata['description'];
+            }
+        }
+
         $file->save();
+        if(isset($metadata)) {
+            if(isset($metadata['tags'])) {
+                foreach($metadata['tags'] as $tid) {
+                    try {
+                        ThConcept::findOrFail($tid);
+                    } catch(ModelNotFoundException $e) {
+                        return response()->json([
+                            'error' => 'This tag does not exist'
+                        ], 400);
+                    }
+                    $tag = new FileTag();
+                    $tag->photo_id = $file->id;
+                    $tag->concept_id = $tid;
+                    $tag->save();
+                }
+            }
+        }
 
         if($file->isImage()) {
             $nameNoExt = pathinfo($filename, PATHINFO_FILENAME);

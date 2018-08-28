@@ -100,6 +100,10 @@ const de = {
                         lastmodified: 'Zuletzt geändert',
                         filesize: 'Größe'
                     },
+                    props: {
+                        copyright: 'Copyright',
+                        description: 'Beschreibung'
+                    },
                     replace: {
                         button: 'Datei ersetzen',
                         confirm: 'Willst du die Datei ({size}) durch {name} ({size2}) ersetzen?'

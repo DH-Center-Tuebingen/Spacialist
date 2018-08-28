@@ -265,11 +265,19 @@ class FileController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'file' => 'required|file'
+            'file' => 'required|file',
+            'copyright' => 'string',
+            'description' => 'string',
+            'tags' => 'json',
         ]);
 
         $file = $request->file('file');
-        $newFile = File::createFromUpload($file, $user);
+        $metadata = [
+            'copyright' => $request->get('copyright'),
+            'description' => $request->get('description'),
+            'tags' => json_decode($request->get('tags'))
+        ];
+        $newFile = File::createFromUpload($file, $user, $metadata);
         return response()->json($newFile);
     }
 
