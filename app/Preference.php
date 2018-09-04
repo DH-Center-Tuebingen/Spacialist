@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\UserPreference;
 use Illuminate\Database\Eloquent\Model;
 
 class Preference extends Model
@@ -21,29 +22,31 @@ class Preference extends Model
     }
 
     public static function getUserPreferences($id) {
-        $prefs = self::leftJoin('user_preferences as up', 'preferences.id', '=', 'up.pref_id')
-            ->select('preferences.*', 'up.pref_id', 'up.user_id')
-            ->selectRaw(\DB::raw('COALESCE(up.value, default_value) AS default_value'))
-            ->where('up.user_id', $id)
-            ->orWhereNull('up.user_id')
-            ->orderBy('id')
+        $userPrefs = UserPreference::select('user_preferences.*', 'preferences.*', 'value as default_value')
+            ->join('preferences', 'user_preferences.pref_id', 'preferences.id')
+            ->where('user_id', $id)
             ->get();
+        $systemPrefs = self::whereNotIn('id', $userPrefs->pluck('pref_id')->toArray())
+            ->get();
+        $prefs = $systemPrefs;
+        foreach($userPrefs as $p) {
+            $prefs[] = $p;
+        }
         $prefObj = self::decodePreferences($prefs);
         return $prefObj;
     }
 
     public static function getUserPreference($uid, $label) {
-        $pref = self::leftJoin('user_preferences as up', 'preferences.id', '=', 'up.pref_id')
-            ->select('preferences.*')
-            ->selectRaw(\DB::raw('COALESCE(up.value, default_value) AS default_value'))
-            ->where('label', $label)
-            ->where(function($query) use ($uid) {
-                $query->where('up.user_id', $uid)
-                    ->orWhereNull('up.user_id');
-            })
+        $pref = self::where('label', $label)
+            ->join('user_preferences', 'pref_id', 'preferences.id')
+            ->where('user_id', $uid)
             ->first();
-        $pref->value = self::decodePreference($pref->label, json_decode($pref->default_value));
-        unset($pref->default_value);
+        if(!isset($pref)) {
+            $pref = self::where('label', $label)->first();
+            $pref->value = $pref->default_value;
+            unset($pref->default_value);
+        }
+        $pref->value = self::decodePreference($pref->label, json_decode($pref->value));
         return $pref;
     }
 
