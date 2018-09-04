@@ -424,6 +424,12 @@
                 if(this.entriesLoaded == this.allEntries.length) return;
                 this.entriesLoaded = Math.min(this.entriesLoaded + this.chunkSize, this.allEntries.length);
             },
+            addEntry(entry) {
+                this.allEntries.push(entry);
+                if(this.allEntries.length < this.chunkSize) {
+                    this.entriesLoaded++;
+                }
+            },
             setOrderColumn(column) {
                 if(this.orderColumn == column) {
                     if(this.orderType == 'asc') {
@@ -472,15 +478,15 @@
 
                 if(item.id) {
                     $http.patch(`bibliography/${item.id}`, data).then(response => {
-                        let entry = this.localEntries.find(e => e.id == item.id);
+                        let entry = this.allEntries.find(e => e.id == item.id);
                         for(let k in item.fields) {
-                            entry[k] = item.fields[k];
+                            Vue.set(entry, k, item.fields[k]);
                         }
                         this.hideNewItemModal();
                     });
                 } else {
                     $http.post('bibliography', data).then(response => {
-                        this.allEntries.push(response.data);
+                        this.addEntry(response.data);
                         this.hideNewItemModal();
                     });
                 }
@@ -506,14 +512,13 @@
                 });
             },
             deleteEntry(entry) {
-                const vm = this;
-                if(!vm.$can('add_remove_literature')) return;
-                vm.$http.delete(`bibliography/${entry.id}`).then(function(response) {
-                    const index = vm.localEntries.findIndex(e => e.id == entry.id);
+                if(!this.$can('add_remove_literature')) return;
+                $http.delete(`bibliography/${entry.id}`).then(response => {
+                    const index = this.allEntries.findIndex(e => e.id == entry.id);
                     if(index > -1) {
-                        vm.localEntries.splice(index, 1);
+                        this.allEntries.splice(index, 1);
                     }
-                    vm.hideDeleteEntryModal();
+                    this.hideDeleteEntryModal();
                 });
             },
             requestDeleteEntry(entry) {
@@ -549,7 +554,6 @@
                 allEntries: [],
                 entriesLoaded: 0,
                 chunkSize: 20,
-                localEntries: [],
                 orderColumn: 'author',
                 orderType: 'asc',
                 query: '',
@@ -682,7 +686,7 @@
                         return false;
                     });
                 }
-                const size = Math.min(this.entriesLoaded, this.allEntries.length);
+                const size = Math.min(this.entriesLoaded, filteredEntries.length);
                 return _.orderBy(filteredEntries, this.orderColumn, this.orderType).slice(0, size);
             }
         }

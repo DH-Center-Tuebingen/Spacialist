@@ -122,6 +122,12 @@ class BibliographyController extends Controller
     // PATCH
 
     public function updateItem(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('edit_literature')) {
+            return response()->json([
+                'error' => 'You do not have the permission to edit existing literature'
+            ], 403);
+        }
         $this->validate($request, [
             'type' => 'required|alpha'
         ]);
@@ -136,7 +142,7 @@ class BibliographyController extends Controller
 
         $bib->fieldsFromRequest($request, $user);
 
-        return response()->json(null, 204);
+        return response()->json($bib);
     }
 
     // DELETE
