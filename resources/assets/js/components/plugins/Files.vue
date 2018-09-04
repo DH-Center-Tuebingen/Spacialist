@@ -312,7 +312,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="col-md-6 h-100 d-flex flex-column">
+                    <div class="col-md-6 d-flex flex-column">
                         <ul class="nav nav-tabs nav-fill">
                             <li class="nav-item">
                                 <a href="#" class="nav-link" :class="{active: modalTab == 'properties'}" @click.prevent="modalTab = 'properties'">
