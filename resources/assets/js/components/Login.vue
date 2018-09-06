@@ -75,12 +75,13 @@
         methods: {
             login() {
                 const vm = this;
-                const redirect = vm.$auth.redirect();
+                let redirect;
+                if(vm.$router.currentRoute.query) {
+                    redirect = vm.$router.currentRoute.query.redirect;
+                }
                 let to = {};
                 if(redirect) {
-                    to.name = redirect.from.name;
-                    to.params = redirect.from.params;
-                    to.query = redirect.from.query;
+                    to.path = redirect;
                 } else {
                     to.name = 'home';
                 }

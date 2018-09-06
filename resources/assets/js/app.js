@@ -276,9 +276,17 @@ Axios.interceptors.response.use(response => {
     return response;
 }, error => {
     if(error.response.status == 401) {
+        let redirectQuery = {};
+        // Only append redirect query if from another route than login
+        // to prevent recursivly appending current route's full path
+        // on reloading login page
+        if(Vue.router.currentRoute.name != 'login') {
+            redirectQuery.redirect = Vue.router.currentRoute.fullPath;
+        }
         Vue.auth.logout({
             redirect: {
-                name: 'login'
+                name: 'login',
+                query: redirectQuery
             }
         });
     } else {
