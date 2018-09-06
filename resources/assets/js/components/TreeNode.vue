@@ -1,5 +1,5 @@
 <template>
-    <div @dragenter="onDragEnter" @dragleave="onDragLeave">
+    <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`">
         <i class="fas fa-fw fa-monument"></i>
         <span>{{data.name}}</span>
         <span class="pl-1 font-italic mb-0" v-if="data.entity_type_id">

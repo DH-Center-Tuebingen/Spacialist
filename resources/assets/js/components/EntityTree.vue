@@ -46,7 +46,7 @@
                 @drop="itemDrop"
                 @toggle="itemToggle">
             </tree>
-            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAdd)">
+            <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="onEntityAdd(onAdd)">
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
         </div>
@@ -402,13 +402,15 @@
                 return openRecursive(path, this.tree);
             },
             selectNodeById(id) {
-                const vm = this;
                 $http.get(`/entity/${id}/path`).then(response => {
                     const path = response.data;
-                    vm.openPath(path).then(targetNode => {
+                    this.openPath(path).then(targetNode => {
                         targetNode.state.selected = true;
-                        vm.selectedItem = targetNode;
-                        vm.selectedItem.path = path;
+                        this.selectedItem = targetNode;
+                        this.selectedItem.path = path;
+                        // Scroll tree to selected element
+                        const elem = document.getElementById(`tree-node-${targetNode.id}`);
+                        elem.scrollIntoView();
                     });
                 });
             },
