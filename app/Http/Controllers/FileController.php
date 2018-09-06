@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\File;
-use App\Context;
+use App\Entity;
 use App\FileTag;
 use App\Preference;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -26,7 +26,7 @@ class FileController extends Controller
 
     public function getFile($id) {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to view a specific file'
             ], 403);
@@ -43,7 +43,7 @@ class FileController extends Controller
 
     public function getArchiveFileList($id) {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to view a specific file'
             ], 403);
@@ -62,7 +62,7 @@ class FileController extends Controller
 
     public function downloadArchivedFile(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to download parts of a zip file'
             ], 403);
@@ -86,7 +86,7 @@ class FileController extends Controller
 
     public function getAsHtml($id) {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to view a specific file as HTML'
             ], 403);
@@ -104,13 +104,13 @@ class FileController extends Controller
 
     public function getSubFiles(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to view successors of a specific file'
             ], 403);
         }
         try {
-            Context::findOrFail($id);
+            Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This entity does not exist'
@@ -136,7 +136,7 @@ class FileController extends Controller
 
     public function getCategories() {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to get the file categories'
             ], 403);
@@ -151,7 +151,7 @@ class FileController extends Controller
 
     public function getCameraNames() {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to get the camera names'
             ], 403);
@@ -166,7 +166,7 @@ class FileController extends Controller
 
     public function getDates() {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to get the file dates'
             ], 403);
@@ -223,7 +223,7 @@ class FileController extends Controller
 
     public function getFiles(Request $request, $page = 1) {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to view files'
             ], 403);
@@ -235,7 +235,7 @@ class FileController extends Controller
 
     public function getUnlinkedFiles(Request $request, $page = 1) {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to view files'
             ], 403);
@@ -247,7 +247,7 @@ class FileController extends Controller
 
     public function getLinkedFiles(Request $request, $cid, $page = 1) {
         $user = auth()->user();
-        if(!$user->can('view_photos')) {
+        if(!$user->can('view_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to view files'
             ], 403);
@@ -259,7 +259,7 @@ class FileController extends Controller
 
     public function uploadFile(Request $request) {
         $user = auth()->user();
-        if(!$user->can('manage_photos')) {
+        if(!$user->can('manage_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to upload files'
             ], 403);
@@ -283,7 +283,7 @@ class FileController extends Controller
 
     public function patchContent(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('manage_photos')) {
+        if(!$user->can('manage_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to edit a file\'s content'
             ], 403);
@@ -310,7 +310,7 @@ class FileController extends Controller
 
     public function patchProperty(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('manage_photos')) {
+        if(!$user->can('manage_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to modify file properties'
             ], 403);
@@ -353,7 +353,7 @@ class FileController extends Controller
 
     public function patchTags(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('manage_photos')) {
+        if(!$user->can('manage_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to modify file properties'
             ], 403);
@@ -376,12 +376,12 @@ class FileController extends Controller
         }, $tags);
 
         // Delete all entries where tags no longer set
-        FileTag::where('photo_id', $file->id)
+        FileTag::where('file_id', $file->id)
             ->whereNotIn('concept_id', $tags)
             ->delete();
 
         // Get current tags...
-        $currentTags = FileTag::where('photo_id', $file->id)
+        $currentTags = FileTag::where('file_id', $file->id)
             ->pluck('concept_id')->toArray();
 
         // ... and remove them from requested tags...
@@ -390,7 +390,7 @@ class FileController extends Controller
         // ... so we can set all new tags
         foreach($newTags as $t) {
             $pt = new FileTag();
-            $pt->photo_id = $file->id;
+            $pt->file_id = $file->id;
             $pt->concept_id = $t;
             $pt->save();
         }
@@ -402,13 +402,13 @@ class FileController extends Controller
 
     public function linkToEntity(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('link_photos')) {
+        if(!$user->can('link_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to link files'
             ], 403);
         }
         $this->validate($request, [
-            'context_id' => 'required|integer|exists:contexts,id'
+            'entity_id' => 'required|integer|exists:entities,id'
         ]);
 
         try {
@@ -419,7 +419,7 @@ class FileController extends Controller
             ], 400);
         }
 
-        $file->link($request->get('context_id'), $user);
+        $file->link($request->get('entity_id'), $user);
 
         return response()->json();
     }
@@ -428,7 +428,7 @@ class FileController extends Controller
 
     public function deleteFile($id) {
         $user = auth()->user();
-        if(!$user->can('manage_photos')) {
+        if(!$user->can('manage_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to delete files'
             ], 403);
@@ -448,7 +448,7 @@ class FileController extends Controller
 
     public function unlinkEntity($fid, $cid) {
         $user = auth()->user();
-        if(!$user->can('link_photos')) {
+        if(!$user->can('link_files')) {
             return response()->json([
                 'error' => 'You do not have the permission to unlink files'
             ], 403);
@@ -463,7 +463,7 @@ class FileController extends Controller
         }
 
         try {
-            Context::findOrFail($cid);
+            Entity::findOrFail($cid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This entity does not exist'

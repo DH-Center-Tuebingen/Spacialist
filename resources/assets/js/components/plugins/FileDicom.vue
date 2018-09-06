@@ -126,7 +126,7 @@
             },
             onImageRendered(e) {
                 const eventData = e.detail;
-                cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
+                cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasEntity);
 
                 this.renderTime = eventData.renderTimeInMs;
                 this.ww = Math.round(eventData.viewport.voi.windowWidth);

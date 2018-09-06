@@ -280,7 +280,7 @@
                                 let layer;
                                 const ent = f.get('entity');
                                 if(ent) {
-                                    layer = vm.getLayer(ent.context_type_id)
+                                    layer = vm.getLayer(ent.entity_type_id)
                                 } else {
                                     layer = vm.getUnlinkedLayer();
                                 }
@@ -355,7 +355,7 @@
                                 let layer;
                                 const ent = f.get('entity');
                                 if(ent) {
-                                    layer = vm.getLayer(ent.context_type_id)
+                                    layer = vm.getLayer(ent.entity_type_id)
                                 } else {
                                     layer = vm.getUnlinkedLayer();
                                 }
@@ -425,14 +425,14 @@
                 let geojsonLayers = {};
                 for(let k in vm.overlays) {
                     const l = vm.overlays[k];
-                    if(!l.context_type_id && l.type != 'unlinked') {
+                    if(!l.entity_type_id && l.type != 'unlinked') {
                         vm.overlayLayers.push(vm.createNewLayer(l));
                         continue;
                     };
                     const layerId = l.id;
                     let layerName;
-                    if(l.context_type_id) {
-                        const ct = vm.getContextTypeById(l.context_type_id);
+                    if(l.entity_type_id) {
+                        const ct = vm.getEntityTypeById(l.entity_type_id);
                         if(ct) {
                             layerName = vm.$translateConcept(ct.thesaurus_url);
                         }
@@ -484,7 +484,7 @@
                         feature.setProperties(geojson.props);
                         let layer;
                         if(geojson.props.entity) {
-                            layer = vm.getLayer(geojson.props.entity.context_type_id);
+                            layer = vm.getLayer(geojson.props.entity.entity_type_id);
                         } else {
                             layer = vm.getUnlinkedLayer();
                         }
@@ -694,7 +694,7 @@
                             if (props.entity) {
                                 vm.$router.push({
                                     append: true,
-                                    name: 'contextdetail',
+                                    name: 'entitydetail',
                                     params: {
                                         id: props.entity.id
                                     },
@@ -808,7 +808,7 @@
             },
             getLayer(ctid) {
                 for(let k in this.layers) {
-                    if(this.layers[k].context_type_id == ctid) {
+                    if(this.layers[k].entity_type_id == ctid) {
                         return this.layers[k];
                     }
                 }
@@ -822,11 +822,11 @@
                 }
                 return;
             },
-            getContextType(context) {
-                if(!context) return;
-                return this.getContextTypeById(context.context_type_id);
+            getEntityType(entity) {
+                if(!entity) return;
+                return this.getEntityTypeById(entity.entity_type_id);
             },
-            getContextTypeById(ctid) {
+            getEntityTypeById(ctid) {
                 return this.$getEntityType(ctid);
             },
             getSnapFeatures() {
@@ -1030,8 +1030,8 @@
                     let index = 0;
                     let nullValueFound = false;
                     if(!features.length) continue;
-                    const ctid = features[0].getProperties().entity.context_type_id;
-                    $http.get(`context/entity_type/${ctid}/data/${opts.attribute_id}`).then(response => {
+                    const ctid = features[0].getProperties().entity.entity_type_id;
+                    $http.get(`entity/entity_type/${ctid}/data/${opts.attribute_id}`).then(response => {
                         const data = response.data;
                         let values = [];
                         features.forEach(f => {
@@ -1251,7 +1251,7 @@
                     let layer;
                     const ent = newFeature.get('entity');
                     if(ent) {
-                        layer = this.getLayer(ent.context_type_id)
+                        layer = this.getLayer(ent.entity_type_id)
                     } else {
                         layer = this.getUnlinkedLayer();
                     }

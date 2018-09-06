@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ContextTypeRelation extends Model
+class EntityTypeRelation extends Model
 {
     /**
      * The attributes that are assignable.

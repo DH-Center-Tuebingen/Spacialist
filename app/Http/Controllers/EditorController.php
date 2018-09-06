@@ -7,10 +7,10 @@ use \DB;
 use App\Attribute;
 use App\AttributeValue;
 use App\AvailableLayer;
-use App\Context;
-use App\ContextAttribute;
-use App\ContextType;
-use App\ContextTypeRelation;
+use App\Entity;
+use App\EntityAttribute;
+use App\EntityType;
+use App\EntityTypeRelation;
 use App\Geodata;
 use App\Helpers;
 use App\ThConcept;
@@ -20,22 +20,22 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class EditorController extends Controller {
     // GET
 
-    public function getContextTypeOccurrenceCount($id) {
-        $cnt = Context::where('context_type_id', $id)->count();
+    public function getEntityTypeOccurrenceCount($id) {
+        $cnt = Entity::where('entity_type_id', $id)->count();
         return response()->json($cnt);
     }
 
     public function getAttributeOccurrenceCount($aid, $ctid = -1) {
         $query = AttributeValue::where('attribute_id', $aid);
         if($ctid > -1) {
-            $query->where('context_type_id', $ctid);
-            $query->join('contexts', 'contexts.id', '=', 'context_id');
+            $query->where('entity_type_id', $ctid);
+            $query->join('entities', 'entities.id', '=', 'entity_id');
         }
         $cnt = $query->count();
         return response()->json($cnt);
     }
 
-    public function getContextType($id) {
+    public function getEntityType($id) {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
@@ -43,26 +43,26 @@ class EditorController extends Controller {
             ], 403);
         }
         try {
-            $contextType = ContextType::with('sub_context_types')->findOrFail($id);
+            $entityType = EntityType::with('sub_entity_types')->findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context-type does not exist'
+                'error' => 'This entity-type does not exist'
             ], 400);
         }
-        return response()->json($contextType);
+        return response()->json($entityType);
     }
 
-    public function getContextTypeAttributes($id) {
+    public function getEntityTypeAttributes($id) {
         $user = auth()->user();
         if(!$user->can('view_concept_props')) {
             return response()->json([
                 'error' => 'You do not have the permission to view entity data'
             ], 403);
         }
-        $attributes = DB::table('context_types as c')
+        $attributes = DB::table('entity_types as c')
             ->where('c.id', $id)
             ->whereNull('a.parent_id')
-            ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+            ->join('entity_attributes as ca', 'c.id', '=', 'ca.entity_type_id')
             ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
             ->orderBy('ca.position', 'asc')
             ->get();
@@ -145,18 +145,18 @@ class EditorController extends Controller {
         return response()->json(array_values($selection));
     }
 
-    public function getTopContextTypes() {
+    public function getTopEntityTypes() {
         $user = auth()->user();
         if(!$user->can('view_concept_props')) {
             return response()->json([
                 'error' => 'You do not have the permission to view entity data'
             ], 403);
         }
-        $contextTypes = ContextType::where('is_root', true)->get();
-        return response()->json($contextTypes);
+        $entityTypes = EntityType::where('is_root', true)->get();
+        return response()->json($entityTypes);
     }
 
-    public function getContextTypesByParent($cid) {
+    public function getEntityTypesByParent($cid) {
         $user = auth()->user();
         if(!$user->can('view_concept_props')) {
             return response()->json([
@@ -164,16 +164,16 @@ class EditorController extends Controller {
             ], 403);
         }
         try {
-            $parentContext = Context::findOrFail($cid);
+            $parentEntity = Entity::findOrFail($cid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context-type does not exist'
+                'error' => 'This entity-type does not exist'
             ], 400);
         }
-        $id = $parentContext->context_type_id;
-        $relations = ContextTypeRelation::where('parent_id', $id)->pluck('child_id')->toArray();
-        $contextTypes = ContextType::find($relations);
-        return response()->json($contextTypes);
+        $id = $parentEntity->entity_type_id;
+        $relations = EntityTypeRelation::where('parent_id', $id)->pluck('child_id')->toArray();
+        $entityTypes = EntityType::find($relations);
+        return response()->json($entityTypes);
     }
 
     public function getAttributes() {
@@ -245,8 +245,8 @@ class EditorController extends Controller {
                 'description' => 'attribute.percentage.desc'
             ],
             [
-                'datatype' => 'context',
-                'description' => 'attribute.context.desc'
+                'datatype' => 'entity',
+                'description' => 'attribute.entity.desc'
             ],
             [
                 'datatype' => 'table',
@@ -266,7 +266,7 @@ class EditorController extends Controller {
 
     // POST
 
-    public function addContextType(Request $request) {
+    public function addEntityType(Request $request) {
         $user = auth()->user();
         if(!$user->can('create_concepts')) {
             return response()->json([
@@ -282,7 +282,7 @@ class EditorController extends Controller {
         $curl = $request->get('concept_url');
         $is_root = Helpers::parseBoolean($request->get('is_root'));
         $geomtype = $request->get('geomtype');
-        $cType = new ContextType();
+        $cType = new EntityType();
         $cType->thesaurus_url = $curl;
         $cType->is_root = $is_root;
         $cType->save();
@@ -295,7 +295,7 @@ class EditorController extends Controller {
         $layer->visible = true;
         $layer->is_overlay = true;
         $layer->position = AvailableLayer::where('is_overlay', '=', true)->max('position') + 1;
-        $layer->context_type_id = $cType->id;
+        $layer->entity_type_id = $cType->id;
         $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
         $layer->save();
 
@@ -311,18 +311,18 @@ class EditorController extends Controller {
         }
         $this->validate($request, [
             'is_root' => 'boolean_string',
-            'sub_context_types' => 'array'
+            'sub_entity_types' => 'array'
         ]);
         try {
-            $contextType = ContextType::findOrFail($id);
+            $entityType = EntityType::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context-type does not exist'
+                'error' => 'This entity-type does not exist'
             ], 400);
         }
         $is_root = $request->get('is_root');
-        $subs = $request->get('sub_context_types');
-        $contextType->setRelationInfo($is_root, $subs);
+        $subs = $request->get('sub_entity_types');
+        $entityType->setRelationInfo($is_root, $subs);
         return response()->json(null, 204);
     }
 
@@ -378,7 +378,7 @@ class EditorController extends Controller {
         return response()->json($attr, 201);
     }
 
-    public function addAttributeToContextType(Request $request, $ctid) {
+    public function addAttributeToEntityType(Request $request, $ctid) {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
@@ -393,10 +393,10 @@ class EditorController extends Controller {
         $aid = $request->get('attribute_id');
         $pos = $request->get('position');
         if(!isset($pos)) {
-            $attrsCnt = ContextAttribute::where('context_type_id', '=', $ctid)->count();
+            $attrsCnt = EntityAttribute::where('entity_type_id', '=', $ctid)->count();
             $pos = $attrsCnt + 1; // add new attribute to the end
         } else {
-            $successors = ContextAttribute::where('context_type_id', $ctid)
+            $successors = EntityAttribute::where('entity_type_id', $ctid)
                 ->where('position', '>=', $pos)
                 ->get();
             foreach($successors as $s) {
@@ -404,8 +404,8 @@ class EditorController extends Controller {
                 $s->save();
             }
         }
-        $ca = new ContextAttribute();
-        $ca->context_type_id = $ctid;
+        $ca = new EntityAttribute();
+        $ca->entity_type_id = $ctid;
         $ca->attribute_id = $aid;
         $ca->position = $pos;
         $ca->save();
@@ -413,9 +413,9 @@ class EditorController extends Controller {
         $a = Attribute::find($aid);
         $ca->datatype = $a->datatype;
 
-        return response()->json(DB::table('context_types as c')
+        return response()->json(DB::table('entity_types as c')
                 ->where('ca.id', $ca->id)
-                ->join('context_attributes as ca', 'c.id', '=', 'ca.context_type_id')
+                ->join('entity_attributes as ca', 'c.id', '=', 'ca.entity_type_id')
                 ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
                 ->first(), 201);
     }
@@ -430,18 +430,18 @@ class EditorController extends Controller {
             ], 403);
         }
         $this->validate($request, [
-            'position' => 'required|integer|exists:context_attributes,position'
+            'position' => 'required|integer|exists:entity_attributes,position'
         ]);
 
         $pos = $request->get('position');
-        $ca = ContextAttribute::where([
+        $ca = EntityAttribute::where([
             ['attribute_id', '=', $aid],
-            ['context_type_id', '=', $ctid]
+            ['entity_type_id', '=', $ctid]
         ])->first();
 
         if($ca === null){
             return response()->json([
-                'error' => 'No ContextAttribute found'
+                'error' => 'No EntityAttribute found'
             ], 400);
         }
 
@@ -450,20 +450,20 @@ class EditorController extends Controller {
             return response()->json();
         }
         if($ca->position < $pos) {
-            $successors = ContextAttribute::where([
+            $successors = EntityAttribute::where([
                 ['position', '>', $ca->position],
                 ['position', '<=', $pos],
-                ['context_type_id', '=', $ctid]
+                ['entity_type_id', '=', $ctid]
             ])->get();
             foreach($successors as $s) {
                 $s->position--;
                 $s->save();
             }
         } else { // $ca->position > $pos
-            $predecessors = ContextAttribute::where([
+            $predecessors = EntityAttribute::where([
                 ['position', '<', $ca->position],
                 ['position', '>=', $pos],
-                ['context_type_id', '=', $ctid]
+                ['entity_type_id', '=', $ctid]
             ])->get();
             foreach($predecessors as $p) {
                 $p->position++;
@@ -483,19 +483,19 @@ class EditorController extends Controller {
             ], 403);
         }
         $this->validate($request, [
-            'd_attribute' => 'required|nullable|integer|exists:context_attributes,attribute_id',
+            'd_attribute' => 'required|nullable|integer|exists:entity_attributes,attribute_id',
             'd_operator' => 'required|nullable|in:<,>,=',
             'd_value' => 'required|nullable'
         ]);
 
-        $contextAttribute = ContextAttribute::where([
+        $entityAttribute = EntityAttribute::where([
             ['attribute_id', '=', $aid],
-            ['context_type_id', '=', $ctid]
+            ['entity_type_id', '=', $ctid]
         ])->first();
 
-        if($contextAttribute === null){
+        if($entityAttribute === null){
             return response()->json([
-                'error' => 'Context Attribute not found'
+                'error' => 'Entity Attribute not found'
             ], 400);
         }
 
@@ -528,21 +528,21 @@ class EditorController extends Controller {
             ]
         ];
 
-        $contextAttribute->depends_on = json_encode($dependsOn);
-        $contextAttribute->save();
+        $entityAttribute->depends_on = json_encode($dependsOn);
+        $entityAttribute->save();
         return response()->json(null, 204);
     }
 
     // DELETE
 
-    public function deleteContextType($id) {
+    public function deleteEntityType($id) {
         $user = auth()->user();
         if(!$user->can('delete_move_concepts')) {
             return response()->json([
                 'error' => 'You do not have the permission to delete entity types'
             ], 403);
         }
-        ContextType::find($id)->delete();
+        EntityType::find($id)->delete();
         return response()->json(null, 204);
     }
 
@@ -557,30 +557,30 @@ class EditorController extends Controller {
         return response()->json(null, 204);
     }
 
-    public function removeAttributeFromContextType($ctid, $aid) {
+    public function removeAttributeFromEntityType($ctid, $aid) {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
                 'error' => 'You do not have the permission to remove attributes from entity types'
             ], 403);
         }
-        $ca = ContextAttribute::where([
+        $ca = EntityAttribute::where([
             ['attribute_id', '=', $aid],
-            ['context_type_id', '=', $ctid]
+            ['entity_type_id', '=', $ctid]
         ])->first();
 
         if($ca === null){
             return response()->json([
-                'error' => 'No ContextAttribute found'
+                'error' => 'No EntityAttribute found'
             ], 400);
         }
 
         $pos = $ca->position;
         $ca->delete();
 
-        $successors = ContextAttribute::where([
+        $successors = EntityAttribute::where([
                 ['position', '>', $pos],
-                ['context_type_id', '=', $ctid]
+                ['entity_type_id', '=', $ctid]
             ])->get();
         foreach($successors as $s) {
             $s->position--;

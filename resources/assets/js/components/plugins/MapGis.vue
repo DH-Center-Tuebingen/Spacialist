@@ -96,8 +96,8 @@
                 if(layer.name) {
                     return layer.name
                 }
-                if(layer.context_type) {
-                    return this.$translateConcept(layer.context_type.thesaurus_url);
+                if(layer.entity_type) {
+                    return this.$translateConcept(layer.entity_type.thesaurus_url);
                 }
                 return this.$t('plugins.map.untitled');
             },
@@ -188,7 +188,7 @@
             getProperties(geodata) {
                 return {
                     id: geodata.id,
-                    entity: geodata.context
+                    entity: geodata.entity
                 };
             },
             openImportModal() {

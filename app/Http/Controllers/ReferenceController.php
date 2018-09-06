@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Attribute;
-use App\Context;
+use App\Entity;
 use App\Reference;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 class ReferenceController extends Controller {
@@ -20,14 +20,14 @@ class ReferenceController extends Controller {
 
     // GET
 
-    public function getByContext($id) {
+    public function getByEntity($id) {
         $user = auth()->user();
         if(!$user->can('view_concept_props')) {
             return response()->json([
                 'error' => 'You do not have the permission to view references'
             ], 403);
         }
-        $references = Reference::with(['attribute', 'bibliography'])->where('context_id', $id)->get();
+        $references = Reference::with(['attribute', 'bibliography'])->where('entity_id', $id)->get();
 
         $groupedReferences = [];
         foreach($references as $r) {
@@ -54,10 +54,10 @@ class ReferenceController extends Controller {
         $this->validate($request, Reference::rules);
 
         try {
-            Context::findOrFail($id);
+            Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context does not exist'
+                'error' => 'This entity does not exist'
             ], 400);
         }
         try {
@@ -69,7 +69,7 @@ class ReferenceController extends Controller {
         }
 
         $props = array_merge([
-            'context_id' => $id,
+            'entity_id' => $id,
             'attribute_id' => $aid
         ], $request->only(array_keys(Reference::rules)));
         $reference = Reference::add($props, $user);
@@ -114,7 +114,7 @@ class ReferenceController extends Controller {
             $reference = Reference::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'No ContextAttribute found'
+                'error' => 'No EntityAttribute found'
             ], 400);
         }
         $reference->delete();

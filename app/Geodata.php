@@ -63,7 +63,7 @@ class Geodata extends Model
             $geodata->geom = $parsedWkt;
             $geodata->lasteditor = $user->name;
             $geodata->save();
-            $geodata->context;
+            $geodata->entity;
             $objs[] = $geodata;
         }
         return $objs;
@@ -79,7 +79,7 @@ class Geodata extends Model
         }
     }
 
-    public function context() {
-        return $this->hasOne('App\Context');
+    public function entity() {
+        return $this->hasOne('App\Entity');
     }
 }

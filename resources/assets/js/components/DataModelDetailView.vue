@@ -2,7 +2,7 @@
     <div class="h-100 d-flex flex-column">
         <h4>{{ $t('main.datamodel.detail.properties.title') }}</h4>
         <div v-if="entityType.id" class="col d-flex flex-column">
-            <form role="form" v-on:submit.prevent="updateContextType">
+            <form role="form" v-on:submit.prevent="updateEntityType">
                 <div class="form-group row">
                     <label class="col-form-label col-md-3 text-right">{{ $t('main.datamodel.detail.properties.top-level') }}</label>
                     <div class="col-md-9">
@@ -15,22 +15,22 @@
                         <multiselect
                             label="thesaurus_url"
                             track-by="id"
-                            v-model="entityType.sub_context_types"
+                            v-model="entityType.sub_entity_types"
                             :allowEmpty="true"
                             :closeOnSelect="false"
                             :customLabel="translateLabel"
                             :hideSelected="true"
                             :multiple="true"
-                            :options="minimalContextTypes"
+                            :options="minimalEntityTypes"
                             :placeholder="$t('global.select.placehoder')"
                             :select-label="$t('global.select.select')"
                             :deselect-label="$t('global.select.deselect')">
                         </multiselect>
                         <div class="pt-2">
-                            <button type="button" class="btn btn-outline-success mr-2" @click="addAllContextTypes">
+                            <button type="button" class="btn btn-outline-success mr-2" @click="addAllEntityTypes">
                                 <i class="fas fa-fw fa-tasks"></i> {{ $t('global.select-all') }}
                             </button>
-                            <button type="button" class="btn btn-outline-danger" @click="removeAllContextTypes">
+                            <button type="button" class="btn btn-outline-danger" @click="removeAllEntityTypes">
                                 <i class="fas fa-fw fa-times"></i> {{ $t('global.select-none') }}
                             </button>
                         </div>
@@ -53,24 +53,24 @@
                 :attributes="entityAttributes"
                 :values="entityValues"
                 :selections="entitySelections"
-                :on-add="addAttributeToContextType"
-                :on-edit="onEditContextAttribute"
-                :on-remove="onRemoveAttributeFromContextType"
-                :on-reorder="reorderContextAttribute"
+                :on-add="addAttributeToEntityType"
+                :on-edit="onEditEntityAttribute"
+                :on-remove="onRemoveAttributeFromEntityType"
+                :on-reorder="reorderEntityAttribute"
                 :show-info="true">
             </attributes>
         </div>
 
-        <modal name="edit-context-attribute-modal" height="auto" :scrollable="true">
-            <div class="modal-content" v-if="openedModal == 'edit-context-attribute-modal'">
+        <modal name="edit-entity-attribute-modal" height="auto" :scrollable="true">
+            <div class="modal-content" v-if="openedModal == 'edit-entity-attribute-modal'">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ $t('global.edit-name.title', {name: $translateConcept(modalSelectedAttribute.thesaurus_url)}) }}</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideEditContextAttributeModal">
+                    <button type="button" class="close" aria-label="Close" @click="hideEditEntityAttributeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="editContextAttributeForm" name="editContextAttributeForm" role="form" v-on:submit.prevent="editContextAttribute(modalSelectedAttribute, selectedDependency)">
+                    <form id="editEntityAttributeForm" name="editEntityAttributeForm" role="form" v-on:submit.prevent="editEntityAttribute(modalSelectedAttribute, selectedDependency)">
                         <div class="form-group row">
                             <label class="col-form-label col-md-3">
                                 {{ $t('global.label') }}:
@@ -149,10 +149,10 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" form="editContextAttributeForm" class="btn btn-success" :disabled="editContextAttributeDisabled">
+                    <button type="submit" form="editEntityAttributeForm" class="btn btn-success" :disabled="editEntityAttributeDisabled">
                         <i class="fas fa-fw fa-save"></i> {{ $t('global.update') }}
                     </button>
-                    <button type="button" class="btn btn-secondary" @click="hideEditContextAttributeModal">
+                    <button type="button" class="btn btn-secondary" @click="hideEditEntityAttributeModal">
                         <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
@@ -182,7 +182,7 @@
                     </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @click="removeAttributeFromContextType(modalSelectedAttribute)">
+                    <button type="button" class="btn btn-danger" @click="removeAttributeFromEntityType(modalSelectedAttribute)">
                         <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
                     </button>
                     <button type="button" class="btn btn-secondary" @click="hideRemoveAttributeModal">
@@ -213,7 +213,7 @@
             init(id) {
                 this.entityAttributes = [];
                 this.entityType = this.$getEntityTypes()[id];
-                $http.get(`/editor/context_type/${id}/attribute`)
+                $http.get(`/editor/entity_type/${id}/attribute`)
                     .then(response => {
                         let data = response.data;
                         // if result is empty, php returns [] instead of {}
@@ -224,7 +224,7 @@
                         this.entityDependencies = data.dependencies;
                         for(let i=0; i<data.attributes.length; i++) {
                             this.entityAttributes.push(data.attributes[i]);
-                            // Set values for all context attributes to '', so values in <attributes> are existant
+                            // Set values for all entity attributes to '', so values in <attributes> are existant
                             Vue.set(this.entityValues, data.attributes[i].id, '');
                         }
                         for(let i=0; i<this.attributes.length; i++) {
@@ -234,12 +234,12 @@
                         }
                     });
             },
-            updateContextType() {
+            updateEntityType() {
                 if(!this.entityType.id) return;
                 const id = this.entityType.id;
                 const data = {
                     'is_root': this.entityType.is_root,
-                    'sub_context_types': this.entityType.sub_context_types.map(t => t.id)
+                    'sub_entity_types': this.entityType.sub_entity_types.map(t => t.id)
                 };
                 $http.post(`/editor/dm/${id}/relation`, data).then(response => {
                     const name = this.$translateConcept(this.entityType.thesaurus_url);
@@ -252,14 +252,14 @@
                     );
                 });
             },
-            addAttributeToContextType(oldIndex, index) {
+            addAttributeToEntityType(oldIndex, index) {
                 const ctid = this.entityType.id;
                 const attribute = this.attributes[oldIndex];
                 let attributes = this.entityAttributes;
                 let data = {};
                 data.attribute_id = attribute.id;
                 data.position = index + 1;
-                $http.post(`/editor/dm/context_type/${ctid}/attribute`, data).then(response => {
+                $http.post(`/editor/dm/entity_type/${ctid}/attribute`, data).then(response => {
                     // Add element to attribute list
                     attributes.splice(index, 0, response.data);
                     attribute.isDisabled = true;
@@ -281,21 +281,21 @@
                 });
 
             },
-            editContextAttribute(attribute, options) {
+            editEntityAttribute(attribute, options) {
                 const vm = this;
-                if(vm.editContextAttributeDisabled) return;
+                if(vm.editEntityAttributeDisabled) return;
                 const aid = attribute.id;
-                const ctid = attribute.context_type_id;
+                const ctid = attribute.entity_type_id;
                 let data = {
                     d_attribute: options.attribute.id,
                     d_operator: options.operator.id
                 };
                 data.d_value = vm.getDependencyValue(options.value, options.attribute.datatype);
-                vm.$http.patch(`/editor/dm/context_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
-                    vm.hideEditContextAttributeModal();
+                vm.$http.patch(`/editor/dm/entity_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
+                    vm.hideEditEntityAttributeModal();
                 });
             },
-            onEditContextAttribute(attribute) {
+            onEditEntityAttribute(attribute) {
                 const ctid = this.entityType.id;
                 this.depends.attributes = this.entityAttributes.filter(function(a) {
                     return a.id != attribute.id;
@@ -314,20 +314,20 @@
                 if(Object.keys(attrDependency).length) {
                     this.setSelectedDependency(attrDependency);
                 }
-                this.openedModal = 'edit-context-attribute-modal';
-                this.$modal.show('edit-context-attribute-modal');
+                this.openedModal = 'edit-entity-attribute-modal';
+                this.$modal.show('edit-entity-attribute-modal');
             },
-            hideEditContextAttributeModal() {
-                this.$modal.hide('edit-context-attribute-modal');
+            hideEditEntityAttributeModal() {
+                this.$modal.hide('edit-entity-attribute-modal');
                 this.openedModal = '';
                 this.selectedDependency.attribute = {};
                 this.selectedDependency.operator = undefined;
                 this.selectedDependency.value = undefined;
             },
-            removeAttributeFromContextType(attribute) {
+            removeAttributeFromEntityType(attribute) {
                 const ctid = this.entityType.id;
                 const aid = attribute.id;
-                this.$http.delete('/editor/dm/context_type/'+ctid+'/attribute/'+aid).then(response => {
+                this.$http.delete('/editor/dm/entity_type/'+ctid+'/attribute/'+aid).then(response => {
                     const index = this.entityAttributes.findIndex(function(a) {
                         return a.id == attribute.id;
                     });
@@ -342,7 +342,7 @@
                     this.hideRemoveAttributeModal();
                 });
             },
-            reorderContextAttribute(oldIndex, index) {
+            reorderEntityAttribute(oldIndex, index) {
                 let attribute = this.entityAttributes[oldIndex];
                 const ctid = this.entityType.id;
                 let aid = attribute.id;
@@ -353,7 +353,7 @@
                 }
                 let data = {};
                 data.position = position;
-                $http.patch(`/editor/dm/context_type/${ctid}/attribute/${aid}/position`, data).then(response => {
+                $http.patch(`/editor/dm/entity_type/${ctid}/attribute/${aid}/position`, data).then(response => {
                     attribute.position = position;
                     this.entityAttributes.splice(oldIndex, 1);
                     this.entityAttributes.splice(index, 0, attribute);
@@ -403,12 +403,12 @@
                 }
             },
             // Modal Methods
-            onRemoveAttributeFromContextType(attribute) {
+            onRemoveAttributeFromEntityType(attribute) {
                 const aid = attribute.id;
                 const ctid = this.entityType.id;
                 $http.get(`/editor/dm/attribute/occurrence_count/${aid}/${ctid}`).then(response => {
                     this.setModalSelectedAttribute(attribute);
-                    this.setModalSelectedContextType(this.entityType);
+                    this.setModalSelectedEntityType(this.entityType);
                     this.setAttributeValueCount(response.data);
                     this.openedModal = 'remove-attribute-from-ct-modal';
                     this.$modal.show('remove-attribute-from-ct-modal');
@@ -418,12 +418,12 @@
                 this.$modal.hide('remove-attribute-from-ct-modal');
                 this.openedModal = '';
             },
-            addAllContextTypes() {
-                this.entityType.sub_context_types = [];
-                this.entityType.sub_context_types = this.minimalContextTypes.slice();
+            addAllEntityTypes() {
+                this.entityType.sub_entity_types = [];
+                this.entityType.sub_entity_types = this.minimalEntityTypes.slice();
             },
-            removeAllContextTypes() {
-                this.entityType.sub_context_types = [];
+            removeAllEntityTypes() {
+                this.entityType.sub_entity_types = [];
             },
             setSelectedDependency(values) {
                 if(!values) return;
@@ -458,8 +458,8 @@
             setModalSelectedAttribute(attribute) {
                 this.modalSelectedAttribute = Object.assign({}, attribute);
             },
-            setModalSelectedContextType(contextType) {
-                this.modalSelectedEntityType = Object.assign({}, contextType);
+            setModalSelectedEntityType(entityType) {
+                this.modalSelectedEntityType = Object.assign({}, entityType);
             },
             translateLabel(element, prop) {
                 return this.$translateLabel(element, prop);
@@ -481,7 +481,7 @@
                     attributes: [],
                     values: []
                 },
-                minimalContextTypes: Object.values(this.$getEntityTypes()).map(ct => ({
+                minimalEntityTypes: Object.values(this.$getEntityTypes()).map(ct => ({
                         id: ct.id,
                         thesaurus_url: ct.thesaurus_url
                     })),
@@ -532,7 +532,7 @@
                         return 'string';
                 }
             },
-            editContextAttributeDisabled: function() {
+            editEntityAttributeDisabled: function() {
                 return !this.modalSelectedAttribute ||
                     // Either all or none of the deps must be set to be valid
                        !(

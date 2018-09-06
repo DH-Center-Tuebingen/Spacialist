@@ -83,6 +83,6 @@ class ThConcept extends Model
     }
 
     public function files() {
-        return $this->belongsToMany('App\File', 'photo_tags', 'concept_id', 'photo_id');
+        return $this->belongsToMany('App\File', 'file_tags', 'concept_id', 'file_id');
     }
 }

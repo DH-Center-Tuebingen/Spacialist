@@ -131,11 +131,11 @@ Vue.prototype.$translateConcept = function(url) {
 }
 
 Vue.prototype.$getEntityType = function(id) {
-    return this.$root.$data.contextTypes[id];
+    return this.$root.$data.entityTypes[id];
 }
 
 Vue.prototype.$getEntityTypes = function() {
-    return this.$root.$data.contextTypes;
+    return this.$root.$data.entityTypes;
 }
 
 Vue.prototype.$getPreference = function(prefKey) {

@@ -2,8 +2,8 @@
     <div @dragenter="onDragEnter" @dragleave="onDragLeave">
         <i class="fas fa-fw fa-monument"></i>
         <span>{{data.name}}</span>
-        <span class="pl-1 font-italic mb-0" v-if="data.context_type_id">
-            {{ $translateConcept($getEntityType(data.context_type_id).thesaurus_url) }}
+        <span class="pl-1 font-italic mb-0" v-if="data.entity_type_id">
+            {{ $translateConcept($getEntityType(data.entity_type_id).thesaurus_url) }}
         </span>
         <span class="pl-1" v-show="data.children_count">
             ({{ data.children_count }})

@@ -16,9 +16,9 @@ class AttributeValue extends Model
      * @var array
      */
     protected $fillable = [
-        'context_id',
+        'entity_id',
         'attribute_id',
-        'context_val',
+        'entity_val',
         'dbl_val',
         'dt_val',
         'geography_val',
@@ -26,14 +26,14 @@ class AttributeValue extends Model
         'json_val',
         'str_val',
         'thesaurus_val',
-        'possibility',
-        'possibility_description',
+        'certainty',
+        'certainty_description',
         'lasteditor',
     ];
 
     // TODO always hide *_val in favor of (computed) value?
     protected $hidden = [
-        'context_val',
+        'entity_val',
         'dbl_val',
         'dt_val',
         'geography_val',
@@ -56,7 +56,7 @@ class AttributeValue extends Model
         return $this->str_val ??
                $this->int_val ??
                $this->dbl_val ??
-               $this->context_val ??
+               $this->entity_val ??
                $this->thesaurus_val ??
                json_decode($this->json_val) ??
                $this->geography_val ??
@@ -65,7 +65,7 @@ class AttributeValue extends Model
 
     public static function getValueById($aid, $cid) {
         $av = self::where('attribute_id', $aid)
-            ->where('context_id', $cid)->first();
+            ->where('entity_id', $cid)->first();
         if(!isset($av)) {
             return null;
         }
@@ -85,16 +85,16 @@ class AttributeValue extends Model
         $this->save();
     }
 
-    public function context() {
-        return $this->belongsTo('App\Context');
+    public function entity() {
+        return $this->belongsTo('App\Entity');
     }
 
     public function attribute() {
         return $this->belongsTo('App\Attribute');
     }
 
-    public function context_val() {
-        return $this->belongsTo('App\Context', 'context_val');
+    public function entity_val() {
+        return $this->belongsTo('App\Entity', 'entity_val');
     }
 
     public function thesaurus_val() {

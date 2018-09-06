@@ -600,8 +600,8 @@
                         name: 'attribute_values'
                     },
                     {
-                        label: 'analysis.query-options.table.contexts',
-                        name: 'contexts'
+                        label: 'analysis.query-options.table.entities',
+                        name: 'entities'
                     },
                     {
                         label: 'analysis.query-options.table.files',
@@ -718,7 +718,7 @@
                             },
                             {
                                 label: 'Corresponding Entity',
-                                key: 'context',
+                                key: 'entity',
                                 hidden: false,
                                 type: 'entity',
                                 is_relation: true
@@ -754,7 +754,7 @@
                                 hidden: true
                             }
                         ];
-                    case 'contexts':
+                    case 'entities':
                         return [
                             {
                                 label: 'Name',
@@ -763,7 +763,7 @@
                             },
                             {
                                 label: 'Entity-Type',
-                                key: 'context_type',
+                                key: 'entity_type',
                                 hidden: false,
                                 type: 'entity_type',
                                 is_relation: true
@@ -800,14 +800,14 @@
                             },
                             {
                                 label: 'Child Entities',
-                                key: 'child_contexts',
+                                key: 'child_entities',
                                 hidden: true,
                                 type: 'list.entity',
                                 is_relation: true
                             },
                             {
                                 label: 'Parent Entity',
-                                key: 'root_context',
+                                key: 'root_entity',
                                 hidden: true,
                                 type: 'entity',
                                 is_relation: true
@@ -887,7 +887,7 @@
                             },
                             {
                                 label: 'Entity',
-                                key: 'context',
+                                key: 'entity',
                                 hidden: true,
                                 type: 'entity',
                                 is_relation: true

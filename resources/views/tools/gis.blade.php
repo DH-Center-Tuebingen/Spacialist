@@ -2,8 +2,8 @@
 
 @section('content')
     <gis
-        :context-types="{{ $contextTypes }}"
-        :layers="{{ $contextLayers }}"
+        :entity-types="{{ $entityTypes }}"
+        :layers="{{ $entityLayers }}"
     >
     </gis>
 @endsection

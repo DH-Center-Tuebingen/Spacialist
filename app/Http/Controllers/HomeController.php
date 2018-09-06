@@ -6,8 +6,8 @@ use Illuminate\Http\Request;
 use App\Attribute;
 use App\AvailableLayer;
 use App\Bibliography;
-use App\Context;
-use App\ContextType;
+use App\Entity;
+use App\EntityType;
 use App\Permission;
 use App\Preference;
 use App\Role;
@@ -47,15 +47,15 @@ class HomeController extends Controller
 
         $concepts = ThConcept::getMap();
 
-        $contextTypes = ContextType::with('sub_context_types')
+        $entityTypes = EntityType::with('sub_entity_types')
             ->orderBy('id')
             ->get();
-        $contextTypeMap = $contextTypes->getDictionary();
+        $entityTypeMap = $entityTypes->getDictionary();
 
         return response()->json([
             'preferences' => $preferenceValues,
             'concepts' => $concepts,
-            'contextTypes' => $contextTypeMap
+            'entityTypes' => $entityTypeMap
         ]);
     }
 
@@ -71,30 +71,30 @@ class HomeController extends Controller
     public function layer()
     {
         $baselayers = AvailableLayer::where('is_overlay', false)->orderBy('id')->get();
-        $overlays = AvailableLayer::with('context_type')->where('is_overlay', true)->orderBy('id')->get();
+        $overlays = AvailableLayer::with('entity_type')->where('is_overlay', true)->orderBy('id')->get();
 
         return view('settings.editor.layer', ['baselayers' => $baselayers, 'overlays' => $overlays]);
     }
 
     public function gis()
     {
-        $contextLayers = AvailableLayer::with(['context_type'])
-            ->whereNotNull('context_type_id')
+        $entityLayers = AvailableLayer::with(['entity_type'])
+            ->whereNotNull('entity_type_id')
             ->orWhere('type', 'unlinked')
             ->orderBy('id')
             ->get();
-        foreach($contextLayers as &$layer) {
-            if(isset($layer->context_type)) {
-                $layer->thesaurus_url = $layer->context_type->thesaurus_url;
+        foreach($entityLayers as &$layer) {
+            if(isset($layer->entity_type)) {
+                $layer->thesaurus_url = $layer->entity_type->thesaurus_url;
             } else {
                 unset($layer->thesaurus_url);
             }
-            unset($layer->context_type);
+            unset($layer->entity_type);
         }
-        $contextLayers = json_encode($contextLayers);
+        $entityLayers = json_encode($entityLayers);
 
         $data = [
-            'contextLayers' => $contextLayers
+            'entityLayers' => $entityLayers
         ];
 
         return view('tools.gis', $data);

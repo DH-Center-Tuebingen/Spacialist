@@ -87,7 +87,7 @@
                 this.$modal.show('delete-layer-modal');
             },
             deleteLayer(layer) {
-                if(layer.context_type_id || layer.type == 'unlinked') {
+                if(layer.entity_type_id || layer.type == 'unlinked') {
                     return;
                 }
                 $http.delete(`map/layer/${layer.id}`).then(response => {
@@ -118,7 +118,7 @@
             },
             getContextMenu(layer) {
                 let menu = [];
-                if(!layer.context_type_id && layer.type != 'unlinked') {
+                if(!layer.entity_type_id && layer.type != 'unlinked') {
                     menu.push({
                         getLabel: file => this.$t('global.delete'),
                         getIconClasses: file => 'fas fa-fw fa-trash text-danger',
@@ -134,8 +134,8 @@
                 if(layer.name) {
                     return layer.name
                 }
-                if(layer.context_type) {
-                    return this.$translateConcept(layer.context_type.thesaurus_url);
+                if(layer.entity_type) {
+                    return this.$translateConcept(layer.entity_type.thesaurus_url);
                 }
                 return this.$t('plugins.map.untitled');
             }

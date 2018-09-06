@@ -2,8 +2,8 @@
     <div class="d-flex flex-column h-100">
         <ul class="nav nav-pills nav-fill mb-2">
             <li class="nav-item">
-                <a class="nav-link" href="#" :class="{active: isAction('linkedFiles'), disabled: !context.id}" @click.prevent="setAction('linkedFiles')">
-                    <i class="fas fa-fw fa-link"></i> {{ $t('plugins.files.header.linked') }} <span class="badge" :class="[isAction('linkedFiles') ? 'badge-light' : 'badge-primary']" v-show="context.id">{{linkedFiles.files.length}}</span>
+                <a class="nav-link" href="#" :class="{active: isAction('linkedFiles'), disabled: !entity.id}" @click.prevent="setAction('linkedFiles')">
+                    <i class="fas fa-fw fa-link"></i> {{ $t('plugins.files.header.linked') }} <span class="badge" :class="[isAction('linkedFiles') ? 'badge-light' : 'badge-primary']" v-show="entity.id">{{linkedFiles.files.length}}</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -297,7 +297,7 @@
                         <component
                             class="col px-0"
                             id="file-container"
-                            :context="localContext"
+                            :entity="localEntity"
                             :file="selectedFile"
                             :fullscreen-handler="toggleFullscreen"
                             :is="fileCategoryComponent"
@@ -476,8 +476,8 @@
                         <div v-show="modalTab == 'links'" class="h-100">
                             <div class="d-flex flex-column h-100 mx-4">
                                 <div class="my-3 col p-0 scroll-y-auto">
-                                    <ul class="list-group mx-0" v-if="selectedFile.contexts && selectedFile.contexts.length">
-                                        <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.contexts">
+                                    <ul class="list-group mx-0" v-if="selectedFile.entities && selectedFile.entities.length">
+                                        <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.entities">
                                             <a href="#" @click.prevent="routeToEntity(link)">
                                                 <i class="fas fa-fw fa-monument"></i> {{ link.name }}
                                             </a>
@@ -490,23 +490,23 @@
                                         {{ $t('plugins.files.modal.detail.no-links') }}
                                     </p>
                                 </div>
-                                <button type="button" class="btn btn-outline-success mb-3" @click.prevent="linkFile(selectedFile, context)" v-if="!linkedToCurrentEntity && context.id">
+                                <button type="button" class="btn btn-outline-success mb-3" @click.prevent="linkFile(selectedFile, entity)" v-if="!linkedToCurrentEntity && entity.id">
                                     <span class="fa-stack d-inline">
                                         <i class="fas fa-monument"></i>
-                                        <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i> {{ $t('global.link-to', {name: context.name})}}
+                                        <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i> {{ $t('global.link-to', {name: entity.name})}}
                                     </span>
                                 </button>
                                 <h5>
                                     {{ $t('plugins.files.modal.detail.link-further-entities') }}
                                 </h5>
-                                <context-search
+                                <entity-search
                                     class="mt-2"
                                     id="link-entity-search"
                                     name="link-entity-search"
-                                    :filters="selectedFile.contexts ? selectedFile.contexts.map(c => c.id) : []"
+                                    :filters="selectedFile.entities ? selectedFile.entities.map(c => c.id) : []"
                                     :on-select="selection => linkFile(selectedFile, selection)"
                                     :reset-input="true">
-                                </context-search>
+                                </entity-search>
                             </div>
                         </div>
                         <div v-show="modalTab == 'exif'">
@@ -660,13 +660,13 @@
                         {{
                             $t('global.unlink-name.desc', {
                                 file: contextMenuFile.name,
-                                ent: contextMenuContext.name
+                                ent: contextMenuEntity.name
                             })
                         }}
                     </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @click="unlinkFile(contextMenuFile, contextMenuContext)">
+                    <button type="button" class="btn btn-danger" @click="unlinkFile(contextMenuFile, contextMenuEntity)">
                         <i class="fas fa-fw fa-check"></i> {{ $t('global.unlink')}}
                     </button>
                     <button type="button" class="btn btn-outline-secondary"     @click="hideUnlinkFileModal">
@@ -696,12 +696,12 @@
 
     export default {
         props: {
-            context: {
+            entity: {
                 required: false,
                 type: Object,
                 default: {}
             },
-            contextDataLoaded: {
+            entityDataLoaded: {
                 required: false,
                 type: Boolean,
                 default: false
@@ -899,8 +899,8 @@
                 screenfull.toggle(element);
             },
             linkedFilesChanged() {
-                if(!this.context.id) return;
-                this.linkedFiles.apiUrl = '/file/linked/' + this.context.id;
+                if(!this.entity.id) return;
+                this.linkedFiles.apiUrl = '/file/linked/' + this.entity.id;
                 this.resetFiles('linkedFiles');
                 this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
             },
@@ -924,8 +924,8 @@
                 });
             },
             setAction(id) {
-                // disable linked tab if no context is selected
-                if(id == 'linkedFiles' && !this.localContext.id) return;
+                // disable linked tab if no entity is selected
+                if(id == 'linkedFiles' && !this.localEntity.id) return;
                 this.selectedTopAction = id;
                 // If it is the first time the action is set, load images
                 if(this[id] && !Object.keys(this[id].pagination).length) {
@@ -991,7 +991,7 @@
                 arr.pagination = {};
             },
             getNextFiles(fileType, filters) {
-                if(fileType == 'linkedFiles' && !this.context.id) {
+                if(fileType == 'linkedFiles' && !this.entity.id) {
                     return;
                 }
                 let arr = this[fileType];
@@ -1134,33 +1134,33 @@
                 this.$modal.hide('delete-file-modal');
                 this.contextMenuFile = {};
             },
-            requestUnlinkFile(file, context) {
+            requestUnlinkFile(file, entity) {
                 const vm = this;
                 const id = file.id;
                 vm.contextMenuFile = Object.assign({}, file);
-                vm.contextMenuContext = Object.assign({}, context);
+                vm.contextMenuEntity = Object.assign({}, entity);
                 vm.$http.get(`/file/${id}/link_count`).then(function(response) {
                     vm.linkCount = response.data;
                     vm.$modal.show('unlink-file-modal');
                 });
             },
-            unlinkFile(file, context) {
+            unlinkFile(file, entity) {
                 const id = file.id;
-                const cid = context.id;
+                const cid = entity.id;
                 $http.delete(`/file/${id}/link/${cid}`).then(response => {
                     this.linkCount--;
                     this.onFileDeleted(file, this.linkedFiles);
                     this.onFileUnlinked(file, this.unlinkedFiles, this.linkCount);
-                    const index = file.contexts.findIndex(c => c.id == cid);
+                    const index = file.entities.findIndex(c => c.id == cid);
                     if(index > -1) {
-                        file.contexts.splice(index, 1);
+                        file.entities.splice(index, 1);
                     }
                     this.hideUnlinkFileModal();
                     this.$showToast(
                         this.$t('plugins.files.toasts.unlinked.title'),
                         this.$t('plugins.files.toasts.unlinked.msg', {
                             name: file.name,
-                            eName: context.name
+                            eName: entity.name
                         }),
                         'success'
                     );
@@ -1169,27 +1169,27 @@
             hideUnlinkFileModal() {
                 this.$modal.hide('unlink-file-modal');
                 this.contextMenuFile = {};
-                this.contextMenuContext = {};
+                this.contextMenuEntity = {};
                 this.linkCount = 0;
             },
-            linkFile(file, context) {
-                if(!file || !context) return;
+            linkFile(file, entity) {
+                if(!file || !entity) return;
                 const id = file.id;
                 const data = {
-                    'context_id': context.id
+                    'entity_id': entity.id
                 };
                 $http.put(`/file/${id}/link`, data).then(response => {
                     this.onFileLinked(file, this.linkedFiles);
                     this.onFileDeleted(file, this.unlinkedFiles);
-                    if(!file.contexts) {
-                        file.contexts = [];
+                    if(!file.entities) {
+                        file.entities = [];
                     }
-                    file.contexts.push(context);
+                    file.entities.push(entity);
                     this.$showToast(
                         this.$t('plugins.files.toasts.linked.title'),
                         this.$t('plugins.files.toasts.linked.msg', {
                             name: file.name,
-                            eName: context.name
+                            eName: entity.name
                         }),
                         'success'
                     );
@@ -1261,7 +1261,7 @@
             },
             routeToEntity(entity) {
                 this.routeOnFileClose = {
-                    to: 'contextdetail',
+                    to: 'entitydetail',
                     params: {
                         id: entity.id
                     }
@@ -1360,7 +1360,7 @@
                 selectedFile: {},
                 replaceFiles: [],
                 contextMenuFile: {},
-                contextMenuContext: {},
+                contextMenuEntity: {},
                 linkCount: 0,
                 fileCategoryComponent: '',
                 modalTab: 'properties',
@@ -1407,8 +1407,8 @@
             }
         },
         computed: {
-            localContext: function() {
-                return Object.assign({}, this.context);
+            localEntity: function() {
+                return Object.assign({}, this.entity);
             },
             replaceFileUrl: function() {
                 if(!this.selectedFile.id) return '';
@@ -1421,11 +1421,11 @@
                 return this.selectedFile.category == 'image';
             },
             linkedToCurrentEntity: function() {
-                if(!this.context.id || !this.selectedFile.id) {
+                if(!this.entity.id || !this.selectedFile.id) {
                     return false;
                 }
 
-                return !!this.selectedFile.contexts.find(c => c.id == this.context.id);
+                return !!this.selectedFile.entities.find(c => c.id == this.entity.id);
             },
             isFirstFile: function() {
                 if(!this.selectedFile && !this.selectedFile.id) {
@@ -1456,22 +1456,22 @@
             contextMenu: function() {
                 const vm = this;
                 let menu = [];
-                if(vm.context.id) {
+                if(vm.entity.id) {
                     menu.push({
                         getLabel: file => {
-                            const isLinkedTo = file.contexts.some(c => vm.context.id == c.id);
+                            const isLinkedTo = file.entities.some(c => vm.entity.id == c.id);
                             if(isLinkedTo) {
                                 return vm.$t('global.unlink-from', {
-                                    name: vm.context.name
+                                    name: vm.entity.name
                                 });
                             } else {
                                 return vm.$t('global.link-to', {
-                                    name: vm.context.name
+                                    name: vm.entity.name
                                 });
                             }
                         },
                         getIconClasses: file => {
-                            const isLinkedTo = file.contexts.some(c => vm.context.id == c.id);
+                            const isLinkedTo = file.entities.some(c => vm.entity.id == c.id);
                             if(isLinkedTo) {
                                 return 'fas fa-fw fa-unlink text-warning';
                             } else {
@@ -1480,11 +1480,11 @@
                         },
                         getIconContent: file => '',
                         callback: file => {
-                            const isLinkedTo = file.contexts.some(c => vm.context.id == c.id);
+                            const isLinkedTo = file.entities.some(c => vm.entity.id == c.id);
                             if(isLinkedTo) {
-                                vm.requestUnlinkFile(file, vm.context);
+                                vm.requestUnlinkFile(file, vm.entity);
                             } else {
-                                vm.linkFile(file, vm.context);
+                                vm.linkFile(file, vm.entity);
                             }
                         }
                     });
@@ -1501,8 +1501,8 @@
             }
         },
         watch: {
-            context: function(newContextDataLoaded, oldContextDataLoaded) {
-                if(newContextDataLoaded) {
+            entity: function(newEntityDataLoaded, oldEntityDataLoaded) {
+                if(newEntityDataLoaded) {
                     this.linkedFilesChanged();
                 }
             },

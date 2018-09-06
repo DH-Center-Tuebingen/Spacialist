@@ -6,22 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Reference extends Model
 {
-    protected $table = 'sources';
+    protected $table = 'references';
     /**
      * The attributes that are assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'context_id',
+        'entity_id',
         'attribute_id',
-        'literature_id',
+        'bibliography_id',
         'description',
         'lasteditor',
     ];
 
     const rules = [
-        'bibliography_id' => 'required|integer|exists:literature,id',
+        'bibliography_id' => 'required|integer|exists:bibliography,id',
         'description' => 'string|nullable'
     ];
 
@@ -34,7 +34,7 @@ class Reference extends Model
         foreach($values as $k => $v) {
             // TODO remove after table/column renaming
             if($k == 'bibliography_id') {
-                $reference->literature_id = $v;
+                $reference->bibliography_id = $v;
             } else {
                 $reference->{$k} = $v;
             }
@@ -53,8 +53,8 @@ class Reference extends Model
         $this->save();
     }
 
-    public function context() {
-        return $this->belongsTo('App\Context');
+    public function entity() {
+        return $this->belongsTo('App\Entity');
     }
 
     public function attribute() {
@@ -62,6 +62,6 @@ class Reference extends Model
     }
 
     public function bibliography() {
-        return $this->belongsTo('App\Bibliography', 'literature_id');
+        return $this->belongsTo('App\Bibliography', 'bibliography_id');
     }
 }

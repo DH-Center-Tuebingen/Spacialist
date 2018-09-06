@@ -32,7 +32,7 @@ class AvailableLayer extends Model
         'color' => 'color',
     ];
 
-    public function context_type() {
-        return $this->belongsTo('App\ContextType');
+    public function entity_type() {
+        return $this->belongsTo('App\EntityType');
     }
 }

@@ -4,16 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Attribute;
 use App\AttributeValue;
-use App\Context;
-use App\ContextAttribute;
-use App\ContextType;
-use App\ContextTypeRelation;
+use App\Entity;
+use App\EntityAttribute;
+use App\EntityType;
+use App\EntityTypeRelation;
 use App\ThConcept;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class ContextController extends Controller {
+class EntityController extends Controller {
     /**
      * Create a new controller instance.
      *
@@ -30,12 +30,12 @@ class ContextController extends Controller {
         if(!$user->can('view_concepts')) {
             return response()->json([], 204);
         }
-        $roots = Context::getEntitiesByParent(null);
+        $roots = Entity::getEntitiesByParent(null);
 
         return response()->json($roots);
     }
 
-    public function getContext($id) {
+    public function getEntity($id) {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
@@ -43,14 +43,14 @@ class ContextController extends Controller {
             ], 403);
         }
         try {
-            $context = Context::findOrFail($id);
+            $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context does not exist'
+                'error' => 'This entity does not exist'
             ], 400);
         }
 
-        return response()->json($context);
+        return response()->json($entity);
     }
 
     public function getDataForEntityType($ctid, $aid) {
@@ -61,16 +61,16 @@ class ContextController extends Controller {
             ], 403);
         }
         try {
-            $contextType = ContextType::findOrFail($ctid);
+            $entityType = EntityType::findOrFail($ctid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context type does not exist'
+                'error' => 'This entity type does not exist'
             ], 400);
         }
-        $contexts = Context::where('context_type_id', $ctid)->get();
-        $contextIds = $contexts->pluck('id')->toArray();
+        $entities = Entity::where('entity_type_id', $ctid)->get();
+        $entityIds = $entities->pluck('id')->toArray();
         $values = AttributeValue::with(['attribute'])
-            ->whereIn('context_id', $contextIds)
+            ->whereIn('entity_id', $entityIds)
             ->where('attribute_id', $aid)
             ->get();
         $data = [];
@@ -79,14 +79,14 @@ class ContextController extends Controller {
                 case 'string-sc':
                     $value->thesaurus_val = ThConcept::where('concept_url', $value->thesaurus_val)->first();
                     break;
-                case 'context':
-                    $value->name = Context::find($value->context_val)->name;
+                case 'entity':
+                    $value->name = Entity::find($value->entity_val)->name;
                     break;
                 default:
                     break;
             }
             $value->value = $value->getValue();
-            $data[$value->context_id] = $value;
+            $data[$value->entity_id] = $value;
         }
 
         return response()->json($data);
@@ -100,20 +100,20 @@ class ContextController extends Controller {
             ], 403);
         }
         try {
-            $context = Context::findOrFail($id);
+            $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context does not exist'
+                'error' => 'This entity does not exist'
             ], 400);
         }
         if(isset($aid)) {
             $attributes = AttributeValue::with(['attribute'])
-                ->where('context_id', $id)
+                ->where('entity_id', $id)
                 ->where('attribute_id', $aid)
                 ->get();
         } else {
             $attributes = AttributeValue::with(['attribute'])
-                ->where('context_id', $id)
+                ->where('entity_id', $id)
                 ->get();
         }
 
@@ -123,8 +123,8 @@ class ContextController extends Controller {
                 case 'string-sc':
                     $a->thesaurus_val = ThConcept::where('concept_url', $a->thesaurus_val)->first();
                     break;
-                case 'context':
-                    $a->name = Context::find($a->context_val)->name;
+                case 'entity':
+                    $a->name = Entity::find($a->entity_val)->name;
                     break;
                 default:
                     break;
@@ -134,8 +134,8 @@ class ContextController extends Controller {
             $data[$a->attribute_id] = $a;
         }
 
-        $sqls = ContextAttribute::join('attributes', 'attributes.id', '=', 'attribute_id')
-            ->where('context_type_id', $context->context_type_id)
+        $sqls = EntityAttribute::join('attributes', 'attributes.id', '=', 'attribute_id')
+            ->where('entity_type_id', $entity->entity_type_id)
             ->where('datatype', 'sql')
             ->get();
         foreach($sqls as $sql) {
@@ -189,13 +189,13 @@ class ContextController extends Controller {
         }
 
         try {
-            $context = Context::findOrFail($id);
+            $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context does not exist'
+                'error' => 'This entity does not exist'
             ], 400);
         }
-        return response()->json($context->path);
+        return response()->json($entity->path);
     }
 
     public function getChildren($id) {
@@ -206,18 +206,18 @@ class ContextController extends Controller {
             ], 403);
         }
         try {
-            $context = Context::findOrFail($id);
+            $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context does not exist'
+                'error' => 'This entity does not exist'
             ], 400);
         }
-        $children = Context::where('root_context_id', $id)->get();
+        $children = Entity::where('root_entity_id', $id)->get();
         return response()->json($children);
     }
 
     public function getEntitiesByParent($id) {
-        return Context::getEntitiesByParent($id);
+        return Entity::getEntitiesByParent($id);
     }
 
     // POST
@@ -229,44 +229,44 @@ class ContextController extends Controller {
                 'error' => 'You do not have the permission to add a new entity'
             ], 403);
         }
-        $this->validate($request, Context::rules);
+        $this->validate($request, Entity::rules);
 
-        $isChild = $request->has('root_context_id');
-        $rcid = $request->get('root_context_id');
+        $isChild = $request->has('root_entity_id');
+        $rcid = $request->get('root_entity_id');
 
         if($isChild) {
-            $parentCtid = Context::find($rcid)->context_type_id;
-            $relation = ContextTypeRelation::where('parent_id', $parentCtid)
-                ->where('child_id', $request->get('context_type_id'))->get();
+            $parentCtid = Entity::find($rcid)->entity_type_id;
+            $relation = EntityTypeRelation::where('parent_id', $parentCtid)
+                ->where('child_id', $request->get('entity_type_id'))->get();
             if(!isset($relation)) {
                 return response()->json([
                     'error' => 'This type is not an allowed sub-type.'
                 ], 400);
             }
         } else {
-            if(!ContextType::find($request->get('context_type_id'))->is_root) {
+            if(!EntityType::find($request->get('entity_type_id'))->is_root) {
                 return response()->json([
                     'error' => 'This type is not an allowed root-type.'
                 ], 400);
             }
         }
 
-        $context = new Context();
+        $entity = new Entity();
         $rank;
         if($isChild) {
-            $rank = Context::where('root_context_id', '=', $rcid)->max('rank') + 1;
+            $rank = Entity::where('root_entity_id', '=', $rcid)->max('rank') + 1;
         } else {
-            $rank = Context::whereNull('root_context_id')->max('rank') + 1;
+            $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
         }
-        $context->rank = $rank;
+        $entity->rank = $rank;
 
-        foreach($request->only(array_keys(Context::rules)) as $key => $value) {
-            $context->{$key} = $value;
+        foreach($request->only(array_keys(Entity::rules)) as $key => $value) {
+            $entity->{$key} = $value;
         }
-        $context->lasteditor = $user->name;
-        $context->save();
+        $entity->lasteditor = $user->name;
+        $entity->save();
 
-        return response()->json($context, 201);
+        return response()->json($entity, 201);
     }
 
     // PATCH
@@ -285,7 +285,7 @@ class ContextController extends Controller {
             switch($op) {
                 case 'remove':
                     $attrval = AttributeValue::where([
-                        ['context_id', '=', $id],
+                        ['entity_id', '=', $id],
                         ['attribute_id', '=', $aid]
                     ])->first();
                     $attrval->delete();
@@ -293,13 +293,13 @@ class ContextController extends Controller {
                 case 'add':
                     $value = $patch['value'];
                     $attrval = new AttributeValue();
-                    $attrval->context_id = $id;
+                    $attrval->entity_id = $id;
                     $attrval->attribute_id = $aid;
                     break;
                 case 'replace':
                     $value = $patch['value'];
                     $attrval = AttributeValue::where([
-                        ['context_id', '=', $id],
+                        ['entity_id', '=', $id],
                         ['attribute_id', '=', $aid]
                     ])->first();
                     break;
@@ -346,8 +346,8 @@ class ContextController extends Controller {
                 case 'table':
                     $attrval->json_val = json_encode($value);
                     break;
-                case 'context':
-                    $attrval->context_val = $value;
+                case 'entity':
+                    $attrval->entity_val = $value;
             }
             $attrval->lasteditor = $user->name;
             $attrval->save();
@@ -364,10 +364,10 @@ class ContextController extends Controller {
         $this->validate($request, AttributeValue::patchRules);
 
         try {
-            $context = Context::findOrFail($id);
+            $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context does not exist'
+                'error' => 'This entity does not exist'
             ], 400);
         }
         try {
@@ -378,7 +378,7 @@ class ContextController extends Controller {
             ], 400);
         }
 
-        $attrs = AttributeValue::where('context_id', $id)
+        $attrs = AttributeValue::where('entity_id', $id)
             ->where('attribute_id', $aid)
             ->get();
         $values = $request->only(array_keys(AttributeValue::patchRules));
@@ -398,26 +398,26 @@ class ContextController extends Controller {
         }
         $this->validate($request, [
             'rank' => 'required|integer',
-            'parent_id' => 'nullable|integer|exists:contexts,id',
+            'parent_id' => 'nullable|integer|exists:entities,id',
         ]);
 
         try {
-            $context = Context::findOrFail($id);
+            $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context does not exist'
+                'error' => 'This entity does not exist'
             ], 400);
         }
 
         $rank = $request->get('rank');
         $parent_id = $request->get('parent_id');
-        Context::patchRanks($rank, $id, $parent_id, $user);
+        Entity::patchRanks($rank, $id, $parent_id, $user);
         return response()->json(null, 204);
     }
 
     // DELETE
 
-    public function deleteContext($id) {
+    public function deleteEntity($id) {
         $user = auth()->user();
         if(!$user->can('delete_move_concepts')) {
             return response()->json([
@@ -425,13 +425,13 @@ class ContextController extends Controller {
             ], 403);
         }
         try {
-            $context = Context::findOrFail($id);
+            $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This context does not exist'
+                'error' => 'This entity does not exist'
             ], 400);
         }
-        $context->delete();
+        $entity->delete();
 
         return response()->json(null, 204);
     }

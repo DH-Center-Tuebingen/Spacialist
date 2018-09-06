@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\ContextType;
 use App\Preference;
 use App\ThConcept;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -21,7 +20,7 @@ class Controller extends BaseController
         foreach($preferences as $p) {
             $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
         }
-        
+
         View::share('p', $preferenceValues);
   }
 }

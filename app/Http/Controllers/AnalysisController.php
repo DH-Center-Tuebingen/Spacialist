@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use \DB;
 use App\Attribute;
 use App\AttributeValue;
-use App\Context;
+use App\Entity;
 use App\File;
 use App\Geodata;
 use App\Helpers;
@@ -64,35 +64,35 @@ class AnalysisController extends Controller {
                 case 'attribute_values':
                     $exceptions = [
                         'attribute',
-                        'context',
-                        'context_val',
+                        'entity',
+                        'entity_val',
                         'thesaurus_val'
                     ];
                     break;
-                case 'contexts':
+                case 'entities':
                     $exceptions = [
-                        'child_contexts',
-                        'context_type',
+                        'child_entities',
+                        'entity_type',
                         'geodata',
-                        'root_context',
-                        'literatures',
+                        'root_entity',
+                        'bibliographies',
                         'attributes',
                         'files'
                     ];
                 case 'files':
                     $exceptions = [
-                        'contexts',
+                        'entities',
                         // 'tags'
                     ];
                     break;
                 case 'geodata':
                     $exceptions = [
-                        'context'
+                        'entity'
                     ];
                     break;
-                case 'literature':
+                case 'bibliography':
                     $exceptions = [
-                        'contexts'
+                        'entities'
                     ];
                     break;
             }
@@ -213,11 +213,11 @@ class AnalysisController extends Controller {
                     $a->value = $a->getValue();
                 }
                 break;
-            case 'contexts':
-                $total = Context::count();
+            case 'entities':
+                $total = Entity::count();
                 foreach($rows->items() as $c) {
                     foreach($c->attributes as $a) {
-                        $a->pivot->value = AttributeValue::getValueById($a->pivot->attribute_id, $a->pivot->context_id);
+                        $a->pivot->value = AttributeValue::getValueById($a->pivot->attribute_id, $a->pivot->entity_id);
                     }
                 }
                 break;
@@ -239,7 +239,7 @@ class AnalysisController extends Controller {
             $splitArray = $this->addRelationSplits($rows->items(), $splits);
         }
 
-        if($origin === 'contexts') {
+        if($origin === 'entities') {
             foreach($rows->items() as $r) {
                 if(isset($r->geodata)) {
                     $r->geodata['wkt'] = $r->geodata->geom->toWKT();
@@ -331,14 +331,14 @@ class AnalysisController extends Controller {
                 if($relations) {
                     $query = AttributeValue::with([
                         'attribute',
-                        'context',
-                        'context_val',
+                        'entity',
+                        'entity_val',
                         'thesaurus_val'
                     ]);
                 } else {
-                    $query = AttributeValue::leftJoin('contexts', 'contexts.id', '=', 'context_val');
+                    $query = AttributeValue::leftJoin('entities', 'entities.id', '=', 'entity_val');
                     if(!$hasColumnSelection) {
-                        $tables = ['attribute_values', 'contexts'];
+                        $tables = ['attribute_values', 'entities'];
 
                         $columnNames = [];
                         foreach($tables as $table) {
@@ -349,32 +349,32 @@ class AnalysisController extends Controller {
                     }
                 }
                 break;
-            case 'contexts':
+            case 'entities':
                 if($relations) {
-                    $query = Context::with([
-                        'child_contexts',
-                        'context_type',
+                    $query = Entity::with([
+                        'child_entities',
+                        'entity_type',
                         'geodata',
-                        'root_context',
-                        'literatures',
+                        'root_entity',
+                        'bibliographies',
                         'attributes',
                         'files'
                     ]);
                 } else {
-                    $query = Context::leftJoin('contexts as child', 'child.root_context_id', '=', 'contexts.id')
-                                    ->leftJoin('contexts as root', 'root.id', '=', 'contexts.root_context_id')
-                                    ->leftJoin('context_types', 'context_types.id', '=', 'contexts.context_type_id')
-                                    ->leftJoin('geodata', 'geodata.id', '=', 'contexts.geodata_id')
-                                    ->leftJoin('attribute_values', 'attribute_values.context_id', '=', 'contexts.id')
+                    $query = Entity::leftJoin('entities as child', 'child.root_entity_id', '=', 'entities.id')
+                                    ->leftJoin('entities as root', 'root.id', '=', 'entities.root_entity_id')
+                                    ->leftJoin('entity_types', 'entity_types.id', '=', 'entities.entity_type_id')
+                                    ->leftJoin('geodata', 'geodata.id', '=', 'entities.geodata_id')
+                                    ->leftJoin('attribute_values', 'attribute_values.entity_id', '=', 'entities.id')
                                     ->leftJoin('attributes', 'attributes.id', '=', 'attribute_id')
-                                    ->leftJoin('context_photos as cp', 'cp.context_id', '=', 'contexts.id')
-                                    ->leftJoin('photos', 'photos.id', '=', 'photo_id');
+                                    ->leftJoin('entity_files as cp', 'cp.entity_id', '=', 'entities.id')
+                                    ->leftJoin('files', 'files.id', '=', 'file_id');
                     if(!$hasColumnSelection) {
-                        $tables = ['contexts', 'child', 'root', 'context_types', 'geodata', 'attribute_values', 'attributes', 'photos'];
+                        $tables = ['entities', 'child', 'root', 'entity_types', 'geodata', 'attribute_values', 'attributes', 'files'];
                         $columnNames = [];
                         foreach($tables as $table) {
                             if($table === 'child' || $table === 'root') {
-                                $columnNames[$table] = Helpers::getColumnNames('contexts');
+                                $columnNames[$table] = Helpers::getColumnNames('entities');
                             } else {
                                 $columnNames[$table] = Helpers::getColumnNames($table);
                             }
@@ -387,16 +387,16 @@ class AnalysisController extends Controller {
             case 'files':
                 if($relations) {
                     $query = File::with([
-                        'contexts',
+                        'entities',
                         // 'tags'
                     ]);
                 } else {
-                    $query = File::leftJoin('context_photos as cp', 'cp.photo_id', '=', 'id')
-                                    ->leftJoin('contexts', 'contexts.id', '=', 'context_id')
-                                    ->leftJoin('photo_tags as pt', 'pt.photo_id', '=', 'photos.id')
+                    $query = File::leftJoin('entity_files as cp', 'cp.file_id', '=', 'id')
+                                    ->leftJoin('entities', 'entities.id', '=', 'entity_id')
+                                    ->leftJoin('file_tags as pt', 'pt.file_id', '=', 'files.id')
                                     ->leftJoin('th_concept', 'th_concept.concept_url', '=', 'pt.concept_url');
                     if(!$hasColumnSelection) {
-                        $tables = ['photos', 'contexts', 'th_concept'];
+                        $tables = ['files', 'entities', 'th_concept'];
                         $columnNames = [];
                         foreach($tables as $table) {
                             $columnNames[$table] = Helpers::getColumnNames($table);
@@ -409,12 +409,12 @@ class AnalysisController extends Controller {
             case 'geodata':
                 if($relations) {
                     $query = Geodata::with([
-                        'context'
+                        'entity'
                     ]);
                 } else {
-                    $query = Geodata::leftJoin('contexts', 'contexts.geodata_id', '=', 'geodata.id');
+                    $query = Geodata::leftJoin('entities', 'entities.geodata_id', '=', 'geodata.id');
                     if(!$hasColumnSelection) {
-                        $tables = ['geodata', 'contexts'];
+                        $tables = ['geodata', 'entities'];
                         $columnNames = [];
                         foreach($tables as $table) {
                             $columnNames[$table] = Helpers::getColumnNames($table);
@@ -427,14 +427,14 @@ class AnalysisController extends Controller {
             case 'bibliography':
                 if($relations) {
                     $query = Bibliography::with([
-                        // 'contexts'
+                        // 'entities'
                     ]);
                 } else {
-                    $query = Bibliography::leftJoin('sources', 'sources.literature_id', '=', 'literature.id')
-                        ->leftJoin('contexts', 'sources.context_id', '=', 'contexts.id')
-                        ->leftJoin('attributes', 'sources.attribute_id', '=', 'attributes.id');
+                    $query = Bibliography::leftJoin('references', 'references.bibliography_id', '=', 'bibliography.id')
+                        ->leftJoin('entities', 'references.entity_id', '=', 'entities.id')
+                        ->leftJoin('attributes', 'references.attribute_id', '=', 'attributes.id');
                     if(!$hasColumnSelection) {
-                        $tables = ['literature', 'attributes', 'contexts', 'sources'];
+                        $tables = ['bibliography', 'attributes', 'entities', 'references'];
                         $columnNames = [];
                         foreach($tables as $table) {
                             $columnNames[$table] = Helpers::getColumnNames($table);
@@ -758,8 +758,8 @@ class AnalysisController extends Controller {
             case 'boolean':
             case 'percentage':
             	return 'int_val';
-            case 'context':
-            	return 'context_val';
+            case 'entity':
+            	return 'entity_val';
             default:
                 return 'str_val';
         }

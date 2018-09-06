@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\ContextFile;
+use App\EntityFile;
 use App\FileTag;
 use App\Helpers;
 use App\ThConcept;
@@ -24,7 +24,7 @@ class File extends Model
 {
     use SearchableTrait;
 
-    protected $table = 'photos';
+    protected $table = 'files';
     /**
      * The attributes that are assignable.
      *
@@ -34,10 +34,8 @@ class File extends Model
         'name',
         'modified',
         'cameraname',
-        'photographer_id',
         'created',
         'thumb',
-        'orientation',
         'copyright',
         'description',
         'lasteditor',
@@ -157,7 +155,7 @@ class File extends Model
     }
 
     public static function getAllPaginate($page, $filters) {
-        $files = self::with(['contexts', 'tags'])
+        $files = self::with(['entities', 'tags'])
             ->orderBy('id', 'asc');
         $files->where(function($subQuery) use ($filters) {
             self::applyFilters($subQuery, $filters);
@@ -173,9 +171,9 @@ class File extends Model
     }
 
     public static function getUnlinkedPaginate($page, $filters) {
-        $files = self::with(['contexts', 'tags'])
+        $files = self::with(['entities', 'tags'])
             ->orderBy('id', 'asc')
-            ->doesntHave('contexts');
+            ->doesntHave('entities');
         $files->where(function($subQuery) use ($filters) {
             self::applyFilters($subQuery, $filters);
         });
@@ -190,12 +188,12 @@ class File extends Model
     }
 
     public static function getLinkedPaginate($cid, $page, $filters) {
-        $files = self::with(['contexts', 'tags'])
-            ->whereHas('contexts', function($query) use($cid, $filters) {
-                $query->where('context_id', $cid);
+        $files = self::with(['entities', 'tags'])
+            ->whereHas('entities', function($query) use($cid, $filters) {
+                $query->where('entity_id', $cid);
                 $subs = $filters['sub_entities'];
                 if(isset($subs) && Helpers::parseBoolean($subs)) {
-                    $query->orWhere('root_context_id', $cid);
+                    $query->orWhere('root_entity_id', $cid);
                 }
             })
             ->orderBy('id', 'asc');
@@ -213,14 +211,14 @@ class File extends Model
     }
 
     public static function getFileById($id) {
-        $file = self::with(['contexts', 'tags'])->findOrFail($id);
+        $file = self::with(['entities', 'tags'])->findOrFail($id);
         $file->setFileInfo();
         return $file;
     }
 
     public static function getSubFiles($id, $category) {
-        $subFiles = self::with(['tags'])->whereHas('contexts', function($query) use ($id) {
-            $query->where('root_context_id', $id);
+        $subFiles = self::with(['tags'])->whereHas('entities', function($query) use ($id) {
+            $query->where('root_entity_id', $id);
         });
 
         $subFiles->where(function($builder) use ($category) {
@@ -326,7 +324,7 @@ class File extends Model
                         ], 400);
                     }
                     $tag = new FileTag();
-                    $tag->photo_id = $file->id;
+                    $tag->file_id = $file->id;
                     $tag->concept_id = $tid;
                     $tag->save();
                 }
@@ -374,7 +372,6 @@ class File extends Model
                 Storage::copy($filename, $thumbFilename);
             }
             $file->thumb = $thumbFilename;
-            $file->photographer_id = 1;
 
             if($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM) {
                 $exif = @exif_read_data($fileUrl, 'ANY_TAG', true);
@@ -391,13 +388,6 @@ class File extends Model
                         $model = $model . " ($make)";
                     }
                     $file->cameraname = $model;
-
-                    if(Helpers::exifDataExists($exif, 'IFD0', 'Orientation')) {
-                        $orientation = $exif['IFD0']['Orientation'];
-                    } else {
-                        $orientation = 0;
-                    }
-                    $file->orientation = $orientation;
 
                     if(Helpers::exifDataExists($exif, 'IFD0', 'Copyright')) {
                         $copyright = $exif['IFD0']['Copyright'];
@@ -449,16 +439,16 @@ class File extends Model
     }
 
     public function link($eid, $user) {
-        $link = new ContextFile();
-        $link->photo_id = $this->id;
-        $link->context_id = $eid;
+        $link = new EntityFile();
+        $link->file_id = $this->id;
+        $link->entity_id = $eid;
         $link->lasteditor = $user->name;
         $link->save();
     }
 
     public function unlink($eid) {
-        $link = ContextFile::where('context_id', $eid)
-            ->where('photo_id', $this->id)
+        $link = EntityFile::where('entity_id', $eid)
+            ->where('file_id', $this->id)
             ->delete();
     }
 
@@ -771,19 +761,19 @@ class File extends Model
     }
 
     public function linkCount() {
-        return ContextFile::where('photo_id', $this->id)->count();
+        return EntityFile::where('file_id', $this->id)->count();
     }
 
     public function getExifAttribute() {
         return $this->getExifData();
     }
 
-    public function contexts() {
-        return $this->belongsToMany('App\Context', 'context_photos', 'photo_id', 'context_id');
+    public function entities() {
+        return $this->belongsToMany('App\Entity', 'entity_files', 'file_id', 'entity_id');
     }
 
     public function tags() {
-        return $this->belongsToMany('App\ThConcept', 'photo_tags', 'photo_id', 'concept_id');
+        return $this->belongsToMany('App\ThConcept', 'file_tags', 'file_id', 'concept_id');
     }
 
     private function extractFromIfd($ifd, &$values) {

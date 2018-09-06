@@ -94,7 +94,7 @@
                     switch (item.group) {
                         case 'entities':
                             this.$router.push({
-                                name: 'contextdetail',
+                                name: 'entitydetail',
                                 params: {
                                     id: item.id
                                 }
@@ -108,7 +108,7 @@
                             };
                             // Only append, if current route is one of the
                             // MainView routes
-                            const append = currRoute.name == 'home' || currRoute.name == 'contextdetail';
+                            const append = currRoute.name == 'home' || currRoute.name == 'entitydetail';
                             this.$router.push({
                                 append: append,
                                 query: query

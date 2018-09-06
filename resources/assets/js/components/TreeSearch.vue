@@ -69,7 +69,7 @@
         },
         data () {
             return {
-                src: 'search/context',
+                src: 'search/entity',
                 minChars: 2,
                 selectFirst: false
             }

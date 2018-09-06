@@ -4,16 +4,16 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ContextAttribute extends Model
+class EntityAttribute extends Model
 {
-    protected $table = 'context_attributes';
+    protected $table = 'entity_attributes';
     /**
      * The attributes that are assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'context_type_id',
+        'entity_type_id',
         'attribute_id',
     ];
 }

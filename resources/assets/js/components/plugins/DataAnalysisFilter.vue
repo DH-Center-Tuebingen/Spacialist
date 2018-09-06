@@ -133,7 +133,7 @@
                         vm.selections = Object.values(vm.$getEntityTypes());
                         break;
                     case 'entity':
-                    case 'context':
+                    case 'entity':
                         vm.filter.comp = c.equals;
                         newTypes = [
                             c.is,
@@ -329,7 +329,7 @@
                         if(this.isType(this.column.type, 'entity_type')) {
                             obj.column = 'id';
                         } else if(this.isType(this.column.type, 'entity')) {
-                            obj.column = 'context_type_id';
+                            obj.column = 'entity_type_id';
                         } else if(this.isType(this.column.type, 'attribute')) {
                             obj.column = 'attribute_id';
                         } else {

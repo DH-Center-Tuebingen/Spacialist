@@ -356,9 +356,9 @@
                     }
                     let callback;
                     if(this.selectedAttribute && this.isEntityLayer) {
-                        const id = this.layer.context_type_id;
+                        const id = this.layer.entity_type_id;
                         const aid = this.selectedAttribute.attribute_id;
-                        $http.get(`context/entity_type/${id}/data/${aid}`).then(response => {
+                        $http.get(`entity/entity_type/${id}/data/${aid}`).then(response => {
                             options.getText = feature => {
                                 const eid = feature.get('entity').id;
                                 const data = response.data[eid];
@@ -401,8 +401,8 @@
                     }
                 }
                 let name;
-                if(this.layer.context_type) {
-                    name = this.$translateConcept(this.layer.context_type.thesaurus_url)
+                if(this.layer.entity_type) {
+                    name = this.$translateConcept(this.layer.entity_type.thesaurus_url)
                 } else {
                     name = this.layer.name;
                 }

@@ -48,9 +48,9 @@
             onLeave(i) {
                 Vue.set(this.hovered, i, false);
             },
-            select(contextType) {
-                this.selectedElement = Object.assign({}, contextType);
-                this.onSelect(contextType);
+            select(entityType) {
+                this.selectedElement = Object.assign({}, entityType);
+                this.onSelect(entityType);
             }
         },
         data() {

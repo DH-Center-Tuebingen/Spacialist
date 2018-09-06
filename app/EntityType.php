@@ -4,9 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ContextType extends Model
+class EntityType extends Model
 {
-    protected $table = 'context_types';
+    protected $table = 'entity_types';
     /**
      * The attributes that are assignable.
      *
@@ -19,9 +19,9 @@ class ContextType extends Model
 
     public function setRelationInfo($isRoot = false, $subTypes = []) {
         $this->is_root = $isRoot;
-        ContextTypeRelation::where('parent_id', $this->id)->delete();
+        EntityTypeRelation::where('parent_id', $this->id)->delete();
         foreach($subTypes as $type) {
-            $relation = new ContextTypeRelation();
+            $relation = new EntityTypeRelation();
             $relation->parent_id = $this->id;
             $relation->child_id = $type;
             $relation->save();
@@ -33,16 +33,16 @@ class ContextType extends Model
         return $this->hasOne('App\AvailableLayer');
     }
 
-    public function contexts() {
-        return $this->hasMany('App\Context');
+    public function entities() {
+        return $this->hasMany('App\Entity');
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'context_attributes')->withPivot('position');
+        return $this->belongsToMany('App\Attribute', 'entity_attributes')->withPivot('position');
     }
 
-    public function sub_context_types() {
-        return $this->belongsToMany('App\ContextType', 'context_type_relations', 'parent_id', 'child_id');
+    public function sub_entity_types() {
+        return $this->belongsToMany('App\EntityType', 'entity_type_relations', 'parent_id', 'child_id');
     }
 
     // This relationship is one-way, in case the has-relation is needed it must be implemented

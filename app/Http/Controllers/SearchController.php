@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Bibliography;
-use App\Context;
+use App\Entity;
 use App\File;
 use App\Geodata;
 use App\ThConceptLabel;
@@ -34,7 +34,7 @@ class SearchController extends Controller {
                 return $m;
             });
         } else if(starts_with($q, self::$shebangPrefix['entities'])) {
-            $matches = Context::search(str_after($q, self::$shebangPrefix['entities']))->get();
+            $matches = Entity::search(str_after($q, self::$shebangPrefix['entities']))->get();
             $matches->map(function($m) {
                 $m->group = 'entities';
                 return $m;
@@ -61,7 +61,7 @@ class SearchController extends Controller {
                 $f->setFileInfo();
                 return $f;
             });
-            $entities = Context::search($q)->get();
+            $entities = Entity::search($q)->get();
             $entities->map(function($e) {
                 $e->group = 'entities';
                 return $e;
@@ -86,7 +86,7 @@ class SearchController extends Controller {
         return response()->json($matches);
     }
 
-    public function searchContextByName(Request $request) {
+    public function searchEntityByName(Request $request) {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
@@ -94,7 +94,7 @@ class SearchController extends Controller {
             ], 403);
         }
         $q = $request->query('q');
-        $matches = Context::where('name', 'ilike', '%'.$q.'%')
+        $matches = Entity::where('name', 'ilike', '%'.$q.'%')
             ->orderBy('name')
             ->get();
         $matches->each->append('ancestors');

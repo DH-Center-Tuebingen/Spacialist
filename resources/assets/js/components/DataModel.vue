@@ -18,40 +18,40 @@
         </div>
         <div class="col-md-2 d-flex flex-column">
             <h4>{{ $t('main.datamodel.entity.title') }}</h4>
-            <context-types
+            <entity-types
                 class="col px-0 h-100 scroll-y-auto"
-                :data="localContextTypes"
-                :on-add="onCreateContextType"
-                :on-delete="onDeleteContextType"
-                :on-select="setContextType">
-            </context-types>
+                :data="localEntityTypes"
+                :on-add="onCreateEntityType"
+                :on-delete="onDeleteEntityType"
+                :on-select="setEntityType">
+            </entity-types>
         </div>
         <router-view class="col-md-5 h-100"
             :attributes="attributeList">
         </router-view>
 
-        <modal name="new-context-type-modal" height="auto" :scrollable="true" classes="of-visible">
+        <modal name="new-entity-type-modal" height="auto" :scrollable="true" classes="of-visible">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ $t('main.datamodel.entity.modal.new.title') }}</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideNewContextTypeModal">
+                    <button type="button" class="close" aria-label="Close" @click="hideNewEntityTypeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form name="newContextTypeForm" id="newContextTypeForm" role="form" v-on:submit.prevent="createContextType(newContextType)">
+                    <form name="newEntityTypeForm" id="newEntityTypeForm" role="form" v-on:submit.prevent="createEntityType(newEntityType)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
                                 {{ $t('global.label') }}:
                             </label>
                             <div class="col-md-9">
                                 <label-search
-                                    :on-select="newContextTypeSearchResultSelected"
+                                    :on-select="newEntityTypeSearchResultSelected"
                                 ></label-search>
                             </div>
                         </div>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="isRoot" v-model="newContextType.is_root" />
+                            <input type="checkbox" class="form-check-input" id="isRoot" v-model="newEntityType.is_root" />
                             <label class="form-check-label" for="isRoot">
                                 {{ $t('main.datamodel.detail.properties.top-level') }}
                             </label>
@@ -64,7 +64,7 @@
                                 <multiselect
                                     label="label"
                                     track-by="id"
-                                    v-model="newContextType.geomtype"
+                                    v-model="newEntityType.geomtype"
                                     :allowEmpty="false"
                                     :closeOnSelect="false"
                                     :hideSelected="true"
@@ -79,10 +79,10 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" form="newContextTypeForm" :disabled="newContextTypeDisabled">
+                    <button type="submit" class="btn btn-success" form="newEntityTypeForm" :disabled="newEntityTypeDisabled">
                         <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
                     </button>
-                    <button type="button" class="btn btn-danger" @click="hideNewContextTypeModal">
+                    <button type="button" class="btn btn-danger" @click="hideNewEntityTypeModal">
                         <i class="fas fa-fw fa-ban"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
@@ -160,32 +160,32 @@
             </div>
         </modal>
 
-        <modal name="delete-context-type-modal" height="auto" :scrollable="true">
-            <div class="modal-content" v-if="openedModal == 'delete-context-type-modal'">
+        <modal name="delete-entity-type-modal" height="auto" :scrollable="true">
+            <div class="modal-content" v-if="openedModal == 'delete-entity-type-modal'">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: $translateConcept(modalSelectedContextType.thesaurus_url)}) }}</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideDeleteContextTypeModal">
+                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: $translateConcept(modalSelectedEntityType.thesaurus_url)}) }}</h5>
+                    <button type="button" class="close" aria-label="Close" @click="hideDeleteEntityTypeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-info">
-                        {{ $t('global.delete-name.desc', {name: $translateConcept(modalSelectedContextType.thesaurus_url)}) }}
+                        {{ $t('global.delete-name.desc', {name: $translateConcept(modalSelectedEntityType.thesaurus_url)}) }}
                     </p>
                     <p class="alert alert-danger">
                         {{
-                            $tc('main.datamodel.entity.modal.delete.alert', contextCount, {
-                                name: $translateConcept(modalSelectedContextType.thesaurus_url),
-                                cnt: contextCount
+                            $tc('main.datamodel.entity.modal.delete.alert', entityCount, {
+                                name: $translateConcept(modalSelectedEntityType.thesaurus_url),
+                                cnt: entityCount
                             })
                         }}
                     </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @click="deleteContextType(modalSelectedContextType)">
+                    <button type="button" class="btn btn-danger" @click="deleteEntityType(modalSelectedEntityType)">
                         <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
                     </button>
-                    <button type="button" class="btn btn-secondary" @click="hideDeleteContextTypeModal">
+                    <button type="button" class="btn btn-secondary" @click="hideDeleteEntityTypeModal">
                         <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                     </button>
                 </div>
@@ -273,31 +273,31 @@
                     vm.hideDeleteAttributeModal();
                 });
             },
-            createContextType(contextType) {
+            createEntityType(entityType) {
                 const vm = this;
-                if(vm.newContextTypeDisabled) return;
-                const url = contextType.label.concept.concept_url;
+                if(vm.newEntityTypeDisabled) return;
+                const url = entityType.label.concept.concept_url;
                 let data = {
                     'concept_url': url,
-                    'is_root': contextType.is_root || false,
-                    'geomtype': contextType.geomtype.key
+                    'is_root': entityType.is_root || false,
+                    'geomtype': entityType.geomtype.key
                 };
-                vm.$http.post('/editor/dm/context_type', data).then(function(response) {
-                    vm.localContextTypes.push(response.data);
-                    vm.hideNewContextTypeModal();
+                vm.$http.post('/editor/dm/entity_type', data).then(function(response) {
+                    vm.localEntityTypes.push(response.data);
+                    vm.hideNewEntityTypeModal();
                 });
             },
-            deleteContextType(contextType) {
+            deleteEntityType(entityType) {
                 const vm = this;
-                const id = contextType.id;
-                vm.$http.delete('/editor/dm/context_type/' + id).then(function(response) {
-                    const index = vm.localContextTypes.findIndex(function(ct) {
+                const id = entityType.id;
+                vm.$http.delete('/editor/dm/entity_type/' + id).then(function(response) {
+                    const index = vm.localEntityTypes.findIndex(function(ct) {
                         return ct.id == id;
                     });
                     if(index) {
-                        vm.localContextTypes.splice(index, 1);
+                        vm.localEntityTypes.splice(index, 1);
                     }
-                    vm.hideDeleteContextTypeModal();
+                    vm.hideDeleteEntityTypeModal();
                 });
             },
             onCreateAttribute() {
@@ -329,7 +329,7 @@
                 this.openedModal = '';
                 this.attributeValueCount = 0;
             },
-            onCreateContextType() {
+            onCreateEntityType() {
                 const vm = this;
                 vm.$http.get('/editor/dm/geometry').then(function(response) {
                     vm.availableGeometries = [];
@@ -348,25 +348,25 @@
                         label: 'Any',
                         key: 'any'
                     });
-                    vm.$modal.show('new-context-type-modal');
+                    vm.$modal.show('new-entity-type-modal');
                 });
             },
-            onDeleteContextType(contextType) {
+            onDeleteEntityType(entityType) {
                 const vm = this;
-                const id = contextType.id;
-                vm.$http.get('/editor/dm/context_type/occurrence_count/' + id).then(function(response) {
-                    vm.setContextCount(response.data);
-                    vm.setModalSelectedContextType(contextType);
-                    vm.openedModal = 'delete-context-type-modal';
-                    vm.$modal.show('delete-context-type-modal');
+                const id = entityType.id;
+                vm.$http.get('/editor/dm/entity_type/occurrence_count/' + id).then(function(response) {
+                    vm.setEntityCount(response.data);
+                    vm.setModalSelectedEntityType(entityType);
+                    vm.openedModal = 'delete-entity-type-modal';
+                    vm.$modal.show('delete-entity-type-modal');
                 });
             },
-            hideNewContextTypeModal() {
-                this.$modal.hide('new-context-type-modal');
+            hideNewEntityTypeModal() {
+                this.$modal.hide('new-entity-type-modal');
             },
-            hideDeleteContextTypeModal() {
-                this.$modal.hide('delete-context-type-modal');
-                this.contextCount = 0;
+            hideDeleteEntityTypeModal() {
+                this.$modal.hide('delete-entity-type-modal');
+                this.entityCount = 0;
                 this.openedModal = '';
             },
             setAttributeLabel(label) {
@@ -375,14 +375,14 @@
             setAttributeRoot(label) {
                 Vue.set(this.newAttribute, 'root', label);
             },
-            newContextTypeSearchResultSelected(label) {
-                Vue.set(this.newContextType, 'label', label);
+            newEntityTypeSearchResultSelected(label) {
+                Vue.set(this.newEntityType, 'label', label);
             },
-            setContextType(contextType) {
+            setEntityType(entityType) {
                 this.$router.push({
                     name: 'dmdetail',
                     params: {
-                        id: contextType.id
+                        id: entityType.id
                     }
                 });
             },
@@ -393,32 +393,32 @@
             setModalSelectedAttribute(attribute) {
                 this.modalSelectedAttribute = Object.assign({}, attribute);
             },
-            setContextCount(cnt) {
-                this.contextCount = cnt;
+            setEntityCount(cnt) {
+                this.entityCount = cnt;
             },
-            setModalSelectedContextType(contextType) {
-                this.modalSelectedContextType = Object.assign({}, contextType);
+            setModalSelectedEntityType(entityType) {
+                this.modalSelectedEntityType = Object.assign({}, entityType);
             }
         },
         data() {
             return {
                 attributeList: [],
                 initFinished: false,
-                contextType: {},
-                contextAttributes: [],
-                contextSelections: {},
-                contextDependencies: {},
-                contextValues: {},
+                entityType: {},
+                entityAttributes: [],
+                entitySelections: {},
+                entityDependencies: {},
+                entityValues: {},
                 attributeTypes: [],
                 newAttribute: {},
                 openedModal: '',
                 modalSelectedAttribute: {},
                 attributeValueCount: 0,
                 availableGeometries: [],
-                newContextType: {},
-                localContextTypes: Object.values(this.$getEntityTypes()),
-                modalSelectedContextType: {},
-                contextCount: 0,
+                newEntityType: {},
+                localEntityTypes: Object.values(this.$getEntityTypes()),
+                modalSelectedEntityType: {},
+                entityCount: 0,
                 allowedTableKeys: [
                     'string', 'string-sc', 'integer', 'double', 'boolean'
                 ]
@@ -448,8 +448,8 @@
                         this.newAttribute.type.datatype == 'sql'
                     );
             },
-            newContextTypeDisabled: function() {
-                const nct = this.newContextType;
+            newEntityTypeDisabled: function() {
+                const nct = this.newEntityType;
                 return !nct.label || !nct.geomtype;
             },
             validated: function() {

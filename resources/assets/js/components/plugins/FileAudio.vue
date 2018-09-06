@@ -200,7 +200,11 @@
         },
         watch: {
             file(newFile, oldFile) {
-                this.init();
+                // Only init if file changed
+                if(!oldFile || (newFile.name != oldFile.name && newFile.size != oldFile.size)) {
+                    if(this.wavesurfer.destroy) this.wavesurfer.destroy();
+                    this.init();
+                }
             }
         }
     }

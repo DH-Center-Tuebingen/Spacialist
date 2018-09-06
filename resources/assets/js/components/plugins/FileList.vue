@@ -158,10 +158,10 @@
         methods: {
             getFileLinks(file) {
                 if(!this.showLinks) return [];
-                if(!file.contexts) {
+                if(!file.entities) {
                     return [];
                 }
-                return file.contexts;
+                return file.entities;
             },
             getFileTags(file) {
                 return file.tags;

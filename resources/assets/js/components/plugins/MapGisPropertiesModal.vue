@@ -71,7 +71,7 @@
             init(event) {
                 this.layer = event.params.layer;
                 if(this.isEntityLayer) {
-                    $http.get(`editor/context_type/${this.layer.context_type.id}/attribute`).then(response => {
+                    $http.get(`editor/entity_type/${this.layer.entity_type.id}/attribute`).then(response => {
                         this.attributes = response.data.attributes;
                     });
                 }
@@ -95,7 +95,7 @@
                 return `map-gis-properties-${this.activeTab}`;
             },
             isEntityLayer: function() {
-                return !!this.layer.context_type;
+                return !!this.layer.entity_type;
             }
         }
     }

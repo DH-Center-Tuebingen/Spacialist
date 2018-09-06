@@ -59,14 +59,14 @@
                         </button>
                     </div>
                     <!-- TODO: dirty checking -->
-                    <div v-else-if="attribute.datatype == 'context'">
-                        <context-search
+                    <div v-else-if="attribute.datatype == 'entity'">
+                        <entity-search
                             v-validate=""
                             :id="'attribute-'+attribute.id"
                             :name="'attribute-'+attribute.id"
-                            :on-select="selection => setContextSearchResult(selection, attribute.id)"
+                            :on-select="selection => setEntitySearchResult(selection, attribute.id)"
                             :value="localValues[attribute.id].name">
-                        </context-search>
+                        </entity-search>
                     </div>
                     <v-date-picker
                         mode="single"
@@ -311,7 +311,7 @@
                 ms += (offset * 60 * 1000);
                 vm.localValues[aid].value = new Date(ms);
             },
-            setContextSearchResult(result, aid) {
+            setEntitySearchResult(result, aid) {
                 if(result) {
                     this.localValues[aid].value = result.id;
                 } else {
@@ -452,8 +452,8 @@
                 this.onReorder(oldIndex, newIndex);
             },
             move(event, originalEvent) {
-                let src = event.draggedContext.element;
-                let dst = event.relatedContext;
+                let src = event.draggedEntity.element;
+                let dst = event.relatedEntity;
                 let tgtList = event.to;
                 let srcList = event.from;
                 // Move is always allowed if not source or from other list

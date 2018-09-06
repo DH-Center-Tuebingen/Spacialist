@@ -258,7 +258,7 @@
                     parent_id: newParent ? newParent.id : null
                 };
 
-                this.$http.patch(`/context/${draggedElement.id}/rank`, data).then(function(response) {
+                this.$http.patch(`/entity/${draggedElement.id}/rank`, data).then(function(response) {
                     const oldIndex = oldSiblings.indexOf(draggedElement);
                     oldSiblings.splice(oldIndex, 1);
                     siblingPromise.then(newSiblings => {
@@ -276,7 +276,7 @@
             },
             fetchChildren(id) {
                 const vm = this;
-                return $http.get('/context/byParent/'+id)
+                return $http.get('/entity/byParent/'+id)
                 .then(response => {
                     return response.data.map(n => new Node(n, vm));
                 });
@@ -313,25 +313,25 @@
                 const item = dropData.sourceData;
                 const target = dropData.targetData;
                 const vm = this;
-                const dragContextType = vm.$getEntityType(item.context_type_id);
-                let dropContextType;
+                const dragEntityType = vm.$getEntityType(item.entity_type_id);
+                let dropEntityType;
                 if(dropData.targetPath.length == 1) {
-                    dropContextType = {
-                        sub_context_types: Object.values(vm.$getEntityTypes()).filter(f => f.is_root)
+                    dropEntityType = {
+                        sub_entity_types: Object.values(vm.$getEntityTypes()).filter(f => f.is_root)
                     }
                 } else {
-                    dropContextType = vm.$getEntityType(target.context_type_id);
+                    dropEntityType = vm.$getEntityType(target.entity_type_id);
                 }
                 // If currently dragged element is not allowed as root
                 // and dragged on element is a root element (no parent)
                 // do not allow drop
-                if(!dragContextType.is_root && dropData.targetPath.length == 1) {
+                if(!dragEntityType.is_root && dropData.targetPath.length == 1) {
                     return false;
                 }
 
-                // Check if currently dragged context type is allowed
+                // Check if currently dragged entity type is allowed
                 // as subtype of current drop target
-                const index = dropContextType.sub_context_types.findIndex(ct => ct.id == dragContextType.id);
+                const index = dropEntityType.sub_entity_types.findIndex(ct => ct.id == dragEntityType.id);
                 if(index == -1) {
                     return false;
                 }
@@ -403,7 +403,7 @@
             },
             selectNodeById(id) {
                 const vm = this;
-                $http.get(`/context/${id}/path`).then(response => {
+                $http.get(`/entity/${id}/path`).then(response => {
                     const path = response.data;
                     vm.openPath(path).then(targetNode => {
                         targetNode.state.selected = true;

@@ -2,7 +2,7 @@
     <div class="h-100 d-flex flex-column">
         <ul class="list-inline mb-2">
             <li class="list-inline-item">
-                <form class="form-inline" id="literature-search-form">
+                <form class="form-inline" id="bibliography-search-form">
                     <div class="form-group">
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -16,7 +16,7 @@
                 </form>
             </li>
             <li class="list-inline-item">
-                <button type="button" class="btn btn-success" id="literature-add-button" @click="showNewItemModal" :disabled="!$can('add_remove_literature')">
+                <button type="button" class="btn btn-success" id="bibliography-add-button" @click="showNewItemModal" :disabled="!$can('add_remove_bibliography')">
                     <i class="fas fa-fw fa-plus"></i> {{ $t('main.bibliography.add') }}
                 </button>
             </li>
@@ -28,7 +28,7 @@
                     v-model="files"
                     post-action="/api/v1/bibliography/import"
                     :directory="false"
-                    :disabled="!$can('add_remove_literature|edit_literature')"
+                    :disabled="!$can('add_remove_bibliography|edit_bibliography')"
                     :multiple="false"
                     :drop="true"
                     @input-file="inputFile">
@@ -341,10 +341,10 @@
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
                                 <div class="dropdown-menu overlay-all" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="#" @click.prevent="editEntry(entry)" :disabled="!$can('edit_literature')">
+                                    <a class="dropdown-item" href="#" @click.prevent="editEntry(entry)" :disabled="!$can('edit_bibliography')">
                                         <i class="fas fa-fw fa-edit text-info"></i> {{ $t('global.edit') }}
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="requestDeleteEntry(entry)" :disabled="!$can('add_remove_literature')">
+                                    <a class="dropdown-item" href="#" @click.prevent="requestDeleteEntry(entry)" :disabled="!$can('add_remove_bibliography')">
                                         <i class="fas fa-fw fa-trash text-danger"></i> {{ $t('global.delete') }}
                                     </a>
                                 </div>
@@ -356,14 +356,14 @@
         </div>
 
         <router-view
-            v-can.one="'add_remove_literature|edit_literature'"
+            v-can.one="'add_remove_bibliography|edit_bibliography'"
             :data="newItem"
             :available-types="availableTypes"
             :on-success="addBibliographyItem"
             :on-close="onModalClose">
         </router-view>
 
-        <modal name="delete-bibliography-item-modal" height="auto" :scrollable="true" v-can="'add_remove_literature'">
+        <modal name="delete-bibliography-item-modal" height="auto" :scrollable="true" v-can="'add_remove_bibliography'">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ $t('main.bibliography.modal.delete.title') }}</h5>
@@ -443,7 +443,7 @@
                 }
             },
             inputFile(newFile, oldFile) {
-                if(!this.$can('add_remove_literature|edit_literature')) return;
+                if(!this.$can('add_remove_bibliography|edit_bibliography')) return;
                 // Wait for response
                 if(newFile && oldFile && newFile.success && !oldFile.success) {
                     this.allEntries.push(newFile.response);
@@ -467,7 +467,7 @@
                 });
             },
             addBibliographyItem(item) {
-                if(!this.$can('add_remove_literature')) return;
+                if(!this.$can('add_remove_bibliography')) return;
                 if(!item.type) return;
                 if(!item.fields) return;
                 let data = {};
@@ -492,7 +492,7 @@
                 }
             },
             editEntry(entry) {
-                if(!this.$can('edit_literature')) return;
+                if(!this.$can('edit_bibliography')) return;
                 const type = this.availableTypes.find(t => t.name == entry.type);
                 if(!type) return;
                 let fields = {};
@@ -512,7 +512,7 @@
                 });
             },
             deleteEntry(entry) {
-                if(!this.$can('add_remove_literature')) return;
+                if(!this.$can('add_remove_bibliography')) return;
                 $http.delete(`bibliography/${entry.id}`).then(response => {
                     const index = this.allEntries.findIndex(e => e.id == entry.id);
                     if(index > -1) {
@@ -523,7 +523,7 @@
             },
             requestDeleteEntry(entry) {
                 const vm = this;
-                if(!vm.$can('add_remove_literature')) return;
+                if(!vm.$can('add_remove_bibliography')) return;
                 vm.$http.get(`bibliography/${entry.id}/ref_count`).then(function(response) {
                     vm.deleteItem = Object.assign({}, entry);
                     vm.deleteItem.count = response.data;
@@ -535,7 +535,7 @@
                 this.$modal.hide('delete-bibliography-item-modal');
             },
             showNewItemModal() {
-                if(!this.$can('add_remove_literature')) return;
+                if(!this.$can('add_remove_bibliography')) return;
                 this.newItem = {
                     fields: {}
                 };

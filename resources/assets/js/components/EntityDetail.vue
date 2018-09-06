@@ -34,7 +34,7 @@
     export default {
         beforeRouteEnter(to, from, next) {
             const entityId = to.params.id;
-            $http.get(`context/${entityId}`).then(response => {
+            $http.get(`entity/${entityId}`).then(response => {
                 next(vm => {
                     vm.init(response.data)
                     vm.eventBus.$emit('entity-change', {
@@ -52,7 +52,7 @@
                 this.setModalValues(to.params.aid);
                 next();
             } else if(!to.params.aid && from.params.aid) {
-                $http.get(`/context/${to.params.id}/data/${from.params.aid}`).then(response => {
+                $http.get(`/entity/${to.params.id}/data/${from.params.aid}`).then(response => {
                     // if result is empty, php returns [] instead of {}
                     if(response.data instanceof Array) {
                         response.data = {};
@@ -64,7 +64,7 @@
                 const vm = this;
                 const entityId = to.params.id;
                 let loadNext = function() {
-                    $http.get(`context/${entityId}`).then(response => {
+                    $http.get(`entity/${entityId}`).then(response => {
                         vm.init(response.data);
                         next();
                     });
@@ -130,9 +130,9 @@
                 this.dataLoaded = false;
                 this.entity = {};
                 this.entity = entity;
-                this.getContextData(entity);
+                this.getEntityData(entity);
             },
-            getContextData(entity) {
+            getEntityData(entity) {
                 const vm = this;
                 if(!vm.$can('view_concept_props')) {
                     Vue.set(vm.entity, 'data', {});
@@ -144,14 +144,14 @@
                     return;
                 }
                 const cid = entity.id;
-                const ctid = entity.context_type_id;
-                vm.$http.get(`/context/${cid}/data`).then(function(response) {
+                const ctid = entity.entity_type_id;
+                vm.$http.get(`/entity/${cid}/data`).then(function(response) {
                     // if result is empty, php returns [] instead of {}
                     if(response.data instanceof Array) {
                         response.data = {};
                     }
                     Vue.set(vm.entity, 'data', response.data);
-                    return vm.$http.get(`/editor/context_type/${ctid}/attribute`);
+                    return vm.$http.get(`/editor/entity_type/${ctid}/attribute`);
                 }).then(function(response) {
                     vm.entity.attributes = [];
                     let data = response.data;
@@ -190,7 +190,7 @@
                     }
                     Vue.set(vm.entity, 'selections', data.selections);
                     Vue.set(vm.entity, 'dependencies', data.dependencies);
-                    return vm.$http.get(`/context/${cid}/reference`);
+                    return vm.$http.get(`/entity/${cid}/reference`);
                 }).then(function(response) {
                     let data = response.data;
                     if(data instanceof Array) {
@@ -241,7 +241,7 @@
                         }
                     }
                 }
-                return $http.patch('/context/'+cid+'/attributes', patches).then(response => {
+                return $http.patch('/entity/'+cid+'/attributes', patches).then(response => {
                     this.resetFlags();
                     this.$showToast(
                         this.$t('main.entity.toasts.updated.title'),
@@ -269,7 +269,7 @@
             showMetadata(attribute) {
                 this.$router.push({
                     append: true,
-                    name: 'contextrefs',
+                    name: 'entityrefs',
                     params: {
                         aid: attribute.id
                     },

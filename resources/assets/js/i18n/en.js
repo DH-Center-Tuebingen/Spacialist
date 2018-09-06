@@ -134,16 +134,16 @@ const en = {
 
             },
             references: {
-                title: 'Sources',
-                empty: 'No Sources found',
+                title: 'References',
+                empty: 'No References found',
                 certainty: 'Certainty',
                 certaintyc: 'Comment',
                 certaintyu: 'Update Certainty',
                 bibliography: {
                     title: 'Literature',
-                    add: 'Add new Source',
+                    add: 'Add new Reference',
                     comment: 'Comment',
-                    'add-button': 'Add Source'
+                    'add-button': 'Add Reference'
                 },
                 toasts: {
                     'updated-certainty': {
@@ -305,7 +305,7 @@ const en = {
                 },
                 delete: {
                     title: 'Delete entry',
-                    alert: 'Note: If you delete {name}, one source is deleted, too. | Note: If you delete {name}, {cnt} sources are deleted, too.',
+                    alert: 'Note: If you delete {name}, one reference is deleted, too. | Note: If you delete {name}, {cnt} references are deleted, too.',
                 }
             },
             add: 'Add new Bibliography-Entry',

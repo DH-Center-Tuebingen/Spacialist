@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use App\Context;
+use App\Entity;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -27,8 +27,8 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         parent::boot();
-        Context::deleted(function ($c) {
-            $olderSiblings = Context::where('root_context_id', $c->root_context_id)->where('rank', '>', $c->rank)->decrement('rank');
+        Entity::deleted(function ($c) {
+            $olderSiblings = Entity::where('root_entity_id', $c->root_entity_id)->where('rank', '>', $c->rank)->decrement('rank');
         });
         //
     }

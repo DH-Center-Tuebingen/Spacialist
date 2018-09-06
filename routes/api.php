@@ -32,62 +32,62 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // CONTEXT
-Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/context')->group(function() {
-    Route::get('/top', 'ContextController@getTopEntities')->where('id', '[0-9]+');
-    Route::get('/{id}', 'ContextController@getContext')->where('id', '[0-9]+');
-    Route::get('/entity_type/{ctid}/data/{aid}', 'ContextController@getDataForEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
-    Route::get('/{id}/data', 'ContextController@getData')->where('id', '[0-9]+');
-    Route::get('/{id}/data/{aid}', 'ContextController@getData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
-    Route::get('/{id}/children', 'ContextController@getChildren')->where('id', '[0-9]+');
-    Route::get('/{id}/reference', 'ReferenceController@getByContext')->where('id', '[0-9]+');
-    Route::get('/{id}/path', 'ContextController@getPath')->where('id', '[0-9]+');
-    Route::get('/byParent/{id}', 'ContextController@getEntitiesByParent')->where('id', '[0-9]+');
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/entity')->group(function() {
+    Route::get('/top', 'EntityController@getTopEntities')->where('id', '[0-9]+');
+    Route::get('/{id}', 'EntityController@getEntity')->where('id', '[0-9]+');
+    Route::get('/entity_type/{ctid}/data/{aid}', 'EntityController@getDataForEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::get('/{id}/data', 'EntityController@getData')->where('id', '[0-9]+');
+    Route::get('/{id}/data/{aid}', 'EntityController@getData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+    Route::get('/{id}/children', 'EntityController@getChildren')->where('id', '[0-9]+');
+    Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
+    Route::get('/{id}/path', 'EntityController@getPath')->where('id', '[0-9]+');
+    Route::get('/byParent/{id}', 'EntityController@getEntitiesByParent')->where('id', '[0-9]+');
 
-    Route::post('', 'ContextController@addEntity');
+    Route::post('', 'EntityController@addEntity');
     Route::post('/{id}/reference/{aid}', 'ReferenceController@addReference')->where('id', '[0-9]+')->where('aid', '[0-9]+');
 
-    Route::patch('/{id}/attributes', 'ContextController@patchAttributes')->where('id', '[0-9]+');
-    Route::patch('/{id}/attribute/{aid}', 'ContextController@patchAttribute')->where('id', '[0-9]+')->where('aid', '[0-9]+');
-    Route::patch('/{id}/rank', 'ContextController@patchRank')->where('id', '[0-9]+');
+    Route::patch('/{id}/attributes', 'EntityController@patchAttributes')->where('id', '[0-9]+');
+    Route::patch('/{id}/attribute/{aid}', 'EntityController@patchAttribute')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+    Route::patch('/{id}/rank', 'EntityController@patchRank')->where('id', '[0-9]+');
     Route::patch('/reference/{id}', 'ReferenceController@patchReference')->where('id', '[0-9]+');
 
-    Route::delete('/{id}', 'ContextController@deleteContext')->where('id', '[0-9]+');
+    Route::delete('/{id}', 'EntityController@deleteEntity')->where('id', '[0-9]+');
     Route::delete('/reference/{id}', 'ReferenceController@delete')->where('id', '[0-9]+');
 });
 
 // SEARCH
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/search')->group(function() {
     Route::get('', 'SearchController@searchGlobal');
-    Route::get('/context', 'SearchController@searchContextByName');
+    Route::get('/entity', 'SearchController@searchEntityByName');
     Route::get('/label', 'SearchController@searchInThesaurus');
 });
 
 // EDITOR
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/editor')->group(function() {
-    Route::get('/dm/context_type/occurrence_count/{id}', 'EditorController@getContextTypeOccurrenceCount')->where('id', '[0-9]+');
+    Route::get('/dm/entity_type/occurrence_count/{id}', 'EditorController@getEntityTypeOccurrenceCount')->where('id', '[0-9]+');
     Route::get('/dm/attribute/occurrence_count/{aid}', 'EditorController@getAttributeOccurrenceCount')->where('aid', '[0-9]+');
     Route::get('/dm/attribute/occurrence_count/{aid}/{ctid}', 'EditorController@getAttributeOccurrenceCount')->where('aid', '[0-9]+')->where('ctid', '[0-9]+');
-    Route::get('/dm/context_type/top', 'EditorController@getTopContextTypes');
-    Route::get('/dm/context_type/parent/{cid}', 'EditorController@getContextTypesByParent')->where('cid', '[0-9]+');
+    Route::get('/dm/entity_type/top', 'EditorController@getTopEntityTypes');
+    Route::get('/dm/entity_type/parent/{cid}', 'EditorController@getEntityTypesByParent')->where('cid', '[0-9]+');
     Route::get('/dm/attribute', 'EditorController@getAttributes');
     Route::get('/dm/attribute_types', 'EditorController@getAttributeTypes');
-    Route::get('/context_type/{id}', 'EditorController@getContextType')->where('id', '[0-9]+');
-    Route::get('/context_type/{id}/attribute', 'EditorController@getContextTypeAttributes')->where('id', '[0-9]+');
+    Route::get('/entity_type/{id}', 'EditorController@getEntityType')->where('id', '[0-9]+');
+    Route::get('/entity_type/{id}/attribute', 'EditorController@getEntityTypeAttributes')->where('id', '[0-9]+');
     Route::get('/attribute/{id}/selection', 'EditorController@getAttributeSelection')->where('id', '[0-9]+');
-    Route::get('/dm/context_type/{ctid}/attribute/{aid}/dependency', 'EditorController@getDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::get('/dm/entity_type/{ctid}/attribute/{aid}/dependency', 'EditorController@getDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/dm/geometry', 'EditorController@getAvailableGeometryTypes');
 
-    Route::post('/dm/context_type', 'EditorController@addContextType');
+    Route::post('/dm/entity_type', 'EditorController@addEntityType');
     Route::post('/dm/{id}/relation', 'EditorController@setRelationInfo')->where('id', '[0-9]+');
     Route::post('/dm/attribute', 'EditorController@addAttribute');
-    Route::post('/dm/context_type/{ctid}/attribute', 'EditorController@addAttributeToContextType')->where('ctid', '[0-9]+');
+    Route::post('/dm/entity_type/{ctid}/attribute', 'EditorController@addAttributeToEntityType')->where('ctid', '[0-9]+');
 
-    Route::patch('/dm/context_type/{ctid}/attribute/{aid}/position', 'EditorController@reorderAttribute')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
-    Route::patch('/dm/context_type/{ctid}/attribute/{aid}/dependency', 'EditorController@patchDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::patch('/dm/entity_type/{ctid}/attribute/{aid}/position', 'EditorController@reorderAttribute')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::patch('/dm/entity_type/{ctid}/attribute/{aid}/dependency', 'EditorController@patchDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
 
-    Route::delete('/dm/context_type/{id}', 'EditorController@deleteContextType')->where('id', '[0-9]+');
+    Route::delete('/dm/entity_type/{id}', 'EditorController@deleteEntityType')->where('id', '[0-9]+');
     Route::delete('/dm/attribute/{id}', 'EditorController@deleteAttribute')->where('id', '[0-9]+');
-    Route::delete('/dm/context_type/{ctid}/attribute/{aid}', 'EditorController@removeAttributeFromContextType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
+    Route::delete('/dm/entity_type/{ctid}/attribute/{aid}', 'EditorController@removeAttributeFromEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
 });
 
 // USER

@@ -9,7 +9,7 @@
             :on-drawend="addFeature"
             :on-modifyend="updateFeatures"
             :reset="false"
-            :selected-entity="context"
+            :selected-entity="entity"
             v-on:update:link="(geoId, entityId) => $emit('update:link', geoId, entityId)">
         </ol-map>
     </div>
@@ -22,7 +22,7 @@
 
     export default {
         props: {
-            context: {
+            entity: {
                 type: Object,
                 required: true
             }
@@ -53,7 +53,7 @@
             getProperties(geodata) {
                 return {
                     id: geodata.id,
-                    entity: geodata.context
+                    entity: geodata.entity
                 };
             },
             deleteFeatures(features, wkt) {

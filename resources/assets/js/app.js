@@ -13,7 +13,7 @@ import de from './i18n/de';
 
 import App from './App.vue';
 import MainView from './components/MainView.vue';
-import ContextDetail from './components/ContextDetail.vue';
+import EntityDetail from './components/EntityDetail.vue';
 import ReferenceModal from './components/EntityReferenceModal.vue';
 import Login from './components/Login.vue';
 // Tools
@@ -99,7 +99,7 @@ const router = new VueRouter({
                     path: 'context/:id',
                     redirect: to => {
                         return {
-                            name: 'contextdetail',
+                            name: 'entitydetail',
                             params: {
                                 id: to.params.id
                             }
@@ -109,7 +109,7 @@ const router = new VueRouter({
                         path: 'sources/:aid',
                         redirect: to => {
                             return {
-                                name: 'contextrefs',
+                                name: 'entityrefs',
                                 params: {
                                     id: to.params.id,
                                     aid: to.params.aid,
@@ -174,12 +174,12 @@ const router = new VueRouter({
             children: [
                 {
                     path: 'e/:id',
-                    name: 'contextdetail',
-                    component: ContextDetail,
+                    name: 'entitydetail',
+                    component: EntityDetail,
                     children: [
                         {
                             path: 'refs/:aid',
-                            name: 'contextrefs',
+                            name: 'entityrefs',
                             component: ReferenceModal
                         }
                     ]
@@ -317,14 +317,14 @@ Vue.component('file-upload', VueUploadComponent);
 
 // Extended Components
 Vue.component('global-search', require('./components/GlobalSearch.vue'));
-Vue.component('context-search', require('./components/ContextSearch.vue'));
+Vue.component('entity-search', require('./components/EntitySearch.vue'));
 Vue.component('label-search', require('./components/LabelSearch.vue'));
 Vue.component('csv-table', require('./components/CsvTable.vue'));
 
 // Reusable Components
 Vue.component('attributes', require('./components/AttributeList.vue'));
-Vue.component('context-tree', require('./components/ContextTree.vue'));
-Vue.component('context-types', require('./components/ContextTypeList.vue'));
+Vue.component('entity-tree', require('./components/EntityTree.vue'));
+Vue.component('entity-types', require('./components/EntityTypeList.vue'));
 Vue.component('ol-map', require('./components/OlMap.vue'));
 Vue.component('color-gradient', require('./components/Gradient.vue'));
 
@@ -439,7 +439,7 @@ const app = new Vue({
             Axios.get('pre').then(response =>  {
                 this.preferences = response.data.preferences;
                 this.concepts = response.data.concepts;
-                this.contextTypes = response.data.contextTypes;
+                this.entityTypes = response.data.entityTypes;
                 app.$auth.ready(_ => {
                     // Check if user is logged in and set preferred language
                     // instead of browser default
@@ -465,13 +465,13 @@ const app = new Vue({
     },
     data() {
         return {
-            selectedContext: {},
-            onSelectContext: function(selection) {
-                app.$data.selectedContext = Object.assign({}, selection);
+            selectedEntity: {},
+            onSelectEntity: function(selection) {
+                app.$data.selectedEntity = Object.assign({}, selection);
             },
             preferences: {},
             concepts: {},
-            contextTypes: {},
+            entityTypes: {},
             plugins: {},
             onInit: null
         }

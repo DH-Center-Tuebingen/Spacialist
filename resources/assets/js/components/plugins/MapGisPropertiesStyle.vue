@@ -189,8 +189,8 @@
                     });
                 }
                 let name;
-                if(this.layer.context_type) {
-                    name = this.$translateConcept(this.layer.context_type.thesaurus_url)
+                if(this.layer.entity_type) {
+                    name = this.$translateConcept(this.layer.entity_type.thesaurus_url)
                 } else {
                     name = this.layer.name;
                 }

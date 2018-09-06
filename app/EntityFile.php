@@ -4,9 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ContextFile extends Model
+class EntityFile extends Model
 {
-    protected $table = 'context_photos';
+    protected $table = 'entity_files';
 
     public $timestamps = false; // disable updated_at and created_at in ->save()
 
@@ -20,8 +20,8 @@ class ContextFile extends Model
      * @var array
      */
     protected $fillable = [
-        'photo_id',
-        'context_id',
+        'file_id',
+        'entity_id',
         'lasteditor',
     ];
 }

@@ -204,13 +204,13 @@
                 if(this.layer.name) {
                     return this.layer.name
                 }
-                if(this.layer.context_type) {
-                    return this.$translateConcept(this.layer.context_type.thesaurus_url);
+                if(this.layer.entity_type) {
+                    return this.$translateConcept(this.layer.entity_type.thesaurus_url);
                 }
                 return this.$t('plugins.map.untitled');
             },
             isEntityLayer: function() {
-                return this.layer.context_type_id || this.layer.type == 'unlinked';
+                return this.layer.entity_type_id || this.layer.type == 'unlinked';
             }
         }
     }

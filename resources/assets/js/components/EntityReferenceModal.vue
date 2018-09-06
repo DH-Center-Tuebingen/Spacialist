@@ -179,7 +179,7 @@
                     certainty: this.refs.value.possibility,
                     certainty_description: this.refs.value.possibility_description
                 };
-                $http.patch(`/context/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
+                $http.patch(`/entity/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
                     const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
                     this.$showToast(
                         this.$t('main.entity.references.toasts.updated-certainty.title'),
@@ -193,12 +193,12 @@
                 });
             },
             onAddReference(item) {
-                if(!this.$can('add_remove_literature')) return;
+                if(!this.$can('add_remove_bibliography')) return;
                 const data = {
                     bibliography_id: item.bibliography.id,
                     description: item.description
                 };
-                $http.post(`/context/${this.entityId}/reference/${this.attributeId}`, data).then(response => {
+                $http.post(`/entity/${this.entityId}/reference/${this.attributeId}`, data).then(response => {
                     if(!this.refs.refs) {
                         this.refs.refs = [];
                     }
@@ -206,9 +206,9 @@
                 });
             },
             onDeleteReference(reference) {
-                if(!this.$can('add_remove_literature')) return;
+                if(!this.$can('add_remove_bibliography')) return;
                 const id = reference.id;
-                $http.delete(`/context/reference/${id}`).then(response => {
+                $http.delete(`/entity/reference/${id}`).then(response => {
                     const index = this.refs.refs.findIndex(r => r.id == reference.id);
                     if(index > -1) {
                         this.refs.refs.splice(index, 1);
@@ -216,7 +216,7 @@
                 });
             },
             onUpdateReference(editedReference) {
-                if(!this.$can('edit_literature')) return;
+                if(!this.$can('edit_bibliography')) return;
                 const id = editedReference.id;
                 let ref = this.refs.refs.find(r => r.id == editedReference.id);
                 if(ref.description == editedReference.description) {
@@ -225,7 +225,7 @@
                 const data = {
                     description: editedReference.description
                 };
-                $http.patch(`/context/reference/${id}`, data).then(response => {
+                $http.patch(`/entity/reference/${id}`, data).then(response => {
                     ref.description = editedReference.description;
                     this.cancelEditReference();
                 });
@@ -242,7 +242,7 @@
             routeBack() {
                 const curr = this.$route;
                 this.$router.push({
-                    name: 'contextdetail',
+                    name: 'entitydetail',
                     params: {
                         id: curr.params.id
                     },

@@ -1,7 +1,7 @@
 <template>
     <div class="row h-100 of-hidden" v-if="initFinished">
         <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100" v-can="'view_concepts'">
-            <context-tree
+            <entity-tree
                 class="col px-0"
                 :on-entity-add="requestAddNewEntity"
                 :on-context-menu-duplicate="duplicateEntity"
@@ -9,7 +9,7 @@
                 :roots="roots"
                 :selection-callback="onSetSelectedElement"
                 :event-bus="eventBus">
-            </context-tree>
+            </entity-tree>
         </div>
         <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100" v-can="'view_concepts|view_concept_props'">
             <router-view class="h-100"
@@ -26,7 +26,7 @@
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" :class="{active: tab == 'references', disabled: !selectedContext.id}" @click.prevent="setReferencesTab()">
+                    <a href="#" class="nav-link" :class="{active: tab == 'references', disabled: !selectedEntity.id}" @click.prevent="setReferencesTab()">
                         <i class="fas fa-fw fa-bookmark"></i> {{ $t('main.entity.references.title') }}
                     </a>
                 </li>
@@ -34,8 +34,8 @@
             <div class="mt-2 col px-0">
                 <keep-alive>
                     <component
-                        :context="selectedContext"
-                        :context-data-loaded="dataLoaded"
+                        :entity="selectedEntity"
+                        :entity-data-loaded="dataLoaded"
                         :is="activePlugin"
                         :params="$route.query"
                         v-on:update:link="updateLink">
@@ -152,7 +152,7 @@
             let bibliography, roots;
             $http.get('bibliography').then(response => {
                 bibliography = response.data;
-                return $http.get('context/top');
+                return $http.get('entity/top');
             }).then(response => {
                 roots = response.data;
                 next(vm => vm.init(roots, bibliography, to.query.tab, to.params.id));
@@ -163,7 +163,7 @@
                 this.setTabOrPlugin(to.query.tab);
             }
             if(to.params.id) {
-                $http.get(`/context/${to.params.id}/reference`).then(response => {
+                $http.get(`/entity/${to.params.id}/reference`).then(response => {
                     this.references = response.data;
                 });
             } else {
@@ -179,8 +179,8 @@
                 this.roots = roots;
                 this.bibliography = bibliography;
                 if(initialSelectedId) {
-                    $http.get(`/context/${initialSelectedId}`).then(response => {
-                        vm.selectedContext = response.data;
+                    $http.get(`/entity/${initialSelectedId}`).then(response => {
+                        vm.selectedEntity = response.data;
                     });
                 }
                 if(openTab) {
@@ -193,25 +193,25 @@
                 this.attributesLoaded = false;
                 this.dataLoaded = false;
                 if(!id) {
-                    this.selectedContext = {};
+                    this.selectedEntity = {};
                     this.$router.push({
                         name: 'home',
                         query: this.$route.query
                     });
                     this.dataLoaded = true;
                 } else {
-                    $http.get(`/context/${id}`).then(response => {
-                        vm.selectedContext = response.data;
+                    $http.get(`/entity/${id}`).then(response => {
+                        vm.selectedEntity = response.data;
                         // if all extensions are disabled, auto-load references on select
                         if(this.tab == '') {
                             this.tab = 'references';
                         }
-                        this.$requestHooks(this.selectedContext);
+                        this.$requestHooks(this.selectedEntity);
                         this.dataLoaded = true;
                         this.$router.push({
-                            name: 'contextdetail',
+                            name: 'entitydetail',
                             params: {
-                                id: this.selectedContext.id
+                                id: this.selectedEntity.id
                             },
                             query: this.$route.query
                         });
@@ -219,7 +219,7 @@
                 }
             },
             setReferencesTab() {
-                if(!this.selectedContext.id) return;
+                if(!this.selectedEntity.id) return;
                 this.$router.push({
                     append: true,
                     query: {
@@ -240,7 +240,7 @@
             },
             setActiveTab: function(tab) {
                 if(tab == 'references') {
-                    if(!this.selectedContext.id) return;
+                    if(!this.selectedEntity.id) return;
                     this.activePlugin = '';
                 }
                 this.tab = tab;
@@ -251,10 +251,10 @@
             },
             showMetadataForReferenceGroup(referenceGroup) {
                 if(!referenceGroup) return;
-                if(!this.selectedContext) return;
+                if(!this.selectedEntity) return;
                 const aid = referenceGroup[0].attribute_id;
                 this.$router.push({
-                    name: 'contextrefs',
+                    name: 'entityrefs',
                     params: {
                         aid: aid
                     },
@@ -271,11 +271,11 @@
                 if(vm.addEntityDisabled(entity)) return;
                 let data = {};
                 data.name = entity.name;
-                data.context_type_id = entity.type.id;
-                if(entity.root_context_id) data.root_context_id = entity.root_context_id;
+                data.entity_type_id = entity.type.id;
+                if(entity.root_entity_id) data.root_entity_id = entity.root_entity_id;
                 if(entity.geodata_id) data.geodata_id = entity.geodata_id;
 
-                vm.$http.post('/context', data).then(function(response) {
+                vm.$http.post('/entity', data).then(function(response) {
                     if (!entity.parent) {
                         vm.roots.push(response.data);
                     }
@@ -290,7 +290,7 @@
                 if(!vm.$can('create_concepts')) return;
                 let selection = [];
                 if(parent) {
-                    selection = vm.$getEntityType(parent.context_type_id).sub_context_types;
+                    selection = vm.$getEntityType(parent.entity_type_id).sub_entity_types;
                 } else {
                     selection = Object.values(vm.$getEntityTypes()).filter(f => f.is_root);
                 }
@@ -299,7 +299,7 @@
                 Vue.set(vm.newEntity, 'selection', selection);
                 Vue.set(vm.newEntity, 'callback', callback);
                 if(parent) {
-                    Vue.set(vm.newEntity, 'root_context_id', parent.id);
+                    Vue.set(vm.newEntity, 'root_entity_id', parent.id);
                     Vue.set(vm.newEntity, 'parent', parent);
                 }
                 vm.$modal.show('add-entity-modal');
@@ -311,9 +311,9 @@
             deleteEntity(entity) {
                 if(!this.$can('delete_move_concepts')) return;
                 const id = entity.id;
-                $http.delete(`/context/${id}`).then(response => {
+                $http.delete(`/entity/${id}`).then(response => {
                     // if deleted entity is currently selected entity...
-                    if(id == this.selectedContext.id) {
+                    if(id == this.selectedEntity.id) {
                         // ...unset it
                         this.onSetSelectedElement(undefined);
                     }
@@ -346,9 +346,9 @@
                 let duplicate = {
                     name: entity.name,
                     type: {
-                        id: entity.context_type_id
+                        id: entity.entity_type_id
                     },
-                    root_context_id: entity.root_context_id,
+                    root_entity_id: entity.root_entity_id,
                     callback: callback,
                     parent: parent
                 };
@@ -358,10 +358,10 @@
                 return this.$translateLabel(element, prop);
             },
             updateLink(geoId, entityId) {
-                if (entityId != this.selectedContext.id) {
+                if (entityId != this.selectedEntity.id) {
                     return;
                 }
-                this.selectedContext.geodata_id = geoId;
+                this.selectedEntity.geodata_id = geoId;
             }
         },
         data() {
@@ -369,7 +369,7 @@
                 roots: [],
                 bibliography: {},
                 initFinished: false,
-                selectedContext: {},
+                selectedEntity: {},
                 toDeleteEntity: {},
                 referenceModal: {},
                 references: [],

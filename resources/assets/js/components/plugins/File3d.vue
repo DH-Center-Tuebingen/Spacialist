@@ -9,7 +9,7 @@
         </transition>
         <div :id="containerId" class="w-100 h-100">
             <div class="position-relative">
-                <button type="button" class="btn btn-outline-info position-absolute m-2" v-if="context.id" @click="loadAllSubModels" style="left: 0;">
+                <button type="button" class="btn btn-outline-info position-absolute m-2" v-if="entity.id" @click="loadAllSubModels" style="left: 0;">
                     {{ $t('plugins.files.modal.detail.threed.load-sub-models') }}
                 </button>
                 <button type="button" class="btn btn-outline-info position-absolute m-2" v-if="fullscreenHandler" @click="toggleFullscreen" style="right: 0;">
@@ -67,7 +67,7 @@
                 required: true,
                 type: Object
             },
-            context: {
+            entity: {
                 required: false,
                 type: Object
             },
@@ -147,8 +147,8 @@
             },
             loadAllSubModels: function() {
                 const vm = this;
-                if(!vm.context && !vm.context.id) return;
-                const id = vm.context.id;
+                if(!vm.entity && !vm.entity.id) return;
+                const id = vm.entity.id;
                 vm.$http.get(`/file/${id}/sub_files?c=3d`).then(function(response) {
                     const models = response.data;
                     models.forEach(m => vm.loadModel(m));

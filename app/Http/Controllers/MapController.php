@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\AvailableLayer;
-use App\Context;
-use App\ContextType;
+use App\Entity;
+use App\EntityType;
 use App\Geodata;
 use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Point;
@@ -42,14 +42,14 @@ class MapController extends Controller
         }
         // layers: id => layer
         $layers = AvailableLayer::all()->getDictionary();
-        // contexts: id => context
-        $contexts = Context::all()->getDictionary();
+        // entities: id => entity
+        $entities = Entity::all()->getDictionary();
         // geoObjects: id => geoO
-        $geodata = Geodata::with(['context'])->get()->getDictionary();
+        $geodata = Geodata::with(['entity'])->get()->getDictionary();
 
         return response()->json([
             'layers' => $layers,
-            'contexts' => $contexts,
+            'entities' => $entities,
             'geodata' => $geodata
         ]);
     }
@@ -68,11 +68,11 @@ class MapController extends Controller
         $baselayers = AvailableLayer::where('is_overlay', false)
             ->orderBy('id')
             ->get();
-        $overlayQuery = AvailableLayer::with('context_type')
+        $overlayQuery = AvailableLayer::with('entity_type')
             ->where('is_overlay', true)
             ->orderBy('id');
         if($basicOnly) {
-            $overlayQuery->whereNull('context_type_id')
+            $overlayQuery->whereNull('entity_type_id')
                 ->where('type', '!=', 'unlinked');
         }
         $overlays = $overlayQuery->get();
@@ -95,8 +95,8 @@ class MapController extends Controller
                 'error' => 'You do not have the permission to add geometric data'
             ], 403);
         }
-        $entityLayers = AvailableLayer::with(['context_type'])
-            ->whereNotNull('context_type_id')
+        $entityLayers = AvailableLayer::with(['entity_type'])
+            ->whereNotNull('entity_type_id')
             ->orWhere('type', 'unlinked')
             ->orderBy('id')
             ->get();
@@ -112,7 +112,7 @@ class MapController extends Controller
             ], 403);
         }
         try {
-            $layer = AvailableLayer::with('context_type')->findOrFail($id);
+            $layer = AvailableLayer::with('entity_type')->findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This layer does not exist'
@@ -137,12 +137,12 @@ class MapController extends Controller
                 'error' => 'This layer does not exist'
             ]);
         }
-        $query = Geodata::with(['context']);
+        $query = Geodata::with(['entity']);
         if($layer->type == 'unlinked') {
-            $query->doesntHave('context');
-        } else if(isset($layer->context_type_id)) {
-            $query->whereHas('context', function($q) use ($layer) {
-                $q->where('context_type_id', $layer->context_type_id);
+            $query->doesntHave('entity');
+        } else if(isset($layer->entity_type_id)) {
+            $query->whereHas('entity', function($q) use ($layer) {
+                $q->where('entity_type_id', $layer->entity_type_id);
             });
         }
         $geodata = $query->get();
@@ -172,17 +172,17 @@ class MapController extends Controller
                 'error' => 'This layer does not exist'
             ]);
         }
-        if(strtoupper($layer->type) != 'UNLINKED' && !isset($layer->context_type_id)) {
+        if(strtoupper($layer->type) != 'UNLINKED' && !isset($layer->entity_type_id)) {
             return response()->json([
                 'error' => 'This layer does not support export'
             ]);
         }
         if(strtoupper($layer->type) == 'UNLINKED') {
-            $geodataBuilder = Geodata::doesntHave('context');
+            $geodataBuilder = Geodata::doesntHave('entity');
         } else {
-            $geodataBuilder = Geodata::with(['context'])
-                ->whereHas('context', function($query) use($layer) {
-                    $query->where('context_type_id', $layer->context_type_id);
+            $geodataBuilder = Geodata::with(['entity'])
+                ->whereHas('entity', function($query) use($layer) {
+                    $query->where('entity_type_id', $layer->entity_type_id);
                 });
         }
         $query = Helpers::parseSql($geodataBuilder);
@@ -323,7 +323,7 @@ class MapController extends Controller
             ], 400);
         }
         try {
-            $entity = Context::findOrFail($eid);
+            $entity = Entity::findOrFail($eid);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This entity does not exist'
@@ -337,7 +337,7 @@ class MapController extends Controller
         }
 
         try {
-            $layer = AvailableLayer::where('context_type_id', $entity->context_type_id)->firstOrFail();
+            $layer = AvailableLayer::where('entity_type_id', $entity->entity_type_id)->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'Entity layer not found'
@@ -466,7 +466,7 @@ class MapController extends Controller
                 'error' => 'This layer does not exist'
             ], 400);
         }
-        if(isset($layer->context_type_id) || $layer->type == 'unlinked') {
+        if(isset($layer->entity_type_id) || $layer->type == 'unlinked') {
             return response()->json([
                 'error' => 'This layer can not be deleted'
             ], 400);
@@ -492,7 +492,7 @@ class MapController extends Controller
             ], 400);
         }
         try {
-            $entity = Context::findOrFail($eid);
+            $entity = Entity::findOrFail($eid);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'error' => 'This entity does not exist'

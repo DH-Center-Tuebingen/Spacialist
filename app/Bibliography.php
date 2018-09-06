@@ -9,7 +9,7 @@ class Bibliography extends Model
 {
     use SearchableTrait;
 
-    protected $table = 'literature';
+    protected $table = 'bibliography';
     /**
      * The attributes that are assignable.
      *
@@ -123,7 +123,7 @@ class Bibliography extends Model
     }
 
     public function referenceCount() {
-        return Reference::where('literature_id', $this->id)->count();
+        return Reference::where('bibliography_id', $this->id)->count();
     }
 
     public static function computeCitationKey($fields) {
@@ -158,7 +158,7 @@ class Bibliography extends Model
         return $key;
     }
 
-    public function contexts() {
-        return $this->belongsToMany('App\Context', 'sources')->withPivot('description', 'attribute_id');
+    public function entities() {
+        return $this->belongsToMany('App\Entity', 'references')->withPivot('description', 'attribute_id');
     }
 }

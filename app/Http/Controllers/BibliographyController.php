@@ -68,9 +68,9 @@ class BibliographyController extends Controller
 
     public function addItem(Request $request) {
         $user = auth()->user();
-        if(!$user->can('add_remove_literature')) {
+        if(!$user->can('add_remove_bibliography')) {
             return response()->json([
-                'error' => 'You do not have the permission to add new literature'
+                'error' => 'You do not have the permission to add new bibliography'
             ], 403);
         }
         $this->validate($request, [
@@ -108,12 +108,12 @@ class BibliographyController extends Controller
             if($ckey == null || $ckey == '') {
                 $ckey = Bibliography::computeCitationKey($insArray);
             }
-            $literature = Bibliography::updateOrCreate(
+            $bibliography = Bibliography::updateOrCreate(
                 ['citekey' => $ckey],
                 $insArray
             );
-            if($literature->wasRecentlyCreated) {
-                $newEntries[] = $literature;
+            if($bibliography->wasRecentlyCreated) {
+                $newEntries[] = $bibliography;
             }
         }
         return response()->json($newEntries, 201);
@@ -123,9 +123,9 @@ class BibliographyController extends Controller
 
     public function updateItem(Request $request, $id) {
         $user = auth()->user();
-        if(!$user->can('edit_literature')) {
+        if(!$user->can('edit_bibliography')) {
             return response()->json([
-                'error' => 'You do not have the permission to edit existing literature'
+                'error' => 'You do not have the permission to edit existing bibliography'
             ], 403);
         }
         $this->validate($request, [
@@ -149,7 +149,7 @@ class BibliographyController extends Controller
 
     public function deleteItem($id) {
         $user = auth()->user();
-        if(!$user->can('add_remove_literature')) {
+        if(!$user->can('add_remove_bibliography')) {
             return response()->json([
                 'error' => 'You do not have the permission to remove bibliogra entries'
             ], 403);
