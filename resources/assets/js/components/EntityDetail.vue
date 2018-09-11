@@ -1,7 +1,9 @@
 <template>
     <div class="h-100 d-flex flex-column">
         <div class="d-flex align-items-center justify-content-between">
-            <h1>{{ entity.name }}</h1>
+            <h1 class="mb-0">
+                {{ entity.name }}
+            </h1>
             <span>
                 <button type="button" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(entity)">
                     <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
@@ -10,6 +12,14 @@
                     <i class="fas fa-fw fa-trash"></i> {{ $t('global.delete') }}
                 </button>
             </span>
+        </div>
+        <div>
+            <i class="fas fa-fw fa-user-edit"></i>
+            <span class="font-weight-bold">
+                {{ entity.lasteditor }}
+            </span>
+            -
+            {{ entity.updated_at || entity.created_at }}
         </div>
         <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="dataLoaded" v-can="'view_concept_props'"
             :attributes="entity.attributes"
