@@ -42,14 +42,11 @@ class MapController extends Controller
         }
         // layers: id => layer
         $layers = AvailableLayer::all()->getDictionary();
-        // entities: id => entity
-        $entities = Entity::all()->getDictionary();
         // geoObjects: id => geoO
         $geodata = Geodata::with(['entity'])->get()->getDictionary();
 
         return response()->json([
             'layers' => $layers,
-            'entities' => $entities,
             'geodata' => $geodata
         ]);
     }
