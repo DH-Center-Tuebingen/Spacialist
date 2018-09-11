@@ -149,9 +149,9 @@ class SetupTables extends Migration
             $table->jsonb('depends_on')->nullable();
         });
 
-        $this->migrateDatatypes();
         $this->migrateTableNames();
         $this->migrateColumnNames();
+        $this->migrateDatatypes();
         $this->migrateFileTags();
         $this->migratePermissionNames();
     }
@@ -177,22 +177,22 @@ class SetupTables extends Migration
         $list_aid = Attribute::where('datatype', 'list')->pluck('id')->toArray();
         foreach($list_aid as $aid) {
             $lists = AttributeValue::where('attribute_id', $aid)->get();
-            $context_ids = $lists->pluck('context_id')->unique()->toArray();
+            $context_ids = $lists->pluck('entity_id')->unique()->toArray();
             foreach($context_ids as $cid) {
-                $list = $lists->where('context_id', $cid)->values();
+                $list = $lists->where('entity_id', $cid)->values();
                 $entries = $list->map(function ($item, $key) {
                     return $item->getValue();
                 });
                 $tmp = $list[0];
                 $av = new AttributeValue();
-                $av->context_id = $cid;
+                $av->entity_id = $cid;
                 $av->attribute_id = $aid;
                 $av->json_val = $entries;
                 $av->created_at = $tmp->created_at;
                 $av->updated_at = $tmp->updated_at;
-                $av->possibility = $tmp->possibility;
+                $av->certainty = $tmp->certainty;
                 $av->lasteditor = $tmp->lasteditor;
-                $av->possibility_description = $tmp->possibility_description;
+                $av->certainty_description = $tmp->certainty_description;
                 $av->save();
                 AttributeValue::whereIn('id', $list->pluck('id'))->delete();
             }
@@ -202,9 +202,9 @@ class SetupTables extends Migration
         $table_aid = Attribute::where('datatype', 'table')->pluck('id')->toArray();
         foreach($table_aid as $table_id) {
             $tables = AttributeValue::where('attribute_id', $table_id)->orderBy('id')->get();
-            $context_ids = $tables->pluck('context_id')->unique()->toArray();
+            $context_ids = $tables->pluck('entity_id')->unique()->toArray();
             foreach($context_ids as $cid) {
-                $table = $tables->where('context_id', $cid)->sortBy('id')->values();
+                $table = $tables->where('entity_id', $cid)->sortBy('id')->values();
                 $rows = $table->map(function ($item, $key) {
                     return $item->getValue();
                 });
@@ -222,14 +222,14 @@ class SetupTables extends Migration
                 }
                 $tmp = $table[0];
                 $av = new AttributeValue();
-                $av->context_id = $cid;
+                $av->entity_id = $cid;
                 $av->attribute_id = $table_id;
                 $av->json_val = json_encode($newRows);
                 $av->created_at = $tmp->created_at;
                 $av->updated_at = $tmp->updated_at;
-                $av->possibility = $tmp->possibility;
+                $av->certainty = $tmp->certainty;
                 $av->lasteditor = $tmp->lasteditor;
-                $av->possibility_description = $tmp->possibility_description;
+                $av->certainty_description = $tmp->certainty_description;
                 $av->save();
                 foreach($table as $row) {
                     $row->delete();
