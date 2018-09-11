@@ -157,7 +157,9 @@ const en = {
                 'add-wkt': 'Add WKT',
                 'set-location': 'Set Location',
                 BC: 'BC',
-                AD: 'AD'
+                bc: '@:main.entity.attributes.BC',
+                AD: 'AD',
+                ad: '@:main.entity.attributes.AD'
             }
         },
         user: {

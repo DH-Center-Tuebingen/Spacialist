@@ -157,7 +157,9 @@ const de = {
                 'add-wkt': 'WKT hinzufügen',
                 'set-location': 'Position setzen',
                 BC: 'v. Chr.',
-                AD: 'n. Chr.'
+                bc: '@:main.entity.attributes.BC',
+                AD: 'n. Chr.',
+                ad: '@:main.entity.attributes.AD'
             }
         },
         user: {
