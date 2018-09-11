@@ -398,7 +398,7 @@ class EntityController extends Controller {
         }
         $this->validate($request, [
             'rank' => 'required|integer',
-            'parent_id' => 'nullable|integer|exists:entities,id',
+            'parent_id' => 'nullable|integer|exists:entities,id|different:id',
         ]);
 
         try {

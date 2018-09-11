@@ -214,7 +214,6 @@
                 item.state.opened = !item.state.opened;
             },
             itemDrop(dropData) {
-                //TODO: remove once DropPosition can be imported from tree-vue-component
                 const DropPosition = {
                     empty: 0,
                     up: 1,
@@ -314,6 +313,10 @@
                 const target = dropData.targetData;
                 const vm = this;
                 const dragEntityType = vm.$getEntityType(item.entity_type_id);
+
+                if(item.id == target.id) {
+                    return false;
+                }
                 let dropEntityType;
                 if(dropData.targetPath.length == 1) {
                     dropEntityType = {
