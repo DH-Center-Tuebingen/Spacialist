@@ -278,7 +278,9 @@
             draggable
         },
         inject: ['$validator'],
-        mounted() {},
+        mounted() {
+            this.attributes.forEach(a => this.checkDependency(a.id));
+        },
         methods: {
             onEnter(i) {
                 Vue.set(this.hovered, i, this.hoverEnabled);
@@ -341,15 +343,18 @@
                 deps.forEach(d => {
                     // return = continue in forEach
                     if(hides[d.dependant]) return;
-                    hides[d.dependant] = this.evalDependency(this.localValues[aid], d.operator, d.value);
+                    // Hide if current value does not match the
+                    // dependency
+                    hides[d.dependant] = !this.matchDependency(aid, this.localValues[aid], d.operator, d.value);
                 });
                 for(let k in hides) {
-                    this.hiddenByDependency[k] = hides[k];
+                    Vue.set(this.hiddenByDependency, k, hides[k]);
                 }
             },
-            evalDependency(attrValue, operator, depValue) {
+            matchDependency(attribute_id, attrValue, operator, depValue) {
+                if(!attrValue || !attrValue.value) return false;
                 const attr = this.localAttributes.find(function(a) {
-                    return a.id == attrValue.attribute_id;
+                    return a.id == attribute_id;
                 });
                 if(!attr) return false;
                 switch(attr.datatype) {
