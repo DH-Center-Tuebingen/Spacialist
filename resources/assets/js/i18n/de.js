@@ -159,7 +159,8 @@ const de = {
                 BC: 'v. Chr.',
                 bc: '@:main.entity.attributes.BC',
                 AD: 'n. Chr.',
-                ad: '@:main.entity.attributes.AD'
+                ad: '@:main.entity.attributes.AD',
+                hidden: 'keine Attribute ausgeblendet | ein Attribut ausgeblendet | {cnt} Attribute ausgeblendet'
             }
         },
         user: {

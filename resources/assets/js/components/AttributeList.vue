@@ -350,6 +350,9 @@
                 for(let k in hides) {
                     Vue.set(this.hiddenByDependency, k, hides[k]);
                 }
+                this.$emit('attr-dep-change', {
+                    counter: this.hiddenAttributes
+                });
             },
             matchDependency(attribute_id, attrValue, operator, depValue) {
                 if(!attrValue || !attrValue.value) return false;
@@ -553,6 +556,15 @@
                     opts.handle = '.reorder-handle';
                 }
                 return opts;
+            },
+            hiddenAttributes: function() {
+                let cnt = 0;
+                for(let k in this.hiddenByDependency) {
+                    if(this.hiddenByDependency[k]) {
+                        cnt++;
+                    }
+                }
+                return cnt;
             },
             hoverEnabled: function() {
                 return this.onReorder || this.onEdit  || this.onRemove || this.onDelete;

@@ -3,6 +3,11 @@
         <div class="d-flex align-items-center justify-content-between">
             <h1 class="mb-0">
                 {{ entity.name }}
+                <small>
+                    <span v-show="hiddenAttributes > 0" @mouseenter="dependencyInfoHoverOver" @mouseleave="dependencyInfoHoverOut">
+                        <i id="dependency-info" class="fas fa-fw fa-xs fa-eye-slash"></i>
+                    </span>
+                </small>
             </h1>
             <span>
                 <button type="button" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(entity)">
@@ -28,7 +33,8 @@
             :on-metadata="showMetadata"
             :metadata-addon="hasReferenceGroup"
             :selections="entity.selections"
-            :values="entity.data">
+            :values="entity.data"
+            v-on:attr-dep-change="updateDependencyCounter">
         </attributes>
 
         <router-view
@@ -270,6 +276,28 @@
                     entity: entity
                 });
             },
+            updateDependencyCounter(event) {
+                this.hiddenAttributes = event.counter;
+            },
+            dependencyInfoHoverOver(event) {
+                if(this.dependencyInfoHovered) {
+                    return;
+                }
+                this.dependencyInfoHovered = true;
+                $('#dependency-info').popover({
+                    placement: 'bottom',
+                    animation: true,
+                    html: false,
+                    content: this.$tc('main.entity.attributes.hidden', this.hiddenAttributes, {
+                        cnt: this.hiddenAttributes
+                    })
+                });
+                $('#dependency-info').popover('show');
+            },
+            dependencyInfoHoverOut(event) {
+                this.dependencyInfoHovered = false;
+                $('#dependency-info').popover('dispose');
+            },
             setModalValues(aid) {
                 const attribute = this.entity.attributes.find(a => a.id == aid);
                 this.ref.refs = this.entity.references[attribute.thesaurus_url];
@@ -303,6 +331,8 @@
             return {
                 entity: {},
                 dataLoaded: false,
+                dependencyInfoHovered: false,
+                hiddenAttributes: 0,
                 ref: {
                     refs: {},
                     value: {},

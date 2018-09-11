@@ -159,7 +159,8 @@ const en = {
                 BC: 'BC',
                 bc: '@:main.entity.attributes.BC',
                 AD: 'AD',
-                ad: '@:main.entity.attributes.AD'
+                ad: '@:main.entity.attributes.AD',
+                hidden: 'no attributes hidden | one attribute hidden | {cnt} attributes hidden'
             }
         },
         user: {
