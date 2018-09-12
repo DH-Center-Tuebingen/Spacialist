@@ -180,11 +180,11 @@ class EntityController extends Controller {
         return response()->json($data);
     }
 
-    public function getPath($id) {
+    public function getParentIds($id) {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to get an entity\'s path'
+                'error' => 'You do not have the permission to get an entity\'s parent id\'s'
             ], 403);
         }
 
@@ -195,7 +195,7 @@ class EntityController extends Controller {
                 'error' => 'This entity does not exist'
             ], 400);
         }
-        return response()->json($entity->path);
+        return response()->json($entity->parentIds);
     }
 
     public function getChildren($id) {

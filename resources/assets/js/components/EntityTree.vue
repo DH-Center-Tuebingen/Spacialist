@@ -402,7 +402,7 @@
             },
             highlightItems(items) {
                 items.forEach(i => {
-                    return this.openPath(i.path).then(targetNode => {
+                    return this.openPath(i.parentIds).then(targetNode => {
                         targetNode.state.highlighted = true;
                         this.highlightedItems.push(targetNode);
                     });
@@ -412,10 +412,10 @@
                 this.highlightedItems.forEach(i => i.state.highlighted = false);
                 this.highlightedItems = [];
             },
-            async openPath(path, tree=this.tree) {
-                const index = path.pop();
+            async openPath(ids, tree=this.tree) {
+                const index = ids.pop();
                 const elem = tree.find(e => e.id == index);
-                if(path.length == 0) {
+                if(ids.length == 0) {
                     return elem;
                 }
                 if(!elem.childrenLoaded) {
@@ -426,12 +426,12 @@
                     elem.childrenLoaded = true;
                 }
                 elem.state.opened = true;
-                return this.openPath(path, elem.children);
+                return this.openPath(ids, elem.children);
             },
             selectNodeById(id) {
-                $http.get(`/entity/${id}/path`).then(response => {
-                    const path = response.data;
-                    this.openPath(path).then(targetNode => {
+                $http.get(`/entity/${id}/parentIds`).then(response => {
+                    const ids = response.data;
+                    this.openPath(ids).then(targetNode => {
                         targetNode.state.selected = true;
                         this.selectedItem = targetNode;
                         // Scroll tree to selected element
