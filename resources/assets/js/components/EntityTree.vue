@@ -366,7 +366,8 @@
                 const vm = this;
                 const dragEntityType = vm.$getEntityType(item.entity_type_id);
 
-                if(item.id == target.id) {
+                if(target.parentIds.indexOf(item.id) != -1 ||
+                   (target.state.dropPosition == DropPosition.inside && target.id == item.root_entity_id)) {
                     return false;
                 }
                 let dropEntityType;
