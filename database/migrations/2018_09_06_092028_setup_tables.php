@@ -435,6 +435,17 @@ class SetupTables extends Migration
             $table->foreign('entity_type_id')->references('id')->on('entity_types')->onDelete('cascade');
             $table->foreign('attribute_id')->references('id')->on('attributes')->onDelete('cascade');
         });
+        // Create Geodata
+        // enable the postgis extension
+        Schema::getConnection()->statement('CREATE EXTENSION IF NOT EXISTS postgis');
+        // create new table
+        Schema::create('geodata', function (Blueprint $table){
+            $table->increments('id');
+            $table->geography('geom');
+            $table->text('color')->nullable();
+            $table->text('lasteditor');
+            $table->timestamps();
+        });
         // Create Entities
         Schema::create('entities', function (Blueprint $table) {
             $table->increments('id');
@@ -448,21 +459,6 @@ class SetupTables extends Migration
 
 			$table->foreign('entity_type_id')->references('id')->on('entity_types')->onDelete('cascade');
 			$table->foreign('root_entity_id')->references('id')->on('entities')->onDelete('cascade');
-        });
-        // Create Geodata
-        // enable the postgis extension
-        Schema::getConnection()->statement('CREATE EXTENSION IF NOT EXISTS postgis');
-        // create new table
-        Schema::create('geodata', function (Blueprint $table){
-            $table->increments('id');
-            $table->geography('geom');
-            $table->text('color')->nullable();
-            $table->text('lasteditor');
-            $table->timestamps();
-        });
-        // create foreign key column in entities table
-        Schema::table('entities', function (Blueprint $table) {
-            $table->integer('geodata_id')->unsigned()->nullable();
             $table->foreign('geodata_id')->references('id')->on('geodata');
         });
         // Create AttributeValues
@@ -570,7 +566,7 @@ class SetupTables extends Migration
         Schema::create('file_tags', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('file_id');
-            $table->text('concept_id');
+            $table->integer('concept_id');
             $table->timestamps();
 
             $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade');
