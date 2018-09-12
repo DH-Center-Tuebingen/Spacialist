@@ -25,6 +25,11 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
        'public/css'
    )
+   .webpackConfig({
+      output: {
+         publicPath: '/'
+      }
+   })
    .autoload({
        jquery: ['$'],
        axios: ['$http']

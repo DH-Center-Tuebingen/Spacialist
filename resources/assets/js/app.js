@@ -53,7 +53,7 @@ window._ = require('lodash');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
 require('./globals.js');
 
-Axios.defaults.baseURL = '/api/v1';
+Axios.defaults.baseURL = 'api/v1';
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

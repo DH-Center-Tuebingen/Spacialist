@@ -1,5 +1,5 @@
 # Installation
-We recommend a recent unix/linux-based OS. Please check if your desired OS meets the following requirements. If not, we recommend debian (8.5 aka _jessie_ or later) or Ubuntu (16.04 LTS aka _Xenial Xerus_ or later). For Giza and later at least PHP 7.1.3 is required. Note: Installation on Windows 10 with PHP 5.6 was also successfully tested, but you will need to adjust the commands in these instructions by yourself to your local Windows version equivalents.
+We recommend a recent unix/linux-based OS. Please check if your desired OS meets the following requirements. If not, we recommend debian (9.5 aka _Stretch_ or later) or Ubuntu (18.04 LTS aka _Bionic Beaver_ or later). For Giza and later at least PHP 7.1.3 is required. Note: Installation on Windows 10 with PHP 5.6 was also successfully tested, but you will need to adjust the commands in these instructions by yourself to your local Windows version equivalents.
 
 ## Requirements
 The following packages you should be able to install from your package manager:
@@ -65,10 +65,8 @@ composer update
 ```
 
 ### Proxy Setup
-To communicate with Laravel, Spacialist requires the API folder to be in the Spacialist folder. If you run Spacialist under `yourdomain.tld/Spacialist`, the Laravel API has to be `yourdomain.tld/Spacialist/api`.
-
-Since Laravel has a sub-folder as document root `laravel/public`, it won't work to simply copy Laravel to your webserver's root directory.
-One solution is to setup a proxy on the same machine and re-route all requests from `/Spacialist/api` to Laravel's public folder (e.g. `/var/www/html/Spacialist/laravel/public`).
+Since Laravel has a sub-folder as document root `Spacialist/public`, it won't work to simply copy Laravel to your webserver's root directory.
+One solution is to setup a proxy on the same machine and re-route all requests from `/Spacialist` to Laravel's public folder (e.g. `/var/www/html/Spacialist/public`).
 
 1. Enable the webserver's proxy packages and the rewrite engine
 
@@ -110,8 +108,8 @@ One solution is to setup a proxy on the same machine and re-route all requests f
 4. Add the proxy route to your default vHost file (e.g. `/etc/apache2/sites-available/000-default.conf`)
 
     ```apache
-    ProxyPass "/Spacialist/api" "http://spacialist-laravel.tld"
-    ProxyPassReverse "/Spacialist/api" "http://spacialist-laravel.tld"
+    ProxyPass "/Spacialist" "http://spacialist-laravel.tld"
+    ProxyPassReverse "/Spacialist" "http://spacialist-laravel.tld"
     ```
 
 5. Enable the new vHost file and restart the webserver
@@ -121,7 +119,32 @@ One solution is to setup a proxy on the same machine and re-route all requests f
     sudo service apache2 restart
     ```
 
+### Configure JavaScript
+Spacialist is based on several JavaScript libraries, which are bundled using Webpack (configuration is done using Laravel Mix, a webpack-wrapper for Laravel). Only the zipped releases contain the already bundled JavaScript libraries. All other users have to run webpack to bundle these libraries.
+
+Before running webpack, you have to adjust the public path in the mix config file `webpack.mix.js`. Replace `publicPath` inside the `webpackConfig` call with the path of your instance.
+
+```bash
+.webpackConfig({
+    output: {
+        publicPath: '/Spacialist/'
+    }
+})
+```
+
+Now you can run webpack using
+
+```bash
+npm run dev
+# or
+npm run prod
+```
+ depending on whether you want a debugging-friendly development build or an optimized production-ready build.
+
 ### Configure Laravel
+In your `config/app.php` you have to adjust the `APP_URL` key. Replace `http://localhost` with the URL of your instance.
+E.g. `https://spacialist.mydomain.tld`
+
 Laravel should now work, but to test it you need to create a `.env` file which stores the Laravel configuration.
 Inside the installation folder, create the `.env` file:
 ```bash
