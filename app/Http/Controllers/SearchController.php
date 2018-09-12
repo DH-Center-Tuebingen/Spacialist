@@ -97,7 +97,7 @@ class SearchController extends Controller {
         $matches = Entity::where('name', 'ilike', '%'.$q.'%')
             ->orderBy('name')
             ->get();
-        $matches->each->append('ancestors');
+        $matches->each->append(['ancestors', 'path']);
         return response()->json($matches);
     }
 

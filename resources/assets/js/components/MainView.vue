@@ -325,7 +325,7 @@
                         'success'
                     );
                     if (entity.callback) {
-                        entity.callback(entity);
+                        entity.callback(entity, entity.path);
                     }
                     this.hideDeleteEntityModal();
                 });

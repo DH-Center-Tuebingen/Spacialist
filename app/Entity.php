@@ -22,7 +22,7 @@ class Entity extends Model
         'geodata_id',
     ];
 
-    protected $appends = ['path'];
+    protected $appends = [];
 
     protected $searchable = [
         'columns' => [
@@ -131,9 +131,7 @@ class Entity extends Model
                 $parent = $this->where('id', '=', $ancestors->last()->root_entity_id)->get();
                 $ancestors = $ancestors->merge($parent);
             }
-        return $ancestors->reverse()->pluck('rank')->map(function($item, $key) {
-            return $item - 1;
-        })->all();
+        return $ancestors->pluck('id')->all();
     }
 
     public function getPathAttribute() {

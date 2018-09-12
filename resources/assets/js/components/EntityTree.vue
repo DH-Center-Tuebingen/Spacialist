@@ -13,7 +13,7 @@
             :on-clear="resetHighlighting">
         </tree-search>
         <div class="d-flex flex-column col px-0">
-            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAdd)">
+            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAddNewEntity)">
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
             <div class="mb-2">
@@ -46,7 +46,7 @@
                 @drop="itemDrop"
                 @toggle="itemToggle">
             </tree>
-            <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="onEntityAdd(onAdd)">
+            <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="onEntityAdd(onAddNewEntity)">
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
         </div>
@@ -62,6 +62,13 @@
     Vue.component('tree-contextmenu', require('./TreeContextmenu.vue'));
     Vue.component('tree-search', require('./TreeSearch.vue'));
 
+    const DropPosition = {
+        empty: 0,
+        up: 1,
+        inside: 2,
+        down: 3,
+    };
+
     class Node {
         constructor(data, vm) {
             Object.assign(this, data);
@@ -72,26 +79,26 @@
                 loading: false,
                 highlighted: false,
                 openable: this.children_count > 0,
-                dropPosition: 0, //TODO set to DropPosition.empty once exported by tree-vue-component
+                dropPosition: DropPosition.empty,
                 dropAllowed: true,
             };
             this.icon = false;
             this.children = [];
-            this.childrenLoaded = this.children.length < this.children_count;
+            this.childrenLoaded = this.children.length == this.children_count;
             this.component = 'tree-node';
             this.dragDelay = vm.dragDelay;
             this.dragAllowed = _ => vm.isDragAllowed;
             this.onToggle = vm.itemToggle;
             this.contextmenu = 'tree-contextmenu';
             this.onContextMenuAdd = function(parent) {
-                vm.onEntityAdd(vm.onAdd, parent);
+                vm.onEntityAdd(vm.onAddNewEntity, parent);
             };
             this.onContextMenuDuplicate = function(entity, path) {
                 let parent;
                 if (path.length > 1) {
                     parent = treeUtility.getNodeFromPath(vm.tree, path.slice(0, path.length - 1));
                 }
-                vm.onContextMenuDuplicate(vm.onAdd, entity, parent);
+                vm.onContextMenuDuplicate(vm.onAddNewEntity, entity, parent);
             };
             this.onContextMenuDelete = function(entity, path) {
                 vm.onContextMenuDelete(vm.onDelete, entity, path);
@@ -214,63 +221,36 @@
                 item.state.opened = !item.state.opened;
             },
             itemDrop(dropData) {
-                const DropPosition = {
-                    empty: 0,
-                    up: 1,
-                    inside: 2,
-                    down: 3,
-                };
-
                 if(!this.isDragAllowed || !this.isDropAllowed(dropData)) {
                     return;
                 }
 
-                const draggedElement = dropData.sourceData;
-                const targetElement = dropData.targetData;
-                let oldParent = treeUtility.getNodeFromPath(this.tree, dropData.sourcePath.slice(0, dropData.sourcePath.length - 1));
-                let oldSiblings = oldParent ? oldParent.children : this.tree;
+                const vm = this;
+                const node = dropData.sourceData;
+                const newRank = vm.getNewRank(dropData);
+                const oldRank = node.rank;
                 let newParent;
-                let siblingPromise;
-                let newRank;
-                if(targetElement.state.dropPosition == DropPosition.inside) {
-                    if(!targetElement.childrenLoaded) {
-                        siblingPromise = this.fetchChildren(targetElement.id);
-                    }
-                    newRank = targetElement.children_count + 1;
-                    newParent = targetElement;
+                const oldParent = treeUtility.getNodeFromPath(this.tree, dropData.sourcePath.slice(0, dropData.sourcePath.length - 1));
+                if(dropData.targetData.state.dropPosition == DropPosition.inside) {
+                    newParent = dropData.targetData;
                 } else {
                     newParent = treeUtility.getNodeFromPath(this.tree, dropData.targetPath.slice(0, dropData.targetPath.length - 1));
-                    siblingPromise = new Promise((resolve, reject) => resolve(newParent ? newParent.children : this.tree));
-                    const targetRank = dropData.targetPath[dropData.targetPath.length - 1] + 1;
-                    if(targetElement.state.dropPosition == DropPosition.up) {
-                        newRank = targetRank;
-                    } else if(targetElement.state.dropPosition == DropPosition.down) {
-                        newRank = targetRank + 1;
-                    } else {
-                        this.$throwError({message: `DropPosition ${targetElement.state.dropPosition} does not correspond to a valid choice`});
-                        return;
-                    }
+                }
+
+                if (newParent == oldParent && newRank == oldRank) {
+                    return;
                 }
 
                 let data = {
+                    id: node.id,
                     rank: newRank,
                     parent_id: newParent ? newParent.id : null
                 };
 
-                this.$http.patch(`/entity/${draggedElement.id}/rank`, data).then(function(response) {
-                    const oldIndex = oldSiblings.indexOf(draggedElement);
-                    oldSiblings.splice(oldIndex, 1);
-                    siblingPromise.then(newSiblings => {
-                        newSiblings.splice(newRank - 1, 0, draggedElement);
-                        if(newParent) {
-                            newParent.children_count++;
-                            newParent.state.openable = true;
-                        }
-                    });
-                    if(oldParent) {
-                        oldParent.children_count--;
-                        oldParent.state.openable = oldParent.children_count > 0;
-                    }
+                vm.$http.patch(`/entity/${node.id}/rank`, data).then(function(response) {
+                    vm.onDelete(node, dropData.sourcePath);
+                    node.rank = newRank;
+                    vm.onAdd(node, newParent);
                 });
             },
             fetchChildren(id) {
@@ -280,27 +260,99 @@
                     return response.data.map(n => new Node(n, vm));
                 });
             },
-            onAdd(entity, parent) {
-                const node = new Node(entity, this);
-                let siblings;
-                if(parent) {
-                    siblings = parent.children;
-                    parent.children_count++;
-                    parent.state.openable = true;
+            getNewRank(dropData) {
+                let newRank;
+                if(dropData.targetData.state.dropPosition == DropPosition.inside) {
+                    newRank = dropData.targetData.children_count + 1;
                 } else {
-                    siblings = this.tree;
+                    const newParent = treeUtility.getNodeFromPath(this.tree, dropData.targetPath.slice(0, dropData.targetPath.length - 1));
+                    const oldParent = treeUtility.getNodeFromPath(this.tree, dropData.sourcePath.slice(0, dropData.sourcePath.length - 1));
+                    const children_count = newParent ? newParent.children_count : this.tree.length;
+                    const oldRank = dropData.sourceData.rank;
+
+                    if(this.sort.by == 'rank') {
+                        if(dropData.targetData.state.dropPosition == DropPosition.up) {
+                            if(this.sort.dir == 'asc') {
+                                newRank = dropData.targetData.rank;
+                            } else {
+                                newRank = dropData.targetData.rank + 1;
+                            }
+                        } else if(dropData.targetData.state.dropPosition == DropPosition.down) {
+                            if(this.sort.dir == 'asc') {
+                                newRank = dropData.targetData.rank + 1;
+                            } else {
+                                newRank = dropData.targetData.rank;
+                            }
+                        }
+                        if(newParent == oldParent && newRank > oldRank) {
+                            newRank--;
+                        }
+                    } else {
+                        newRank = newParent.children_count + 1;
+                    }
                 }
-                siblings.splice(entity.rank, 0, node);
+                return newRank
             },
-            onDelete(entity) {
-                const index = entity.path.pop();
-                if (entity.path.length > 0) {
-                    let parent = treeUtility.getNodeFromPath(this.tree, entity.path);
-                    parent.children.splice(index, 1);
+            onAdd(node, parent) {
+                if (parent && !parent.childrenLoaded) {
+                    parent.children_count++;
+                    return;
+                }
+                let siblings = parent ? parent.children : this.tree;
+                const isAsc = this.sort.dir == 'asc';
+                siblings.map(s => {
+                    if(s.rank >= node.rank) {
+                        s.rank++;
+                    }
+                });
+                let insertIndex;
+                if(this.sort.by == 'rank') {
+                    if(isAsc) {
+                        insertIndex = node.rank - 1;
+                    } else {
+                        insertIndex = siblings.length - (node.rank - 1);
+                    }
+                } else {
+                    let sortField;
+                    switch(this.sort.by) {
+                        case 'alpha':
+                            sortField = 'name';
+                            break;
+                        case 'children':
+                            sortField = 'children_count';
+                            break;
+                        default:
+                            this.$throwError({message: `Sort key unknown.`});
+                    }
+                    insertIndex = siblings.length;
+                    for(let i = 0; i < siblings.length; i++) {
+                        if((siblings[i][sortField] < node[sortField]) != isAsc) {
+                            insertIndex = i;
+                            break;
+                        }
+                    }
+                }
+                siblings.splice(insertIndex, 0, node);
+                if(parent) parent.children_count++;
+            },
+            onAddNewEntity(entity, parent) {
+                const node = new Node(entity, this);
+                this.onAdd(node, parent);
+            },
+            onDelete(entity, path) {
+                const index = path.pop();
+                const parent = treeUtility.getNodeFromPath(this.tree, path);
+                const siblings = parent ? parent.children : this.tree;
+                siblings.splice(index, 1);
+                siblings.map(s => {
+                    if(s.rank > entity.rank) {
+                        s.rank--;
+                    }
+                });
+
+                if (parent) {
                     parent.children_count--;
                     parent.state.openable = parent.children_count > 0;
-                } else {
-                    this.tree.splice(index, 1);
                 }
             },
             init() {
@@ -349,13 +401,10 @@
                 this.resetHighlighting();
             },
             highlightItems(items) {
-                let p = new Promise((resolve, reject) => resolve(0));
                 items.forEach(i => {
-                    p = p.then(_ => {
-                        return this.openPath(i.path).then(targetNode => {
-                            targetNode.state.highlighted = true;
-                            this.highlightedItems.push(targetNode);
-                        });
+                    return this.openPath(i.path).then(targetNode => {
+                        targetNode.state.highlighted = true;
+                        this.highlightedItems.push(targetNode);
                     });
                 });
             },
@@ -363,46 +412,21 @@
                 this.highlightedItems.forEach(i => i.state.highlighted = false);
                 this.highlightedItems = [];
             },
-            openPath(path) {
-                const vm = this;
-                let openRecursive = (path, tree) => {
-                    const idx = path[0];
-                    return new Promise((resolve, reject) => {
-                        if (path.length <= 1) {
-                            // terminate recursion
-                            resolve(tree[idx]);
-                        }
-                        else {
-                            // recurse further
-                            const rest = path.slice(1);
-                            const curNode = tree[idx];
-                            if(curNode.children.length < curNode.children_count) {
-                                //async load children
-                                curNode.state.loading = true;
-                                resolve(
-                                    vm.fetchChildren(curNode.id).then(children => {
-                                        curNode.children = children;
-                                        curNode.state.loading = false;
-                                        curNode.childrenLoaded = true;
-                                        curNode.state.opened = true;
-                                        return openRecursive(rest, children).then(targetNode => {
-                                            return targetNode;
-                                        });
-                                    })
-                                );
-                            } else {
-                                if(!curNode.state.opened) {
-                                    // open node
-                                    curNode.state.opened = true;
-                                }
-                                resolve(
-                                    openRecursive(rest, curNode.children).then(targetNode => targetNode)
-                                );
-                            }
-                        }
-                    });
-                };
-                return openRecursive(path, this.tree);
+            async openPath(path, tree=this.tree) {
+                const index = path.pop();
+                const elem = tree.find(e => e.id == index);
+                if(path.length == 0) {
+                    return elem;
+                }
+                if(!elem.childrenLoaded) {
+                    elem.state.loading = true;
+                    const children = await this.fetchChildren(elem.id);
+                    elem.state.loading = false;
+                    elem.children = children;
+                    elem.childrenLoaded = true;
+                }
+                elem.state.opened = true;
+                return this.openPath(path, elem.children);
             },
             selectNodeById(id) {
                 $http.get(`/entity/${id}/path`).then(response => {
@@ -410,7 +434,6 @@
                     this.openPath(path).then(targetNode => {
                         targetNode.state.selected = true;
                         this.selectedItem = targetNode;
-                        this.selectedItem.path = path;
                         // Scroll tree to selected element
                         const elem = document.getElementById(`tree-node-${targetNode.id}`);
                         elem.scrollIntoView();
@@ -460,7 +483,7 @@
                 return this.tree.length || 0;
             },
             isDragAllowed: function() {
-                return this.sort.by == 'rank' && this.sort.dir == 'asc';
+                return true;
             }
         }
     }

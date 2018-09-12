@@ -389,7 +389,7 @@ class EntityController extends Controller {
         return response()->json(null, 204);
     }
 
-    public function patchRank(Request $request, $id) {
+    public function moveEntity(Request $request, $id) {
         $user = auth()->user();
         if(!$user->can('delete_move_concepts')) {
             return response()->json([
@@ -400,14 +400,6 @@ class EntityController extends Controller {
             'rank' => 'required|integer',
             'parent_id' => 'nullable|integer|exists:entities,id|different:id',
         ]);
-
-        try {
-            $entity = Entity::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => 'This entity does not exist'
-            ], 400);
-        }
 
         $rank = $request->get('rank');
         $parent_id = $request->get('parent_id');

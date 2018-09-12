@@ -48,7 +48,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
     Route::patch('/{id}/attributes', 'EntityController@patchAttributes')->where('id', '[0-9]+');
     Route::patch('/{id}/attribute/{aid}', 'EntityController@patchAttribute')->where('id', '[0-9]+')->where('aid', '[0-9]+');
-    Route::patch('/{id}/rank', 'EntityController@patchRank')->where('id', '[0-9]+');
+    Route::patch('/{id}/rank', 'EntityController@moveEntity')->where('id', '[0-9]+');
     Route::patch('/reference/{id}', 'ReferenceController@patchReference')->where('id', '[0-9]+');
 
     Route::delete('/{id}', 'EntityController@deleteEntity')->where('id', '[0-9]+');
