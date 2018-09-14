@@ -460,8 +460,8 @@
                 this.onReorder(oldIndex, newIndex);
             },
             move(event, originalEvent) {
-                let src = event.draggedEntity.element;
-                let dst = event.relatedEntity;
+                let src = event.draggedContext.element;
+                let dst = event.relatedContext;
                 let tgtList = event.to;
                 let srcList = event.from;
                 // Move is always allowed if not source or from other list
