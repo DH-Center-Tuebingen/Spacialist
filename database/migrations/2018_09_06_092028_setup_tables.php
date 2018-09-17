@@ -476,6 +476,7 @@ class SetupTables extends Migration
             $table->geography('geography_val')->nullable();
             $table->integer('certainty')->nullable();
             $table->text('certainty_description')->nullable();
+            $table->text('lasteditor');
             $table->timestamps();
 
             $table->foreign('entity_id')->references('id')->on('entities')->onDelete('cascade');
