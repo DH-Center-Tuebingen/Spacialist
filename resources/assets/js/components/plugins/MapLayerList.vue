@@ -1,36 +1,27 @@
 <template>
     <div>
         <ul class="ml-3 list-unstyled">
-            <li v-for="l in layer" class="pb-1" @contextmenu.prevent="openContextMenu($event, l)">
+            <li v-for="(l, i) in layer" class="pb-1 d-flex align-items-center justify-content-between" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
                 <i class="fas fa-fw fa-map-marked-alt"></i>
-                <a href="#" @click.prevent="onSelect(l)">{{ getTitle(l) }}</a>
+                <a class="p-1" href="#" @click.prevent="onSelect(l)">
+                    {{ getTitle(l) }}
+                </a>
+                <span class="ml-auto">
+                    <button class="btn btn-danger btn-fab rounded-circle" v-show="hoverStates[i] && deleteAllowed(l)" @click="onDelete(l)">
+                        <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
+                    </button>
+                </span>
             </li>
             <li v-if="addNew">
                 <i class="fas fa-fw fa-plus"></i>
                 <a href="#" @click.prevent="addNew" class="text-secondary" v-html="$t('plugins.map.new-item')"></a>
             </li>
         </ul>
-
-        <vue-context ref="layerMenu" class="context-menu-wrapper">
-            <ul class="list-group list-group-vue-context" slot-scope="fileScope" v-if="fileScope.data">
-                <li class="list-group-item list-group-item-vue-context" v-for="entry in contextMenuEntries" @click.prevent="entry.callback(fileScope.data.layer)">
-                    <i :class="entry.getIconClasses(fileScope.data.layer)">
-                        {{ entry.getIconContent(fileScope.data.layer) }}
-                    </i>
-                    {{ entry.getLabel(fileScope.data.layer) }}
-                </li>
-            </ul>
-        </vue-context>
     </div>
 </template>
 
 <script>
-    import { VueContext } from 'vue-context';
-
     export default {
-        components: {
-            VueContext
-        },
         props: {
             layer: {
                 type: Array,
@@ -45,7 +36,7 @@
                 required: false,
                 default: l => l
             },
-            contextMenu: {
+            onDelete: {
                 type: Function,
                 required: false
             }
@@ -61,15 +52,20 @@
                 }
                 return this.$t('plugins.map.untitled');
             },
-            openContextMenu(event, layer) {
-                if(!this.contextMenu) return;
-                this.contextMenuEntries = this.contextMenu(layer);
-                this.$refs.layerMenu.open(event, {layer: layer});
-            }
+            deleteAllowed(layer) {
+                if(!this.onDelete) return false;
+                return layer.type != 'unlinked' && !layer.entity_type_id;
+            },
+            onEnter(i) {
+                Vue.set(this.hoverStates, i, true);
+            },
+            onLeave(i) {
+                Vue.set(this.hoverStates, i, false);
+            },
         },
         data() {
             return {
-                contextMenuEntries: []
+                hoverStates: {}
             }
         }
     }

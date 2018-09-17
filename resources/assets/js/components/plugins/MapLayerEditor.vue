@@ -7,7 +7,7 @@
                 :add-new="_ => onAddNewLayer(false)"
                 :layer="baselayer"
                 :on-select="onLayerSelect"
-                :context-menu="getContextMenu">
+                :on-delete="requestDeleteLayer">
             </layer-list>
             <h5 class="mt-3">{{ $tc('main.map.overlay', 2) }}</h5>
             <layer-list
@@ -15,7 +15,7 @@
                 :add-new="_ => onAddNewLayer(true)"
                 :layer="overlays"
                 :on-select="onLayerSelect"
-                :context-menu="getContextMenu">
+                :on-delete="requestDeleteLayer">
             </layer-list>
         </div>
         <div class="col-md-6 h-100">
@@ -115,20 +115,6 @@
             hideDeleteLayerModal() {
                 this.$modal.hide('delete-layer-modal');
                 this.selectedLayer = {};
-            },
-            getContextMenu(layer) {
-                let menu = [];
-                if(!layer.entity_type_id && layer.type != 'unlinked') {
-                    menu.push({
-                        getLabel: file => this.$t('global.delete'),
-                        getIconClasses: file => 'fas fa-fw fa-trash text-danger',
-                        getIconContent: file => '',
-                        callback: file => {
-                            this.requestDeleteLayer(layer);
-                        }
-                    });
-                }
-                return menu;
             },
             getTitle(layer) {
                 if(layer.name) {
