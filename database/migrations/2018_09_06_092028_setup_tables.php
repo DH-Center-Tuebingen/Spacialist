@@ -573,6 +573,14 @@ class SetupTables extends Migration
             $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade');
             $table->foreign('concept_id')->references('id')->on('th_concept')->onDelete('cascade');
         });
+        // Create EntityFiles
+        Schema::create('entity_files', function (Blueprint $table) {
+            $table->integer('file_id');
+            $table->integer('entity_id');
+            $table->text('lasteditor');
+            $table->foreign('file_id')->references('id')->on('files')->onDelete('cascade');
+            $table->foreign('entity_id')->references('id')->on('entities')->onDelete('cascade');
+        });
         // Create Preferences
         Schema::create('preferences', function (Blueprint $table) {
             $table->increments('id');
@@ -655,6 +663,7 @@ class SetupTables extends Migration
     private function rollbackToScratch() {
         Schema::dropIfExists('user_preferences');
         Schema::dropIfExists('preferences');
+        Schema::dropIfExists('entity_files');
         Schema::dropIfExists('file_tags');
         Schema::dropIfExists('available_layers');
         Schema::dropIfExists('permission_role');
