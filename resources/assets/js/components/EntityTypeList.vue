@@ -1,6 +1,6 @@
 <template>
     <ul class="ml-3 list-unstyled mb-0">
-        <li v-for="(d, i) in data" class="pb-1 d-flex align-items-center justify-content-between" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
+        <li v-for="(d, i) in entries" class="pb-1 d-flex align-items-center justify-content-between" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)">
             <i class="fas fa-fw fa-monument"></i>
             <a class="p-2" href="#" :class="{ 'font-weight-bold': d.id == selectedElement.id }" @click.prevent="select(d)">
                 {{ $translateConcept(d.thesaurus_url) }}
@@ -67,6 +67,9 @@
         computed: {
             hoverState: function() {
                 return this.hovered;
+            },
+            entries: function() {
+                return this.data.slice();
             }
         }
     }
