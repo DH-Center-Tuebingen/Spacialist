@@ -71,27 +71,35 @@
                 type: Function
             }
         },
-        mounted() {},
+        mounted() {
+            if(this.$auth.check()) {
+                this.$router.push({
+                    name: 'home'
+                });
+            }
+            let lastRoute = this.$auth.redirect() ? this.$auth.redirect().from : undefined;
+            if(lastRoute && lastRoute.name != 'login') {
+                this.redirect = {
+                    name: lastRoute.name,
+                    params: lastRoute.params,
+                    query: lastRoute.query
+                };
+            } else if(this.$router.currentRoute.query && this.$router.currentRoute.query.redirect) {
+                this.redirect = {
+                    path: this.$router.currentRoute.query.redirect
+                };
+            }
+        },
         methods: {
             login() {
                 const vm = this;
-                let redirect;
-                if(vm.$router.currentRoute.query) {
-                    redirect = vm.$router.currentRoute.query.redirect;
-                }
-                let to = {};
-                if(redirect) {
-                    to.path = redirect;
-                } else {
-                    to.name = 'home';
-                }
                 vm.$auth.login({
                     data: {
                         email: vm.user.email,
                         password: vm.user.password
                     },
                     rememberMe: vm.user.remember,
-                    redirect: to,
+                    redirect: vm.redirect,
                     success: _ => {
                         if(vm.onLogin) {
                             vm.onLogin();
@@ -103,7 +111,10 @@
         },
         data() {
             return {
-                user: {}
+                user: {},
+                redirect: {
+                    name: 'home'
+                }
             }
         }
     }

@@ -312,10 +312,10 @@ Vue.use(require('@websanova/vue-auth'), {
    http: require('@websanova/vue-auth/drivers/http/axios.1.x.js'),
    router: require('@websanova/vue-auth/drivers/router/vue-router.2.x.js'),
    forbiddenRedirect: {
-       name: 'login'
+       name: 'home'
    },
    notFoundRedirect: {
-       name: 'login'
+       name: 'home'
    },
 });
 
