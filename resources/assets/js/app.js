@@ -67,7 +67,7 @@ Vue.use(VueRouter);
 Vue.use(SpacialistPluginSystem);
 
 Vue.use(VueI18n);
-Vue.use(VModal);
+Vue.use(VModal, {dynamic: true});
 Vue.use(VeeValidate);
 Vue.use(Notifications);
 Vue.use(VCalendar, {

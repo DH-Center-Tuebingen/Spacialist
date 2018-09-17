@@ -136,8 +136,9 @@
                 type: Object
             },
             onDelete: {
-                required: true,
-                type: Function
+                required: false,
+                type: Function,
+                default: () => {}
             }
         },
         mounted() {},
@@ -269,7 +270,7 @@
                 });
             },
             deleteEntity(entity) {
-                this.onDelete(this.afterDelete, entity, entity.path);
+                // this.onDelete(this.afterDelete, entity, entity.path);
             },
             afterDelete(entity) {
                 this.eventBus.$emit('entity-delete', {

@@ -13,7 +13,7 @@
             :on-clear="resetHighlighting">
         </tree-search>
         <div class="d-flex flex-column col px-0">
-            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="onEntityAdd(onAddNewEntity)">
+            <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="requestAddNewEntity()">
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
             <div class="mb-2">
@@ -46,10 +46,11 @@
                 @drop="itemDrop"
                 @toggle="itemToggle">
             </tree>
-            <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="onEntityAdd(onAddNewEntity)">
+            <button type="button" class="btn btn-sm btn-outline-success mt-2" @click="requestAddNewEntity()">
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
         </div>
+        <modals-container/>
     </div>
 </template>
 
@@ -57,7 +58,8 @@
     import * as treeUtility from 'tree-vue-component';
     import { VueContext } from 'vue-context';
     import { transliterate as tr, slugify } from 'transliteration';
-    import { bus } from './MainView.vue';
+    import AddNewEntityModal from './modals/AddNewEntity.vue';
+    import DeleteEntityModal from './modals/DeleteEntity.vue';
     Vue.component('tree-node', require('./TreeNode.vue'));
     Vue.component('tree-contextmenu', require('./TreeContextmenu.vue'));
     Vue.component('tree-search', require('./TreeSearch.vue'));
@@ -91,17 +93,14 @@
             this.onToggle = vm.itemToggle;
             this.contextmenu = 'tree-contextmenu';
             this.onContextMenuAdd = function(parent) {
-                vm.onEntityAdd(vm.onAddNewEntity, parent);
+                vm.requestAddNewEntity(parent);
             };
             this.onContextMenuDuplicate = function(entity, path) {
-                let parent;
-                if (path.length > 1) {
-                    parent = treeUtility.getNodeFromPath(vm.tree, path.slice(0, path.length - 1));
-                }
-                vm.onContextMenuDuplicate(vm.onAddNewEntity, entity, parent);
+                const parent = entity.root_entity_id ? vm.entities[entity.root_entity_id] : null;
+                vm.onAdd(entity, parent);
             };
             this.onContextMenuDelete = function(entity, path) {
-                vm.onContextMenuDelete(vm.onDelete, entity, path);
+                vm.requestDeleteEntity(entity, path);
             };
         }
     }
@@ -111,22 +110,6 @@
             VueContext,
         },
         props: {
-            onEntityAdd: {
-                required: false,
-                type: Function
-            },
-            onContextMenuDuplicate: {
-                required: false,
-                type: Function
-            },
-            onContextMenuDelete: {
-                required: false,
-                type: Function
-            },
-            roots: {
-                required: true,
-                type: Array
-            },
             selectionCallback: {
                 required: false,
                 type: Function
@@ -248,16 +231,21 @@
                 };
 
                 vm.$http.patch(`/entity/${node.id}/rank`, data).then(function(response) {
-                    vm.onDelete(node, dropData.sourcePath);
+                    vm.removeFromTree(node, dropData.sourcePath);
                     node.rank = newRank;
-                    vm.onAdd(node, newParent);
+                    vm.insertIntoTree(node, newParent);
                 });
             },
             fetchChildren(id) {
                 const vm = this;
-                return $http.get('/entity/byParent/'+id)
+                return $http.get(`/entity/byParent/${id}`)
                 .then(response => {
-                    return response.data.map(n => new Node(n, vm));
+                    const newNodes = response.data.map(e => {
+                        const n = new Node(e, vm);
+                        vm.entities[n.id] = n;
+                        return n;
+                    });
+                    return newNodes;
                 });
             },
             getNewRank(dropData) {
@@ -293,20 +281,35 @@
                 }
                 return newRank
             },
-            onAdd(node, parent) {
+            onAdd(entity, parent) {
+                const vm = this;
+                if(!vm.$can('create_concepts')) return;
+                let data = {};
+                data.name = entity.name;
+                data.entity_type_id = entity.entity_type_id;
+                if(entity.root_entity_id) data.root_entity_id = entity.root_entity_id;
+                if(entity.geodata_id) entity.geodata_id = entity.geodata_id;
+
+                vm.$http.post('/entity', data).then(function(response) {
+                    vm.insertIntoTree(response.data, parent);
+                });
+            },
+            insertIntoTree(entity, parent) {
+                const vm = this;
+                const node = new Node(entity, vm);
                 if (parent && !parent.childrenLoaded) {
                     parent.children_count++;
                     return;
                 }
-                let siblings = parent ? parent.children : this.tree;
-                const isAsc = this.sort.dir == 'asc';
+                let siblings = parent ? parent.children : vm.tree;
+                const isAsc = vm.sort.dir == 'asc';
                 siblings.map(s => {
                     if(s.rank >= node.rank) {
                         s.rank++;
                     }
                 });
                 let insertIndex;
-                if(this.sort.by == 'rank') {
+                if(vm.sort.by == 'rank') {
                     if(isAsc) {
                         insertIndex = node.rank - 1;
                     } else {
@@ -314,15 +317,15 @@
                     }
                 } else {
                     let sortField;
-                    switch(this.sort.by) {
+                    switch(vm.sort.by) {
                         case 'alpha':
-                            sortField = 'name';
-                            break;
+                        sortField = 'name';
+                        break;
                         case 'children':
-                            sortField = 'children_count';
-                            break;
+                        sortField = 'children_count';
+                        break;
                         default:
-                            this.$throwError({message: `Sort key unknown.`});
+                        vm.$throwError({message: `Sort key unknown.`});
                     }
                     insertIndex = siblings.length;
                     for(let i = 0; i < siblings.length; i++) {
@@ -334,15 +337,62 @@
                 }
                 siblings.splice(insertIndex, 0, node);
                 if(parent) parent.children_count++;
+                vm.entities[node.id] = node;
             },
-            onAddNewEntity(entity, parent) {
-                const node = new Node(entity, this);
-                this.onAdd(node, parent);
+            requestAddNewEntity(parent) {
+                const vm = this;
+                if(!vm.$can('create_concepts')) return;
+
+                let selection = [];
+                if(parent) {
+                    selection = vm.$getEntityType(parent.entity_type_id).sub_entity_types;
+                } else {
+                    selection = Object.values(vm.$getEntityTypes()).filter(f => f.is_root);
+                }
+                let entity = {
+                    name: '',
+                    entity_type_id: selection.length == 1 ? selection[0].id : null,
+                    selection: selection,
+                    root_entity_id: parent ? parent.id : null,
+                };
+                vm.$modal.show(AddNewEntityModal, {
+                    newEntity: entity,
+                    onSubmit: e => vm.onAdd(e, parent)
+                });
+            },
+            requestDeleteEntity(entity, path) {
+                const vm = this;
+                if(!vm.$can('delete_move_concepts')) return;
+                vm.$modal.show(DeleteEntityModal, {
+                    entity: entity,
+                    onDelete: e => vm.onDelete(e, path)
+                })
             },
             onDelete(entity, path) {
+                const vm = this;
+                if(!vm.$can('delete_move_concepts')) return;
+                const id = entity.id;
+                $http.delete(`/entity/${id}`).then(response => {
+                    // if deleted entity is currently selected entity...
+                    if(id == vm.selectedItem.id) {
+                        // ...unset it
+                        vm.selectionCallback();
+                    }
+                    vm.$showToast(
+                        this.$t('main.entity.toasts.deleted.title'),
+                        this.$t('main.entity.toasts.deleted.msg', {
+                            name: entity.name
+                        }),
+                        'success'
+                    );
+                    vm.removeFromTree(entity, path);
+                });
+            },
+            removeFromTree(entity, path) {
+                const vm = this;
                 const index = path.pop();
-                const parent = treeUtility.getNodeFromPath(this.tree, path);
-                const siblings = parent ? parent.children : this.tree;
+                const parent = treeUtility.getNodeFromPath(vm.tree, path);
+                const siblings = parent ? parent.children : vm.tree;
                 siblings.splice(index, 1);
                 siblings.map(s => {
                     if(s.rank > entity.rank) {
@@ -354,10 +404,18 @@
                     parent.children_count--;
                     parent.state.openable = parent.children_count > 0;
                 }
+                delete vm.entities[entity.id];
             },
             init() {
-                this.roots.forEach(n => this.tree.push(new Node(n, this)))
-                this.sortTree(this.sort.by, this.sort.dir, this.tree);
+                const vm = this
+                this.$http.get('/entity/top').then(response => {
+                    response.data.forEach(e => {
+                        const n = new Node(e, vm);
+                        vm.entities[n.id] = n;
+                        vm.tree.push(n);
+                    });
+                    vm.sortTree(vm.sort.by, vm.sort.dir, vm.tree);
+                });
             },
             isDropAllowed(dropData) {
                 //TODO check if it works with tree-vue-component
@@ -415,7 +473,7 @@
             },
             async openPath(ids, tree=this.tree) {
                 const index = ids.pop();
-                const elem = tree.find(e => e.id == index);
+                const elem = this.entities[index];
                 if(ids.length == 0) {
                     return elem;
                 }
@@ -470,6 +528,7 @@
         },
         data() {
             return {
+                entities: [],
                 tree: [],
                 selectedItem: {},
                 highlightedItems: [],

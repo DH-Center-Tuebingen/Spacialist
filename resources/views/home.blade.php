@@ -1,8 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-    <main-view
-        :bibliography="{{$bibliography}}"
-        :roots="{{$roots}}">
-    </main-view>
+    <main-view :bibliography="{{$bibliography}}"></main-view>
 @endsection

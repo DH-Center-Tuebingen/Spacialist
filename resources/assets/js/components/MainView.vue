@@ -3,10 +3,6 @@
         <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100" v-can="'view_concepts'">
             <entity-tree
                 class="col px-0"
-                :on-entity-add="requestAddNewEntity"
-                :on-context-menu-duplicate="duplicateEntity"
-                :on-context-menu-delete="requestDeleteEntity"
-                :roots="roots"
                 :selection-callback="onSetSelectedElement"
                 :event-bus="eventBus">
             </entity-tree>
@@ -15,7 +11,7 @@
             <router-view class="h-100"
                 :bibliography="bibliography"
                 :event-bus="eventBus"
-                :on-delete="requestDeleteEntity">
+            >
             </router-view>
         </div>
         <div :class="'col-md-'+$getPreference('prefs.columns').right" id="addon-container" class="d-flex flex-column">
@@ -68,79 +64,6 @@
             </div>
         </div>
 
-        <modal name="add-entity-modal" height="auto" :scrollable="true" classes="of-visible" v-can="'create_concepts'">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ $t('main.entity.modal.title') }}</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideNewEntityModal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="newEntityForm" name="newEntityForm" role="form" v-on:submit.prevent="addNewEntity(newEntity)">
-                        <div class="form-group row">
-                            <label class="col-form-label col-md-3" for="name">
-                                {{ $t('global.name') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <input type="text" id="name" class="form-control" required v-model="newEntity.name" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-form-label col-md-3" for="type">
-                                {{ $t('global.type') }}:
-                            </label>
-                            <multiselect class="col-md-9" style="box-sizing: border-box;"
-                                :customLabel="translateLabel"
-                                label="thesaurus_url"
-                                track-by="id"
-                                v-model="newEntity.type"
-                                :allowEmpty="false"
-                                :closeOnSelect="true"
-                                :hideSelected="true"
-                                :multiple="false"
-                                :options="newEntity.selection"
-                                :placeholder="$t('global.select.placehoder')"
-                                :select-label="$t('global.select.select')"
-                                :deselect-label="$t('global.select.deselect')">
-                            </multiselect>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" :disabled="addEntityDisabled(newEntity)" form="newEntityForm">
-                        <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
-                    </button>
-                    <button type="button" class="btn btn-secondary" @click="hideNewEntityModal">
-                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
-        </modal>
-
-        <modal name="delete-entity-modal" height="auto" :scrollable="true">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ $t('global.delete-name.title', {name: toDeleteEntity.name}) }}</h5>
-                    <button type="button" class="close" aria-label="Close" @click="hideDeleteEntityModal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="alert alert-info">
-                        {{ $t('global.delete-name.desc', {name: toDeleteEntity.name}) }}</i>
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @click="deleteEntity(toDeleteEntity)">
-                        <i class="fas fa-fw fa-check"></i> {{ $t('global.delete') }}
-                    </button>
-                    <button type="button" class="btn btn-secondary" @click="hideDeleteEntityModal">
-                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
-                    </button>
-                </div>
-            </div>
-        </modal>
     </div>
 </template>
 
@@ -149,13 +72,10 @@
 
     export default {
         beforeRouteEnter(to, from, next) {
-            let bibliography, roots;
+            let bibliography;
             $http.get('bibliography').then(response => {
                 bibliography = response.data;
-                return $http.get('entity/top');
-            }).then(response => {
-                roots = response.data;
-                next(vm => vm.init(roots, bibliography, to.query.tab, to.params.id));
+                next(vm => vm.init(bibliography, to.query.tab, to.params.id));
             });
         },
         beforeRouteUpdate(to, from, next) {
@@ -173,10 +93,9 @@
         },
         mounted() {},
         methods: {
-            init(roots, bibliography, openTab, initialSelectedId) {
+            init(bibliography, openTab, initialSelectedId) {
                 const vm = this;
                 this.initFinished = false;
-                this.roots = roots;
                 this.bibliography = bibliography;
                 if(initialSelectedId) {
                     $http.get(`/entity/${initialSelectedId}`).then(response => {
@@ -262,101 +181,6 @@
                     append: true
                 });
             },
-            addEntityDisabled(entity) {
-                return !entity.name || !entity.type;
-            },
-            addNewEntity(entity) {
-                const vm = this;
-                if(!vm.$can('create_concepts')) return;
-                if(vm.addEntityDisabled(entity)) return;
-                let data = {};
-                data.name = entity.name;
-                data.entity_type_id = entity.type.id;
-                if(entity.root_entity_id) data.root_entity_id = entity.root_entity_id;
-                if(entity.geodata_id) data.geodata_id = entity.geodata_id;
-
-                vm.$http.post('/entity', data).then(function(response) {
-                    if (!entity.parent) {
-                        vm.roots.push(response.data);
-                    }
-                    vm.hideNewEntityModal();
-                    if (entity.callback) {
-                        entity.callback(response.data, entity.parent);
-                    }
-                });
-            },
-            requestAddNewEntity(callback, parent) {
-                const vm = this;
-                if(!vm.$can('create_concepts')) return;
-                let selection = [];
-                if(parent) {
-                    selection = vm.$getEntityType(parent.entity_type_id).sub_entity_types;
-                } else {
-                    selection = Object.values(vm.$getEntityTypes()).filter(f => f.is_root);
-                }
-                Vue.set(vm.newEntity, 'name', '');
-                Vue.set(vm.newEntity, 'type', selection.length == 1 ? selection[0] : null);
-                Vue.set(vm.newEntity, 'selection', selection);
-                Vue.set(vm.newEntity, 'callback', callback);
-                if(parent) {
-                    Vue.set(vm.newEntity, 'root_entity_id', parent.id);
-                    Vue.set(vm.newEntity, 'parent', parent);
-                }
-                vm.$modal.show('add-entity-modal');
-            },
-            hideNewEntityModal() {
-                this.newEntity = {};
-                this.$modal.hide('add-entity-modal');
-            },
-            deleteEntity(entity) {
-                if(!this.$can('delete_move_concepts')) return;
-                const id = entity.id;
-                $http.delete(`/entity/${id}`).then(response => {
-                    // if deleted entity is currently selected entity...
-                    if(id == this.selectedEntity.id) {
-                        // ...unset it
-                        this.onSetSelectedElement(undefined);
-                    }
-                    this.$showToast(
-                        this.$t('main.entity.toasts.deleted.title'),
-                        this.$t('main.entity.toasts.deleted.msg', {
-                            name: entity.name
-                        }),
-                        'success'
-                    );
-                    if (entity.callback) {
-                        entity.callback(entity, entity.path);
-                    }
-                    this.hideDeleteEntityModal();
-                });
-            },
-            requestDeleteEntity(cb, entity, path) {
-                if(!this.$can('delete_move_concepts')) return;
-                this.toDeleteEntity = Object.assign({}, entity);
-                Vue.set(this.toDeleteEntity, 'callback', cb);
-                Vue.set(this.toDeleteEntity, 'path', path);
-                this.$modal.show('delete-entity-modal');
-            },
-            hideDeleteEntityModal() {
-                this.toDeleteEntity = {};
-                this.$modal.hide('delete-entity-modal');
-            },
-            duplicateEntity(callback, entity, parent) {
-                if(!this.$can('duplicate_edit_concepts')) return;
-                let duplicate = {
-                    name: entity.name,
-                    type: {
-                        id: entity.entity_type_id
-                    },
-                    root_entity_id: entity.root_entity_id,
-                    callback: callback,
-                    parent: parent
-                };
-                this.addNewEntity(duplicate);
-            },
-            translateLabel(element, prop) {
-                return this.$translateLabel(element, prop);
-            },
             updateLink(geoId, entityId) {
                 if (entityId != this.selectedEntity.id) {
                     return;
@@ -366,14 +190,11 @@
         },
         data() {
             return {
-                roots: [],
                 bibliography: {},
                 initFinished: false,
                 selectedEntity: {},
-                toDeleteEntity: {},
                 referenceModal: {},
                 references: [],
-                newEntity: {},
                 dataLoaded: false,
                 defaultKey: undefined,
                 plugins: this.$getTabPlugins(),
