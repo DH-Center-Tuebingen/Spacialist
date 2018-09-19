@@ -389,6 +389,31 @@ class EntityController extends Controller {
         return response()->json(null, 204);
     }
 
+    public function patchName($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to modify an entity\'s data'
+            ], 403);
+        }
+        $this->validate($request, [
+            'name' => 'required|string'
+        ]);
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This entity does not exist'
+            ], 400);
+        }
+
+        $entity->name = $request->get('name');
+        $entity->save();
+
+        return response()->json(null, 204);
+    }
+
     public function moveEntity(Request $request, $id) {
         $user = auth()->user();
         if(!$user->can('delete_move_concepts')) {

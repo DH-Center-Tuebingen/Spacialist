@@ -1,14 +1,28 @@
 <template>
     <div class="h-100 d-flex flex-column">
         <div class="d-flex align-items-center justify-content-between">
-            <h1 class="mb-0">
-                {{ entity.name }}
-                <small>
-                    <span v-show="hiddenAttributes > 0" @mouseenter="dependencyInfoHoverOver" @mouseleave="dependencyInfoHoverOut">
-                        <i id="dependency-info" class="fas fa-fw fa-xs fa-eye-slash"></i>
-                    </span>
-                </small>
-            </h1>
+            <h3 class="mb-0" @mouseenter="onEntityHeaderHover(true)" @mouseleave="onEntityHeaderHover(false)">
+                <span v-if="!entity.editing">
+                    {{ entity.name }}
+                    <small>
+                        <span v-show="hiddenAttributes > 0" @mouseenter="dependencyInfoHoverOver" @mouseleave="dependencyInfoHoverOut">
+                            <i id="dependency-info" class="fas fa-fw fa-xs fa-eye-slash"></i>
+                        </span>
+                    </small>
+                    <a href="#" v-if="entityHeaderHovered" class="text-dark" @click.prevent="enableEntityNameEditing()">
+                        <i class="fas fa-fw fa-edit fa-xs"></i>
+                    </a>
+                </span>
+                <form class="form-inline" v-else>
+                    <input type="text" class="form-control mr-2" v-model="newEntityName" />
+                    <button type="submit" class="btn btn-outline-success mr-2" @click="updateEntityName(entity, newEntityName)">
+                        <i class="fas fa-fw fa-check"></i>
+                    </button>
+                    <button type="reset" class="btn btn-outline-danger" @click="cancelUpdateEntityName()">
+                        <i class="fas fa-fw fa-ban"></i>
+                    </button>
+                </form>
+            </h3>
             <span>
                 <button type="button" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(entity)">
                     <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
@@ -277,6 +291,36 @@
                     entity: entity
                 });
             },
+            onEntityHeaderHover(hoverState) {
+                this.entityHeaderHovered = hoverState;
+            },
+            enableEntityNameEditing() {
+                this.newEntityName = this.entity.name;
+                Vue.set(this.entity, 'editing', true);
+            },
+            updateEntityName(entity, name) {
+                // If name does not change, just cancel
+                if(entity.name == name) {
+                    this.cancelUpdateEntityName();
+                } else {
+                    const data = {
+                        name: name
+                    };
+                    $http.patch(`entity/${entity.id}/name`, data).then(response => {
+                        this.eventBus.$emit('entity-update', {
+                            type: 'name',
+                            entity_id: entity.id,
+                            value: name
+                        });
+                        entity.name = name;
+                        this.cancelUpdateEntityName();
+                    });
+                }
+            },
+            cancelUpdateEntityName() {
+                Vue.set(this.entity, 'editing', false);
+                this.newEntityName = '';
+            },
             updateDependencyCounter(event) {
                 this.hiddenAttributes = event.counter;
             },
@@ -331,6 +375,8 @@
         data() {
             return {
                 entity: {},
+                newEntityName: '',
+                entityHeaderHovered: false,
                 dataLoaded: false,
                 dependencyInfoHovered: false,
                 hiddenAttributes: 0,

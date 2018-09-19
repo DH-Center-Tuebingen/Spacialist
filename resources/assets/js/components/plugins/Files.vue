@@ -274,7 +274,7 @@
                     <h5 class="modal-title" @mouseenter="onFileHeaderHover(true)" @mouseleave="onFileHeaderHover(false)">
                         <span v-if="!selectedFile.editing">
                             {{ $t('plugins.files.modal.detail.title', {name: selectedFile.name}) }}
-                            <a href="#" v-if="fileHeaderHovered" class="text-dark" @click="enableFilenameEditing()">
+                            <a href="#" v-if="fileHeaderHovered" class="text-dark" @click.prevent="enableFilenameEditing()">
                                 <i class="fas fa-fw fa-edit"></i>
                             </a>
                         </span>

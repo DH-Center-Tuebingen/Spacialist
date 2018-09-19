@@ -126,6 +126,7 @@
         },
         mounted() {
             this.init();
+            this.eventBus.$on('entity-update', this.handleEntityUpdate);
             this.eventBus.$on('entity-change', this.handleEntityChange);
             this.eventBus.$on('entity-delete', this.handleEntityDelete);
         },
@@ -503,6 +504,15 @@
                 this.selectedItem.state.selected = false;
                 this.selectedItem = {};
             },
+            handleEntityUpdate(e) {
+                switch(e.type) {
+                    case 'name':
+                        this.entities[e.entity_id].name = e.value;
+                        break;
+                    default:
+                        vm.$throwError({message: `Unknown event type ${e.type} received.`});
+                }
+            },
             handleEntityChange(e) {
                 const vm = this;
                 const from = e.from;
@@ -510,14 +520,14 @@
                 switch (e.type) {
                     case 'enter':
                         vm.selectNodeById(to.params.id);
-                    break;
+                        break;
                     case 'update':
                         vm.deselectNode();
                         vm.selectNodeById(to.params.id);
-                    break;
+                        break;
                     case 'leave':
                         vm.deselectNode();
-                    break;
+                        break;
                     default:
                         vm.$throwError({message: `Unknown event type ${e.type} received.`});
                 }
