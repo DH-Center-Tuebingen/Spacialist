@@ -51,7 +51,7 @@
                         :length="csv.rows">
                     </csv-table>
                 </div>
-                <div class="mt-2" v-if="isMarkdown && markdown.render">
+                <div class="h-100 scroll-y-auto" v-if="isMarkdown && markdown.render">
                     <vue-markdown
                         :source="content"
                         :watches="['show','html','breaks','linkify','emoji','typographer','toc']"

@@ -182,7 +182,7 @@
                 if(this.animationMixer.update) {
                      this.animationMixer.update(this.animationClock.getDelta());
                 }
-                this.renderer.animate(this.render);
+                this.render();
             },
             render: function() {
                 if(!this.renderer) return;
@@ -619,7 +619,7 @@
         },
         watch: {
             file(newFile, oldFile) {
-                this.loadModel();
+                this.loadModel(newFile);
             }
         }
     }

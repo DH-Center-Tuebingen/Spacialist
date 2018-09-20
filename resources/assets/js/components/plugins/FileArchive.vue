@@ -46,15 +46,17 @@
                 });
             },
             setArchiveFileList() {
-                const vm = this;
-                const id = vm.file.id;
+                if(this.isFetching) return;
+                const id = this.file.id;
                 const url = `/file/${id}/archive/list`;
-                vm.fileList = [];
-                vm.$http.get(url).then(function(response) {
+                this.isFetching = true;
+                $http.get(url).then(response => {
+                    this.fileList = [];
                     response.data.forEach(entry => {
-                        vm.addNodeProperties(entry);
-                        vm.fileList.push(entry);
+                        this.addNodeProperties(entry);
+                        this.fileList.push(entry);
                     });
+                    this.isFetching = false;
                 });
             },
             onSelect(eventData) {
@@ -76,7 +78,8 @@
         },
         data() {
             return {
-                fileList: []
+                fileList: [],
+                isFetching: false
             }
         },
         watch: {

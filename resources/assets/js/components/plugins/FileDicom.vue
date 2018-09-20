@@ -70,12 +70,14 @@
     import * as cornerstoneMath from 'cornerstone-math';
     import * as cornerstoneTools from 'cornerstone-tools';
     import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
+    import * as dicomParser from 'dicom-parser';
     import dicomUids from '../../plugins/dicomUids';
     import dicomTags from '../../plugins/dicomDict';
 
     cornerstoneTools.external.cornerstone = cornerstone;
     cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
     cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+    cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
 
     const config = {
         webWorkerPath : '../../js/cornerstoneWADOImageLoaderWebWorker.min.js',
@@ -121,12 +123,14 @@
                     cornerstoneTools.zoom.activate(this.elem, 4) // right click
                     cornerstoneTools.zoomWheel.activate(this.elem);
 
+                    cornerstoneTools.scaleOverlayTool.enable(this.elem);
+
                     this.parseMetadata(image.data);
                 });
             },
             onImageRendered(e) {
                 const eventData = e.detail;
-                cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasEntity);
+                cornerstone.setToPixelCoordinateSystem(eventData.enabledElement, eventData.canvasContext);
 
                 this.renderTime = eventData.renderTimeInMs;
                 this.ww = Math.round(eventData.viewport.voi.windowWidth);
@@ -257,7 +261,7 @@
         },
         watch: {
             file(newFile, oldFile) {
-                this.loadImage(`wadouri:${this.newFile.url}`);
+                this.loadImage(`wadouri:${newFile.url}`);
             }
         }
     }
