@@ -2,8 +2,8 @@
     <div class="d-flex flex-column h-100">
         <ul class="nav nav-pills nav-fill mb-2">
             <li class="nav-item">
-                <a class="nav-link" href="#" :class="{active: isAction('linkedFiles'), disabled: !entity.id}" @click.prevent="setAction('linkedFiles')">
-                    <i class="fas fa-fw fa-link"></i> {{ $t('plugins.files.header.linked') }} <span class="badge" :class="[isAction('linkedFiles') ? 'badge-light' : 'badge-primary']" v-show="entity.id">{{linkedFiles.files.length}}</span>
+                <a class="nav-link" href="#" :class="{active: isAction('linkedFiles'), disabled: !selectedEntity.id}" @click.prevent="setAction('linkedFiles')">
+                    <i class="fas fa-fw fa-link"></i> {{ $t('plugins.files.header.linked') }} <span class="badge" :class="[isAction('linkedFiles') ? 'badge-light' : 'badge-primary']" v-show="selectedEntity.id">{{linkedFiles.files.length}}</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -490,10 +490,10 @@
                                         {{ $t('plugins.files.modal.detail.no-links') }}
                                     </p>
                                 </div>
-                                <button type="button" class="btn btn-outline-success mb-3" @click.prevent="linkFile(selectedFile, entity)" v-if="!linkedToCurrentEntity && entity.id">
+                                <button type="button" class="btn btn-outline-success mb-3" @click.prevent="linkFile(selectedFile, selectedEntity)" v-if="!linkedToCurrentEntity && selectedEntity.id">
                                     <span class="fa-stack d-inline">
                                         <i class="fas fa-monument"></i>
-                                        <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i> {{ $t('global.link-to', {name: entity.name})}}
+                                        <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i> {{ $t('global.link-to', {name: selectedEntity.name})}}
                                     </span>
                                 </button>
                                 <h5>
@@ -696,7 +696,7 @@
 
     export default {
         props: {
-            entity: {
+            selectedEntity: {
                 required: false,
                 type: Object,
                 default: {}
@@ -899,8 +899,8 @@
                 screenfull.toggle(element);
             },
             linkedFilesChanged() {
-                if(!this.entity.id) return;
-                this.linkedFiles.apiUrl = '/file/linked/' + this.entity.id;
+                if(!this.selectedEntity.id) return;
+                this.linkedFiles.apiUrl = '/file/linked/' + this.selectedEntity.id;
                 this.resetFiles('linkedFiles');
                 this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
             },
@@ -991,7 +991,7 @@
                 arr.pagination = {};
             },
             getNextFiles(fileType, filters) {
-                if(fileType == 'linkedFiles' && !this.entity.id) {
+                if(fileType == 'linkedFiles' && !this.selectedEntity.id) {
                     return;
                 }
                 let arr = this[fileType];
@@ -1408,7 +1408,7 @@
         },
         computed: {
             localEntity: function() {
-                return Object.assign({}, this.entity);
+                return Object.assign({}, this.selectedEntity);
             },
             replaceFileUrl: function() {
                 if(!this.selectedFile.id) return '';
@@ -1421,11 +1421,11 @@
                 return this.selectedFile.category == 'image';
             },
             linkedToCurrentEntity: function() {
-                if(!this.entity.id || !this.selectedFile.id) {
+                if(!this.selectedEntity.id || !this.selectedFile.id) {
                     return false;
                 }
 
-                return !!this.selectedFile.entities.find(c => c.id == this.entity.id);
+                return !!this.selectedFile.entities.find(c => c.id == this.selectedEntity.id);
             },
             isFirstFile: function() {
                 if(!this.selectedFile && !this.selectedFile.id) {
@@ -1456,22 +1456,22 @@
             contextMenu: function() {
                 const vm = this;
                 let menu = [];
-                if(vm.entity.id) {
+                if(vm.selectedEntity.id) {
                     menu.push({
                         getLabel: file => {
-                            const isLinkedTo = file.entities.some(c => vm.entity.id == c.id);
+                            const isLinkedTo = file.entities.some(c => vm.selectedEntity.id == c.id);
                             if(isLinkedTo) {
                                 return vm.$t('global.unlink-from', {
-                                    name: vm.entity.name
+                                    name: vm.selectedEntity.name
                                 });
                             } else {
                                 return vm.$t('global.link-to', {
-                                    name: vm.entity.name
+                                    name: vm.selectedEntity.name
                                 });
                             }
                         },
                         getIconClasses: file => {
-                            const isLinkedTo = file.entities.some(c => vm.entity.id == c.id);
+                            const isLinkedTo = file.entities.some(c => vm.selectedEntity.id == c.id);
                             if(isLinkedTo) {
                                 return 'fas fa-fw fa-unlink text-warning';
                             } else {
@@ -1480,11 +1480,11 @@
                         },
                         getIconContent: file => '',
                         callback: file => {
-                            const isLinkedTo = file.entities.some(c => vm.entity.id == c.id);
+                            const isLinkedTo = file.entities.some(c => vm.selectedEntity.id == c.id);
                             if(isLinkedTo) {
-                                vm.requestUnlinkFile(file, vm.entity);
+                                vm.requestUnlinkFile(file, vm.selectedEntity);
                             } else {
-                                vm.linkFile(file, vm.entity);
+                                vm.linkFile(file, vm.selectedEntity);
                             }
                         }
                     });
@@ -1501,7 +1501,7 @@
             }
         },
         watch: {
-            entity: function(newEntityDataLoaded, oldEntityDataLoaded) {
+            selectedEntity: function(newEntityDataLoaded, oldEntityDataLoaded) {
                 if(newEntityDataLoaded) {
                     this.linkedFilesChanged();
                 }

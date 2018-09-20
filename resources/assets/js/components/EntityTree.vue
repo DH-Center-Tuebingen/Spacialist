@@ -8,7 +8,6 @@
         </h3>
         <tree-search
             class="mb-2"
-            :on-select="selectionCallback"
             :on-multiselect="onSearchMultiSelect"
             :on-clear="resetHighlighting">
         </tree-search>
@@ -105,7 +104,9 @@
                 vm.onAdd(entity, parent);
             };
             this.onContextMenuDelete = function(entity, path) {
-                vm.requestDeleteEntity(entity, path);
+                vm.eventBus.$emit('entity-delete', {
+                    entity: entity
+                });
             };
         }
     }
@@ -115,9 +116,9 @@
             VueContext,
         },
         props: {
-            selectionCallback: {
+            selectedEntity: {
                 required: false,
-                type: Function
+                type: Object
             },
             dragDelay: {
                 required: false,
@@ -132,7 +133,6 @@
         mounted() {
             this.init();
             this.eventBus.$on('entity-update', this.handleEntityUpdate);
-            this.eventBus.$on('entity-change', this.handleEntityChange);
             this.eventBus.$on('entity-delete', this.handleEntityDelete);
         },
         methods: {
@@ -190,10 +190,20 @@
             },
             itemClick(eventData) {
                 const item = eventData.data;
-                if(this.selectedItem.id == item.id) {
-                    this.selectionCallback();
+                if(this.selectedEntity.id == item.id) {
+                    this.$router.push({
+                        append: true,
+                        name: 'home',
+                        query: this.$route.query
+                    });
                 } else {
-                    this.selectionCallback(item.id);
+                    this.$router.push({
+                        name: 'entitydetail',
+                        params: {
+                            id: item.id
+                        },
+                        query: this.$route.query
+                    });
                 }
             },
             itemToggle(eventData) {
@@ -380,9 +390,13 @@
                 const id = entity.id;
                 $http.delete(`/entity/${id}`).then(response => {
                     // if deleted entity is currently selected entity...
-                    if(id == vm.selectedItem.id) {
+                    if(id == vm.selectedEntity.id) {
                         // ...unset it
-                        vm.selectionCallback();
+                        this.$router.push({
+                            append: true,
+                            name: 'home',
+                            query: vm.$route.query
+                        });
                     }
                     vm.$showToast(
                         this.$t('main.entity.toasts.deleted.title'),
@@ -421,6 +435,7 @@
                         vm.tree.push(n);
                     });
                     vm.sortTree(vm.sort.by, vm.sort.dir, vm.tree);
+                    vm.selectEntity();
                 });
             },
             isDropAllowed(dropData) {
@@ -493,21 +508,18 @@
                 elem.state.opened = true;
                 return this.openPath(ids, elem.children);
             },
-            selectNodeById(id) {
-                $http.get(`/entity/${id}/parentIds`).then(response => {
-                    const ids = response.data;
-                    this.openPath(ids).then(targetNode => {
-                        targetNode.state.selected = true;
-                        this.selectedItem = targetNode;
-                        // Scroll tree to selected element
-                        const elem = document.getElementById(`tree-node-${targetNode.id}`);
-                        VueScrollTo.scrollTo(elem, this.scrollTo.duration, this.scrollTo.options);
-                    });
+            selectEntity() {
+                this.openPath(this.selectedEntity.parentIds.slice()).then(targetNode => {
+                    targetNode.state.selected = true;
+                    // Scroll tree to selected element
+                    const elem = document.getElementById(`tree-node-${targetNode.id}`);
+                    VueScrollTo.scrollTo(elem, this.scrollTo.duration, this.scrollTo.options);
                 });
             },
-            deselectNode() {
-                this.selectedItem.state.selected = false;
-                this.selectedItem = {};
+            deselectNode(id) {
+                if(this.entities[id]) {
+                    this.entities[id].state.selected = false;
+                }
             },
             handleEntityUpdate(e) {
                 switch(e.type) {
@@ -518,34 +530,17 @@
                         vm.$throwError({message: `Unknown event type ${e.type} received.`});
                 }
             },
-            handleEntityChange(e) {
-                const vm = this;
-                const from = e.from;
-                const to = e.to;
-                switch (e.type) {
-                    case 'enter':
-                        vm.selectNodeById(to.params.id);
-                        break;
-                    case 'update':
-                        vm.deselectNode();
-                        vm.selectNodeById(to.params.id);
-                        break;
-                    case 'leave':
-                        vm.deselectNode();
-                        break;
-                    default:
-                        vm.$throwError({message: `Unknown event type ${e.type} received.`});
-                }
-            },
             handleEntityDelete(e) {
-                this.onDelete(e.entity)
+                const id = e.entity.id;
+                if(!id) return;
+                const path = document.getElementById(`tree-node-${id}`).parentElement.getAttribute('data-path').split(',');
+                this.requestDeleteEntity(e.entity, path);
             }
         },
         data() {
             return {
                 entities: [],
                 tree: [],
-                selectedItem: {},
                 highlightedItems: [],
                 sort: {
                     by: 'rank',
@@ -569,6 +564,16 @@
             },
             isDragAllowed: function() {
                 return true;
+            }
+        },
+        watch: {
+            'selectedEntity.id': function(newId, oldId) {
+                if(oldId) {
+                    this.deselectNode(oldId);
+                }
+                if(newId) {
+                    this.selectEntity();
+                }
             }
         }
     }

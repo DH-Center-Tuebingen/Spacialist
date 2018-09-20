@@ -3,12 +3,13 @@
         <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100" v-can="'view_concepts'">
             <entity-tree
                 class="col px-0"
-                :selection-callback="onSetSelectedElement"
-                :event-bus="eventBus">
+                :event-bus="eventBus"
+                :selected-entity="selectedEntity">
             </entity-tree>
         </div>
         <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100" v-can="'view_concepts|view_concept_props'">
             <router-view class="h-100"
+                :selected-entity="selectedEntity"
                 :bibliography="bibliography"
                 :event-bus="eventBus"
             >
@@ -30,7 +31,8 @@
             <div class="mt-2 col px-0">
                 <keep-alive>
                     <component
-                        :entity="selectedEntity"
+                        :selected-entity="selectedEntity"
+                        :event-bus="eventBus"
                         :entity-data-loaded="dataLoaded"
                         :is="activePlugin"
                         :params="$route.query"
@@ -41,7 +43,7 @@
                     <p class="alert alert-info" v-if="!hasReferences">
                         {{ $t('main.entity.references.empty') }}
                     </p>
-                    <div v-else v-for="(referenceGroup, key) in references" class="mb-2">
+                    <div v-else v-for="(referenceGroup, key) in selectedEntity.references" class="mb-2">
                         <h5 class="mb-1">
                             <a href="#" @click.prevent="showMetadataForReferenceGroup(referenceGroup)">{{ $translateConcept(key) }}</a>
                         </h5>
@@ -83,11 +85,14 @@
                 this.setTabOrPlugin(to.query.tab);
             }
             if(to.params.id) {
-                $http.get(`/entity/${to.params.id}/reference`).then(response => {
-                    this.references = response.data;
+                $http.get(`/entity/${to.params.id}`).then(response => {
+                    this.selectedEntity = response.data;
+                    $http.get(`/entity/${to.params.id}/reference`).then(response => {
+                        this.selectedEntity.references = response.data;
+                    });
                 });
             } else {
-                this.references = [];
+                this.selectedEntity = {};
             }
             next();
         },
@@ -105,37 +110,8 @@
                 if(openTab) {
                     this.setTabOrPlugin(openTab);
                 }
+                this.eventBus.$on('entity-update', this.handleEntityUpdate);
                 this.initFinished = true;
-            },
-            onSetSelectedElement(id) {
-                const vm = this;
-                this.attributesLoaded = false;
-                this.dataLoaded = false;
-                if(!id) {
-                    this.selectedEntity = {};
-                    this.$router.push({
-                        name: 'home',
-                        query: this.$route.query
-                    });
-                    this.dataLoaded = true;
-                } else {
-                    $http.get(`/entity/${id}`).then(response => {
-                        vm.selectedEntity = response.data;
-                        // if all extensions are disabled, auto-load references on select
-                        if(this.tab == '') {
-                            this.tab = 'references';
-                        }
-                        this.$requestHooks(this.selectedEntity);
-                        this.dataLoaded = true;
-                        this.$router.push({
-                            name: 'entitydetail',
-                            params: {
-                                id: this.selectedEntity.id
-                            },
-                            query: this.$route.query
-                        });
-                    });
-                }
             },
             setReferencesTab() {
                 if(!this.selectedEntity.id) return;
@@ -186,6 +162,17 @@
                     return;
                 }
                 this.selectedEntity.geodata_id = geoId;
+            },
+            handleEntityUpdate(e) {
+                if(this.selectedEntity && this.selectedEntity.id == e.entity_id) {
+                    switch(e.type) {
+                        case 'name':
+                            this.selectedEntity.name = e.value;
+                        break;
+                        default:
+                            vm.$throwError({message: `Unknown event type ${e.type} received.`});
+                    }
+                }
             }
         },
         data() {
@@ -194,7 +181,6 @@
                 initFinished: false,
                 selectedEntity: {},
                 referenceModal: {},
-                references: [],
                 dataLoaded: false,
                 defaultKey: undefined,
                 plugins: this.$getTabPlugins(),
@@ -204,7 +190,7 @@
         },
         computed: {
             hasReferences: function() {
-                return this.references && Object.keys(this.references).length;
+                return this.selectedEntity && this.selectedEntity.references && Object.keys(this.selectedEntity.references).length;
             },
             tab: {
                 get() {

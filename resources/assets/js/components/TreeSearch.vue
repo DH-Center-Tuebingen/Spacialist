@@ -50,10 +50,6 @@
                 type: String,
                 default: 'global.search'
             },
-            onSelect: {
-                type: Function,
-                required: false
-            },
             onMultiselect: {
                 type: Function,
                 required: false
@@ -85,7 +81,13 @@
         methods: {
             onHit(item) {
                 const vm = this;
-                if(vm.onSelect) vm.onSelect(item.id);
+                this.$router.push({
+                    name: 'entitydetail',
+                    params: {
+                        id: item.id
+                    },
+                    query: this.$route.query
+                });
                 this.reset();
             },
             clearItem() {

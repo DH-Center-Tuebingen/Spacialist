@@ -143,6 +143,10 @@
                 required: true,
                 type: Object
             },
+            eventBus: {
+                type: Object,
+                required: true
+            },
             layerStyles: {
                 required: false,
                 type: Object
@@ -722,6 +726,8 @@
                     }
                     vm.updatePopup(vm.selectedFeature);
                 });
+                vm.eventBus.$on('entity-update', this.handleEntityUpdate);
+                vm.eventBus.$on('entity-delete', this.handleEntityDelete);
             },
             initMapProjection() {
                 if(!this.epsg) {
@@ -1501,6 +1507,39 @@
                     });
                     $(element).popover('show');
                 });
+            },
+            handleEntityDelete(e) {
+                console.log('delete');
+                const id = e.entity.id;
+                if(!id) return;
+                const features = this.getEntityLayerFeatures();
+                let feature = features.find(f => {
+                    const props = f.getProperties();
+                    return props.entity && props.entity.id == id;
+                });
+                if(feature) {
+                    console.log('unlink it');
+                    this.unlink(feature, e.entity)
+                }
+            },
+            handleEntityUpdate(e) {
+                const id = e.entity_id;
+                switch(e.type) {
+                    case 'name':
+                        const features = this.getEntityLayerFeatures();
+                        let feature = features.find(f => {
+                            const props = f.getProperties();
+                            return props.entity && props.entity.id == id;
+                        });
+                        if(feature) {
+                            let entity = feature.getProperties().entity;
+                            entity.name = e.value;
+                            feature.set('entity', entity);
+                        }
+                    break;
+                    default:
+                        vm.$throwError({message: `Unknown event type ${e.type} received.`});
+                }
             }
         },
         data() {

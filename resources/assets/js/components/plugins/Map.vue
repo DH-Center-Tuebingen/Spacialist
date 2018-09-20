@@ -5,11 +5,12 @@
             :init-geojson="geojson"
             :init-projection="'EPSG:4326'"
             :layers="layers"
+            :event-bus="eventBus"
             :on-deleteend="deleteFeatures"
             :on-drawend="addFeature"
             :on-modifyend="updateFeatures"
             :reset="false"
-            :selected-entity="entity"
+            :selected-entity="selectedEntity"
             v-on:update:link="(geoId, entityId) => $emit('update:link', geoId, entityId)">
         </ol-map>
     </div>
@@ -22,7 +23,11 @@
 
     export default {
         props: {
-            entity: {
+            selectedEntity: {
+                type: Object,
+                required: true
+            },
+            eventBus: {
                 type: Object,
                 required: true
             }

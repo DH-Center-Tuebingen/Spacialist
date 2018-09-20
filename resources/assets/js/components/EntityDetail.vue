@@ -2,8 +2,8 @@
     <div class="h-100 d-flex flex-column">
         <div class="d-flex align-items-center justify-content-between">
             <h3 class="mb-0" @mouseenter="onEntityHeaderHover(true)" @mouseleave="onEntityHeaderHover(false)">
-                <span v-if="!entity.editing">
-                    {{ entity.name }}
+                <span v-if="!selectedEntity.editing">
+                    {{ selectedEntity.name }}
                     <small>
                         <span v-show="hiddenAttributes > 0" @mouseenter="dependencyInfoHoverOver" @mouseleave="dependencyInfoHoverOut">
                             <i id="dependency-info" class="fas fa-fw fa-xs fa-eye-slash"></i>
@@ -15,7 +15,7 @@
                 </span>
                 <form class="form-inline" v-else>
                     <input type="text" class="form-control mr-2" v-model="newEntityName" />
-                    <button type="submit" class="btn btn-outline-success mr-2" @click="updateEntityName(entity, newEntityName)">
+                    <button type="submit" class="btn btn-outline-success mr-2" @click="updateEntityName(selectedEntity, newEntityName)">
                         <i class="fas fa-fw fa-check"></i>
                     </button>
                     <button type="reset" class="btn btn-outline-danger" @click="cancelUpdateEntityName()">
@@ -24,10 +24,10 @@
                 </form>
             </h3>
             <span>
-                <button type="button" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(entity)">
+                <button type="button" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(selectedEntity)">
                     <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
                 </button>
-                <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="deleteEntity(entity)">
+                <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="deleteEntity(selectedEntity)">
                     <i class="fas fa-fw fa-trash"></i> {{ $t('global.delete') }}
                 </button>
             </span>
@@ -35,19 +35,19 @@
         <div>
             <i class="fas fa-fw fa-user-edit"></i>
             <span class="font-weight-bold">
-                {{ entity.lasteditor }}
+                {{ selectedEntity.lasteditor }}
             </span>
             -
-            {{ entity.updated_at || entity.created_at }}
+            {{ selectedEntity.updated_at || selectedEntity.created_at }}
         </div>
         <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="dataLoaded" v-can="'view_concept_props'"
-            :attributes="entity.attributes"
-            :dependencies="entity.dependencies"
+            :attributes="selectedEntity.attributes"
+            :dependencies="selectedEntity.dependencies"
             :disable-drag="true"
             :on-metadata="showMetadata"
             :metadata-addon="hasReferenceGroup"
-            :selections="entity.selections"
-            :values="entity.data"
+            :selections="selectedEntity.selections"
+            :values="selectedEntity.data"
             v-on:attr-dep-change="updateDependencyCounter">
         </attributes>
 
@@ -62,84 +62,46 @@
 
 <script>
     export default {
-        beforeRouteEnter(to, from, next) {
-            const entityId = to.params.id;
-            $http.get(`entity/${entityId}`).then(response => {
-                next(vm => {
-                    vm.init(response.data)
-                    vm.eventBus.$emit('entity-change', {
-                        type: 'enter',
-                        from: from,
-                        to: to
-                    });
-                });
-            });
-        },
         beforeRouteUpdate(to, from, next) {
-            if(to.params.id == from.params.id && to.name == from.name) {
-                next();
-            } else if(to.params.aid) { // do not reload data if reference modal is opened
-                this.setModalValues(to.params.aid);
-                next();
-            } else if(!to.params.aid && from.params.aid) {
-                $http.get(`/entity/${to.params.id}/data/${from.params.aid}`).then(response => {
-                    // if result is empty, php returns [] instead of {}
-                    if(response.data instanceof Array) {
-                        response.data = {};
-                    }
-                    Vue.set(this.entity.data, from.params.aid, response.data[from.params.aid]);
-                    next();
-                });
-            } else {
-                const vm = this;
-                const entityId = to.params.id;
-                let loadNext = function() {
-                    $http.get(`entity/${entityId}`).then(response => {
-                        vm.init(response.data);
-                        next();
-                    });
-                    vm.eventBus.$emit('entity-change', {
-                        type: 'update',
-                        from: from,
-                        to: to
-                    });
-                };
-                if (vm.isFormDirty) {
-                    let discardAndContinue = function() {
-                        loadNext();
-                    };
-                    let saveAndContinue = function() {
-                        vm.saveEntity(vm.entity).then(loadNext);
-                    };
-                    vm.$modal.show(vm.discardModal, {entityName: vm.entity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
-                } else {
-                    loadNext();
-                }
-            }
-        },
-        beforeRouteLeave: function(to, from, next) {
             const vm = this;
             let loadNext = function() {
+                vm.dataLoaded = false;
                 next();
-                vm.eventBus.$emit('entity-change', {
-                    type: 'leave',
-                    from: from,
-                    to: to
-                })
             }
             if (vm.isFormDirty) {
                 let discardAndContinue = function() {
                     loadNext();
                 };
                 let saveAndContinue = function() {
-                    vm.saveEntity(this.entity).then(loadNext);
+                    vm.saveEntity(this.selectedEntity).then(loadNext);
                 };
-                vm.$modal.show(vm.discardModal, {entityName: vm.entity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+                vm.$modal.show(vm.discardModal, {entityName: vm.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+            } else {
+                loadNext();
+            }
+        },
+        beforeRouteLeave: function(to, from, next) {
+            const vm = this;
+            let loadNext = function() {
+                next();
+            }
+            if (vm.isFormDirty) {
+                let discardAndContinue = function() {
+                    loadNext();
+                };
+                let saveAndContinue = function() {
+                    vm.saveEntity(this.selectedEntity).then(loadNext);
+                };
+                vm.$modal.show(vm.discardModal, {entityName: vm.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
             } else {
                 loadNext();
             }
         },
         props: {
+            selectedEntity: {
+                required: true,
+                type: Object
+            },
             bibliography: {
                 required: false,
                 type: Array,
@@ -157,20 +119,15 @@
         },
         mounted() {},
         methods: {
-            init(entity) {
-                this.dataLoaded = false;
-                this.entity = {};
-                this.entity = entity;
-                this.getEntityData(entity);
-            },
+            init(entity) {},
             getEntityData(entity) {
                 const vm = this;
                 if(!vm.$can('view_concept_props')) {
-                    Vue.set(vm.entity, 'data', {});
-                    Vue.set(vm.entity, 'attributes', []);
-                    Vue.set(vm.entity, 'selections', {});
-                    Vue.set(vm.entity, 'dependencies', []);
-                    Vue.set(vm.entity, 'references', []);
+                    Vue.set(vm.selectedEntity, 'data', {});
+                    Vue.set(vm.selectedEntity, 'attributes', []);
+                    Vue.set(vm.selectedEntity, 'selections', {});
+                    Vue.set(vm.selectedEntity, 'dependencies', []);
+                    Vue.set(vm.selectedEntity, 'references', []);
                     Vue.set(vm, 'dataLoaded', true);
                     return;
                 }
@@ -181,14 +138,14 @@
                     if(response.data instanceof Array) {
                         response.data = {};
                     }
-                    Vue.set(vm.entity, 'data', response.data);
+                    Vue.set(vm.selectedEntity, 'data', response.data);
                     return vm.$http.get(`/editor/entity_type/${ctid}/attribute`);
                 }).then(function(response) {
-                    vm.entity.attributes = [];
+                    vm.selectedEntity.attributes = [];
                     let data = response.data;
                     for(let i=0; i<data.attributes.length; i++) {
                         let aid = data.attributes[i].id;
-                        if(!vm.entity.data[aid]) {
+                        if(!vm.selectedEntity.data[aid]) {
                             let val = {};
                             switch(data.attributes[i].datatype) {
                                 case 'dimension':
@@ -200,17 +157,17 @@
                                     val.value = [];
                                     break;
                             }
-                            Vue.set(vm.entity.data, aid, val);
+                            Vue.set(vm.selectedEntity.data, aid, val);
                         } else {
-                            const val = vm.entity.data[aid].value;
+                            const val = vm.selectedEntity.data[aid].value;
                             switch(data.attributes[i].datatype) {
                                 case 'date':
                                     const dtVal = new Date(val);
-                                    vm.entity.data[aid].value = dtVal;
+                                    vm.selectedEntity.data[aid].value = dtVal;
                                     break;
                             }
                         }
-                        vm.entity.attributes.push(data.attributes[i]);
+                        vm.selectedEntity.attributes.push(data.attributes[i]);
                     }
                     // if result is empty, php returns [] instead of {}
                     if(data.selections instanceof Array) {
@@ -219,19 +176,12 @@
                     if(data.dependencies instanceof Array) {
                         data.dependencies = {};
                     }
-                    Vue.set(vm.entity, 'selections', data.selections);
-                    Vue.set(vm.entity, 'dependencies', data.dependencies);
-                    return vm.$http.get(`/entity/${cid}/reference`);
-                }).then(function(response) {
-                    let data = response.data;
-                    if(data instanceof Array) {
-                        data = {};
-                    }
-                    Vue.set(vm.entity, 'references', data);
+                    Vue.set(vm.selectedEntity, 'selections', data.selections);
+                    Vue.set(vm.selectedEntity, 'dependencies', data.dependencies);
 
                     const aid = vm.$route.params.aid;
                     if(aid) {
-                        setModalValues(aid)
+                        this.setModalValues(aid)
                     }
 
                     Vue.set(vm, 'dataLoaded', true);
@@ -284,9 +234,6 @@
                 });
             },
             deleteEntity(entity) {
-                // this.onDelete(this.afterDelete, entity, entity.path);
-            },
-            afterDelete(entity) {
                 this.eventBus.$emit('entity-delete', {
                     entity: entity
                 });
@@ -295,8 +242,8 @@
                 this.entityHeaderHovered = hoverState;
             },
             enableEntityNameEditing() {
-                this.newEntityName = this.entity.name;
-                Vue.set(this.entity, 'editing', true);
+                this.newEntityName = this.selectedEntity.name;
+                Vue.set(this.selectedEntity, 'editing', true);
             },
             updateEntityName(entity, name) {
                 // If name does not change, just cancel
@@ -318,7 +265,7 @@
                 }
             },
             cancelUpdateEntityName() {
-                Vue.set(this.entity, 'editing', false);
+                Vue.set(this.selectedEntity, 'editing', false);
                 this.newEntityName = '';
             },
             updateDependencyCounter(event) {
@@ -344,9 +291,9 @@
                 $('#dependency-info').popover('dispose');
             },
             setModalValues(aid) {
-                const attribute = this.entity.attributes.find(a => a.id == aid);
-                this.ref.refs = this.entity.references[attribute.thesaurus_url];
-                this.ref.value = this.entity.data[aid];
+                const attribute = this.selectedEntity.attributes.find(a => a.id == aid);
+                this.ref.refs = this.selectedEntity.references[attribute.thesaurus_url];
+                this.ref.value = this.selectedEntity.data[aid];
                 this.ref.attribute = attribute;
             },
             showMetadata(attribute) {
@@ -360,10 +307,10 @@
                 });
             },
             hasReferenceGroup: function(group) {
-                if(!this.entity.references) return false;
-                if(!Object.keys(this.entity.references).length) return false;
-                if(!this.entity.references[group]) return false;
-                let count = Object.keys(this.entity.references[group]).length > 0;
+                if(!this.selectedEntity.references) return false;
+                if(!Object.keys(this.selectedEntity.references).length) return false;
+                if(!this.selectedEntity.references[group]) return false;
+                let count = Object.keys(this.selectedEntity.references[group]).length > 0;
                 return count > 0;
             },
             resetFlags() {
@@ -374,7 +321,6 @@
         },
         data() {
             return {
-                entity: {},
                 newEntityName: '',
                 entityHeaderHovered: false,
                 dataLoaded: false,
@@ -391,6 +337,11 @@
         computed: {
             isFormDirty: function() {
                 return Object.keys(this.fields).some(key => this.fields[key].dirty);
+            }
+        },
+        watch: {
+            'selectedEntity.id': function(newId, oldId) {
+                this.getEntityData(this.selectedEntity);
             }
         }
     }
