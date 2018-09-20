@@ -66,7 +66,7 @@
                                     track-by="id"
                                     v-model="newEntityType.geomtype"
                                     :allowEmpty="false"
-                                    :closeOnSelect="false"
+                                    :closeOnSelect="true"
                                     :hideSelected="true"
                                     :multiple="false"
                                     :options="availableGeometries"
@@ -116,7 +116,7 @@
                             <div class="col-md-9">
                                 <multiselect
                                     label="datatype"
-                                    track-by="id"
+                                    track-by="datatype"
                                     v-model="newAttribute.type"
                                     :allowEmpty="false"
                                     :closeOnSelect="true"
