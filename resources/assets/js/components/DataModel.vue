@@ -243,7 +243,6 @@
                 this.validated = event.state;
             },
             addColumn(event) {
-                console.log(event.attribute);
                 const attribute = event.attribute;
                 let column = {
                     label_id: attribute.label.concept.id,
