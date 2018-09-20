@@ -74,6 +74,7 @@
         "vue-multiselect": "^2.1.0",
         "vue-notification": "^1.3.7",
         "vue-pdf": "^3.3.1",
+        "vue-scrollto": "^2.13.0",
         "vue-typeahead": "^2.3.2",
         "vue-upload-component": "^2.8.11",
         "vuedraggable": "^2.16.0",

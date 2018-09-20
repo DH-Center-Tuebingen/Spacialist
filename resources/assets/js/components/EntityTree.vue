@@ -37,6 +37,7 @@
                 </button>
             </div>
             <tree
+                id="entity-tree"
                 class="col px-0 scroll-y-auto"
                 :data="tree"
                 :draggable="isDragAllowed"
@@ -57,12 +58,16 @@
 <script>
     import * as treeUtility from 'tree-vue-component';
     import { VueContext } from 'vue-context';
+    import VueScrollTo from 'vue-scrollto';
     import { transliterate as tr, slugify } from 'transliteration';
     import AddNewEntityModal from './modals/AddNewEntity.vue';
     import DeleteEntityModal from './modals/DeleteEntity.vue';
+
     Vue.component('tree-node', require('./TreeNode.vue'));
     Vue.component('tree-contextmenu', require('./TreeContextmenu.vue'));
     Vue.component('tree-search', require('./TreeSearch.vue'));
+
+    Vue.use(VueScrollTo);
 
     const DropPosition = {
         empty: 0,
@@ -496,7 +501,7 @@
                         this.selectedItem = targetNode;
                         // Scroll tree to selected element
                         const elem = document.getElementById(`tree-node-${targetNode.id}`);
-                        elem.scrollIntoView();
+                        VueScrollTo.scrollTo(elem, this.scrollTo.duration, this.scrollTo.options);
                     });
                 });
             },
@@ -545,6 +550,16 @@
                 sort: {
                     by: 'rank',
                     dir: 'asc'
+                },
+                scrollTo: {
+                    duration: 500,
+                    options: {
+                        container: '#entity-tree',
+                        force: false,
+                        cancelable: true,
+                        x: false,
+                        y: true
+                    }
                 }
             }
         },
