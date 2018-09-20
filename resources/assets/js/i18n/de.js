@@ -11,6 +11,7 @@ const de = {
         replace: 'Ersetzen',
         clear: 'Leeren',
         confirm: 'Ok',
+        create: 'Anlegen',
         'select-all': 'Alle auswählen',
         'select-none': 'Alle abwählen',
         'delete-name': {
@@ -100,6 +101,7 @@ const de = {
         type: 'Typ',
         'root-element': 'Eltern-Element',
         content: 'Inhalt',
+        column: 'Spalte | Spalten',
         'geometry-type': 'Geometrietyp',
         'depends-on': 'Hängt ab von',
         preference: 'Einstellung',

@@ -98,59 +98,30 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="newAttributeForm" name="newAttributeForm" role="form" v-on:submit.prevent="createAttribute(newAttribute)">
-                        <div class="form-group">
-                            <label class="col-form-label col-md-3">
-                                {{ $t('global.label') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <label-search
-                                    :on-select="setAttributeLabel"
-                                ></label-search>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label col-md-3">
-                                {{ $t('global.type') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <multiselect
-                                    label="datatype"
-                                    track-by="datatype"
-                                    v-model="newAttribute.type"
-                                    :allowEmpty="false"
-                                    :closeOnSelect="true"
-                                    :hideSelected="true"
-                                    :multiple="false"
-                                    :options="attributeTypes"
-                                    :placeholder="$t('global.select.placehoder')"
-                                    :select-label="$t('global.select.select')"
-                                    :deselect-label="$t('global.select.deselect')">
-                                </multiselect>
-                            </div>
-                        </div>
-                        <div class="form-group" v-show="needsRootElement">
-                            <label class="col-form-label col-md-3">
-                                {{ $t('global.root-element') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <label-search
-                                    :on-select="setAttributeRoot"
-                                ></label-search>
-                            </div>
-                        </div>
-                        <div class="form-group" v-show="needsTextElement">
-                            <label class="col-form-label col-md-3">
-                                {{ $t('global.content') }}:
-                            </label>
-                            <div class="col-md-9">
-                                <textarea class="form-control" v-model="newAttribute.textContent"></textarea>
-                            </div>
-                        </div>
-                    </form>
+                    <create-attribute
+                        :attribute-types="attributeTypes"
+                        :external-submit="newAttributeFormId"
+                        v-on:created="createAttribute"
+                        v-on:selected-type="checkAttributeType"
+                        v-on:validation="checkValidation"
+                    >
+                    </create-attribute>
+                    <div v-if="needsColumns">
+                        <h5>
+                            {{ $tc('global.column', 2) }}
+                            <span class="badge">
+                                {{ columns.length }}
+                            </span>
+                        </h5>
+                        <create-attribute
+                            :attribute-types="columnAttributeTypes"
+                            v-on:created="addColumn"
+                        >
+                        </create-attribute>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" form="newAttributeForm" :disabled="!validated">
+                    <button type="submit" class="btn btn-success" :form="newAttributeFormId" :disabled="!validated">
                         <i class="fas fa-fw fa-plus"></i> {{ $t('global.add') }}
                     </button>
                     <button type="button" class="btn btn-danger" @click="hideNewAttributeModal">
@@ -227,11 +198,16 @@
 </template>
 
 <script>
+    import CreateAttribute from './CreateAttribute.vue';
+
     export default {
         beforeRouteEnter(to, from, next) {
             $http.get('editor/dm/attribute').then(response => {
                 next(vm => vm.init(response.data));
             });
+        },
+        components: {
+            CreateAttribute
         },
         mounted() {},
         methods: {
@@ -240,25 +216,43 @@
                 this.attributeList = attributes;
                 this.initFinished = true;
             },
-            createAttribute(attribute) {
-                const vm = this;
-                if(!vm.validated) return;
+            createAttribute(event) {
+                if(!this.validated) return;
+                const attribute = event.attribute;
                 let data = {};
                 data.label_id = attribute.label.concept.id;
                 data.datatype = attribute.type.datatype;
-                if(data.datatype == 'table') {
-                    data.columns = JSON.stringify(attribute.columns);
+                if(this.needsColumns) {
+                    data.columns = JSON.stringify(this.columns);
                 }
-                if(vm.needsRootElement) {
+                if(this.needsRootElement) {
                     data.root_id = attribute.root.concept.id;
                 }
-                if(vm.needsTextElement) {
+                if(this.needsTextElement) {
                     data.text = attribute.textContent;
                 }
-                vm.$http.post('/editor/dm/attribute', data).then(function(response) {
-                    vm.attributeList.push(response.data);
-                    vm.hideNewAttributeModal();
+                $http.post('/editor/dm/attribute', data).then(response => {
+                    this.attributeList.push(response.data);
+                    this.hideNewAttributeModal();
                 });
+            },
+            checkAttributeType(event) {
+                this.needsColumns = event.type == 'table';
+            },
+            checkValidation(event) {
+                this.validated = event.state;
+            },
+            addColumn(event) {
+                console.log(event.attribute);
+                const attribute = event.attribute;
+                let column = {
+                    label_id: attribute.label.concept.id,
+                    datatype: attribute.type.datatype
+                };
+                if(attribute.root) {
+                    column.root_id = attribute.root.id;
+                }
+                this.columns.push(column);
             },
             deleteAttribute(attribute) {
                 const vm = this;
@@ -301,12 +295,16 @@
                 });
             },
             onCreateAttribute() {
-                const vm = this;
-                vm.$http.get('/editor/dm/attribute_types').then(function(response) {
+                $http.get('/editor/dm/attribute_types').then(response => {
+                    this.attributeTypes = [];
                     for(let i=0; i<response.data.length; i++) {
-                        vm.attributeTypes.push(response.data[i]);
+                        const at = response.data[i];
+                        this.attributeTypes.push(at);
+                        if(this.allowedTableKeys.indexOf(at.datatype) >= 0) {
+                            this.columnAttributeTypes.push(at);
+                        }
                     }
-                    vm.$modal.show('new-attribute-modal');
+                    this.$modal.show('new-attribute-modal');
                 });
             },
             onDeleteAttribute(attribute) {
@@ -320,8 +318,8 @@
                 });
             },
             hideNewAttributeModal() {
-                this.newAttribute = {};
                 this.attributeTypes = [];
+                this.columns = [];
                 this.$modal.hide('new-attribute-modal');
             },
             hideDeleteAttributeModal() {
@@ -369,12 +367,6 @@
                 this.entityCount = 0;
                 this.openedModal = '';
             },
-            setAttributeLabel(label) {
-                Vue.set(this.newAttribute, 'label', label);
-            },
-            setAttributeRoot(label) {
-                Vue.set(this.newAttribute, 'root', label);
-            },
             newEntityTypeSearchResultSelected(label) {
                 Vue.set(this.newEntityType, 'label', label);
             },
@@ -409,8 +401,12 @@
                 entitySelections: {},
                 entityDependencies: {},
                 entityValues: {},
+                newAttributeFormId: 'new-attribute-form-external-submit',
                 attributeTypes: [],
-                newAttribute: {},
+                columnAttributeTypes: [],
+                columns: [],
+                needsColumns: false,
+                validated: false,
                 openedModal: '',
                 modalSelectedAttribute: {},
                 attributeValueCount: 0,
@@ -434,46 +430,9 @@
                 }
                 return data;
             },
-            needsRootElement: function() {
-                return this.newAttribute.type &&
-                    (
-                        this.newAttribute.type.datatype == 'string-sc' ||
-                        this.newAttribute.type.datatype == 'string-mc' ||
-                        this.newAttribute.type.datatype == 'epoch'
-                    );
-            },
-            needsTextElement: function() {
-                return this.newAttribute.type &&
-                    (
-                        this.newAttribute.type.datatype == 'sql'
-                    );
-            },
             newEntityTypeDisabled: function() {
                 const nct = this.newEntityType;
                 return !nct.label || !nct.geomtype;
-            },
-            validated: function() {
-                let isValid = this.newAttribute.label &&
-                    this.newAttribute.type &&
-                    this.newAttribute.label.id > 0 &&
-                    this.newAttribute.type.datatype.length > 0 &&
-                    (
-                        !this.needsRootElement ||
-                        (
-                            this.needsRootElement &&
-                            this.newAttribute.root &&
-                            this.newAttribute.root.id > 0
-                        )
-                    ) &&
-                    (
-                        !this.needsTextElement ||
-                        (
-                            this.needsTextElement &&
-                            this.newAttribute.textContent &&
-                            this.newAttribute.textContent.length > 0
-                        )
-                    );
-                return isValid;
             }
         }
     }

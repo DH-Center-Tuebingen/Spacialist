@@ -11,6 +11,7 @@ const en = {
         replace: 'Replace',
         clear: 'Clear',
         confirm: 'OK',
+        create: 'Create',
         'select-all': 'Select All',
         'select-none': 'Deselect All',
         'delete-name': {
@@ -100,6 +101,7 @@ const en = {
         type: 'Type',
         'root-element': 'Parent-Element',
         content: 'Content',
+        column: 'Column | Columns',
         'geometry-type': 'Geometry-Type',
         'depends-on': 'Depends on',
         preference: 'Preference',

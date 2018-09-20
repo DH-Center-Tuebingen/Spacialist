@@ -370,11 +370,11 @@ class EditorController extends Controller {
                     $purl = ThConcept::find($pid)->concept_url;
                     $childAttr->thesaurus_root_url = $purl;
                 }
-                $childAttr->root_id = $attr->id;
+                $childAttr->parent_id = $attr->id;
                 $childAttr->save();
             }
         }
-
+        $attr->columns = Attribute::where('parent_id', $attr->id)->get();
         return response()->json($attr, 201);
     }
 
