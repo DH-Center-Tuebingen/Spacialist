@@ -24,6 +24,9 @@ class SetupTables extends Migration
     ];
 
     private static $newColumnNames = [
+        'attributes' => [
+            'root_id' => 'parent_id'
+        ],
         'attribute_values' => [
             'context_id' => 'entity_id',
             'context_val' => 'entity_val',
