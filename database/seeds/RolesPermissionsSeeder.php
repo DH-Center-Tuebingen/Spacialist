@@ -83,69 +83,69 @@ class RolesPermissionsSeeder extends Seeder
             $admin->attachPermission($view_concept_props);
             $guest->attachPermission($view_concept_props);
         }
-        // Edit literature
-        if(Permission::where('name', 'edit_literature')->first() === null) {
-            $edit_literature = new Permission();
-            $edit_literature->name = 'edit_literature';
-            $edit_literature->display_name = 'Edit literature';
-            $edit_literature->description = 'edit literature entries';
-            $edit_literature->save();
-            $admin->attachPermission($edit_literature);
+        // Edit bibliography
+        if(Permission::where('name', 'edit_bibliography')->first() === null) {
+            $edit_bibliography = new Permission();
+            $edit_bibliography->name = 'edit_bibliography';
+            $edit_bibliography->display_name = 'Edit bibliography';
+            $edit_bibliography->description = 'edit bibliography entries';
+            $edit_bibliography->save();
+            $admin->attachPermission($edit_bibliography);
         }
-        // Add/remove literature
-        if(Permission::where('name', 'add_remove_literature')->first() === null) {
-            $add_remove_literature = new Permission();
-            $add_remove_literature->name = 'add_remove_literature';
-            $add_remove_literature->display_name = 'Add and remove literature';
-            $add_remove_literature->description = 'add and remove literature entries';
-            $add_remove_literature->save();
-            $admin->attachPermission($add_remove_literature);
+        // Add/remove bibliography
+        if(Permission::where('name', 'add_remove_bibliography')->first() === null) {
+            $add_remove_bibliography = new Permission();
+            $add_remove_bibliography->name = 'add_remove_bibliography';
+            $add_remove_bibliography->display_name = 'Add and remove bibliography';
+            $add_remove_bibliography->description = 'add and remove bibliography entries';
+            $add_remove_bibliography->save();
+            $admin->attachPermission($add_remove_bibliography);
         }
-        // Manage photos
-        if(Permission::where('name', 'manage_photos')->first() === null) {
-            $manage_photos = new Permission();
-            $manage_photos->name = 'manage_photos';
-            $manage_photos->display_name = 'Manage photos';
-            $manage_photos->description = 'upload and remove photos';
-            $manage_photos->save();
-            $admin->attachPermission($manage_photos);
+        // Manage files
+        if(Permission::where('name', 'manage_files')->first() === null) {
+            $manage_files = new Permission();
+            $manage_files->name = 'manage_files';
+            $manage_files->display_name = 'Manage files';
+            $manage_files->description = 'upload and remove files';
+            $manage_files->save();
+            $admin->attachPermission($manage_files);
         }
-        // Link photos
-        if(Permission::where('name', 'link_photos')->first() === null) {
-            $link_photos = new Permission();
-            $link_photos->name = 'link_photos';
-            $link_photos->display_name = 'Link photos';
-            $link_photos->description = 'link photos to concepts';
-            $link_photos->save();
-            $admin->attachPermission($link_photos);
+        // Link files
+        if(Permission::where('name', 'link_files')->first() === null) {
+            $link_files = new Permission();
+            $link_files->name = 'link_files';
+            $link_files->display_name = 'Link files';
+            $link_files->description = 'link files to concepts';
+            $link_files->save();
+            $admin->attachPermission($link_files);
         }
-        // Edit photo properties
-        if(Permission::where('name', 'edit_photo_props')->first() === null) {
-            $edit_photo_props = new Permission();
-            $edit_photo_props->name = 'edit_photo_props';
-            $edit_photo_props->display_name = 'Edit photo properties';
-            $edit_photo_props->description = 'edit the properties of uploaded photos';
-            $edit_photo_props->save();
-            $admin->attachPermission($edit_photo_props);
+        // Edit file properties
+        if(Permission::where('name', 'edit_file_props')->first() === null) {
+            $edit_file_props = new Permission();
+            $edit_file_props->name = 'edit_file_props';
+            $edit_file_props->display_name = 'Edit file properties';
+            $edit_file_props->description = 'edit the properties of uploaded files';
+            $edit_file_props->save();
+            $admin->attachPermission($edit_file_props);
         }
-        // View photos
-        if(Permission::where('name', 'view_photos')->first() === null) {
-            $view_photos = new Permission();
-            $view_photos->name = 'view_photos';
-            $view_photos->display_name = 'View photos';
-            $view_photos->description = 'view uploaded photos';
-            $view_photos->save();
-            $admin->attachPermission($view_photos);
-            $guest->attachPermission($view_photos);
+        // View files
+        if(Permission::where('name', 'view_files')->first() === null) {
+            $view_files = new Permission();
+            $view_files->name = 'view_files';
+            $view_files->display_name = 'View files';
+            $view_files->description = 'view uploaded files';
+            $view_files->save();
+            $admin->attachPermission($view_files);
+            $guest->attachPermission($view_files);
         }
-        // Export photos
-        if(Permission::where('name', 'export_photos')->first() === null) {
-            $export_photos = new Permission();
-            $export_photos->name = 'export_photos';
-            $export_photos->display_name = 'Export photos';
-            $export_photos->description = 'export photos in different resolutions and formats';
-            $export_photos->save();
-            $admin->attachPermission($export_photos);
+        // Export files
+        if(Permission::where('name', 'export_files')->first() === null) {
+            $export_files = new Permission();
+            $export_files->name = 'export_files';
+            $export_files->display_name = 'Export files';
+            $export_files->description = 'export files in different resolutions and formats';
+            $export_files->save();
+            $admin->attachPermission($export_files);
         }
         // View geodata
         if(Permission::where('name', 'view_geodata')->first() === null) {
