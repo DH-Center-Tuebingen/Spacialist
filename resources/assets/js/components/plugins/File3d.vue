@@ -79,6 +79,23 @@
         mounted() {
             this.startup();
         },
+        destroyed() {
+            for(let i=this.scene.children.length-1; i>=0; i--) {
+                let obj = this.scene.children[i];
+                obj.geometry.dispose();
+                obj.material.dispose();
+                this.scene.remove(obj);
+            }
+            this.renderer.forceContextLoss();
+            this.renderer.dispose();
+            this.renderer = null;
+            this.scene = null;
+            if(this.labelRenderer) {
+                this.labelRenderer.forceContextLoss();
+                this.labelRenderer.dispose();
+                this.labelRenderer = null;
+            }
+        },
         methods: {
             getFileType: function(file) {
                 if(file.mime_type == 'model/vnd.collada+xml') {
