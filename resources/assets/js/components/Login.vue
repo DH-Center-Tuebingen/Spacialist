@@ -6,12 +6,19 @@
         </div>
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Login</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Welcome to Spacialist</h6>
+                <h5 class="card-title">
+                    {{ $t('global.login-title') }}
+                </h5>
+                <h6 class="card-subtitle mb-2 text-muted">
+                    {{ $t('global.login-subtitle') }}
+                </h6>
                 <p class="card-text">
                     <form @submit.prevent="login">
                         <div class="form-group">
-                            <label for="email" class="col-md-4 col-form-label">E-Mail Address <i class="fas fa-fw fa-envelope"></i></label>
+                            <label for="email" class="col-md-4 col-form-label">
+                                {{ $t('global.email') }}
+                                <i class="fas fa-fw fa-envelope"></i>
+                            </label>
 
                             <div class="col-md-6">
                                 <input id="email" type="email" class="form-control" v-model="user.email" name="email" required autofocus>
@@ -25,7 +32,10 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="password" class="col-md-4 col-form-label">Password <i class="fas fa-fw fa-unlock-alt"></i></label>
+                            <label for="password" class="col-md-4 col-form-label">
+                                {{ $t('global.password') }}
+                                <i class="fas fa-fw fa-unlock-alt"></i>
+                            </label>
 
                             <div class="col-md-6">
                                 <input id="password" type="password" class="form-control" v-model="user.password" name="password" required>
@@ -42,7 +52,7 @@
                             <div class="col-md-6 col-md-offset-4">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" name="remember" v-model="user.remember"> Remember Me
+                                        <input type="checkbox" name="remember" v-model="user.remember"> {{ $t('global.remember-me') }}
                                     </label>
                                 </div>
                             </div>
@@ -51,7 +61,7 @@
                         <div class="form-group">
                             <div class="col-md-8 col-md-offset-4">
                                 <button type="submit" class="btn btn-primary">
-                                    Login
+                                    {{ $t('global.login') }}
                                 </button>
                             </div>
                         </div>
