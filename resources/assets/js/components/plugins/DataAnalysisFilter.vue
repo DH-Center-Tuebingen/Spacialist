@@ -171,9 +171,9 @@
                             c.equals_dd,
                             c.notEqual_dd
                         ];
-                        vm.$http.get('/editor/dm/attribute').then(function(response) {
+                        $httpQueue.add(() => vm.$http.get('/editor/dm/attribute').then(function(response) {
                             vm.selections = response.data;
-                        });
+                        }));
                         break;
                     case 'date':
                         vm.filter.comp = c.lessThan;

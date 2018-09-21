@@ -50,7 +50,7 @@
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
         </div>
-        <modals-container/>
+        <modals-container class="visible-overflow" />
     </div>
 </template>
 
@@ -246,23 +246,22 @@
                     parent_id: newParent ? newParent.id : null
                 };
 
-                vm.$http.patch(`/entity/${node.id}/rank`, data).then(function(response) {
+                $httpQueue.add(() => vm.$http.patch(`/entity/${node.id}/rank`, data).then(function(response) {
                     vm.removeFromTree(node, dropData.sourcePath);
                     node.rank = newRank;
                     vm.insertIntoTree(node, newParent);
-                });
+                }));
             },
             fetchChildren(id) {
-                const vm = this;
-                return $http.get(`/entity/byParent/${id}`)
+                return $httpQueue.add(() => $http.get(`/entity/byParent/${id}`)
                 .then(response => {
                     const newNodes = response.data.map(e => {
-                        const n = new Node(e, vm);
-                        vm.entities[n.id] = n;
+                        const n = new Node(e, this);
+                        this.entities[n.id] = n;
                         return n;
                     });
                     return newNodes;
-                });
+                }));
             },
             getNewRank(dropData) {
                 let newRank;
@@ -306,9 +305,9 @@
                 if(entity.root_entity_id) data.root_entity_id = entity.root_entity_id;
                 if(entity.geodata_id) entity.geodata_id = entity.geodata_id;
 
-                vm.$http.post('/entity', data).then(function(response) {
+                $httpQueue.add(() => vm.$http.post('/entity', data).then(function(response) {
                     vm.insertIntoTree(response.data, parent);
-                });
+                }));
             },
             insertIntoTree(entity, parent) {
                 const vm = this;
@@ -388,7 +387,7 @@
                 const vm = this;
                 if(!vm.$can('delete_move_concepts')) return;
                 const id = entity.id;
-                $http.delete(`/entity/${id}`).then(response => {
+                $httpQueue.add(() => $http.delete(`/entity/${id}`).then(response => {
                     // if deleted entity is currently selected entity...
                     if(id == vm.selectedEntity.id) {
                         // ...unset it
@@ -406,7 +405,7 @@
                         'success'
                     );
                     vm.removeFromTree(entity, path);
-                });
+                }));
             },
             removeFromTree(entity, path) {
                 const vm = this;
@@ -428,7 +427,7 @@
             },
             init() {
                 const vm = this
-                this.$http.get('/entity/top').then(response => {
+                $httpQueue.add(() => $http.get('/entity/top').then(response => {
                     response.data.forEach(e => {
                         const n = new Node(e, vm);
                         vm.entities[n.id] = n;
@@ -436,7 +435,7 @@
                     });
                     vm.sortTree(vm.sort.by, vm.sort.dir, vm.tree);
                     vm.selectEntity();
-                });
+                }));
             },
             isDropAllowed(dropData) {
                 //TODO check if it works with tree-vue-component
@@ -509,6 +508,7 @@
                 return this.openPath(ids, elem.children);
             },
             selectEntity() {
+                if(!this.selectedEntity.id) return;
                 this.openPath(this.selectedEntity.parentIds.slice()).then(targetNode => {
                     targetNode.state.selected = true;
                     // Scroll tree to selected element

@@ -77,12 +77,12 @@
         },
         beforeRouteEnter(to, from, next) {
             let mapLayers;
-            $http.get('map/layer?basic=true&d=true').then(response => {
+            $httpQueue.add(() => $http.get('map/layer?basic=true&d=true').then(response => {
                 mapLayers = response.data;
                 return $http.get('map/layer/entity')
             }).then(response => {
                 next(vm => vm.init(mapLayers, response.data));
-            });
+            }));
         },
         mounted() {},
         methods: {

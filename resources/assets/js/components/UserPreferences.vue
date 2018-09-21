@@ -237,9 +237,9 @@
 <script>
     export default {
         beforeRouteEnter(to, from, next) {
-            $http.get(`preference/${to.params.id}`).then(response => {
+            $httpQueue.add(() => $http.get(`preference/${to.params.id}`).then(response => {
                 next(vm => vm.init(response.data));
-            });
+            }));
         },
         mounted() {},
         methods: {

@@ -40,7 +40,7 @@
                 const vm = this;
                 vm.epsg = vm.$getPreference('prefs.map-projection');
                 vm.dataInitialized = false;
-                vm.$http.get('/map').then(function(response) {
+                $httpQueue.add(() => vm.$http.get('/map').then(function(response) {
                     const mapData = response.data;
                     vm.layers = mapData.layers;
                     vm.geodata = mapData.geodata;
@@ -53,7 +53,7 @@
                         vm.geojson.push(geo);
                     }
                     vm.dataInitialized = true;
-                });
+                }));
             },
             getProperties(geodata) {
                 return {

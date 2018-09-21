@@ -60,9 +60,9 @@
             },
             setFileContent() {
                 const vm = this;
-                vm.$http.get(vm.file.url, vm.storageConfig).then(function(response) {
+                $httpQueue.add(() => vm.$http.get(vm.file.url, vm.storageConfig).then(function(response) {
                     vm.content = response.data;
-                });
+                }));
             },
             updateFile(file, content) {
                 const vm = this;

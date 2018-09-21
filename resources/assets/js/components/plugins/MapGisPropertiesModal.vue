@@ -71,9 +71,9 @@
             init(event) {
                 this.layer = event.params.layer;
                 if(this.isEntityLayer) {
-                    $http.get(`editor/entity_type/${this.layer.entity_type.id}/attribute`).then(response => {
+                    $httpQueue.add(() => $http.get(`editor/entity_type/${this.layer.entity_type.id}/attribute`).then(response => {
                         this.attributes = response.data.attributes;
-                    });
+                    }));
                 }
             },
             setActiveTab(id) {

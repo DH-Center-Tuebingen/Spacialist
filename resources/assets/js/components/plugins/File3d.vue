@@ -166,10 +166,10 @@
                 const vm = this;
                 if(!vm.entity && !vm.entity.id) return;
                 const id = vm.entity.id;
-                vm.$http.get(`/file/${id}/sub_files?c=3d`).then(function(response) {
+                $httpQueue.add(() => vm.$http.get(`/file/${id}/sub_files?c=3d`).then(function(response) {
                     const models = response.data;
                     models.forEach(m => vm.loadModel(m));
-                });
+                }));
             },
             loadModel: function(file) {
                 let fileType = this.getFileType(file);

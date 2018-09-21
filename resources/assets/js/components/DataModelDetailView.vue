@@ -213,7 +213,7 @@
             init(id) {
                 this.entityAttributes = [];
                 this.entityType = this.$getEntityTypes()[id];
-                $http.get(`/editor/entity_type/${id}/attribute`)
+                $httpQueue.add(() => $http.get(`/editor/entity_type/${id}/attribute`)
                     .then(response => {
                         let data = response.data;
                         // if result is empty, php returns [] instead of {}
@@ -232,7 +232,7 @@
                             let index = this.entityAttributes.findIndex(a => a.id == id);
                             this.attributes[i].isDisabled = index > -1;
                         }
-                    });
+                    }));
             },
             updateEntityType() {
                 if(!this.entityType.id) return;
@@ -241,7 +241,7 @@
                     'is_root': this.entityType.is_root,
                     'sub_entity_types': this.entityType.sub_entity_types.map(t => t.id)
                 };
-                $http.post(`/editor/dm/${id}/relation`, data).then(response => {
+                $httpQueue.add(() => $http.post(`/editor/dm/${id}/relation`, data).then(response => {
                     const name = this.$translateConcept(this.entityType.thesaurus_url);
                     this.$showToast(
                         this.$t('main.datamodel.toasts.updated-type.title'),
@@ -250,7 +250,7 @@
                         }),
                         'success'
                     );
-                });
+                }));
             },
             addAttributeToEntityType(oldIndex, index) {
                 const ctid = this.entityType.id;
@@ -259,7 +259,7 @@
                 let data = {};
                 data.attribute_id = attribute.id;
                 data.position = index + 1;
-                $http.post(`/editor/dm/entity_type/${ctid}/attribute`, data).then(response => {
+                $httpQueue.add(() => $http.post(`/editor/dm/entity_type/${ctid}/attribute`, data).then(response => {
                     // Add element to attribute list
                     attributes.splice(index, 0, response.data);
                     attribute.isDisabled = true;
@@ -278,7 +278,7 @@
                         }),
                         'success'
                     );
-                });
+                }));
 
             },
             editEntityAttribute(attribute, options) {
@@ -291,9 +291,9 @@
                     d_operator: options.operator.id
                 };
                 data.d_value = vm.getDependencyValue(options.value, options.attribute.datatype);
-                vm.$http.patch(`/editor/dm/entity_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
+                $httpQueue.add(() => vm.$http.patch(`/editor/dm/entity_type/${ctid}/attribute/${aid}/dependency`, data).then(function(response) {
                     vm.hideEditEntityAttributeModal();
-                });
+                }));
             },
             onEditEntityAttribute(attribute) {
                 const ctid = this.entityType.id;
@@ -327,7 +327,7 @@
             removeAttributeFromEntityType(attribute) {
                 const ctid = this.entityType.id;
                 const aid = attribute.id;
-                this.$http.delete('/editor/dm/entity_type/'+ctid+'/attribute/'+aid).then(response => {
+                $httpQueue.add(() => this.$http.delete('/editor/dm/entity_type/'+ctid+'/attribute/'+aid).then(response => {
                     const index = this.entityAttributes.findIndex(function(a) {
                         return a.id == attribute.id;
                     });
@@ -340,7 +340,7 @@
                         }
                     }
                     this.hideRemoveAttributeModal();
-                });
+                }));
             },
             reorderEntityAttribute(oldIndex, index) {
                 let attribute = this.entityAttributes[oldIndex];
@@ -353,7 +353,7 @@
                 }
                 let data = {};
                 data.position = position;
-                $http.patch(`/editor/dm/entity_type/${ctid}/attribute/${aid}/position`, data).then(response => {
+                $httpQueue.add(() => $http.patch(`/editor/dm/entity_type/${ctid}/attribute/${aid}/position`, data).then(response => {
                     attribute.position = position;
                     this.entityAttributes.splice(oldIndex, 1);
                     this.entityAttributes.splice(index, 0, attribute);
@@ -366,7 +366,7 @@
                             this.entityAttributes[i].position++;
                         }
                     }
-                });
+                }));
             },
             dependencyAttributeSelected(attribute) {
                 const vm = this;
@@ -378,7 +378,7 @@
                 switch(attribute.datatype) {
                     case 'string-sc':
                     case 'string-mc':
-                        vm.$http.get(`/editor/attribute/${id}/selection`).then(function(response) {
+                        $httpQueue.add(() => vm.$http.get(`/editor/attribute/${id}/selection`).then(function(response) {
                             vm.depends.values = [];
                             const selections = response.data;
                             if(selections) {
@@ -386,7 +386,7 @@
                                     vm.depends.values.push(selections[i]);
                                 }
                             }
-                        });
+                        }));
                         break;
                     default:
                         vm.depends.values = [];
@@ -406,13 +406,13 @@
             onRemoveAttributeFromEntityType(attribute) {
                 const aid = attribute.id;
                 const ctid = this.entityType.id;
-                $http.get(`/editor/dm/attribute/occurrence_count/${aid}/${ctid}`).then(response => {
+                $httpQueue.add(() => $http.get(`/editor/dm/attribute/occurrence_count/${aid}/${ctid}`).then(response => {
                     this.setModalSelectedAttribute(attribute);
                     this.setModalSelectedEntityType(this.entityType);
                     this.setAttributeValueCount(response.data);
                     this.openedModal = 'remove-attribute-from-ct-modal';
                     this.$modal.show('remove-attribute-from-ct-modal');
-                });
+                }));
             },
             hideRemoveAttributeModal() {
                 this.$modal.hide('remove-attribute-from-ct-modal');

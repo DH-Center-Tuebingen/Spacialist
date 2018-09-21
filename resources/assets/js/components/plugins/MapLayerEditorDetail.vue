@@ -149,15 +149,15 @@
 <script>
     export default {
         beforeRouteEnter(to, from, next) {
-            $http.get(`map/layer/${to.params.id}`).then(response => {
+            $httpQueue.add(() => $http.get(`map/layer/${to.params.id}`).then(response => {
                 next(vm => vm.init(response.data));
-            });
+            }));
         },
         beforeRouteUpdate(to, from, next) {
-            $http.get(`map/layer/${to.params.id}`).then(response => {
+            $httpQueue.add(() => $http.get(`map/layer/${to.params.id}`).then(response => {
                 this.init(response.data);
                 next();
-            });
+            }));
         },
         mounted() {},
         methods: {

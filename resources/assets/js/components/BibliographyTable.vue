@@ -406,9 +406,9 @@
             infiniteScroll
         },
         beforeRouteEnter(to, from, next) {
-            $http.get('bibliography').then(response => {
+            $httpQueue.add(() => $http.get('bibliography').then(response => {
                 next(vm => vm.init(response.data));
-            });
+            }));
         },
         created() {
             this.debouncedSearch = debounce(e => {
@@ -456,10 +456,10 @@
                 }
             },
             exportFile() {
-                $http.get('bibliography/export').then(response => {
+                $httpQueue.add(() => $http.get('bibliography/export').then(response => {
                     const filename = this.$getPreference('prefs.project-name') + '.bibtex';
                     this.$createDownloadLink(response.data, filename, false, response.headers['content-type']);
-                });
+                }));
             },
             onModalClose() {
                 this.$router.push({
@@ -477,18 +477,18 @@
                 data.type = item.type.name;
 
                 if(item.id) {
-                    $http.patch(`bibliography/${item.id}`, data).then(response => {
+                    $httpQueue.add(() => $http.patch(`bibliography/${item.id}`, data).then(response => {
                         let entry = this.allEntries.find(e => e.id == item.id);
                         for(let k in item.fields) {
                             Vue.set(entry, k, item.fields[k]);
                         }
                         this.hideNewItemModal();
-                    });
+                    }));
                 } else {
-                    $http.post('bibliography', data).then(response => {
+                    $httpQueue.add(() => $http.post('bibliography', data).then(response => {
                         this.addEntry(response.data);
                         this.hideNewItemModal();
-                    });
+                    }));
                 }
             },
             editEntry(entry) {
@@ -513,22 +513,22 @@
             },
             deleteEntry(entry) {
                 if(!this.$can('add_remove_bibliography')) return;
-                $http.delete(`bibliography/${entry.id}`).then(response => {
+                $httpQueue.add(() => $http.delete(`bibliography/${entry.id}`).then(response => {
                     const index = this.allEntries.findIndex(e => e.id == entry.id);
                     if(index > -1) {
                         this.allEntries.splice(index, 1);
                     }
                     this.hideDeleteEntryModal();
-                });
+                }));
             },
             requestDeleteEntry(entry) {
                 const vm = this;
                 if(!vm.$can('add_remove_bibliography')) return;
-                vm.$http.get(`bibliography/${entry.id}/ref_count`).then(function(response) {
+                $httpQueue.add(() => vm.$http.get(`bibliography/${entry.id}/ref_count`).then(function(response) {
                     vm.deleteItem = Object.assign({}, entry);
                     vm.deleteItem.count = response.data;
                     vm.$modal.show('delete-bibliography-item-modal');
-                });
+                }));
             },
             hideDeleteEntryModal() {
                 this.deleteItem = {};

@@ -50,14 +50,14 @@
                 const id = this.file.id;
                 const url = `/file/${id}/archive/list`;
                 this.isFetching = true;
-                $http.get(url).then(response => {
+                $httpQueue.add(() => $http.get(url).then(response => {
                     this.fileList = [];
                     response.data.forEach(entry => {
                         this.addNodeProperties(entry);
                         this.fileList.push(entry);
                     });
                     this.isFetching = false;
-                });
+                }));
             },
             onSelect(eventData) {
                 const vm = this;
@@ -67,9 +67,9 @@
                 const id = vm.file.id;
                 const p = selectedFile.filename;
                 const url = '/file/'+id+'/archive/download?p='+p;
-                vm.$http.get(url).then(function(response) {
+                $httpQueue.add(() => vm.$http.get(url).then(function(response) {
                     vm.$createDownloadLink(response.data, selectedFile.clean_filename, true);
-                });
+                }));
             },
             itemToggle(eventData) {
                 const item = eventData.data;

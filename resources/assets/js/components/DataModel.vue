@@ -202,9 +202,9 @@
 
     export default {
         beforeRouteEnter(to, from, next) {
-            $http.get('editor/dm/attribute').then(response => {
+            $httpQueue.add(() => $http.get('editor/dm/attribute').then(response => {
                 next(vm => vm.init(response.data));
-            });
+            }));
         },
         components: {
             CreateAttribute
@@ -231,10 +231,10 @@
                 if(this.needsTextElement) {
                     data.text = attribute.textContent;
                 }
-                $http.post('/editor/dm/attribute', data).then(response => {
+                $httpQueue.add(() => $http.post('/editor/dm/attribute', data).then(response => {
                     this.attributeList.push(response.data);
                     this.hideNewAttributeModal();
-                });
+                }));
             },
             checkAttributeType(event) {
                 this.needsColumns = event.type == 'table';
@@ -256,7 +256,7 @@
             deleteAttribute(attribute) {
                 const vm = this;
                 const id = attribute.id;
-                vm.$http.delete(`/editor/dm/attribute/${id}`).then(function(response) {
+                $httpQueue.add(() => vm.$http.delete(`/editor/dm/attribute/${id}`).then(function(response) {
                     let index = vm.attributeList.findIndex(function(a) {
                         return a.id == id;
                     });
@@ -264,7 +264,7 @@
                         vm.attributeList.splice(index, 1);
                     }
                     vm.hideDeleteAttributeModal();
-                });
+                }));
             },
             createEntityType(entityType) {
                 const vm = this;
@@ -275,15 +275,15 @@
                     'is_root': entityType.is_root || false,
                     'geomtype': entityType.geomtype.key
                 };
-                vm.$http.post('/editor/dm/entity_type', data).then(function(response) {
+                $httpQueue.add(() => vm.$http.post('/editor/dm/entity_type', data).then(function(response) {
                     vm.localEntityTypes.push(response.data);
                     vm.hideNewEntityTypeModal();
-                });
+                }));
             },
             deleteEntityType(entityType) {
                 const vm = this;
                 const id = entityType.id;
-                vm.$http.delete('/editor/dm/entity_type/' + id).then(function(response) {
+                $httpQueue.add(() => vm.$http.delete('/editor/dm/entity_type/' + id).then(function(response) {
                     const index = vm.localEntityTypes.findIndex(function(ct) {
                         return ct.id == id;
                     });
@@ -291,10 +291,10 @@
                         vm.localEntityTypes.splice(index, 1);
                     }
                     vm.hideDeleteEntityTypeModal();
-                });
+                }));
             },
             onCreateAttribute() {
-                $http.get('/editor/dm/attribute_types').then(response => {
+                $httpQueue.add(() => $http.get('/editor/dm/attribute_types').then(response => {
                     this.attributeTypes = [];
                     for(let i=0; i<response.data.length; i++) {
                         const at = response.data[i];
@@ -304,17 +304,17 @@
                         }
                     }
                     this.$modal.show('new-attribute-modal');
-                });
+                }));
             },
             onDeleteAttribute(attribute) {
                 const vm = this;
                 const id = attribute.id;
-                vm.$http.get('/editor/dm/attribute/occurrence_count/'+id).then(function(response) {
+                $httpQueue.add(() => vm.$http.get('/editor/dm/attribute/occurrence_count/'+id).then(function(response) {
                     vm.setAttributeValueCount(response.data);
                     vm.setModalSelectedAttribute(attribute);
                     vm.openedModal = 'delete-attribute-modal';
                     vm.$modal.show('delete-attribute-modal');
-                });
+                }));
             },
             hideNewAttributeModal() {
                 this.attributeTypes = [];
@@ -328,7 +328,7 @@
             },
             onCreateEntityType() {
                 const vm = this;
-                vm.$http.get('/editor/dm/geometry').then(function(response) {
+                $httpQueue.add(() => vm.$http.get('/editor/dm/geometry').then(function(response) {
                     vm.availableGeometries = [];
                     let idCtr = 1;
                     response.data.forEach(g => {
@@ -346,17 +346,17 @@
                         key: 'any'
                     });
                     vm.$modal.show('new-entity-type-modal');
-                });
+                }));
             },
             onDeleteEntityType(entityType) {
                 const vm = this;
                 const id = entityType.id;
-                vm.$http.get('/editor/dm/entity_type/occurrence_count/' + id).then(function(response) {
+                $httpQueue.add(() => vm.$http.get('/editor/dm/entity_type/occurrence_count/' + id).then(function(response) {
                     vm.setEntityCount(response.data);
                     vm.setModalSelectedEntityType(entityType);
                     vm.openedModal = 'delete-entity-type-modal';
                     vm.$modal.show('delete-entity-type-modal');
-                });
+                }));
             },
             hideNewEntityTypeModal() {
                 this.$modal.hide('new-entity-type-modal');

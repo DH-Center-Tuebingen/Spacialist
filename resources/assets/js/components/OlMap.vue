@@ -145,7 +145,7 @@
             },
             eventBus: {
                 type: Object,
-                required: true
+                required: false
             },
             layerStyles: {
                 required: false,
@@ -726,8 +726,10 @@
                     }
                     vm.updatePopup(vm.selectedFeature);
                 });
-                vm.eventBus.$on('entity-update', this.handleEntityUpdate);
-                vm.eventBus.$on('entity-delete', this.handleEntityDelete);
+                if(vm.eventBus) {
+                    vm.eventBus.$on('entity-update', this.handleEntityUpdate);
+                    vm.eventBus.$on('entity-delete', this.handleEntityDelete);
+                }
             },
             initMapProjection() {
                 if(!this.epsg) {
@@ -741,14 +743,14 @@
                 addProjection(projection);
                 if(this.initProjection != name && this.initProjection != 'EPSG:4326' && this.initProjection != 'EPSG:3857') {
                     const srid = this.initProjection.split(':')[1];
-                    $http.get(`map/epsg/${srid}`).then(response => {
+                    $httpQueue.add(() => $http.get(`map/epsg/${srid}`).then(response => {
                         proj4.defs(this.initProjection, response.data.proj4text);
                         registerProj(proj4);
                         const projection = getProjection(this.initProjection);
                         addProjection(projection);
 
                         this.init();
-                    });
+                    }));
                 } else {
                     this.init();
                 }
@@ -1037,7 +1039,7 @@
                     let nullValueFound = false;
                     if(!features.length) continue;
                     const ctid = features[0].getProperties().entity.entity_type_id;
-                    $http.get(`entity/entity_type/${ctid}/data/${opts.attribute_id}`).then(response => {
+                    $httpQueue.add(() => $http.get(`entity/entity_type/${ctid}/data/${opts.attribute_id}`).then(response => {
                         const data = response.data;
                         let values = [];
                         features.forEach(f => {
@@ -1123,7 +1125,7 @@
                             this.featureStyles[id].style = this.createStyle(color, opts.size);
                             this.updateStyles(v.feature);
                         });
-                    });
+                    }));
                 }
             },
             getGradients(from, to, classes) {
@@ -1397,29 +1399,33 @@
                 return str;
             },
             link(feature, entity) {
-                const vm = this;
-                if(!vm.linkPossible) return;
+                if(!this.linkPossible) return;
                 const props = feature.getProperties();
                 const gid = props.id;
                 const eid = entity.id;
-                vm.$http.post(`/map/link/${gid}/${eid}`, {}).then(function(response) {
+                $http.post(`/map/link/${gid}/${eid}`, {}).then(response => {
                     feature.setProperties({
                         entity: Object.assign({}, entity)
                     });
-                    vm.$emit('update:link', gid, eid);
+                    const layer = this.getLayer(entity.entity_type_id);
+                    this.featureStyles[feature.get('id')].default = this.createStyle(layer.color);
+                    this.updateStyles(feature);
+                    this.$emit('update:link', gid, eid);
                 });
             },
             unlink(feature, entity) {
-                const vm = this;
-                if(!vm.unlinkPossible) return;
+                if(!this.unlinkPossible) return;
                 const props = feature.getProperties();
                 const gid = props.id;
                 const eid = entity.id;
-                vm.$http.delete(`/map/link/${gid}/${eid}`, {}).then(function(response) {
+                $http.delete(`/map/link/${gid}/${eid}`, {}).then(response => {
                     feature.setProperties({
-                        entity: {}
+                        entity: null
                     });
-                    vm.$emit('update:link', gid, eid);
+                    const layer = this.getUnlinkedLayer();
+                    this.featureStyles[feature.get('id')].default = this.createStyle(layer.color);
+                    this.updateStyles(feature);
+                    this.$emit('update:link', null, eid);
                 });
             },
             geometryToTable(g) {
@@ -1509,7 +1515,6 @@
                 });
             },
             handleEntityDelete(e) {
-                console.log('delete');
                 const id = e.entity.id;
                 if(!id) return;
                 const features = this.getEntityLayerFeatures();
@@ -1518,7 +1523,6 @@
                     return props.entity && props.entity.id == id;
                 });
                 if(feature) {
-                    console.log('unlink it');
                     this.unlink(feature, e.entity)
                 }
             },
@@ -1644,7 +1648,7 @@
                     }
             },
             'selectedEntity.geodata_id': function(newId, oldId) {
-                this.updatePopup(this.selectedFeature)
+                this.updatePopup(this.selectedFeature);
             },
             layers: function(newLayers, oldLayers) {
                 this.resetLayers();

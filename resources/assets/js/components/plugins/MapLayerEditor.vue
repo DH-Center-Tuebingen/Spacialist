@@ -51,9 +51,9 @@
 <script>
     export default {
         beforeRouteEnter(to, from, next) {
-            $http.get('map/layer').then(response => {
+            $httpQueue.add(() => $http.get('map/layer').then(response => {
                 next(vm => vm.init(response.data));
-            });
+            }));
         },
         mounted() {},
         methods: {

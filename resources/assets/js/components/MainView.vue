@@ -75,23 +75,23 @@
     export default {
         beforeRouteEnter(to, from, next) {
             let bibliography;
-            $http.get('bibliography').then(response => {
+            $httpQueue.add(() => $http.get('bibliography').then(response => {
                 bibliography = response.data;
                 next(vm => vm.init(bibliography, to.query.tab, to.params.id));
-            });
+            }));
         },
         beforeRouteUpdate(to, from, next) {
             if(to.query.tab) {
                 this.setTabOrPlugin(to.query.tab);
             }
-            if(to.params.id) {
-                $http.get(`/entity/${to.params.id}`).then(response => {
+            if(to.params.id && !_.isEqual(from.params, to.params)) {
+                $httpQueue.add(() => $http.get(`/entity/${to.params.id}`).then(response => {
                     this.selectedEntity = response.data;
-                    $http.get(`/entity/${to.params.id}/reference`).then(response => {
+                    $httpQueue.add(() => $http.get(`/entity/${to.params.id}/reference`).then(response => {
                         this.selectedEntity.references = response.data;
-                    });
-                });
-            } else {
+                    }));
+                }));
+            } else if(!to.params.id) {
                 this.selectedEntity = {};
             }
             next();
@@ -103,9 +103,9 @@
                 this.initFinished = false;
                 this.bibliography = bibliography;
                 if(initialSelectedId) {
-                    $http.get(`/entity/${initialSelectedId}`).then(response => {
+                    $httpQueue.add(() => $http.get(`/entity/${initialSelectedId}`).then(response => {
                         vm.selectedEntity = response.data;
-                    });
+                    }));
                 }
                 if(openTab) {
                     this.setTabOrPlugin(openTab);
@@ -158,7 +158,7 @@
                 });
             },
             updateLink(geoId, entityId) {
-                if (entityId != this.selectedEntity.id) {
+                if(entityId != this.selectedEntity.id) {
                     return;
                 }
                 this.selectedEntity.geodata_id = geoId;

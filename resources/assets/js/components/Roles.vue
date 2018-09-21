@@ -151,11 +151,11 @@
 
     export default {
         beforeRouteEnter(to, from, next) {
-            $http.get('role').then(response => {
+            $httpQueue.add(() => $http.get('role').then(response => {
                 const roles = response.data.roles;
                 const permissions = response.data.permissions;
                 next(vm => vm.init(roles, permissions));
-            });
+            }));
         },
         mounted() {},
         methods: {

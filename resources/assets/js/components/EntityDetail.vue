@@ -63,38 +63,46 @@
 <script>
     export default {
         beforeRouteUpdate(to, from, next) {
-            const vm = this;
-            let loadNext = function() {
-                vm.dataLoaded = false;
+            if(_.isEqual(from.params, to.params)) {
+                this.dataLoaded = true;
                 next();
-            }
-            if (vm.isFormDirty) {
-                let discardAndContinue = function() {
-                    loadNext();
-                };
-                let saveAndContinue = function() {
-                    vm.saveEntity(this.selectedEntity).then(loadNext);
-                };
-                vm.$modal.show(vm.discardModal, {entityName: vm.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
             } else {
-                loadNext();
+                const vm = this;
+                let loadNext = function() {
+                    vm.dataLoaded = false;
+                    next();
+                }
+                if (vm.isFormDirty) {
+                    let discardAndContinue = function() {
+                        loadNext();
+                    };
+                    let saveAndContinue = function() {
+                        vm.saveEntity(this.selectedEntity).then(loadNext);
+                    };
+                    vm.$modal.show(vm.discardModal, {entityName: vm.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+                } else {
+                    loadNext();
+                }
             }
         },
         beforeRouteLeave: function(to, from, next) {
-            const vm = this;
-            let loadNext = function() {
+            if(_.isEqual(from.params, to.params)) {
                 next();
-            }
-            if (vm.isFormDirty) {
-                let discardAndContinue = function() {
-                    loadNext();
-                };
-                let saveAndContinue = function() {
-                    vm.saveEntity(this.selectedEntity).then(loadNext);
-                };
-                vm.$modal.show(vm.discardModal, {entityName: vm.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
             } else {
-                loadNext();
+                let loadNext = () => {
+                    next();
+                }
+                if(this.isFormDirty) {
+                    let discardAndContinue = () => {
+                        loadNext();
+                    };
+                    let saveAndContinue = () => {
+                        this.saveEntity(this.selectedEntity).then(loadNext);
+                    };
+                    this.$modal.show(this.discardModal, {entityName: this.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+                } else {
+                    loadNext();
+                }
             }
         },
         props: {
@@ -133,7 +141,7 @@
                 }
                 const cid = entity.id;
                 const ctid = entity.entity_type_id;
-                vm.$http.get(`/entity/${cid}/data`).then(function(response) {
+                $httpQueue.add(() => vm.$http.get(`/entity/${cid}/data`).then(function(response) {
                     // if result is empty, php returns [] instead of {}
                     if(response.data instanceof Array) {
                         response.data = {};
@@ -185,7 +193,7 @@
                     }
 
                     Vue.set(vm, 'dataLoaded', true);
-                });
+                }));
             },
             saveEntity(entity) {
                 if(!this.$can('duplicate_edit_concepts')) return;
@@ -222,7 +230,7 @@
                         }
                     }
                 }
-                return $http.patch('/entity/'+cid+'/attributes', patches).then(response => {
+                return $httpQueue.add(() => $http.patch('/entity/'+cid+'/attributes', patches).then(response => {
                     this.resetFlags();
                     this.$showToast(
                         this.$t('main.entity.toasts.updated.title'),
@@ -231,7 +239,7 @@
                         }),
                         'success'
                     );
-                });
+                }));
             },
             deleteEntity(entity) {
                 this.eventBus.$emit('entity-delete', {
@@ -253,7 +261,7 @@
                     const data = {
                         name: name
                     };
-                    $http.patch(`entity/${entity.id}/name`, data).then(response => {
+                    $httpQueue.add(() => $http.patch(`entity/${entity.id}/name`, data).then(response => {
                         this.eventBus.$emit('entity-update', {
                             type: 'name',
                             entity_id: entity.id,
@@ -261,7 +269,7 @@
                         });
                         entity.name = name;
                         this.cancelUpdateEntityName();
-                    });
+                    }));
                 }
             },
             cancelUpdateEntityName() {

@@ -147,11 +147,11 @@
 
     export default {
         beforeRouteEnter(to, from, next) {
-            $http.get('user').then(response => {
+            $httpQueue.add(() => $http.get('user').then(response => {
                 const users = response.data.users;
                 const roles = response.data.roles;
                 next(vm => vm.init(users, roles));
-            });
+            }));
         },
         mounted() {},
         methods: {

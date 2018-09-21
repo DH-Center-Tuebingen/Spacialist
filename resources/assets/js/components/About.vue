@@ -100,11 +100,11 @@
             }
         },
         created() {
-            $http.get('/version').then(response => {
+            $httpQueue.add(() => $http.get('/version').then(response => {
                 for(var k in response.data) {
                     Vue.set(this.version, k, response.data[k]);
                 }
-            });
+            }));
         }
     }
 </script>

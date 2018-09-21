@@ -42,7 +42,7 @@
             loadAsHtml: function() {
                 const vm = this;
                 const id = vm.file.id;
-                vm.$http.get(`/file/${id}/as_html`).then(function(response) {
+                $httpQueue.add(() => vm.$http.get(`/file/${id}/as_html`).then(function(response) {
                     let data;
                     if(typeof response.data == 'object') {
                         data = JSON.stringify(response.data, null, 4);
@@ -51,7 +51,7 @@
                     }
                     vm.htmlContent = data;
                     vm.htmlLoaded = true;
-                });
+                }));
             }
         },
         data() {

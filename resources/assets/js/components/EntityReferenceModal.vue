@@ -179,7 +179,7 @@
                     certainty: this.refs.value.possibility,
                     certainty_description: this.refs.value.possibility_description
                 };
-                $http.patch(`/entity/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
+                $httpQueue.add(() => $http.patch(`/entity/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
                     const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
                     this.$showToast(
                         this.$t('main.entity.references.toasts.updated-certainty.title'),
@@ -190,7 +190,7 @@
                         }),
                         'success'
                     );
-                });
+                }));
             },
             onAddReference(item) {
                 if(!this.$can('add_remove_bibliography')) return;
@@ -198,22 +198,22 @@
                     bibliography_id: item.bibliography.id,
                     description: item.description
                 };
-                $http.post(`/entity/${this.entityId}/reference/${this.attributeId}`, data).then(response => {
+                $httpQueue.add(() => $http.post(`/entity/${this.entityId}/reference/${this.attributeId}`, data).then(response => {
                     if(!this.refs.refs) {
                         this.refs.refs = [];
                     }
                     this.refs.refs.push(response.data);
-                });
+                }));
             },
             onDeleteReference(reference) {
                 if(!this.$can('add_remove_bibliography')) return;
                 const id = reference.id;
-                $http.delete(`/entity/reference/${id}`).then(response => {
+                $httpQueue.add(() => $http.delete(`/entity/reference/${id}`).then(response => {
                     const index = this.refs.refs.findIndex(r => r.id == reference.id);
                     if(index > -1) {
                         this.refs.refs.splice(index, 1);
                     }
-                });
+                }));
             },
             onUpdateReference(editedReference) {
                 if(!this.$can('edit_bibliography')) return;
@@ -225,10 +225,10 @@
                 const data = {
                     description: editedReference.description
                 };
-                $http.patch(`/entity/reference/${id}`, data).then(response => {
+                $httpQueue.add(() => $http.patch(`/entity/reference/${id}`, data).then(response => {
                     ref.description = editedReference.description;
                     this.cancelEditReference();
-                });
+                }));
             },
             enableEditReference(reference) {
                 Vue.set(this, 'editReference', Object.assign({}, reference));

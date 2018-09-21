@@ -268,9 +268,9 @@
             if(!Vue.prototype.$can('edit_preferences')) {
                 next(vm => vm.init({}));
             }
-            $http.get('preference').then(response => {
+            $httpQueue.add(() => $http.get('preference').then(response => {
                 next(vm => vm.init(response.data));
-            });
+            }));
         },
         mounted() {},
         methods: {

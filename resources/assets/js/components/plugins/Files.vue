@@ -723,9 +723,9 @@
         },
         methods: {
             initTags() {
-                $http.get('file/tags').then(response => {
+                $httpQueue.add(() => $http.get('file/tags').then(response => {
                     this.tags = response.data;
-                });
+                }));
             },
             updateTags(file) {
                 const data = {
@@ -743,15 +743,15 @@
             },
             initFilters() {
                 const vm = this;
-                vm.$http.get('/file/filter/category').then(function(response) {
+                $httpQueue.add(() => vm.$http.get('/file/filter/category').then(function(response) {
                     vm.filterTypeList = [];
                     vm.filterTypeList = response.data;
-                });
-                vm.$http.get('/file/filter/camera').then(function(response) {
+                }));
+                $httpQueue.add(() => vm.$http.get('/file/filter/camera').then(function(response) {
                     vm.filterCameraList = [];
                     vm.filterCameraList = response.data;
-                });
-                vm.$http.get('/file/filter/date').then(function(response) {
+                }));
+                $httpQueue.add(() => vm.$http.get('/file/filter/date').then(function(response) {
                     vm.filterDateList = [];
                     let cnt = 0;
                     vm.filterDateList = response.data.map(d => {
@@ -759,7 +759,7 @@
                         d.id = cnt;
                         return d;
                     });
-                });
+                }));
             },
             toggleFilters() {
                 this.showFilters = !this.showFilters;
@@ -919,9 +919,9 @@
                 return $http.post('file/new', formData);
             },
             openFile(id) {
-                $http.get(`/file/${id}`).then(response => {
+                $httpQueue.add(() => $http.get(`/file/${id}`).then(response => {
                     this.showFileModal(response.data);
-                });
+                }));
             },
             setAction(id) {
                 // disable linked tab if no entity is selected
@@ -1013,7 +1013,7 @@
                 if(filters) {
                     data.filters = filters;
                 }
-                return $http.post(pageUrl, data).then(response => {
+                return $httpQueue.add(() => $http.post(pageUrl, data).then(response => {
                     let resp = response.data;
                     for(let i=0; i<resp.data.length; i++) {
                         filesObj.files.push(resp.data[i]);
@@ -1022,7 +1022,7 @@
                     Vue.set(filesObj, 'pagination', resp);
                     filesObj.fetchingFiles = false;
                     this.updateFileState(filesObj);
-                });
+                }));
             },
             updateFileState(filesObj) {
                 filesObj.fileState.from = filesObj.pagination.from ? 1 : 0,
@@ -1139,10 +1139,10 @@
                 const id = file.id;
                 vm.contextMenuFile = Object.assign({}, file);
                 vm.contextMenuEntity = Object.assign({}, entity);
-                vm.$http.get(`/file/${id}/link_count`).then(function(response) {
+                $httpQueue.add(() => vm.$http.get(`/file/${id}/link_count`).then(function(response) {
                     vm.linkCount = response.data;
                     vm.$modal.show('unlink-file-modal');
-                });
+                }));
             },
             unlinkFile(file, entity) {
                 const id = file.id;
@@ -1501,8 +1501,8 @@
             }
         },
         watch: {
-            selectedEntity: function(newEntityDataLoaded, oldEntityDataLoaded) {
-                if(newEntityDataLoaded) {
+            selectedEntity: function(newData, oldData) {
+                if(newData && (!oldData || (newData.id != oldData.id))) {
                     this.linkedFilesChanged();
                 }
             },

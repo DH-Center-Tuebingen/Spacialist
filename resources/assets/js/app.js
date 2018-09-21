@@ -44,6 +44,7 @@ dom.watch(); // search for <i> tags to replace with <svg>
  * building robust, powerful web applications using Vue and Laravel.
  */
 
+const PQueue = require('p-queue');
 require('typeface-raleway');
 require('typeface-source-code-pro');
 require('popper.js');
@@ -60,6 +61,7 @@ Axios.defaults.baseURL = 'api/v1';
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
+Vue.queue = Vue.prototype.$httpQueue = window.$httpQueue = new PQueue({concurrency: 1});
 Vue.prototype.$http = Axios;
 Vue.axios = Axios;
 Vue.use(VueRouter);
@@ -309,7 +311,7 @@ Vue.i18n = i18n;
 
 Vue.use(require('@websanova/vue-auth'), {
    auth: require('@websanova/vue-auth/drivers/auth/bearer.js'),
-   http: require('@websanova/vue-auth/drivers/http/axios.1.x.js'),
+   http: require('./queued-axios-1.x-driver.js'),
    router: require('@websanova/vue-auth/drivers/router/vue-router.2.x.js'),
    forbiddenRedirect: {
        name: 'home'
@@ -444,6 +446,7 @@ const app = new Vue({
     },
     methods: {
         init() {
+            Vue.prototype.$httpQueue.add(() =>
             Axios.get('pre').then(response =>  {
                 this.preferences = response.data.preferences;
                 this.concepts = response.data.concepts;
@@ -468,7 +471,7 @@ const app = new Vue({
                     });
                 }
                 this.$getSpacialistPlugins('plugins');
-            });
+            }));
         }
     },
     data() {

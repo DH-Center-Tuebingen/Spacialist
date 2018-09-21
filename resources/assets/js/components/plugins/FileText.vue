@@ -105,7 +105,7 @@
             },
             setFileContent() {
                 const vm = this;
-                vm.$http.get(vm.file.url, vm.storageConfig).then(function(response) {
+                $httpQueue.add(() => vm.$http.get(vm.file.url, vm.storageConfig).then(function(response) {
                     let data;
                     if(typeof response.data == 'object') {
                         data = JSON.stringify(response.data, null, 4);
@@ -113,7 +113,7 @@
                         data = response.data;
                     }
                     vm.content = data;
-                });
+                }));
             },
             updateFile(file, content) {
                 const vm = this;

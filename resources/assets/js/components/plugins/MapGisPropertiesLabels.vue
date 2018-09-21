@@ -358,7 +358,7 @@
                     if(this.selectedAttribute && this.isEntityLayer) {
                         const id = this.layer.entity_type_id;
                         const aid = this.selectedAttribute.attribute_id;
-                        $http.get(`entity/entity_type/${id}/data/${aid}`).then(response => {
+                        $httpQueue.add(() => $http.get(`entity/entity_type/${id}/data/${aid}`).then(response => {
                             options.getText = feature => {
                                 const eid = feature.get('entity').id;
                                 const data = response.data[eid];
@@ -370,7 +370,7 @@
                                     data: options
                                 });
                             }
-                        });
+                        }));
                     } else if(this.useEntityName) {
                         options.getText = feature => {
                             return feature.get('entity').name;
