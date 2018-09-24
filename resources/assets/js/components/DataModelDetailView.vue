@@ -84,7 +84,7 @@
                                 {{ $t('global.type') }}:
                             </label>
                             <div class="col-md-9">
-                                <input type="text" class="form-control-plaintext" :value="modalSelectedAttribute.datatype" readonly />
+                                <input type="text" class="form-control-plaintext" :value="$t(`global.attributes.${modalSelectedAttribute.datatype}`)" readonly />
                             </div>
                         </div>
                         <div class="form-group row">

@@ -193,68 +193,52 @@ class EditorController extends Controller {
     public function getAttributeTypes() {
         return response()->json([
             [
-                'datatype' => 'string',
-                'description' => 'attribute.string.desc'
+                'datatype' => 'string'
             ],
             [
-                'datatype' => 'stringf',
-                'description' => 'attribute.stringf.desc'
+                'datatype' => 'stringf'
             ],
             [
-                'datatype' => 'double',
-                'description' => 'attribute.double.desc'
+                'datatype' => 'double'
             ],
             [
-                'datatype' => 'string-sc',
-                'description' => 'attribute.string-sc.desc'
+                'datatype' => 'integer'
             ],
             [
-                'datatype' => 'string-mc',
-                'description' => 'attribute.string-mc.desc'
+                'datatype' => 'boolean'
             ],
             [
-                'datatype' => 'epoch',
-                'description' => 'attribute.epoch.desc'
+                'datatype' => 'string-sc'
             ],
             [
-                'datatype' => 'date',
-                'description' => 'attribute.date.desc'
+                'datatype' => 'string-mc'
             ],
             [
-                'datatype' => 'dimension',
-                'description' => 'attribute.dimension.desc'
+                'datatype' => 'epoch'
             ],
             [
-                'datatype' => 'list',
-                'description' => 'attribute.list.desc'
+                'datatype' => 'date'
             ],
             [
-                'datatype' => 'geography',
-                'description' => 'attribute.geography.desc'
+                'datatype' => 'dimension'
             ],
             [
-                'datatype' => 'integer',
-                'description' => 'attribute.integer.desc'
+                'datatype' => 'list'
             ],
             [
-                'datatype' => 'boolean',
-                'description' => 'attribute.boolean.desc'
+                'datatype' => 'geography'
             ],
             [
-                'datatype' => 'percentage',
-                'description' => 'attribute.percentage.desc'
+                'datatype' => 'percentage'
             ],
             [
-                'datatype' => 'entity',
-                'description' => 'attribute.entity.desc'
+                'datatype' => 'entity'
             ],
             [
-                'datatype' => 'table',
-                'description' => 'attribute.table.desc'
+                'datatype' => 'table'
             ],
             [
-                'datatype' => 'sql',
-                'description' => 'attribute.sql.desc'
+                'datatype' => 'sql'
             ]
         ]);
     }

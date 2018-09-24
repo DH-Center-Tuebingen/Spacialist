@@ -16,7 +16,6 @@
             </label>
             <div class="col-md-9">
                 <multiselect
-                    label="datatype"
                     track-by="datatype"
                     v-model="newAttribute.type"
                     :allowEmpty="false"
@@ -27,6 +26,7 @@
                     :placeholder="$t('global.select.placehoder')"
                     :select-label="$t('global.select.select')"
                     :deselect-label="$t('global.select.deselect')"
+                    :custom-label="translateDatatype"
                     @select="typeSelected">
                 </multiselect>
             </div>
@@ -79,6 +79,9 @@
                 this.$emit('selected-type', {
                     type: type.datatype
                 });
+            },
+            translateDatatype(option) {
+                return this.$t(`global.attributes.${option.datatype}`);
             },
             setAttributeLabel(label) {
                 Vue.set(this.newAttribute, 'label', label);
