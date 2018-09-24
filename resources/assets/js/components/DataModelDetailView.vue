@@ -238,7 +238,7 @@
                 if(!this.entityType.id) return;
                 const id = this.entityType.id;
                 const data = {
-                    'is_root': this.entityType.is_root,
+                    'is_root': this.entityType.is_root || false,
                     'sub_entity_types': this.entityType.sub_entity_types.map(t => t.id)
                 };
                 $httpQueue.add(() => $http.post(`/editor/dm/${id}/relation`, data).then(response => {
