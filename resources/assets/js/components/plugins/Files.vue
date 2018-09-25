@@ -42,16 +42,6 @@
             </h5>
             <div class="mb-2" v-show="showFilters">
                 <form v-on:submit.prevent="applyFilters(selectedTopAction)">
-                    <!-- <div class="form-check">
-                        <input type="radio" name="filter-matching" id="match-all-filters" class="form-check-input" value="all" v-model="filterMatching[selectedTopAction]" />
-                        <label class="form-check-label" for="match-all-filters">
-                            Match all filters
-                        </label>
-                        <input type="radio" name="filter-matching" id="match-any-filters" class="form-check-input" value="any" v-model="filterMatching[selectedTopAction]" />
-                        <label class="form-check-label" for="match-any-filters">
-                            Match any filters
-                        </label>
-                    </div> -->
                     <div class="form-group row">
                         <label class="col-form-label col-md-3" for="filetypes">
                             {{ $t('plugins.files.header.rules.types.file') }}:
@@ -1399,11 +1389,6 @@
                     allFiles: 0
                 },
                 routeOnFileClose: {}
-                // filterMatching: {
-                //     linkedFiles: 'any',
-                //     unlinkedFiles: 'any',
-                //     allFiles: 'any'
-                // }
             }
         },
         computed: {

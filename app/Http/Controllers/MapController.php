@@ -242,7 +242,7 @@ class MapController extends Controller
         if($type == 'KMZ') {
             $contentType = 'application/vnd.google-earth.kmz';
             $tmpZip = '/tmp/export-kml-'.$dt.'.zip';
-            UnifiedArchive::archiveNodes($tmpFile, $tmpZip);
+            UnifiedArchive::archiveFiles($tmpFile, $tmpZip);
             // overwrite tmpFile path, because the zip should be downloaded
             unlink($tmpFile);
             $tmpFile = $tmpZip;

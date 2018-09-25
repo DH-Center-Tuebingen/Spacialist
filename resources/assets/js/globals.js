@@ -96,7 +96,6 @@ Vue.prototype.$createDownloadLink = function(content, filename, base64 = false, 
     } else {
         url = window.URL.createObjectURL(new Blob([content]));
     }
-    // link.setAttribute("href", 'data:;base64,' + raw);
     link.setAttribute("href", url);
     link.setAttribute("type", contentType);
     link.setAttribute("download", filename);
