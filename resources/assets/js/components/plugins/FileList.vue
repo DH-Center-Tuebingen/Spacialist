@@ -1,13 +1,33 @@
 <template>
     <div class="h-100 d-flex flex-column">
-        {{
-            $t('plugins.files.list.display', {
-                from: fileState.from,
-                to: fileState.to,
-                total: fileState.total
-            })
-        }}
-        <div class="row col px-0 scroll-y-auto" infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk">
+        <div class="d-flex justify-content-between mb-2">
+            <span v-if="fileState.total > 0">
+                {{
+                    $t('plugins.files.list.display', {
+                        from: fileState.from,
+                        to: fileState.to,
+                        total: fileState.total
+                    })
+                }}
+            </span>
+            <span v-else>
+                {{
+                    $t('plugins.files.list.none', {
+                        from: fileState.from,
+                        to: fileState.to,
+                        total: fileState.total
+                    })
+                }}
+            </span>
+            <button class="btn btn-sm btn-outline-primary" v-show="fileCount" @click="exportFiles(selectedFiles)">
+                {{
+                    $t('plugins.files.header.export.selected', {
+                        cnt: fileCount
+                    })
+                }}
+            </button>
+        </div>
+        <div class="row col mx-0 px-0 scroll-y-auto" infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk">
             <div class="col-sm-6 col-md-4 mb-3" v-for="file in files">
                 <div class="card text-center clickable" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
                     <div class="card-hover-overlay">
@@ -80,6 +100,9 @@
                             <span v-if="getFileTags(file).length" :title="$tc('global.has-tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
                                 <i class="fas fa-fw fa-tags text-info"></i>
                             </span>
+                        </div>
+                        <div class="position-absolute top-0 left-0 m-2">
+                            <input type="checkbox" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
                         </div>
                     </div>
                 </div>
@@ -165,10 +188,29 @@
             },
             getFileTags(file) {
                 return file.tags;
+            },
+            exportFiles(fileIds) {
+                const data = {
+                    files: JSON.stringify(fileIds)
+                };
+                $http.post(`file/export`, data).then(response => {
+                    const filename = this.$getPreference('prefs.project-name') + '.zip';
+                    this.$createDownloadLink(response.data, filename, true, response.headers['content-type']);
+                });
+            },
+            toggleExportSettings() {
+                this.showExportSettings = !this.showExportSettings;
             }
         },
         data() {
             return {
+                selectedFiles: [],
+                showExportSettings: false
+            }
+        },
+        computed: {
+            fileCount() {
+                return this.selectedFiles.length;
             }
         }
     }

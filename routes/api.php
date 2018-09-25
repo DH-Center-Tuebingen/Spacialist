@@ -156,6 +156,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('/new', 'FileController@uploadFile');
     // Should be patch, but file upload is not allowed as patch
     Route::post('/{id}/patch', 'FileController@patchContent')->where('id', '[0-9]+');
+    Route::post('/export', 'FileController@exportFiles');
 
     Route::patch('/{id}/property', 'FileController@patchProperty')->where('id', '[0-9]+');
     Route::patch('/{id}/tag', 'FileController@patchTags')->where('id', '[0-9]+');

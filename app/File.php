@@ -483,6 +483,24 @@ class File extends Model
         return base64_encode($archive->getFileContent($filepath));
     }
 
+    public static function createArchiveFromList($fileList) {
+        $dt = date('dmYHis');
+        $zip = '/tmp/exported-files-'.$dt.'.zip';
+        // Convert Laravel file collection to [
+        //     path => name
+        // ];
+        $nodes = [];
+        foreach($fileList as $f) {
+            $path = Helpers::getStorageFilePath($f->name);
+            $nodes[$path] = $f->name;
+        }
+        UnifiedArchive::archiveFiles($nodes, $zip);
+        return [
+            'path' => $zip,
+            'type' => 'application/zip'
+        ];
+    }
+
     private static function convertFileListToArray($fileList) {
         $newList = array_values($fileList);
         foreach($newList as $k => $entry) {

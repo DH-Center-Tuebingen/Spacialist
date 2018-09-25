@@ -306,6 +306,32 @@ class FileController extends Controller
         return response()->json($file);
     }
 
+    public function exportFiles(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_files')) {
+            return response()->json([
+                'error' => 'You do not have the permission to view files'
+            ], 403);
+        }
+        $this->validate($request, [
+            'files' => 'required|json'
+        ]);
+
+        $ids = json_decode($request->get('files'));
+        $files = File::whereIn('id', $ids)->get();
+        $archive = File::createArchiveFromList($files);
+        // get raw parsed content
+        $content = file_get_contents($archive['path']);
+        // delete tmp file
+        unlink($archive['path']);
+        // return response()->streamDownload(function() use ($content) {
+        //     echo $content;
+        // }, 'export.zip', [
+        //     'Content-Type' => $archive['type']
+        // ]);
+        return response(base64_encode($content))->header('Content-Type', $archive['type']);
+    }
+
     // PATCH
 
     public function patchProperty(Request $request, $id) {

@@ -16,6 +16,9 @@ const de = {
                     },
                     apply: 'Filter anwenden',
                     active: 'keine Filter aktiv | ein Filter aktiv | {cnt} Filter aktiv'
+                },
+                export: {
+                    selected: 'Ausgewählte Dateien exportieren ({cnt})'
                 }
             },
             toasts: {
@@ -116,7 +119,8 @@ const de = {
                 }
             },
             list: {
-                display: 'Zeige {from}-{to} von {total} Dateien an'
+                display: 'Zeige {from}-{to} von {total} Dateien an',
+                none: 'Keine Dateien vorhanden'
             }
         }
     }
