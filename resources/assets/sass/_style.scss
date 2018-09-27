@@ -129,3 +129,8 @@ code {
 .hover-underline:hover {
     text-decoration: underline;
 }
+
+.hover-item:hover {
+    background-color: $gray-200 !important;
+    border-radius: $input-border-radius !important;
+}

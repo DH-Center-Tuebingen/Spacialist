@@ -1,7 +1,7 @@
 <template>
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title">{{ $t('main.entity.modal.title') }}</h5>
+            <h5 class="modal-title">{{ $t('main.entity.modals.add.title') }}</h5>
             <button type="button" class="close" aria-label="Close" @click="$emit('close')">
                 <span aria-hidden="true">&times;</span>
             </button>

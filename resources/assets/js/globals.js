@@ -158,3 +158,7 @@ Vue.prototype.$getSettingsPlugins = function() {
 Vue.prototype.$getPlugins = function() {
     return this.$root.$data.plugins;
 }
+
+Vue.prototype.$addEntityType = function(entityType) {
+    this.$root.$data.entityTypes[entityType.id] = entityType;
+}

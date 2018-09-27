@@ -149,8 +149,13 @@ const de = {
             tree: {
                 add: 'Neue Top-Level Entität hinzufügen'
             },
-            modal: {
-                title: 'Neue Entität'
+            modals: {
+                add: {
+                    title: 'Neue Entität'
+                },
+                edit: {
+                    title: 'Entität editieren - {name}'
+                }
             },
             menu: {
                 add: 'Neue Entität hinzufügen',

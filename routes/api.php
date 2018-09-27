@@ -82,7 +82,9 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('/dm/{id}/relation', 'EditorController@setRelationInfo')->where('id', '[0-9]+');
     Route::post('/dm/attribute', 'EditorController@addAttribute');
     Route::post('/dm/entity_type/{ctid}/attribute', 'EditorController@addAttributeToEntityType')->where('ctid', '[0-9]+');
+    Route::post('/dm/entity_type/{ctid}/duplicate', 'EditorController@duplicateEntityType')->where('ctid', '[0-9]+');
 
+    Route::patch('/dm/entity_type/{ctid}/label', 'EditorController@patchLabel')->where('ctid', '[0-9]+');
     Route::patch('/dm/entity_type/{ctid}/attribute/{aid}/position', 'EditorController@reorderAttribute')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
     Route::patch('/dm/entity_type/{ctid}/attribute/{aid}/dependency', 'EditorController@patchDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
 

@@ -404,7 +404,85 @@ class EditorController extends Controller {
                 ->first(), 201);
     }
 
+    public function duplicateEntityType(Request $request, $ctid) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to duplicate an entity type'
+            ], 403);
+        }
+
+        try {
+            $entityType = EntityType::findOrFail($ctid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This entity-type does not exist'
+            ], 400);
+        }
+
+        $duplicate = $entityType->replicate();
+        $duplicate->save();
+
+        $newLayer = $entityType->layer->replicate();
+        $newLayer->entity_type_id = $duplicate->id;
+        $newLayer->position = AvailableLayer::where('is_overlay', true)->max('position') + 1;
+        $newLayer->save();
+
+        foreach($entityType->attributes as $attribute) {
+            $newAttribute = EntityAttribute::where('attribute_id', $attribute->pivot->attribute_id)
+                ->where('entity_type_id', $attribute->pivot->entity_type_id)
+                ->first()
+                ->replicate();
+            $newAttribute->entity_type_id = $duplicate->id;
+            $newAttribute->save();
+        }
+
+        foreach($entityType->sub_entity_types as $set) {
+            $newSet = EntityTypeRelation::where('parent_id', $set->pivot->parent_id)
+                ->where('child_id', $set->pivot->child_id)
+                ->first()
+                ->replicate();
+            $newSet->parent_id = $duplicate->id;
+            $newSet->save();
+        }
+
+        $childRelations = EntityTypeRelation::where('child_id', $ctid)->get();
+        foreach($childRelations as $relation) {
+            $newRelation = $relation->replicate();
+            $newRelation->child_id = $duplicate->id;
+            $newRelation->save();
+        }
+
+        $duplicate->load('sub_entity_types');
+
+        return response()->json($duplicate);
+    }
+
     // PATCH
+
+    public function patchLabel(Request $request, $ctid) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => 'You do not have the permission to reorder attributes'
+            ], 403);
+        }
+        $this->validate($request, [
+            'label' => 'required|string|exists:th_concept,concept_url'
+        ]);
+
+        try {
+            $entityType = EntityType::findOrFail($ctid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This entity-type does not exist'
+            ], 400);
+        }
+        $entityType->thesaurus_url = $request->get('label');
+        $entityType->save();
+
+        return response()->json(null, 204);
+    }
 
     public function reorderAttribute(Request $request, $ctid, $aid) {
         $user = auth()->user();

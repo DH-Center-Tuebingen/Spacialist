@@ -21,14 +21,18 @@
             <entity-types
                 class="col px-0 h-100 scroll-y-auto"
                 :data="localEntityTypes"
-                :on-add="onCreateEntityType"
-                :on-delete="onDeleteEntityType"
-                :on-select="setEntityType">
+                @add="onCreateEntityType"
+                @delete="onDeleteEntityType"
+                @duplicate="onDuplicateEntityType"
+                @edit="onEditEntityType"
+                @select="setEntityType">
             </entity-types>
         </div>
         <router-view class="col-md-5 h-100"
             :attributes="attributeList">
         </router-view>
+
+        <modals-container class="visible-overflow" />
 
         <modal name="new-entity-type-modal" height="auto" :scrollable="true" classes="of-visible">
             <div class="modal-content">
@@ -199,6 +203,7 @@
 
 <script>
     import CreateAttribute from './CreateAttribute.vue';
+    import EditEntityTypeModal from './modals/EditEntityType.vue';
 
     export default {
         beforeRouteEnter(to, from, next) {
@@ -348,7 +353,8 @@
                     vm.$modal.show('new-entity-type-modal');
                 }));
             },
-            onDeleteEntityType(entityType) {
+            onDeleteEntityType(event) {
+                const entityType = event.type;
                 const vm = this;
                 const id = entityType.id;
                 $httpQueue.add(() => vm.$http.get('/editor/dm/entity_type/occurrence_count/' + id).then(function(response) {
@@ -356,6 +362,29 @@
                     vm.setModalSelectedEntityType(entityType);
                     vm.openedModal = 'delete-entity-type-modal';
                     vm.$modal.show('delete-entity-type-modal');
+                }));
+            },
+            onDuplicateEntityType(event) {
+                const id = event.id;
+                $httpQueue.add(() => $http.post(`/editor/dm/entity_type/${id}/duplicate`).then(response => {
+                    this.localEntityTypes.push(response.data);
+                    this.$addEntityType(response.data);
+                }));
+            },
+            onEditEntityType(event) {
+                const entityType = event.type;
+                this.$modal.show(EditEntityTypeModal, {
+                    entityType: {...entityType},
+                    onSubmit: editedType => this.editEntityType(editedType, entityType)
+                });
+            },
+            editEntityType(edited, original) {
+                const id = edited.id;
+                const data = {
+                    label: edited.thesaurus_url
+                };
+                $httpQueue.add(() => $http.patch(`/editor/dm/entity_type/${id}/label`, data).then(response => {
+                    original.thesaurus_url = edited.thesaurus_url;
                 }));
             },
             hideNewEntityTypeModal() {
@@ -369,7 +398,8 @@
             newEntityTypeSearchResultSelected(label) {
                 Vue.set(this.newEntityType, 'label', label);
             },
-            setEntityType(entityType) {
+            setEntityType(event) {
+                const entityType = event.type;
                 this.$router.push({
                     name: 'dmdetail',
                     params: {
