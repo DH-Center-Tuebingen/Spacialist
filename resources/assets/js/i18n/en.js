@@ -91,7 +91,15 @@ const en = {
             list: 'List',
             geography: 'WKT (Well-Known-Binary)',
             table: 'Table',
-            sql: 'SQL-Query'
+            sql: 'SQL-Query',
+            serial: 'Serial (Auto-counting ID)',
+            'serial-info': `All instances share this identifier as attribute. Add <code class="normal">%d</code> as counter.
+            <br />
+            <span class="font-weight-bold">Example:</span>
+            <br />
+            <code class="normal">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;
+            <br />
+            To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class="normal">%03d</code>.`
         },
         active: 'Active',
         visible: 'Visible',

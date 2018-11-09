@@ -91,7 +91,15 @@ const de = {
             list: 'Liste',
             geography: 'WKT (Well-Known-Binary)',
             table: 'Tabelle',
-            sql: 'SQL-Abfrage'
+            sql: 'SQL-Abfrage',
+            serial: 'Fortlaufende ID',
+            'serial-info': `Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class="normal">%d</code> als Zähler.
+            <br />
+            <span class="font-weight-bold">Beispiel:</span>
+            <br />
+            <code class="normal">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.
+            <br />
+            Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class="normal">%03d</code>.`
         },
         active: 'Aktiviert',
         visible: 'Sichtbar',

@@ -239,6 +239,9 @@ class EditorController extends Controller {
             ],
             [
                 'datatype' => 'sql'
+            ],
+            [
+                'datatype' => 'serial'
             ]
         ]);
     }
@@ -396,6 +399,18 @@ class EditorController extends Controller {
 
         $a = Attribute::find($aid);
         $ca->datatype = $a->datatype;
+
+        // If new attribute is serial, add attribute to all existing entities
+        if($a->datatype == 'serial') {
+            $entites = Entity::where('entity_type_id', $ctid)
+                ->orderBy('created_at', 'asc')
+                ->get();
+            $ctr = 1;
+            foreach($entites as $e) {
+                Entity::addSerial($e->id, $aid, $a->text, $ctr, $user->name);
+                $ctr++;
+            }
+        }
 
         return response()->json(DB::table('entity_types as c')
                 ->where('ca.id', $ca->id)

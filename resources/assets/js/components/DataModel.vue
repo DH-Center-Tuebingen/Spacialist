@@ -230,10 +230,10 @@
                 if(this.needsColumns) {
                     data.columns = JSON.stringify(this.columns);
                 }
-                if(this.needsRootElement) {
+                if(attribute.root) {
                     data.root_id = attribute.root.concept.id;
                 }
-                if(this.needsTextElement) {
+                if(attribute.textContent) {
                     data.text = attribute.textContent;
                 }
                 $httpQueue.add(() => $http.post('/editor/dm/attribute', data).then(response => {

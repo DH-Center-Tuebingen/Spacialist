@@ -266,6 +266,28 @@ class EntityController extends Controller {
         $entity->lasteditor = $user->name;
         $entity->save();
 
+        $serialAttributes = $entity->entity_type
+                ->attributes()
+                ->where('datatype', 'serial')
+                ->get();
+        foreach($serialAttributes as $s) {
+            $cleanedRegex = preg_replace('/(.*)(%\d*d)(.*)/i', '/$1(\d+)$3/i', $s->text);
+
+            // get last added
+            $lastEntity = Entity::where('entity_type_id', $entity->entity_type_id)
+                ->orderBy('created_at', 'desc')
+                ->skip(1)
+                ->first();
+            $lastValue = AttributeValue::where('attribute_id', $s->id)
+                ->where('entity_id', $lastEntity->id)
+                ->first();
+            $nextValue = intval(preg_replace($cleanedRegex, '$1', $lastValue->str_val));
+            $nextValue++;
+
+
+            Entity::addSerial($entity->id, $s->id, $s->text, $nextValue, $user->name);
+        }
+
         return response()->json($entity, 201);
     }
 

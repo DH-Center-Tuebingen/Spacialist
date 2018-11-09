@@ -42,6 +42,17 @@
             </div>
         </div>
         <div class="form-group" v-show="needsTextElement">
+            <p class="alert alert-info" v-if="newAttribute.type && newAttribute.type.datatype == 'serial'">
+                <span v-html="$t('global.attributes.serial-info')"></span>
+            </p>
+            <label class="col-form-label col-md-3">
+                {{ $t('global.content') }}:
+            </label>
+            <div class="col-md-9">
+                <input type="text" class="form-control" v-model="newAttribute.textContent" />
+            </div>
+        </div>
+        <div class="form-group" v-show="needsTextareaElement">
             <label class="col-form-label col-md-3">
                 {{ $t('global.content') }}:
             </label>
@@ -70,6 +81,12 @@
         mounted() {},
         methods: {
             create() {
+                if(!this.needsRootElement) {
+                    Vue.delete(this.newAttribute, 'root');
+                }
+                if(!this.needsTextElement && !this.needsTextareaElement) {
+                    Vue.delete(this.newAttribute, 'textContent');
+                }
                 this.$emit('created', {
                     attribute: {...this.newAttribute}
                 });
@@ -114,6 +131,12 @@
             needsTextElement: function() {
                 return this.newAttribute.type &&
                     (
+                        this.newAttribute.type.datatype == 'serial'
+                    );
+            },
+            needsTextareaElement: function() {
+                return this.newAttribute.type &&
+                    (
                         this.newAttribute.type.datatype == 'sql'
                     );
             },
@@ -131,9 +154,9 @@
                         )
                     ) &&
                     (
-                        !this.needsTextElement ||
+                        !this.needsTextareaElement ||
                         (
-                            this.needsTextElement &&
+                            this.needsTextareaElement &&
                             this.newAttribute.textContent &&
                             this.newAttribute.textContent.length > 0
                         )

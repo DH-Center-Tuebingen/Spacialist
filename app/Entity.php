@@ -96,6 +96,15 @@ class Entity extends Model
         $entity->save();
     }
 
+    public static function addSerial($eid, $aid, $text, $ctr, $username) {
+        $av = new AttributeValue();
+        $av->entity_id = $eid;
+        $av->attribute_id = $aid;
+        $av->str_val = sprintf($text, $ctr);
+        $av->lasteditor = $username;
+        $av->save();
+    }
+
     public function child_entities() {
         return $this->hasMany('App\Entity', 'root_entity_id');
     }
@@ -117,7 +126,7 @@ class Entity extends Model
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'possibility', 'possibility_description', 'lasteditor', 'thesaurus_val', 'json_val', 'geography_val');
+        return $this->belongsToMany('App\Attribute', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'certainty_description', 'lasteditor', 'thesaurus_val', 'json_val', 'geography_val');
     }
 
     public function files() {
