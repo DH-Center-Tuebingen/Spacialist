@@ -83,7 +83,7 @@ class EditorController extends Controller {
                 case 'string-sc':
                 case 'string-mc':
                 case 'epoch':
-                    $selections[$a->id] = ThConcept::getChildren($a->thesaurus_root_url);
+                    $selections[$a->id] = ThConcept::getChildren($a->thesaurus_root_url, $a->recursive);
                     break;
                 case 'table':
                     $a->columns = Attribute::where('parent_id', $a->id)->get()->keyBy('id');
@@ -92,7 +92,7 @@ class EditorController extends Controller {
                         ->where('datatype', 'string-sc')
                         ->get();
                     foreach($columns as $c) {
-                        $selections[$c->id] = ThConcept::getChildren($c->thesaurus_root_url);
+                        $selections[$c->id] = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
                     }
                     break;
                 default:
@@ -127,7 +127,7 @@ class EditorController extends Controller {
             case 'string-sc':
             case 'string-mc':
             case 'epoch':
-                $selection = ThConcept::getChildren($attribute->thesaurus_root_url);
+                $selection = ThConcept::getChildren($attribute->thesaurus_root_url, $attribute->recursive);
                 break;
             case 'table':
                 // Only string-sc is allowed in tables
@@ -135,7 +135,7 @@ class EditorController extends Controller {
                     ->where('datatype', 'string-sc')
                     ->get();
                 foreach($columns as $c) {
-                    $selection = ThConcept::getChildren($c->thesaurus_root_url);
+                    $selection = ThConcept::getChildren($c->thesaurus_root_url, $c->recursive);
                 }
                 break;
             default:
@@ -325,7 +325,8 @@ class EditorController extends Controller {
             'datatype' => 'required|string',
             'root_id' => 'nullable|integer|exists:th_concept,id',
             'columns' => 'nullable|json',
-            'text' => 'string'
+            'text' => 'string',
+            'recursive' => 'nullable|boolean_string'
         ]);
 
         $lid = $request->get('label_id');
@@ -334,6 +335,7 @@ class EditorController extends Controller {
         $attr = new Attribute();
         $attr->thesaurus_url = $curl;
         $attr->datatype = $datatype;
+        $attr->recursive = $request->has('recursive') && Helpers::parseBoolean($request->get('recursive'));
         if($request->has('root_id')) {
             $pid = $request->get('root_id');
             $purl = ThConcept::find($pid)->concept_url;
@@ -352,6 +354,7 @@ class EditorController extends Controller {
                 $childAttr = new Attribute();
                 $childAttr->thesaurus_url = $curl;
                 $childAttr->datatype = $col->datatype;
+                $childAttr->recursive = Helpers::parseBoolean($col->recursive);
                 if(isset($col->root_id)) {
                     $pid = $col->root_id;
                     $purl = ThConcept::find($pid)->concept_url;

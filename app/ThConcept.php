@@ -49,25 +49,31 @@ class ThConcept extends Model
         return $conceptMap;
     }
 
-    public static function getChildren($url) {
+    public static function getChildren($url, $recursive = true) {
         $id = self::where('concept_url', $url)->value('id');
         if(!isset($id)) return [];
-        return DB::select("
-            WITH RECURSIVE
-            top AS (
-                SELECT br.broader_id, br.narrower_id, c.*
-                FROM th_broaders br
-                JOIN th_concept as c on c.id = br.narrower_id
-                WHERE broader_id = $id
-                UNION
-                SELECT br.broader_id, br.narrower_id, c2.*
-                FROM top t, th_broaders br
-                JOIN th_concept as c2 on c2.id = br.narrower_id
-                WHERE t.narrower_id = br.broader_id
-            )
-            SELECT *
-            FROM top
-        ");
+
+        $query = "SELECT br.broader_id, br.narrower_id, c.*
+        FROM th_broaders br
+        JOIN th_concept as c on c.id = br.narrower_id
+        WHERE broader_id = $id";
+
+        if($recursive) {
+            $query = "
+                WITH RECURSIVE
+                top AS (
+                    $query
+                    UNION
+                    SELECT br.broader_id, br.narrower_id, c2.*
+                    FROM top t, th_broaders br
+                    JOIN th_concept as c2 on c2.id = br.narrower_id
+                    WHERE t.narrower_id = br.broader_id
+                )
+                SELECT *
+                FROM top
+            ";
+        }
+        return DB::select($query);
     }
 
     public function labels() {

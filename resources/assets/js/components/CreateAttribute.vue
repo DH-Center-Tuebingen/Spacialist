@@ -41,6 +41,12 @@
                 ></label-search>
             </div>
         </div>
+        <div class="form-group" v-show="allowsRestriction">
+            <label class="col-form-label px-3" for="allow-restrictions">
+                {{ $t('global.recursive') }}:
+            </label>
+            <input type="checkbox" id="allow-restrictions" v-model="newAttribute.recursive" />
+        </div>
         <div class="form-group" v-show="needsTextElement">
             <p class="alert alert-info" v-if="newAttribute.type && newAttribute.type.datatype == 'serial'">
                 <span v-html="$t('global.attributes.serial-info')"></span>
@@ -90,7 +96,9 @@
                 this.$emit('created', {
                     attribute: {...this.newAttribute}
                 });
-                this.newAttribute = {};
+                this.newAttribute = {
+                    recursive: true
+                };
             },
             typeSelected(type, id) {
                 this.$emit('selected-type', {
@@ -109,7 +117,9 @@
         },
         data() {
             return {
-                newAttribute: {}
+                newAttribute: {
+                    recursive: true
+                }
             }
         },
         computed: {
@@ -119,6 +129,14 @@
                 } else {
                     return 'create-attribute-form';
                 }
+            },
+            allowsRestriction: function() {
+                return this.newAttribute.type &&
+                    (
+                        this.newAttribute.type.datatype == 'string-sc' ||
+                        this.newAttribute.type.datatype == 'string-mc' ||
+                        this.newAttribute.type.datatype == 'epoch'
+                    );
             },
             needsRootElement: function() {
                 return this.newAttribute.type &&

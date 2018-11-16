@@ -227,6 +227,7 @@
                 let data = {};
                 data.label_id = attribute.label.concept.id;
                 data.datatype = attribute.type.datatype;
+                data.recursive = attribute.recursive;
                 if(this.needsColumns) {
                     data.columns = JSON.stringify(this.columns);
                 }
@@ -251,7 +252,8 @@
                 const attribute = event.attribute;
                 let column = {
                     label_id: attribute.label.concept.id,
-                    datatype: attribute.type.datatype
+                    datatype: attribute.type.datatype,
+                    recursive: attribute.recursive
                 };
                 if(attribute.root) {
                     column.root_id = attribute.root.id;
