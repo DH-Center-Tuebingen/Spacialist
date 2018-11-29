@@ -95,7 +95,7 @@ const de = {
             serial: 'Fortlaufende ID',
             'serial-info': `Alle Instanzen teilen diesen Identifier als Attribut. Benutze <code class="normal">%d</code> als Zähler.
             <br />
-            <span class="font-weight-bold">Beispiel:</span>
+            <span class="font-weight-medium">Beispiel:</span>
             <br />
             <code class="normal">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.
             <br />

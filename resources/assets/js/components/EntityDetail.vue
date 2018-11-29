@@ -34,7 +34,7 @@
         </div>
         <div>
             <i class="fas fa-fw fa-user-edit"></i>
-            <span class="font-weight-bold">
+            <span class="font-weight-medium">
                 {{ selectedEntity.lasteditor }}
             </span>
             -

@@ -95,7 +95,7 @@ const en = {
             serial: 'Serial (Auto-counting ID)',
             'serial-info': `All instances share this identifier as attribute. Add <code class="normal">%d</code> as counter.
             <br />
-            <span class="font-weight-bold">Example:</span>
+            <span class="font-weight-medium">Example:</span>
             <br />
             <code class="normal">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;
             <br />

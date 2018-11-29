@@ -325,7 +325,7 @@
                             <table class="table table-striped table-hover table-sm mb-0">
                                 <tbody>
                                     <tr v-for="p in fileProperties" class="d-flex justify-content-between">
-                                        <td class="text-left font-weight-bold">
+                                        <td class="text-left font-weight-medium">
                                             {{ $t(`plugins.files.modal.detail.props.${p}`) }}
                                         </td>
                                         <td class="col text-left">
@@ -361,7 +361,7 @@
                             <table class="table table-striped table-hover table-sm mb-0">
                                 <tbody>
                                     <tr>
-                                        <td class="text-left font-weight-bold">
+                                        <td class="text-left font-weight-medium">
                                             {{ $t('plugins.files.modal.detail.metadata.created') }}
                                         </td>
                                         <td class="text-right text-muted">
@@ -369,7 +369,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-left font-weight-bold">
+                                        <td class="text-left font-weight-medium">
                                             {{ $t('plugins.files.modal.detail.metadata.lastmodified') }}
                                         </td>
                                         <td class="text-right text-muted">
@@ -377,7 +377,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-left font-weight-bold">
+                                        <td class="text-left font-weight-medium">
                                             {{ $t('plugins.files.modal.detail.metadata.filesize') }}
                                         </td>
                                         <td class="text-right text-muted">
@@ -385,7 +385,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-left font-weight-bold">
+                                        <td class="text-left font-weight-medium">
                                             <file-upload
                                                 class="mb-0"
                                                 v-show="!replaceFiles.length"
@@ -422,7 +422,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="text-right font-weight-bold">
+                                        <td class="text-right font-weight-medium">
                                             <a :href="selectedFile.url" :download="selectedFile.name" target="_blank">
                                                 {{ $t('global.download') }}
                                                 <i class="fas fa-fw fa-file-download text-muted"></i>

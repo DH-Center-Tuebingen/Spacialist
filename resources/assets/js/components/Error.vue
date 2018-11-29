@@ -9,7 +9,7 @@
             </div>
             <div class="modal-body col d-flex flex-column">
                 <p v-if="hasRequest">
-                    <code>{{ request.method }}</code> Request <a :href="request.url">{{ request.url }}</a> failed with status <span class="font-weight-bold">{{ request.status }}</span>.
+                    <code>{{ request.method }}</code> Request <a :href="request.url">{{ request.url }}</a> failed with status <span class="font-weight-medium">{{ request.status }}</span>.
                 </p>
                 <p class="alert alert-danger col scroll-y-auto">
                     Error Message: <span class="font-weight-light font-italic">{{ msg.error || msg }}</span>
