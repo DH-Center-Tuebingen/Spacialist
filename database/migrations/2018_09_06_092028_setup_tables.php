@@ -176,19 +176,44 @@ class SetupTables extends Migration
             $e->save();
         }
 
-        // list data format changes
-        $list_aid = Attribute::where('datatype', 'list')->pluck('id')->toArray();
+        // string-mc data format changes
+        $list_aid = Attribute::where('datatype', 'string-mc')->pluck('id')->toArray();
         foreach($list_aid as $aid) {
             $lists = AttributeValue::where('attribute_id', $aid)->get();
-            $context_ids = $lists->pluck('entity_id')->unique()->toArray();
-            foreach($context_ids as $cid) {
-                $list = $lists->where('entity_id', $cid)->values();
+            $entity_ids = $lists->pluck('entity_id')->unique()->toArray();
+            foreach($entity_ids as $eid) {
+                $list = $lists->where('entity_id', $eid)->values();
                 $entries = $list->map(function ($item, $key) {
                     return $item->getValue();
                 });
                 $tmp = $list[0];
                 $av = new AttributeValue();
-                $av->entity_id = $cid;
+                $av->entity_id = $eid;
+                $av->attribute_id = $aid;
+                $av->json_val = $entries;
+                $av->created_at = $tmp->created_at;
+                $av->updated_at = $tmp->updated_at;
+                $av->certainty = $tmp->certainty;
+                $av->lasteditor = $tmp->lasteditor;
+                $av->certainty_description = $tmp->certainty_description;
+                $av->save();
+                AttributeValue::whereIn('id', $list->pluck('id'))->delete();
+            }
+        }
+
+        // list data format changes
+        $list_aid = Attribute::where('datatype', 'list')->pluck('id')->toArray();
+        foreach($list_aid as $aid) {
+            $lists = AttributeValue::where('attribute_id', $aid)->get();
+            $entity_ids = $lists->pluck('entity_id')->unique()->toArray();
+            foreach($entity_ids as $eid) {
+                $list = $lists->where('entity_id', $eid)->values();
+                $entries = $list->map(function ($item, $key) {
+                    return $item->getValue();
+                });
+                $tmp = $list[0];
+                $av = new AttributeValue();
+                $av->entity_id = $eid;
                 $av->attribute_id = $aid;
                 $av->json_val = $entries;
                 $av->created_at = $tmp->created_at;
@@ -205,9 +230,9 @@ class SetupTables extends Migration
         $table_aid = Attribute::where('datatype', 'table')->pluck('id')->toArray();
         foreach($table_aid as $table_id) {
             $tables = AttributeValue::where('attribute_id', $table_id)->orderBy('id')->get();
-            $context_ids = $tables->pluck('entity_id')->unique()->toArray();
-            foreach($context_ids as $cid) {
-                $table = $tables->where('entity_id', $cid)->sortBy('id')->values();
+            $entity_ids = $tables->pluck('entity_id')->unique()->toArray();
+            foreach($entity_ids as $eid) {
+                $table = $tables->where('entity_id', $eid)->sortBy('id')->values();
                 $rows = $table->map(function ($item, $key) {
                     return $item->getValue();
                 });
@@ -225,7 +250,7 @@ class SetupTables extends Migration
                 }
                 $tmp = $table[0];
                 $av = new AttributeValue();
-                $av->entity_id = $cid;
+                $av->entity_id = $eid;
                 $av->attribute_id = $table_id;
                 $av->json_val = json_encode($newRows);
                 $av->created_at = $tmp->created_at;
