@@ -347,9 +347,14 @@ Vue.component('error-modal', require('./components/Error.vue'));
 Vue.component('data-analysis', require('./components/plugins/DataAnalysis.vue'));
 
 // Filter
-Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm', useLocale = false) {
+Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm', useLocale = false, isDateString) {
     if(value) {
-        let mom = moment.unix(Number(value));
+        let mom;
+        if(isDateString) {
+            mom = moment(value);
+        } else {
+            mom = moment.unix(Number(value));
+        }
         if(!useLocale) {
             mom = mom.utc();
         }

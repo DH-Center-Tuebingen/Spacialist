@@ -38,7 +38,9 @@
                 {{ selectedEntity.lasteditor }}
             </span>
             -
-            {{ selectedEntity.updated_at || selectedEntity.created_at }}
+            <span>
+                {{ (selectedEntity.updated_at || selectedEntity.created_at) | date(undefined, true, true) }}
+            </span>
         </div>
         <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="dataLoaded" v-can="'view_concept_props'"
             :attributes="selectedEntity.attributes"
