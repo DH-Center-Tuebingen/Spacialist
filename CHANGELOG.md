@@ -35,12 +35,12 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - QGIS-like styling (categorized and graduated (equal interval and quantile)) and labeling
 - Contributors in about modal
 ### Changed
-- Moved from Lumen (5.3) to Laravel (5.6)
+- Moved from Lumen (5.3) to Laravel (5.7)
 - Moved from AngularJS (1.5) to Vue.js (2.5)
-- Moved from LeafletJS (1.0) to OpenLayers (5.1)
+- Moved from LeafletJS (1.0) to OpenLayers (5.2)
 - Updated Bootstrap 3.3 to 4.1
 - Switched from Material Design back to original Bootstrap
-- Switched from Material Icons to new FontAwesome 5.2
+- Switched from Material Icons to new FontAwesome 5.5
 - Moved Plugin-like parts to real Plugins
 - Certainty Modal now has 3 icons to view information without opening the modal
   - !-Icon: Always displayed. Color based on certainty level
