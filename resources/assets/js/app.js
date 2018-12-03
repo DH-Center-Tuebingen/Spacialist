@@ -12,20 +12,20 @@ import en from './i18n/en';
 import de from './i18n/de';
 
 import App from './App.vue';
-import MainView from './components/MainView.vue';
-import EntityDetail from './components/EntityDetail.vue';
-import ReferenceModal from './components/EntityReferenceModal.vue';
 import Login from './components/Login.vue';
+const MainView = () => import(/* webpackChunkName: "group-main" */ './components/MainView.vue')
+const EntityDetail = () => import(/* webpackChunkName: "group-main" */ './components/EntityDetail.vue')
+const ReferenceModal = () => import(/* webpackChunkName: "group-main" */ './components/EntityReferenceModal.vue')
 // Tools
-import Bibliography from './components/BibliographyTable.vue';
-import BibliographyItemModal from './components/BibliographyItemModal.vue';
+const Bibliography = () => import(/* webpackChunkName: "group-bib" */ './components/BibliographyTable.vue')
+const BibliographyItemModal = () => import(/* webpackChunkName: "group-bib" */ './components/BibliographyItemModal.vue')
 // Settings
 import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
-import DataModel from './components/DataModel.vue';
-import DataModelDetailView from './components/DataModelDetailView.vue';
 import Preferences from './components/Preferences.vue';
 import UserPreferences from './components/UserPreferences.vue';
+const DataModel = () => import(/* webpackChunkName: "group-bib" */ './components/DataModel.vue')
+const DataModelDetailView = () => import(/* webpackChunkName: "group-bib" */ './components/DataModelDetailView.vue')
 
 import VueUploadComponent from 'vue-upload-component';
 import moment from 'moment';
