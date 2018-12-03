@@ -252,6 +252,7 @@
                     selectedFeature: undefined,
                     select: {},
                     modify: {},
+                    changeState: '',
                     init: function() {
                         vm.modify.select = new Select({
                             hitTolerance: 5,
@@ -300,15 +301,16 @@
                         });
                         vm.modify.modify.on('change:active', function(event) {
                             vm.modify.modifyActive = !event.oldValue;
-                            if(!vm.modify.modifyActive) {
+                            if(!vm.modify.modifyActive && vm.modify.changeState == 'cancel') {
                                 for(let k in vm.modify.modifiedFeatures) {
                                     const org = vm.modify.originalFeatures[k];
                                     vm.modify.modifiedFeatures[k].setGeometry(org.feature.getGeometry());
                                 }
-                                vm.modify.modifiedFeatures = {};
-                                vm.modify.originalFeatures = {};
-                                vm.modify.selectedFeature = undefined;
                             }
+                            vm.modify.changeState = '';
+                            vm.modify.modifiedFeatures = {};
+                            vm.modify.originalFeatures = {};
+                            vm.modify.selectedFeature = undefined;
                         });
                         vm.modify.modify.on('modifyend', function(event) {
                         });
@@ -336,6 +338,9 @@
                             features.push(vm.modify.modifiedFeatures[k].clone());
                         }
                         return features;
+                    },
+                    setChangeState(state) {
+                        vm.modify.changeState = state;
                     }
                 };
                 vm.delete = {
@@ -1198,6 +1203,9 @@
                     this.modify.setActive(false, oldMode == 'modify');
                     this.delete.setActive(true);
                 } else {
+                    if(cancelled) {
+                        this.modify.setChangeState('cancel');
+                    }
                     this.drawType = '';
                     this.interactionMode = '';
                     this.draw.setActive(false);
