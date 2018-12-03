@@ -11,7 +11,8 @@
             :on-modifyend="updateFeatures"
             :reset="false"
             :selected-entity="selectedEntity"
-            v-on:update:link="(geoId, entityId) => $emit('update:link', geoId, entityId)">
+            @update:link="(geoId, entityId) => $emit('update:link', geoId, entityId)"
+            @feature-selected="handleFeatureSelection">
         </ol-map>
     </div>
     <div v-else v-html="$t('plugins.map.tab.loading')">
@@ -98,6 +99,19 @@
 
                     });
                 });
+            },
+            handleFeatureSelection(e) {
+                const p = e.properties;
+                if(p.entity) {
+                    this.$router.push({
+                        append: true,
+                        name: 'entitydetail',
+                        params: {
+                            id: p.entity.id
+                        },
+                        query: this.$route.query
+                    });
+                }
             }
         },
         data() {

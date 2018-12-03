@@ -694,17 +694,10 @@
                         const feature = vm.getFeatureForEvent(e);
                         if(feature) {
                             vm.selectedFeature = feature;
-                            let props = feature.getProperties();
-                            if (props.entity) {
-                                vm.$router.push({
-                                    append: true,
-                                    name: 'entitydetail',
-                                    params: {
-                                        id: props.entity.id
-                                    },
-                                    query: vm.$route.query
-                                });
-                            }
+                            vm.$emit('feature-selected', {
+                                feature: feature,
+                                properties: feature.getProperties()
+                            });
                         } else {
                             vm.selectedFeature = {};
                         }
