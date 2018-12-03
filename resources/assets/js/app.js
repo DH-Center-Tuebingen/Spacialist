@@ -270,6 +270,14 @@ const router = new VueRouter({
         },
     ]
 });
+// Workaround to load plugin pages, whose routes
+// are loaded after the initial page load
+router.onReady(() => {
+    const matchedComponents = router.getMatchedComponents(router.history.current.fullPath);
+    if(matchedComponents.length == 1) {
+        router.push(router.history.current.fullPath);
+    }
+});
 
 Vue.router = router;
 App.router = Vue.router;
