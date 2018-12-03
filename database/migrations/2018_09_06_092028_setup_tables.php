@@ -24,9 +24,6 @@ class SetupTables extends Migration
     ];
 
     private static $newColumnNames = [
-        'attributes' => [
-            'root_id' => 'parent_id'
-        ],
         'attribute_values' => [
             'context_id' => 'entity_id',
             'context_val' => 'entity_val',
@@ -184,7 +181,11 @@ class SetupTables extends Migration
             foreach($entity_ids as $eid) {
                 $list = $lists->where('entity_id', $eid)->values();
                 $entries = $list->map(function ($item, $key) {
-                    return $item->getValue();
+                    $url = $item->getValue();
+                    $concept = ThConcept::where('concept_url', $url)
+                        ->select('id', 'concept_url')
+                        ->first();
+                    return $concept->toArray();
                 });
                 $tmp = $list[0];
                 $av = new AttributeValue();
