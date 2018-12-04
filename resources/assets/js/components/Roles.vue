@@ -98,7 +98,7 @@
                                 {{ $t('global.display-name') }}:
                             </label>
                             <div class="col-md-9">
-                                <input class="form-control" type="text" id="display_name" v-model="newRole.display_name" required />
+                                <input class="form-control" type="text" id="display_name" v-model="newRole.display_name" />
                             </div>
                         </div>
                         <div class="form-group">
@@ -106,7 +106,7 @@
                                 {{ $t('global.description') }}:
                             </label>
                             <div class="col-md-9">
-                                <input class="form-control" type="text" id="description" v-model="newRole.description" required />
+                                <input class="form-control" type="text" id="description" v-model="newRole.description" />
                             </div>
                         </div>
                     </form>
