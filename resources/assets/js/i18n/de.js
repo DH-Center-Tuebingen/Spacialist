@@ -158,7 +158,21 @@ const de = {
                 }
             },
             tree: {
-                add: 'Neue Top-Level Entität hinzufügen'
+                add: 'Neue Top-Level Entität hinzufügen',
+                sorts: {
+                    asc: {
+                        rank: 'Rang - Aufsteigend (Drag & Drop)',
+                        name: 'Name - Aufsteigend',
+                        children: 'Anzahl Unter-Entitäten - Aufsteigend',
+                        type: 'Entitätstyp - Aufsteigend'
+                    },
+                    desc: {
+                        rank: 'Rang - Absteigend',
+                        name: 'Name - Absteigend',
+                        children: 'Anzahl Unter-Entitäten - Absteigend',
+                        type: 'Entitätstyp - Absteigend'
+                    }
+                }
             },
             modals: {
                 add: {

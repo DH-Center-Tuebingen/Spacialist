@@ -15,32 +15,32 @@
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="requestAddNewEntity()">
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
-            <div class="mb-2">
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'asc')">
+            <div class="mb-2 d-flex flex-row justify-content-between">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'asc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.asc.rank')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-sort-numeric-down"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'desc')">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'desc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.desc.rank')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-sort-numeric-up"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'asc')">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'asc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.asc.name')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-sort-alpha-down"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'desc')">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('alpha', 'desc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.desc.name')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-sort-alpha-up"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'asc')">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'asc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.asc.children')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-sort-amount-down"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'desc')">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'desc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.desc.children')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-sort-amount-up"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'asc')">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'asc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.asc.type')" data-trigger="hover" data-placement="bottom">
                     <span class="fa-stack d-inline" style="margin-right: -0.2rem;">
                         <i class="fas fa-long-arrow-alt-down"></i>
                         <i class="fas fa-monument" data-fa-transform="left-4"></i>
                     </span>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'desc')">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'desc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.desc.type')" data-trigger="hover" data-placement="bottom">
                     <span class="fa-stack d-inline" style="margin-right: -0.2rem;">
                         <i class="fas fa-long-arrow-alt-up"></i>
                         <i class="fas fa-monument" data-fa-transform="left-4"></i>
@@ -141,6 +141,12 @@
                 required: true,
                 type: Object
             }
+        },
+        beforeMount() {
+            // Enable popovers
+            $(function () {
+                $('[data-toggle="popover"]').popover()
+            });
         },
         mounted() {
             this.init();

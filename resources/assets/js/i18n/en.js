@@ -158,7 +158,21 @@ const en = {
                 }
             },
             tree: {
-                add: 'Add new Top-Level-Entity'
+                add: 'Add new Top-Level-Entity',
+                sorts: {
+                    asc: {
+                        rank: 'Rank - Ascending (Drag & Drop)',
+                        name: 'Name - Ascending',
+                        children: 'Count Sub-Entities - Ascending',
+                        type: 'Entity-Type - Ascending'
+                    },
+                    desc: {
+                        rank: 'Rank - Descending (Drag & Drop)',
+                        name: 'Name - Descending',
+                        children: 'Count Sub-Entities - Descending',
+                        type: 'Entity-Type - Descending'
+                    }
+                }
             },
             modals: {
                 add: {
