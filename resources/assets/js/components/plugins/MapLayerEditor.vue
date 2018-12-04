@@ -19,7 +19,7 @@
             </layer-list>
         </div>
         <div class="col-md-6 h-100">
-            <router-view></router-view>
+            <router-view @request-delete="handleLayerDeleteRequest"></router-view>
         </div>
 
         <modal name="delete-layer-modal" height="auto" :scrollable="true">
@@ -81,6 +81,9 @@
                         id: layer.id
                     }
                 });
+            },
+            handleLayerDeleteRequest(e) {
+                this.requestDeleteLayer(e.layer);
             },
             requestDeleteLayer(layer) {
                 this.selectedLayer = {...layer};

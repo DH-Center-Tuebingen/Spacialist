@@ -4,9 +4,14 @@
             <h5>
                 {{ $t('plugins.map.layer-editor.properties-of', {name: title}) }}
             </h5>
-            <button type="submit" form="layer-form" class="btn btn-success">
-                <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
-            </button>
+            <div class="">
+                <button type="submit" form="layer-form" class="btn btn-success">
+                    <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
+                </button>
+                <button type="button" class="btn btn-danger" v-if="layer.type != 'unlinked' && !layer.entity_type_id" @click="requestDeleteLayer()">
+                    <i class="fas fa-fw fa-trash"></i> {{ $t('global.delete') }}
+                </button>
+            </div>
         </div>
         <form role="form" id="layer-form" class="col pl-0 scroll-y-auto scroll-x-hidden" @submit.prevent="updateLayer(layer)">
             <div v-if="isEntityLayer">
@@ -190,6 +195,11 @@
                         }),
                         'success'
                     );
+                });
+            },
+            requestDeleteLayer() {
+                this.$emit('request-delete', {
+                    layer: this.layer
                 });
             }
         },
