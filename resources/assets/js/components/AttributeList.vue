@@ -13,16 +13,16 @@
             <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" v-show="!hiddenByDependency[attribute.id]">
                 <label class="col-form-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
                     <div v-show="hoverState[i]">
-                        <a v-if="onReorder" href="#" class="reorder-handle">
+                        <a v-show="onReorder" href="" @click.prevent="" class="reorder-handle" data-toggle="popover" :data-content="$t('global.resort')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-sort text-secondary"></i>
                         </a>
-                        <button v-if="onEdit" class="btn btn-info btn-fab rounded-circle" @click="onEdit(attribute)">
+                        <button v-show="onEdit" class="btn btn-info btn-fab rounded-circle" @click="onEdit(attribute)" data-toggle="popover" :data-content="$t('global.edit')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
                         </button>
-                        <button v-if="onRemove" class="btn btn-danger btn-fab rounded-circle" @click="onRemove(attribute)">
+                        <button v-show="onRemove" class="btn btn-danger btn-fab rounded-circle" @click="onRemove(attribute)" data-toggle="popover" :data-content="$t('global.remove')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
                         </button>
-                        <button v-if="onDelete" class="btn btn-danger btn-fab rounded-circle" @click="onDelete(attribute)">
+                        <button v-show="onDelete" class="btn btn-danger btn-fab rounded-circle" @click="onDelete(attribute)" data-toggle="popover" :data-content="$t('global.delete')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                         </button>
                     </div>
@@ -279,6 +279,12 @@
             draggable
         },
         inject: ['$validator'],
+        beforeMount() {
+            // Enable popovers
+            $(function () {
+                $('[data-toggle="popover"]').popover()
+            });
+        },
         mounted() {
             this.attributes.forEach(a => this.checkDependency(a.id));
         },

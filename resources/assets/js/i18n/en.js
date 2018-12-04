@@ -7,6 +7,8 @@ const en = {
         close: 'Close',
         add: 'Add',
         edit: 'Edit',
+        duplicate: 'Duplicate',
+        resort: 'Re-sort',
         update: 'Update',
         replace: 'Replace',
         clear: 'Clear',

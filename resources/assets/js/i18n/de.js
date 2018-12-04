@@ -7,6 +7,8 @@ const de = {
         close: 'Schließen',
         add: 'Hinzufügen',
         edit: 'Editieren',
+        duplicate: 'Duplizieren',
+        resort: 'Umsortieren',
         update: 'Aktualisieren',
         replace: 'Ersetzen',
         clear: 'Leeren',

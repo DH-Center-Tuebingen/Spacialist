@@ -8,13 +8,13 @@
                 </a>
             </div>
             <div class="ml-auto" v-show="hoverState[i]">
-                <button class="btn btn-info btn-fab rounded-circle" v-if=" hasEditListener" @click="$emit('edit', {type: d})">
+                <button class="btn btn-info btn-fab rounded-circle" v-if=" hasEditListener" @click="$emit('edit', {type: d})" data-toggle="popover" :data-content="$t('global.edit')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-xs fa-edit" style="vertical-align: 0;"></i>
                 </button>
-                <button class="btn btn-primary btn-fab rounded-circle" v-if=" hasDuplicateListener" @click="$emit('duplicate', {id: d.id})">
+                <button class="btn btn-primary btn-fab rounded-circle" v-if=" hasDuplicateListener" @click="$emit('duplicate', {id: d.id})" data-toggle="popover" :data-content="$t('global.duplicate')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-xs fa-clone" style="vertical-align: 0;"></i>
                 </button>
-                <button class="btn btn-danger btn-fab rounded-circle" v-if=" hasDeleteListener" @click="$emit('delete', {type: d})">
+                <button class="btn btn-danger btn-fab rounded-circle" v-if=" hasDeleteListener" @click="$emit('delete', {type: d})" data-toggle="popover" :data-content="$t('global.delete')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-xs fa-trash" style="vertical-align: 0;"></i>
                 </button>
             </div>
@@ -35,6 +35,12 @@
                 type: Array,
                 required: true
             }
+        },
+        beforeMount() {
+            // Enable popovers
+            $(function () {
+                $('[data-toggle="popover"]').popover()
+            });
         },
         mounted() {},
         methods: {
