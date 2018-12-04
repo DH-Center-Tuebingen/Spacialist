@@ -20,11 +20,6 @@
                                 <i class="fas fa-fw fa-tags"></i> {{ $t('plugins.map.gis.props.labels.title') }}
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" :class="{active: activeTab == 'diagrams'}" @click.prevent="setActiveTab('diagrams')" href="#">
-                                <i class="fas fa-fw fa-chart-pie"></i> {{ $t('plugins.map.gis.props.diagrams.title') }}
-                            </a>
-                        </li>
                     </ul>
                 </div>
                 <div class="col-md-10 h-100">
@@ -51,7 +46,6 @@
 <script>
     Vue.component('map-gis-properties-style', require('./MapGisPropertiesStyle.vue'))
     Vue.component('map-gis-properties-labels', require('./MapGisPropertiesLabels.vue'))
-    Vue.component('map-gis-properties-diagrams', require('./MapGisPropertiesDiagrams.vue'))
 
     export default {
         props: {
