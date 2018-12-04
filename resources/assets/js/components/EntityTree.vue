@@ -34,6 +34,18 @@
                 <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('children', 'desc')">
                     <i class="fas fa-fw fa-sort-amount-up"></i>
                 </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'asc')">
+                    <span class="fa-stack d-inline" style="margin-right: -0.2rem;">
+                        <i class="fas fa-long-arrow-alt-down"></i>
+                        <i class="fas fa-monument" data-fa-transform="left-4"></i>
+                    </span>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'desc')">
+                    <span class="fa-stack d-inline" style="margin-right: -0.2rem;">
+                        <i class="fas fa-long-arrow-alt-up"></i>
+                        <i class="fas fa-monument" data-fa-transform="left-4"></i>
+                    </span>
+                </button>
             </div>
             <tree
                 id="entity-tree"
@@ -170,6 +182,19 @@
                     case 'children':
                         sortFn = (a, b) => {
                             let value = a.children_count - b.children_count;
+                            if(dir == 'desc') {
+                                value = -value;
+                            }
+                            return value;
+                        };
+                        break;
+                    case 'type':
+                        sortFn = (a, b) => {
+                            const aurl = this.$translateEntityType(a.entity_type_id);
+                            const burl = this.$translateEntityType(b.entity_type_id);
+                            let value = 0;
+                            if(aurl < burl) value = -1;
+                            if(aurl > burl) value = 1;
                             if(dir == 'desc') {
                                 value = -value;
                             }

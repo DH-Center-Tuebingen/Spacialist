@@ -129,6 +129,10 @@ Vue.prototype.$translateConcept = function(url) {
     return concepts[url].label;
 }
 
+Vue.prototype.$translateEntityType = function(id) {
+    return this.$translateConcept(this.$root.$data.entityTypes[id].thesaurus_url);
+}
+
 Vue.prototype.$getEntityType = function(id) {
     return this.$root.$data.entityTypes[id];
 }
