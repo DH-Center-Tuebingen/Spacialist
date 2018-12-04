@@ -186,7 +186,7 @@
                         </p>
                     </div>
             </file-upload>
-            <div v-show="!uploadFiles.length">
+            <div v-show="!uploadFiles.length" class="mt-2">
                 <form role="form">
                     <div class="form-group row">
                         <label class="col-form-label col-md-3" for="upload-property-copyright">
@@ -946,9 +946,10 @@
                     if(this.filesUploaded > 0) {
                         this.onFilesUploaded(this.unlinkedFiles);
                         this.onFilesUploaded(this.allFiles);
-                        this.filesUploaded = 0;
-                        this.filesErrored = 0;
                     }
+                    this.filesUploaded = 0;
+                    this.filesErrored = 0;
+                    this.uploadFiles = [];
                 }
             },
             replaceFile(file, vm) {
