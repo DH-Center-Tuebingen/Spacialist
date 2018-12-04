@@ -32,9 +32,9 @@
                     <sup class="clickable" v-if="onMetadata" @click="onMetadata(attribute)">
                         <span>
                         <i class="fas fa-fw fa-exclamation"
-                        :class="getPossibilityClass(localValues[attribute.id].possibility)"></i>
+                        :class="getCertaintyClass(localValues[attribute.id].certainty)"></i>
                         </span>
-                        <span v-if="localValues[attribute.id].possibility_description">
+                        <span v-if="localValues[attribute.id].certainty_description">
                             <i class="fas fa-fw fa-comment"></i>
                         </span>
                         <span v-if="metadataAddon(attribute.thesaurus_url)">
@@ -329,7 +329,7 @@
                 this.fields[`attribute-${aid}`].dirty = true;
                 this.checkDependency(aid);
             },
-            getPossibilityClass(certainty, aid) {
+            getCertaintyClass(certainty, aid) {
                 let activeClasses = [];
                 if(certainty <= 25) {
                     activeClasses.push('text-danger');

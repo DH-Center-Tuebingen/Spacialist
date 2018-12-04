@@ -10,16 +10,16 @@
             <div class="modal-body col col-md-8 offset-md-2 scroll-y-auto">
                 <h4>{{ $t('main.entity.references.certainty') }}</h4>
                 <div class="progress" @click="setCertainty">
-                    <div class="progress-bar" role="progressbar" :class="{'bg-danger': refs.value.possibility <= 25, 'bg-warning': refs.value.possibility <= 50, 'bg-info': refs.value.possibility <= 75, 'bg-success': refs.value.possibility > 75}" :aria-valuenow="refs.value.possibility" aria-valuemin="0" aria-valuemax="100" :style="{width: refs.value.possibility+'%'}">
+                    <div class="progress-bar" role="progressbar" :class="{'bg-danger': refs.value.certainty <= 25, 'bg-warning': refs.value.certainty <= 50, 'bg-info': refs.value.certainty <= 75, 'bg-success': refs.value.certainty > 75}" :aria-valuenow="refs.value.certainty" aria-valuemin="0" aria-valuemax="100" :style="{width: refs.value.certainty+'%'}">
                         <span class="sr-only">
-                            {{ refs.value.possibility }}% certainty
+                            {{ refs.value.certainty }}% certainty
                         </span>
-                        {{ refs.value.possibility }}%
+                        {{ refs.value.certainty }}%
                     </div>
                 </div>
                 <form role="form" class="mt-2" @submit.prevent="onUpdateCertainty">
                     <div class="form-group">
-                        <textarea class="form-control" v-model="refs.value.possibility_description" :placeholder="$t('main.entity.references.certaintyc')"></textarea>
+                        <textarea class="form-control" v-model="refs.value.certainty_description" :placeholder="$t('main.entity.references.certaintyc')"></textarea>
                     </div>
                     <div class="text-center">
                         <button type="submit" class="btn btn-outline-success">
@@ -148,8 +148,8 @@
         },
         methods: {
             init() {
-                if(!this.refs.value.possibility) {
-                    Vue.set(this.refs.value, 'possibility', 100);
+                if(!this.refs.value.certainty) {
+                    Vue.set(this.refs.value, 'certainty', 100);
                 }
                 const curr = this.$route;
                 this.entityId = curr.params.id;
@@ -159,7 +159,7 @@
             setCertainty(event) {
                 const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
                 const clickPos = event.layerX; // in px
-                const currentValue = this.refs.value.possibility;
+                const currentValue = this.refs.value.certainty;
                 let value = parseInt(clickPos/maxSize*100);
                 const diff = Math.abs(value-currentValue);
                 if(diff < 10) {
@@ -171,13 +171,13 @@
                 } else {
                     value = parseInt((value+5)/10)*10;
                 }
-                Vue.set(this.refs.value, 'possibility', value);
+                Vue.set(this.refs.value, 'certainty', value);
             },
             onUpdateCertainty() {
                 if(!this.$can('duplicate_edit_concepts')) return;
                 const data = {
-                    certainty: this.refs.value.possibility,
-                    certainty_description: this.refs.value.possibility_description
+                    certainty: this.refs.value.certainty,
+                    certainty_description: this.refs.value.certainty_description
                 };
                 $httpQueue.add(() => $http.patch(`/entity/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
                     const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
@@ -185,8 +185,8 @@
                         this.$t('main.entity.references.toasts.updated-certainty.title'),
                         this.$t('main.entity.references.toasts.updated-certainty.msg', {
                             name: attributeName,
-                            i: this.refs.value.possibility,
-                            desc: this.refs.value.possibility_description
+                            i: this.refs.value.certainty,
+                            desc: this.refs.value.certainty_description
                         }),
                         'success'
                     );

@@ -74,13 +74,7 @@ class AttributeValue extends Model
 
     public function patch($values) {
         foreach($values as $k => $v) {
-            if($k == 'certainty') {
-                $this->possibility = $v;
-            } else if($k == 'certainty_description') {
-                $this->possibility_description = $v;
-            } else {
-                $this->{$k} = $v;
-            }
+            $this->{$k} = $v;
         }
         $this->save();
     }

@@ -351,7 +351,7 @@ $factory->define(App\AttributeValue::class, function(Faker $faker) {
     return [
         'context_id' => $context->id,
         'attribute_id' => $attribute->id,
-        'possibility' => $faker->numberBetween($min = 0, $max = 100),
+        'certainty' => $faker->numberBetween($min = 0, $max = 100),
         'lasteditor' => $faker->name,
         $dt => $val
     ];

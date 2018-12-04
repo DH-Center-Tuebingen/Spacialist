@@ -732,7 +732,7 @@
                             },
                             {
                                 label: 'Certainty',
-                                key: 'possibility',
+                                key: 'certainty',
                                 hidden: true,
                                 type: 'percentage'
                             },

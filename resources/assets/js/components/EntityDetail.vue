@@ -131,31 +131,30 @@
         methods: {
             init(entity) {},
             getEntityData(entity) {
-                const vm = this;
-                if(!vm.$can('view_concept_props')) {
-                    Vue.set(vm.selectedEntity, 'data', {});
-                    Vue.set(vm.selectedEntity, 'attributes', []);
-                    Vue.set(vm.selectedEntity, 'selections', {});
-                    Vue.set(vm.selectedEntity, 'dependencies', []);
-                    Vue.set(vm.selectedEntity, 'references', []);
-                    Vue.set(vm, 'dataLoaded', true);
+                if(!this.$can('view_concept_props')) {
+                    Vue.set(this.selectedEntity, 'data', {});
+                    Vue.set(this.selectedEntity, 'attributes', []);
+                    Vue.set(this.selectedEntity, 'selections', {});
+                    Vue.set(this.selectedEntity, 'dependencies', []);
+                    Vue.set(this.selectedEntity, 'references', []);
+                    Vue.set(this, 'dataLoaded', true);
                     return;
                 }
                 const cid = entity.id;
                 const ctid = entity.entity_type_id;
-                $httpQueue.add(() => vm.$http.get(`/entity/${cid}/data`).then(function(response) {
+                $httpQueue.add(() => $http.get(`/entity/${cid}/data`).then(response => {
                     // if result is empty, php returns [] instead of {}
                     if(response.data instanceof Array) {
                         response.data = {};
                     }
-                    Vue.set(vm.selectedEntity, 'data', response.data);
-                    return vm.$http.get(`/editor/entity_type/${ctid}/attribute`);
-                }).then(function(response) {
-                    vm.selectedEntity.attributes = [];
+                    Vue.set(this.selectedEntity, 'data', response.data);
+                    return $http.get(`/editor/entity_type/${ctid}/attribute`);
+                }).then(response => {
+                    this.selectedEntity.attributes = [];
                     let data = response.data;
                     for(let i=0; i<data.attributes.length; i++) {
                         let aid = data.attributes[i].id;
-                        if(!vm.selectedEntity.data[aid]) {
+                        if(!this.selectedEntity.data[aid]) {
                             let val = {};
                             switch(data.attributes[i].datatype) {
                                 case 'dimension':
@@ -167,17 +166,17 @@
                                     val.value = [];
                                     break;
                             }
-                            Vue.set(vm.selectedEntity.data, aid, val);
+                            Vue.set(this.selectedEntity.data, aid, val);
                         } else {
-                            const val = vm.selectedEntity.data[aid].value;
+                            const val = this.selectedEntity.data[aid].value;
                             switch(data.attributes[i].datatype) {
                                 case 'date':
                                     const dtVal = new Date(val);
-                                    vm.selectedEntity.data[aid].value = dtVal;
+                                    this.selectedEntity.data[aid].value = dtVal;
                                     break;
                             }
                         }
-                        vm.selectedEntity.attributes.push(data.attributes[i]);
+                        this.selectedEntity.attributes.push(data.attributes[i]);
                     }
                     // if result is empty, php returns [] instead of {}
                     if(data.selections instanceof Array) {
@@ -186,15 +185,15 @@
                     if(data.dependencies instanceof Array) {
                         data.dependencies = {};
                     }
-                    Vue.set(vm.selectedEntity, 'selections', data.selections);
-                    Vue.set(vm.selectedEntity, 'dependencies', data.dependencies);
+                    Vue.set(this.selectedEntity, 'selections', data.selections);
+                    Vue.set(this.selectedEntity, 'dependencies', data.dependencies);
 
-                    const aid = vm.$route.params.aid;
+                    const aid = this.$route.params.aid;
                     if(aid) {
-                        this.setModalValues(aid)
+                        this.setModalValues(aid);
                     }
 
-                    Vue.set(vm, 'dataLoaded', true);
+                    Vue.set(this, 'dataLoaded', true);
                 }));
             },
             saveEntity(entity) {
@@ -302,7 +301,7 @@
             },
             setModalValues(aid) {
                 const attribute = this.selectedEntity.attributes.find(a => a.id == aid);
-                this.ref.refs = this.selectedEntity.references[attribute.thesaurus_url];
+                this.ref.refs = this.hasReferenceGroup(attribute.thesaurus_url) ? this.selectedEntity.references[attribute.thesaurus_url] : [];
                 this.ref.value = this.selectedEntity.data[aid];
                 this.ref.attribute = attribute;
             },
