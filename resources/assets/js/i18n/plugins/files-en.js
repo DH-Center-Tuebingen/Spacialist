@@ -111,7 +111,8 @@ const en = {
                     },
                     replace: {
                         button: 'Replace file',
-                        confirm: 'Do you want to replace the file ({size}) with {name} ({size2})?'
+                        confirm: 'Do you want to replace the file ({size}) with {name} ({size2})?',
+                        different_mime: 'These files have a different mime-type. If you proceed, type is changed from <span class="font-weight-medium">{mime_old}</span> to <span class="font-weight-medium">{mime_new}</span>. You should adjust the filename.'
                     }
                 },
                 delete: {

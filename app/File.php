@@ -424,6 +424,7 @@ class File extends Model
         $fileUrl = Helpers::getStorageFilePath($this->name);
         $lastModified = date('Y-m-d H:i:s', filemtime($fileUrl));
 
+        $this->mime_type = $fileObject->getMimeType();
         $this->modified = $lastModified;
         $this->save();
     }

@@ -111,7 +111,8 @@ const de = {
                     },
                     replace: {
                         button: 'Datei ersetzen',
-                        confirm: 'Willst du die Datei ({size}) durch {name} ({size2}) ersetzen?'
+                        confirm: 'Willst du die Datei ({size}) durch {name} ({size2}) ersetzen?',
+                        different_mime: 'Die Dateien haben einen unterschiedlichen Mime-Type. Wenn du fortfährst, wird der Typ von <span class="font-weight-medium">{mime_old}</span> zu <span class="font-weight-medium">{mime_new}</span> geändert. Du solltest daher den Dateinamen anpassen.'
                     }
                 },
                 delete: {

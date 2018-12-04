@@ -410,6 +410,8 @@
                                                         })
                                                     }}
                                                 </span>
+                                                <span class="text-danger" v-if="replaceFiles[0].type != selectedFile.mime_type" v-html="$t('plugins.files.modal.detail.replace.different_mime', { mime_old: selectedFile.mime_type, mime_new: replaceFiles[0].type})">
+                                                </span>
                                                 <div class="d-flex mt-1">
                                                     <button type="button" class="btn btn-outline-success" @click="doReplaceFile">
                                                         <i class="fas fa-fw fa-check"></i>
@@ -952,12 +954,13 @@
                     this.uploadFiles = [];
                 }
             },
-            replaceFile(file, vm) {
+            replaceFile(file) {
                 if(!this.replaceFileUrl) return;
                 let formData = new FormData();
                 formData.append('file', file.file);
                 return $http.post(this.replaceFileUrl, formData).then(response => {
                     Vue.set(this, 'selectedFile', response.data);
+                    this.showFileModal(this.selectedFile);
                     return response;
                 });
             },
