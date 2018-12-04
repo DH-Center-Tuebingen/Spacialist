@@ -1,5 +1,5 @@
 <template>
-    <modal :name="id" width="80%" height="90%" classes="of-visible">
+    <modal :name="id" width="80%" height="85%" classes="of-visible">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Import Geodata</h5>

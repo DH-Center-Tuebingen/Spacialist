@@ -17,7 +17,7 @@
                 <input class="form-check-input" type="radio" id="point-type-wkt" value="wkt" v-model="pointType" />
                 <label class="form-check-label" for="point-type-wkt">WKT</label>
             </div>
-            <div class="form-group mr-2" v-if="pointType == 'point'">
+            <div class="form-group mr-2 overlay-all" v-if="pointType == 'point'">
                 <label for="x" class="sr-only">Longitude Field</label>
                 <multiselect
                     label="label"
@@ -30,7 +30,7 @@
                     :options="selectionColumns">
                 </multiselect>
             </div>
-            <div class="form-group mr-2" v-if="pointType == 'point'">
+            <div class="form-group mr-2 overlay-all" v-if="pointType == 'point'">
                 <label for="y" class="sr-only">Latitude Field</label>
                 <multiselect
                     label="label"
@@ -43,7 +43,7 @@
                     :options="selectionColumns">
                 </multiselect>
             </div>
-            <div class="form-group mr-2" v-if="pointType == 'wkt'">
+            <div class="form-group mr-2 overlay-all" v-if="pointType == 'wkt'">
                 <label for="y" class="sr-only">WKT Field</label>
                 <multiselect
                     label="label"
