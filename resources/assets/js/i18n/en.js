@@ -95,7 +95,7 @@ const en = {
             geography: 'WKT (Well-Known-Binary)',
             table: 'Table',
             sql: 'SQL-Query',
-            serial: 'Serial (Auto-counting ID)',
+            serial: 'Serial (Auto-incrementing ID)',
             'serial-info': `All instances share this identifier as attribute. Add <code class="normal">%d</code> as counter.
             <br />
             <span class="font-weight-medium">Example:</span>
