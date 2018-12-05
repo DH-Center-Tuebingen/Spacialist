@@ -14,6 +14,7 @@ const de = {
         clear: 'Leeren',
         confirm: 'Ok',
         create: 'Anlegen',
+        parse: 'Parsen',
         'select-all': 'Alle auswählen',
         'select-none': 'Alle abwählen',
         'delete-name': {

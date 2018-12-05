@@ -27,7 +27,46 @@ const de = {
             },
             gis: {
                 title: 'GIS',
-                'import-button': 'Geodaten importieren',
+                import: {
+                    button: 'Geodaten importieren',
+                    title: 'Geodaten importieren',
+                    epsg: 'EPSG-Code',
+                    feature_count: 'Anzahl von Features',
+                    files: {
+                        button: 'Dateien auswählen oder hierher ziehen',
+                        selected: 'Ausgewählte Dateien',
+                        confirm: 'Import abschließen'
+                    },
+                    csv: {
+                        label: 'CSV',
+                        delimiter: 'Trennzeichen',
+                        header_row: 'Kopfzeile',
+                        points: 'Punkte',
+                        wkt: 'WKT',
+                        preview_hide: 'Daten-Vorschau ausblenden',
+                        preview_show: 'Daten-Vorschau einblenden',
+                        lon: 'Rechtswert (X)',
+                        lat: 'Hochwert (Y)',
+                        wkt: 'WKT',
+                        delimiters: {
+                            comma: 'Komma',
+                            colon: 'Doppelpunkt',
+                            semicolon: 'Semikolon',
+                            tab: 'Tab',
+                            pipe: 'Senkrechter Strich',
+                            space: 'Leerzeichen'
+                        }
+                    },
+                    kml: {
+                        label: 'KML/KMZ',
+                    },
+                    shape: {
+                        label: 'Shape-Datei',
+                    },
+                    geojson: {
+                        label: 'GeoJSON'
+                    },
+                },
                 'available-layers': 'Verfügbare Ebenen',
                 'selected-layers': 'Ausgewählte Ebenen',
                 info: 'Benutze <kbd>Doppelklick</kbd> um eine verfügbare Ebene zu den ausgewählten Ebenen hinzuzufügen, und um sie wieder so entfernen.',

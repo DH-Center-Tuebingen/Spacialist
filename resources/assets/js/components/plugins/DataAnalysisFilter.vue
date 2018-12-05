@@ -92,7 +92,7 @@
                     <i class="fas fa-filter"></i>
                     <i class="fas fa-plus" data-fa-transform="shrink-5 left-10 down-5"></i>
                 </span>
-                <span style="margin-left: -0.5rem;">
+                <span class="stacked-icon-text">
                     Add Filter
                 </span>
             </button>

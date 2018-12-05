@@ -1,24 +1,47 @@
 <template>
     <div>
         <form class="form-inline mb-3" @submit.prevent="parse">
-            <div class="form-group mr-2">
-                <label for="delimiter" class="sr-only">Delimiter</label>
-                <input type="text" class="form-control" id="delimiter" v-model="delimiter" />
+            <div class="form-group mr-2 overlay-all">
+                <label for="delimiter" class="sr-only">
+                    {{ $t('plugins.map.gis.import.csv.delimiter') }}
+                </label>
+                <multiselect
+                    label="label"
+                    track-by="label"
+                    v-model="delimiter"
+                    :allowEmpty="false"
+                    :closeOnSelect="true"
+                    :customLabel="getDelimiterTranslation"
+                    :hideSelected="false"
+                    :multiple="false"
+                    :options="delimiters"
+                    :placeholder="$t('plugins.map.gis.import.csv.delimiter')"
+                    :select-label="$t('global.select.select')"
+                    :deselect-label="$t('global.select.deselect')">
+                </multiselect>
             </div>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox" id="header" v-model="hasHeader" />
-                <label class="form-check-label" for="header">Header Row</label>
+                <label class="form-check-label" for="header">
+                    {{ $t('plugins.map.gis.import.csv.header_row') }}
+                </label>
             </div>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" id="point-type-xy" value="point" v-model="pointType" />
-                <label class="form-check-label" for="point-type-xy">Points</label>
+                <label class="form-check-label" for="point-type-xy">
+                    {{ $t('plugins.map.gis.import.csv.points') }}
+                </label>
             </div>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" id="point-type-wkt" value="wkt" v-model="pointType" />
-                <label class="form-check-label" for="point-type-wkt">WKT</label>
+                <label class="form-check-label" for="point-type-wkt">
+                    {{ $t('plugins.map.gis.import.csv.wkt') }}
+                </label>
             </div>
-            <div class="form-group mr-2 overlay-all" v-if="pointType == 'point'">
-                <label for="x" class="sr-only">Longitude Field</label>
+            <div class="form-group mr-2 overlay-all" v-if="pointType == 'point'" style="min-width: 120px;">
+                <label for="x" class="sr-only">
+                    {{ $t('plugins.map.gis.import.csv.lon') }}
+                </label>
                 <multiselect
                     label="label"
                     track-by="id"
@@ -27,11 +50,16 @@
                     :closeOnSelect="true"
                     :hideSelected="true"
                     :multiple="false"
-                    :options="selectionColumns">
+                    :options="selectionColumns"
+                    :placeholder="$t('plugins.map.gis.import.csv.lon')"
+                    :select-label="$t('global.select.select')"
+                    :deselect-label="$t('global.select.deselect')">
                 </multiselect>
             </div>
-            <div class="form-group mr-2 overlay-all" v-if="pointType == 'point'">
-                <label for="y" class="sr-only">Latitude Field</label>
+            <div class="form-group mr-2 overlay-all" v-if="pointType == 'point'" style="min-width: 120px;">
+                <label for="y" class="sr-only">
+                    {{ $t('plugins.map.gis.import.csv.lat') }}
+                </label>
                 <multiselect
                     label="label"
                     track-by="id"
@@ -40,11 +68,16 @@
                     :closeOnSelect="true"
                     :hideSelected="true"
                     :multiple="false"
-                    :options="selectionColumns">
+                    :options="selectionColumns"
+                    :placeholder="$t('plugins.map.gis.import.csv.lat')"
+                    :select-label="$t('global.select.select')"
+                    :deselect-label="$t('global.select.deselect')">
                 </multiselect>
             </div>
             <div class="form-group mr-2 overlay-all" v-if="pointType == 'wkt'">
-                <label for="y" class="sr-only">WKT Field</label>
+                <label for="y" class="sr-only">
+                    {{ $t('plugins.map.gis.import.csv.wkt') }}
+                </label>
                 <multiselect
                     label="label"
                     track-by="id"
@@ -53,30 +86,35 @@
                     :closeOnSelect="true"
                     :hideSelected="true"
                     :multiple="false"
-                    :options="selectionColumns">
+                    :options="selectionColumns"
+                    :placeholder="$t('plugins.map.gis.import.csv.wkt')"
+                    :select-label="$t('global.select.select')"
+                    :deselect-label="$t('global.select.deselect')">
                 </multiselect>
             </div>
             <div class="form-group mr-2">
-                <label for="epsg-code" class="sr-only">EPSG-Code</label>
+                <label for="epsg-code" class="sr-only">
+                    {{ $t('plugins.map.gis.import.epsg') }}
+                </label>
                 <input type="text" class="form-control" id="epsg-code" v-model="epsgCode" />
             </div>
             <button type="submit" class="btn btn-primary" :disabled="infoMissing">
-                Parse
+                {{ $t('global.parse') }}
             </button>
         </form>
         <div class="text-center">
             <button type="button" class="btn btn-sm btn-outline-secondary" @click="showDataPreview = !showDataPreview">
                 <span v-if="showDataPreview">
-                    Hide Data Preview
+                    {{ $t('plugins.map.gis.import.csv.preview_hide') }}
                 </span>
                 <span v-else>
-                    Show Data Preview
+                    {{ $t('plugins.map.gis.import.csv.preview_show') }}
                 </span>
             </button>
         </div>
         <csv-table class="mt-2" v-if="files.length && showDataPreview"
             :content="fileContent"
-            :delimiter="delimiter"
+            :delimiter="delimiter.value"
             :header="hasHeader"
             :length="10"
             :small="true">
@@ -126,6 +164,9 @@
                     this.fileContent = '';
                 }
             },
+            getDelimiterTranslation(element, label) {
+                return this.$t(`plugins.map.gis.import.csv.delimiters.${element[label]}`);
+            },
             parse() {
                 if(this.infoMissing) return;
                 // Hide preview on parse, so visualization is in focus
@@ -133,14 +174,14 @@
                 let content = this.fileContent;
                 // If csv has no header, we add one, because csv2geojson needs one
                 if(!this.hasHeader) {
-                    let header = this.selectionColumns.join(this.delimiter);
+                    let header = this.selectionColumns.join(this.delimiter.value);
                     content = `${header}\n${content}`;
                 }
                 if(this.pointType == 'point') {
                     csv2geojson.csv2geojson(content, {
                         lonfield: this.longitude.label,
                         latfield: this.latitude.label,
-                        delimiter: this.delimiter
+                        delimiter: this.delimiter.value
                     }, (error, data) => {
                         if(error) {
                             this.$throwError(error);
@@ -176,7 +217,36 @@
                 selectedFile: {},
                 fileContent: '',
                 fileReader: new FileReader(),
-                delimiter: ',',
+                delimiter: {
+                    value: ',',
+                    label: 'comma'
+                },
+                delimiters: [
+                    {
+                        value: ',',
+                        label: 'comma'
+                    },
+                    {
+                        value: ':',
+                        label: 'colon'
+                    },
+                    {
+                        value: ';',
+                        label: 'semicolon'
+                    },
+                    {
+                        value: '\t',
+                        label: 'tab'
+                    },
+                    {
+                        value: '|',
+                        label: 'pipe'
+                    },
+                    {
+                        value: ' ',
+                        label: 'space'
+                    }
+                ],
                 hasHeader: true,
                 pointType: 'point',
                 longitude: {},
@@ -188,7 +258,7 @@
         },
         computed: {
             dsv: function() {
-                let delimiter = this.delimiter || ',';
+                let delimiter = this.delimiter ? this.delimiter.value : ',';
                 return d3.dsvFormat(delimiter);
             },
             infoMissing: function() {

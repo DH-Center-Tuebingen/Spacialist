@@ -458,7 +458,7 @@
                                             <i class="fas fa-tags"></i>
                                             <i class="fas fa-check" data-fa-transform="shrink-4 left-13 down-4"></i>
                                         </span>
-                                        <span style="margin-left: -0.5rem;">
+                                        <span class="stacked-icon-text">
                                             {{ $t('global.update') }}
                                         </span>
                                     </button>

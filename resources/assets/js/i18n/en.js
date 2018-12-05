@@ -14,6 +14,7 @@ const en = {
         clear: 'Clear',
         confirm: 'OK',
         create: 'Create',
+        parse: 'Parse',
         'select-all': 'Select All',
         'select-none': 'Deselect All',
         'delete-name': {

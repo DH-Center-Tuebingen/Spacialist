@@ -2,11 +2,13 @@
     <div>
         <form class="form-inline mb-3" @submit.prevent="parse">
             <div class="form-group mr-2">
-                <label for="epsg-code" class="sr-only">EPSG-Code</label>
+                <label for="epsg-code" class="sr-only">
+                    {{ $t('plugins.map.gis.import.epsg') }}
+                </label>
                 <input type="text" class="form-control" id="epsg-code" v-model="epsgCode" />
             </div>
             <button type="submit" class="btn btn-primary" :disabled="infoMissing">
-                Parse
+                {{ $t('global.parse') }}
             </button>
         </form>
     </div>

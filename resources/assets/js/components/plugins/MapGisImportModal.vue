@@ -2,7 +2,9 @@
     <modal :name="id" width="80%" height="85%" classes="of-visible">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Import Geodata</h5>
+                <h5 class="modal-title">
+                    {{ $t('plugins.map.gis.import.title') }}
+                </h5>
                 <button type="button" class="close" aria-label="Close" @click.prevent="hide">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -38,12 +40,12 @@
                         :multiple="true"
                         @input-file="onFileInput">
                         <span class="btn btn-outline-primary text-center">
-                            <i class="fas fa-fw fa-file-import"></i> Select files or drop here
+                            <i class="fas fa-fw fa-file-import"></i> {{ $t('plugins.map.gis.import.files.button') }}
                         </span>
                     </file-upload>
                     <div v-if="files.length" class="text-left w-25">
                         <h5>
-                            Selected Files
+                            {{ $t('plugins.map.gis.import.files.selected') }}
                             <small class="clickable" @click="showFileList = !showFileList">
                                 <span v-show="showFileList">
                                     <i class="fas fa-fw fa-caret-up"></i>
@@ -75,7 +77,7 @@
                         <hr />
                     </div>
                     <div class="row modal-map col" v-if="mapLayers && parsed">
-                        <div class="col-md-8">
+                        <div class="col-md-8 h-100">
                             <ol-map
                                 :draw-disabled="true"
                                 :epsg="mapEpsg"
@@ -86,11 +88,15 @@
                         </div>
                         <div class="col-md-4 d-flex flex-column justify-content-center">
                             <dl class="row my-2">
-                                <dt class="col-md-6 text-right"># of Features</dt>
+                                <dt class="col-md-6 text-right">
+                                    {{ $t('plugins.map.gis.import.feature_count') }}
+                                </dt>
                                 <dd class="col-md-6">
                                     {{ featureCollection.features.length }}
                                 </dd>
-                                <dt class="col-md-6 text-right">EPSG-Code</dt>
+                                <dt class="col-md-6 text-right">
+                                    {{ $t('plugins.map.gis.import.epsg') }}
+                                </dt>
                                 <dd class="col-md-6">
                                     {{ featureProjection }}
                                 </dd>
@@ -101,7 +107,9 @@
                                         <i class="fas fa-download"></i>
                                         <i class="fas fa-check text-dark" data-fa-transform="shrink-2 left-12 down-7"></i>
                                     </span>
-                                    Confirm Import
+                                    <span class="stacked-icon-text">
+                                        {{ $t('plugins.map.gis.import.files.confirm') }}
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -110,7 +118,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click="hide">
-                    <i class="fas fa-fw fa-times"></i> Cancel
+                    <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
                 </button>
             </div>
         </div>

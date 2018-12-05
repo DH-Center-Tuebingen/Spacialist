@@ -2,7 +2,7 @@
     <div class="h-100 row of-hidden" v-if="initFinished">
         <div class="col-md-2 h-100 d-flex flex-column">
             <button type="button" class="btn btn-default" @click.prevent="openImportModal">
-                <i class="fas fa-fw fa-download"></i> {{ $t('plugins.map.gis.import-button') }}
+                <i class="fas fa-fw fa-download"></i> {{ $t('plugins.map.gis.import.button') }}
             </button>
             <div class="col d-flex flex-column h-100 pt-2">
                 <div class="col of-hidden d-flex flex-column">

@@ -27,7 +27,46 @@ const en = {
             },
             gis: {
                 title: 'GIS',
-                'import-button': 'Import Geodata',
+                import: {
+                    button: 'Import Geodata',
+                    title: 'Import Geodata',
+                    epsg: 'EPSG-Code',
+                    feature_count: '# of features',
+                    files: {
+                        button: 'Select files or drop here',
+                        selected: 'Selected files',
+                        confirm: 'Confirm import'
+                    },
+                    csv: {
+                        label: 'CSV',
+                        delimiter: 'Delimiter',
+                        header_row: 'Header Row',
+                        points: 'Points',
+                        wkt: 'WKT',
+                        preview_hide: 'Hide Data-Preview',
+                        preview_show: 'Show Data-Preview',
+                        lon: 'Easting (X)',
+                        lat: 'Northing (Y)',
+                        wkt: 'WKT',
+                        delimiters: {
+                            comma: 'Comma',
+                            colon: 'Colon',
+                            semicolon: 'Semicolon',
+                            tab: 'Tab',
+                            pipe: 'Vertical Bar (Pipe)',
+                            space: 'Space'
+                        }
+                    },
+                    kml: {
+                        label: 'KML/KMZ',
+                    },
+                    shape: {
+                        label: 'Shape File',
+                    },
+                    geojson: {
+                        label: 'GeoJSON'
+                    },
+                },
                 'available-layers': 'Available Layers',
                 'selected-layers': 'Selected Layers',
                 info: 'Use <kbd>Double Click</kbd> to add an available layer to selected layers, and again to remove it.',
