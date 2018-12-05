@@ -42,6 +42,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
        '@mapbox/togeojson',
        '@websanova/vue-auth',
        'axios',
+       'bibtex-parse',
        'bootstrap',
        'cornerstone-core',
        'cornerstone-math',

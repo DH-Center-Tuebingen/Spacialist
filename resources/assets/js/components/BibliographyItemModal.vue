@@ -1,6 +1,6 @@
 <template>
     <modal :name="id" height="80%" @closed="hide" :click-to-close="!!data.id">
-        <div class="modal-content">
+        <div class="modal-content" @paste="handlePasteFromClipboard">
             <div class="modal-header">
                 <h5 class="modal-title" v-if="data.id">{{ $t('main.bibliography.modal.edit.title') }}</h5>
                 <h5 class="modal-title" v-else>{{ $t('main.bibliography.modal.new.title') }}</h5>
@@ -9,6 +9,11 @@
                 </button>
             </div>
             <div class="modal-body col d-flex flex-column">
+                <p class="alert alert-info">
+                    <i class="fas fa-lightbulb mr-1"></i> <span class="font-weight-medium">Note</span>
+                    <br />
+                    You can use <kbd><kbd>ctrl</kbd> + <kbd>v</kbd></kbd> to fill out the fields with a BibTeX entry from your clipboard.
+                </p>
                 <form role="form" id="newBibliographyItemForm" class="col px-0 scroll-y-auto" name="newBibliographyItemForm" @submit.prevent="success(data)">
                     <div class="form-group">
                         <label class="col-form-label col-md-3" for="type">{{ $t('global.type') }}:</label>
@@ -30,15 +35,25 @@
                     </div>
                     <div class="form-group" v-for="field in typeFields">
                         <label class="col-form-label col-md-3">
-                            {{ field }}:
+                            {{ $t(`main.bibliography.column.${field}`) }}:
                         </label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" v-model="data.fields[field]"/>
                         </div>
                     </div>
                 </form>
-                <h4 class="mt-3">{{ $t('main.bibliography.modal.new.bibtex-code') }}</h4>
-                <span v-if="data.type" v-html="this.$options.filters.bibtexify(data.fields, data.type.name)"></span>
+                <h5 class="mt-3">
+                    {{ $t('main.bibliography.modal.new.bibtex-code') }}
+                    <small class="clickable" @click="showBibtexCode = !showBibtexCode">
+                        <span v-show="showBibtexCode">
+                            <i class="fas fa-fw fa-caret-up"></i>
+                        </span>
+                        <span v-show="!showBibtexCode">
+                            <i class="fas fa-fw fa-caret-down"></i>
+                        </span>
+                    </small>
+                </h5>
+                <span v-if="data.type" v-show="showBibtexCode" v-html="this.$options.filters.bibtexify(data.fields, data.type.name)"></span>
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-success" form="newBibliographyItemForm" v-if="data.id">
@@ -56,6 +71,8 @@
 </template>
 
 <script>
+    const bibtexParse = require('bibtex-parse');
+
     export default {
         props: {
             data: {
@@ -86,6 +103,33 @@
             init() {
                 this.$modal.show(this.id);
             },
+            handlePasteFromClipboard(e) {
+                let items = e.clipboardData.items;
+                for(let i=0; i<items.length; i++) {
+                    let c = items[i];
+                    if(c.kind == 'string' && c.type == 'text/plain') {
+                        c.getAsString(s => {
+                            this.fromBibtexEntry(s);
+                        });
+                    }
+                }
+            },
+            fromBibtexEntry(str) {
+                try {
+                    const content = bibtexParse.parse(str);
+                    // only parse if str contains exactly one entry
+                    if(!content || content.entries.length !== 1) return;
+                    const entry = content.entries[0];
+                    const type = this.availableTypes.find(t => t.name == entry.type);
+                    Vue.set(this.data, 'type', type);
+                    this.data.fields.citekey = entry.id;
+                    for(let k in entry.properties) {
+                        const p = entry.properties[k];
+                        this.data.fields[k] = p.value;
+                    }
+                } catch(err) {
+                }
+            },
             success(data) {
                 if(this.onSuccess) {
                     this.onSuccess(this.data);
@@ -101,7 +145,8 @@
         },
         data() {
             return {
-                id: 'new-bibliography-item-modal'
+                id: 'new-bibliography-item-modal',
+                showBibtexCode: true
             }
         },
         computed: {
