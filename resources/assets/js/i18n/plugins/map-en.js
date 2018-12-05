@@ -96,6 +96,7 @@ const en = {
                         none: 'None',
                         categorized: 'Categorized',
                         graduated: 'Graduated',
+                        color: 'Color',
                         colors: {
                             blues: 'Blue',
                             greens: 'Green',

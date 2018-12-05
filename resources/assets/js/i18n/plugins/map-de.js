@@ -96,6 +96,7 @@ const de = {
                         none: 'Kein Stil',
                         categorized: 'Kategorisiert',
                         graduated: 'Abgestuft',
+                        color: 'Farbe',
                         colors: {
                             blues: 'Blau',
                             greens: 'Grün',

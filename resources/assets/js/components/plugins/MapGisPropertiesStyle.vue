@@ -24,7 +24,7 @@
                     </div>
                 </div>
                 <div v-if="styleActive">
-                    <div class="form-group row">
+                    <div class="form-group row" v-if="selectedStyle.id != 'color'">
                         <label class="col-form-label col-md-6 text-right" for="style-attribute">
                             {{ $t('global.attribute') }}:
                         </label>
@@ -173,7 +173,6 @@
                 let options = {};
                 if(this.styleActive) {
                     options = {
-                        attribute_id: this.selectedAttribute.id,
                         style: this.selectedStyle,
                         classes: this.numberOfClasses,
                         mode: this.selectedMode,
@@ -181,6 +180,9 @@
                         size: this.size,
                         transparency: this.transparency
                     };
+                    if(this.selectedAttribute) {
+                        options.attribute_id = this.selectedAttribute.id;
+                    }
                 }
                 if(this.onUpdate) {
                     this.onUpdate(this.layer, {
@@ -221,6 +223,10 @@
                     {
                         label: this.$t('plugins.map.gis.props.style.graduated'),
                         id: 'graduated'
+                    },
+                    {
+                        label: this.$t('plugins.map.gis.props.style.color'),
+                        id: 'color'
                     }
                 ],
                 colorRamps: [

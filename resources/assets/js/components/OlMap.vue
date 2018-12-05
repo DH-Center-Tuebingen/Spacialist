@@ -1036,6 +1036,17 @@
                     let index = 0;
                     let nullValueFound = false;
                     if(!features.length) continue;
+
+                    if(opts.style.id == 'color') {let tr, tg, tb;
+                        let r, g, b;
+                        [r, g, b] = this.$rgb2hex(opts.color.to);
+                        const color = { r: r, g: g, b: b };
+                        features.forEach(f => {
+                            this.applyStyle(f, color, opts);
+                        });
+                        continue;
+                    }
+
                     const ctid = features[0].getProperties().entity.entity_type_id;
                     $httpQueue.add(() => $http.get(`entity/entity_type/${ctid}/data/${opts.attribute_id}`).then(response => {
                         const data = response.data;
@@ -1118,13 +1129,16 @@
                                     overallBucketCount++;
                                 }
                             }
-                            const color = `rgba(${currentGradient.r}, ${currentGradient.g}, ${currentGradient.b}, ${1-opts.transparency})`;
-                            const id = v.feature.getProperties().id;
-                            this.featureStyles[id].style = this.createStyle(color, opts.size);
-                            this.updateStyles(v.feature);
+                            this.applyStyle(v.feature, currentGradient, opts);
                         });
                     }));
                 }
+            },
+            applyStyle(feature, color, styleOptions) {
+                const rgb = `rgba(${color.r}, ${color.g}, ${color.b}, ${1-styleOptions.transparency})`;
+                const id = feature.getProperties().id;
+                this.featureStyles[id].style = this.createStyle(rgb, styleOptions.size);
+                this.updateStyles(feature);
             },
             getGradients(from, to, classes) {
                 const stepWeight = classes > 1 ? 1/(classes-1) : 0;
