@@ -7,7 +7,7 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
 - File Viewer
   - Simple Office Documents Viewer (as HTML-Text)
   - Edit Mode for text and XML files
-  - Replace single files
+  - Replace single files (even with different file types)
   - Rendering of HTML files
   - DICOM Support
   - Rename files
@@ -15,25 +15,35 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - New audio plugin (based on [wavesurfer](https://wavesurfer-js.org), visualization and EQ)
   - Simple navigation to jump to previous/next file right from the modal (using buttons or left/right arrow key)
   - Icons in the upper right corner to indicate whether this file is linked and has tags
-- Added Welcome Page
+  - Checkboxes in the upper left corner to select files for export/download
+  - Properties (copyright and description) and tags fields to upload page, to set them for all uploaded files
+- Tree View
+  - Reorder buttons (by rank (default), name, entity-type, children count)
+- Welcome Page
   - Maintainer (Name and E-Mail-Address), Project Description and Access (Public/Private) can be configured in settings
 - Reference Modal
   - Options (Edit/Delete) to reference list
 - Bibliography
   - Export BibTeX
   - 'Hide BibTeX metadata fields' toggle in Bibliography view
-- SQL Attribute Type
-  - Rendered as Table or single value
-  - Supports translations (Use `concept_url` as header/content)
-  - Supports `:entity_id` as placeholder for current selected entity
+  - Auto-Fill from clipboard `ctrl + v` in new/edit entry modal
+- Attribute Types
+  - SQL Type
+    - Rendered as Table or single value
+    - Supports translations (Use `concept_url` as header/content)
+    - Supports `:entity_id` as placeholder for current selected entity
+  - Serial Type (Auto-incrementing ID)
 - Geometry Preference (EPSG-Code). E.g. to display coordinates in popups different from EPSG:4326
 - Measurement tool for map
-- 'Unlink/Link from/to entity' button in file link tab
 - Attribute Dependencies
   - Attributes can now depend (are visible/invisible) on values of other attributes
 - GIS View
-  - QGIS-like styling (categorized and graduated (equal interval and quantile)) and labeling
+  - QGIS-like styling (categorized, graduated (equal interval and quantile) and color) and labeling
 - Contributors in about modal
+- Data-Model-Editor
+  - Duplicate Entity-Types
+  - Option to restrict options for dropdowns
+- Info texts on hover to icon-only labeled buttons/links/etc.
 ### Changed
 - Moved from Lumen (5.3) to Laravel (5.7)
 - Moved from AngularJS (1.5) to Vue.js (2.5)
@@ -54,7 +64,11 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
     - Filetype
     - Camera
     - Date
-- Tree View now loads root elements only. Sub-elements are loaded on request
+  - Link tab revamped
+    - Added option to link to entities from a search bar
+    - Added 'Unlink/Link from/to entity' button in
+- Tree View
+  - Now loads root elements only. Sub-elements are loaded on request
 - Bibliography
   - Only loads the first 20 entries. More entries are loaded on scroll.
   - Dropped differentiation between mandatory and optional fields (all are optional now).
