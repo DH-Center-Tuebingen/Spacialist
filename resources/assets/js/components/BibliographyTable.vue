@@ -59,7 +59,7 @@
                 <thead class="thead-light sticky-top">
                     <tr>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('type')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('type')">
                                 {{ $t('global.type') }}
                                 <span v-show="orderColumn == 'type'">
                                     <span v-show="orderType == 'asc'">
@@ -72,7 +72,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('citekey')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('citekey')">
                                 {{ $t('main.bibliography.column.cite-key') }}
                                 <span v-show="orderColumn == 'citekey'">
                                     <span v-show="orderType == 'asc'">
@@ -85,7 +85,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('author')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('author')">
                                 {{ $t('main.bibliography.column.author') }}
                                 <span v-show="orderColumn == 'author'">
                                     <span v-show="orderType == 'asc'">
@@ -98,7 +98,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('year')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('year')">
                                 {{ $t('main.bibliography.column.year') }}
                                 <span v-show="orderColumn == 'year'">
                                     <span v-show="orderType == 'asc'">
@@ -111,7 +111,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('title')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('title')">
                                 {{ $t('main.bibliography.column.title') }}
                                 <span v-show="orderColumn == 'title'">
                                     <span v-show="orderType == 'asc'">
@@ -124,7 +124,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('booktitle')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('booktitle')">
                                 {{ $t('main.bibliography.column.booktitle') }}
                                 <span v-show="orderColumn == 'booktitle'">
                                     <span v-show="orderType == 'asc'">
@@ -137,7 +137,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('publisher')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('publisher')">
                                 {{ $t('main.bibliography.column.publisher') }}
                                 <span v-show="orderColumn == 'publisher'">
                                     <span v-show="orderType == 'asc'">
@@ -153,7 +153,7 @@
                             {{ $t('main.bibliography.column.pages') }}
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('editor')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('editor')">
                                 {{ $t('main.bibliography.column.editor') }}
                                 <span v-show="orderColumn == 'editor'">
                                     <span v-show="orderType == 'asc'">
@@ -166,7 +166,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('journal')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('journal')">
                                 {{ $t('main.bibliography.column.journal') }}
                                 <span v-show="orderColumn == 'journal'">
                                     <span v-show="orderType == 'asc'">
@@ -197,7 +197,7 @@
                             {{ $t('main.bibliography.column.series') }}
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('address')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('address')">
                                 {{ $t('main.bibliography.column.address') }}
                                 <span v-show="orderColumn == 'address'">
                                     <span v-show="orderType == 'asc'">
@@ -213,7 +213,7 @@
                             {{ $t('main.bibliography.column.note') }}
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('misc')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('misc')">
                                 {{ $t('main.bibliography.column.misc') }}
                                 <span v-show="orderColumn == 'misc'">
                                     <span v-show="orderType == 'asc'">
@@ -226,7 +226,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click.prevent="setOrderColumn('howpublished')">
+                            <a href="#" class="text-nowrap" @click.prevent="setOrderColumn('howpublished')">
                                 {{ $t('main.bibliography.column.howpublished') }}
                                 <span v-show="orderColumn == 'howpublished'">
                                     <span v-show="orderType == 'asc'">

@@ -26,6 +26,10 @@
     white-space: pre-line;
 }
 
+.text-nowrap {
+    white-space: nowrap !important;
+}
+
 .flex-grow-1 {
     flex-grow: 1;
 }
