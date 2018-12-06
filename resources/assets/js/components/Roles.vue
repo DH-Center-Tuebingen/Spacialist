@@ -18,10 +18,10 @@
                         {{ role.name }}
                     </td>
                     <td>
-                        {{ role.display_name }}
+                        <input type="text" class="form-control" v-model="role.display_name" v-validate="" :name="`disp_${role.id}`" />
                     </td>
                     <td>
-                        {{ role.description }}
+                        <input type="text" class="form-control" v-model="role.description" v-validate="" :name="`desc_${role.id}`" />
                     </td>
                     <td>
                         <multiselect
@@ -33,7 +33,7 @@
                             :disabled="!$can('add_remove_permission')"
                             :hideSelected="true"
                             :multiple="true"
-                            :name="'perms_'+role.id"
+                            :name="`perms_${role.id}`"
                             :options="permissions"
                             :placeholder="$t('main.role.add-permission-placeholder')"
                             :select-label="$t('global.select.select')"
@@ -50,17 +50,14 @@
                         <div class="dropdown">
                             <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-fw fa-ellipsis-h"></i>
-                                <sup class="notification-info" v-if="isDirty('perms_'+role.id)">
+                                <sup class="notification-info" v-if="roleDirty(role.id)">
                                     <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
                                 </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="isDirty('perms_'+role.id)" :disabled="!$can('add_remove_permission')" @click.prevent="onPatchRole(role.id)">
+                                <a class="dropdown-item" href="#" v-if="roleDirty(role.id)" :disabled="!$can('add_remove_permission')" @click.prevent="onPatchRole(role.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> {{ $t('global.save') }}
                                 </a>
-                                <!-- <a class="dropdown-item" href="#">
-                                    <i class="fas fa-fw fa-edit text-info"></i> Edit
-                                </a> -->
                                 <a class="dropdown-item" href="#" @click.prevent="requestDeleteRole(role.id)" :disabled="!$can('delete_role')">
                                     <i class="fas fa-fw fa-trash text-danger"></i> {{ $t('global.delete') }}
                                 </a>
@@ -181,26 +178,33 @@
             },
             onPatchRole(id) {
                 if(!this.$can('add_edit_role')) return;
+                if(!this.roleDirty(id)) return;
+                let role = this.roleList.find(r => r.id == id);
+                let data = {};
                 if(this.isDirty(`perms_${id}`)) {
-                    let role = this.roleList.find(r => r.id == id);
                     let permissions = [];
                     for(let i=0; i<role.permissions.length; i++) {
                         permissions.push(role.permissions[i].id);
                     }
-                    const data = {
-                        permissions: JSON.stringify(permissions)
-                    };
-                    $http.patch(`role/${id}/permission`, data).then(response => {
-                        this.setPristine(`perms_${id}`);
-                        this.$showToast(
-                            this.$t('main.role.toasts.updated.title'),
-                            this.$t('main.role.toasts.updated.msg', {
-                                name: role.display_name
-                            }),
-                            'success'
-                        );
-                    });
+                    data.permissions = permissions;
                 }
+                if(this.isDirty(`disp_${id}`)) {
+                    data.display_name = role.display_name;
+                }
+                if(this.isDirty(`desc_${id}`)) {
+                    data.description = role.description;
+                }
+                $http.patch(`role/${id}`, data).then(response => {
+                    this.setRolePristine(id);
+                    role.updated_at = response.data.updated_at;
+                    this.$showToast(
+                        this.$t('main.role.toasts.updated.title'),
+                        this.$t('main.role.toasts.updated.msg', {
+                            name: role.display_name
+                        }),
+                        'success'
+                    );
+                });
             },
             showDeleteRoleModal() {
                 if(!this.$can('delete_role')) return;
@@ -231,11 +235,19 @@
                 }
                 return false;
             },
+            roleDirty(rid) {
+                return this.isDirty(`perms_${rid}`) || this.isDirty(`disp_${rid}`) || this.isDirty(`desc_${rid}`);
+            },
             setPristine(fieldname) {
                 this.$validator.flag(fieldname, {
                     dirty: false,
                     pristine: true
                 });
+            },
+            setRolePristine(rid) {
+                this.setPristine(`perms_${rid}`);
+                this.setPristine(`disp_${rid}`);
+                this.setPristine(`desc_${rid}`);
             }
         },
         data() {

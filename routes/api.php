@@ -107,7 +107,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::post('/auth/logout', 'UserController@logout');
 
     Route::patch('/user/{id}', 'UserController@patchUser');
-    Route::patch('/role/{id}/permission', 'UserController@setPermissions');
+    Route::patch('/role/{id}', 'UserController@patchRole');
 
     Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');
     Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');
