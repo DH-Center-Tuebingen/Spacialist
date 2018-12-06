@@ -7,7 +7,7 @@
                     <th>{{ $t('global.email') }}</th>
                     <th>{{ $t('global.roles') }}</th>
                     <th>{{ $t('global.added-at') }}</th>
-                    <th>{{ $t('global.created-at') }}</th>
+                    <th>{{ $t('global.updated-at') }}</th>
                     <th>{{ $t('global.options') }}</th>
                 </tr>
             </thead>
@@ -17,7 +17,7 @@
                         {{ user.name }}
                     </td>
                     <td>
-                        {{ user.email }}
+                        <input type="text" class="form-control" v-model="user.email" v-validate="" :name="`email_${user.id}`" />
                     </td>
                     <td>
                         <multiselect
@@ -29,7 +29,7 @@
                             :disabled="!$can('add_remove_role')"
                             :hideSelected="true"
                             :multiple="true"
-                            :name="'roles_'+user.id"
+                            :name="`roles_${user.id}`"
                             :options="roles"
                             :placeholder="$t('main.user.add-role-placeholder')"
                             :select-label="$t('global.select.select')"
@@ -46,12 +46,12 @@
                         <div class="dropdown">
                             <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-fw fa-ellipsis-h"></i>
-                                <sup class="notification-info" v-if="isDirty('roles_'+user.id)">
+                                <sup class="notification-info" v-if="userDirty(user.id)">
                                     <i class="fas fa-fw fa-xs fa-circle text-warning"></i>
                                 </sup>
                             </span>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#" v-if="isDirty('roles_'+user.id)" :disabled="!$can('add_remove_role')" @click.prevent="onPatchUser(user.id)">
+                                <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!$can('add_remove_role')" @click.prevent="onPatchUser(user.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> {{ $t('global.save') }}
                                 </a>
                                 <a class="dropdown-item" href="#" :disabled="!$can('change_password')" @click.prevent="updatePassword(user.id)">
@@ -177,26 +177,30 @@
             },
             onPatchUser(id) {
                 if(!this.$can('add_remove_role')) return;
+                if(!this.userDirty(id)) return;
+                let data = {};
+                let user = this.userList.find(u => u.id == id);
                 if(this.isDirty(`roles_${id}`)) {
-                    let user = this.userList.find(u => u.id == id);
                     let roles = [];
                     for(let i=0; i<user.roles.length; i++) {
                         roles.push(user.roles[i].id);
                     }
-                    const data = {
-                        roles: JSON.stringify(roles)
-                    };
-                    $http.patch(`user/${id}/role`, data).then(response => {
-                        this.setPristine(`roles_${id}`);
-                        this.$showToast(
-                            this.$t('main.user.toasts.updated.title'),
-                            this.$t('main.user.toasts.updated.msg', {
-                                name: user.name
-                            }),
-                            'success'
-                        );
-                    });
+                    data.roles = roles;
                 }
+                if(this.isDirty(`email_${id}`)) {
+                    data.email = user.email;
+                }
+                $http.patch(`user/${id}`, data).then(response => {
+                    this.setUserPristine(id);
+                    user.updated_at = response.data.updated_at;
+                    this.$showToast(
+                        this.$t('main.user.toasts.updated.title'),
+                        this.$t('main.user.toasts.updated.msg', {
+                            name: user.name
+                        }),
+                        'success'
+                    );
+                });
             },
             showDeleteUserModal() {
                 if(!this.$can('delete_users')) return;
@@ -230,11 +234,18 @@
                 }
                 return false;
             },
+            userDirty(uid) {
+                return this.isDirty(`roles_${uid}`) || this.isDirty(`email_${uid}`);
+            },
             setPristine(fieldname) {
                 this.$validator.flag(fieldname, {
                     dirty: false,
                     pristine: true
                 });
+            },
+            setUserPristine(uid) {
+                this.setPristine(`roles_${uid}`);
+                this.setPristine(`email_${uid}`);
             }
         },
         data() {

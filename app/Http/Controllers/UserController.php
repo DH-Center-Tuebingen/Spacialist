@@ -139,7 +139,7 @@ class UserController extends Controller
 
     // PATCH
 
-    public function setRoles(Request $request, $id) {
+    public function patchUser(Request $request, $id) {
         $user = auth()->user();
         if(!$user->can('add_remove_role')) {
             return response()->json([
@@ -147,8 +147,13 @@ class UserController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'roles' => 'required'
+            'roles' => 'array',
+            'email' => 'email'
         ]);
+
+        if(!$this->hasInput($request)) {
+            return response()->json(null, 204);
+        }
 
         try {
             $user = User::findOrFail($id);
@@ -157,13 +162,23 @@ class UserController extends Controller
                 'error' => 'This user does not exist'
             ], 400);
         }
-        $user->detachRoles($user->roles);
-        $roles = json_decode($request->get('roles'));
-        foreach($roles as $roleId) {
-            $user->attachRole($roleId);
+
+        if($request->has('roles')) {
+            $user->detachRoles($user->roles);
+            $roles = $request->get('roles');
+            foreach($roles as $roleId) {
+                $user->attachRole($roleId);
+            }
+
+            // Update updated_at column
+            $user->touch();
+        }
+        if($request->has('email')) {
+            $user->email = $request->get('email');
+            $user->save();
         }
 
-        return response()->json(null, 204);
+        return response()->json($user);
     }
 
     public function setPermissions(Request $request, $id) {
