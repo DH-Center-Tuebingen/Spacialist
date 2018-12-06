@@ -139,6 +139,7 @@
                 </div>
             </div>
         </modal>
+        <discard-changes-modal :name="discardModal"/>
     </div>
 </template>
 
@@ -152,6 +153,28 @@
                 const roles = response.data.roles;
                 next(vm => vm.init(users, roles));
             }));
+        },
+        beforeRouteLeave: function(to, from, next) {
+            let loadNext = () => {
+                next();
+            }
+            if(this.isOneDirty) {
+                let discardAndContinue = () => {
+                    loadNext();
+                };
+                let saveAndContinue = () => {
+                    let patching = async _ => {
+                        await this.$asyncFor(this.userList, async u => {
+                            await this.onPatchUser(u.id);
+                        });
+                        loadNext();
+                    };
+                    patching();
+                };
+                this.$modal.show(this.discardModal, {reference: this.$t('global.settings.users'), onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+            } else {
+                loadNext();
+            }
         },
         mounted() {},
         methods: {
@@ -176,8 +199,8 @@
                 });
             },
             onPatchUser(id) {
-                if(!this.$can('add_remove_role')) return;
-                if(!this.userDirty(id)) return;
+                if(!this.$can('add_remove_role')) return new Promise(r => r());
+                if(!this.userDirty(id)) return new Promise(r => r());
                 let data = {};
                 let user = this.userList.find(u => u.id == id);
                 if(this.isDirty(`roles_${id}`)) {
@@ -190,7 +213,7 @@
                 if(this.isDirty(`email_${id}`)) {
                     data.email = user.email;
                 }
-                $http.patch(`user/${id}`, data).then(response => {
+                return $httpQueue.add(() => $http.patch(`user/${id}`, data).then(response => {
                     this.setUserPristine(id);
                     user.updated_at = response.data.updated_at;
                     this.$showToast(
@@ -200,7 +223,7 @@
                         }),
                         'success'
                     );
-                });
+                }));
             },
             showDeleteUserModal() {
                 if(!this.$can('delete_users')) return;
@@ -254,8 +277,14 @@
                 roles: [],
                 userRoles: {},
                 newUser: {},
-                selectedUser: {}
+                selectedUser: {},
+                discardModal: 'discard-changes-modal'
             }
+        },
+        computed: {
+            isOneDirty() {
+                return Object.keys(this.fields).some(key => this.fields[key].dirty);
+            },
         }
     }
 </script>

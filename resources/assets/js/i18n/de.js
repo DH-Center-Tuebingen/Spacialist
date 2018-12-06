@@ -41,7 +41,7 @@ const de = {
         'has-links': 'Hat keine Verknüpfungen | Hat eine Verknüpfung | Hat {cnt} Verknüpfungen',
         discard: {
             title: 'Ungespeicherte Änderungen',
-            msg: 'Ungespeicherte Änderungen in {name}. Willst du wirklich fortfahren und die Änderungen verwerfen?',
+            msg: 'Ungespeicherte Änderungen in <span class="font-weight-medium">{name}</span>. Willst du wirklich fortfahren und die Änderungen verwerfen?',
             confirm: 'Ja, Änderungen verwerfen',
             confirmpos: 'Nein, Speichern und fortfahren'
         },

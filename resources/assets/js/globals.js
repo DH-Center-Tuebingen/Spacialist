@@ -10,7 +10,7 @@ Vue.prototype.$validateObject = function(value) {
 Vue.directive('can', {
     terminal: true,
     bind: function(el, bindings) {
-        const canI = this.Vue.prototype.$can(bindings.value, bindings.modifiers.one);
+        const canI = Vue.prototype.$can(bindings.value, bindings.modifiers.one);
 
         if(!canI) {
             this.warning = document.createElement('p');
@@ -55,6 +55,12 @@ Vue.prototype.$can = function(permissionString, oneOf) {
         return permissions.every(hasPermission);
     }
 }
+
+Vue.prototype.$asyncFor = async function(arr, callback) {
+    for(let i=0; i<arr.length; i++) {
+        await callback(arr[i]);
+    }
+};
 
 Vue.prototype.$showToast = function(title, text, type, duration) {
     type = type || 'info'; // success, info, warn, error

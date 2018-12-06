@@ -41,7 +41,7 @@ const en = {
         'has-links': 'Has no links | Has one link | Has {cnt} links',
         discard: {
             title: 'Unsaved Changes',
-            msg: 'Unsaved changes in {name}. Do you really want to continue and discard changes?',
+            msg: 'Unsaved changes in <span class="font-weight-medium">{name}</span>. Do you really want to continue and discard changes?',
             confirm: 'Yes, discard changes',
             confirmpos: 'No, save and continue'
         },

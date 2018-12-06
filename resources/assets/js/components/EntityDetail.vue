@@ -79,9 +79,9 @@
                         loadNext();
                     };
                     let saveAndContinue = function() {
-                        vm.saveEntity(this.selectedEntity).then(loadNext);
+                        vm.saveEntity(vm.selectedEntity).then(loadNext);
                     };
-                    vm.$modal.show(vm.discardModal, {entityName: vm.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+                    vm.$modal.show(vm.discardModal, {reference: vm.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
                 } else {
                     loadNext();
                 }

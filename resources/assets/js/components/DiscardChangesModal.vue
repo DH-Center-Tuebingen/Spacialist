@@ -8,8 +8,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p class="alert alert-info">
-                    {{ $t('global.discard.msg', {name: entityName}) }}
+                <p class="alert alert-info" v-html="$t('global.discard.msg', {name: reference})">
                 </p>
             </div>
             <div class="modal-footer">
@@ -40,7 +39,7 @@
                 Vue.set(this, 'onDiscard', event.params.onDiscard);
                 Vue.set(this, 'onSave', event.params.onSave);
                 Vue.set(this, 'onCancel', event.params.onCancel);
-                Vue.set(this, 'entityName', event.params.entityName);
+                Vue.set(this, 'reference', event.params.reference);
             },
             discard() {
                 if(this.onDiscard) this.onDiscard();
@@ -63,7 +62,7 @@
                 onDiscard: undefined,
                 onSave: undefined,
                 onCancel: undefined,
-                entityName: "",
+                reference: "",
             }
         }
     }

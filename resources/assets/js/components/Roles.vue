@@ -140,6 +140,7 @@
                 </div>
             </div>
         </modal>
+        <discard-changes-modal :name="discardModal"/>
     </div>
 </template>
 
@@ -153,6 +154,28 @@
                 const permissions = response.data.permissions;
                 next(vm => vm.init(roles, permissions));
             }));
+        },
+        beforeRouteLeave: function(to, from, next) {
+            let loadNext = () => {
+                next();
+            }
+            if(this.isOneDirty) {
+                let discardAndContinue = () => {
+                    loadNext();
+                };
+                let saveAndContinue = () => {
+                    let patching = async _ => {
+                        await this.$asyncFor(this.roleList, async r => {
+                            await this.onPatchRole(r.id);
+                        });
+                        loadNext();
+                    };
+                    patching();
+                };
+                this.$modal.show(this.discardModal, {reference: this.$t('global.settings.roles'), onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+            } else {
+                loadNext();
+            }
         },
         mounted() {},
         methods: {
@@ -177,8 +200,8 @@
                 });
             },
             onPatchRole(id) {
-                if(!this.$can('add_edit_role')) return;
-                if(!this.roleDirty(id)) return;
+                if(!this.$can('add_edit_role')) return new Promise(r => r());
+                if(!this.roleDirty(id)) return new Promise(r => r());
                 let role = this.roleList.find(r => r.id == id);
                 let data = {};
                 if(this.isDirty(`perms_${id}`)) {
@@ -194,7 +217,7 @@
                 if(this.isDirty(`desc_${id}`)) {
                     data.description = role.description;
                 }
-                $http.patch(`role/${id}`, data).then(response => {
+                return $httpQueue.add(() => $http.patch(`role/${id}`, data).then(response => {
                     this.setRolePristine(id);
                     role.updated_at = response.data.updated_at;
                     this.$showToast(
@@ -204,7 +227,7 @@
                         }),
                         'success'
                     );
-                });
+                }));
             },
             showDeleteRoleModal() {
                 if(!this.$can('delete_role')) return;
@@ -256,8 +279,14 @@
                 permissions: [],
                 userRoles: {},
                 newRole: {},
-                selectedRole: {}
+                selectedRole: {},
+                discardModal: 'discard-changes-modal'
             }
+        },
+        computed: {
+            isOneDirty() {
+                return Object.keys(this.fields).some(key => this.fields[key].dirty);
+            },
         }
     }
 </script>
