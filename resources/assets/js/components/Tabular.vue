@@ -111,6 +111,10 @@
         },
         mounted () {
             this.$el.value = this.value;
+            for(let k in this.attribute.columns) {
+                const c = this.attribute.columns[k];
+                Vue.set(this.newTableCols, c.id, null);
+            }
         },
         methods: {
             onInput(field, value) {
@@ -136,8 +140,10 @@
                 return this.$translateLabel(element, prop);
             },
         },
-        computed: {
-            newTableCols: _ => new Object()
+        data() {
+            return {
+                newTableCols: {}
+            }
         }
     }
 </script>
