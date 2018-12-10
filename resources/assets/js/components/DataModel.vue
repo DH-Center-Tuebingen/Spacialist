@@ -221,8 +221,7 @@
                 this.attributeList = attributes;
                 this.initFinished = true;
             },
-            createAttribute(event) {
-                if(!this.validated) return;
+            attributeFromCreateEvent(event) {
                 const attribute = event.attribute;
                 let data = {};
                 data.label_id = attribute.label.concept.id;
@@ -237,6 +236,10 @@
                 if(attribute.textContent) {
                     data.text = attribute.textContent;
                 }
+            },
+            createAttribute(event) {
+                if(!this.validated) return;
+                const data = this.attributeFromCreateEvent(event);
                 $httpQueue.add(() => $http.post('/editor/dm/attribute', data).then(response => {
                     this.attributeList.push(response.data);
                     this.hideNewAttributeModal();
@@ -249,15 +252,7 @@
                 this.validated = event.state;
             },
             addColumn(event) {
-                const attribute = event.attribute;
-                let column = {
-                    label_id: attribute.label.concept.id,
-                    datatype: attribute.type.datatype,
-                    recursive: attribute.recursive
-                };
-                if(attribute.root) {
-                    column.root_id = attribute.root.id;
-                }
+                const column = this.attributeFromCreateEvent(event);
                 this.columns.push(column);
             },
             deleteAttribute(attribute) {
@@ -326,6 +321,7 @@
             hideNewAttributeModal() {
                 this.attributeTypes = [];
                 this.columns = [];
+                this.needsColumns = false;
                 this.$modal.hide('new-attribute-modal');
             },
             hideDeleteAttributeModal() {
