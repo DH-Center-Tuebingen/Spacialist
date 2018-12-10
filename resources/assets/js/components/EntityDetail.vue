@@ -216,6 +216,7 @@
                                     // value is set, therefore it is a replace
                                     patch.op = "replace";
                                     patch.value = data.value;
+                                    patch.value = this.getCleanValue(data);
                                 } else {
                                     // value is empty, therefore it is a remove
                                     patch.op = "remove";
@@ -224,7 +225,7 @@
                                 // there has been no entry in the database before, therefore it is an add operation
                                 if(data.value && data.value != '') {
                                     patch.op = "add";
-                                    patch.value = data.value;
+                                    patch.value = this.getCleanValue(data);
                                 }
                             }
                             patches.push(patch);
@@ -240,6 +241,7 @@
                         }),
                         'success'
                     );
+                    this.setModificationFields(response.data);
                 }));
             },
             deleteEntity(entity) {
@@ -276,6 +278,48 @@
             cancelUpdateEntityName() {
                 Vue.set(this.selectedEntity, 'editing', false);
                 this.newEntityName = '';
+            },
+            getCleanValue(entry) {
+                if(!entry) return;
+                const v = entry.value;
+                switch(entry.attribute.datatype) {
+                    case 'string-sc':
+                        return {
+                            id: v.id,
+                            concept_url: v.concept_url
+                        };
+                    case 'string-mc':
+                        return v.map(smc => {
+                            return {
+                                id: smc.id,
+                                concept_url: smc.concept_url
+                            };
+                        });
+                    case 'table':
+                        return v.map(row => {
+                            for(let k in row) {
+                                const col = row[k];
+                                // if column is object, return necessary fields only
+                                if(col.id) {
+                                    row[k] = {
+                                        id: col.id,
+                                        concept_url: col.concept_url
+                                    };
+                                } else {
+                                    row[k] = col;
+                                }
+                            }
+                            return row;
+                        });
+                    default:
+                        return entry.value;
+                }
+            },
+            setModificationFields(entity) {
+                if(!this.selectedEntity && !this.selectedEntity.id) return;
+
+                this.selectedEntity.lasteditor = entity.lasteditor;
+                this.selectedEntity.updated_at = entity.updated_at;
             },
             updateDependencyCounter(event) {
                 this.hiddenAttributes = event.counter;

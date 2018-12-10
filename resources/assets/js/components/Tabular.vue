@@ -32,7 +32,7 @@
                             :placeholder="$t('global.select.placehoder')"
                             :select-label="$t('global.select.select')"
                             :deselect-label="$t('global.select.deselect')"
-                            @input="onInput($index, $event.target.value)">
+                            @input="onInput($index, $event.target)">
                         </multiselect>
                     </div>
                 </td>

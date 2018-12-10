@@ -300,6 +300,15 @@ class EntityController extends Controller {
                 'error' => 'You do not have the permission to modify an entity\' data'
             ], 403);
         }
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'This entity does not exist'
+            ], 400);
+        }
+
         foreach($request->request as $pid => $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
@@ -331,7 +340,7 @@ class EntityController extends Controller {
                     ], 400);
             }
             switch($attr->datatype) {
-                # for primitive types: just save them to the db
+                // for primitive types: just save them to the db
                 case 'stringf':
                 case 'string':
                 case 'geography':
@@ -370,10 +379,22 @@ class EntityController extends Controller {
                     break;
                 case 'entity':
                     $attrval->entity_val = $value;
+                    break;
             }
             $attrval->lasteditor = $user->name;
             $attrval->save();
         }
+
+        // Save model if lasteditor changed
+        // Only update timestamps otherwise
+        $entity->lasteditor = $user->name;
+        if($entity->isDirty()) {
+            $entity->save();
+        } else {
+            $entity->touch();
+        }
+
+        return response()->json($entity);
     }
 
     public function patchAttribute($id, $aid, Request $request) {
