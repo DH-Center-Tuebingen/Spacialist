@@ -58,55 +58,11 @@
             :bibliography="bibliography"
             :refs="ref">
         </router-view>
-        <discard-changes-modal :name="discardModal"/>
     </div>
 </template>
 
 <script>
     export default {
-        beforeRouteUpdate(to, from, next) {
-            if(_.isEqual(from.params, to.params)) {
-                this.dataLoaded = true;
-                next();
-            } else {
-                const vm = this;
-                let loadNext = function() {
-                    vm.dataLoaded = false;
-                    next();
-                }
-                if (vm.isFormDirty) {
-                    let discardAndContinue = function() {
-                        loadNext();
-                    };
-                    let saveAndContinue = function() {
-                        vm.saveEntity(vm.selectedEntity).then(loadNext);
-                    };
-                    vm.$modal.show(vm.discardModal, {reference: vm.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
-                } else {
-                    loadNext();
-                }
-            }
-        },
-        beforeRouteLeave: function(to, from, next) {
-            if(_.isEqual(from.params, to.params)) {
-                next();
-            } else {
-                let loadNext = () => {
-                    next();
-                }
-                if(this.isFormDirty) {
-                    let discardAndContinue = () => {
-                        loadNext();
-                    };
-                    let saveAndContinue = () => {
-                        this.saveEntity(this.selectedEntity).then(loadNext);
-                    };
-                    this.$modal.show(this.discardModal, {entityName: this.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
-                } else {
-                    loadNext();
-                }
-            }
-        },
         props: {
             selectedEntity: {
                 required: true,
@@ -131,6 +87,7 @@
         methods: {
             init(entity) {},
             getEntityData(entity) {
+                this.dataLoaded = false;
                 if(!this.$can('view_concept_props')) {
                     Vue.set(this.selectedEntity, 'data', {});
                     Vue.set(this.selectedEntity, 'attributes', []);
@@ -383,8 +340,7 @@
                     refs: {},
                     value: {},
                     attribute: {}
-                },
-                discardModal: 'discard-changes-modal'
+                }
             }
         },
         computed: {
@@ -395,6 +351,14 @@
         watch: {
             'selectedEntity.id': function(newId, oldId) {
                 this.getEntityData(this.selectedEntity);
+            },
+            isFormDirty(newDirty, oldDirty) {
+                if(newDirty != oldDirty) {
+                    this.$emit('detail-updated', {
+                        isDirty: newDirty,
+                        onDiscard: newDirty ? this.saveEntity : entity => {}
+                    });
+                }
             }
         }
     }

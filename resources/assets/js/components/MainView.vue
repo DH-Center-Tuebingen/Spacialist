@@ -12,6 +12,7 @@
                 :selected-entity="selectedEntity"
                 :bibliography="bibliography"
                 :event-bus="eventBus"
+                @detail-updated="setDetailDirty"
             >
             </router-view>
         </div>
@@ -65,7 +66,7 @@
                 </div>
             </div>
         </div>
-
+        <discard-changes-modal :name="discardModal"/>
     </div>
 </template>
 
@@ -84,20 +85,39 @@
             if(to.query.tab) {
                 this.setTabOrPlugin(to.query.tab);
             }
-            if(to.params.id && !_.isEqual(from.params, to.params)) {
-                $httpQueue.add(() => $http.get(`/entity/${to.params.id}`).then(response => {
-                    this.selectedEntity = response.data;
-                    $httpQueue.add(() => $http.get(`/entity/${to.params.id}/reference`).then(response => {
-                        this.selectedEntity.references = response.data;
-                    }));
-                }));
-            } else if(!to.params.id) {
-                this.selectedEntity = {};
+            let loadNext = () => {
+                if(to.params.id) {
+                    this.getNewEntity(to.params.id).then(next());
+                } else {
+                    this.resetEntity();
+                    next();
+                }
             }
-            next();
+            if(this.discardState.dirty) {
+                let discardAndContinue = () => {
+                    loadNext();
+                };
+                let saveAndContinue = () => {
+                    this.discardState.callback(this.selectedEntity).then(loadNext);
+                };
+                this.$modal.show(this.discardModal, {reference: this.selectedEntity.name, onDiscard: discardAndContinue, onSave: saveAndContinue, onCancel: _ => next(false)})
+            } else {
+                loadNext();
+            }
         },
         mounted() {},
         methods: {
+            getNewEntity(id) {
+                return $httpQueue.add(() => $http.get(`/entity/${id}`).then(response => {
+                    this.selectedEntity = response.data;
+                    $httpQueue.add(() => $http.get(`/entity/${id}/reference`).then(response => {
+                        this.selectedEntity.references = response.data;
+                    }));
+                }));
+            },
+            resetEntity() {
+                this.selectedEntity = {};
+            },
             init(bibliography, openTab, initialSelectedId) {
                 const vm = this;
                 this.initFinished = false;
@@ -112,6 +132,10 @@
                 }
                 this.eventBus.$on('entity-update', this.handleEntityUpdate);
                 this.initFinished = true;
+            },
+            setDetailDirty(event) {
+                this.discardState.dirty = event.isDirty;
+                this.discardState.callback = event.onDiscard;
             },
             setReferencesTab() {
                 if(!this.selectedEntity.id) return;
@@ -185,7 +209,12 @@
                 defaultKey: undefined,
                 plugins: this.$getTabPlugins(),
                 activePlugin: '',
-                eventBus: new Vue()
+                eventBus: new Vue(),
+                discardModal: 'discard-changes-modal',
+                discardState: {
+                    dirty: false,
+                    callback: () => {}
+                }
             }
         },
         computed: {
