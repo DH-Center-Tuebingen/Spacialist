@@ -590,11 +590,12 @@
             }
         },
         computed: {
-            topLevelCount: function() {
+            topLevelCount() {
                 return this.tree.length || 0;
             },
-            isDragAllowed: function() {
-                return true;
+            // drag is only allowed, when sorted by rank (asc)
+            isDragAllowed() {
+                return this.sort.by == 'rank' && this.sort.dir == 'asc';
             }
         },
         watch: {
