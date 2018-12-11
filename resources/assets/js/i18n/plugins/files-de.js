@@ -81,7 +81,7 @@ const de = {
                             'voi-desc': 'Benutze <kbd><kbd>Linksklick</kbd> + <kbd>Ziehen</kbd></kbd> um die Fensterbreite (hoch/runter) und das Fensterzentrum (links/rechts) zu ändern.',
                         },
                         metadata: {
-                            title: 'Metadaten',
+                            title: '@:plugins.files.modal.detail.metadata.title',
                             'search-placeholder': 'Suche nach Metadaten-Schlagworten...'
                         },
                         save: 'Bild speichern',
@@ -117,6 +117,11 @@ const de = {
                 },
                 delete: {
                     alert: 'Beachte: Wenn du {name} löschst, wird eine Verknüpfung zu einer Entität ebenfalls gelöscht. | Beachte: Wenn du {name} löschst, werden {cnt} Verknüpfungen zu Entitäten ebenfalls gelöscht.'
+                },
+                clipboard: {
+                    title: '{name} - Upload bestätigen',
+                    file_info: '@:plugins.files.modal.detail.metadata.title',
+                    no_preview: 'Für diesen Dateityp ist keine Vorschau verfügbar.'
                 }
             },
             list: {

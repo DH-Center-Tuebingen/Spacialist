@@ -17,6 +17,7 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - Icons in the upper right corner to indicate whether this file is linked and has tags
   - Checkboxes in the upper left corner to select files for export/download
   - Properties (copyright and description) and tags fields to upload page, to set them for all uploaded files
+  - Shortcut (`ctrl + v`) to directly upload files from clipboard
 - Tree View
   - Reorder buttons (by rank (default), name, entity-type, children count)
 - Welcome Page
@@ -26,7 +27,7 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
 - Bibliography
   - Export BibTeX
   - 'Hide BibTeX metadata fields' toggle in Bibliography view
-  - Auto-Fill from clipboard `ctrl + v` in new/edit entry modal
+  - Auto-Fill from clipboard (`ctrl + v`) in new/edit entry modal
 - Attribute Types
   - SQL Type
     - Rendered as Table or single value

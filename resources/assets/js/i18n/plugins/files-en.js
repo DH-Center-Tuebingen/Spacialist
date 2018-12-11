@@ -81,7 +81,7 @@ const en = {
                             'voi-desc': 'Use <kbd><kbd>Left Click</kbd> + <kbd>Drag</kbd></kbd> to change window width (up/down) and window center (left/right).',
                         },
                         metadata: {
-                            title: 'Metadata',
+                            title: '@:plugins.files.modal.detail.metadata.title',
                             'search-placeholder': 'Search for Metadata-Tags...'
                         },
                         save: 'Save Image',
@@ -117,6 +117,11 @@ const en = {
                 },
                 delete: {
                     alert: 'Note: If you delete {name}, one link to an entity is deleted, too. | Note: If you delete {name}, {cnt} links to entities are deleted, too.'
+                },
+                clipboard: {
+                    title: '{name} - Confirm upload',
+                    file_info: '@:plugins.files.modal.detail.metadata.title',
+                    no_preview: 'No preview available for this file type.'
                 }
             },
             list: {

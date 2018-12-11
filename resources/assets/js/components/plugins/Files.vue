@@ -170,7 +170,7 @@
                 :show-links="true">
             </file-list>
         </div>
-        <div v-if="isAction('upload')">
+        <div v-if="isAction('upload')" @paste="handleClipboardPaste">
             <file-upload class="w-100"
                 ref="upload"
                 v-model="uploadFiles"
@@ -667,6 +667,11 @@
                 </div>
             </div>
         </modal>
+
+        <file-confirm-upload-modal
+            :id="confirmModalId"
+            @confirm="uploadFileFromClipboard"
+        ></file-confirm-upload-modal>
     </div>
 </template>
 
@@ -685,6 +690,8 @@
     Vue.component('file-archive', require('./FileArchive.vue'));
     Vue.component('file-text', require('./FileText.vue'));
     Vue.component('file-undefined', require('./FileUndefined.vue'));
+
+    Vue.component('file-confirm-upload-modal', require('./FileConfirmUploadModal.vue'));
 
     export default {
         props: {
@@ -896,9 +903,37 @@
                 this.resetFiles('linkedFiles');
                 this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
             },
+            handleClipboardPaste(e) {
+                let items = e.clipboardData.items;
+                for(let i=0; i<items.length; i++) {
+                    let c = items[i];
+                    if(c.kind == 'string' && c.type == 'text/plain') {
+                        c.getAsString(s => {
+                            const f = new File([s], 'clipboard-paste.txt', {
+                                type: 'text/plain'
+                            });
+                            this.confirmClipboardUpload(f);
+                        });
+                    } else if(c.kind == 'file') {
+                        const f = c.getAsFile();
+                        this.confirmClipboardUpload(f);
+                    }
+                }
+            },
+            confirmClipboardUpload(file) {
+                this.$modal.show(this.confirmModalId, {
+                    file: file
+                });
+            },
+            uploadFileFromClipboard(event) {
+                this.uploadFile(event.file).then(response => {
+                    this.onFilesUploaded(this.unlinkedFiles);
+                    this.onFilesUploaded(this.allFiles);
+                });
+            },
             uploadFile(file, component) {
                 let formData = new FormData();
-                formData.append('file', file.file);
+                formData.append('file', file.file ? file.file : file);
                 if(this.toUpload.copyright.length) {
                     formData.append('copyright', this.toUpload.copyright);
                 }
@@ -1034,7 +1069,7 @@
                 }
                 let url = filesObj.apiPrefix;
                 url += filesObj.apiUrl + '?' + filesObj.apiPageParam + '=' + filesObj.pagination.current_page;
-                if(filesObj.pagination.to < filesObj.pagination.total) {
+                if(filesObj.pagination.to <= filesObj.pagination.total) {
                     // remove current page files and reload them
                     let index = filesObj.pagination.from - 1;
                     let howmany = (filesObj.pagination.to - filesObj.pagination.from) + 1;
@@ -1291,6 +1326,7 @@
                 storageConfig: {
                     baseURL: ''
                 },
+                confirmModalId: 'file-confirm-upload-modal',
                 showFilters: false,
                 filterRules: {
                     type: {},
