@@ -30,9 +30,8 @@
                         {{ $translateConcept(attribute.thesaurus_url) }}:
                     </span>
                     <sup class="clickable" v-if="onMetadata" @click="onMetadata(attribute)">
-                        <span>
-                        <i class="fas fa-fw fa-exclamation"
-                        :class="getCertaintyClass(localValues[attribute.id].certainty)"></i>
+                        <span :class="getCertaintyClass(localValues[attribute.id].certainty)">
+                            <i class="fas fa-fw fa-exclamation"></i>
                         </span>
                         <span v-if="localValues[attribute.id].certainty_description">
                             <i class="fas fa-fw fa-comment"></i>
@@ -329,7 +328,7 @@
                 this.fields[`attribute-${aid}`].dirty = true;
                 this.checkDependency(aid);
             },
-            getCertaintyClass(certainty, aid) {
+            getCertaintyClass(certainty) {
                 let activeClasses = [];
                 if(certainty <= 25) {
                     activeClasses.push('text-danger');

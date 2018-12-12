@@ -42,7 +42,7 @@
                 {{ (selectedEntity.updated_at || selectedEntity.created_at) | date(undefined, true, true) }}
             </span>
         </div>
-        <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="dataLoaded" v-can="'view_concept_props'"
+        <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
             :attributes="selectedEntity.attributes"
             :dependencies="selectedEntity.dependencies"
             :disable-drag="true"
@@ -50,7 +50,7 @@
             :metadata-addon="hasReferenceGroup"
             :selections="selectedEntity.selections"
             :values="selectedEntity.data"
-            v-on:attr-dep-change="updateDependencyCounter">
+            @attr-dep-change="updateDependencyCounter">
         </attributes>
 
         <router-view
@@ -63,6 +63,21 @@
 
 <script>
     export default {
+        beforeRouteEnter(to, from, next) {
+            next(vm => vm.getEntityData(vm.selectedEntity));
+        },
+        beforeRouteUpdate(to, from, next) {
+            if(to.params.id != from.params.id) {
+                this.getEntityData(this.selectedEntity).then(r => {
+                    next();
+                });
+            } else {
+                if(to.params.aid) {
+                    this.setModalValues(to.params.aid);
+                }
+                next();
+            }
+        },
         props: {
             selectedEntity: {
                 required: true,
@@ -95,11 +110,11 @@
                     Vue.set(this.selectedEntity, 'dependencies', []);
                     Vue.set(this.selectedEntity, 'references', []);
                     Vue.set(this, 'dataLoaded', true);
-                    return;
+                    return new Promise(r => r(null));
                 }
                 const cid = entity.id;
                 const ctid = entity.entity_type_id;
-                $httpQueue.add(() => $http.get(`/entity/${cid}/data`).then(response => {
+                return $httpQueue.add(() => $http.get(`/entity/${cid}/data`).then(response => {
                     // if result is empty, php returns [] instead of {}
                     if(response.data instanceof Array) {
                         response.data = {};
@@ -344,14 +359,17 @@
             }
         },
         computed: {
-            isFormDirty: function() {
+            isFormDirty() {
                 return Object.keys(this.fields).some(key => this.fields[key].dirty);
+            },
+            hasData() {
+                return this.dataLoaded &&
+                    !!this.selectedEntity &&
+                    !!this.selectedEntity.attributes &&
+                    !!this.selectedEntity.selections
             }
         },
         watch: {
-            'selectedEntity.id': function(newId, oldId) {
-                this.getEntityData(this.selectedEntity);
-            },
             isFormDirty(newDirty, oldDirty) {
                 if(newDirty != oldDirty) {
                     this.$emit('detail-updated', {

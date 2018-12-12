@@ -32,23 +32,32 @@
                     <tbody>
                         <tr class="d-flex flex-row" v-for="reference in refs.refs">
                             <td class="text-left py-2 col px-0 pl-1">
-                                <h6>{{ reference.bibliography.title }}</h6>
-                                <p class="mb-0">
-                                    {{ reference.bibliography.author }}, <span class="text-muted font-weight-light">{{ reference.bibliography.year}}</span>
-                                </p>
+                                <div class="d-flex flex-column">
+                                    <h6>{{ reference.bibliography.title }}</h6>
+                                    <span class="mb-0">
+                                        {{ reference.bibliography.author }}, <span class="text-muted font-weight-light">{{ reference.bibliography.year}}</span>
+                                    </span>
+                                </div>
                             </td>
                             <td class="text-right p-2 col">
-                                <p class="font-weight-light font-italic mb-0" v-if="editReference.id != reference.id">
-                                    {{ reference.description }}
-                                </p>
-                                <div class="d-flex" v-else>
-                                    <input type="text" class="form-control mr-1" v-model="editReference.description" />
-                                    <button type="button" class="btn btn-outline-success mr-1" @click="onUpdateReference(editReference)">
-                                        <i class="fas fa-fw fa-check"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-danger" @click="cancelEditReference">
-                                        <i class="fas fa-fw fa-times"></i>
-                                    </button>
+                                <div class="d-flex flex-column">
+                                    <div>
+                                        <p class="font-weight-light font-italic mb-0" v-if="editReference.id != reference.id">
+                                            {{ reference.description }}
+                                        </p>
+                                        <div class="d-flex" v-else>
+                                            <input type="text" class="form-control mr-1" v-model="editReference.description" />
+                                            <button type="button" class="btn btn-outline-success mr-1" @click="onUpdateReference(editReference)">
+                                                <i class="fas fa-fw fa-check"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" @click="cancelEditReference">
+                                                <i class="fas fa-fw fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <span class="text-muted font-weight-light">
+                                        {{ reference.updated_at | date(undefined, true, true) }}
+                                    </span>
                                 </div>
                             </td>
                             <td class="px-0 pr-1">
@@ -203,6 +212,8 @@
                         this.refs.refs = [];
                     }
                     this.refs.refs.push(response.data);
+                    item.bibliography = {};
+                    item.description = '';
                 }));
             },
             onDeleteReference(reference) {
@@ -226,7 +237,8 @@
                     description: editedReference.description
                 };
                 $httpQueue.add(() => $http.patch(`/entity/reference/${id}`, data).then(response => {
-                    ref.description = editedReference.description;
+                    ref.description = response.data.description;
+                    ref.updated_at = response.data.updated_at;
                     this.cancelEditReference();
                 }));
             },
@@ -258,13 +270,13 @@
                 newItem: {
                     bibliography: {},
                     description: ''
-                },
+                }
             }
         },
         computed: {
-            addReferenceDisabled: function() {
+            addReferenceDisabled() {
                 return !this.newItem.bibliography.id || this.newItem.description.length == 0;
-            },
+            }
         }
     }
 </script>

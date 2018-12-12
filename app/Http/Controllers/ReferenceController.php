@@ -96,7 +96,7 @@ class ReferenceController extends Controller {
         }
 
         $reference->patch($request->only(array_keys(Reference::patchRules)));
-        return response()->json(null, 204);
+        return response()->json($reference);
     }
 
     // PUT

@@ -75,10 +75,23 @@
 
     export default {
         beforeRouteEnter(to, from, next) {
-            let bibliography;
+            let bibliography, entityData;
             $httpQueue.add(() => $http.get('bibliography').then(response => {
                 bibliography = response.data;
-                next(vm => vm.init(bibliography, to.query.tab, to.params.id));
+                if(to.params.id) {
+                    return $http.get(`/entity/${to.params.id}`);
+                } else {
+                    return new Promise(resolve => resolve(null));
+                }
+            }).then(response => {
+                entityData = response ? response.data : null;
+                if(to.params.id) {
+                    return $http.get(`/entity/${to.params.id}/reference`);
+                } else {
+                    return new Promise(resolve => resolve(null));
+                }
+            }).then(response => {
+                next(vm => vm.init(bibliography, to.query.tab, entityData, response ? response.data : null));
             }));
         },
         beforeRouteUpdate(to, from, next) {
@@ -87,7 +100,13 @@
             }
             let loadNext = () => {
                 if(to.params.id) {
-                    this.getNewEntity(to.params.id).then(next());
+                    if(to.params.id != from.params.id) {
+                        this.getNewEntity(to.params.id).then(r => {
+                            next();
+                        });
+                    } else {
+                        next();
+                    }
                 } else {
                     this.resetEntity();
                     next();
@@ -110,28 +129,29 @@
             getNewEntity(id) {
                 return $httpQueue.add(() => $http.get(`/entity/${id}`).then(response => {
                     this.selectedEntity = response.data;
-                    $httpQueue.add(() => $http.get(`/entity/${id}/reference`).then(response => {
-                        this.selectedEntity.references = response.data;
-                    }));
+                    return $http.get(`/entity/${id}/reference`);
+                }).then(response => {
+                    this.selectedEntity.references = response.data;
                 }));
             },
             resetEntity() {
                 this.selectedEntity = {};
             },
-            init(bibliography, openTab, initialSelectedId) {
-                const vm = this;
+            init(bibliography, openTab, entityData, entityReferences) {
                 this.initFinished = false;
                 this.bibliography = bibliography;
-                if(initialSelectedId) {
-                    $httpQueue.add(() => $http.get(`/entity/${initialSelectedId}`).then(response => {
-                        vm.selectedEntity = response.data;
-                    }));
+                if(entityData) {
+                    this.selectedEntity = entityData;
+                }
+                if(entityReferences) {
+                    this.selectedEntity.references = entityReferences;
                 }
                 if(openTab) {
                     this.setTabOrPlugin(openTab);
                 }
                 this.eventBus.$on('entity-update', this.handleEntityUpdate);
                 this.initFinished = true;
+                return new Promise(r => r(null));
             },
             setDetailDirty(event) {
                 this.discardState.dirty = event.isDirty;
