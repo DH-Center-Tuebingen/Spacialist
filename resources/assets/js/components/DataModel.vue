@@ -236,6 +236,7 @@
                 if(attribute.textContent) {
                     data.text = attribute.textContent;
                 }
+                return data;
             },
             createAttribute(event) {
                 if(!this.validated) return;

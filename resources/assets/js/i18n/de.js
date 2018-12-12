@@ -132,7 +132,7 @@ const de = {
         options: 'Optionen',
         type: 'Typ',
         'root-element': 'Eltern-Element',
-        'recursive': 'Alle Kind-Elemente (Rekursiv)',
+        recursive: 'Alle Kind-Elemente (Rekursiv)',
         content: 'Inhalt',
         column: 'Spalte | Spalten',
         'geometry-type': 'Geometrietyp',

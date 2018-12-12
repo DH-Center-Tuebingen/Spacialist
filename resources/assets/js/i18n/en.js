@@ -132,7 +132,7 @@ const en = {
         options: 'Options',
         type: 'Type',
         'root-element': 'Parent-Element',
-        'non-recursive': 'All descendants (recursive)',
+        recursive: 'All descendants (recursive)',
         content: 'Content',
         column: 'Column | Columns',
         'geometry-type': 'Geometry-Type',
