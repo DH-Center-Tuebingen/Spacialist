@@ -2,6 +2,26 @@ let mix = require('laravel-mix');
 
 /*
  |--------------------------------------------------------------------------
+ | App Path
+ |--------------------------------------------------------------------------
+ |
+ | The relative path of your app in your web browser's root folder
+ | **without** leading and **with** trailing slash
+ |
+ |--------------------------------------------------------------------------
+ | Example
+ |--------------------------------------------------------------------------
+ |
+ | Document Root: /var/www/html
+ | App Root: /var/www/html/spacialist/instance1
+ | => appPath = 'spacialist/instance1/'
+ |
+ */
+
+const appPath = '';
+
+/*
+ |--------------------------------------------------------------------------
  | Mix Asset Management
  |--------------------------------------------------------------------------
  |
@@ -25,9 +45,14 @@ mix.js('resources/assets/js/app.js', 'public/js')
        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
        'public/css'
    )
+   .options({
+       fileLoaderDirs: {
+           fonts: appPath + 'fonts'
+       }
+   })
    .webpackConfig({
       output: {
-         publicPath: '/'
+         publicPath: '/' + appPath
       }
    })
    .autoload({
