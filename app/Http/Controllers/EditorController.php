@@ -12,7 +12,6 @@ use App\EntityAttribute;
 use App\EntityType;
 use App\EntityTypeRelation;
 use App\Geodata;
-use App\Helpers;
 use App\ThConcept;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -267,7 +266,7 @@ class EditorController extends Controller {
         ]);
 
         $curl = $request->get('concept_url');
-        $is_root = Helpers::parseBoolean($request->get('is_root'));
+        $is_root = sp_parse_boolean($request->get('is_root'));
         $geomtype = $request->get('geomtype');
         $cType = new EntityType();
         $cType->thesaurus_url = $curl;
@@ -335,7 +334,7 @@ class EditorController extends Controller {
         $attr = new Attribute();
         $attr->thesaurus_url = $curl;
         $attr->datatype = $datatype;
-        $attr->recursive = $request->has('recursive') && Helpers::parseBoolean($request->get('recursive'));
+        $attr->recursive = $request->has('recursive') && sp_parse_boolean($request->get('recursive'));
         if($request->has('root_id')) {
             $pid = $request->get('root_id');
             $purl = ThConcept::find($pid)->concept_url;
@@ -354,7 +353,7 @@ class EditorController extends Controller {
                 $childAttr = new Attribute();
                 $childAttr->thesaurus_url = $curl;
                 $childAttr->datatype = $col->datatype;
-                $childAttr->recursive = Helpers::parseBoolean($col->recursive);
+                $childAttr->recursive = sp_parse_boolean($col->recursive);
                 if(isset($col->root_id)) {
                     $pid = $col->root_id;
                     $purl = ThConcept::find($pid)->concept_url;

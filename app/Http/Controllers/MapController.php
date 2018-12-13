@@ -6,7 +6,6 @@ use App\AvailableLayer;
 use App\Entity;
 use App\EntityType;
 use App\Geodata;
-use App\Helpers;
 use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
 use Phaza\LaravelPostgis\Geometries\Polygon;
@@ -182,7 +181,7 @@ class MapController extends Controller
                     $query->where('entity_type_id', $layer->entity_type_id);
                 });
         }
-        $query = Helpers::parseSql($geodataBuilder);
+        $query = sp_raw_query($geodataBuilder);
         $type = strtoupper($request->query('type', 'geojson'));
         $srid = strtoupper($request->query('srid', '4326'));
         $contentType = 'text/plain';

@@ -8,7 +8,6 @@ use App\AttributeValue;
 use App\Entity;
 use App\File;
 use App\Geodata;
-use App\Helpers;
 use App\Bibliography;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Geometries\Point;
@@ -35,8 +34,8 @@ class AnalysisController extends Controller {
         $orders = $request->input('orders', []);
         $limit = $request->input('limit', []);
         $splits = $request->input('splits', []);
-        $simple = Helpers::parseBoolean($request->input('simple', false));
-        $distinct = Helpers::parseBoolean($request->input('distinct', false));
+        $simple = sp_parse_boolean($request->input('simple', false));
+        $distinct = sp_parse_boolean($request->input('distinct', false));
         $page = $request->input('page');
         $result = $this->requestToQuery($origin, $filters, $columns, $orders, $limit, $splits, $simple, $distinct, $page);
         switch($type) {
@@ -182,8 +181,8 @@ class AnalysisController extends Controller {
         $orders = $request->input('orders', []);
         $limit = $request->input('limit', []);
         $splits = $request->input('splits', []);
-        $simple = Helpers::parseBoolean($request->input('simple', false));
-        $distinct = Helpers::parseBoolean($request->input('distinct', false));
+        $simple = sp_parse_boolean($request->input('simple', false));
+        $distinct = sp_parse_boolean($request->input('distinct', false));
         $result = $this->requestToQuery($origin, $filters, $columns, $orders, $limit, $splits, $simple, $distinct, $page);
         return response()->json($result);
     }
@@ -342,7 +341,7 @@ class AnalysisController extends Controller {
 
                         $columnNames = [];
                         foreach($tables as $table) {
-                            $columnNames[$table] = Helpers::getColumnNames($table);
+                            $columnNames[$table] = sp_column_names($table);
                         }
 
                         $this->renameColumns($query, $tables, $columnNames);
@@ -374,9 +373,9 @@ class AnalysisController extends Controller {
                         $columnNames = [];
                         foreach($tables as $table) {
                             if($table === 'child' || $table === 'root') {
-                                $columnNames[$table] = Helpers::getColumnNames('entities');
+                                $columnNames[$table] = sp_column_names('entities');
                             } else {
-                                $columnNames[$table] = Helpers::getColumnNames($table);
+                                $columnNames[$table] = sp_column_names($table);
                             }
                         }
 
@@ -399,7 +398,7 @@ class AnalysisController extends Controller {
                         $tables = ['files', 'entities', 'th_concept'];
                         $columnNames = [];
                         foreach($tables as $table) {
-                            $columnNames[$table] = Helpers::getColumnNames($table);
+                            $columnNames[$table] = sp_column_names($table);
                         }
 
                         $this->renameColumns($query, $tables, $columnNames);
@@ -417,7 +416,7 @@ class AnalysisController extends Controller {
                         $tables = ['geodata', 'entities'];
                         $columnNames = [];
                         foreach($tables as $table) {
-                            $columnNames[$table] = Helpers::getColumnNames($table);
+                            $columnNames[$table] = sp_column_names($table);
                         }
 
                         $this->renameColumns($query, $tables, $columnNames);
@@ -437,7 +436,7 @@ class AnalysisController extends Controller {
                         $tables = ['bibliography', 'attributes', 'entities', 'references'];
                         $columnNames = [];
                         foreach($tables as $table) {
-                            $columnNames[$table] = Helpers::getColumnNames($table);
+                            $columnNames[$table] = sp_column_names($table);
                         }
 
                         $this->renameColumns($query, $tables, $columnNames);

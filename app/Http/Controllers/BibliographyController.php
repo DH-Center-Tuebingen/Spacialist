@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 use App\Bibliography;
-use App\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RenanBr\BibTexParser\Listener;

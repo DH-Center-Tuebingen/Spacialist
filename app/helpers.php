@@ -1,30 +1,36 @@
 <?php
 
-namespace App;
-
 use App\Bibliography;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
-class Helpers {
-    public static function parseBoolean($str) {
+if(!function_exists('sp_parse_boolean')) {
+    function sp_parse_boolean($str) {
         $acceptable = [true, 1, '1', 'true', 'TRUE'];
         return in_array($str, $acceptable, true);
     }
+}
 
-    public static function getFullFilePath($filename) {
+if(!function_exists('sp_get_full_file_path')) {
+    function sp_get_full_file_path($filename) {
         return Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $filename);
     }
+}
 
-    public static function getStorageFilePath($filename) {
+if(!function_exists('sp_get_storage_file_path')) {
+    function sp_get_storage_file_path($filename) {
         return Storage::url(env('SP_FILE_PATH') .'/'. $filename);
     }
+}
 
-    public static function exifDataExists($exif, $rootKey, $dataKey) {
+if(!function_exists('sp_has_exif')) {
+    function sp_has_exif($exif, $rootKey, $dataKey) {
         return array_key_exists($rootKey, $exif) && array_key_exists($dataKey, $exif[$rootKey]);
     }
+}
 
-    public static function parseSql($builder) {
+if(!function_exists('sp_raw_query')) {
+    function sp_raw_query($builder) {
         $sql = $builder->toSql();
         $bindings = $builder->getBindings();
         foreach($bindings as $binding) {
@@ -33,8 +39,10 @@ class Helpers {
         }
         return $sql;
     }
+}
 
-    public static function getColumnNames($table) {
+if(!function_exists('sp_column_names')) {
+    function sp_column_names($table) {
         switch($table) {
             case 'attributes':
                 return \DB::table('information_schema.columns')
@@ -45,7 +53,6 @@ class Helpers {
                     ->pluck('column_name');
             default:
                 return Schema::getColumnListing($table);
-
         }
     }
 }

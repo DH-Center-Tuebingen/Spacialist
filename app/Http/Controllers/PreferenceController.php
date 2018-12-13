@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 use App\Preference;
 use App\UserPreference;
-use App\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -80,7 +79,7 @@ class PreferenceController extends Controller {
         } else {
             $pref->default_value = $encodedValue;
             if(isset($allowOverride)) {
-                $allowOverride = Helpers::parseBoolean($allowOverride);
+                $allowOverride = sp_parse_boolean($allowOverride);
                 $removeUserPrefs = $pref->allow_override && !$allowOverride;
                 $pref->allow_override = $allowOverride;
                 // remove stored user prefs, if pref is no longer overridable

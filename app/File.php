@@ -4,7 +4,6 @@ namespace App;
 
 use App\EntityFile;
 use App\FileTag;
-use App\Helpers;
 use App\ThConcept;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
@@ -192,7 +191,7 @@ class File extends Model
             ->whereHas('entities', function($query) use($cid, $filters) {
                 $query->where('entity_id', $cid);
                 $subs = $filters['sub_entities'];
-                if(isset($subs) && Helpers::parseBoolean($subs)) {
+                if(isset($subs) && sp_parse_boolean($subs)) {
                     $query->orWhere('root_entity_id', $cid);
                 }
             })
@@ -293,7 +292,7 @@ class File extends Model
         fclose($filehandle);
 
         $mimeType = $input->getMimeType();
-        $fileUrl = Helpers::getStorageFilePath($filename);
+        $fileUrl = sp_get_storage_file_path($filename);
         $lastModified = date('Y-m-d H:i:s', filemtime($fileUrl));
 
         $file = new File();
@@ -353,7 +352,7 @@ class File extends Model
                     default:
                         // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
                         $im = new Imagick($fileUrl);
-                        $fileUrl = Helpers::getStorageFilePath($nameNoExt . self::EXP_SUFFIX);
+                        $fileUrl = sp_get_storage_file_path($nameNoExt . self::EXP_SUFFIX);
                         $im->setImageFormat(self::EXP_FORMAT);
                         $im->writeImage($fileUrl);
                         $im->clear();
@@ -376,10 +375,10 @@ class File extends Model
             if($mime === IMAGETYPE_JPEG || $mime === IMAGETYPE_TIFF_II || $mime === IMAGETYPE_TIFF_MM) {
                 $exif = @exif_read_data($fileUrl, 'ANY_TAG', true);
                 if($exif !== false) {
-                    if(Helpers::exifDataExists($exif, 'IFD0', 'Make')) {
+                    if(sp_has_exif($exif, 'IFD0', 'Make')) {
                         $make = $exif['IFD0']['Make'];
                     }
-                    if(Helpers::exifDataExists($exif, 'IFD0', 'Model')) {
+                    if(sp_has_exif($exif, 'IFD0', 'Model')) {
                         $model = $exif['IFD0']['Model'];
                     } else {
                         $model = '';
@@ -389,21 +388,21 @@ class File extends Model
                     }
                     $file->cameraname = $model;
 
-                    if(Helpers::exifDataExists($exif, 'IFD0', 'Copyright')) {
+                    if(sp_has_exif($exif, 'IFD0', 'Copyright')) {
                         $copyright = $exif['IFD0']['Copyright'];
                     } else {
                         $copyright = '';
                     }
                     $file->copyright = $copyright;
 
-                    if(Helpers::exifDataExists($exif, 'IFD0', 'ImageDescription')) {
+                    if(sp_has_exif($exif, 'IFD0', 'ImageDescription')) {
                         $description = $exif['IFD0']['ImageDescription'];
                     } else {
                         $description = '';
                     }
                     $file->description = $description;
 
-                    if(Helpers::exifDataExists($exif, 'EXIF', 'DateTimeOriginal')) {
+                    if(sp_has_exif($exif, 'EXIF', 'DateTimeOriginal')) {
                         $dateOrig = strtotime($exif['EXIF']['DateTimeOriginal']);
                         $dateOrig = date('Y-m-d H:i:s', $dateOrig);
                         $file->created = $dateOrig;
@@ -421,7 +420,7 @@ class File extends Model
             $filehandle
         );
         fclose($filehandle);
-        $fileUrl = Helpers::getStorageFilePath($this->name);
+        $fileUrl = sp_get_storage_file_path($this->name);
         $lastModified = date('Y-m-d H:i:s', filemtime($fileUrl));
 
         $this->mime_type = $fileObject->getMimeType();
@@ -454,9 +453,9 @@ class File extends Model
     }
 
     public function setFileInfo() {
-        $this->url = Helpers::getFullFilePath($this->name);
+        $this->url = sp_get_full_file_path($this->name);
         if($this->isImage()) {
-            $this->thumb_url = Helpers::getFullFilePath($this->thumb);
+            $this->thumb_url = sp_get_full_file_path($this->thumb);
         }
 
         try {
@@ -471,7 +470,7 @@ class File extends Model
 
     public function getArchiveFileList() {
         if(!$this->isArchive()) return [];
-        $path = Helpers::getStorageFilePath($this->name);
+        $path = sp_get_storage_file_path($this->name);
         $archive = UnifiedArchive::open($path);
         $fileList = $this->getContainingFiles($archive->getFileNames(), $archive);
 
@@ -479,7 +478,7 @@ class File extends Model
     }
 
     public function getArchivedFileContent($filepath) {
-        $path = Helpers::getStorageFilePath($this->name);
+        $path = sp_get_storage_file_path($this->name);
         $archive = UnifiedArchive::open($path);
         return base64_encode($archive->getFileContent($filepath));
     }
@@ -492,7 +491,7 @@ class File extends Model
         // ];
         $nodes = [];
         foreach($fileList as $f) {
-            $path = Helpers::getStorageFilePath($f->name);
+            $path = sp_get_storage_file_path($f->name);
             $nodes[$path] = $f->name;
         }
         UnifiedArchive::archiveFiles($nodes, $zip);
@@ -549,10 +548,10 @@ class File extends Model
     }
 
     public function deleteFile() {
-        $url = Helpers::getStorageFilePath($this->name);
+        $url = sp_get_storage_file_path($this->name);
         Storage::delete($url);
         if(isset($this->thumb)) {
-            $thumbUrl = Helpers::getStorageFilePath($this->thumb);
+            $thumbUrl = sp_get_storage_file_path($this->thumb);
             Storage::delete($thumbUrl);
         }
         $this->delete();
@@ -764,11 +763,11 @@ class File extends Model
         $tempFile = tempnam(sys_get_temp_dir(), 'Spacialist_html_');
 
         if($this->isDocument()) {
-            $phpWord = \PhpOffice\PhpWord\IOFactory::load(Helpers::getStorageFilePath($this->name));
+            $phpWord = \PhpOffice\PhpWord\IOFactory::load(sp_get_storage_file_path($this->name));
             $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
             $writer->save($tempFile);
         } else if($this->isSpreadsheet()) {
-            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load(Helpers::getStorageFilePath($this->name));
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load(sp_get_storage_file_path($this->name));
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Html($spreadsheet);
             $writer->save($tempFile);
         } else  if($this->isPresentation()) {
