@@ -15,7 +15,11 @@
                 <td>
                     <form class="form-mb-0">
                         <div class="form-group row">
-                            <label class="col-md-2 col-form-label"></label>
+                            <label class="col-md-2 col-form-label py-0">
+                                <button class="btn btn-outline-primary" @click="preferences['prefs.gui-language'].value = browserLanguage" :disabled="!preferences['prefs.gui-language'].allow_override">
+                                    Set to {{ browserLanguage }}
+                                </button>
+                            </label>
                             <div class="col-md-10">
                                 <input type="text" :readonly="!preferences['prefs.gui-language'].allow_override" :class="[preferences['prefs.gui-language'].allow_override ? 'form-control' : 'form-control-plaintext']" v-model="preferences['prefs.gui-language'].value" />
                             </div>
@@ -246,6 +250,9 @@
             init(preferences) {
                 this.initFinished = false;
                 this.preferences = preferences;
+                // get language code of browser's default language
+                //
+                this.browserLanguage = navigator.language ? navigator.language.split('-')[0] : 'en';
                 this.initFinished = true;
             },
             getMax(column) {
@@ -288,6 +295,7 @@
         data() {
             return {
                 preferences: {},
+                browserLanguage: 'en',
                 initFinished: false
             }
         },
