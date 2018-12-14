@@ -25,6 +25,10 @@ code.normal {
     font-weight: 400 !important;
 }
 
+.form-mb-0 > div.form-group:last-child {
+    margin-bottom: 0;
+}
+
 .v-can-hidden {
     display: none !important;
 }

@@ -13,7 +13,7 @@
                     <strong>{{ $t('main.preference.key.language') }}</strong>
                 </td>
                 <td>
-                    <form>
+                    <form class="form-mb-0">
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label"></label>
                             <div class="col-md-10">
@@ -36,7 +36,7 @@
                     </p>
                 </td>
                 <td>
-                    <form>
+                    <form class="form-mb-0">
                         <div class="form-group row">
                             <label for="left-column" class="col-md-2 col-form-label">{{ $t('main.preference.key.columns.left') }}:</label>
                             <div class="col-md-10">
@@ -68,7 +68,7 @@
                     <strong>{{ $t('main.preference.key.tooltips') }}</strong>
                 </td>
                 <td>
-                    <form>
+                    <form class="form-mb-0">
                         <div class="form-group row">
                             <div class="col-md-2"></div>
                             <div class="col-md-10">
@@ -90,7 +90,7 @@
                     <strong>{{ $t('main.preference.key.tag-root') }}</strong>
                 </td>
                 <td>
-                    <form>
+                    <form class="form-mb-0">
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label"></label>
                             <div class="col-md-10">
@@ -110,7 +110,7 @@
                     <strong>{{ $t('main.preference.key.extensions') }}</strong>
                 </td>
                 <td>
-                    <form>
+                    <form class="form-mb-0">
                         <div class="form-group row" v-for="(extension, key) in preferences['prefs.load-extensions'].value">
                             <div class="col-md-2"></div>
                             <div class="col-md-10">
@@ -135,7 +135,7 @@
                     <strong>{{ $t('main.preference.key.link-thesaurex') }}</strong>
                 </td>
                 <td>
-                    <form>
+                    <form class="form-mb-0">
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label"></label>
                             <div class="col-md-10">
@@ -155,7 +155,7 @@
                     <strong>{{ $t('main.preference.key.project.name') }}</strong>
                 </td>
                 <td>
-                    <form>
+                    <form class="form-mb-0">
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label"></label>
                             <div class="col-md-10">
@@ -175,7 +175,7 @@
                     <strong>{{ $t('main.preference.key.project.maintainer') }}</strong>
                 </td>
                 <td>
-                    <form>
+                    <form class="form-mb-0">
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label">{{ $t('global.name') }}:</label>
                             <div class="col-md-10">
@@ -215,7 +215,7 @@
                     <strong>{{ $t('main.preference.key.map.projection') }}</strong>
                 </td>
                 <td>
-                    <form>
+                    <form class="form-mb-0">
                         <div class="form-group row">
                             <label class="col-md-2 col-form-label">{{ $t('main.preference.key.map.epsg') }}:</label>
                             <div class="col-md-10">
