@@ -149,6 +149,12 @@ class SetupTables extends Migration
             $table->jsonb('depends_on')->nullable();
         });
 
+        $p = Preference::where('label', 'prefs.load-extensions')->first();
+        $value = json_decode($p->default_value);
+        unset($value->bibliography);
+        $p->default_value = json_encode($value);
+        $p->save();
+
         $this->migrateTableNames();
         $this->migrateColumnNames();
         $this->migrateDatatypes();
@@ -651,7 +657,7 @@ class SetupTables extends Migration
             ],
             [
                 'label' => 'prefs.load-extensions',
-                'default_value' => json_encode(['map' => true, 'files' => true, 'bibliography' => true, 'data-analysis' => true]),
+                'default_value' => json_encode(['map' => true, 'files' => true, 'data-analysis' => true]),
                 'allow_override' => false
             ],
             [
