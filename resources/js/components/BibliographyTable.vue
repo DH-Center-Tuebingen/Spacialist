@@ -467,9 +467,10 @@
                 });
             },
             addBibliographyItem(item) {
-                if(!this.$can('add_remove_bibliography')) return;
-                if(!item.type) return;
-                if(!item.fields) return;
+                const emptyPromise = new Promise(r => r(null));
+                if(!this.$can('add_remove_bibliography')) return emptyPromise;
+                if(!item.type) return emptyPromise;
+                if(!item.fields) return emptyPromise;
                 let data = {};
                 for(let k in item.fields) {
                     data[k] = item.fields[k];
@@ -477,17 +478,15 @@
                 data.type = item.type.name;
 
                 if(item.id) {
-                    $httpQueue.add(() => $http.patch(`bibliography/${item.id}`, data).then(response => {
+                    return $httpQueue.add(() => $http.patch(`bibliography/${item.id}`, data).then(response => {
                         let entry = this.allEntries.find(e => e.id == item.id);
                         for(let k in item.fields) {
                             Vue.set(entry, k, item.fields[k]);
                         }
-                        this.hideNewItemModal();
                     }));
                 } else {
-                    $httpQueue.add(() => $http.post('bibliography', data).then(response => {
+                    return $httpQueue.add(() => $http.post('bibliography', data).then(response => {
                         this.addEntry(response.data);
-                        this.hideNewItemModal();
                     }));
                 }
             },
@@ -544,9 +543,6 @@
                 this.$router.push({
                     name: 'bibnew'
                 });
-            },
-            hideNewItemModal() {
-                this.$modal.hide('new-bibliography-item-modal');
             }
         },
         data() {

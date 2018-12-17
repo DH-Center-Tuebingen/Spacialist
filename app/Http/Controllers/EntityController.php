@@ -39,14 +39,14 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to get a specific entity'
+                'error' => __('You do not have the permission to get a specific entity')
             ], 403);
         }
         try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
 
@@ -57,14 +57,14 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to get an entity\'s data'
+                'error' => __('You do not have the permission to get an entity\'s data')
             ], 403);
         }
         try {
             $entityType = EntityType::findOrFail($ctid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity type does not exist'
+                'error' => __('This entity type does not exist')
             ], 400);
         }
         $entities = Entity::where('entity_type_id', $ctid)->get();
@@ -96,14 +96,14 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to get an entity\'s data'
+                'error' => __('You do not have the permission to get an entity\'s data')
             ], 403);
         }
         try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
         if(isset($aid)) {
@@ -184,7 +184,7 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to get an entity\'s parent id\'s'
+                'error' => __('You do not have the permission to get an entity\'s parent id\'s')
             ], 403);
         }
 
@@ -192,7 +192,7 @@ class EntityController extends Controller {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
         return response()->json($entity->parentIds);
@@ -202,14 +202,14 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to get an entity\'s successors'
+                'error' => __('You do not have the permission to get an entity\'s successors')
             ], 403);
         }
         try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
         $children = Entity::where('root_entity_id', $id)->get();
@@ -226,7 +226,7 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('create_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to add a new entity'
+                'error' => __('You do not have the permission to add a new entity')
             ], 403);
         }
         $this->validate($request, Entity::rules);
@@ -240,13 +240,13 @@ class EntityController extends Controller {
                 ->where('child_id', $request->get('entity_type_id'))->get();
             if(!isset($relation)) {
                 return response()->json([
-                    'error' => 'This type is not an allowed sub-type.'
+                    'error' => __('This type is not an allowed sub-type.')
                 ], 400);
             }
         } else {
             if(!EntityType::find($request->get('entity_type_id'))->is_root) {
                 return response()->json([
-                    'error' => 'This type is not an allowed root-type.'
+                    'error' => __('This type is not an allowed root-type.')
                 ], 400);
             }
         }
@@ -297,7 +297,7 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to modify an entity\' data'
+                'error' => __('You do not have the permission to modify an entity\' data')
             ], 403);
         }
 
@@ -305,7 +305,7 @@ class EntityController extends Controller {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
 
@@ -336,7 +336,7 @@ class EntityController extends Controller {
                     break;
                 default:
                     return response()->json([
-                        'error' => 'Unknown operation'
+                        'error' => __('Unknown operation')
                     ], 400);
             }
             switch($attr->datatype) {
@@ -401,7 +401,7 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to modify an entity\'s data'
+                'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
         }
         $this->validate($request, AttributeValue::patchRules);
@@ -410,14 +410,14 @@ class EntityController extends Controller {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
         try {
             $attribute = Attribute::findOrFail($aid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This attribute does not exist'
+                'error' => __('This attribute does not exist')
             ], 400);
         }
 
@@ -436,7 +436,7 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to modify an entity\'s data'
+                'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
         }
         $this->validate($request, [
@@ -447,7 +447,7 @@ class EntityController extends Controller {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
 
@@ -461,7 +461,7 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('delete_move_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to modify an entity'
+                'error' => __('You do not have the permission to modify an entity')
             ], 403);
         }
         $this->validate($request, [
@@ -481,14 +481,14 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('delete_move_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to delete an entity'
+                'error' => __('You do not have the permission to delete an entity')
             ], 403);
         }
         try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
         $entity->delete();

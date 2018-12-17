@@ -26,7 +26,7 @@ class PreferenceController extends Controller {
         $user = auth()->user();
         if(!isset($user) || $user->id != $id) {
             return response()->json([
-                'error' => 'You are not allowed to access preferences of another user'
+                'error' => __('You are not allowed to access preferences of another user')
             ], 403);
         }
         $preferences = Preference::getUserPreferences($id);
@@ -48,7 +48,7 @@ class PreferenceController extends Controller {
         $uid = $request->get('user_id');
         if(!$user->can('edit_preferences') && !isset($uid)) {
             return response()->json([
-                'error' => 'You do not have the permission to edit preferences'
+                'error' => __('You do not have the permission to edit preferences')
             ], 403);
         }
 
@@ -60,7 +60,7 @@ class PreferenceController extends Controller {
             $pref = Preference::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This preference does not exist'
+                'error' => __('This preference does not exist')
             ], 400);
         }
 

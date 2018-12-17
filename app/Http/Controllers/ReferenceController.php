@@ -24,7 +24,7 @@ class ReferenceController extends Controller {
         $user = auth()->user();
         if(!$user->can('view_concept_props')) {
             return response()->json([
-                'error' => 'You do not have the permission to view references'
+                'error' => __('You do not have the permission to view references')
             ], 403);
         }
         $references = Reference::with(['attribute', 'bibliography'])->where('entity_id', $id)->get();
@@ -48,7 +48,7 @@ class ReferenceController extends Controller {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to add references'
+                'error' => __('You do not have the permission to add references')
             ], 403);
         }
         $this->validate($request, Reference::rules);
@@ -57,14 +57,14 @@ class ReferenceController extends Controller {
             Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
         try {
             Attribute::findOrFail($aid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This attribute does not exist'
+                'error' => __('This attribute does not exist')
             ], 400);
         }
 
@@ -82,7 +82,7 @@ class ReferenceController extends Controller {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to edit references'
+                'error' => __('You do not have the permission to edit references')
             ], 403);
         }
         $this->validate($request, Reference::patchRules);
@@ -91,7 +91,7 @@ class ReferenceController extends Controller {
             $reference = Reference::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This reference does not exist'
+                'error' => __('This reference does not exist')
             ], 400);
         }
 
@@ -107,14 +107,14 @@ class ReferenceController extends Controller {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to delete references'
+                'error' => __('You do not have the permission to delete references')
             ], 403);
         }
         try {
             $reference = Reference::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'No EntityAttribute found'
+                'error' => __('No EntityAttribute found')
             ], 400);
         }
         $reference->delete();

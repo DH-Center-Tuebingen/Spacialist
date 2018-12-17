@@ -17,7 +17,13 @@
                         {{ user.name }}
                     </td>
                     <td>
-                        <input type="text" class="form-control" v-model="user.email" v-validate="" :name="`email_${user.id}`" />
+                        <input type="email" class="form-control" :class="$getValidClass(error, `email_${user.id}`)" v-model="user.email" v-validate="" :name="`email_${user.id}`" />
+
+                        <div class="invalid-feedback">
+                            <span v-for="msg in error[`email_${user.id}`]">
+                                {{ msg }}
+                            </span>
+                        </div>
                     </td>
                     <td>
                         <multiselect
@@ -83,26 +89,47 @@
                     <form id="newUserForm" name="newUserForm" role="form" v-on:submit.prevent="onAddUser(newUser)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
-                                {{ $t('global.name') }}:
+                                {{ $t('global.name') }}
+                                <span class="text-danger">*</span>:
                             </label>
                             <div class="col-md-9">
-                                <input class="form-control" type="text" id="name" v-model="newUser.name" required />
+                                <input class="form-control" :class="$getValidClass(error, 'name')" type="text" id="name" v-model="newUser.name" required />
+
+                                <div class="invalid-feedback">
+                                    <span v-for="msg in error.name">
+                                        {{ msg }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label col-md-3" for="display_name">
-                                {{ $t('global.email') }}:
+                            <label class="col-form-label col-md-4" for="display_name">
+                                {{ $t('global.email') }}
+                                <span class="text-danger">*</span>:
                             </label>
                             <div class="col-md-9">
-                                <input class="form-control" type="email" id="display_name" v-model="newUser.email" required />
+                                <input class="form-control" :class="$getValidClass(error, 'email')" type="email" id="display_name" v-model="newUser.email" required />
+
+                                <div class="invalid-feedback">
+                                    <span v-for="msg in error.email">
+                                        {{ msg }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="description">
-                                {{ $t('global.password') }}:
+                                {{ $t('global.password') }}
+                                <span class="text-danger">*</span>:
                             </label>
                             <div class="col-md-9">
-                                <input class="form-control" type="password" id="description" v-model="newUser.password" required />
+                                <input class="form-control" :class="$getValidClass(error, 'password')" type="password" id="description" v-model="newUser.password" required />
+
+                                <div class="invalid-feedback">
+                                    <span v-for="msg in error.password">
+                                        {{ msg }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -191,11 +218,12 @@
                 this.newUser = {};
             },
             onAddUser(newUser) {
-                const vm = this;
-                if(!vm.$can('create_users')) return;
-                vm.$http.post('user', newUser).then(function(response) {
-                    vm.userList.push(response.data);
-                    vm.hideNewUserModal();
+                if(!this.$can('create_users')) return;
+                $http.post('user', newUser).then(response => {
+                    this.userList.push(response.data);
+                    this.hideNewUserModal();
+                }).catch(e => {
+                    this.$getErrorMessages(e, this.error);
                 });
             },
             onPatchUser(id) {
@@ -223,6 +251,8 @@
                         }),
                         'success'
                     );
+                }).catch(e => {
+                    this.$getErrorMessages(e, this.error, `_${id}`);
                 }));
             },
             showDeleteUserModal() {
@@ -277,6 +307,7 @@
                 roles: [],
                 userRoles: {},
                 newUser: {},
+                error: {},
                 selectedUser: {},
                 discardModal: 'discard-changes-modal'
             }

@@ -56,7 +56,7 @@ class BibliographyController extends Controller
             $bib = Bibliography::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This bibliography item does not exist'
+                'error' => __('This bibliography item does not exist')
             ], 400);
         }
         $count = $bib->referenceCount();
@@ -69,11 +69,12 @@ class BibliographyController extends Controller
         $user = auth()->user();
         if(!$user->can('add_remove_bibliography')) {
             return response()->json([
-                'error' => 'You do not have the permission to add new bibliography'
+                'error' => __('You do not have the permission to add new bibliography')
             ], 403);
         }
         $this->validate($request, [
-            'type' => 'required|alpha'
+            'type' => 'required|alpha',
+            'title' => 'required|string'
         ]);
 
         $bib = new Bibliography();
@@ -124,18 +125,19 @@ class BibliographyController extends Controller
         $user = auth()->user();
         if(!$user->can('edit_bibliography')) {
             return response()->json([
-                'error' => 'You do not have the permission to edit existing bibliography'
+                'error' => __('You do not have the permission to edit existing bibliography')
             ], 403);
         }
         $this->validate($request, [
-            'type' => 'required|alpha'
+            'type' => 'required|alpha',
+            'title' => 'required|string'
         ]);
 
         try {
             $bib = Bibliography::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This bibliography item does not exist'
+                'error' => __('This bibliography item does not exist')
             ], 400);
         }
 
@@ -150,14 +152,14 @@ class BibliographyController extends Controller
         $user = auth()->user();
         if(!$user->can('add_remove_bibliography')) {
             return response()->json([
-                'error' => 'You do not have the permission to remove bibliogra entries'
+                'error' => __('You do not have the permission to remove bibliogra entries')
             ], 403);
         }
         try {
             $bib = Bibliography::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This bibliography item does not exist'
+                'error' => __('This bibliography item does not exist')
             ], 400);
         }
 

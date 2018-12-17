@@ -23,7 +23,7 @@ class SearchController extends Controller {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to search global'
+                'error' => __('You do not have the permission to search global')
             ], 403);
         }
         $q = $request->query('q');
@@ -90,7 +90,7 @@ class SearchController extends Controller {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
-                'error' => 'You do not have the permission to search for entities'
+                'error' => __('You do not have the permission to search for entities')
             ], 403);
         }
         $q = $request->query('q');

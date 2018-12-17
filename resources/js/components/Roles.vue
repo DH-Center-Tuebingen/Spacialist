@@ -84,10 +84,17 @@
                     <form id="newRoleForm" name="newRoleForm" role="form" v-on:submit.prevent="onAddRole(newRole)">
                         <div class="form-group">
                             <label class="col-form-label col-md-3" for="name">
-                                {{ $t('global.name') }}:
+                                {{ $t('global.name') }}
+                                <span class="text-danger">*</span>:
                             </label>
                             <div class="col-md-9">
-                                <input class="form-control" type="text" id="name" v-model="newRole.name" required />
+                                <input class="form-control" :class="$getValidClass(error, 'name')" type="text" id="name" v-model="newRole.name" required autofocus />
+
+                                <div class="invalid-feedback">
+                                    <span v-for="msg in error.name">
+                                        {{ msg }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
@@ -197,6 +204,8 @@
                 vm.$http.post('role', newRole).then(function(response) {
                     vm.roleList.push(response.data);
                     vm.hideNewRoleModal();
+                }).catch(e => {
+                    this.$getErrorMessages(e, this.error);
                 });
             },
             onPatchRole(id) {
@@ -279,6 +288,7 @@
                 permissions: [],
                 userRoles: {},
                 newRole: {},
+                error: {},
                 selectedRole: {},
                 discardModal: 'discard-changes-modal'
             }

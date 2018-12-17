@@ -28,14 +28,14 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to view a specific file'
+                'error' => __('You do not have the permission to view a specific file')
             ], 403);
         }
         try {
             $file = File::getFileById($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
         return response()->json($file);
@@ -45,14 +45,14 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to view a specific file'
+                'error' => __('You do not have the permission to view a specific file')
             ], 403);
         }
         try {
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
         $content = $file->getArchiveFileList();
@@ -64,7 +64,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to download parts of a zip file'
+                'error' => __('You do not have the permission to download parts of a zip file')
             ], 403);
         }
         $this->validate($request, [
@@ -77,7 +77,7 @@ class FileController extends Controller
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
         $content = $file->getArchivedFileContent($filepath);
@@ -88,14 +88,14 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to view a specific file as HTML'
+                'error' => __('You do not have the permission to view a specific file as HTML')
             ], 403);
         }
         try {
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
         $content = $file->asHtml();
@@ -106,14 +106,14 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to view successors of a specific file'
+                'error' => __('You do not have the permission to view successors of a specific file')
             ], 403);
         }
         try {
             Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
 
@@ -128,7 +128,7 @@ class FileController extends Controller
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
         return response()->json($file->linkCount());
@@ -138,11 +138,11 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to get the file categories'
+                'error' => __('You do not have the permission to get the file categories')
             ], 403);
         }
         if(auth()->check()) {
-            $locale = Preference::getUserPreference($user['id'], 'prefs.gui-language')->value;
+            $locale = $user->getLanguage();
         } else {
             $locale = \App::getLocale();
         }
@@ -153,7 +153,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to get the camera names'
+                'error' => __('You do not have the permission to get the camera names')
             ], 403);
         }
         $cameras = File::distinct()
@@ -168,7 +168,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to get the file dates'
+                'error' => __('You do not have the permission to get the file dates')
             ], 403);
         }
         $dates = File::distinct()
@@ -225,7 +225,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to view files'
+                'error' => __('You do not have the permission to view files')
             ], 403);
         }
         $filters = $request->input('filters', []);
@@ -237,7 +237,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to view files'
+                'error' => __('You do not have the permission to view files')
             ], 403);
         }
         $filters = $request->input('filters', []);
@@ -249,7 +249,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to view files'
+                'error' => __('You do not have the permission to view files')
             ], 403);
         }
         $filters = $request->input('filters', []);
@@ -261,7 +261,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('manage_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to upload files'
+                'error' => __('You do not have the permission to upload files')
             ], 403);
         }
         $this->validate($request, [
@@ -285,7 +285,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('manage_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to edit a file\'s content'
+                'error' => __('You do not have the permission to edit a file\'s content')
             ], 403);
         }
         $this->validate($request, [
@@ -296,7 +296,7 @@ class FileController extends Controller
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
 
@@ -310,7 +310,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to view files'
+                'error' => __('You do not have the permission to view files')
             ], 403);
         }
         $this->validate($request, [
@@ -338,7 +338,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('manage_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to modify file properties'
+                'error' => __('You do not have the permission to modify file properties')
             ], 403);
         }
         $this->validate($request, [
@@ -351,7 +351,7 @@ class FileController extends Controller
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
 
@@ -360,7 +360,7 @@ class FileController extends Controller
             $otherFileWithName = File::where('name', $newName)->first();
             if(isset($otherFileWithName)) {
                 return response()->json([
-                    'error' => 'There is already a file with this name'
+                    'error' => __('There is already a file with this name')
                 ], 400);
             }
         }
@@ -381,7 +381,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('manage_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to modify file properties'
+                'error' => __('You do not have the permission to modify file properties')
             ], 403);
         }
         $this->validate($request, [
@@ -392,7 +392,7 @@ class FileController extends Controller
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
 
@@ -430,7 +430,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('link_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to link files'
+                'error' => __('You do not have the permission to link files')
             ], 403);
         }
         $this->validate($request, [
@@ -441,7 +441,7 @@ class FileController extends Controller
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
 
@@ -456,14 +456,14 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('manage_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to delete files'
+                'error' => __('You do not have the permission to delete files')
             ], 403);
         }
         try {
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
 
@@ -476,7 +476,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('link_files')) {
             return response()->json([
-                'error' => 'You do not have the permission to unlink files'
+                'error' => __('You do not have the permission to unlink files')
             ], 403);
         }
 
@@ -484,7 +484,7 @@ class FileController extends Controller
             $file = File::findOrFail($fid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This file does not exist'
+                'error' => __('This file does not exist')
             ], 400);
         }
 
@@ -492,7 +492,7 @@ class FileController extends Controller
             Entity::findOrFail($cid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
 

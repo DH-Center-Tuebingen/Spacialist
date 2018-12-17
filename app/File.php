@@ -319,7 +319,7 @@ class File extends Model
                         ThConcept::findOrFail($tid);
                     } catch(ModelNotFoundException $e) {
                         return response()->json([
-                            'error' => 'This tag does not exist'
+                            'error' => __('This tag does not exist')
                         ], 400);
                     }
                     $tag = new FileTag();
@@ -757,7 +757,7 @@ class File extends Model
     public function asHtml() {
         if(!$this->isDocument() && !$this->isSpreadsheet() && !$this->isPresentation()) {
             return [
-                'error' => 'HTML not supported for file type ' . $this->mime_type
+                'error' => __('HTML not supported for file type', ['mime' => $this->mime_type])
             ];
         }
         $tempFile = tempnam(sys_get_temp_dir(), 'Spacialist_html_');

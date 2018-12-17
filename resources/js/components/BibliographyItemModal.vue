@@ -38,7 +38,13 @@
                             {{ $t(`main.bibliography.column.${field}`) }}:
                         </label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" v-model="data.fields[field]"/>
+                            <input type="text" class="form-control" :class="$getValidClass(error, field)" v-model="data.fields[field]"/>
+
+                            <div class="invalid-feedback">
+                                <span v-for="msg in error[field]">
+                                    {{ msg }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -132,9 +138,14 @@
             },
             success(data) {
                 if(this.onSuccess) {
-                    this.onSuccess(this.data);
+                    this.onSuccess(this.data).then(response => {
+                        this.$modal.hide(this.id)
+                    }).catch(e => {
+                        this.$getErrorMessages(e, this.error);
+                    });
+                } else {
+                    this.$modal.hide(this.id);
                 }
-                this.$modal.hide(this.id)
             },
             hide() {
                 if(this.onClose) {
@@ -146,7 +157,8 @@
         data() {
             return {
                 id: 'new-bibliography-item-modal',
-                showBibtexCode: true
+                showBibtexCode: true,
+                error: {}
             }
         },
         computed: {

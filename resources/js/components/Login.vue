@@ -21,13 +21,13 @@
                             </label>
 
                             <div class="col-md-6">
-                                <input id="email" type="email" class="form-control" v-model="user.email" name="email" required autofocus>
+                                <input id="email" type="email" class="form-control" :class="$getValidClass(error, 'email')" v-model="user.email" name="email" required autofocus>
 
-                                <!-- @if ($errors->has('email'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('email') }}</strong>
+                                <div class="invalid-feedback">
+                                    <span v-for="msg in error.email">
+                                        {{ msg }}
                                     </span>
-                                @endif -->
+                                </div>
                             </div>
                         </div>
 
@@ -38,13 +38,19 @@
                             </label>
 
                             <div class="col-md-6">
-                                <input id="password" type="password" class="form-control" v-model="user.password" name="password" required>
+                                <input id="password" type="password" class="form-control" :class="$getValidClass(error, 'password')" v-model="user.password" name="password" required>
 
-                                <!-- @if ($errors->has('password'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('password') }}</strong>
+                                <div class="invalid-feedback">
+                                    <span v-for="msg in error.password">
+                                        {{ msg }}
                                     </span>
-                                @endif -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" v-if="error.global">
+                            <div class="col-md-6 text-danger small">
+                                {{ error.global }}
                             </div>
                         </div>
 
@@ -111,9 +117,13 @@
                     rememberMe: vm.user.remember,
                     redirect: vm.redirect,
                     success: _ => {
+                        vm.error = {};
                         if(vm.onLogin) {
                             vm.onLogin();
                         }
+                    },
+                    error: e => {
+                        vm.$getErrorMessages(e, vm.error);
                     },
                     fetchUser: true
                 });
@@ -124,7 +134,8 @@
                 user: {},
                 redirect: {
                     name: 'home'
-                }
+                },
+                error: {}
             }
         }
     }

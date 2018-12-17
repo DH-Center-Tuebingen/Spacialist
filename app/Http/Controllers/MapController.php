@@ -36,7 +36,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to view the geo data'
+                'error' => __('You do not have the permission to view the geo data')
             ], 403);
         }
         // layers: id => layer
@@ -54,7 +54,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to add geometric data'
+                'error' => __('You do not have the permission to add geometric data')
             ], 403);
         }
         $basic = $request->query('basic');
@@ -88,7 +88,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to add geometric data'
+                'error' => __('You do not have the permission to add geometric data')
             ], 403);
         }
         $entityLayers = AvailableLayer::with(['entity_type'])
@@ -104,14 +104,14 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to add geometric data'
+                'error' => __('You do not have the permission to add geometric data')
             ], 403);
         }
         try {
             $layer = AvailableLayer::with('entity_type')->findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This layer does not exist'
+                'error' => __('This layer does not exist')
             ], 400);
         }
 
@@ -122,7 +122,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to get layers'
+                'error' => __('You do not have the permission to get layers')
             ], 403);
         }
 
@@ -130,7 +130,7 @@ class MapController extends Controller
             $layer = AvailableLayer::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This layer does not exist'
+                'error' => __('This layer does not exist')
             ]);
         }
         $query = Geodata::with(['entity']);
@@ -157,7 +157,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to export layers'
+                'error' => __('You do not have the permission to export layers')
             ], 403);
         }
 
@@ -165,12 +165,12 @@ class MapController extends Controller
             $layer = AvailableLayer::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This layer does not exist'
+                'error' => __('This layer does not exist')
             ]);
         }
         if(strtoupper($layer->type) != 'UNLINKED' && !isset($layer->entity_type_id)) {
             return response()->json([
-                'error' => 'This layer does not support export'
+                'error' => __('This layer does not support export')
             ]);
         }
         if(strtoupper($layer->type) == 'UNLINKED') {
@@ -259,7 +259,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('create_edit_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to add geometric data'
+                'error' => __('You do not have the permission to add geometric data')
             ], 403);
         }
         $this->validate($request, [
@@ -283,7 +283,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('create_edit_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to add layers'
+                'error' => __('You do not have the permission to add layers')
             ], 403);
         }
         $this->validate($request, [
@@ -308,27 +308,27 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('link_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to link geo data'
+                'error' => __('You do not have the permission to link geo data')
             ], 403);
         }
         try {
             $geodata = Geodata::findOrFail($gid);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This geodata does not exist'
+                'error' => __('This geodata does not exist')
             ], 400);
         }
         try {
             $entity = Entity::findOrFail($eid);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
 
         if(isset($entity->geodata_id)) {
             return response()->json([
-                'error' => 'This entity is already linked to a geo object'
+                'error' => __('This entity is already linked to a geo object')
             ], 400);
         }
 
@@ -336,7 +336,7 @@ class MapController extends Controller
             $layer = AvailableLayer::where('entity_type_id', $entity->entity_type_id)->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'Entity layer not found'
+                'error' => __('Entity layer not found')
             ], 400);
         }
 
@@ -372,7 +372,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('create_edit_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to edit geometric data'
+                'error' => __('You do not have the permission to edit geometric data')
             ], 403);
         }
         $this->validate($request, [
@@ -384,7 +384,7 @@ class MapController extends Controller
             $geodata = Geodata::findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This geodata does not exist'
+                'error' => __('This geodata does not exist')
             ], 400);
         }
         $geodata->updateGeometry(json_decode($request->get('feature')), $request->get('srid'), $user);
@@ -394,7 +394,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('create_edit_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to update layers'
+                'error' => __('You do not have the permission to update layers')
             ], 403);
         }
         $this->validate($request, AvailableLayer::patchRules);
@@ -402,7 +402,7 @@ class MapController extends Controller
             $layer = AvailableLayer::findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This layer does not exist'
+                'error' => __('This layer does not exist')
             ], 400);
         }
 
@@ -433,14 +433,14 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('upload_remove_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to delete geo data'
+                'error' => __('You do not have the permission to delete geo data')
             ], 403);
         }
         try {
             $geodata = Geodata::findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This geodata does not exist'
+                'error' => __('This geodata does not exist')
             ], 400);
         }
         $geodata->delete();
@@ -452,19 +452,19 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('upload_remove_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to delete layers'
+                'error' => __('You do not have the permission to delete layers')
             ], 403);
         }
         try {
             $layer = AvailableLayer::findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This layer does not exist'
+                'error' => __('This layer does not exist')
             ], 400);
         }
         if(isset($layer->entity_type_id) || $layer->type == 'unlinked') {
             return response()->json([
-                'error' => 'This layer can not be deleted'
+                'error' => __('This layer can not be deleted')
             ], 400);
         }
 
@@ -477,27 +477,27 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('link_geodata')) {
             return response()->json([
-                'error' => 'You do not have the permission to unlink geo data'
+                'error' => __('You do not have the permission to unlink geo data')
             ], 403);
         }
         try {
             Geodata::findOrFail($gid);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This geodata does not exist'
+                'error' => __('This geodata does not exist')
             ], 400);
         }
         try {
             $entity = Entity::findOrFail($eid);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error' => 'This entity does not exist'
+                'error' => __('This entity does not exist')
             ], 400);
         }
 
         if($entity->geodata_id != $gid) {
             return response()->json([
-                'error' => 'The entity is not linked to the provided geo object'
+                'error' => __('The entity is not linked to the provided geo object')
             ], 400);
         }
 
