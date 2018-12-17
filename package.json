@@ -61,7 +61,7 @@
         "proj4": "^2.5.0",
         "screenfull": "^3.3.3",
         "shpjs": "^3.4.2",
-        "three-full": "^11.3.0",
+        "three-full": "^11.3.2",
         "transliteration": "^1.6.6",
         "tree-vue-component": "^5.4.0",
         "typeface-raleway": "0.0.54",
@@ -83,6 +83,7 @@
         "vue-upload-component": "^2.8.13",
         "vuedraggable": "^2.16.0",
         "wavesurfer.js": "^2.0.6",
-        "wkx": "^0.4.5"
+        "wkx": "^0.4.5",
+        "zlibjs": "^0.3.1"
     }
 }

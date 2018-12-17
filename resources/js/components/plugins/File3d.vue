@@ -33,6 +33,7 @@
         DDSLoader,
         DirectionalLight,
         DoubleSide,
+        FBXLoader,
         GLTFLoader,
         Geometry,
         GridHelper,
@@ -82,8 +83,8 @@
         destroyed() {
             for(let i=this.scene.children.length-1; i>=0; i--) {
                 let obj = this.scene.children[i];
-                obj.geometry.dispose();
-                obj.material.dispose();
+                if(obj.geometry) obj.geometry.dispose();
+                if(obj.material) obj.material.dispose();
                 this.scene.remove(obj);
             }
             this.renderer.forceContextLoss();
@@ -117,6 +118,8 @@
                         return 'pdb';
                     case 'obj':
                         return 'obj';
+                    case 'fbx':
+                        return 'fbx';
                     default:
                         return undefined;
                 }
@@ -183,6 +186,9 @@
                         break;
                     case 'obj':
                         this.loadObj(file);
+                        break;
+                    case 'fbx':
+                        this.loadFbx(file);
                         break;
                     case 'pdb':
                         this.loadProteinDb(file);
@@ -296,9 +302,8 @@
             },
             // Loaders
             loadCollada: function(file) {
-                const vm = this;
-                let loader = new ColladaLoader();
-                loader.load(file.url, function(collada) {
+                const loader = new ColladaLoader();
+                loader.load(file.url, collada => {
                     let object = collada.scene;
                     let material;
                     let children;
@@ -315,104 +320,125 @@
                     object.castShadow = true;
                     object.receiveShadow = true;
 					for(let i=0; i<object.children.length; i++) {
-						vm.octree.add(object.children[i], {
+						this.octree.add(object.children[i], {
 							useFaces: false
 						});
 					}
-                    vm.group.add(object);
-                    vm.onWindowResize();
+                    this.group.add(object);
+                    this.onWindowResize();
                 },
-                function(event) { // onProgress
-                    vm.updateProgress(event);
+                event => { // onProgress
+                    this.updateProgress(event);
                 },
-                function(event) { // onError
+                event => { // onError
                 });
             },
             loadGltf: function(file) {
-                const vm = this;
-                let loader = new GLTFLoader();
-                loader.load(file.url, function(data) {
+                const loader = new GLTFLoader();
+                loader.load(file.url, data => {
                     let gltf = data;
                     let object = gltf.scene;
 
-                    object.traverse(function(node) {
+                    object.traverse(node => {
                         if(node.isMesh) {
                             node.castShadow = true;
                             node.receiveShadow = true;
                         }
+						this.octree.add(node, {
+							useFaces: false
+						});
                     });
 
                     let animations = gltf.animations;
                     if(animations && animations.length > 0) {
-                        vm.animationMixer = new AnimationMixer(object);
-                        for(let i=0; i<animations.length; i++) {
-                            vm.animationMixer.clipAction(animations[i]).play();
+                        this.animationMixer = new AnimationMixer(object);
+                        // Play first animation if available
+                        if(animations && animations.length) {
+                            animationMixer.clipAction(animations[0]).play();
                         }
                     }
-                    for(let i=0; i<object.children.length; i++) {
-						vm.octree.add(object.children[i], {
-							useFaces: false
-						});
-					}
-                    vm.group.add(object);
-                    vm.onWindowResize();
-                }, function(event) {
-                    vm.updateProgress(event);
-                }, function(error) {
+                    this.group.add(object);
+                    this.onWindowResize();
+                }, event => {
+                    this.updateProgress(event);
+                }, error => {
                 });
             },
             loadObj: function(file) {
-                const vm = this;
-                let url = file.url;
-                let sep = url.lastIndexOf('/')+1;
-                let path = url.substr(0, sep);
-                let filename = url.substr(sep);
+                const url = file.url;
+                const sep = url.lastIndexOf('/')+1;
+                const path = url.substr(0, sep);
+                const filename = url.substr(sep);
                 // we assume that the mtl file has the same name as the obj file
-                let mtlname = filename.substr(0, filename.lastIndexOf('.')) + '.mtl';
+                const mtlname = filename.substr(0, filename.lastIndexOf('.')) + '.mtl';
                 Loader.Handlers.add(/\.dds$/i, new DDSLoader());
-                let mtlLoader = new MTLLoader();
+                const mtlLoader = new MTLLoader();
                 mtlLoader.setMaterialOptions({
                     side: DoubleSide
                 });
                 mtlLoader.setPath(path);
                 // try to load mtl file
-                mtlLoader.load(mtlname, function(materials) {
+                mtlLoader.load(mtlname, materials => {
                     // load obj file with loaded materials
                     materials.preload();
-                    vm.loadObjModel(path, filename, materials);
-                }, function(event) {
-                    vm.updateProgress(event);
-                }, function(event) {
+                    this.loadObjModel(path, filename, materials);
+                }, event => {
+                    this.updateProgress(event);
+                }, event => {
                     // onError: try to load obj without materials
-                    vm.loadObjModel(path, filename, undefined);
+                    this.loadObjModel(path, filename, undefined);
                 });
             },
             loadObjModel: function(path, filename, materials) {
-                const vm = this;
                 let objLoader = new OBJLoader();
                 if(materials) {
                     objLoader.setMaterials(materials);
                 }
                 objLoader.setPath(path);
                 objLoader.load(filename,
-                    function(object) { // onSuccess
+                    object => { // onSuccess
                         object.castShadow = true;
                         object.receiveShadow = true;
                         for(var i=0; i<object.children.length; i++) {
                             var child = object.children[i];
-                            vm.octree.add(child, {
+                            this.octree.add(child, {
                                 useFaces: false
                             });
                         }
-                        vm.group.add(object);
-                        vm.onWindowResize();
+                        this.group.add(object);
+                        this.onWindowResize();
                     },
-                    function(event) { // onProgress
-                        vm.updateProgress(event);
+                    event => { // onProgress
+                        this.updateProgress(event);
                     },
-                    function(event) { // on
+                    event => { // on
                     }
                 );
+            },
+            loadFbx: function(file) {
+                const url = file.url;
+                const loader = new FBXLoader();
+                loader.load(url, object => {
+                    this.animationMixer = new AnimationMixer(object);
+                    // Play first animation if available
+                    if(object.animations && object.animations.length) {
+                        animationMixer.clipAction(object.animations[0]).play();
+                    }
+                    object.traverse(node => {
+                        if(node.isMesh) {
+                            node.castShadow = true;
+                            node.receiveShadow = true;
+                        }
+                        this.octree.add(node, {
+                            useFaces: false
+                        });
+                    });
+                    this.group.add(object);
+                    this.onWindowResize();
+                }, event => {
+                    this.updateProgress(event);
+                }, event => {
+                });
             },
             loadProteinDb: function(file) {
                 const vm = this;

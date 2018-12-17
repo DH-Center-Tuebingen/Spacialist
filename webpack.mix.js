@@ -42,6 +42,10 @@ mix.js('resources/js/app.js', 'public/js')
        'public/js/cornerstoneWADOImageLoaderCodecs.min.js'
    )
    .copy(
+       'node_modules/zlibjs/bin/inflate.min.js',
+       'public/js/inflate.min.js'
+   )
+   .copy(
        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
        'public/css'
    )

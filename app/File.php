@@ -634,13 +634,13 @@ class File extends Model
 
     public static function get3d() {
         $mimeTypes = ['model/vnd.collada+xml', 'model/gltf-binary', 'model/gltf+json', 'chemical/x-pdb'];
-        $extensions = ['.dae', '.obj', '.pdb', '.gltf'];
+        $extensions = ['.dae', '.obj', '.pdb', '.gltf', '.fbx'];
         return self::getCategory($mimeTypes, $extensions)->get();
     }
 
     public static function add3d($query, $or = false) {
         $mimeTypes = ['model/vnd.collada+xml', 'model/gltf-binary', 'model/gltf+json', 'chemical/x-pdb'];
-        $extensions = ['.dae', '.obj', '.pdb', '.gltf'];
+        $extensions = ['.dae', '.obj', '.pdb', '.gltf', '.fbx'];
         return self::getCategory($mimeTypes, $extensions, null, $query, $or);
     }
 
@@ -723,15 +723,15 @@ class File extends Model
         if($this->isAudio()) return 'audio';
         if($this->isVideo()) return 'video';
         if($this->isPdf()) return 'pdf';
-        if($this->isXml()) return 'xml';
-        if($this->isHtml()) return 'html';
         if($this->is3d()) return '3d';
         if($this->isDicom()) return 'dicom';
         if($this->isArchive()) return 'archive';
-        if($this->isText()) return 'text';
         if($this->isDocument()) return 'document';
         if($this->isSpreadsheet()) return 'spreadsheet';
         if($this->isPresentation()) return 'presentation';
+        if($this->isHtml()) return 'html';
+        if($this->isXml()) return 'xml';
+        if($this->isText()) return 'text';
         return 'undefined';
     }
 
@@ -889,7 +889,7 @@ class File extends Model
     public function is3d() {
         $is = false;
         $mimeTypes = ['model/vnd.collada+xml', 'model/gltf-binary', 'model/gltf+json'];
-        $extensions = ['.dae', '.obj', '.pdb', '.gltf'];
+        $extensions = ['.dae', '.obj', '.pdb', '.gltf', '.fbx'];
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
