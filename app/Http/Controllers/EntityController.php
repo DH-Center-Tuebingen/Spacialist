@@ -288,6 +288,8 @@ class EntityController extends Controller {
             Entity::addSerial($entity->id, $s->id, $s->text, $nextValue, $user->name);
         }
 
+        $entity->children_count = 0;
+
         return response()->json($entity, 201);
     }
 

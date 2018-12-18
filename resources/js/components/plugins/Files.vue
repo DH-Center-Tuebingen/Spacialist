@@ -1446,7 +1446,7 @@
                 return this.selectedFile.category == 'image';
             },
             linkedToCurrentEntity: function() {
-                if(!this.selectedEntity.id || !this.selectedFile.id) {
+                if(!this.selectedEntity.id || !this.selectedFile.id || !this.selectedFile.entities) {
                     return false;
                 }
 

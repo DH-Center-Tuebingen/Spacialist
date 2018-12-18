@@ -24,7 +24,7 @@
                 </form>
             </h3>
             <span>
-                <button type="button" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(selectedEntity)">
+                <button type="submit" form="entity-attribute-form" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(selectedEntity)">
                     <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
                 </button>
                 <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="deleteEntity(selectedEntity)">
@@ -42,16 +42,18 @@
                 {{ (selectedEntity.updated_at || selectedEntity.created_at) | date(undefined, true, true) }}
             </span>
         </div>
-        <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
-            :attributes="selectedEntity.attributes"
-            :dependencies="selectedEntity.dependencies"
-            :disable-drag="true"
-            :on-metadata="showMetadata"
-            :metadata-addon="hasReferenceGroup"
-            :selections="selectedEntity.selections"
-            :values="selectedEntity.data"
-            @attr-dep-change="updateDependencyCounter">
-        </attributes>
+        <form id="entity-attribute-form" name="entity-attribute-form">
+            <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
+                :attributes="selectedEntity.attributes"
+                :dependencies="selectedEntity.dependencies"
+                :disable-drag="true"
+                :on-metadata="showMetadata"
+                :metadata-addon="hasReferenceGroup"
+                :selections="selectedEntity.selections"
+                :values="selectedEntity.data"
+                @attr-dep-change="updateDependencyCounter">
+            </attributes>
+        </form>
 
         <router-view
             v-can="'view_concept_props'"
@@ -197,7 +199,11 @@
                                 // there has been no entry in the database before, therefore it is an add operation
                                 if(data.value && data.value != '') {
                                     patch.op = "add";
+                                    data.attribute = entity.attributes.find(a => a.id == aid);
                                     patch.value = this.getCleanValue(data);
+                                } else {
+                                    // there has been no entry in the database before and values are not different (should not happen ;))
+                                    continue;
                                 }
                             }
                             patches.push(patch);
@@ -360,7 +366,7 @@
         },
         computed: {
             isFormDirty() {
-                return Object.keys(this.fields).some(key => this.fields[key].dirty);
+                return Object.keys(this.fields).some(key => this.fields[key].dirty) && !this.errors.any();
             },
             hasData() {
                 return this.dataLoaded &&

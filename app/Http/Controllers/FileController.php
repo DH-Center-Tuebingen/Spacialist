@@ -342,8 +342,8 @@ class FileController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'copyright' => 'string',
-            'description' => 'string',
+            'copyright' => 'nullable|string',
+            'description' => 'nullable|string',
             'name' => 'string'
         ]);
 
@@ -358,7 +358,7 @@ class FileController extends Controller
         if($request->has('name')) {
             $newName = $request->get('name');
             $otherFileWithName = File::where('name', $newName)->first();
-            if(isset($otherFileWithName)) {
+            if(isset($otherFileWithName) && $otherFileWithName->id != $id) {
                 return response()->json([
                     'error' => __('There is already a file with this name')
                 ], 400);

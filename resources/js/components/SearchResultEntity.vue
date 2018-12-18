@@ -4,7 +4,6 @@
         <div class="media col px-0 pl-1">
             <div class="media-body small">
                 <h6 class="my-0" style="white-space: pre;">{{ data.name }}</h6>
-                Attributes...
             </div>
             <div class="ml-3 media-image-placeholder">
             </div>

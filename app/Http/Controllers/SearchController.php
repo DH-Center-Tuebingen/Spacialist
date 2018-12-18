@@ -103,7 +103,7 @@ class SearchController extends Controller {
 
     public function searchInThesaurus(Request $request) {
         $q = $request->query('q');
-        $lang = 'de'; // TODO
+        $lang = auth()->user()->getLanguage();
         $langId = ThLanguage::where('short_name', $lang)->value('id');
         $matches = ThConceptLabel::where('label', 'ilike', '%'.$q.'%')
             ->where('language_id', $langId)
