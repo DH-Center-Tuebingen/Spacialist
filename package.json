@@ -24,6 +24,7 @@
     },
     "devDependencies": {
         "@babel/core": "^7.2.0",
+        "@babel/plugin-syntax-dynamic-import": "^7.0.0",
         "@babel/plugin-syntax-jsx": "^7.2.0",
         "@fortawesome/fontawesome-svg-core": "^1.2.4",
         "@fortawesome/free-brands-svg-icons": "^5.3.1",
@@ -40,13 +41,12 @@
         "resolve-url-loader": "2.3.1",
         "sass": "^1.15.2",
         "sass-loader": "7.*",
-        "vue": "^2.5.17",
+        "vue": "^2.5.21",
         "vue-router": "^3.0.1",
         "vue-template-compiler": "^2.5.21",
         "yarn": "^1.12.3"
     },
     "dependencies": {
-        "@babel/plugin-syntax-dynamic-import": "^7.0.0",
         "@mapbox/togeojson": "^0.16.0",
         "bibtex-parse": "^0.2.7",
         "bootstrap": "^4.1.3",
