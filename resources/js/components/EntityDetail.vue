@@ -24,7 +24,7 @@
                 </form>
             </h3>
             <span>
-                <button type="submit" form="entity-attribute-form" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')" @click="saveEntity(selectedEntity)">
+                <button type="submit" form="entity-attribute-form" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')">
                     <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
                 </button>
                 <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="deleteEntity(selectedEntity)">
@@ -42,8 +42,8 @@
                 {{ (selectedEntity.updated_at || selectedEntity.created_at) | date(undefined, true, true) }}
             </span>
         </div>
-        <form id="entity-attribute-form" name="entity-attribute-form">
-            <attributes class="pt-2 col pl-0 pr-2 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
+        <form id="entity-attribute-form" name="entity-attribute-form" class="col pl-0 pr-0" @submit.prevent="saveEntity(selectedEntity)">
+            <attributes class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
                 :attributes="selectedEntity.attributes"
                 :dependencies="selectedEntity.dependencies"
                 :disable-drag="true"

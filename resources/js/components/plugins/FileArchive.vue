@@ -14,7 +14,7 @@
 
 <script>
     import * as treeUtility from 'tree-vue-component';
-    Vue.component('archive-node', require('./ArchiveNode.vue'));
+    import ArchiveNode from './ArchiveNode.vue';
 
     export default {
         props: {
@@ -29,7 +29,7 @@
         methods: {
             addNodeProperties(item) {
                 item.icon = false;
-                item.component = 'archive-node';
+                item.component = ArchiveNode;
                 item.state = {
                     opened: false,
                     selected: false,

@@ -126,10 +126,10 @@
 </template>
 
 <script>
-    Vue.component('map-csv-importer', require('./MapGisImportCsv.vue'));
-    Vue.component('map-kml-importer', require('./MapGisImportKml.vue'));
-    Vue.component('map-shape-importer', require('./MapGisImportShape.vue'));
-    Vue.component('map-geojson-importer', require('./MapGisImportGeoJson.vue'));
+    import MapGisImportCsv from './MapGisImportCsv.vue';
+    import MapGisImportKml from './MapGisImportKml.vue';
+    import MapGisImportShape from './MapGisImportShape.vue';
+    import MapGisImportGeoJson from './MapGisImportGeoJson.vue';
 
     export default {
         props: {
@@ -142,6 +142,12 @@
                 required: false,
                 type: Object
             }
+        },
+        components: {
+            'map-csv-importer': MapGisImportCsv,
+            'map-kml-importer': MapGisImportKml,
+            'map-shape-importer': MapGisImportShape,
+            'map-geojson-importer': MapGisImportGeoJson
         },
         beforeMount() {
             this.mapLayers = {

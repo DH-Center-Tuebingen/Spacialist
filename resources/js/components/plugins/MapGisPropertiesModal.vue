@@ -44,8 +44,8 @@
 </template>
 
 <script>
-    Vue.component('map-gis-properties-style', require('./MapGisPropertiesStyle.vue'))
-    Vue.component('map-gis-properties-labels', require('./MapGisPropertiesLabels.vue'))
+    import MapGisPropertiesStyle from './MapGisPropertiesStyle.vue';
+    import MapGisPropertiesLabels from './MapGisPropertiesLabels.vue';
 
     export default {
         props: {
@@ -58,6 +58,10 @@
                 required: false,
                 type: Function
             }
+        },
+        components: {
+            'map-gis-properties-style': MapGisPropertiesStyle,
+            'map-gis-properties-labels': MapGisPropertiesLabels
         },
         beforeMount() {},
         mounted() {},

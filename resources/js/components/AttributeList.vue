@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="pr-1">
         <draggable
             class="h-100"
             v-model="localAttributes"
@@ -202,10 +202,11 @@
 <script>
     import draggable from 'vuedraggable';
     import { mapFields } from 'vee-validate';
-    Vue.component('dimension', require('./Dimension.vue'));
-    Vue.component('epoch', require('./Epoch.vue'));
-    Vue.component('list', require('./List.vue'));
-    Vue.component('tabular', require('./Tabular.vue'))
+
+    import Dimension from './Dimension.vue';
+    import Epoch from './Epoch.vue';
+    import List from './List.vue';
+    import Tabular from './Tabular.vue';
 
     export default {
         props: {
@@ -275,7 +276,11 @@
             }
         },
         components: {
-            draggable
+            draggable,
+            'dimension': Dimension,
+            'epoch': Epoch,
+            'list': List,
+            'tabular': Tabular
         },
         inject: ['$validator'],
         beforeMount() {

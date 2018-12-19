@@ -1,11 +1,12 @@
 import de from '../i18n/plugins/files-de.js';
 import en from '../i18n/plugins/files-en.js';
-
-Vue.component('files-plugin', require('../components/plugins/Files.vue'));
+import Files from '../components/plugins/Files.vue';
 
 const SpacialistPluginFiles = {
     name: 'SpacialistPluginFiles',
     install(Vue, options) {
+        Vue.component('files-plugin', Files);
+
         if(Vue.i18n) {
             Vue.prototype.$spacialistAddPluginLanguage('de', de);
             Vue.prototype.$spacialistAddPluginLanguage('en', en);

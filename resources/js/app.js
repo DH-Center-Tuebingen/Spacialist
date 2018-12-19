@@ -34,6 +34,7 @@ import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
 import VTooltip from 'v-tooltip';
+import VueScrollTo from 'vue-scrollto';
 
 library.add(fas, far, fab);
 dom.watch(); // search for <i> tags to replace with <svg>
@@ -83,6 +84,7 @@ Vue.use(VTooltip, {
         defaultArrowClass: 'arrow'
     }
 });
+Vue.use(VueScrollTo);
 
 const router = new VueRouter({
     scrollBehavior(to, from, savedPosition) {
@@ -342,25 +344,37 @@ Vue.component('multiselect', Multiselect);
 Vue.component('file-upload', VueUploadComponent);
 
 // Extended Components
-Vue.component('global-search', require('./components/GlobalSearch.vue'));
-Vue.component('entity-search', require('./components/EntitySearch.vue'));
-Vue.component('label-search', require('./components/LabelSearch.vue'));
-Vue.component('csv-table', require('./components/CsvTable.vue'));
+import GlobalSearch from './components/GlobalSearch.vue';
+import EntitySearch from './components/EntitySearch.vue';
+import LabelSearch from './components/LabelSearch.vue';
+import CsvTable from './components/CsvTable.vue';
 
 // Reusable Components
-Vue.component('attributes', require('./components/AttributeList.vue'));
-Vue.component('entity-tree', require('./components/EntityTree.vue'));
-Vue.component('entity-types', require('./components/EntityTypeList.vue'));
-Vue.component('ol-map', require('./components/OlMap.vue'));
-Vue.component('color-gradient', require('./components/Gradient.vue'));
+import Attributes from './components/AttributeList.vue';
+import EntityTree from './components/EntityTree.vue';
+import EntityTypes from './components/EntityTypeList.vue';
+import OlMap from './components/OlMap.vue';
+import ColorGradient from './components/Gradient.vue';
 
 // Page Components
-Vue.component('entity-reference-modal', require('./components/EntityReferenceModal.vue'));
-Vue.component('discard-changes-modal', require('./components/DiscardChangesModal.vue'));
-Vue.component('about-dialog', require('./components/About.vue'));
-Vue.component('error-modal', require('./components/Error.vue'));
+import EntityReferenceModal from './components/EntityReferenceModal.vue';
+import DiscardChangesModal from './components/DiscardChangesModal.vue';
+import AboutDialog from './components/About.vue';
+import ErrorModal from './components/Error.vue';
 
-Vue.component('data-analysis', require('./components/plugins/DataAnalysis.vue'));
+Vue.component('global-search', GlobalSearch);
+Vue.component('entity-search', EntitySearch);
+Vue.component('label-search', LabelSearch);
+Vue.component('csv-table', CsvTable);
+Vue.component('attributes', Attributes);
+Vue.component('entity-tree', EntityTree);
+Vue.component('entity-types', EntityTypes);
+Vue.component('ol-map', OlMap);
+Vue.component('color-gradient', ColorGradient);
+Vue.component('entity-reference-modal', EntityReferenceModal);
+Vue.component('discard-changes-modal', DiscardChangesModal);
+Vue.component('about-dialog', AboutDialog);
+Vue.component('error-modal', ErrorModal);
 
 // Filter
 Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm', useLocale = false, isDateString) {
@@ -487,7 +501,7 @@ const app = new Vue({
                     }
                     let name = k;
                     let nameExt = name + '.js';
-                    System.import('./plugins/' + nameExt).then(function(data) {
+                    import('./plugins/' + nameExt).then(data => {
                         Vue.use(data.default);
                     });
                 }

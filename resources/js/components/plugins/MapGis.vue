@@ -67,13 +67,15 @@
 </template>
 
 <script>
-    Vue.component('map-gis-import-modal', require('./MapGisImportModal.vue'));
-    Vue.component('map-gis-properties-modal', require('./MapGisPropertiesModal.vue'));
+    import MapGisImportModal from './MapGisImportModal.vue';
+    import MapGisPropertiesModal from './MapGisPropertiesModal.vue';
     import { VueContext } from 'vue-context';
 
     export default {
         components: {
-            VueContext
+            VueContext,
+            'map-gis-import-modal': MapGisImportModal,
+            'map-gis-properties-modal': MapGisPropertiesModal
         },
         beforeRouteEnter(to, from, next) {
             let mapLayers;

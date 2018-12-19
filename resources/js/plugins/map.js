@@ -3,13 +3,15 @@ import en from '../i18n/plugins/map-en.js';
 import LayerEditor from '../components/plugins/MapLayerEditor.vue';
 import LayerEditorDetail from '../components/plugins/MapLayerEditorDetail.vue';
 import Gis from '../components/plugins/MapGis.vue';
-
-Vue.component('map-plugin', require('../components/plugins/Map.vue'));
-Vue.component('layer-list', require('../components/plugins/MapLayerList.vue'));
+import MapPlugin from '../components/plugins/Map.vue';
+import MapLayerList from '../components/plugins/MapLayerList.vue';
 
 const SpacialistPluginMap = {
     name: 'SpacialistPluginMap',
     install(Vue, options) {
+        Vue.component('map-plugin', MapPlugin);
+        Vue.component('layer-list', MapLayerList);
+
         if(Vue.i18n) {
             Vue.prototype.$spacialistAddPluginLanguage('de', de);
             Vue.prototype.$spacialistAddPluginLanguage('en', en);

@@ -678,22 +678,37 @@
 <script>
     import * as screenfull from 'screenfull';
 
-    Vue.component('file-list', require('./FileList.vue'));
+    import FileList from './FileList.vue';
 
-    Vue.component('file-image', require('./FileImage.vue'));
-    Vue.component('file-audio', require('./FileAudio.vue'));
-    Vue.component('file-video', require('./FileVideo.vue'));
-    Vue.component('file-pdf', require('./FilePdf.vue'));
-    Vue.component('file-xml', require('./FileXml.vue'));
-    Vue.component('file-3d', require('./File3d.vue'));
-    Vue.component('file-dicom', require('./FileDicom.vue'));
-    Vue.component('file-archive', require('./FileArchive.vue'));
-    Vue.component('file-text', require('./FileText.vue'));
-    Vue.component('file-undefined', require('./FileUndefined.vue'));
+    import FileImage from './FileImage.vue';
+    import FileAudio from './FileAudio.vue';
+    import FileVideo from './FileVideo.vue';
+    import FilePdf from './FilePdf.vue';
+    import FileXml from './FileXml.vue';
+    import File3d from './File3d.vue';
+    import FileDicom from './FileDicom.vue';
+    import FileArchive from './FileArchive.vue';
+    import FileText from './FileText.vue';
+    import FileUndefined from './FileUndefined.vue';
 
-    Vue.component('file-confirm-upload-modal', require('./FileConfirmUploadModal.vue'));
+    import FileConfirmUploadModal from './FileConfirmUploadModal.vue';
+
 
     export default {
+        components: {
+            'file-list': FileList,
+            'file-image': FileImage,
+            'file-audio': FileAudio,
+            'file-video': FileVideo,
+            'file-pdf': FilePdf,
+            'file-xml': FileXml,
+            'file-3d': File3d,
+            'file-dicom': FileDicom,
+            'file-archive': FileArchive,
+            'file-text': FileText,
+            'file-undefined': FileUndefined,
+            'file-confirm-upload-modal': FileConfirmUploadModal
+        },
         props: {
             selectedEntity: {
                 required: false,

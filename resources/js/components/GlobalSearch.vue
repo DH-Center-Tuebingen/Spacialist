@@ -35,13 +35,19 @@
     import VueTypeahead from 'vue-typeahead';
     import debounce from 'debounce';
 
-    Vue.component('search-result-bibliography', require('./SearchResultBibliography.vue'));
-    Vue.component('search-result-entities', require('./SearchResultEntity.vue'));
-    Vue.component('search-result-files', require('./SearchResultFile.vue'));
-    Vue.component('search-result-geodata', require('./SearchResultGeodata.vue'));
+    import SearchResultBibliography from './SearchResultBibliography.vue';
+    import SearchResultEntity from './SearchResultEntity.vue';
+    import SearchResultFile from './SearchResultFile.vue';
+    import SearchResultGeodata from './SearchResultGeodata.vue';
 
     export default {
         extends: VueTypeahead,
+        components: {
+            'search-result-bibliography': SearchResultBibliography,
+            'search-result-entities': SearchResultEntity,
+            'search-result-files': SearchResultFile,
+            'search-result-geodata': SearchResultGeodata
+        },
         props: {
             placeholder: {
                 type: String,

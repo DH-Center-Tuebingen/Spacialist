@@ -67,18 +67,15 @@
 </template>
 
 <script>
+    import TreeNode from './TreeNode.vue';
+    import TreeContextmenu from './TreeContextmenu.vue';
+    import TreeSearch from './TreeSearch.vue';
+
     import * as treeUtility from 'tree-vue-component';
     import { VueContext } from 'vue-context';
-    import VueScrollTo from 'vue-scrollto';
     import { transliterate as tr, slugify } from 'transliteration';
     import AddNewEntityModal from './modals/AddNewEntity.vue';
     import DeleteEntityModal from './modals/DeleteEntity.vue';
-
-    Vue.component('tree-node', require('./TreeNode.vue'));
-    Vue.component('tree-contextmenu', require('./TreeContextmenu.vue'));
-    Vue.component('tree-search', require('./TreeSearch.vue'));
-
-    Vue.use(VueScrollTo);
 
     const DropPosition = {
         empty: 0,
@@ -103,11 +100,11 @@
             this.icon = false;
             this.children = [];
             this.childrenLoaded = this.children.length == this.children_count;
-            this.component = 'tree-node';
+            this.component = TreeNode;
             this.dragDelay = vm.dragDelay;
             this.dragAllowed = _ => vm.isDragAllowed;
             this.onToggle = vm.itemToggle;
-            this.contextmenu = 'tree-contextmenu';
+            this.contextmenu = TreeContextmenu;
             this.onContextMenuAdd = function(parent) {
                 vm.requestAddNewEntity(parent);
             };
@@ -124,8 +121,12 @@
     }
 
     export default {
+        name: 'EntityTree',
         components: {
-            VueContext,
+            'tree-node': TreeNode,
+            'tree-contextmenu': TreeContextmenu,
+            'tree-search': TreeSearch,
+            VueContext
         },
         props: {
             selectedEntity: {
