@@ -86,7 +86,7 @@
                 if(this.resetInput) this.reset();
             },
             prepareResponseData(data) {
-                if(this.filters.length) {
+                if(this.filters && this.filters.length) {
                     // remove all results with id in filters
                     // from result items
                     return data.filter(i => {
@@ -97,6 +97,7 @@
                 }
             },
             clearItem() {
+                if(this.onSelect) this.onSelect();
                 this.reset();
             },
             closeSelect() {

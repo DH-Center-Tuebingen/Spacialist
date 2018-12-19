@@ -58,7 +58,6 @@
                             <i class="fas fa-fw fa-map-marker-alt"></i> {{ $t('main.entity.attributes.open-map') }}
                         </button>
                     </div>
-                    <!-- TODO: dirty checking -->
                     <div v-else-if="attribute.datatype == 'entity'">
                         <entity-search
                             v-validate=""
