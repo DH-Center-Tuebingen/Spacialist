@@ -30,9 +30,14 @@ Beside these packages we use a couple of packages you have to install on your ow
 - [GeoServer](http://geoserver.org/) for hosting your own geo maps
 
 ## Migration from < 0.6 (Lumen- and Angular-based releases)
-There are no additional database migrations steps required. Laravel's migration command should take care of database changes. **But** we recommend to update to the latest pre-0.6 release before switching to 0.6+.
+There are no additional database migrations steps required. Laravel's migration command should take care of database changes. **But you must** update to the latest pre-0.6 release before switching to 0.6+.
 However, since we switched to a different code base, you have to get the new dependencies (see _Download Dependencies_ in [Package Installation](INSTALL.md#package-installation)).
 You should also check for changes in [Proxy Setup](INSTALL.md#proxy-setup) and [Configure Laravel](INSTALL.md#configure-laravel).
+After switching to the new branch/release, you should get rid of the old dependencies.
+**Before** downloading the new dependencies, you should do the following steps:
+1. Copy `.env` file from `lumen` folder to the root folder (`mv lumen/.env .env`)
+2. Remove entire `lumen` folder (`rm -rf lumen`)
+3. Remove `bower_components` (if coming from a very old version) and `node_modules` (`rm -rf bower_components node_modules`)
 
 ## Setup
 ### Package Installation
@@ -56,13 +61,6 @@ You should also check for changes in [Proxy Setup](INSTALL.md#proxy-setup) and [
     npm install
     composer install
     ```
-
-**Please note**: During the `composer install` you might get an error regarding an unsecure installation. To fix this you have to edit your `composer.json` file (only edit this file if you know what you're doing) in the `lumen` folder to disable secure HTTP connections. Add `"secure-http": false` or set `"secure-http": true` to `false` if the line already exists.
-
-After editing the `composer.json` you have to re-run `composer` with
-```bash
-composer update
-```
 
 ### Proxy Setup
 Since Laravel has a sub-folder as document root `Spacialist/public`, it won't work to simply copy Laravel to your webserver's root directory.
@@ -119,28 +117,6 @@ One solution is to setup a proxy on the same machine and re-route all requests f
     sudo service apache2 restart
     ```
 
-### Configure JavaScript
-Spacialist is based on several JavaScript libraries, which are bundled using Webpack (configuration is done using Laravel Mix, a webpack-wrapper for Laravel). Only the zipped releases contain the already bundled JavaScript libraries. All other users have to run webpack to bundle these libraries.
-
-Before running webpack, you have to adjust the public path in the mix config file `webpack.mix.js`. Replace `publicPath` inside the `webpackConfig` call with the path of your instance.
-
-```bash
-.webpackConfig({
-    output: {
-        publicPath: '/Spacialist/'
-    }
-})
-```
-
-Now you can run webpack using
-
-```bash
-npm run dev
-# or
-npm run prod
-```
- depending on whether you want a debugging-friendly development build or an optimized production-ready build.
-
 ### Configure Laravel
 In your `config/app.php` you have to adjust the `APP_URL` key. Replace `http://localhost` with the URL of your instance.
 E.g. `https://spacialist.mydomain.tld`
@@ -182,22 +158,30 @@ MAIL_ENCRYPTION=null
 PUSHER_APP_ID=
 PUSHER_APP_KEY=
 PUSHER_APP_SECRET=
+
+JWT_SECRET=ase64:<32bit-key> #this needs to be a 32 digit random key. Use 'php artisan jwt:secret'
+JWT_BLACKLIST_GRACE_PERIOD=0
+
+MIX_APP_PATH=
 ```
 
-#### Protected Files (Local driver only)
-Your uploaded files are stored in a public folder. To increase security it is recommended to define a random path in your `.env` file. The matching key is `SP_FILE_PATH`. You also have to create the path on your system (Do not actually create the last part of the path, you have to create it as a softlink later).
+### Configure JavaScript
+Spacialist is based on several JavaScript libraries, which are bundled using Webpack (configuration is done using Laravel Mix, a webpack-wrapper for Laravel). Only the zipped releases contain the already bundled JavaScript libraries. All other users have to run webpack to bundle these libraries.
 
-**Example:**
+Before running webpack, you have to adjust the public path in the mix config file `webpack.mix.js`. To do so, set your path using the `MIX_APP_PATH` variable in `.env` file.
+
 ```bash
-# added to .env file
-SP_FILE_PATH=mysecret/anothersecret/privateFolderXYZ
+MIX_APP_PATH=Spacialist/subfolder/instance/
 ```
+
+Now you can run webpack using
+
 ```bash
-cd /var/www/html/Spacialist/public
-mkdir -p storage/mysecret/anothersecret
-cd storage/mysecret/anothersecret
-ln -s /var/www/html/Spacialist/storage/app/images privateFolderXYZ
+npm run dev
+# or
+npm run prod
 ```
+depending on whether you want a debugging-friendly development build or an optimized production-ready build.
 
 ### Migrations
 

@@ -18,7 +18,7 @@ let mix = require('laravel-mix');
  |
  */
 
-const appPath = '';
+const appPath = process.env.MIX_APP_PATH;
 
 /*
  |--------------------------------------------------------------------------
