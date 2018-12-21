@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.6 - Unreleased (Federsee)
+## 0.6 - Federsee
 This version is a complete rewrite using Laravel and Vue.js. Please refer to the [INSTALL.md](INSTALL.md) for migration and new setup information.
 ### Added
 - File Viewer
@@ -45,6 +45,7 @@ This version is a complete rewrite using Laravel and Vue.js. Please refer to the
   - Duplicate Entity-Types
   - Option to restrict options for dropdowns
 - Info texts on hover to icon-only labeled buttons/links/etc.
+- Set user's language to browser's default in user settings
 ### Changed
 - Moved from Lumen (5.3) to Laravel (5.7)
 - Moved from AngularJS (1.5) to Vue.js (2.5)
