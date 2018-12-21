@@ -1,0 +1,45 @@
+// Variables
+@import "variables";
+
+// Bootstrap
+@import "~bootstrap/scss/bootstrap";
+
+// tree-component
+@import "~tree-component/dist/tree.min.css";
+@import "tree";
+
+// Datepicker
+@import "~v-calendar/lib/v-calendar.min.css";
+
+// vue-upload-component
+@import "upload";
+
+// multiselect
+@import "multiselect";
+
+// entity menu
+@import "contextmenu";
+
+// map
+@import "map";
+
+// v-modal
+@import "modal";
+
+// v-tooltip
+@import "popover";
+
+// slider
+@import "slider";
+
+// color gradient
+@import "gradient";
+
+// Spacialist utility classes
+@import "utilities";
+
+// Spacialist specific
+@import "style";
+
+// Data Analysis Plugin
+@import "dataanalysis";

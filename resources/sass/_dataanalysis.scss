@@ -1,0 +1,11 @@
+.filter-group {
+    height: 200px;
+}
+
+.filter-item:first-child {
+    margin-top: 0 !important;
+}
+
+.filter-item:last-child {
+    margin-bottom: 0 !important;
+}

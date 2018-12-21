@@ -1,0 +1,20 @@
+.tree-hovered {
+    background-color: $light !important;
+}
+
+.tree-clicked {
+    background: none !important;
+    border-radius: 0 !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    font-weight: $font-weight-bold !important;
+}
+
+.tree-search {
+    font-style: normal !important;
+    font-weight: $font-weight-normal;
+    // color: $white !important;
+    background-color: rgba(red($yellow), green($yellow), blue($yellow), 0.5) !important;
+
+    border-radius: $border-radius;
+}

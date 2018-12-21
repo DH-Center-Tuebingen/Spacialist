@@ -1,27 +1,24 @@
 # Installation
-We recommend a recent unix/linux-based OS. Please check if your desired OS meets the following requirements. If not, we recommend debian (8.5 aka _jessie_ or later) or Ubuntu (16.04 LTS aka _Xenial Xerus_ or later). For better PHP performance we recommend a system with PHP 7.x support such as Ubuntu 16.04. Note: Installation on Windows 10 with PHP 5.6 was also successfully tested, but you will need to adjust the commands in these instructions by yourself to your local Windows version equivalents.
+We recommend a recent unix/linux-based OS. Please check if your desired OS meets the following requirements. If not, we recommend debian (9.5 aka _Stretch_ or later) or Ubuntu (18.04 LTS aka _Bionic Beaver_ or later). For Giza and later at least PHP 7.1.3 is required. Note: Installation on Windows 10 with PHP 5.6 was also successfully tested, but you will need to adjust the commands in these instructions by yourself to your local Windows version equivalents.
 
 ## Requirements
 The following packages you should be able to install from your package manager:
 - git
 - Apache (or any other web server-software, e.g. nginx)
-- PHP (`>= 5.6.4`) with the following extensions installed and enabled:
+- PHP (`>= 7.1.3`) with the following extensions installed and enabled:
   - Imagick
   - memcached (on Windows this will not work -- see later)
   - mbstring
   - gd
+  - xml
+  - zip
 - libapache2-mod-php (on Unix systems)
-- [Composer](https://getcomposer.org)
+- [composer](https://getcomposer.org)
 - PostGIS (`>= 2.0`)
 - PostgreSQL (`>= 9.1.0`)
 - ImageMagick
 - ufraw
 - memcached (extension DLL not available for Windows at the moment, see later)
-- Python 3.x
-  - pip
-  - rdflib
-  - psycopg2
-  - getopt
 - unzip
 - php-pgsql
 - phpunit
@@ -29,8 +26,18 @@ The following packages you should be able to install from your package manager:
 - npm
 
 Beside these packages we use a couple of packages you have to install on your own.
-- Lumen (PHP-Framework), currently included in the Spacialist repository, so no need to install.
+- Laravel (PHP-Framework), currently included in the Spacialist repository, so no need to install.
 - [GeoServer](http://geoserver.org/) for hosting your own geo maps
+
+## Migration from < 0.6 (Lumen- and Angular-based releases)
+There are no additional database migrations steps required. Laravel's migration command should take care of database changes. **But you must** update to the latest pre-0.6 release before switching to 0.6+.
+However, since we switched to a different code base, you have to get the new dependencies (see _Download Dependencies_ in [Package Installation](INSTALL.md#package-installation)).
+You should also check for changes in [Proxy Setup](INSTALL.md#proxy-setup) and [Configure Laravel](INSTALL.md#configure-laravel).
+After switching to the new branch/release, you should get rid of the old dependencies.
+**Before** downloading the new dependencies, you should do the following steps:
+1. Copy `.env` file from `lumen` folder to the root folder (`mv lumen/.env .env`)
+2. Remove entire `lumen` folder (`rm -rf lumen`)
+3. Remove `bower_components` (if coming from a very old version) and `node_modules` (`rm -rf bower_components node_modules`)
 
 ## Setup
 ### Package Installation
@@ -38,7 +45,7 @@ Beside these packages we use a couple of packages you have to install on your ow
 1. Install all the required packages. For debian-based/apt systems you can use the following command
 
     ```bash
-    sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring php-gd ufraw memcached python3 python-pip python-rdflib python-psycopg2 phpunit nodejs npm
+    sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring php-gd ufraw memcached phpunit nodejs npm
     ```
 
 2. Clone This Repository
@@ -52,22 +59,12 @@ Beside these packages we use a couple of packages you have to install on your ow
     ```bash
     cd Spacialist
     npm install
-    cd lumen
     composer install
     ```
 
-**Please note**: During the `composer install` you might get an error regarding an unsecure installation. To fix this you have to edit your `composer.json` file (only edit this file if you know what you're doing) in the `lumen` folder to disable secure HTTP connections. Add `"secure-http": false` or set `"secure-http": true` to `false` if the line already exists.
-
-After editing the `composer.json` you have to re-run `composer` with
-```bash
-composer update
-```
-
 ### Proxy Setup
-To communicate with Lumen, Spacialist requires the API folder to be in the Spacialist folder. If you run Spacialist under `yourdomain.tld/Spacialist`, the Lumen API has to be `yourdomain.tld/Spacialist/api`.
-
-Since Lumen has a sub-folder as document root `lumen/public`, it won't work to simply copy Lumen to your webserver's root directory.
-One solution is to setup a proxy on the same machine and re-route all requests from `/Spacialist/api` to Lumen's public folder (e.g. `/var/www/html/Spacialist/lumen/public`).
+Since Laravel has a sub-folder as document root `Spacialist/public`, it won't work to simply copy Laravel to your webserver's root directory.
+One solution is to setup a proxy on the same machine and re-route all requests from `/Spacialist` to Laravel's public folder (e.g. `/var/www/html/Spacialist/public`).
 
 1. Enable the webserver's proxy packages and the rewrite engine
 
@@ -80,26 +77,26 @@ One solution is to setup a proxy on the same machine and re-route all requests f
     ```bash
     sudo nano /etc/hosts
     # Add an entry to "redirect" a domain to your local machine (localhost)
-    127.0.0.1 spacialist-lumen.tld # or anything you want
+    127.0.0.1 spacialist-laravel.tld # or anything you want
     ```
 
 3. Add a new vHost file to your apache
 
     ```bash
     cd /etc/apache2/sites-available
-    sudo nano spacialist-lumen.conf
+    sudo nano spacialist-laravel.conf
     ```
 
     Paste the following snippet into the file:
     ```apache
     <VirtualHost *:80>
-      ServerName spacialist-lumen.tld
+      ServerName spacialist-laravel.tld
       ServerAdmin webmaster@localhost
-      DocumentRoot /var/www/html/Spacialist/lumen/public
+      DocumentRoot /var/www/html/Spacialist/public
 
       DirectoryIndex index.php
 
-      <Directory "/var/www/html/Spacialist/lumen/public">
+      <Directory "/var/www/html/Spacialist/public">
         AllowOverride All
         Require all granted
       </Directory>
@@ -109,30 +106,34 @@ One solution is to setup a proxy on the same machine and re-route all requests f
 4. Add the proxy route to your default vHost file (e.g. `/etc/apache2/sites-available/000-default.conf`)
 
     ```apache
-    ProxyPass "/Spacialist/api" "http://spacialist-lumen.tld"
-    ProxyPassReverse "/Spacialist/api" "http://spacialist-lumen.tld"
+    ProxyPass "/Spacialist" "http://spacialist-laravel.tld"
+    ProxyPassReverse "/Spacialist" "http://spacialist-laravel.tld"
     ```
 
 5. Enable the new vHost file and restart the webserver
 
     ```bash
-    sudo a2ensite spacialist-lumen.conf
+    sudo a2ensite spacialist-laravel.conf
     sudo service apache2 restart
     ```
 
-### Configure Lumen
-Lumen should now work, but to test it you need to create a `.env` file which stores the Lumen configuration.
-Inside the `lumen`-subfolder in the Spacialist installation, create the `.env` file:
+### Configure Laravel
+In your `config/app.php` you have to adjust the `APP_URL` key. Replace `http://localhost` with the URL of your instance.
+E.g. `https://spacialist.mydomain.tld`
+
+Laravel should now work, but to test it you need to create a `.env` file which stores the Laravel configuration.
+Inside the installation folder, create the `.env` file:
 ```bash
-cd /var/www/html/Spacialist/lumen
+cd /var/www/html/Spacialist
 sudo nano .env
 ```
 
 Then paste this configuration (Please edit some of the configuration settings `*` to match your installation). **Note**: on Windows, memchached extension DLL seems unavailable. Use `CACHE_DRIVER=array` instead where indicated:
 ```
+APP_NAME=Spacialist
 APP_ENV=local
 APP_DEBUG=true
-APP_KEY=* #this needs to be a 32 digit random key. Use an online generator or run php artisan jwt:secret twice
+APP_KEY=base64:<32bit-key> #this needs to be a 32 digit random key. Use 'php artisan key:generate'
 
 # Your database setup. pgsql is PostgreSQL. Host, port, database, username and password need to be configured first (e.g. using your database server's commands).
 DB_CONNECTION=pgsql
@@ -142,29 +143,45 @@ DB_DATABASE=*
 DB_USERNAME=*
 DB_PASSWORD=*
 
+BROADCAST_DRIVER=log
 CACHE_DRIVER=memcached # on Windows memcached extension unavailable, but it seems to work with "array"
+SESSION_DRIVER=file
 QUEUE_DRIVER=sync
 
-JWT_SECRET=* #same as APP_KEY, run php artisan jwt:secret
-JWT_TTL=* #the time to live (in minutes) of your user tokens. Default is 60 (minutes).
-JWT_REFRESH_TTL=* #the ttl (in minutes) in which you can generate a new token. Default is two weeks
-JWT_BLACKLIST_GRACE_PERIOD=* #a time span in seconds which allows you to use the same token several times in this time span without blacklisting it (good for async api calls)
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+
+JWT_SECRET=ase64:<32bit-key> #this needs to be a 32 digit random key. Use 'php artisan jwt:secret'
+JWT_BLACKLIST_GRACE_PERIOD=0
+
+MIX_APP_PATH=
 ```
 
-#### Protected Files (Local driver only)
-If you use the local (public) filesystem driver, your uploaded files are stored in a public folder. To increase security it is recommended to define a random path in your `.env` file. The matching key is `SP_FILE_PATH`. You also have to create the path on your system (Do not actually create the last part of the path, you have to create it as a softlink later).
+### Configure JavaScript
+Spacialist is based on several JavaScript libraries, which are bundled using Webpack (configuration is done using Laravel Mix, a webpack-wrapper for Laravel). Only the zipped releases contain the already bundled JavaScript libraries. All other users have to run webpack to bundle these libraries.
 
-**Example:**
+Before running webpack, you have to adjust the public path in the mix config file `webpack.mix.js`. To do so, set your path using the `MIX_APP_PATH` variable in `.env` file.
+
 ```bash
-# added to .env file
-SP_FILE_PATH=mysecret/anothersecret/privateFolderXYZ
+MIX_APP_PATH=Spacialist/subfolder/instance/
 ```
+
+Now you can run webpack using
+
 ```bash
-cd /var/www/html/Spacialist/lumen/public
-mkdir -p storage/mysecret/anothersecret
-cd storage/mysecret/anothersecret
-ln -s /var/www/html/Spacialist/lumen/storage/app/images privateFolderXYZ
+npm run dev
+# or
+npm run prod
 ```
+depending on whether you want a debugging-friendly development build or an optimized production-ready build.
 
 ### Migrations
 
@@ -173,39 +190,24 @@ After the `.env` file has been configured you should run the migrations to setup
 php artisan migrate
 ```
 
-To test your installation, simply open `http://yourdomain.tld/Spacialist/api`. You should see a website with Lumen's current version.
+To test your installation, simply open `http://yourdomain.tld/Spacialist/api`. You should see a website with Laravel's current version.
 Example:
 ```
-Lumen (5.3.2) (Laravel Components 5.3.*)
+Laravel (5.5.33)
 ```
-
-### Seeds
-
-Run `php artisan db:seed` for seeding your database with initial data (default Admin Account, Languages, Roles and Permissions). See [list of available seeds](https://github.com/eScienceCenter/Spacialist/tree/master/lumen/database/seeds) for additional available seeds like creating a Guest User Account or random test data). To run only a specific seeder appand `--class=<ClassName>` (e.g. `php artisan db:seed --class=GuestUserSeeder` to create a Guest User Account).
 
 #### External storage
-Lumen supports different filesystems. Some of the most popular adapters:
+Laravel supports different filesystems. Some of the most popular adapters:
 - AWS S3
+- Dropbox
+- Rackspace
 - SFTP
-- Dropbox (Not yet supported by Spacialist)
-- Rackspace (Not yet supported by Spacialist)
-- WebDAV (Not yet supported by Spacialist)
+- WebDAV
 
-To enable one of these adapters (AWS, (S)FTP are enabled by default) you need to add the driver to your `composer.json`. For a list of available adapters, see [here](https://github.com/thephpleague/flysystem). To use one of the drivers add it to the `config => filesystems => disks` array in `bootstrap/app.php`. The `local` and `public` drivers are already configured and `public` is set as default. To switch to another default adapter simply add the configuration to the `disks` array and set the `default` to the key of your added driver.
-Instead of manipulating the `default` key in `bootstrap/app.php` one can set the `SP_FILE_DRIVER` key in the `.env` file. If not provided, it defaults to the `default` setting.
-
-##### Limitations
-Some drivers do not support to create accessible URLs. Thus, there is a new method which creates an URL. Unfortunately, this method does not respect the `ProxyPass` setting (`ProxyPass "/Spacialist/api" "http://spacialist-lumen.tld"`) in the apache config file. To ensure that the correct URL is returned, an additional `env` key (`SP_API_PREFIX`) is added to the `.env` file. It must contain the path to the API defined in the `ProxyPass` setting, but without the name of the cloned folder. E.g. if your ProxyPass is the one above, the API path would be `/api`. However, the `SP_API_PREFIX` must not start with a / and must end with a /. In this example the result would be:
-```bash
-SP_API_PREFIX=api/
-```
-If not provided, it defaults to `api/`.
-
-The following drivers do not support URLs:
-- (S)FTP
+To enable one of these adapters you need to add the driver to your `composer.json`. For a list of available adapters, see [here](https://github.com/thephpleague/flysystem). To use one of the drivers add it to the `config => filesystems => disks` array in `bootstrap/app.php`. The `local` driver is already configured and set as default. To switch to another default adapter simply add the configuration to the `disks` array and set the `default` to the key of your added driver.
 
 For further informations regarding the cotent of `config => filesystems => disks` see these documentations:
-- [Laravel Filesystem](https://laravel.com/docs/5.3/filesystem)
+- [Laravel Filesystem](https://laravel.com/docs/5.4/filesystem)
 - [Laravel Sample Config](https://github.com/laravel/laravel/blob/master/config/filesystems.php)
 - [Flysystem Github Page](https://github.com/thephpleague/flysystem)
 - [Flysystem Laravel Integration](https://github.com/GrahamCampbell/Laravel-Flysystem)
@@ -241,28 +243,6 @@ config([
 ....
 ?>
 ```
-
-### Optional Lumen Installation
-Spacialist ships with Lumen preinstalled. If you ever have or want to install it on your own, please follow these instructions.
-
-**Please note**: This manual is based on version 5.3 of Lumen. If you want to use a different version, please check the [official lumen manual](https://lumen.laravel.com/docs/)
-
-1. Use `composer` to install the lumen executable
-
-    ```bash
-    composer global require "laravel/lumen-installer"
-    ```
-
-2. Change directory to the desired installation path (e.g. `/var/www/html/`)
-3. Run `lumen new lumen` (you can replace the second "lumen" with any name you want. This is the folder name in which lumen will be installed). If the command `lumen` is not found, you can add it to your `PATH` or use the absolute path of the executable
-    1. Change directory to `/usr/local/bin`
-    2. Run `sudo ln -s /home/<your name>/.config/composer/vendor/bin/lumen lumen`
-    3. **Alternatively** run `/home/<your name>/.config/composer/vendor/bin/lumen new lumen` instead of `lumen new lumen`
-4. If the new Lumen application has been created successfully you can now start configuring your project
-5. Change directory to your newly created project folder
-6. Copy the existing `.env.example` file to `.env`
-7. Add the `APP_KEY` to the `.env` file. The `APP_KEY` is a 32 char long random string. To generate such a string you can use your OS build-in method (if present) or use an online generator. Add the generated key to your `.env` file. (e.g. `APP_KEY=KEvtfHdL3Xl3xfYxJcfGp8FhrJz4hxKF`)
-8. In the `.env` file you have to set your database connection information as well (the value for the `DB_CONNECTION` key for PostgreSQL is `pgsql`)
 
 ### GeoServer Installation
 Additional geographical data are included through a GeoServer (see [installation/linux.html](http://docs.geoserver.org/latest/en/user/installation/linux.html)).

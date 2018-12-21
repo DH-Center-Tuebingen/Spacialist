@@ -1,15 +1,90 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased - Federsee
+## 0.6 - Federsee
+This version is a complete rewrite using Laravel and Vue.js. Please refer to the [INSTALL.md](INSTALL.md) for migration and new setup information.
 ### Added
-- Data Importer
-- External Storage (e.g. (S)FTP, AWS, WebDAV)
+- File Viewer
+  - Simple Office Documents Viewer (as HTML-Text)
+  - Edit Mode for text and XML files
+  - Replace single files (even with different file types)
+  - Rendering of HTML files
+  - DICOM Support
+  - Rename files
+  - 3D-Viewer can now load all 3D files of sub-entities into same scene
+  - New audio plugin (based on [wavesurfer](https://wavesurfer-js.org), visualization and EQ)
+  - Simple navigation to jump to previous/next file right from the modal (using buttons or left/right arrow key)
+  - Icons in the upper right corner to indicate whether this file is linked and has tags
+  - Checkboxes in the upper left corner to select files for export/download
+  - Properties (copyright and description) and tags fields to upload page, to set them for all uploaded files
+  - Shortcut (`ctrl + v`) to directly upload files from clipboard
+- Tree View
+  - Reorder buttons (by rank (default), name, entity-type, children count)
+- Welcome Page
+  - Maintainer (Name and E-Mail-Address), Project Description and Access (Public/Private) can be configured in settings
+- Reference Modal
+  - Options (Edit/Delete) to reference list
+- Bibliography
+  - Export BibTeX
+  - 'Hide BibTeX metadata fields' toggle in Bibliography view
+  - Auto-Fill from clipboard (`ctrl + v`) in new/edit entry modal
+- Attribute Types
+  - SQL Type
+    - Rendered as Table or single value
+    - Supports translations (Use `concept_url` as header/content)
+    - Supports `:entity_id` as placeholder for current selected entity
+  - Serial Type (Auto-incrementing ID)
+- Geometry Preference (EPSG-Code). E.g. to display coordinates in popups different from EPSG:4326
+- Measurement tool for map
+- Attribute Dependencies
+  - Attributes can now depend (are visible/invisible) on values of other attributes
+- GIS View
+  - QGIS-like styling (categorized, graduated (equal interval and quantile) and color) and labeling
+- Contributors in about modal
+- Data-Model-Editor
+  - Duplicate Entity-Types
+  - Option to restrict options for dropdowns
+- Info texts on hover to icon-only labeled buttons/links/etc.
+- Set user's language to browser's default in user settings
 ### Changed
-- Removed Context/Find differentiation, is now configurable
-  - All existing context-types are allowed as root-elements
-  - They can have other contexts of all existing context-types as sub-elements
-  - Configurable in Data Model Editor
+- Moved from Lumen (5.3) to Laravel (5.7)
+- Moved from AngularJS (1.5) to Vue.js (2.5)
+- Moved from LeafletJS (1.0) to OpenLayers (5.2)
+- Updated Bootstrap 3.3 to 4.1
+- Switched from Material Design back to original Bootstrap
+- Switched from Material Icons to new FontAwesome 5.5
+- Moved Plugin-like parts to real Plugins
+- Certainty Modal now has 3 icons to view information without opening the modal
+  - !-Icon: Always displayed. Color based on certainty level
+  - Comment-Icon: Displayed if there is a comment
+  - Bookmark-Icon: Displayed if there is at least one reference
+- User/Role Management bundle several actions (Save, Edit, Delete, ...) in single dropdown (...-menu)
+- Adding/Reorder attributes in Context-Type tab in Data-Model-Editor is now done using Drag&Drop.
+- File Viewer
+  - Load files as chunk of 15
+  - Filter by ... for each tab (Linked, Unlinked, All Files)
+    - Filetype
+    - Camera
+    - Date
+  - Link tab revamped
+    - Added option to link to entities from a search bar
+    - Added 'Unlink/Link from/to entity' button in
+- Tree View
+  - Now loads root elements only. Sub-elements are loaded on request
+- Bibliography
+  - Only loads the first 20 entries. More entries are loaded on scroll.
+  - Dropped differentiation between mandatory and optional fields (all are optional now).
+- Tree Search is now async and matching entities can be selected from a list (and expanded/highlighted)
+- Global search based on relevance. Also supports bangs for different categories:
+  - `!e ` + Search term: Entities
+  - `!f ` + Search term: Files
+  - `!g ` + Search term: Geodata
+  - `!b ` + Search term: Bibliography
+### Fixed
+- 3D-File-Viewer: Mouse Controls now work even if WebVR is available (but not active)
+### Removed/Deprecated
+- Links: The links have changed, but they will continue to work. We recommend to update your bookmarks, because the old link structure is now deprecated
+- Edit Mode (Column sizes can still be modified in preferences)
 
 ## 0.5.1
 ### Added

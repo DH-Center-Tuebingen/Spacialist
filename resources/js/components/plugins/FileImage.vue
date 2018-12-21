@@ -1,0 +1,41 @@
+<template>
+    <div>
+        <img :src="localUrl" id="file-container-image" class="modal-image" />
+        <button type="button" class="btn btn-sm btn-info position-absolute m-2" style="right: 0;" v-if="fullscreenHandler" @click="toggleFullscreen">
+            <i class="fas fa-fw fa-expand"></i>
+        </button>
+    </div>
+</template>
+
+<script>
+    export default {
+        props: {
+            file: {
+                required: true,
+                type: Object
+            },
+            fullscreenHandler: {
+                required: false,
+                type: Function
+            }
+        },
+        methods: {
+            toggleFullscreen() {
+                if(!this.fullscreenHandler) return;
+                const element = document.getElementById('file-container-image');
+                this.fullscreenHandler(element)
+            }
+        },
+        data() {
+            return {
+            }
+        },
+        computed: {
+            // update url if file changes, to force image reload
+            localUrl() {
+                const now = new Date();
+                return `${this.file.url}?t=${now.getTime()}`;
+            }
+        }
+    }
+</script>

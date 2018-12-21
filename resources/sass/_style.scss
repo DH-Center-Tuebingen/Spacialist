@@ -1,0 +1,145 @@
+body {
+  font-family: $font-family-sans-serif;
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  color: $text-color;
+  // background-color: #f5f8fa;
+}
+
+html {
+    height: 100vh;
+}
+
+body, #app {
+    height: 100%;
+}
+
+code {
+    font-family: "Source Code Pro" !important;
+    font-size: 1.2em !important;
+    font-weight: 500 !important;
+}
+
+code.normal {
+    font-size: 100% !important;
+    font-weight: 400 !important;
+}
+
+.form-mb-0 > div.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.v-can-hidden {
+    display: none !important;
+}
+
+.overlay-all {
+    z-index: 2000;
+}
+
+.drag-container:empty {
+    height: 100%;
+    width: 100%;
+    border: 2px dashed lightgray;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.drag-container:empty::after {
+    content: "Drop items here";
+}
+
+.logo {
+    height: $logo-size;
+    width: $logo-size;
+    display: inline-block !important;
+    vertical-align: middle;
+}
+
+.login-header {
+    text-align: center;
+}
+
+.media-image {
+    max-width: 64px;
+    max-height: 64px;
+}
+
+.media-image-placeholder {
+    width: 64px;
+    height: 64px;
+}
+
+.btn-fab {
+    padding: 0;
+    height: 1.8rem;
+    width: 1.8rem;
+}
+
+.notification-info, .stacked-icon-text {
+    margin-left: -.5rem;
+}
+
+.modal-map {
+    height: 500px;
+}
+
+.shadowed {
+    text-shadow:  1px  1px rgba(255, 255, 255, 0.75),
+                  1px -1px rgba(255, 255, 255, 0.75),
+                 -1px  1px rgba(255, 255, 255, 0.75),
+                 -1px -1px rgba(255, 255, 255, 0.75) !important;
+}
+
+.card-title.shadowed {
+    color: $black !important;
+}
+
+.card-hover {
+    transition: .5s ease;
+}
+
+.card-hover-overlay {
+    border-radius: $card-border-radius !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    position: absolute;
+    transition: .5s ease;
+}
+
+.card:hover .card-hover {
+    opacity: .25;
+}
+
+.card:hover .card-hover-overlay {
+    opacity: .5;
+}
+
+.card:hover .card-title {
+    opacity: 1;
+}
+
+.font-size-50 {
+    font-size: 50%;
+}
+
+.table-cell-250 td, .table-cell-250 ul {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.hover-underline:hover {
+    text-decoration: underline;
+}
+
+.hover-item:hover {
+    background-color: $gray-200 !important;
+    border-radius: $input-border-radius !important;
+}
