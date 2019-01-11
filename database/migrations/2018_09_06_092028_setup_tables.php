@@ -95,8 +95,7 @@ class SetupTables extends Migration
             return true;
         }
         return !\DB::table('migrations')
-            ->where('migration', '2018_01_30_124502_add_hierarchy_contexts')
-            ->orWhere('migration', '2018_03_16_160201_add_hierarchy_contexts')
+            ->where('migration', '2017_10_26_094535_fix_ranks')
             ->exists();
     }
 
@@ -160,6 +159,7 @@ class SetupTables extends Migration
         $this->migrateDatatypes();
         $this->migrateFileTags();
         $this->migratePermissionNames();
+        $this->migrateEntityRelations();
     }
 
     private function migrateDatatypes() {
@@ -191,6 +191,9 @@ class SetupTables extends Migration
                     $concept = ThConcept::where('concept_url', $url)
                         ->select('id', 'concept_url')
                         ->first();
+                    if(!isset($concept)) {
+                        return [];
+                    }
                     return $concept->toArray();
                 });
                 $tmp = $list[0];
@@ -322,6 +325,44 @@ class SetupTables extends Migration
                 }
             });
         }
+    }
+
+    private function migrateEntityRelations() {
+        Schema::table('entity_types', function (Blueprint $table) {
+            $table->boolean('is_root')->default(true); // Everything can be root!
+        });
+
+        Schema::create('entity_type_relations', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('parent_id')->unsigned();
+            $table->integer('child_id')->unsigned();
+            $table->timestamps();
+
+            $table->foreign('parent_id')->references('id')->on('entity_types')->onDelete('cascade');
+            $table->foreign('child_id')->references('id')->on('entity_types')->onDelete('cascade');
+        });
+
+        $ids = \DB::table('entity_types')->select('id')->get();
+        foreach(\DB::table('entity_types')->get() as $ct) {
+            if($ct->type === 0) {
+                foreach($ids as $id) {
+                    \DB::table('entity_type_relations')
+                        ->insert([
+                            'parent_id' => $ct->id,
+                            'child_id' => $id->id
+                        ]);
+                }
+            }
+        }
+
+        // Remove default value from is_root
+        Schema::table('entity_types', function (Blueprint $table) {
+            $table->boolean('is_root')->default(NULL)->change();
+        });
+
+        /*Schema::table('entity_types', function (Blueprint $table) {
+            $table->dropColumn('type');
+        });*/
     }
 
     private function migrateFromScratch() {
@@ -746,6 +787,7 @@ class SetupTables extends Migration
             $table->dropColumn('depends_on');
         });
 
+        $this->rollbackEntityRelations();
         $this->rollbackDatatypes();
         $this->rollbackFileTags();
         $this->rollbackColumnNames();
@@ -858,5 +900,19 @@ class SetupTables extends Migration
                 WHERE name LIKE '%$old%' OR display_name LIKE '%$old%' OR description LIKE '%$old%'
             ");
         }
+    }
+
+    private function rollbackEntityRelations() {
+        Schema::table('entity_types', function (Blueprint $table) {
+            $table->dropColumn('is_root');
+            $table->integer('type')->default(0); // init all as context
+        });
+
+        // Remove default value from type
+        Schema::table('entity_types', function (Blueprint $table) {
+            $table->integer('type')->default(NULL)->change();
+        });
+
+        Schema::dropIfExists('entity_type_relations');
     }
 }

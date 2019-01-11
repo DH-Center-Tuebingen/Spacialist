@@ -8,7 +8,7 @@
                 </button>
             </div>
             <div class="modal-body row col">
-                <div class="col-md-2 h-100">
+                <div class="col-md-2">
                     <ul class="nav nav-pills flex-column">
                         <li class="nav-item">
                             <a class="nav-link" :class="{active: activeTab == 'style'}" @click.prevent="setActiveTab('style')" href="#">
@@ -22,7 +22,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="col-md-10 h-100">
+                <div class="col-md-10">
                     <keep-alive>
                         <component
                             :attributes="attributes"

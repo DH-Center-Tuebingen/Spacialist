@@ -35,15 +35,15 @@
                     <i class="fas fa-fw fa-sort-amount-up"></i>
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'asc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.asc.type')" data-trigger="hover" data-placement="bottom">
-                    <span class="fa-stack d-inline" style="margin-right: -0.2rem;">
+                    <span class="fa-stack d-inline">
                         <i class="fas fa-long-arrow-alt-down"></i>
-                        <i class="fas fa-monument" data-fa-transform="left-4"></i>
+                        <i class="fas fa-monument" data-fa-transform="left-4" style="margin-right: -0.2rem;"></i>
                     </span>
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('type', 'desc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.desc.type')" data-trigger="hover" data-placement="bottom">
-                    <span class="fa-stack d-inline" style="margin-right: -0.2rem;">
+                    <span class="fa-stack d-inline">
                         <i class="fas fa-long-arrow-alt-up"></i>
-                        <i class="fas fa-monument" data-fa-transform="left-4"></i>
+                        <i class="fas fa-monument" data-fa-transform="left-4" style="margin-right: -0.2rem;"></i>
                     </span>
                 </button>
             </div>

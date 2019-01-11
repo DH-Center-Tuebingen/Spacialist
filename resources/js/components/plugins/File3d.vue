@@ -8,7 +8,7 @@
             </div>
         </transition>
         <div :id="containerId" class="w-100 h-100">
-            <div class="position-relative">
+            <div id="file-controls" class="position-relative">
                 <button type="button" class="btn btn-outline-info position-absolute m-2" v-if="entity.id" @click="loadAllSubModels" style="left: 0;">
                     {{ $t('plugins.files.modal.detail.threed.load-sub-models') }}
                 </button>
@@ -21,6 +21,8 @@
 </template>
 
 <script>
+    import * as dat from 'dat.gui';
+
     import {
         AmbientLight,
         AnimationMixer,
@@ -98,6 +100,10 @@
             }
         },
         methods: {
+            setScale() {
+                const s = this.guiConfig.scale;
+                this.group.scale.set(s, s, s);
+            },
             getFileType: function(file) {
                 if(file.mime_type == 'model/vnd.collada+xml') {
                     return 'dae'
@@ -133,7 +139,16 @@
                 this.animate();
             },
             init: function() {
+                this.gui = new dat.GUI({
+                    autoPlace: false
+                });
+                this.guiConfig = {
+                    scale: this.scale
+                };
+                this.gui.add(this.guiConfig, 'scale', 0.01, 100, 0.01).onChange(this.setScale);
+
                 this.container = document.getElementById(this.containerId);
+                document.getElementById('file-controls').appendChild(this.gui.domElement);
                 this.containerWidth = this.container.clientWidth;
                 this.containerHeight = this.container.clientHeight;
 
@@ -630,6 +645,9 @@
                 containerId: 'three-container',
                 progress: 0,
                 // three
+                scale: 1,
+                gui: null,
+                guiConfig: null,
                 animationClock: new Clock(),
                 animationId: -1,
                 animationMixer: {},

@@ -47,12 +47,6 @@
                             </router-link>
                             <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="/analysis">
-                                    <i class="far fa-fw fa-chart-bar"></i> {{ $t('global.tools.analysis') }}
-                                </a>
-                            </template>
-                            <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
-                                <div class="dropdown-divider"></div>
                                 <h6 class="dropdown-header">
                                     {{ $t('global.tools.external') }} <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
                                 </h6>
@@ -63,8 +57,11 @@
                                 </a>
                             </template>
                             <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
-                                <a class="dropdown-item" href="/db" target="_blank">
+                                <a class="dropdown-item" href="../db" target="_blank">
                                     <i class="fas fa-fw fa-chart-bar"></i> {{ $t('global.tools.dbwebgen') }}
+                                </a>
+                                <a class="dropdown-item" href="../analysis" target="_blank">
+                                    <i class="fas fa-fw fa-chart-bar"></i> {{ $t('global.tools.analysis') }}
                                 </a>
                             </template>
                         </div>

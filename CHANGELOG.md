@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+## 0.6.1
+### Added
+- Scaling control to 3D file viewer
+### Fixed
+- Missing content in Chrome/WebKit/Blink browsers
+- Migration from previous version
+- Links to Data Analysis-Plugins
+- Several style issues
+
 ## 0.6 - Federsee
 This version is a complete rewrite using Laravel and Vue.js. Please refer to the [INSTALL.md](INSTALL.md) for migration and new setup information.
 ### Added

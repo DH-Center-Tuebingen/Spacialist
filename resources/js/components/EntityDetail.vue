@@ -42,7 +42,7 @@
                 {{ (selectedEntity.updated_at || selectedEntity.created_at) | date(undefined, true, true) }}
             </span>
         </div>
-        <form id="entity-attribute-form" name="entity-attribute-form" class="col pl-0 pr-0" @submit.prevent="saveEntity(selectedEntity)">
+        <form id="entity-attribute-form" name="entity-attribute-form" class="col pl-0 pr-0 overflow-hidden" @submit.prevent="saveEntity(selectedEntity)">
             <attributes class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
                 :attributes="selectedEntity.attributes"
                 :dependencies="selectedEntity.dependencies"
