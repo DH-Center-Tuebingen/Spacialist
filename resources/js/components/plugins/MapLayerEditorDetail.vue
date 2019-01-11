@@ -187,7 +187,7 @@
                     }
                     data[k] = tmpLayer[k];
                 }
-                $http.patch(`map/layer/${lid}`, data).then(function(response) {
+                $http.patch(`map/layer/${lid}`, data).then(response => {
                     this.$showToast(
                         this.$t('plugins.map.layer-editor.toasts.updated.title'),
                         this.$t('plugins.map.layer-editor.toasts.updated.msg', {
