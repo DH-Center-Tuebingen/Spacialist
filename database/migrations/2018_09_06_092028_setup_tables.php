@@ -253,6 +253,9 @@ class SetupTables extends Migration
                         if(isset($column->attribute_id) && isset($column->value)) {
                             $aid = $column->attribute_id;
                             $value = $column->value;
+                            if(is_object($value) && property_exists($value, 'concept_url')) {
+                                $value->id = ThConcept::where('concept_url', $value->concept_url)->value('id');
+                            }
                             $newRow[$aid] = $value;
                         }
                     }
@@ -328,10 +331,6 @@ class SetupTables extends Migration
     }
 
     private function migrateEntityRelations() {
-        Schema::table('entity_types', function (Blueprint $table) {
-            $table->boolean('is_root')->default(true); // Everything can be root!
-        });
-
         Schema::create('entity_type_relations', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('parent_id')->unsigned();

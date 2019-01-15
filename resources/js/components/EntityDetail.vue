@@ -278,7 +278,7 @@
                             for(let k in row) {
                                 const col = row[k];
                                 // if column is object, return necessary fields only
-                                if(col.id) {
+                                if(col && col.id) {
                                     row[k] = {
                                         id: col.id,
                                         concept_url: col.concept_url
