@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 0.6.2
+### Fixed
+- Bug in migrations causing errors on saving new values 
+
 ## 0.6.1
 ### Added
 - Scaling control to 3D file viewer
