@@ -63,11 +63,10 @@
                 };
             },
             deleteFeatures(features, wkt) {
-                const vm = this;
                 features.forEach(f => {
-                    vm.$http.delete(`/map/${f.getProperties().id}`).then(function(response) {
+                    $httpQueue.add(() => $http.delete(`/map/${f.getProperties().id}`).then(response => {
 
-                    });
+                    }));
                 });
             },
             addFeature(feature, wkt) {

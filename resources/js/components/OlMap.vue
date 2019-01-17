@@ -361,19 +361,13 @@
                             // config allows only one selected feature
                             if(event.selected.length) {
                                 const f = event.selected[0];
-                                let layer;
-                                const ent = f.get('entity');
-                                if(ent) {
-                                    layer = vm.getLayer(ent.entity_type_id)
-                                } else {
-                                    layer = vm.getUnlinkedLayer();
-                                }
-                                let olLayer = vm.getEntityLayerById(layer.id);
+                                let olLayer = vm.delete.select.getLayer(f);
                                 vm.delete.deletedFeatures[f.ol_uid] = {
                                     feature: f.clone(),
                                     layer: olLayer.get('layer_id')
                                 };
                                 olLayer.getSource().removeFeature(f);
+                                vm.delete.select.getFeatures().clear();
                             }
                         });
                     },
@@ -1300,14 +1294,13 @@
                 this.setInteractionMode('', true);
             },
             deleteFeatures() {
-                const vm = this;
-                const features = vm.delete.getDeletedFeatures();
+                const features = this.delete.getDeletedFeatures();
                 let wktFeatures = features.map(f => {
-                    vm.snap.removeFeature(f);
-                    vm.wktFormat.writeFeature(f);
+                    this.snap.removeFeature(f);
+                    this.wktFormat.writeFeature(f);
                 });
-                vm.onDeleteend(features, wktFeatures);
-                vm.setInteractionMode('');
+                this.onDeleteend(features, wktFeatures);
+                this.setInteractionMode('');
             },
             cancelDeleteFeatures() {
                 this.setInteractionMode('', true);
