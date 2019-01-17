@@ -1,7 +1,7 @@
 <template>
     <div class="h-100 row of-hidden" v-if="initFinished">
         <div class="col-md-2 h-100 d-flex flex-column">
-            <button type="button" class="btn btn-default" @click.prevent="openImportModal">
+            <button type="button" class="btn btn-outline-secondary" @click.prevent="openImportModal">
                 <i class="fas fa-fw fa-download"></i> {{ $t('plugins.map.gis.import.button') }}
             </button>
             <div class="col d-flex flex-column h-100 pt-2">
