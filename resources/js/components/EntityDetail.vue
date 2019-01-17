@@ -32,15 +32,23 @@
                 </button>
             </span>
         </div>
-        <div>
-            <i class="fas fa-fw fa-user-edit"></i>
-            <span class="font-weight-medium">
-                {{ selectedEntity.lasteditor }}
-            </span>
-            -
-            <span>
-                {{ (selectedEntity.updated_at || selectedEntity.created_at) | date(undefined, true, true) }}
-            </span>
+        <div class="d-flex justify-content-between my-2">
+            <div>
+                <i class="fas fa-fw fa-monument"></i>
+                {{
+                    $translateConcept($getEntityType(selectedEntity.entity_type_id).thesaurus_url)
+                }}
+            </div>
+            <div>
+                <span>
+                    {{ (selectedEntity.updated_at || selectedEntity.created_at) | date(undefined, true, true) }}
+                </span>
+                -
+                <i class="fas fa-fw fa-user-edit"></i>
+                <span class="font-weight-medium">
+                    {{ selectedEntity.lasteditor }}
+                </span>
+            </div>
         </div>
         <form id="entity-attribute-form" name="entity-attribute-form" class="col pl-0 pr-0 overflow-hidden" @submit.prevent="saveEntity(selectedEntity)">
             <attributes class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
