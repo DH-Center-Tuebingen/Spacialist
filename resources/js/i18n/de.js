@@ -58,7 +58,11 @@ const de = {
             analysis: 'Datenanalyse',
             thesaurex: 'ThesauRex',
             dbwebgen: 'dbWebGen',
-            external: 'Externe Werkzeuge'
+            external: 'Externe Werkzeuge',
+            record: {
+                start: 'Aufnahme starten',
+                stop: 'Aufnahme beenden'
+            }
         },
         settings: {
             title: 'Einstellungen',

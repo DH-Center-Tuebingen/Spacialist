@@ -140,6 +140,11 @@ Vue.prototype.$rgb2hex = function(rgb) {
     return [r, g, b];
 }
 
+Vue.prototype.$getTs = function() {
+    const d = new Date();
+    return d.getTime();
+}
+
 Vue.prototype.$hasConcept = function(url) {
     if(!url) return false;
     return !!this.$root.$data.concepts[url];

@@ -33,8 +33,8 @@
         computed: {
             // update url if file changes, to force image reload
             localUrl() {
-                const now = new Date();
-                return `${this.file.url}?t=${now.getTime()}`;
+                const now = this.$getTs();
+                return `${this.file.url}?t=${now}`;
             }
         }
     }

@@ -45,6 +45,12 @@
                             <router-link :to="{name: 'bibliography'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-book"></i> {{ $t('global.tools.bibliography') }}
                             </router-link>
+                            <a v-show="!rtc.isRecording" class="dropdown-item" href="#" @click.prevent="startRecording">
+                                <i class="fas fa-fw fa-play"></i> {{ $t('global.tools.record.start') }}
+                            </a>
+                            <a v-show="rtc.isRecording" class="dropdown-item" href="#" @click.prevent="stopRecording">
+                                <i class="fas fa-fw fa-stop"></i> {{ $t('global.tools.record.stop') }}
+                            </a>
                             <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
                                 <div class="dropdown-divider"></div>
                                 <h6 class="dropdown-header">
@@ -111,6 +117,7 @@
         </nav>
         <div class="container-fluid mt-3 mb-3 col">
             <router-view :on-login="onInit"></router-view>
+            <video id="rtc-sharing-container" class="video-js d-none"></video>
             <about-dialog></about-dialog>
             <error-modal></error-modal>
         </div>
@@ -119,6 +126,10 @@
 </template>
 
 <script>
+    import videojs from 'video.js';
+    import adapter from 'webrtc-adapter';
+    import Record from 'videojs-record';
+
     export default {
         props: {
             onInit: {
@@ -126,8 +137,43 @@
                 type: Function
             }
         },
-        mounted() {},
+        mounted() {
+            if (adapter.browserDetails.browser == 'firefox') {
+                adapter.browserShim.shimGetDisplayMedia(window, 'window');
+            }
+            this.rtc.player = videojs('#rtc-sharing-container', this.rtc.opts);
+            this.rtc.player.on('deviceReady', () => {
+                // if we requested recording, but device was not ready,
+                // start recording after device is ready
+                if(this.rtc.requestRecord) {
+                    this.rtc.player.record().start();
+                }
+           });
+            this.rtc.player.on('startRecord', _ => {
+                this.rtc.isRecording = true;
+            });
+            this.rtc.player.on('finishRecord', _ => {
+                this.rtc.isRecording = false;
+                this.rtc.data = this.rtc.player.recordedData;
+                // Release devices
+                this.rtc.player.record().stopDevice();
+                this.$createDownloadLink(this.rtc.data, `spacialist-screencapture-${this.$getTs()}.webm`, false, 'video/webm')
+            });
+        },
         methods: {
+            startRecording() {
+                if(!this.rtc.player) return;
+                if(!this.rtc.deviceReady) {
+                    this.rtc.requestRecord = true;
+                    this.rtc.player.record().getDevice();
+                } else {
+                    this.rtc.player.record().start();
+                }
+            },
+            stopRecording() {
+                if(!this.rtc.player) return;
+                this.rtc.player.record().stop();
+            },
             logout() {
                 this.$auth.logout({
                     makeRequest: true,
@@ -140,7 +186,25 @@
         },
         data() {
             return {
-                plugins: {}
+                plugins: {},
+                rtc: {
+                    data: null,
+                    player: null,
+                    isRecording: false,
+                    requestRecord: false,
+                    deviceReady: false,
+                    opts: {
+                        controls: true,
+                        autoplay: false,
+                        plugins: {
+                            record: {
+                                maxLength: 120,
+                                audio: true,
+                                screen: true
+                            }
+                        }
+                    }
+                }
             }
         },
         computed: {
