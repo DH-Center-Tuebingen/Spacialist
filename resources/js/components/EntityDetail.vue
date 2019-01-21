@@ -198,7 +198,7 @@
                                     // value is set, therefore it is a replace
                                     patch.op = "replace";
                                     patch.value = data.value;
-                                    patch.value = this.getCleanValue(data);
+                                    patch.value = this.getCleanValue(data, entity.attributes);
                                 } else {
                                     // value is empty, therefore it is a remove
                                     patch.op = "remove";
@@ -208,7 +208,7 @@
                                 if(data.value && data.value != '') {
                                     patch.op = "add";
                                     data.attribute = entity.attributes.find(a => a.id == aid);
-                                    patch.value = this.getCleanValue(data);
+                                    patch.value = this.getCleanValue(data, entity.attributes);
                                 } else {
                                     // there has been no entry in the database before and values are not different (should not happen ;))
                                     continue;
@@ -265,7 +265,7 @@
                 Vue.set(this.selectedEntity, 'editing', false);
                 this.newEntityName = '';
             },
-            getCleanValue(entry) {
+            getCleanValue(entry, attributes) {
                 if(!entry) return;
                 const v = entry.value;
                 switch(entry.attribute.datatype) {
@@ -285,14 +285,26 @@
                         return v.map(row => {
                             for(let k in row) {
                                 const col = row[k];
-                                // if column is object, return necessary fields only
-                                if(col && col.id) {
-                                    row[k] = {
-                                        id: col.id,
-                                        concept_url: col.concept_url
-                                    };
-                                } else {
-                                    row[k] = col;
+                                const aid = entry.attribute.id;
+                                const tattr = attributes.find(a => a.id == aid);
+                                const attr = tattr.columns[k];
+                                // return necessary fields only
+                                switch(attr.datatype) {
+                                    case 'string-sc':
+                                        row[k] = {
+                                            id: col.id,
+                                            concept_url: col.concept_url
+                                        };
+                                        break;
+                                    case 'entity':
+                                        row[k] = {
+                                            id: col.id,
+                                            name: col.name
+                                        };
+                                        break;
+                                    default:
+                                        row[k] = col;
+                                        break;
                                 }
                             }
                             return row;

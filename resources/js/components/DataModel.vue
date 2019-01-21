@@ -299,6 +299,7 @@
             onCreateAttribute() {
                 $httpQueue.add(() => $http.get('/editor/dm/attribute_types').then(response => {
                     this.attributeTypes = [];
+                    this.columnAttributeTypes = [];
                     for(let i=0; i<response.data.length; i++) {
                         const at = response.data[i];
                         this.attributeTypes.push(at);
@@ -444,7 +445,7 @@
                 modalSelectedEntityType: {},
                 entityCount: 0,
                 allowedTableKeys: [
-                    'string', 'string-sc', 'integer', 'double', 'boolean'
+                    'string', 'string-sc', 'integer', 'double', 'boolean', 'entity'
                 ]
             }
         },

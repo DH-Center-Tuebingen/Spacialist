@@ -35,6 +35,14 @@
                             @input="onInput($index, $event.target)">
                         </multiselect>
                     </div>
+                    <div v-else-if="column.datatype == 'entity'">
+                        <entity-search
+                            :id="`attribute-${column.id}`"
+                            :name="`attribute-${column.id}`"
+                            :on-select="selection => setEntitySearchResult(selection, row, column.id, $index)"
+                            :value="row[column.id] ? row[column.id].name : ''">
+                        </entity-search>
+                    </div>
                 </td>
                 <td>
                     <button type="button" :disabled="disabled" class="btn btn-danger btn-sm" @click="deleteTableRow($index)">
@@ -65,6 +73,14 @@
                             :select-label="$t('global.select.select')"
                             :deselect-label="$t('global.select.deselect')">
                         </multiselect>
+                    </div>
+                    <div v-else-if="column.datatype == 'entity'">
+                        <entity-search
+                            :id="`attribute-${column.id}`"
+                            :name="`attribute-${column.id}`"
+                            :on-select="selection => setEntitySearchResult(selection, newTableCols, column.id)"
+                            :value="newTableCols[column.id] ? newTableCols[column.id].name : ''">
+                        </entity-search>
                     </div>
                 </td>
                 <td>
@@ -126,6 +142,16 @@
                     value = this.value[field];
                 }
                 this.onChange(field, value);
+            },
+            setEntitySearchResult(result, row, column, field) {
+                if(result) {
+                    Vue.set(row, column, result);
+                } else {
+                    Vue.delete(row, column);
+                }
+                if(field) {
+                    this.onInput(field, result);
+                }
             },
             addTableRow(row) {
                 this.value.push(_.clone(row));
