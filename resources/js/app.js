@@ -36,6 +36,8 @@ import SpacialistPluginSystem from './plugin.js';
 import VTooltip from 'v-tooltip';
 import VueScrollTo from 'vue-scrollto';
 
+import { EventBus } from './event-bus.js';
+
 library.add(fas, far, fab);
 dom.watch(); // search for <i> tags to replace with <svg>
 
@@ -503,6 +505,7 @@ const app = new Vue({
                     let nameExt = name + '.js';
                     import('./plugins/' + nameExt).then(data => {
                         Vue.use(data.default);
+                        this.$addEnabledPlugin(name);
                     });
                 }
                 this.$getSpacialistPlugins('plugins');

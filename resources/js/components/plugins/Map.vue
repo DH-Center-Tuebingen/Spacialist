@@ -5,7 +5,6 @@
             :init-geojson="geojson"
             :init-projection="'EPSG:4326'"
             :layers="layers"
-            :event-bus="eventBus"
             :on-deleteend="deleteFeatures"
             :on-drawend="addFeature"
             :on-modifyend="updateFeatures"
@@ -25,10 +24,6 @@
     export default {
         props: {
             selectedEntity: {
-                type: Object,
-                required: true
-            },
-            eventBus: {
                 type: Object,
                 required: true
             }

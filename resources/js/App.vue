@@ -129,6 +129,7 @@
     import videojs from 'video.js';
     import adapter from 'webrtc-adapter';
     import Record from 'videojs-record';
+    import SaveScreencastModal from './components/modals/SaveScreencastModal.vue';
 
     export default {
         props: {
@@ -155,12 +156,39 @@
             this.rtc.player.on('finishRecord', _ => {
                 this.rtc.isRecording = false;
                 this.rtc.data = this.rtc.player.recordedData;
+                const dur = this.rtc.player.record().getDuration();
                 // Release devices
                 this.rtc.player.record().stopDevice();
-                this.$createDownloadLink(this.rtc.data, `spacialist-screencapture-${this.$getTs()}.webm`, false, 'video/webm')
+                this.onRecordingFinished(this.rtc.data, dur);
             });
         },
         methods: {
+            onRecordingFinished(data, duration) {
+                const file = new File([data], data.name, {
+                    type: data.type
+                });
+                this.$modal.show(SaveScreencastModal, {
+                    content: file,
+                    duration: duration,
+                    storeLocal: _ => this.saveToDisk(data),
+                    storeServer: _ => this.saveToSpacialist(file)
+                }, {
+                    height: 'auto'
+                });
+            },
+            saveToDisk(content) {
+                this.$createDownloadLink(content, `spacialist-screencapture-${this.$getTs()}.webm`, false, 'video/webm');
+            },
+            saveToSpacialist(file) {
+                if(!this.$hasPlugin('files')) return;
+                this.$uploadFile({
+                    file: file
+                }).then(response => {
+                    EventBus.$emit('files-uploaded', {
+                        new: true
+                    });
+                });
+            },
             startRecording() {
                 if(!this.rtc.player) return;
                 if(!this.rtc.deviceReady) {

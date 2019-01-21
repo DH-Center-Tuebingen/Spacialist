@@ -23,6 +23,22 @@ const SpacialistPluginFiles = {
             hook: function(entity) {
             }
         }, 'tab');
+        Vue.prototype.$uploadFile = function(file, metadata) {
+            let formData = new FormData();
+            formData.append('file', file.file);
+            if(metadata) {
+                if(metadata.copyright.length) {
+                    formData.append('copyright', metadata.copyright);
+                }
+                if(metadata.description.length) {
+                    formData.append('description', metadata.description);
+                }
+                if(metadata.tags.length) {
+                    formData.append('tags', JSON.stringify(metadata.tags.map(t => t.id)));
+                }
+            }
+            return $http.post('file/new', formData);
+        };
     }
 };
 

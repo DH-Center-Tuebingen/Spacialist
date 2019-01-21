@@ -117,6 +117,7 @@ const en = {
         font: 'Font',
         mode: 'Mode',
         size: 'Size',
+        duration: 'Duration',
         color: 'Color',
         format: 'Format',
         version: 'Version',
@@ -185,6 +186,18 @@ const en = {
                 },
                 edit: {
                     title: 'Edit Entity - {name}'
+                },
+                screencast: {
+                    title: 'Save Screencast',
+                    info: 'Screencast recorded. What do you want to do with it?',
+                    actions: {
+                        local: {
+                            button: 'Store local'
+                        },
+                        server: {
+                            button: 'Store in Spacialist'
+                        }
+                    }
                 }
             },
             menu: {

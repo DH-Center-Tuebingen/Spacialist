@@ -3,10 +3,14 @@ const SpacialistPluginSystem = {
     install(Vue, options) {
         Vue.prototype.$spacialistPluginsEnabled = true;
         Vue.prototype.$spacialistHooks = [];
+        Vue.prototype.$enabledPlugins = [];
         Vue.prototype.$spacialistPlugins = {
             tab: [],
             tools: [],
             settings: []
+        };
+        Vue.prototype.$hasPlugin = function(name) {
+            return Vue.prototype.$enabledPlugins.includes(name);
         };
         Vue.prototype.$registerHook = function(hook) {
             Vue.prototype.$spacialistHooks.push(hook);
@@ -43,6 +47,11 @@ const SpacialistPluginSystem = {
                 default:
                     console.error("Slot " + slot + " is not supported for Spacialist plugins");
                     return;
+            }
+        };
+        Vue.prototype.$addEnabledPlugin = function(name) {
+            if(!Vue.prototype.$enabledPlugins.includes(name)) {
+                Vue.prototype.$enabledPlugins.push(name);
             }
         };
         Vue.prototype.$spacialistAddPluginLanguage = function(locale, messages) {

@@ -55,6 +55,8 @@
 </template>
 
 <script>
+    import { EventBus } from '../event-bus.js';
+    
     import 'ol/ol.css';
     import Collection from 'ol/Collection';
     import {defaults as defaultControls} from 'ol/control.js';
@@ -142,10 +144,6 @@
             layers: {
                 required: true,
                 type: Object
-            },
-            eventBus: {
-                type: Object,
-                required: false
             },
             layerStyles: {
                 required: false,
@@ -724,9 +722,9 @@
                     }
                     vm.updatePopup(vm.selectedFeature);
                 });
-                if(vm.eventBus) {
-                    vm.eventBus.$on('entity-update', this.handleEntityUpdate);
-                    vm.eventBus.$on('entity-delete', this.handleEntityDelete);
+                if(EventBus) {
+                    EventBus.$on('entity-update', this.handleEntityUpdate);
+                    EventBus.$on('entity-delete', this.handleEntityDelete);
                 }
             },
             initMapProjection() {

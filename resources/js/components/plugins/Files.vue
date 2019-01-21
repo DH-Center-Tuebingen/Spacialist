@@ -676,6 +676,7 @@
 </template>
 
 <script>
+    import { EventBus } from '../../event-bus.js';
     import * as screenfull from 'screenfull';
 
     import FileList from './FileList.vue';
@@ -692,7 +693,6 @@
     import FileUndefined from './FileUndefined.vue';
 
     import FileConfirmUploadModal from './FileConfirmUploadModal.vue';
-
 
     export default {
         components: {
@@ -734,6 +734,7 @@
         mounted() {
             this.initFilters();
             this.initTags();
+            EventBus.$on('files-uploaded', this.handleFileUpload);
         },
         methods: {
             initTags() {
@@ -941,24 +942,33 @@
                 });
             },
             uploadFileFromClipboard(event) {
-                this.uploadFile(event.file).then(response => {
+                this.uploadFile({file: event.file}).then(response => {
                     this.onFilesUploaded(this.unlinkedFiles);
                     this.onFilesUploaded(this.allFiles);
                 });
             },
             uploadFile(file, component) {
-                let formData = new FormData();
-                formData.append('file', file.file ? file.file : file);
-                if(this.toUpload.copyright.length) {
-                    formData.append('copyright', this.toUpload.copyright);
+                return this.$uploadFile(file, this.toUpload);
+            },
+            handleFileUpload(event) {
+                let affects = [];
+                if(event.new) {
+                    affects.push('unlinkedFiles');
+                    affects.push('allFiles');
+                } else {
+                    if(event.linkedFiles) {
+                        affects.push('linkedFiles');
+                    }
+                    if(event.unlinkedFiles) {
+                        affects.push('unlinkedFiles');
+                    }
+                    if(event.allFiles) {
+                        affects.push('allFiles');
+                    }
                 }
-                if(this.toUpload.description.length) {
-                    formData.append('description', this.toUpload.description);
-                }
-                if(this.toUpload.tags.length) {
-                    formData.append('tags', JSON.stringify(this.toUpload.tags.map(t => t.id)));
-                }
-                return $http.post('file/new', formData);
+                affects.forEach(a => {
+                    this.onFilesUploaded(this[a]);
+                });
             },
             openFile(id) {
                 $httpQueue.add(() => $http.get(`/file/${id}`).then(response => {
