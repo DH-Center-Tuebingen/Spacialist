@@ -1,11 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 0.6.3 - Unreleased
+### Added
+- Entity as table column datatype
+- Entity type to entity detail form header
+- Demo Seeder (See [INSTALL.md](https://github.com/eScienceCenter/Spacialist/blob/0.6.3/INSTALL.md#migrations) for more details)
+### Fixed
+- Use color picker for simple layer styling (GIS)
+- Deleting geodata on map
 
 ## 0.6.2
 ### Fixed
-- Bug in migrations causing errors on saving new values 
+- Bug in migrations causing errors on saving new values
 
 ## 0.6.1
 ### Added
