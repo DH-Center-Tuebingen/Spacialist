@@ -920,6 +920,9 @@
                 this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
             },
             handleClipboardPaste(e) {
+                const tag = e.target.tagName.toLowerCase();
+                // do not handle if pasted in input field
+                if(tag == 'input' || tag == 'textarea') return;
                 let items = e.clipboardData.items;
                 for(let i=0; i<items.length; i++) {
                     let c = items[i];
