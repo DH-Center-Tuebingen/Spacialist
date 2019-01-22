@@ -200,10 +200,17 @@ Vue.prototype.$getEntityColors = function(id, alpha = 0.5) {
     };
 }
 
+Vue.prototype.$hasPreference = function(prefKey, prop) {
+    const ps = this.$root.$data.preferences;
+    return ps[prefKey] && ps[prefKey][prop];
+}
+
 Vue.prototype.$getPreference = function(prefKey) {
-    const pref = this.$root.$data.preferences[prefKey];
-    if(!pref) return {};
-    return pref;
+    return this.$root.$data.preferences[prefKey];
+}
+
+Vue.prototype.$setPreference = function(prefKey, value) {
+    this.$root.$data.preferences[prefKey] = value;
 }
 
 Vue.prototype.$getTabPlugins = function() {
