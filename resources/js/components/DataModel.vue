@@ -257,16 +257,25 @@
                 this.columns.push(column);
             },
             deleteAttribute(attribute) {
-                const vm = this;
                 const id = attribute.id;
-                $httpQueue.add(() => vm.$http.delete(`/editor/dm/attribute/${id}`).then(function(response) {
-                    let index = vm.attributeList.findIndex(function(a) {
+                $httpQueue.add(() => $http.delete(`/editor/dm/attribute/${id}`).then(response => {
+                    let index = this.attributeList.findIndex(function(a) {
                         return a.id == id;
                     });
                     if(index) {
-                        vm.attributeList.splice(index, 1);
+                        let delAttr = this.attributeList.splice(index, 1);
+                        if(delAttr.length) {
+                            delAttr = delAttr[0];
+                            this.$showToast(
+                                this.$t('main.datamodel.toasts.attribute_deleted.title'),
+                                this.$t('main.datamodel.toasts.attribute_deleted.msg', {
+                                    name: this.$translateConcept(delAttr.thesaurus_url)
+                                }),
+                                'success'
+                            );
+                        }
                     }
-                    vm.hideDeleteAttributeModal();
+                    this.hideDeleteAttributeModal();
                 }));
             },
             createEntityType(entityType) {

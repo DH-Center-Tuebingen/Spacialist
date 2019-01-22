@@ -256,6 +256,10 @@ const de = {
                 'added-attribute': {
                     title: 'Attribut hinzugefügt',
                     msg: '{name} erfolgreich zu {etName} hinzugefügt.'
+                },
+                attribute_deleted: {
+                    title: 'Attribut gelöscht',
+                    msg: '{name} erfolgreich gelöscht.'
                 }
             },
             attribute: {
