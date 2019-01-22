@@ -38,22 +38,27 @@
         },
         methods: {
             initData() {
-                const vm = this;
-                vm.epsg = vm.$getPreference('prefs.map-projection');
-                vm.dataInitialized = false;
-                $httpQueue.add(() => vm.$http.get('/map').then(function(response) {
+                this.epsg = this.$getPreference('prefs.map-projection');
+                this.dataInitialized = false;
+                $httpQueue.add(() => $http.get('/map').then(response => {
                     const mapData = response.data;
-                    vm.layers = mapData.layers;
-                    vm.geodata = mapData.geodata;
-                    for(let k in vm.geodata) {
-                        const curr = vm.geodata[k];
+                    // empty objects returned as json by php are []
+                    // thus if no layers exist, set to real empty {}
+                    if(Array.isArray(mapData.layers) && !mapData.layers.length) {
+                        this.layers = {};
+                    } else {
+                        this.layers = mapData.layers;
+                    }
+                    this.geodata = mapData.geodata;
+                    for(let k in this.geodata) {
+                        const curr = this.geodata[k];
                         let geo = {
                             geom: curr.geom,
-                            props: vm.getProperties(curr)
+                            props: this.getProperties(curr)
                         };
-                        vm.geojson.push(geo);
+                        this.geojson.push(geo);
                     }
-                    vm.dataInitialized = true;
+                    this.dataInitialized = true;
                 }));
             },
             getProperties(geodata) {
