@@ -56,6 +56,12 @@ Vue.prototype.$can = function(permissionString, oneOf) {
     }
 }
 
+Vue.prototype.$updateLanguage = function() {
+    if(Vue.prototype.$auth.check()) {
+        Vue.i18n.locale = this.$getPreference('prefs.gui-language');
+    }
+};
+
 Vue.prototype.$asyncFor = async function(arr, callback) {
     for(let i=0; i<arr.length; i++) {
         await callback(arr[i]);

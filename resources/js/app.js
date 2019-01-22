@@ -486,13 +486,15 @@ const app = new Vue({
                 this.preferences = response.data.preferences;
                 this.concepts = response.data.concepts;
                 this.entityTypes = response.data.entityTypes;
-                app.$auth.ready(_ => {
-                    // Check if user is logged in and set preferred language
-                    // instead of browser default
-                    if(app.$auth.check()) {
-                        Vue.i18n.locale = this.preferences['prefs.gui-language'];
-                    }
-                });
+                // Check if user is logged in and set preferred language
+                // instead of browser default
+                if(!app.$auth.ready()) {
+                    app.$auth.ready(_ => {
+                        app.$updateLanguage();
+                    });
+                } else {
+                    app.$updateLanguage();
+                }
                 const extensions = this.preferences['prefs.load-extensions'];
                 for(let k in extensions) {
                     if(!extensions[k] || (k != 'map' && k != 'files')) {
