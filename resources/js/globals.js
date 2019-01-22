@@ -170,6 +170,30 @@ Vue.prototype.$getEntityTypes = function() {
     return this.$root.$data.entityTypes;
 }
 
+// Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
+Vue.prototype.$getEntityColors = function(id, alpha = 0.5) {
+    const et = this.$getEntityType(id);
+    if(!et && !et.layer) return {};
+    let r, g, b, a;
+    [r, g, b] = this.$rgb2hex(et.layer.color);
+    const cs = [r, g, b].map(c => {
+        c /= 255.0;
+        if(c <= 0.03928) c /= 12.92;
+        else c = Math.pow(((c+0.055)/1.055), 2.4);
+        return c;
+    });
+    // let cont = r*0.299 + g*0.587 + b*0.114;
+    const l = cs[0]*0.2126 + cs[1]*0.7152 + cs[2]*0.0722;
+
+    // const textColor = cont > 150 ? '#000000' : '#ffffff';
+    const textColor = l > 0.179 ? '#000000' : '#ffffff';
+    const color = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    return {
+        color: textColor,
+        backgroundColor: color
+    };
+}
+
 Vue.prototype.$getPreference = function(prefKey) {
     const pref = this.$root.$data.preferences[prefKey];
     if(!pref) return {};

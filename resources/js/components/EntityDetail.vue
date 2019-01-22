@@ -34,7 +34,9 @@
         </div>
         <div class="d-flex justify-content-between my-2">
             <div>
-                <i class="fas fa-fw fa-monument"></i>
+                <span :style="colorStyles">
+                    <i class="fas fa-fw fa-circle"></i>
+                </span>
                 {{
                     $translateConcept($getEntityType(selectedEntity.entity_type_id).thesaurus_url)
                 }}
@@ -393,6 +395,12 @@
                     !!this.selectedEntity &&
                     !!this.selectedEntity.attributes &&
                     !!this.selectedEntity.selections
+            },
+            colorStyles() {
+                const colors = this.$getEntityColors(this.selectedEntity.entity_type_id, 0.75);
+                return {
+                    color: colors.backgroundColor
+                };
             }
         },
         watch: {

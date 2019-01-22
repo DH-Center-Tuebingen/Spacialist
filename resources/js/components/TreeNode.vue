@@ -1,7 +1,11 @@
 <template>
     <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`">
-        <i class="fas fa-fw fa-monument"></i>
-        <span>{{data.name}}</span>
+        <span :style="colorStyles">
+            <i class="fas fa-circle fa-xs"></i>
+        </span>
+        <span>
+            {{data.name}}
+        </span>
         <span class="pl-1 font-italic mb-0" v-if="data.entity_type_id">
             {{ $translateConcept($getEntityType(data.entity_type_id).thesaurus_url) }}
         </span>
@@ -43,6 +47,12 @@
             asyncToggle() {
                 return debounce(this.doToggle, this.data.dragDelay || 500);
             },
+            colorStyles() {
+                const colors = this.$getEntityColors(this.data.entity_type_id);
+                return {
+                    color: colors.backgroundColor
+                };
+            }
         }
     }
 </script>
