@@ -1,14 +1,24 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.6.3 - Unreleased
+## 0.6.3
 ### Added
 - Entity as table column datatype
 - Entity type to entity detail form header
 - Demo Seeder (See [INSTALL.md](https://github.com/eScienceCenter/Spacialist/blob/0.6.3/INSTALL.md#migrations) for more details)
+- Show notification if attribute is deleted
+- Color indicator (based on entity layer color) to tree and entity-detail view (replaces monument icon)
+- Apply new preference values without reload
 ### Fixed
 - Use color picker for simple layer styling (GIS)
 - Deleting geodata on map
+- User locale after login
+- Font loading
+- Error on empty layer array in map
+- Unset preference handling
+- Use user's language/default language for retrieved concepts
+### Removed/Deprecated
+- Monument icon in tree and entity-detail view
 
 ## 0.6.2
 ### Fixed
