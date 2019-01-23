@@ -37,15 +37,17 @@ class HomeController extends Controller
             foreach($preferences as $k => $p) {
                 $preferenceValues[$k] = $p->value;
             }
+            $locale = auth()->user()->getLanguage();
         } else {
             $preferences = Preference::all();
             $preferenceValues = [];
             foreach($preferences as $p) {
                 $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
             }
+            $locale = \App::getLocale();
         }
 
-        $concepts = ThConcept::getMap();
+        $concepts = ThConcept::getMap($locale);
 
         $entityTypes = EntityType::with(['sub_entity_types', 'layer'])
             ->orderBy('id')

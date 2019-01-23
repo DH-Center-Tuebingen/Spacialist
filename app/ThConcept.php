@@ -19,8 +19,7 @@ class ThConcept extends Model
         'lasteditor',
     ];
 
-    public static function getMap() {
-        $lang = 'de'; // TODO
+    public static function getMap($lang = 'en') {
         $concepts = \DB::select(\DB::raw("
             WITH summary AS
             (
