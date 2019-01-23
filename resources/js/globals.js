@@ -179,7 +179,7 @@ Vue.prototype.$getEntityTypes = function() {
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
 Vue.prototype.$getEntityColors = function(id, alpha = 0.5) {
     const et = this.$getEntityType(id);
-    if(!et && !et.layer) return {};
+    if(!et || !et.layer) return {};
     let r, g, b, a;
     [r, g, b] = this.$rgb2hex(et.layer.color);
     const cs = [r, g, b].map(c => {
