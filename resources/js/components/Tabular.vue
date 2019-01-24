@@ -155,7 +155,9 @@
             },
             addTableRow(row) {
                 this.value.push(_.clone(row));
-                for(let k in row) delete row[k];
+                for(let k in row) {
+                    Vue.delete(row, k);
+                }
                 this.onInput(null, this.value);
             },
             deleteTableRow(index) {

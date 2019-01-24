@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - Unset preference handling
 - Use user's language/default language for retrieved concepts
 - Jump to selected element in tree
+- Empty table row after add
 ### Removed/Deprecated
 - Monument icon in tree and entity-detail view
 

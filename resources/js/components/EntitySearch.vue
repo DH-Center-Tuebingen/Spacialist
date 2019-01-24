@@ -104,6 +104,11 @@
                 this.items = [];
                 this.loading = false;
             }
+        },
+        watch: {
+            value(newValue, oldValue) {
+                this.query = newValue;
+            }
         }
     }
 </script>
