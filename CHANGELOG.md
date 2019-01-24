@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Error on empty layer array in map
 - Unset preference handling
 - Use user's language/default language for retrieved concepts
+- Jump to selected element in tree
 ### Removed/Deprecated
 - Monument icon in tree and entity-detail view
 
