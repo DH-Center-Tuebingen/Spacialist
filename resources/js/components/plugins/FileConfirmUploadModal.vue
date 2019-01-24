@@ -13,7 +13,17 @@
             </div>
             <div class="modal-body col row">
                 <div class="col h-100 border-right">
-                    <pre class="mb-0 h-100 text-left" v-if="type == 'text'" v-highlightjs="content"><code class="h-100 text-wrap word-break-all"></code></pre>
+                    <div class="mb-0 h-100 d-flex flex-column" v-if="type == 'text'">
+                        <div class="text-center">
+                            <button type="button" class="btn btn-outline-primary" @click="toggleEditMode">
+                                {{ $t('plugins.files.modal.clipboard.toggle_edit_mode') }}
+                            </button>
+                        </div>
+                        <div class="col px-0 mt-2">
+                            <pre class="text-left w-100 h-100 mb-0" v-if="!editMode" v-highlightjs="content"><code class="h-100 text-prewrap word-break-all"></code></pre>
+                            <textarea class="w-100 h-100 p-2" v-else v-model="content" @input="fileEdited = true"></textarea>
+                        </div>
+                    </div>
                     <div v-else-if="type == 'image'" class="h-100 d-flex flex-row justify-content-center align-items-center">
                         <img class="mw-100 mh-100" :src="content" />
                     </div>
@@ -55,6 +65,10 @@
         mounted() {},
         methods: {
             init(event) {
+                this.editMode = false;
+                this.fileEdited = false;
+                this.content = '';
+
                 this.file = event.params.file;
 
                 let reader = new FileReader();
@@ -67,9 +81,20 @@
                     reader.readAsDataURL(this.file);
                 }
             },
+            toggleEditMode() {
+                this.editMode = !this.editMode;
+            },
             confirm() {
+                let uplFile;
+                if(this.fileEdited) {
+                    uplFile = new File([this.content], this.file.name, {
+                        type: this.file.type
+                    });
+                } else {
+                    uplFile = this.file;
+                }
                 this.$emit('confirm', {
-                    file: this.file
+                    file: uplFile
                 });
                 this.hide();
             },
@@ -80,7 +105,9 @@
         data() {
             return {
                 file: {},
-                content: ''
+                content: '',
+                fileEdited: false,
+                editMode: false
             }
         },
         computed: {

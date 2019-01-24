@@ -121,6 +121,7 @@ const en = {
                 clipboard: {
                     title: '{name} - Confirm upload',
                     file_info: '@:plugins.files.modal.detail.metadata.title',
+                    toggle_edit_mode: 'Toggle Edit-Mode',
                     no_preview: 'No preview available for this file type.'
                 }
             },

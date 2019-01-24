@@ -121,6 +121,7 @@ const de = {
                 clipboard: {
                     title: '{name} - Upload bestätigen',
                     file_info: '@:plugins.files.modal.detail.metadata.title',
+                    toggle_edit_mode: 'Editiermodus umschalten',
                     no_preview: 'Für diesen Dateityp ist keine Vorschau verfügbar.'
                 }
             },
