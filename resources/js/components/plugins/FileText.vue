@@ -22,7 +22,7 @@
                 <textarea v-validate="" name="editTextarea" class="w-100 h-100 p-2" v-model="content"></textarea>
             </div>
             <div class="col px-1">
-                <pre class="mb-0 h-100 text-left" v-show="!csv.render && !markdown.render" v-highlightjs="content"><code class="h-100 text-wrap word-break-all" :class="{nohighlight: disableHighlighting}"></code></pre>
+                <pre class="mb-0 h-100 text-left" v-show="!csv.render && !markdown.render" v-highlightjs="content"><code class="h-100 text-prewrap word-break-all" :class="{nohighlight: disableHighlighting}"></code></pre>
                 <div class="mt-2 h-100 d-flex flex-column" v-if="isCsv && csv.render">
                     <form class="form-inline">
                         <div class="form-group mx-2">
