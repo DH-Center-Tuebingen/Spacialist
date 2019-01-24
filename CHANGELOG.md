@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 - Show notification if attribute is deleted
 - Color indicator (based on entity layer color) to tree and entity-detail view (replaces monument icon)
 - Apply new preference values without reload
+### Changed
+- Sub-Entity count in tree is now displayed inside color indicator
 ### Fixed
 - Use color picker for simple layer styling (GIS)
 - Deleting geodata on map

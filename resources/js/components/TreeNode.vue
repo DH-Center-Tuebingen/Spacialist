@@ -1,16 +1,15 @@
 <template>
     <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`">
-        <span :style="colorStyles">
-            <i class="fas fa-circle fa-xs"></i>
+        <span style="width: 2em; display: inline-block; text-align: center;">
+            <span v-if="data.children_count" class="badge badge-pill" style="font-size: 9px;" :style="colorStyles" :title="data.children_count">
+                {{ data.children_count | numPlus(3) }}
+            </span>
+            <span v-else :style="colorStyles">
+                <i class="fas fa-circle fa-sm"></i>
+            </span>
         </span>
         <span>
-            {{data.name}}
-        </span>
-        <span class="pl-1 font-italic mb-0" v-if="data.entity_type_id">
-            {{ $translateConcept($getEntityType(data.entity_type_id).thesaurus_url) }}
-        </span>
-        <span class="pl-1" v-show="data.children_count">
-            ({{ data.children_count }})
+            {{ data.name }}
         </span>
     </div>
 </template>
@@ -49,9 +48,13 @@
             },
             colorStyles() {
                 const colors = this.$getEntityColors(this.data.entity_type_id);
-                return {
-                    color: colors.backgroundColor
-                };
+                if(this.data.children_count) {
+                    return colors;
+                } else {
+                    return {
+                        color: colors.backgroundColor
+                    };
+                }
             }
         }
     }

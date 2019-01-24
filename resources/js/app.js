@@ -400,6 +400,16 @@ Vue.filter('datestring', function(value, useLocale = true) {
         return mom.utc().toString();
     }
 });
+Vue.filter('numPlus', function(value, length = 2) {
+    if(value) {
+        const v = Math.floor(value);
+        const max = Math.pow(10, length) - 1;
+        if(v > max) return `${max.toString(10)}+`;
+        else return v;
+    } else {
+        return value;
+    }
+});
 Vue.filter('time', function(value, withHours) {
     if(value) {
         let hours = 0;
