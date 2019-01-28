@@ -143,12 +143,17 @@
             },
             init: function() {
                 this.gui = new dat.GUI({
-                    autoPlace: false
+                    autoPlace: false,
+                    hideable: true,
+                    closed: true
                 });
                 this.guiConfig = {
                     scale: this.scale
                 };
                 this.gui.add(this.guiConfig, 'scale', 0.01, 100, 0.01).onChange(this.setScale);
+
+                // initially hide gui
+                dat.GUI.toggleHide();
 
                 this.container = document.getElementById(this.containerId);
                 document.getElementById('file-controls').appendChild(this.gui.domElement);
@@ -185,17 +190,29 @@
                 this.scene.add(this.group);
         		this.scene.add(new GridHelper(100, 10));
             },
+            selectObject(object) {
+                dat.GUI.toggleHide();
+                if(object) {
+                    this.addTransformControlsTo(object);
+                } else {
+                    this.removeTransformControls();
+                }
+            },
             addTransformControlsTo(mesh) {
                 this.activeMesh = mesh;
                 this.scene.add(this.transformControls);
                 this.transformControls.attach(mesh);
                 this.transformControls.enabled = true;
+                this.controls.target = mesh.position;
+                this.controls.update();
             },
             removeTransformControls() {
                 this.transformControls.detach();
                 this.activeMesh = null;
                 this.scene.remove(this.transformControls);
                 this.transformControls.enabled = false;
+                this.controls.target = new Vector3(0, 0, 0);
+                this.controls.update();
             },
             zoomToObject(object) {
                 const offset = 1.25;
@@ -204,20 +221,26 @@
                 }
                 const bbox = object.geometry.boundingBox;
                 const center = bbox.getCenter();
-                const size = bbox.getSize();
+                let size = bbox.getSize();
+                size.multiply(object.scale);
 
                 const maxDim = Math.max(size.x, size.y, size.z);
                 const fov = this.camera.fov * (Math.PI/180);
-                let z = Math.abs(maxDim/2 * Math.tan(fov/2)) * offset;
+                const z = Math.abs(maxDim / Math.sin(fov/2));
 
                 this.scene.updateMatrixWorld();
                 const objWP = object.getWorldPosition();
 
                 const dir = this.camera.position.sub(objWP);
                 const unitDir = dir.normalize();
-                this.camera.position.copy(unitDir.multiplyScalar(z));
-                this.camera.lookAt(objWP);
+                unitDir.multiplyScalar(z);
+                let newPos = new Vector3();
+                newPos.add(objWP);
+                newPos.add(unitDir);
+                this.camera.position.copy(newPos);
+                this.camera.lookAt(object.position);
 	            this.camera.updateProjectionMatrix();
+                this.controls.update();
             },
             loadAllSubModels: function() {
                 const vm = this;
@@ -658,7 +681,7 @@
                 if(this.transformControls.enabled) return;
                 const intersections = this.intersectAtClick(event);
                 if(intersections.length) {
-                    this.addTransformControlsTo(intersections[0].object);
+                    this.selectObject(intersections[0].object);
                 }
             },
             onWindowResize: function() {
