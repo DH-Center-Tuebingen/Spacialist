@@ -91,35 +91,44 @@
             },
             fullscreenHandler: {
                 required: false,
-                type: Function
+                type: Object
             }
         },
         beforeMount() {
             this.initFilterLists();
         },
         mounted() {
-            fabric.textureSize = 4096;
-            fabric.filterBackend = fabric.initFilterBackend();
+            if(this.fullscreenHandler) {
+                this.fullscreenHandler.add(this.onFullscreenChange);
+            }
 
             this.canvas = new fabric.Canvas('file-container-canvas', {
                 enableRetinaScaling: true
             });
 
-            this.canvas.getElement().parentElement.classList.add('w-100');
-            this.canvas.getElement().parentElement.classList.add('h-100');
+            const el = this.canvas.getElement().parentElement;
+            el.classList.add('w-100');
+            el.classList.add('h-100');
+            this.resizeCanvasTo(el);
+
             this.filters = fabric.Image.filters;
 
             fabric.Image.fromURL(this.localUrl, img => {
-                img.set({
-                    left: 0,
-                    top: 0,
-                    selectable: false,
-                    scaleX: this.canvas.getWidth()/img.width,
-                    scaleY: this.canvas.getHeight()/img.height
-                });
-                this.canvas.add(img);
+                const maxSize = Math.max(img.width, img.height);
+                if(maxSize > fabric.textureSize) {
+                    fabric.textureSize = maxSize;
+                }
+                this.setOriginalImage(img);
+                this.scaledImg = this.getScaledImage();
+                fabric.filterBackend = fabric.initFilterBackend();
+                this.setImage(this.scaledImg);
                 this.canvas.renderAll();
             });
+        },
+        destroyed() {
+            if(this.fullscreenHandler) {
+                this.fullscreenHandler.remove(this.onFullscreenChange);
+            }
         },
         methods: {
             initFilterLists() {
@@ -227,10 +236,39 @@
                 this.img.applyFilters();
                 this.canvas.renderAll();
             },
+            resizeCanvasTo(el) {
+                this.canvas.setDimensions({
+                    width: el.clientWidth,
+                    height: el.clientHeight
+                });
+            },
+            setOriginalImage(img) {
+                this.originalImg = img;
+            },
+            getScaledImage() {
+                return this.originalImg.set({
+                    left: 0,
+                    top: 0,
+                    selectable: false,
+                    scaleX: this.canvas.width/this.originalImg.width,
+                    scaleY: this.canvas.height/this.originalImg.height
+                });
+            },
+            setImage(img) {
+                this.canvas.add(img);
+            },
+            unsetImage(img) {
+                this.canvas.remove(img);
+            },
             toggleFullscreen() {
                 if(!this.fullscreenHandler) return;
-                const element = document.getElementById('file-container-image');
-                this.fullscreenHandler(element)
+                this.fullscreenHandler.toggle(document.getElementById('file-container-image'));
+            },
+            onFullscreenChange() {
+                this.unsetImage(this.scaledImg);
+                this.resizeCanvasTo(this.canvas.getElement().parentElement);
+                this.scaledImg = this.getScaledImage();
+                this.setImage(this.scaledImg);
             }
         },
         data() {
@@ -239,7 +277,9 @@
                 filterIds: {},
                 canvas: null,
                 filters: null,
-                img: null
+                img: null,
+                originalImg: null,
+                scaledImg: null
             }
         },
         computed: {

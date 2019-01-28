@@ -289,7 +289,7 @@
                             id="file-container"
                             :entity="localEntity"
                             :file="selectedFile"
-                            :fullscreen-handler="toggleFullscreen"
+                            :fullscreen-handler="fullscreenHandler"
                             :is="fileCategoryComponent"
                             :storage-config="storageConfig">
                         </component>
@@ -908,9 +908,19 @@
                 this.selectedFile.editing = false;
             },
             toggleFullscreen(element) {
-                if(!screenfull.enabled) return;
-                if(!element) return;
-                screenfull.toggle(element);
+                if(!screenfull.enabled) return new Promise(r => r(null));
+                if(!element) return new Promise(r => r(null));
+                return screenfull.toggle(element);
+            },
+            addToggleListener(callback) {
+                if(screenfull.enabled) {
+                    screenfull.on('change', callback);
+                }
+            },
+            removeToggleListener(callback) {
+                if(screenfull.enabled) {
+                    screenfull.off('change', callback);
+                }
             },
             linkedFilesChanged() {
                 if(!this.selectedEntity.id) return;
@@ -1399,6 +1409,11 @@
                 editingProperty: {
                     key: '',
                     value: ''
+                },
+                fullscreenHandler: {
+                    toggle: this.toggleFullscreen,
+                    add: this.addToggleListener,
+                    remove: this.removeToggleListener
                 },
                 fileHeaderHovered: false,
                 newFilename: '',
