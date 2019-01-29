@@ -1,7 +1,7 @@
 <template>
     <div class="w-100 h-100">
         <div class="d-flex flex-row h-100" id="file-container-image">
-            <div class="text-left pl-0 scroll-y-auto" :class="panelClasses.filters">
+            <div v-if="fabricSupported" class="text-left pl-0 scroll-y-auto" :class="panelClasses.filters">
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-grayscale" v-model="filterList['grayscale'].active" @change="toggleFilter('grayscale')">
                     <label class="custom-control-label" for="check-grayscale">Grayscale</label>
@@ -50,7 +50,7 @@
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-saturation" v-model="filterList['saturation'].active" @change="toggleFilter('saturation')">
                     <label class="custom-control-label" for="check-saturation">Saturation</label>
-                    <div v-show="filterList['pixelate'].active">
+                    <div v-show="filterList['saturation'].active">
                         <input type="range" class="form-control px-0" min="-1" max="1" step="0.003921" v-model="filterList['saturation'].value" @change="toggleFilter('saturation')" />
                     </div>
                 </div>
@@ -83,15 +83,18 @@
                     <input type="checkbox" class="custom-control-input" id="check-emboss" v-model="filterList['emboss'].active" @change="toggleFilter('emboss')">
                     <label class="custom-control-label" for="check-emboss">Emboss</label>
                 </div>
+                <button type="button" class="btn btn-outline-success" @click="storeFiltered">
+                    Save Changes
+                </button>
             </div>
             <div class="px-0":class="panelClasses.image">
-                <canvas id="file-container-canvas" class="w-100 h-100"></canvas>
-                <!-- <img :src="localUrl" id="file-container-image" class="modal-image" /> -->
+                <canvas v-if="fabricSupported" id="file-container-canvas" class="w-100 h-100"></canvas>
+                <img v-else :src="localUrl" class="modal-image" />
+                <button v-if="fabricSupported" type="button" class="btn btn-sm btn-secondary position-absolute m-2" style="left: 0; top: 0;" @click="toggleFilterPanel">
+                    <i class="fas fa-fw fa-magic"></i>
+                </button>
                 <button type="button" class="btn btn-sm btn-secondary position-absolute m-2" style="right: 0; top: 0;" v-if="fullscreenHandler" @click="toggleFullscreen">
                     <i class="fas fa-fw fa-expand"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-secondary position-absolute m-2" style="left: 0; top: 0;" @click="toggleFilterPanel">
-                    <i class="fas fa-fw fa-edit"></i>
                 </button>
             </div>
         </div>
@@ -263,6 +266,25 @@
                 this.img.applyFilters();
                 this.canvas.renderAll();
             },
+            storeFiltered() {
+                const oldScale = this.scaledImg.scaleX;
+                this.scaledImg.scaleX = 1;
+                this.scaledImg.scaleY = 1;
+                const format = this.isPng() ? 'png' : 'jpeg';
+                const data = this.scaledImg.toDataURL({
+                    format: format,
+                    quality: 1,
+                    multiplier: 1
+                });
+                this.scaledImg.scaleX = oldScale;
+                this.scaledImg.scaleY = oldScale;
+                fetch(data).then(r => r.blob()).then(blob => {
+                    this.$emit('update-file-content', {
+                        file: this.file,
+                        content: blob
+                    });
+                });
+            },
             resizeCanvasTo(el) {
                 this.canvas.setDimensions({
                     width: el.clientWidth,
@@ -301,6 +323,18 @@
                 this.resizeCanvasTo(this.canvas.getElement().parentElement);
                 this.scaledImg = this.getScaledImage();
                 this.setImage(this.scaledImg);
+            },
+            isJpeg() {
+                switch(this.file.mime_type) {
+                    case 'image/jpg':
+                    case 'image/jpeg':
+                        return true;
+                    default:
+                        return false;
+                }
+            },
+            isPng() {
+                return this.file.mime_type === 'image/png';
             }
         },
         data() {
@@ -320,6 +354,9 @@
             localUrl() {
                 const now = new Date();
                 return `${this.file.url}?t=${now.getTime()}`;
+            },
+            fabricSupported() {
+                return this.isJpeg() || this.isPng();
             },
             panelClasses() {
                 if(this.filterPanelActive) {

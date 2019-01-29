@@ -291,7 +291,8 @@
                             :file="selectedFile"
                             :fullscreen-handler="fullscreenHandler"
                             :is="fileCategoryComponent"
-                            :storage-config="storageConfig">
+                            :storage-config="storageConfig"
+                            @update-file-content="updateFileContent">
                         </component>
                         <div class="d-flex flex-row justify-content-between mt-2">
                             <button type="button" class="btn btn-outline-secondary" :disabled="isFirstFile" @click="gotoPreviousFile(selectedFile)">
@@ -875,6 +876,26 @@
                         query: query
                     });
                 }
+            },
+            updateFileContent(event) {
+                const file = event.file;
+                const content = event.content;
+                let id = file.id;
+                let blob;
+                if(content instanceof Blob) {
+                    blob = content;
+                } else {
+                    blob = new Blob([content], {type: file.mime_type});
+                }
+                let data = new FormData();
+                data.append('file', blob, file.name);
+                $http.post(`/file/${id}/patch`, data, {
+                    headers: { 'content-type': false }
+                }).then(response => {
+                    if(event.onSuccess) {
+                        event.onSuccess(response, file);
+                    }
+                });
             },
             onFileHeaderHover(active) {
                 // If edit mode is enabled, do not disable it on hover
