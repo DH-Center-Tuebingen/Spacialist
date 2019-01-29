@@ -1,7 +1,7 @@
 <template>
     <div class="w-100 h-100">
         <div class="d-flex flex-row h-100" id="file-container-image">
-            <div class="col-md-2 text-left">
+            <div class="text-left pl-0" :class="panelClasses.filters">
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-grayscale" v-model="filterList['grayscale'].active" @change="toggleFilter('grayscale')">
                     <label class="custom-control-label" for="check-grayscale">Grayscale</label>
@@ -21,44 +21,59 @@
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-remove-color" v-model="filterList['remove-color'].active" @change="toggleFilter('remove-color')">
                     <label class="custom-control-label" for="check-remove-color">Remove Color</label>
-                    <div>
-                        <input type="color" v-model="filterList['remove-color'].value" @change="toggleFilter('remove-color')" />
+                    <div v-show="filterList['remove-color'].active">
+                        <input type="color" class="form-control" v-model="filterList['remove-color'].value" @input="toggleFilter('remove-color')" />
+                        <input type="range" class="form-control px-0" min="0" max="1" step="0.01" v-model="filterList['remove-color'].distance" @change="toggleFilter('remove-color')" />
                     </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-brightness" v-model="filterList['brightness'].active" @change="toggleFilter('brightness')">
                     <label class="custom-control-label" for="check-brightness">Brightness</label>
-                    <input type="range" min="-1" max="1" step="0.003921" v-model="filterList['brightness'].value" @change="toggleFilter('brightness')" />
+                    <div v-show="filterList['brightness'].active">
+                        <input type="range" class="form-control px-0" min="-1" max="1" step="0.003921" v-model="filterList['brightness'].value" @change="toggleFilter('brightness')" />
+                    </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-contrast" v-model="filterList['contrast'].active" @change="toggleFilter('contrast')">
                     <label class="custom-control-label" for="check-contrast">Contrast</label>
-                    <input type="range" min="-1" max="1" step="0.003921" v-model="filterList['contrast'].value" @change="toggleFilter('contrast')" />
+                    <div v-show="filterList['contrast'].active">
+                        <input type="range" class="form-control px-0" min="-1" max="1" step="0.003921" v-model="filterList['contrast'].value" @change="toggleFilter('contrast')" />
+                    </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-hue" v-model="filterList['hue'].active" @change="toggleFilter('hue')">
                     <label class="custom-control-label" for="check-hue">Hue</label>
-                    <input type="range" min="-2" max="2" step="0.002" v-model="filterList['hue'].value" @change="toggleFilter('hue')" />
+                    <div v-show="filterList['hue'].active">
+                        <input type="range" class="form-control px-0" min="-2" max="2" step="0.002" v-model="filterList['hue'].value" @change="toggleFilter('hue')" />
+                    </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-saturation" v-model="filterList['saturation'].active" @change="toggleFilter('saturation')">
                     <label class="custom-control-label" for="check-saturation">Saturation</label>
-                    <input type="range" min="-1" max="1" step="0.003921" v-model="filterList['saturation'].value" @change="toggleFilter('saturation')" />
+                    <div v-show="filterList['pixelate'].active">
+                        <input type="range" class="form-control px-0" min="-1" max="1" step="0.003921" v-model="filterList['saturation'].value" @change="toggleFilter('saturation')" />
+                    </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-noise" v-model="filterList['noise'].active" @change="toggleFilter('noise')">
                     <label class="custom-control-label" for="check-noise">Noise</label>
-                    <input type="range" min="0" max="1000" step="1" v-model="filterList['noise'].value" @change="toggleFilter('noise')" />
+                    <div v-show="filterList['noise'].active">
+                        <input type="range" class="form-control px-0" min="0" max="1000" step="1" v-model="filterList['noise'].value" @change="toggleFilter('noise')" />
+                    </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-pixelate" v-model="filterList['pixelate'].active" @change="toggleFilter('pixelate')">
                     <label class="custom-control-label" for="check-pixelate">Pixelate</label>
-                    <input type="range" min="2" max="20" step="1" v-model="filterList['pixelate'].value" @change="toggleFilter('pixelate')" />
+                    <div v-show="filterList['pixelate'].active">
+                        <input type="range" class="form-control px-0" min="2" max="20" step="1" v-model="filterList['pixelate'].value" @change="toggleFilter('pixelate')" />
+                    </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-blur" v-model="filterList['blur'].active" @change="toggleFilter('blur')">
                     <label class="custom-control-label" for="check-blur">Blur</label>
-                    <input type="range" min="0" max="1" step="0.01" v-model="filterList['blur'].value" @change="toggleFilter('blur')" />
+                    <div v-show="filterList['blur'].active">
+                        <input type="range" class="form-control px-0" min="0" max="1" step="0.01" v-model="filterList['blur'].value" @change="toggleFilter('blur')" />
+                    </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-sharpen" v-model="filterList['sharpen'].active" @change="toggleFilter('sharpen')">
@@ -69,11 +84,14 @@
                     <label class="custom-control-label" for="check-emboss">Emboss</label>
                 </div>
             </div>
-            <div class="col-md-10">
+            <div class="px-0":class="panelClasses.image">
                 <canvas id="file-container-canvas" class="w-100 h-100"></canvas>
                 <!-- <img :src="localUrl" id="file-container-image" class="modal-image" /> -->
-                <button type="button" class="btn btn-sm btn-info position-absolute m-2" style="right: 0; top: 0;" v-if="fullscreenHandler" @click="toggleFullscreen">
+                <button type="button" class="btn btn-sm btn-secondary position-absolute m-2" style="right: 0; top: 0;" v-if="fullscreenHandler" @click="toggleFullscreen">
                     <i class="fas fa-fw fa-expand"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary position-absolute m-2" style="left: 0; top: 0;" @click="toggleFilterPanel">
+                    <i class="fas fa-fw fa-edit"></i>
                 </button>
             </div>
         </div>
@@ -141,10 +159,19 @@
 
                 filters.forEach((f, i) => {
                     this.filterIds[f] = i;
-                    this.filterList[f] = {
+                    Vue.set(this.filterList, f, {
                         active: false,
                         value: ''
-                    };
+                    });
+                    if(f === 'remove-color') {
+                        Vue.set(this.filterList[f], 'distance', 0.0);
+                    }
+                });
+            },
+            toggleFilterPanel() {
+                this.filterPanelActive = !this.filterPanelActive;
+                this.$nextTick(_ => {
+                    this.onFullscreenChange();
                 });
             },
             toggleFilter(name) {
@@ -169,7 +196,7 @@
                         break;
                     case 'remove-color':
                         filter = act && new f.RemoveColor({
-                            distance: 0.25,
+                            distance: this.filterList[name].distance,
                             color: val
                         });
                         break;
@@ -246,12 +273,17 @@
                 this.originalImg = img;
             },
             getScaledImage() {
+                // Resize/scale image to the lower scaling factor (in %)
+                // to fit the image onto the canvas
+                const scaleX = this.canvas.width/this.originalImg.width;
+                const scaleY = this.canvas.height/this.originalImg.height;
+                const scale = Math.min(scaleX, scaleY);
                 return this.originalImg.set({
                     left: 0,
                     top: 0,
                     selectable: false,
-                    scaleX: this.canvas.width/this.originalImg.width,
-                    scaleY: this.canvas.height/this.originalImg.height
+                    scaleX: scale,
+                    scaleY: scale
                 });
             },
             setImage(img) {
@@ -275,6 +307,7 @@
             return {
                 filterList: {},
                 filterIds: {},
+                filterPanelActive: false,
                 canvas: null,
                 filters: null,
                 img: null,
@@ -287,6 +320,27 @@
             localUrl() {
                 const now = new Date();
                 return `${this.file.url}?t=${now.getTime()}`;
+            },
+            panelClasses() {
+                if(this.filterPanelActive) {
+                    return {
+                        filters: {
+                            'col-md-2': true
+                        },
+                        image: {
+                            'col-md-10': true
+                        }
+                    };
+                } else {
+                    return {
+                        filters: {
+                            'd-none': true
+                        },
+                        image: {
+                            'col-md-12': true
+                        }
+                    };
+                }
             }
         }
     }
