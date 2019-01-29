@@ -1,7 +1,7 @@
 <template>
     <div class="w-100 h-100">
         <div class="d-flex flex-row h-100" id="file-container-image">
-            <div class="text-left pl-0" :class="panelClasses.filters">
+            <div class="text-left pl-0 scroll-y-auto" :class="panelClasses.filters">
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-grayscale" v-model="filterList['grayscale'].active" @change="toggleFilter('grayscale')">
                     <label class="custom-control-label" for="check-grayscale">Grayscale</label>
