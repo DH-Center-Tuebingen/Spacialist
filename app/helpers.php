@@ -1,6 +1,7 @@
 <?php
 
 use App\Bibliography;
+use App\ThConcept;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
@@ -53,6 +54,26 @@ if(!function_exists('sp_column_names')) {
                     ->pluck('column_name');
             default:
                 return Schema::getColumnListing($table);
+        }
+    }
+}
+
+// detail level
+// 0 = no relations
+// 1 = labels
+// 2 = all
+if(!function_exists('th_tree_builder')) {
+    function th_tree_builder($langCode = null, $detailLevel = 2) {
+        $builder = ThConcept::query();
+        if($detailLevel === 0 || $langCode === null) {
+            return $builder;
+        } else {
+            $labelWith = [
+                'labels.language' => function($query) use($langCode) {
+                    $query->orderByRaw("short_name = '$langCode' desc");
+                }
+            ];
+            return $builder->with($labelWith);
         }
     }
 }

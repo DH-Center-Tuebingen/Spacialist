@@ -79,6 +79,10 @@ class ThConcept extends Model
         return $this->hasMany('App\ThConceptLabel', 'concept_id');
     }
 
+    public function notes() {
+        return $this->hasMany('App\ThConceptNote', 'concept_id');
+    }
+
     public function narrowers() {
         return $this->belongsToMany('App\ThConcept', 'th_broaders', 'broader_id', 'narrower_id');
     }

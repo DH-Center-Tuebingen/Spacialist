@@ -224,7 +224,7 @@
             attributeFromCreateEvent(event) {
                 const attribute = event.attribute;
                 let data = {};
-                data.label_id = attribute.label.concept.id;
+                data.label_id = attribute.label.concept_id;
                 data.datatype = attribute.type.datatype;
                 data.recursive = attribute.recursive;
                 if(this.needsColumns) {
