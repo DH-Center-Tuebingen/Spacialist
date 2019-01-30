@@ -28,7 +28,7 @@
             </button>
         </div>
         <div class="row col mx-0 px-0 scroll-y-auto" infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk">
-            <div class="col-sm-6 col-md-4 mb-3" v-for="file in files">
+            <div class="col-sm-6 col-md-4 mb-3" v-for="file in files" :title="file.name">
                 <div class="card text-center clickable" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
                     <div class="card-hover-overlay">
                         <div class="text-white">
@@ -38,11 +38,8 @@
                     <div class="card-hover">
                         <img class="card-img" v-if="file.category == 'image'" :src="file.url" style="height: 200px;">
                         <div class="card-img" v-else style="width: 100%; height: 200px;"></div>
-                        <div class="card-img-overlay">
-                            <h4 class="card-title text-truncate" :class="{shadowed: file.category == 'image'}">
-                                {{ file.name }}
-                            </h4>
-                            <div class="card-text pt-4">
+                        <div class="card-img-overlay d-flex flex-column justify-content-end">
+                            <div class="card-text pb-4">
                                 <div v-if="file.category == 'xml'">
                                     <i class="fas fa-fw fa-file-code fa-5x"></i>
                                 </div>
@@ -92,6 +89,9 @@
                                     data-fa-mask="fas fa-fw fa-file"></i>
                                 </div>
                             </div>
+                            <h6 class="card-title text-truncate" :class="{shadowed: file.category == 'image'}">
+                                {{ file.name }}
+                            </h6>
                         </div>
                         <div class="position-absolute top-0 right-0 m-2">
                             <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has-links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
