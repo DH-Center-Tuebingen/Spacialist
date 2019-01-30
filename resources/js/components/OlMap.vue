@@ -624,7 +624,7 @@
                     });
                     vm.hoverPopup = new Overlay({
                         element: document.getElementById(`${vm.id}-hover-popup`),
-                        offset: [0, 5] // it's a kind of magic!
+                        offset: [2, 5] // it's a kind of magic!
                     });
                     vm.map.addOverlay(vm.overlay);
                     vm.map.addOverlay(vm.hoverPopup);
@@ -689,7 +689,6 @@
                             return;
                         }
                         if(vm.measurementActive) return;
-                        const element = vm.overlay.getElement();
                         const feature = vm.getFeatureForEvent(e);
                         if(feature) {
                             vm.selectedFeature = feature;
@@ -1499,14 +1498,39 @@
                     vm.overlayTitle = geomName;
                 }
 
+                const length = this.$options.filters.length;
+                let geometryInfo;
+                switch(geometry.getType()) {
+                    case 'LineString':
+                    case 'MultiLineString':
+                        geometryInfo =
+                        `<dl class="mb-0">
+                            <dt>Length</dt>
+                            <dd>${length(geometry.getLength()*1000, 2)}</dd>
+                        </dl>`
+                        break;
+                    case 'Polygon':
+                    case 'MultiPolygon':
+                        geometryInfo =
+                        `<dl class="mb-0">
+                            <dt>Area</dt>
+                            <dd>${length(geometry.getArea()*1000, 2, true)}</dd>
+                        </dl>`
+                        break;
+                }
+
                 const coordHtml = vm.geometryToTable(geometry);
                 vm.overlayContent =
                     `<dl class="mb-0">
                         <dt>${vm.$t('global.type')}</dt>
                         <dd>${geometry.getType()}</dd>
-                        <dt>${vm.$t('main.map.coords-in-epsg', {epsg: vm.epsg.epsg})}</dt>
-                        <dd>${coordHtml}</dd>
                     </dl>`;
+                    // <dt>${vm.$t('main.map.coords-in-epsg', {epsg: vm.epsg.epsg})}</dt>
+                    // <dd>${coordHtml}</dd>
+
+                if(geometryInfo) {
+                    vm.overlayContent = geometryInfo + vm.overlayContent;
+                }
 
                 // Wait for variables to be updated
                 vm.$nextTick(function() {
