@@ -104,8 +104,18 @@
         },
         methods: {
             setScale() {
-                const s = this.guiConfig.scale;
-                this.group.scale.copy(new Vector3(s, s, s));
+                if(!this.activeMesh) return;
+                const sx = this.guiConfig.scaleX;
+                const sy = this.guiConfig.scaleY;
+                const sz = this.guiConfig.scaleZ;
+                this.activeMesh.scale.set(sx, sy, sz);
+            },
+            setPosition() {
+                if(!this.activeMesh) return;
+                const px = this.guiConfig.positionX;
+                const py = this.guiConfig.positionY;
+                const pz = this.guiConfig.positionZ;
+                this.activeMesh.position.set(px, py, pz);
             },
             getFileType: function(file) {
                 if(file.mime_type == 'model/vnd.collada+xml') {
@@ -148,9 +158,19 @@
                     closed: true
                 });
                 this.guiConfig = {
-                    scale: this.scale
+                    scaleX: this.scale,
+                    scaleY: this.scale,
+                    scaleZ: this.scale,
+                    positionX: 0,
+                    positionY: 0,
+                    positionZ: 0
                 };
-                this.gui.add(this.guiConfig, 'scale', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['scaleX'] = this.gui.add(this.guiConfig, 'scaleX', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['scaleY'] = this.gui.add(this.guiConfig, 'scaleY', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['scaleZ'] = this.gui.add(this.guiConfig, 'scaleZ', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['positionX'] = this.gui.add(this.guiConfig, 'positionX', -100, 100, 0.01).onChange(this.setPosition);
+                this.guiCtrl['positionY'] = this.gui.add(this.guiConfig, 'positionY', -100, 100, 0.01).onChange(this.setPosition);
+                this.guiCtrl['positionZ'] = this.gui.add(this.guiConfig, 'positionZ', -100, 100, 0.01).onChange(this.setPosition);
 
                 // initially hide gui
                 dat.GUI.toggleHide();
@@ -320,7 +340,22 @@
                 this.transformControls = new TransformControls(this.camera, this.renderer.domElement);
                 this.transformControls.enabled = false;
 
-                this.transformControls.addEventListener('change', this.render);
+                this.transformControls.addEventListener('change', _ => {
+                    if(this.transformControls.object) {
+                        const s = this.transformControls.object.scale;
+                        const p = this.transformControls.object.position;
+                        this.guiConfig.scaleX = s.x;
+                        this.guiConfig.scaleY = s.y;
+                        this.guiConfig.scaleZ = s.z;
+                        this.guiConfig.positionX = p.x;
+                        this.guiConfig.positionY = p.y;
+                        this.guiConfig.positionZ = p.z;
+                        for(let k in this.guiCtrl) {
+                            this.guiCtrl[k].updateDisplay();
+                        }
+                    }
+                    this.render();
+                });
                 // Disable orbit controls on gizmo drag
                 this.transformControls.addEventListener('dragging-changed', event => {
                     this.controls.enabled = !event.value;
@@ -764,6 +799,7 @@
                 // three
                 scale: 1,
                 gui: null,
+                guiCtrl: {},
                 guiConfig: null,
                 animationClock: new Clock(),
                 animationId: -1,
