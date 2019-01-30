@@ -9,8 +9,11 @@ All notable changes to this project will be documented in this file.
 - Show notification if attribute is deleted
 - Color indicator (based on entity layer color) to tree and entity-detail view (replaces monument icon)
 - Apply new preference values without reload
+- Editmode to upload from clipboard
 ### Changed
 - Sub-Entity count in tree is now displayed inside color indicator
+- Cleaned up geodata popup (Removed coordinate table, added length/area of geodata)
+- Moved file name to bottom of card, made font size smaller, display file name on hover
 ### Fixed
 - Use color picker for simple layer styling (GIS)
 - Deleting geodata on map
@@ -21,6 +24,7 @@ All notable changes to this project will be documented in this file.
 - Use user's language/default language for retrieved concepts
 - Jump to selected element in tree
 - Empty table row after add
+- Search in other available languages for labels that have no match in user's language (to make concepts available as label that are not yet translated)
 ### Removed/Deprecated
 - Monument icon in tree and entity-detail view
 
