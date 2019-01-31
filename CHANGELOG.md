@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - Jump to selected element in tree
 - Empty table row after add
 - Search in other available languages for labels that have no match in user's language (to make concepts available as label that are not yet translated)
+- Align user menu dropdown to the right, so dropdown is not displayed outside document bounds
 ### Removed/Deprecated
 - Monument icon in tree and entity-detail view
 
