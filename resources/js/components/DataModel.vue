@@ -231,7 +231,7 @@
                     data.columns = JSON.stringify(this.columns);
                 }
                 if(attribute.root) {
-                    data.root_id = attribute.root.concept.id;
+                    data.root_id = attribute.root.concept_id;
                 }
                 if(attribute.textContent) {
                     data.text = attribute.textContent;
