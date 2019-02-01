@@ -71,7 +71,7 @@ if(!function_exists('th_tree_builder')) {
             $labelWith = [
                 'labels.language' => function($query) use($langCode) {
                     $query->orderByRaw("short_name = '$langCode' desc");
-                }
+                }, 'labels.concept'
             ];
             return $builder->with($labelWith);
         }

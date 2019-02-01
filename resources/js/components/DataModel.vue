@@ -279,17 +279,17 @@
                 }));
             },
             createEntityType(entityType) {
-                const vm = this;
-                if(vm.newEntityTypeDisabled) return;
+                if(this.newEntityTypeDisabled) return;
                 const url = entityType.label.concept.concept_url;
                 let data = {
                     'concept_url': url,
                     'is_root': entityType.is_root || false,
                     'geomtype': entityType.geomtype.key
                 };
-                $httpQueue.add(() => vm.$http.post('/editor/dm/entity_type', data).then(function(response) {
-                    vm.localEntityTypes.push(response.data);
-                    vm.hideNewEntityTypeModal();
+                $httpQueue.add(() => $http.post('/editor/dm/entity_type', data).then(response => {
+                    this.$addEntityType(response.data);
+                    this.localEntityTypes = Object.values(this.$getEntityTypes());
+                    this.hideNewEntityTypeModal();
                 }));
             },
             deleteEntityType(entityType) {
