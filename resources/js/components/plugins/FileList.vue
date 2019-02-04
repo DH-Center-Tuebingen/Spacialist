@@ -1,6 +1,6 @@
 <template>
     <div class="h-100 d-flex flex-column">
-        <div class="d-flex justify-content-between mb-2">
+        <div class="d-flex justify-content-start mb-2">
             <span v-if="fileState.total > 0">
                 {{
                     $t('plugins.files.list.display', {
@@ -19,6 +19,14 @@
                     })
                 }}
             </span>
+            <a href="" class="mr-auto ml-2" @click.prevent="grid = !grid">
+                <span v-show="grid">
+                    <i class="fas fa-fw fa-list"></i>
+                </span>
+                <span v-show="!grid">
+                    <i class="fas fa-fw fa-th"></i>
+                </span>
+            </a>
             <button class="btn btn-sm btn-outline-primary" v-show="fileCount" @click="exportFiles(selectedFiles)">
                 {{
                     $t('plugins.files.header.export.selected', {
@@ -27,99 +35,168 @@
                 }}
             </button>
         </div>
-        <div class="row col mx-0 px-0 scroll-y-auto" infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk">
-            <div class="col-sm-6 col-md-4 mb-3" v-for="file in files" :title="file.name">
-                <div class="card text-center clickable" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
-                    <div class="card-hover-overlay">
-                        <div class="text-white">
-                            <i class="fas fa-fw fa-binoculars fa-5x"></i>
-                        </div>
-                    </div>
-                    <div class="card-hover">
-                        <img class="card-img" v-if="file.category == 'image'" :src="file.url" style="height: 200px;">
-                        <div class="card-img" v-else style="width: 100%; height: 200px;"></div>
-                        <div class="card-img-overlay d-flex flex-column justify-content-end">
-                            <div class="card-text pb-4">
-                                <div v-if="file.category == 'xml'">
-                                    <i class="fas fa-fw fa-file-code fa-5x"></i>
-                                </div>
-                                <div v-if="file.category == 'html'">
-                                    <i
-                                    class="fab fa-fw fa-html5 fa-5x"
-                                    data-fa-transform="shrink-9 down-2"
-                                    data-fa-mask="fas fa-fw fa-file"></i>
-                                </div>
-                                <div v-else-if="file.category == 'archive'">
-                                    <i class="fas fa-fw fa-file-archive fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'pdf'">
-                                    <i class="fas fa-fw fa-file-pdf fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'audio'">
-                                    <i class="fas fa-fw fa-file-audio fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'video'">
-                                    <i class="fas fa-fw fa-file-video fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'spreadsheet'">
-                                    <i class="fas fa-fw fa-file-excel fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'document'">
-                                    <i class="fas fa-fw fa-file-word fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'presentation'">
-                                    <i class="fas fa-fw fa-file-powerpoint fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == '3d'">
-                                    <i
-                                    class="fas fa-fw fa-cubes fa-5x"
-                                    data-fa-transform="shrink-9 down-2"
-                                    data-fa-mask="fas fa-fw fa-file"></i>
-                                </div>
-                                <div v-else-if="file.category == 'dicom'">
-                                    <i class="fas fa-fw fa-file-medical-alt fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'text'">
-                                    <i class="fas fa-fw fa-file-alt fa-5x"></i>
-                                </div>
-                                <div v-else-if="file.category == 'undefined'">
-                                    <i
-                                    class="fas fa-fw fa-question fa-5x"
-                                    data-fa-transform="shrink-9 down-2"
-                                    data-fa-mask="fas fa-fw fa-file"></i>
+        <div infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk" class="row col scroll-y-auto">
+            <div class="row col" v-if="grid">
+                <div class="col-sm-6 col-md-4 mb-3 clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
+                    <div class="card text-center">
+                        <div style="height: 200px;">
+                            <div class="card-hover-overlay h-100">
+                                <div class="text-white">
+                                    <i class="fas fa-fw fa-binoculars fa-5x"></i>
                                 </div>
                             </div>
-                            <h6 class="card-title text-truncate" :class="{shadowed: file.category == 'image'}">
-                                {{ file.name }}
-                            </h6>
+                            <div class="card-hover h-100">
+                                <img class="card-img w-auto" style="height: 200px;" v-if="file.category == 'image'" :src="file.url">
+                                <div class="card-img w-100" v-else></div>
+                                <div class="card-img-overlay d-flex flex-column justify-content-end" style="height: 200px;">
+                                    <div class="card-text pb-4">
+                                        <div v-if="file.category == 'xml'">
+                                            <i class="fas fa-fw fa-file-code fa-5x"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'html'">
+                                            <i
+                                            class="fab fa-fw fa-html5 fa-5x"
+                                            data-fa-transform="shrink-9 down-2"
+                                            data-fa-mask="fas fa-fw fa-file"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'archive'">
+                                            <i class="fas fa-fw fa-file-archive fa-5x"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'pdf'">
+                                            <i class="fas fa-fw fa-file-pdf fa-5x"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'audio'">
+                                            <i class="fas fa-fw fa-file-audio fa-5x"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'video'">
+                                            <i class="fas fa-fw fa-file-video fa-5x"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'spreadsheet'">
+                                            <i class="fas fa-fw fa-file-excel fa-5x"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'document'">
+                                            <i class="fas fa-fw fa-file-word fa-5x"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'presentation'">
+                                            <i class="fas fa-fw fa-file-powerpoint fa-5x"></i>
+                                        </div>
+                                        <div v-else-if="file.category == '3d'">
+                                            <i
+                                            class="fas fa-fw fa-cubes fa-5x"
+                                            data-fa-transform="shrink-9 down-2"
+                                            data-fa-mask="fas fa-fw fa-file"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'dicom'">
+                                            <i class="fas fa-fw fa-file-medical-alt fa-5x"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'text'">
+                                            <i class="fas fa-fw fa-file-alt fa-5x"></i>
+                                        </div>
+                                        <div v-else-if="file.category == 'undefined'">
+                                            <i
+                                            class="fas fa-fw fa-question fa-5x"
+                                            data-fa-transform="shrink-9 down-2"
+                                            data-fa-mask="fas fa-fw fa-file"></i>
+                                        </div>
+                                    </div>
+                                    <h6 class="card-title text-truncate" :class="{shadowed: file.category == 'image'}">
+                                        {{ file.name }}
+                                    </h6>
+                                </div>
+                            </div>
                         </div>
-                        <div class="position-absolute top-0 right-0 m-2">
-                            <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has-links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
-                                <i class="fas fa-fw fa-link text-info"></i>
-                            </span>
-                            <span v-if="getFileTags(file).length" :title="$tc('global.has-tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
-                                <i class="fas fa-fw fa-tags text-info"></i>
-                            </span>
-                        </div>
-                        <div class="position-absolute top-0 left-0 m-2">
-                            <input type="checkbox" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-md-4 mb-3" v-if="fileState.toLoad">
-                <div class="card text-center">
-                    <div class="card-hover">
-                        <div class="card-img" style="width: 100%; height: 200px;"></div>
-                        <div class="card-img-overlay">
-                            <h4 class="card-title">Load {{fileState.toLoad}} more</h4>
-                            <div class="card-text pt-4">
-                                <i class="fas fa-fw fa-sync fa-3x" :class="{'fa-spin': isFetching}"></i>
+                        <div>
+                            <div class="position-absolute top-0 right-0 m-2">
+                                <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has-links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
+                                    <i class="fas fa-fw fa-link text-info"></i>
+                                </span>
+                                <span v-if="getFileTags(file).length" :title="$tc('global.has-tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
+                                    <i class="fas fa-fw fa-tags text-info"></i>
+                                </span>
+                            </div>
+                            <div class="position-absolute top-0 left-0 m-2">
+                                <input type="checkbox" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-6 col-md-4 mb-3" v-if="fileState.toLoad">
+                    <div class="card text-center">
+                        <div class="card-hover">
+                            <div class="card-img" style="width: 100%; height: 200px;"></div>
+                            <div class="card-img-overlay">
+                                <h4 class="card-title">Load {{fileState.toLoad}} more</h4>
+                                <div class="card-text pt-4">
+                                    <i class="fas fa-fw fa-sync fa-3x" :class="{'fa-spin': isFetching}"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <ul class="list-group mb-2 w-100" v-else>
+                <li class="list-group-item px-3 py-2 w-100 d-flex flex-row justify-content-start align-items-center clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
+                    <input type="checkbox" class="mr-2" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
+                    <div class="mr-2">
+                        <div v-if="file.category == 'xml'">
+                            <i class="fas fa-fw fa-file-code w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == 'html'">
+                            <i
+                            class="fab fa-fw fa-html5"
+                            data-fa-transform="shrink-9 down-2"
+                            data-fa-mask="fas fa-fw fa-file w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == 'archive'">
+                            <i class="fas fa-fw fa-file-archive w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == 'pdf'">
+                            <i class="fas fa-fw fa-file-pdf w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == 'audio'">
+                            <i class="fas fa-fw fa-file-audio w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == 'video'">
+                            <i class="fas fa-fw fa-file-video w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == 'spreadsheet'">
+                            <i class="fas fa-fw fa-file-excel w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == 'document'">
+                            <i class="fas fa-fw fa-file-word w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == 'presentation'">
+                            <i class="fas fa-fw fa-file-powerpoint w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == '3d'">
+                            <i
+                            class="fas fa-fw fa-cubes w-32p h-32p"
+                            data-fa-transform="shrink-9 down-2"
+                            data-fa-mask="fas fa-fw fa-file"></i>
+                        </div>
+                        <div v-else-if="file.category == 'dicom'">
+                            <i class="fas fa-fw fa-file-medical-alt w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == 'text'">
+                            <i class="fas fa-fw fa-file-alt w-32p h-32p"></i>
+                        </div>
+                        <div v-else-if="file.category == 'image'" class="w-32p h-32p">
+                            <img class="mh-100 mw-100" :src="file.url" />
+                        </div>
+                        <div v-else-if="file.category == 'undefined'">
+                            <i
+                            class="fas fa-fw fa-question w-32p h-32p"
+                            data-fa-transform="shrink-9 down-2"
+                            data-fa-mask="fas fa-fw fa-file"></i>
+                        </div>
+                    </div>
+                    {{ file.name }}
+                </li>
+                <li class="list-group-item w-100 d-flex flex-row justify-content-start align-items-center" v-if="fileState.toLoad">
+                    <i class="fas fa-fw fa-sync mr-2 ml-4 w-32p h-32p" :class="{'fa-spin': isFetching}"></i>
+                    Load {{fileState.toLoad}} more
+                </li>
+            </ul>
         </div>
 
         <vue-context ref="fileMenu" class="context-menu-wrapper">
@@ -205,6 +282,7 @@
         data() {
             return {
                 selectedFiles: [],
+                grid: true,
                 showExportSettings: false
             }
         },
