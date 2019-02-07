@@ -21,6 +21,23 @@ const en = {
                     selected: 'export selected files ({cnt})'
                 }
             },
+            image_filters: {
+                grayscale: 'Grayscale',
+                bw: 'Black & White',
+                invert: 'Invert',
+                sepia: 'Sepia',
+                remove_color: 'Remove Color',
+                brightness: 'Brightness',
+                contrast: 'Contrast',
+                hue: 'Hue',
+                saturation: 'Saturation',
+                noise: 'Noise',
+                pixelate: 'Pixelate',
+                blur: 'Blur',
+                sharpen: 'Sharpen',
+                emboss: 'Emboss',
+                save: 'Save Changes'
+            },
             toasts: {
                 deleted: {
                     title: 'File deleted',

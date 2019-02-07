@@ -4,23 +4,33 @@
             <div v-if="fabricSupported" class="text-left pl-0 scroll-y-auto" :class="panelClasses.filters">
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-grayscale" v-model="filterList['grayscale'].active" @change="toggleFilter('grayscale')">
-                    <label class="custom-control-label" for="check-grayscale">Grayscale</label>
+                    <label class="custom-control-label" for="check-grayscale">
+                        {{ $t('plugins.files.image_filters.grayscale') }}
+                    </label>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-blackwhite" v-model="filterList['blackwhite'].active" @change="toggleFilter('blackwhite')">
-                    <label class="custom-control-label" for="check-blackwhite">Black & White</label>
+                    <label class="custom-control-label" for="check-blackwhite">
+                        {{ $t('plugins.files.image_filters.bw') }}
+                    </label>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-invert" v-model="filterList['invert'].active" @change="toggleFilter('invert')">
-                    <label class="custom-control-label" for="check-invert">Invert</label>
+                    <label class="custom-control-label" for="check-invert">
+                        {{ $t('plugins.files.image_filters.invert') }}
+                    </label>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-sepia" v-model="filterList['sepia'].active" @change="toggleFilter('sepia')">
-                    <label class="custom-control-label" for="check-sepia">Sepia</label>
+                    <label class="custom-control-label" for="check-sepia">
+                        {{ $t('plugins.files.image_filters.sepia') }}
+                    </label>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-remove-color" v-model="filterList['remove-color'].active" @change="toggleFilter('remove-color')">
-                    <label class="custom-control-label" for="check-remove-color">Remove Color</label>
+                    <label class="custom-control-label" for="check-remove-color">
+                        {{ $t('plugins.files.image_filters.remove_color') }}
+                    </label>
                     <div v-show="filterList['remove-color'].active">
                         <input type="color" class="form-control" v-model="filterList['remove-color'].value" @input="toggleFilter('remove-color')" />
                         <input type="range" class="form-control px-0" min="0" max="1" step="0.01" v-model="filterList['remove-color'].distance" @change="toggleFilter('remove-color')" />
@@ -28,63 +38,81 @@
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-brightness" v-model="filterList['brightness'].active" @change="toggleFilter('brightness')">
-                    <label class="custom-control-label" for="check-brightness">Brightness</label>
+                    <label class="custom-control-label" for="check-brightness">
+                        {{ $t('plugins.files.image_filters.brightness') }}
+                    </label>
                     <div v-show="filterList['brightness'].active">
                         <input type="range" class="form-control px-0" min="-1" max="1" step="0.003921" v-model="filterList['brightness'].value" @change="toggleFilter('brightness')" />
                     </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-contrast" v-model="filterList['contrast'].active" @change="toggleFilter('contrast')">
-                    <label class="custom-control-label" for="check-contrast">Contrast</label>
+                    <label class="custom-control-label" for="check-contrast">
+                        {{ $t('plugins.files.image_filters.contrast') }}
+                    </label>
                     <div v-show="filterList['contrast'].active">
                         <input type="range" class="form-control px-0" min="-1" max="1" step="0.003921" v-model="filterList['contrast'].value" @change="toggleFilter('contrast')" />
                     </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-hue" v-model="filterList['hue'].active" @change="toggleFilter('hue')">
-                    <label class="custom-control-label" for="check-hue">Hue</label>
+                    <label class="custom-control-label" for="check-hue">
+                        {{ $t('plugins.files.image_filters.hue') }}
+                    </label>
                     <div v-show="filterList['hue'].active">
                         <input type="range" class="form-control px-0" min="-2" max="2" step="0.002" v-model="filterList['hue'].value" @change="toggleFilter('hue')" />
                     </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-saturation" v-model="filterList['saturation'].active" @change="toggleFilter('saturation')">
-                    <label class="custom-control-label" for="check-saturation">Saturation</label>
+                    <label class="custom-control-label" for="check-saturation">
+                        {{ $t('plugins.files.image_filters.saturation') }}
+                    </label>
                     <div v-show="filterList['saturation'].active">
                         <input type="range" class="form-control px-0" min="-1" max="1" step="0.003921" v-model="filterList['saturation'].value" @change="toggleFilter('saturation')" />
                     </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-noise" v-model="filterList['noise'].active" @change="toggleFilter('noise')">
-                    <label class="custom-control-label" for="check-noise">Noise</label>
+                    <label class="custom-control-label" for="check-noise">
+                        {{ $t('plugins.files.image_filters.noise') }}
+                    </label>
                     <div v-show="filterList['noise'].active">
                         <input type="range" class="form-control px-0" min="0" max="1000" step="1" v-model="filterList['noise'].value" @change="toggleFilter('noise')" />
                     </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-pixelate" v-model="filterList['pixelate'].active" @change="toggleFilter('pixelate')">
-                    <label class="custom-control-label" for="check-pixelate">Pixelate</label>
+                    <label class="custom-control-label" for="check-pixelate">
+                        {{ $t('plugins.files.image_filters.pixelate') }}
+                    </label>
                     <div v-show="filterList['pixelate'].active">
                         <input type="range" class="form-control px-0" min="2" max="20" step="1" v-model="filterList['pixelate'].value" @change="toggleFilter('pixelate')" />
                     </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-blur" v-model="filterList['blur'].active" @change="toggleFilter('blur')">
-                    <label class="custom-control-label" for="check-blur">Blur</label>
+                    <label class="custom-control-label" for="check-blur">
+                        {{ $t('plugins.files.image_filters.blur') }}
+                    </label>
                     <div v-show="filterList['blur'].active">
                         <input type="range" class="form-control px-0" min="0" max="1" step="0.01" v-model="filterList['blur'].value" @change="toggleFilter('blur')" />
                     </div>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-sharpen" v-model="filterList['sharpen'].active" @change="toggleFilter('sharpen')">
-                    <label class="custom-control-label" for="check-sharpen">Sharpen</label>
+                    <label class="custom-control-label" for="check-sharpen">
+                        {{ $t('plugins.files.image_filters.sharpen') }}
+                    </label>
                 </div>
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="check-emboss" v-model="filterList['emboss'].active" @change="toggleFilter('emboss')">
-                    <label class="custom-control-label" for="check-emboss">Emboss</label>
+                    <label class="custom-control-label" for="check-emboss">
+                        {{ $t('plugins.files.image_filters.emboss') }}
+                    </label>
                 </div>
-                <button type="button" class="btn btn-outline-success" @click="storeFiltered">
-                    Save Changes
+                <button type="button" class="btn btn-outline-success mt-2" @click="storeFiltered">
+                    {{ $t('plugins.files.image_filters.save') }}
                 </button>
             </div>
             <div class="px-0":class="panelClasses.image">
