@@ -162,17 +162,7 @@
 
             this.filters = fabric.Image.filters;
 
-            fabric.Image.fromURL(this.localUrl, img => {
-                const maxSize = Math.max(img.width, img.height);
-                if(maxSize > fabric.textureSize) {
-                    fabric.textureSize = maxSize;
-                }
-                this.setOriginalImage(img);
-                this.scaledImg = this.getScaledImage();
-                fabric.filterBackend = fabric.initFilterBackend();
-                this.setImage(this.scaledImg);
-                this.canvas.renderAll();
-            });
+            this.loadImageFromUrl(this.localUrl);
         },
         destroyed() {
             if(this.fullscreenHandler) {
@@ -342,6 +332,19 @@
             unsetImage(img) {
                 this.canvas.remove(img);
             },
+            loadImageFromUrl(url) {
+                fabric.Image.fromURL(url, img => {
+                    const maxSize = Math.max(img.width, img.height);
+                    if(maxSize > fabric.textureSize) {
+                        fabric.textureSize = maxSize;
+                    }
+                    this.setOriginalImage(img);
+                    this.scaledImg = this.getScaledImage();
+                    fabric.filterBackend = fabric.initFilterBackend();
+                    this.setImage(this.scaledImg);
+                    this.canvas.renderAll();
+                });
+            },
             toggleFullscreen() {
                 if(!this.fullscreenHandler) return;
                 this.fullscreenHandler.toggle(document.getElementById('file-container-image'));
@@ -406,6 +409,12 @@
                         }
                     };
                 }
+            }
+        },
+        watch: {
+            localUrl(newUrl, oldUrl) {
+                this.canvas.clear();
+                this.loadImageFromUrl(newUrl);
             }
         }
     }
