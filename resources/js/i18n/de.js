@@ -406,6 +406,8 @@ const de = {
             'entity-layers': 'Entitäts-Ebenen',
             'geometry-name': 'Geometrie #{id}',
             'coords-in-epsg': 'Koordinaten in EPSG:{epsg}',
+            length: 'Länge',
+            area: 'Fläche',
             draw: {
                 point: {
                     desc: 'Punkt anlegen',

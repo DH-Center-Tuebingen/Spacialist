@@ -406,6 +406,8 @@ const en = {
             'entity-layers': 'Entity-Layer',
             'geometry-name': 'Geometry #{id}',
             'coords-in-epsg': 'Coordinates in EPSG:{epsg}',
+            length: 'Length',
+            area: 'Area',
             draw: {
                 point: {
                     desc: 'Draw Point',

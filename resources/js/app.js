@@ -481,6 +481,10 @@ Vue.filter('bytes', function(value, precision = 2) {
     const sizeInUnit = bytes / Math.pow(1024, unitIndex);
     return sizeInUnit.toFixed(precision) +  ' ' + unit;
 });
+Vue.filter('toFixed', function(value, precision = 2) {
+    if(precision < 0) precision = 2;
+    return value ? value.toFixed(precision) : value;
+});
 Vue.filter('bibtexify', function(value, type) {
     let rendered = "<pre><code>";
     if(type) {
