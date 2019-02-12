@@ -86,8 +86,12 @@
                             <span class="font-weight-normal">
                                 ({{ coordinateList.length }})
                             </span>
-                            <i class="fas fa-fw fa-caret-up" v-show="overlayInfo.showCoordinates"></i>
-                            <i class="fas fa-fw fa-caret-down" v-show="!overlayInfo.showCoordinates"></i>
+                            <span v-show="overlayInfo.showCoordinates">
+                                <i class="fas fa-fw fa-caret-up"></i>
+                            </span>
+                            <span v-show="!overlayInfo.showCoordinates">
+                                <i class="fas fa-fw fa-caret-down"></i>
+                            </span>
                         </dt>
                         <dd class="mb-0 mh-300p scroll-y-auto">
                             <table class="table table-striped table-borderless table-sm mb-0" v-if="overlayInfo.showCoordinates">
