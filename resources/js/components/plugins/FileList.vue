@@ -200,14 +200,16 @@
         </div>
 
         <vue-context ref="fileMenu" class="context-menu-wrapper">
-            <ul class="list-group list-group-vue-context" slot-scope="fileScope" v-if="fileScope.data">
-                <li class="list-group-item list-group-item-vue-context" v-for="entry in contextMenu" @click.prevent="entry.callback(fileScope.data.file)">
-                    <i :class="entry.getIconClasses(fileScope.data.file)">
-                        {{ entry.getIconContent(fileScope.data.file) }}
-                    </i>
-                    {{ entry.getLabel(fileScope.data.file) }}
-                </li>
-            </ul>
+            <template v-slot="fileScope">
+                <ul class="list-group list-group-vue-context" v-if="fileScope.data">
+                    <li class="list-group-item list-group-item-vue-context" v-for="entry in contextMenu" @click.prevent="entry.callback(fileScope.data.file)">
+                        <i :class="entry.getIconClasses(fileScope.data.file)">
+                            {{ entry.getIconContent(fileScope.data.file) }}
+                        </i>
+                        {{ entry.getLabel(fileScope.data.file) }}
+                    </li>
+                </ul>
+            </template>
         </vue-context>
     </div>
 </template>
