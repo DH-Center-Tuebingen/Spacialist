@@ -58,7 +58,11 @@ const de = {
             analysis: 'Datenanalyse',
             thesaurex: 'ThesauRex',
             dbwebgen: 'dbWebGen',
-            external: 'Externe Werkzeuge'
+            external: 'Externe Werkzeuge',
+            record: {
+                start: 'Aufnahme starten',
+                stop: 'Aufnahme beenden'
+            }
         },
         settings: {
             title: 'Einstellungen',
@@ -113,6 +117,7 @@ const de = {
         font: 'Schrift',
         mode: 'Modus',
         size: 'Größe',
+        duration: 'Dauer',
         color: 'Farbe',
         format: 'Format',
         version: 'Version',
@@ -181,6 +186,18 @@ const de = {
                 },
                 edit: {
                     title: 'Entität editieren - {name}'
+                },
+                screencast: {
+                    title: 'Screencast speichern',
+                    info: 'Screencast erfolgreich aufgenommen. Was möchtest du damit tun?',
+                    actions: {
+                        local: {
+                            button: 'Lokal speichern'
+                        },
+                        server: {
+                            button: 'In Spacialist speichern'
+                        }
+                    }
                 }
             },
             menu: {

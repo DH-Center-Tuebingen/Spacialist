@@ -64,6 +64,8 @@
 </template>
 
 <script>
+    import { EventBus } from '../event-bus.js';
+
     export default {
         beforeRouteEnter(to, from, next) {
             next(vm => vm.getEntityData(vm.selectedEntity));
@@ -89,10 +91,6 @@
                 required: false,
                 type: Array,
                 default: () => []
-            },
-            eventBus: {
-                required: true,
-                type: Object
             },
             onDelete: {
                 required: false,
@@ -223,7 +221,7 @@
                 }));
             },
             deleteEntity(entity) {
-                this.eventBus.$emit('entity-delete', {
+                EventBus.$emit('entity-delete', {
                     entity: entity
                 });
             },
@@ -243,7 +241,7 @@
                         name: name
                     };
                     $httpQueue.add(() => $http.patch(`entity/${entity.id}/name`, data).then(response => {
-                        this.eventBus.$emit('entity-update', {
+                        EventBus.$emit('entity-update', {
                             type: 'name',
                             entity_id: entity.id,
                             value: name

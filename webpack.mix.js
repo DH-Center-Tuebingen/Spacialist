@@ -59,6 +59,23 @@ mix.js('resources/js/app.js', 'public/js')
          publicPath: '/' + appPath
       }
    })
+   .webpackConfig(webpack => {
+       return {
+           resolve: {
+               alias: {
+                   videojs: 'video.js',
+                   WaveSurfer: 'wavesurfer.js'
+               }
+           },
+           plugins: [
+               new webpack.ProvidePlugin({
+                   videojs: 'video.js/dist/video.cjs.js',
+                   RecordRTC: 'recordrtc',
+                   MediaStreamRecorder: ['recordrtc', 'MediaStreamRecorder']
+               })
+           ]
+       }
+   })
    .autoload({
        jquery: ['$'],
        axios: ['$http']

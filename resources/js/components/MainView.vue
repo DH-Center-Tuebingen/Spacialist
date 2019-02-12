@@ -3,7 +3,6 @@
         <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100" v-can="'view_concepts'">
             <entity-tree
                 class="col px-0"
-                :event-bus="eventBus"
                 :selected-entity="selectedEntity">
             </entity-tree>
         </div>
@@ -11,7 +10,6 @@
             <router-view class="h-100"
                 :selected-entity="selectedEntity"
                 :bibliography="bibliography"
-                :event-bus="eventBus"
                 @detail-updated="setDetailDirty"
             >
             </router-view>
@@ -33,7 +31,6 @@
                 <keep-alive>
                     <component
                         :selected-entity="selectedEntity"
-                        :event-bus="eventBus"
                         :entity-data-loaded="dataLoaded"
                         :is="activePlugin"
                         :params="$route.query"
@@ -71,6 +68,7 @@
 </template>
 
 <script>
+    import { EventBus } from '../event-bus.js';
     import { mapFields } from 'vee-validate';
 
     export default {
@@ -149,7 +147,7 @@
                 if(openTab) {
                     this.setTabOrPlugin(openTab);
                 }
-                this.eventBus.$on('entity-update', this.handleEntityUpdate);
+                EventBus.$on('entity-update', this.handleEntityUpdate);
                 this.initFinished = true;
                 return new Promise(r => r(null));
             },
@@ -229,7 +227,6 @@
                 defaultKey: undefined,
                 plugins: this.$getTabPlugins(),
                 activePlugin: '',
-                eventBus: new Vue(),
                 discardModal: 'discard-changes-modal',
                 discardState: {
                     dirty: false,

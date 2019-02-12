@@ -77,6 +77,8 @@
     import AddNewEntityModal from './modals/AddNewEntity.vue';
     import DeleteEntityModal from './modals/DeleteEntity.vue';
 
+    import { EventBus } from '../event-bus.js';
+
     const DropPosition = {
         empty: 0,
         up: 1,
@@ -113,7 +115,7 @@
                 vm.onAdd(entity, parent);
             };
             this.onContextMenuDelete = function(entity, path) {
-                vm.eventBus.$emit('entity-delete', {
+                EventBus.$emit('entity-delete', {
                     entity: entity
                 });
             };
@@ -137,10 +139,6 @@
                 required: false,
                 type: Number,
                 default: 500
-            },
-            eventBus: {
-                required: true,
-                type: Object
             }
         },
         beforeMount() {
@@ -151,8 +149,8 @@
         },
         mounted() {
             this.init();
-            this.eventBus.$on('entity-update', this.handleEntityUpdate);
-            this.eventBus.$on('entity-delete', this.handleEntityDelete);
+            EventBus.$on('entity-update', this.handleEntityUpdate);
+            EventBus.$on('entity-delete', this.handleEntityDelete);
         },
         methods: {
             setSort(by, dir) {
