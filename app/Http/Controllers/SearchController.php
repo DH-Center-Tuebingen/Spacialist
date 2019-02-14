@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Attribute;
 use App\Bibliography;
 use App\Entity;
 use App\File;
 use App\Geodata;
 use App\ThConceptLabel;
+use App\ThConcept;
 use App\ThLanguage;
 use Illuminate\Http\Request;
 
@@ -105,10 +107,43 @@ class SearchController extends Controller {
         $q = $request->query('q');
         $lang = auth()->user()->getLanguage();
         $langId = ThLanguage::where('short_name', $lang)->value('id');
-        $matches = ThConceptLabel::where('label', 'ilike', '%'.$q.'%')
+        $matches = ThConceptLabel::where('label', 'ilike', "%$q%")
             ->where('language_id', $langId)
             ->with('concept')
             ->get();
         return response()->json($matches);
+    }
+
+    public function searchInAttributes(Request $request) {
+        $q = $request->query('q');
+        $lang = auth()->user()->getLanguage();
+        $langId = ThLanguage::where('short_name', $lang)->value('id');
+        $matches = Attribute::where('datatype', 'string-sc')
+            ->whereHas('thesaurus_concept.labels', function($query) use($q, $langId) {
+                $query->where('label', 'ilike', "%$q%")
+                    ->where('language_id', $langId);
+            })
+            ->with('thesaurus_concept')
+            ->get();
+        return response()->json($matches);
+    }
+
+    public function getConceptChildren($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to search for concepts')
+            ], 403);
+        }
+
+        try {
+            $concept = ThConcept::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This concept does not exist')
+            ], 400);
+        }
+
+        return response()->json(ThConcept::getChildren($concept->concept_url, false));
     }
 }

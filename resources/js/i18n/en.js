@@ -136,6 +136,8 @@ const en = {
         'updated-at': 'Updated',
         options: 'Options',
         type: 'Type',
+        'root-attribute': 'Parent-Attribute',
+        'root-attribute-toggle': 'Use value of an existing attribute as Parent-Element',
         'root-element': 'Parent-Element',
         recursive: 'All descendants (recursive)',
         content: 'Content',
