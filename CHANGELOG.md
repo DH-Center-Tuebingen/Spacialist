@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
   - Save local or upload to Spacialist
 - Dynamic Parent-Element for `string-sc` (Single Choice Dropdown) datatype
   - Reference another SCD attribute in Data-Model-Editor to use it's value as Parent-Element
+- 3D editor
+  - Click on objects to select
+    - Move, rotate, scale objects using handler or GUI
+    - Press `f` to focus on object
 ### Changed
 - Use (Tree-Shaking)[https://webpack.js.org/guides/tree-shaking/] in supported modules
 ### Fixed
