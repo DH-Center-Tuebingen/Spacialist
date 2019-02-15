@@ -136,6 +136,8 @@ const de = {
         'updated-at': 'Aktualisert',
         options: 'Optionen',
         type: 'Typ',
+        'root-attribute': 'Eltern-Attribut',
+        'root-attribute-toggle': 'Wert eines vorhandenen Attributs als Eltern-Element verwenden',
         'root-element': 'Eltern-Element',
         recursive: 'Alle Kind-Elemente (Rekursiv)',
         content: 'Inhalt',

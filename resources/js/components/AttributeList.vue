@@ -115,12 +115,14 @@
                             :customLabel="translateLabel"
                             :disabled="attribute.isDisabled"
                             :hideSelected="true"
+                            :loading="dd.loading[attribute.id]"
                             :multiple="false"
-                            :options="localSelections[attribute.id] || []"
+                            :options="dd.selections[attribute.id] || []"
                             :name="'attribute-'+attribute.id"
                             :placeholder="$t('global.select.placehoder')"
                             :select-label="$t('global.select.select')"
                             :deselect-label="$t('global.select.deselect')"
+                            @open="getOptions(attribute)"
                             @input="(value, id) => checkDependency(attribute.id)">
                         </multiselect>
                     </div>
@@ -345,6 +347,35 @@
                 }
                 return activeClasses;
             },
+            getOptions(attribute) {
+                if(attribute.root_attribute_id) {
+                    const rootAttr = this.localAttributes.find(a => a.id == attribute.root_attribute_id);
+                    if(!rootAttr) {
+                        Vue.set(this.dd.selections, attribute.id, []); // TODO set info
+                        return;
+                    }
+                    const rootValue = this.localValues[attribute.root_attribute_id];
+                    if(!rootValue || !rootValue.value) {
+                        Vue.set(this.dd.selections, attribute.id, []); // TODO set info
+                        return;
+                    }
+                    const rootId = rootValue.value.id;
+                    // if value of root value has not changed since last time,
+                    // keep current selection
+                    if(this.dd.idCache[attribute.id] == rootId) {
+                        return;
+                    }
+                    this.dd.loading[attribute.id] = true;
+                    $httpQueue.add(() => $http.get(`search/selection/${rootValue.value.id}`).then(response => {
+                        this.dd.loading[attribute.id] = false;
+                        this.dd.idCache[attribute.id] = rootId;
+                        Vue.set(this.dd.selections, attribute.id, response.data);
+                    }));
+                } else {
+                    const selection = this.localSelections[attribute.id] || [];
+                    Vue.set(this.dd.selections, attribute.id, selection);
+                }
+            },
             checkDependency(aid) {
                 if(!this.dependencies) return;
                 if(!this.dependencies[aid]) return;
@@ -490,6 +521,11 @@
         },
         data() {
             return {
+                dd: {
+                    selections: {},
+                    idCache: {},
+                    loading: {}
+                },
                 hiddenByDependency: {},
                 hovered: [],
                 uniqueId: Math.random().toString(36),
