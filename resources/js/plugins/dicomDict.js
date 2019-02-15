@@ -3648,5 +3648,3 @@ export default {
     'xFFFEE00D': {'tag': '(FFFE,E00D)', 'vr': '', 'vm': '1', 'name': 'ItemDelimitationItem'},
     'xFFFEE0DD': {'tag': '(FFFE,E0DD)', 'vr': '', 'vm': '1', 'name': 'SequenceDelimitationItem'},
 };
-
-export { dataDictionary };
