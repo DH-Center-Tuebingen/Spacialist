@@ -7,10 +7,16 @@ All notable changes to this project will be documented in this file.
   - Save local or upload to Spacialist
 - Dynamic Parent-Element for `string-sc` (Single Choice Dropdown) datatype
   - Reference another SCD attribute in Data-Model-Editor to use it's value as Parent-Element
+- Image manipulation
+  - Supports several filters (blur, sharpen, color-based filters, ...)
+  - Manipulations can be stored
 ### Changed
 - Use (Tree-Shaking)[https://webpack.js.org/guides/tree-shaking/] in supported modules
+- Improved fullscreen handler code
 ### Fixed
 - Do not fire upload-from-clipboard event in input fields
+- File modal container height
+- Conversion for image formats not supported by PHP
 
 ## 0.6.2
 ### Fixed
