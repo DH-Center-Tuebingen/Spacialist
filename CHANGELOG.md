@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - Position of user menu dropdown
 - Polishing file list layout
 - Compatibility with latest version of vue (2.6)
+- File modal container height
 ### Removed/Deprecated
 - Monument icon in tree and entity-detail view
 
