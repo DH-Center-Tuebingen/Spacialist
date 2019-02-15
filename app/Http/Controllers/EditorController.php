@@ -323,6 +323,7 @@ class EditorController extends Controller {
             'label_id' => 'required|integer|exists:th_concept,id',
             'datatype' => 'required|string',
             'root_id' => 'nullable|integer|exists:th_concept,id',
+            'root_attribute_id' => 'nullable|integer|exists:attributes,id',
             'columns' => 'nullable|json',
             'text' => 'string',
             'recursive' => 'nullable|boolean_string'
@@ -339,6 +340,9 @@ class EditorController extends Controller {
             $pid = $request->get('root_id');
             $purl = ThConcept::find($pid)->concept_url;
             $attr->thesaurus_root_url = $purl;
+        } else if($request->has('root_attribute_id')) {
+            $frid = $request->get('root_attribute_id');
+            $attr->root_attribute_id = $frid;
         }
         if($request->has('text')) {
             $attr->text = $request->get('text');

@@ -232,6 +232,8 @@
                 }
                 if(attribute.root) {
                     data.root_id = attribute.root.concept.id;
+                } else if(attribute.root_id) {
+                    data.root_attribute_id = attribute.root_id;
                 }
                 if(attribute.textContent) {
                     data.text = attribute.textContent;

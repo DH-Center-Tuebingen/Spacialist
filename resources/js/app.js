@@ -107,6 +107,7 @@ import {
     faSortNumericUp,
     faSortUp,
     faSpinner,
+    faStop,
     faStopwatch,
     faSun,
     faSync,
@@ -597,6 +598,7 @@ Vue.component('file-upload', VueUploadComponent);
 import GlobalSearch from './components/GlobalSearch.vue';
 import EntitySearch from './components/EntitySearch.vue';
 import LabelSearch from './components/LabelSearch.vue';
+import AttributeSearch from './components/AttributeSearch.vue';
 import CsvTable from './components/CsvTable.vue';
 
 // Reusable Components
@@ -615,6 +617,7 @@ import ErrorModal from './components/Error.vue';
 Vue.component('global-search', GlobalSearch);
 Vue.component('entity-search', EntitySearch);
 Vue.component('label-search', LabelSearch);
+Vue.component('attribute-search', AttributeSearch);
 Vue.component('csv-table', CsvTable);
 Vue.component('attributes', Attributes);
 Vue.component('entity-tree', EntityTree);
