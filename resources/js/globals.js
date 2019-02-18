@@ -202,7 +202,7 @@ Vue.prototype.$getEntityColors = function(id, alpha = 0.5) {
 
 Vue.prototype.$hasPreference = function(prefKey, prop) {
     const ps = this.$root.$data.preferences;
-    return ps[prefKey] && ps[prefKey][prop];
+    return prop ? ps[prefKey] && ps[prefKey][prop] : ps[prefKey];
 }
 
 Vue.prototype.$getPreference = function(prefKey) {
