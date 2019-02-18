@@ -88,7 +88,8 @@ const en = {
                         wwwc: 'WW/WC'
                     },
                     archive: {
-                        info: 'Click on files to download them. Downloading folders is currently not supported.'
+                        info: 'Click on files to download them. Downloading folders is currently not supported.',
+                        files_in_folder: 'Contains <span class="font-weight-medium">{cnt}</span> files'
                     },
                     undef: {
                         info: `The mime-type <code>{mime}</code> of <span class="font-italic">{name}</span> is currently not supported in Spacialist.
