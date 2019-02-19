@@ -3,51 +3,114 @@
         <div class="h-100 px-0">
             <div :id="id" class="map w-100 h-100">
                 <div class="d-flex flex-column ol-bar ol-right ol-bottom">
-            <div v-if="!drawDisabled" class="d-flex flex-column align-items-end">
-                <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" data-toggle="popover" :data-content="$t('main.map.draw.point.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Point')">
-                    <i class="fas fa-fw fa-map-marker-alt"></i>
-                </button>
-                <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}" data-toggle="popover" :data-content="$t('main.map.draw.linestring.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('LineString')">
-                    <i class="fas fa-fw fa-road"></i>
-                </button>
-                <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" data-toggle="popover" :data-content="$t('main.map.draw.polygon.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Polygon')">
-                    <i class="fas fa-fw fa-draw-polygon"></i>
-                </button>
-                <button type="button" class="btn btn-sm p-1 btn-outline-info" v-show="interactionMode != 'modify'" data-toggle="popover" :data-content="$t('main.map.draw.modify.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('modify')">
-                    <i class="fas fa-fw fa-edit"></i>
-                </button>
-                <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'modify'" data-toggle="popover" :data-content="$t('main.map.draw.modify.pos-desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures">
-                    <i class="fas fa-fw fa-check"></i>
-                </button>
-                <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'modify'" data-toggle="popover" :data-content="$t('main.map.draw.modify.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelUpdateFeatures">
-                    <i class="fas fa-fw fa-times"></i>
-                </button>
-                <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode != 'delete'" data-toggle="popover" :data-content="$t('main.map.draw.delete.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('delete')">
-                    <i class="fas fa-fw fa-trash"></i>
-                </button>
-                <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'delete'" data-toggle="popover" :data-content="$t('main.map.draw.delete.pos-desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures">
-                    <i class="fas fa-fw fa-check"></i>
-                </button>
-                <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'delete'" data-toggle="popover" :data-content="$t('main.map.draw.delete.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
-                    <i class="fas fa-fw fa-times"></i>
-                </button>
-                <button type="button" class="btn btn-sm p-1 btn-outline-primary" data-toggle="popover" :data-content="$t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements">
-                    <i class="fas fa-fw fa-ruler-combined"></i>
-                </button>
+                    <div v-if="!drawDisabled" class="d-flex flex-column align-items-end">
+                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'Point', 'btn-outline-primary': drawType != 'Point'}" data-toggle="popover" :data-content="$t('main.map.draw.point.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Point')">
+                            <i class="fas fa-fw fa-map-marker-alt"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'LineString', 'btn-outline-primary': drawType != 'LineString'}" data-toggle="popover" :data-content="$t('main.map.draw.linestring.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('LineString')">
+                            <i class="fas fa-fw fa-road"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm p-1" :class="{'btn-primary': drawType == 'Polygon', 'btn-outline-primary': drawType != 'Polygon'}" data-toggle="popover" :data-content="$t('main.map.draw.polygon.desc')" data-trigger="hover" data-placement="bottom" @click="toggleDrawType('Polygon')">
+                            <i class="fas fa-fw fa-draw-polygon"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm p-1 btn-outline-info" v-show="interactionMode != 'modify'" data-toggle="popover" :data-content="$t('main.map.draw.modify.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('modify')">
+                            <i class="fas fa-fw fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'modify'" data-toggle="popover" :data-content="$t('main.map.draw.modify.pos-desc')" data-trigger="hover" data-placement="bottom" @click="updateFeatures">
+                            <i class="fas fa-fw fa-check"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'modify'" data-toggle="popover" :data-content="$t('main.map.draw.modify.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelUpdateFeatures">
+                            <i class="fas fa-fw fa-times"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode != 'delete'" data-toggle="popover" :data-content="$t('main.map.draw.delete.desc')" data-trigger="hover" data-placement="bottom" @click="setInteractionMode('delete')">
+                            <i class="fas fa-fw fa-trash"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm p-1 btn-outline-success" v-show="interactionMode == 'delete'" data-toggle="popover" :data-content="$t('main.map.draw.delete.pos-desc')" data-trigger="hover" data-placement="bottom" @click="deleteFeatures">
+                            <i class="fas fa-fw fa-check"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm p-1 btn-outline-danger" v-show="interactionMode == 'delete'" data-toggle="popover" :data-content="$t('main.map.draw.delete.neg-desc')" data-trigger="hover" data-placement="bottom" @click="cancelDeleteFeatures">
+                            <i class="fas fa-fw fa-times"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm p-1 btn-outline-primary" data-toggle="popover" :data-content="$t('main.map.draw.measure.desc')" data-trigger="hover" data-placement="bottom" @click="toggleMeasurements">
+                            <i class="fas fa-fw fa-ruler-combined"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-sm p-1 btn-outline-primary" v-show="linkPossible" @click="link(selectedFeature, selectedEntity)">
+                            <i class="fas fa-fw fa-link"></i> {{ $t('global.link-to', {name: selectedEntity.name}) }}
+                        </button>
+                        <button type="button" class="btn btn-sm p-1 btn-outline-primary" v-show="unlinkPossible" @click="unlink(selectedFeature, linkedEntity)">
+                            <i class="fas fa-fw fa-unlink"></i> <span v-if="linkedEntity">
+                                {{ $t('global.unlink-from', {name: linkedEntity.name}) }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div>
-                <button type="button" class="btn btn-sm p-1 btn-outline-primary" v-show="linkPossible" @click="link(selectedFeature, selectedEntity)">
-                    <i class="fas fa-fw fa-link"></i> {{ $t('global.link-to', {name: selectedEntity.name}) }}
-                </button>
-                <button type="button" class="btn btn-sm p-1 btn-outline-primary" v-show="unlinkPossible" @click="unlink(selectedFeature, linkedEntity)">
-                    <i class="fas fa-fw fa-unlink"></i> <span v-if="linkedEntity">
-                        {{ $t('global.unlink-from', {name: linkedEntity.name}) }}
+            <div :id="id+'-popup'" class="popup popover ol-popover bs-popover-top">
+                <h4 class="popover-header">
+                    <span class="font-weight-medium">
+                        {{ overlayInfo.name }}
                     </span>
-                </button>
+                    <span v-if="overlayInfo.subname">
+                        ({{ overlayInfo.subname }})
+                    </span>
+                </h4>
+                <div class="popover-body">
+                    <dl class="mb-0">
+                        <dt>
+                            {{ $t('global.type') }}
+                        </dt>
+                        <dd>
+                            {{ overlayInfo.type }}
+                        </dd>
+                        <template v-if="isPolygonOverlay || isLineOverlay">
+                            <dt>
+                                <span v-if="isLineOverlay">
+                                    {{ $t('main.map.length') }}
+                                </span>
+                                <span v-else-if="isPolygonOverlay">
+                                    {{ $t('main.map.area') }}
+                                </span>
+                            </dt>
+                            <dd>
+                                {{ overlayInfo.size }}
+                            </dd>
+                        </template>
+                        <dt class="clickable" @click="overlayInfo.showCoordinates = !overlayInfo.showCoordinates">
+                            {{
+                                $t('main.map.coords-in-epsg', {
+                                    epsg: epsg.epsg
+                                })
+                            }}
+                            <span class="font-weight-normal">
+                                ({{ coordinateList.length }})
+                            </span>
+                            <span v-show="overlayInfo.showCoordinates">
+                                <i class="fas fa-fw fa-caret-up"></i>
+                            </span>
+                            <span v-show="!overlayInfo.showCoordinates">
+                                <i class="fas fa-fw fa-caret-down"></i>
+                            </span>
+                        </dt>
+                        <dd class="mb-0 mh-300p scroll-y-auto">
+                            <table class="table table-striped table-borderless table-sm mb-0" v-if="overlayInfo.showCoordinates">
+                                <tbody>
+                                    <tr v-for="c in coordinateList">
+                                        <td class="text-left">
+                                            {{ c.x | toFixed(4) }}
+                                        </td>
+                                        <td class="text-right">
+                                            {{ c.y | toFixed(4) }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="arrow ol-arrow"></div>
             </div>
-        </div>
-            </div>
-            <div :id="id+'-popup'"></div>
             <div :id="id+'-hover-popup'" class="tooltip"></div>
             <div :id="id+'-measure-popup'" class="tooltip tooltip-measure"></div>
         </div>
@@ -190,7 +253,7 @@
             this.setDraw();
             // Enable popovers
             $(function () {
-                $('[data-toggle="popover"]').popover()
+                $('[data-toggle="popover"]').popover();
             });
         },
         methods: {
@@ -361,19 +424,13 @@
                             // config allows only one selected feature
                             if(event.selected.length) {
                                 const f = event.selected[0];
-                                let layer;
-                                const ent = f.get('entity');
-                                if(ent) {
-                                    layer = vm.getLayer(ent.entity_type_id)
-                                } else {
-                                    layer = vm.getUnlinkedLayer();
-                                }
-                                let olLayer = vm.getEntityLayerById(layer.id);
+                                let olLayer = vm.delete.select.getLayer(f);
                                 vm.delete.deletedFeatures[f.ol_uid] = {
                                     feature: f.clone(),
                                     layer: olLayer.get('layer_id')
                                 };
                                 olLayer.getSource().removeFeature(f);
+                                vm.delete.select.getFeatures().clear();
                             }
                         });
                     },
@@ -596,6 +653,19 @@
                         layers: vm.entityLayers
                     });
 
+                    vm.overlay = new Overlay({
+                        element: document.getElementById(`${vm.id}-popup`),
+                        positioning: 'bottom-center',
+                        autoPan: true,
+                        autoPanAnimation: {
+                            duration: 250
+                        }
+                    });
+                    vm.hoverPopup = new Overlay({
+                        element: document.getElementById(`${vm.id}-hover-popup`),
+                        offset: [2, 5]
+                    });
+
                     vm.map = new Map({
                         controls: defaultControls().extend([
                             new FullScreen(),
@@ -620,20 +690,13 @@
                             center: [0, 0],
                             projection: 'EPSG:3857',
                             zoom: 2
-                        })
+                        }),
+                        overlays: [
+                            vm.overlay,
+                            vm.hoverPopup
+                        ]
                     });
                     vm.setExtent();
-
-                    vm.overlay = new Overlay({
-                        element: document.getElementById(`${vm.id}-popup`),
-                        offset: [0, -5]
-                    });
-                    vm.hoverPopup = new Overlay({
-                        element: document.getElementById(`${vm.id}-hover-popup`),
-                        offset: [0, 5] // it's a kind of magic!
-                    });
-                    vm.map.addOverlay(vm.overlay);
-                    vm.map.addOverlay(vm.hoverPopup);
 
                     vm.map.on('pointermove', function(e) {
                         if(e.dragging) return;
@@ -681,21 +744,21 @@
 
                     // Update popover position on map render (e.g. pan, zoom)
                     vm.map.on('postrender', function(e) {
-                        if(!vm.overlay) return;
-                        const element = vm.overlay.getElement();
-                        let popover = $(element).data('bs.popover');
+                        if(!vm.hoverPopup) return;
+                        const element = vm.hoverPopup.getElement();
+                        let popover = $(element).data('bs.tooltip');
                         if(!popover) return;
                         let popper = popover._popper;
                         if(!popper) return;
                         popper.scheduleUpdate();
                     });
 
-                    vm.map.on('click', function(e) {
+                    vm.map.on('singleclick', function(e) {
                         if(!vm.drawDisabled && (vm.draw.getActive() || vm.modify.getActive() || vm.delete.getActive())) {
                             return;
                         }
                         if(vm.measurementActive) return;
-                        const element = vm.overlay.getElement();
+
                         const feature = vm.getFeatureForEvent(e);
                         if(feature) {
                             vm.selectedFeature = feature;
@@ -706,6 +769,11 @@
                         } else {
                             vm.selectedFeature = {};
                         }
+                    });
+
+                    // Set map render state as soon as map is rendered
+                    vm.map.once('rendercomplete', e => {
+                        vm.mapRendered = true;
                     });
 
                     vm.initDraw();
@@ -722,7 +790,9 @@
                     if (vm.selectedEntity && vm.selectedEntity.geodata_id) {
                         vm.selectedFeature = vm.features[vm.selectedEntity.geodata_id];
                     }
-                    vm.updatePopup(vm.selectedFeature);
+                    vm.onMapReady(_ => {
+                        vm.updatePopup(vm.selectedFeature);
+                    });
                 });
                 if(vm.eventBus) {
                     vm.eventBus.$on('entity-update', this.handleEntityUpdate);
@@ -1182,12 +1252,22 @@
                 });
                 return entityExtent;
             },
+            // if map ready, exec callback (cb)
+            // otherwise wait for rendercomplete event to call cb
+            onMapReady(cb) {
+                if(this.mapRendered) {
+                    cb();
+                } else {
+                    this.map.once('rendercomplete', e => {
+                        cb();
+                    });
+                }
+            },
             getFeatureForEvent(e) {
                 const features = this.map.getFeaturesAtPixel(e.pixel, {
                     hitTolerance: 5
                 });
-                if(features) return features[0];
-                return;
+                return features ? features[0] : null;
             },
             toggleDrawType(type) {
                 let oldType = this.drawType;
@@ -1300,14 +1380,13 @@
                 this.setInteractionMode('', true);
             },
             deleteFeatures() {
-                const vm = this;
-                const features = vm.delete.getDeletedFeatures();
+                const features = this.delete.getDeletedFeatures();
                 let wktFeatures = features.map(f => {
-                    vm.snap.removeFeature(f);
-                    vm.wktFormat.writeFeature(f);
+                    this.snap.removeFeature(f);
+                    this.wktFormat.writeFeature(f);
                 });
-                vm.onDeleteend(features, wktFeatures);
-                vm.setInteractionMode('');
+                this.onDeleteend(features, wktFeatures);
+                this.setInteractionMode('');
             },
             cancelDeleteFeatures() {
                 this.setInteractionMode('', true);
@@ -1443,91 +1522,59 @@
                     this.$emit('update:link', null, eid);
                 });
             },
-            geometryToTable(g) {
-                if(!g) return '<table class="table table-striped table-borderless table-sm"></table>';
-                let coordHtml = '<table class="table table-striped table-borderless table-sm"><tbody>';
-                const coords = g.getCoordinates();
-                switch(g.getType()) {
-                    case 'Point':
-                        coordHtml += this.coordinateToTableRow(coords)
-                        break;
-                    case 'LineString':
-                    case 'MultiPoint':
-                        coords.forEach(c => {
-                            coordHtml += this.coordinateToTableRow(c);
-                        });
-                        break;
-                    case 'Polygon':
-                    case 'MultiLineString':
-                        coords.forEach(cg => {
-                            cg.forEach(c => {
-                                coordHtml += this.coordinateToTableRow(c);
-                            });
-                        });
-                        break;
-                    case 'MultiPolygon':
-                        coords.forEach(cg => {
-                            cg.forEach(cg2 => {
-                                cg2.forEach(c => {
-                                    coordHtml += this.coordinateToTableRow(c);
-                                });
-                            });
-                        });
-                        break;
-                }
-                coordHtml += '</tbody></table>';
-                return coordHtml;
-            },
-            coordinateToTableRow(c) {
-                if(!c[0] || !c[1]) return;
+            transformCoordinates(c, clist) {
+                if(!c[0] || !c[1]) {
+                    return null;
+                };
                 const transCoord = transformProj(c, 'EPSG:3857', `EPSG:${this.epsg.epsg}`);
-                const row = `<tr>
-                    <td class="text-left">${transCoord[0].toFixed(4)}</td>
-                    <td class="text-right">${transCoord[1].toFixed(4)}</td>
-                </tr>`;
-                return row;
+                const fixedCoord = {
+                    x: transCoord[0],
+                    y: transCoord[1]
+                };
+                if(clist) {
+                    clist.push(fixedCoord);
+                }
+                return fixedCoord;
             },
+
             updatePopup(f) {
-                const vm = this;
-                const element = vm.overlay.getElement();
+                const element = this.overlay.getElement();
                 if(!f.getId) {
                     $(element).popover('dispose');
+                    this.overlay.setPosition(undefined);
                     return;
                 };
                 const props = f.getProperties();
                 const geometry = f.getGeometry();
-                const geomName = vm.$t('main.map.geometry-name', {id: props.id});
+                const geomName = this.$t('main.map.geometry-name', {id: props.id});
                 const coords = getExtentCenter(geometry.getExtent());
-                vm.overlay.setPosition(coords);
+                this.overlay.setPosition(coords);
 
                 if(props.entity) {
-                    vm.overlayTitle = `${props.entity.name} (${geomName})`;
+                    this.overlayInfo.name = props.entity.name;
+                    this.overlayInfo.subname = geomName;
                 } else {
-                    vm.overlayTitle = geomName;
+                    this.overlayInfo.name = geomName;
+                    this.overlayInfo.subname = '';
                 }
 
-                const coordHtml = vm.geometryToTable(geometry);
-                vm.overlayContent =
-                    `<dl class="mb-0">
-                        <dt>${vm.$t('global.type')}</dt>
-                        <dd>${geometry.getType()}</dd>
-                        <dt>${vm.$t('main.map.coords-in-epsg', {epsg: vm.epsg.epsg})}</dt>
-                        <dd>${coordHtml}</dd>
-                    </dl>`;
+                const length = this.$options.filters.length;
+                let geometryInfo;
+                switch(geometry.getType()) {
+                    case 'LineString':
+                    case 'MultiLineString':
+                        this.overlayInfo.size = length(geometry.getLength()*1000, 2);
+                        break;
+                    case 'Polygon':
+                    case 'MultiPolygon':
+                        this.overlayInfo.size =  length(geometry.getArea()*1000, 2, true);
+                        break;
+                }
 
-                // Wait for variables to be updated
-                vm.$nextTick(function() {
-                    $(element).popover('dispose');
-                    $(element).popover({
-                        placement: 'top',
-                        animation: true,
-                        html: true,
-                        container: vm.viewport || '#map',
-                        content: vm.overlayContent,
-                        title: vm.overlayTitle
-                    });
-                    $(element).popover('show');
-                });
+                this.overlayInfo.type = geometry.getType();
+                this.overlayInfo.coordinates = geometry.getCoordinates();
+
+                $(element).popover('show');
             },
             handleEntityDelete(e) {
                 const id = e.entity.id;
@@ -1567,6 +1614,7 @@
                 drawType: '',
                 interactionMode: '',
                 map: {},
+                mapRendered: false,
                 baselayers: {},
                 overlays: {},
                 overlayLayers: [],
@@ -1578,8 +1626,14 @@
                 features: {},
                 vector: {}, // TODO replace
                 overlay: {},
-                overlayTitle: '',
-                overlayContent: '',
+                overlayInfo: {
+                    name: '',
+                    subname: '',
+                    type: '',
+                    size: '',
+                    coordinates: [],
+                    showCoordinates: false
+                },
                 hoverPopup: {},
                 lastHoveredFeature: {},
                 modify: {},
@@ -1644,11 +1698,56 @@
                 if(!vm.selectedFeature.getProperties) return;
                 const props = vm.selectedFeature.getProperties();
                 return props.entity;
+            },
+            coordinateList() {
+                const cs = this.overlayInfo.coordinates;
+                let coordList = [];
+                let coord;
+                switch(this.overlayInfo.type) {
+                    case 'Point':
+                        this.transformCoordinates(cs, coordList);
+                        break;
+                    case 'LineString':
+                    case 'MultiPoint':
+                        cs.forEach(c => {
+                            this.transformCoordinates(c, coordList);
+                        });
+                        break;
+                    case 'Polygon':
+                    case 'MultiLineString':
+                        cs.forEach(cg => {
+                            cg.forEach(c => {
+                                this.transformCoordinates(c, coordList);
+                            });
+                        });
+                        break;
+                    case 'MultiPolygon':
+                        cs.forEach(cg => {
+                            cg.forEach(innerCg => {
+                                innerCg.forEach(c => {
+                                    this.transformCoordinates(c, coordList);
+                                });
+                            });
+                        });
+                        break;
+                }
+                return coordList;
+            },
+            isPointOverlay() {
+                return this.overlayInfo.type == 'Point' || this.overlayInfo.type == 'MultiPoint'
+            },
+            isLineOverlay() {
+                return this.overlayInfo.type == 'LineString' || this.overlayInfo.type == 'MultiLineString'
+            },
+            isPolygonOverlay() {
+                return this.overlayInfo.type == 'Polygon' || this.overlayInfo.type == 'MultiPolygon'
             }
         },
         watch: {
             selectedFeature: function(newFeature, oldFeature) {
-                this.updatePopup(this.selectedFeature);
+                this.onMapReady(_ => {
+                    this.updatePopup(this.selectedFeature);
+                });
             },
             selectedEntity: function(newEntity, oldEntity) {
                     if (newEntity.geodata_id) {

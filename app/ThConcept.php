@@ -19,8 +19,7 @@ class ThConcept extends Model
         'lasteditor',
     ];
 
-    public static function getMap() {
-        $lang = 'de'; // TODO
+    public static function getMap($lang = 'en') {
         $concepts = \DB::select(\DB::raw("
             WITH summary AS
             (
@@ -78,6 +77,10 @@ class ThConcept extends Model
 
     public function labels() {
         return $this->hasMany('App\ThConceptLabel', 'concept_id');
+    }
+
+    public function notes() {
+        return $this->hasMany('App\ThConceptNote', 'concept_id');
     }
 
     public function narrowers() {

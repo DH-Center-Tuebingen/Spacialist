@@ -24,7 +24,7 @@
                     </div>
                 </div>
                 <div v-if="styleActive">
-                    <div class="form-group row" v-if="selectedStyle.id != 'color'">
+                    <div class="form-group row" v-if="isAttributeBased">
                         <label class="col-form-label col-md-6 text-right" for="style-attribute">
                             {{ $t('global.attribute') }}:
                         </label>
@@ -50,7 +50,7 @@
                         <label class="col-form-label col-md-6 text-right" for="style-colors">
                             {{ $t('plugins.map.gis.props.style.color-ramp') }}:
                         </label>
-                        <div class="col-md-6">
+                        <div class="col-md-6" v-if="isAttributeBased">
                             <multiselect
                                 id="style-colors"
                                 name="style-colors"
@@ -80,8 +80,11 @@
                                 </template>
                             </multiselect>
                         </div>
+                        <div class="col-md-6" v-else-if="isColor">
+                            <input type="color" class="form-control" @change="convertColorToRamp" />
+                        </div>
                     </div>
-                    <div class="form-group row" v-if="selectedStyle.id == 'graduated'">
+                    <div class="form-group row" v-if="isGraduated">
                         <label class="col-form-label col-md-6 text-right" for="style-classes">
                             {{ $t('plugins.map.gis.props.style.classes') }}:
                         </label>
@@ -89,7 +92,7 @@
                             <input class="form-control" type="number" id="style-classes" name="style-classes" min="1" v-model.number="numberOfClasses" />
                         </div>
                     </div>
-                    <div class="form-group row" v-if="selectedStyle.id == 'graduated'">
+                    <div class="form-group row" v-if="isGraduated">
                         <label class="col-form-label col-md-6 text-right" for="style-graduated-mode">
                             {{ $t('global.mode') }}:
                         </label>
@@ -204,6 +207,13 @@
                     'success'
                 );
             },
+            convertColorToRamp(event) {
+                const c = event.target.value;
+                this.selectedColorRamp = {
+                    from: c,
+                    to: c
+                };
+            },
             translateLabel(element, prop) {
                 return this.$translateLabel(element, prop);
             }
@@ -271,7 +281,7 @@
             }
         },
         computed: {
-            attributeList: function() {
+            attributeList() {
                 switch(this.selectedStyle.id) {
                     case 'categorized':
                         return this.attributes;
@@ -291,11 +301,27 @@
                         return [];
                 }
             },
-            styleActive: function() {
+            styleActive() {
                 if(!this.selectedStyle || this.selectedStyle.id == 'none') {
                     return false;
                 }
                 return true;
+            },
+            isGraduated() {
+                return this.selectedStyle && this.selectedStyle.id == 'graduated';
+            },
+            isCategorized() {
+                return this.selectedStyle && this.selectedStyle.id == 'categorized';
+            },
+            isColor() {
+                return this.selectedStyle && this.selectedStyle.id == 'color';
+            },
+            isAttributeBased() {
+                return this.selectedStyle &&
+                    (
+                        this.selectedStyle.id == 'graduated' ||
+                        this.selectedStyle.id == 'categorized'
+                    );
             }
         }
     }

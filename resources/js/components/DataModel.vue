@@ -224,14 +224,14 @@
             attributeFromCreateEvent(event) {
                 const attribute = event.attribute;
                 let data = {};
-                data.label_id = attribute.label.concept.id;
+                data.label_id = attribute.label.concept_id;
                 data.datatype = attribute.type.datatype;
                 data.recursive = attribute.recursive;
                 if(this.needsColumns) {
                     data.columns = JSON.stringify(this.columns);
                 }
                 if(attribute.root) {
-                    data.root_id = attribute.root.concept.id;
+                    data.root_id = attribute.root.concept_id;
                 }
                 if(attribute.textContent) {
                     data.text = attribute.textContent;
@@ -257,30 +257,39 @@
                 this.columns.push(column);
             },
             deleteAttribute(attribute) {
-                const vm = this;
                 const id = attribute.id;
-                $httpQueue.add(() => vm.$http.delete(`/editor/dm/attribute/${id}`).then(function(response) {
-                    let index = vm.attributeList.findIndex(function(a) {
+                $httpQueue.add(() => $http.delete(`/editor/dm/attribute/${id}`).then(response => {
+                    let index = this.attributeList.findIndex(function(a) {
                         return a.id == id;
                     });
                     if(index) {
-                        vm.attributeList.splice(index, 1);
+                        let delAttr = this.attributeList.splice(index, 1);
+                        if(delAttr.length) {
+                            delAttr = delAttr[0];
+                            this.$showToast(
+                                this.$t('main.datamodel.toasts.attribute_deleted.title'),
+                                this.$t('main.datamodel.toasts.attribute_deleted.msg', {
+                                    name: this.$translateConcept(delAttr.thesaurus_url)
+                                }),
+                                'success'
+                            );
+                        }
                     }
-                    vm.hideDeleteAttributeModal();
+                    this.hideDeleteAttributeModal();
                 }));
             },
             createEntityType(entityType) {
-                const vm = this;
-                if(vm.newEntityTypeDisabled) return;
+                if(this.newEntityTypeDisabled) return;
                 const url = entityType.label.concept.concept_url;
                 let data = {
                     'concept_url': url,
                     'is_root': entityType.is_root || false,
                     'geomtype': entityType.geomtype.key
                 };
-                $httpQueue.add(() => vm.$http.post('/editor/dm/entity_type', data).then(function(response) {
-                    vm.localEntityTypes.push(response.data);
-                    vm.hideNewEntityTypeModal();
+                $httpQueue.add(() => $http.post('/editor/dm/entity_type', data).then(response => {
+                    this.$addEntityType(response.data);
+                    this.localEntityTypes = Object.values(this.$getEntityTypes());
+                    this.hideNewEntityTypeModal();
                 }));
             },
             deleteEntityType(entityType) {
@@ -299,6 +308,7 @@
             onCreateAttribute() {
                 $httpQueue.add(() => $http.get('/editor/dm/attribute_types').then(response => {
                     this.attributeTypes = [];
+                    this.columnAttributeTypes = [];
                     for(let i=0; i<response.data.length; i++) {
                         const at = response.data[i];
                         this.attributeTypes.push(at);
@@ -444,7 +454,7 @@
                 modalSelectedEntityType: {},
                 entityCount: 0,
                 allowedTableKeys: [
-                    'string', 'string-sc', 'integer', 'double', 'boolean'
+                    'string', 'string-sc', 'integer', 'double', 'boolean', 'entity'
                 ]
             }
         },

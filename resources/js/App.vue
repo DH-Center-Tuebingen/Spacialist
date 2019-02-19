@@ -45,18 +45,18 @@
                             <router-link :to="{name: 'bibliography'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-book"></i> {{ $t('global.tools.bibliography') }}
                             </router-link>
-                            <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
+                            <template v-if="$hasPreference('prefs.load-extensions', 'data-analysis')">
                                 <div class="dropdown-divider"></div>
                                 <h6 class="dropdown-header">
                                     {{ $t('global.tools.external') }} <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
                                 </h6>
                             </template>
-                            <template v-if="$getPreference('prefs.link-to-thesaurex')">
+                            <template v-if="$hasPreference('prefs.link-to-thesaurex')">
                                 <a class="dropdown-item" :href="$getPreference('prefs.link-to-thesaurex')" target="_blank">
                                     <i class="fas fa-fw fa-paw"></i> {{ $t('global.tools.thesaurex') }}
                                 </a>
                             </template>
-                            <template v-if="$getPreference('prefs.load-extensions')['data-analysis']">
+                            <template v-if="$hasPreference('prefs.load-extensions', 'data-analysis')">
                                 <a class="dropdown-item" href="../db" target="_blank">
                                     <i class="fas fa-fw fa-chart-bar"></i> {{ $t('global.tools.dbwebgen') }}
                                 </a>
@@ -96,7 +96,7 @@
                         <a href="#" class="nav-link dropdown-toggle" id="user-dropdown" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
                             <i class="fas fa-fw fa-user"></i> {{ $auth.user().name }}
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="user-dropdown">
+                        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdown">
                             <router-link :to="{name: 'userpreferences', params: { id: $auth.user().id }}" class="dropdown-item">
                                 <i class="fas fa-fw fa-cog"></i> {{ $t('global.user.settings') }}
                             </router-link>

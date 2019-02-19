@@ -23,4 +23,8 @@ class ThConceptLabel extends Model
     public function concept() {
         return $this->belongsTo('App\ThConcept', 'concept_id');
     }
+
+    public function language() {
+        return $this->belongsTo('App\ThLanguage', 'language_id');
+    }
 }

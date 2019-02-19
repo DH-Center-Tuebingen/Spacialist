@@ -104,11 +104,34 @@ class SearchController extends Controller {
     public function searchInThesaurus(Request $request) {
         $q = $request->query('q');
         $lang = auth()->user()->getLanguage();
-        $langId = ThLanguage::where('short_name', $lang)->value('id');
-        $matches = ThConceptLabel::where('label', 'ilike', '%'.$q.'%')
-            ->where('language_id', $langId)
-            ->with('concept')
+
+        try {
+            $language = ThLanguage::where('short_name', $lang)->firstOrFail();
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Your language does not exist in ThesauRex'
+            ], 400);
+        }
+
+        $langId = $language->id;
+        $builder = th_tree_builder($lang);
+
+        $matches = $builder->whereHas('labels', function($query) use ($langId, $q){
+            $query->where('language_id', $langId)
+                ->where('label', 'ilike', "%$q%");
+        })
             ->get();
+
+        $foreignMatches = th_tree_builder($lang)
+            ->whereDoesntHave('labels', function($query) use ($langId) {
+                $query->where('language_id', $langId);
+            })
+            ->whereHas('labels', function($query) use ($q) {
+                $query->where('label', 'ilike', "%$q%");
+            })
+            ->get();
+
+        $matches = $matches->union($foreignMatches);
         return response()->json($matches);
     }
 }
