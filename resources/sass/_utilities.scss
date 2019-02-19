@@ -18,16 +18,24 @@
     right: 0;
 }
 
-.text-wrap {
+.h-32p {
+    height: 32px !important;
+}
+
+.w-32p {
+    width: 32px !important;
+}
+
+.mh-300p {
+    max-height: 300px !important;
+}
+
+.text-prewrap {
     white-space: pre-wrap;
 }
 
 .text-line {
     white-space: pre-line;
-}
-
-.text-nowrap {
-    white-space: nowrap !important;
 }
 
 .flex-grow-1 {

@@ -474,7 +474,7 @@ class File extends Model
         $archive = UnifiedArchive::open($path);
         $fileList = $this->getContainingFiles($archive->getFileNames(), $archive);
 
-        return self::convertFileListToArray($fileList);
+        return $fileList;
     }
 
     public function getArchivedFileContent($filepath) {
@@ -513,38 +513,48 @@ class File extends Model
     }
 
     private function getContainingFiles($files, $archive, $prefix = '') {
-        $tree = [];
-        $subfolders = [];
-        $folders = [];
+        $tree = new \stdClass();
+        $tree->children = [];
+        $tree->isDirectory = true;
         foreach($files as $file) {
-            $isInSubfolder = false;
-            foreach($subfolders as $fkey) {
-                if(starts_with($file, $fkey)) {
-                    $isInSubfolder = true;
-                    $subname = substr($file, strlen($fkey));
-                    $folders[$fkey][] = $subname;
-                    break;
+            // explode folders
+            $parentFolders = explode("/", $file);
+            $currentFile = array_pop($parentFolders);
+            $currentFolderString = '';
+            $currentFolder = $tree;
+            foreach($parentFolders as $pf) {
+                $currentFolderString .= "$pf/";
+                $index = false;
+                for($i=0; $i<count($currentFolder->children); $i++) {
+                    $curr = $currentFolder->children[$i];
+                    if($curr->isDirectory && $curr->cleanFilename == $pf) {
+                        $index = $i;
+                        break;
+                    }
                 }
-            }
-            if($isInSubfolder) continue;
-            $isDirectory = false;
-            // check if "file" is folder
-            if(ends_with($file, '/')) {
-                $isDirectory = true;
-                $subfolders[] = $file;
-                $folders[$file] = [];
-            } else {
-                $isDirectory = false;
+                if($index === false) {
+                    $newFolder = new \stdClass();
+                    $newFolder->children = [];
+                    $newFolder->isDirectory = true;
+                    $newFolder->path = $currentFolderString;
+                    $newFolder->compressedSize = 0;
+                    $newFolder->uncompressedSize = 0;
+                    $newFolder->modificationTime = time();
+                    $newFolder->isCompressed = false;
+                    $newFolder->filename = $currentFolderString;
+                    $newFolder->mtime = time();
+                    $newFolder->cleanFilename = $pf;
+                    $currentFolder->children[] = $newFolder;
+                    $index = count($currentFolder->children) - 1;
+                }
+                $currentFolder = $currentFolder->children[$index];
             }
             $data = $archive->getFileData($prefix.$file);
-            $data->is_directory = $isDirectory;
-            $data->clean_filename = $file;
-            $tree[$file] = $data;
+            $data->isDirectory = false;
+            $data->cleanFilename = $currentFile;
+            $currentFolder->children[] = $data;
         }
-        foreach($folders as $fkey => $subfiles) {
-            $tree[$fkey]->children = $this->getContainingFiles($subfiles, $archive, $prefix.$fkey);
-        }
-        return $tree;
+        return $tree->children;
     }
 
     public function deleteFile() {

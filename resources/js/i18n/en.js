@@ -273,8 +273,12 @@ const en = {
                     msg: '{name} successfully updated.'
                 },
                 'added-attribute': {
-                    title: 'Attribut hinzugefügt',
-                    msg: '{name} erfolgreich zu {etName} hinzugefügt.'
+                    title: 'Attribute added',
+                    msg: '{name} successfully added to {etName}.'
+                },
+                attribute_deleted: {
+                    title: 'Attribute deleted',
+                    msg: '{name} successfully deleted.'
                 }
             },
             attribute: {
@@ -421,6 +425,8 @@ const en = {
             'entity-layers': 'Entity-Layer',
             'geometry-name': 'Geometry #{id}',
             'coords-in-epsg': 'Coordinates in EPSG:{epsg}',
+            length: 'Length',
+            area: 'Area',
             draw: {
                 point: {
                     desc: 'Draw Point',

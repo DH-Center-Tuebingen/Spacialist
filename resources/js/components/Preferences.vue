@@ -311,6 +311,7 @@
                         }),
                         'success'
                     );
+                    this.$setPreference(pref.label, pref.value);
                 });
             }
         },

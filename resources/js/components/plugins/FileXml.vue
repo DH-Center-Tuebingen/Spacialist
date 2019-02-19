@@ -19,7 +19,7 @@
                 <textarea v-validate="" name="editTextarea" class="w-100 h-100 p-2" v-model="content"></textarea>
             </div>
             <div class="col px-1">
-                <pre class="mb-0 h-100 text-left" v-highlightjs="content" v-if="!renderHtml"><code class="h-100 text-wrap" :class="{nohighlight: disableHighlighting}"></code></pre>
+                <pre class="mb-0 h-100 text-left" v-highlightjs="content" v-if="!renderHtml"><code class="h-100 text-prewrap" :class="{nohighlight: disableHighlighting}"></code></pre>
                 <iframe v-else :srcdoc="content" class="border-0 h-100 w-100"></iframe>
             </div>
         </div>
