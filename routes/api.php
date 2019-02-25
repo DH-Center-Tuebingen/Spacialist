@@ -33,7 +33,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
 // CONTEXT
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/entity')->group(function() {
-    Route::get('/top', 'EntityController@getTopEntities')->where('id', '[0-9]+');
+    Route::get('/top', 'EntityController@getTopEntities');
     Route::get('/{id}', 'EntityController@getEntity')->where('id', '[0-9]+');
     Route::get('/entity_type/{ctid}/data/{aid}', 'EntityController@getDataForEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/data', 'EntityController@getData')->where('id', '[0-9]+');

@@ -67,6 +67,13 @@ class EntityController extends Controller {
                 'error' => __('This entity type does not exist')
             ], 400);
         }
+        try {
+            Attribute::findOrFail($aid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This attribute does not exist')
+            ], 400);
+        }
         $entities = Entity::where('entity_type_id', $ctid)->get();
         $entityIds = $entities->pluck('id')->toArray();
         $values = AttributeValue::with(['attribute'])
@@ -107,6 +114,13 @@ class EntityController extends Controller {
             ], 400);
         }
         if(isset($aid)) {
+            try {
+                Attribute::findOrFail($aid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This attribute does not exist')
+                ], 400);
+            }
             $attributes = AttributeValue::with(['attribute'])
                 ->where('entity_id', $id)
                 ->where('attribute_id', $aid)
@@ -265,6 +279,9 @@ class EntityController extends Controller {
         }
         $entity->lasteditor = $user->name;
         $entity->save();
+
+        // TODO workaround to get all (optional, not part of request) attributes
+        $entity = Entity::find($entity->id);
 
         $serialAttributes = $entity->entity_type
                 ->attributes()

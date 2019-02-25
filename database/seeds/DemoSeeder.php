@@ -39,5 +39,9 @@ class DemoSeeder extends Seeder
         $this->call(AttributeValuesTableSeeder::class);
         $this->call(EntityFilesTableSeeder::class);
         $this->call(ReferencesTableSeeder::class);
+
+        if(env('DB_CONNECTION') === 'pgsql') {
+            $this->call(FixSequencesSeeder::class);
+        }
     }
 }
