@@ -1,7 +1,5 @@
 # Spacialist
 
-[![Join the chat at https://gitter.im/eScienceCenter/Spacialist](https://badges.gitter.im/eScienceCenter/Spacialist.svg)](https://gitter.im/eScienceCenter/Spacialist?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 Spacialist is a customizable Web-based platform for collecting, managing, analyzing and publishing research data with a focus on the integration of object-related and spatial data for the digital humanities.
 
 ## Installation
