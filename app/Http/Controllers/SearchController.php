@@ -56,8 +56,7 @@ class SearchController extends Controller {
                 return $m;
             });
         } else {
-            $files = File::search($q);
-            $files = $files->get();
+            $files = File::search($q)->get();
             $files->map(function($f) {
                 $f->group = 'files';
                 $f->setFileInfo();
@@ -104,8 +103,14 @@ class SearchController extends Controller {
     }
 
     public function searchInThesaurus(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts_th')) {
+            return response()->json([
+                'error' => __('You do not have the permission to search for concepts')
+            ], 403);
+        }
         $q = $request->query('q');
-        $lang = auth()->user()->getLanguage();
+        $lang = $user->getLanguage();
 
         try {
             $language = ThLanguage::where('short_name', $lang)->firstOrFail();
@@ -133,7 +138,7 @@ class SearchController extends Controller {
             })
             ->get();
 
-        $matches = $matches->union($foreignMatches);
+        $matches = $matches->merge($foreignMatches);
         return response()->json($matches);
     }
 
@@ -148,6 +153,18 @@ class SearchController extends Controller {
             })
             ->with('thesaurus_concept')
             ->get();
+
+        $foreignMatches = Attribute::where('datatype', 'string-sc')
+            ->whereDoesntHave('thesaurus_concept.labels', function($query) use ($langId) {
+                $query->where('language_id', $langId);
+            })
+            ->whereHas('thesaurus_concept.labels', function($query) use ($q) {
+                $query->where('label', 'ilike', "%$q%");
+            })
+            ->with('thesaurus_concept')
+            ->get();
+
+        $matches = $matches->merge($foreignMatches);
         return response()->json($matches);
     }
 
