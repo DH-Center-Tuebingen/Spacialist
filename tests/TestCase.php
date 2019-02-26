@@ -15,7 +15,7 @@ abstract class TestCase extends BaseTestCase
     use DatabaseTransactions;
 
     protected $connectionsToTransact = [
-        'pgsql'
+        'testing'
     ];
 
     public $user = null;

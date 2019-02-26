@@ -40,7 +40,7 @@ class DemoSeeder extends Seeder
         $this->call(EntityFilesTableSeeder::class);
         $this->call(ReferencesTableSeeder::class);
 
-        if(env('DB_CONNECTION') === 'pgsql') {
+        if(\DB::connection()->getDriverName() === 'pgsql') {
             $this->call(FixSequencesSeeder::class);
         }
     }

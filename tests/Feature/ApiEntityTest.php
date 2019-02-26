@@ -371,7 +371,7 @@ class ApiEntityTest extends TestCase
             'entity_type_id' => 3,
             'root_entity_id' => 1
         ]);
-        
+
         $cnt = Entity::count();
         $this->assertEquals($cnt, 9);
     }

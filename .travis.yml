@@ -1,0 +1,27 @@
+language: php
+
+services:
+    - postgresql
+
+addons:
+  postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
+
+php:
+    - '7.1'
+    - '7.2'
+
+before_script:
+  - cp .env.travis .env.testing
+  - psql -c 'create database myapp_test;' -U postgres
+  - composer self-update
+  - composer install --no-interaction
+  - php artisan key:generate --env=testing
+  - php artisan jwt:secret --env=testing
+  - php artisan migrate --env=testing
+  - php artisan db:seed --class=DemoSeeder --env=testing
+
+script:
+- vendor/bin/phpunit
