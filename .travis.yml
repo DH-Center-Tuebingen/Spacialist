@@ -14,14 +14,18 @@ php:
     - '7.2'
 
 before_script:
-  - cp .env.travis .env.testing
-  - psql -c 'create database myapp_test;' -U postgres
-  - composer self-update
-  - composer install --no-interaction
-  - php artisan key:generate --env=testing
-  - php artisan jwt:secret --env=testing
-  - php artisan migrate --env=testing
-  - php artisan db:seed --class=DemoSeeder --env=testing
+    - mkdir -p build/logs
+    - cp .env.travis .env.testing
+    - psql -c 'create database myapp_test;' -U postgres
+    - composer self-update
+    - composer install --no-interaction
+    - php artisan key:generate --env=testing
+    - php artisan jwt:secret --env=testing
+    - php artisan migrate --env=testing
+    - php artisan db:seed --class=DemoSeeder --env=testing
 
 script:
-- vendor/bin/phpunit
+    - vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+
+after_success:
+    - vendor/bin/php-coveralls -v

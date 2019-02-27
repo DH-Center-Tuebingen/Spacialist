@@ -1,3 +1,15 @@
+<p>
+    <a href='https://coveralls.io/github/eScienceCenter/Spacialist?branch=0.7-giza'>
+        <img src='https://coveralls.io/repos/github/eScienceCenter/Spacialist/badge.svg?branch=0.7-giza' alt='Coverage Status' />
+    </a>
+    <a href='https://travis-ci.com/eScienceCenter/Spacialist'>
+        <img src='https://travis-ci.com/eScienceCenter/Spacialist.svg?branch=0.7-giza' alt='Build Status' />
+    </a>
+    <a href='https://david-dm.org/eScienceCenter/Spacialist'>
+        <img src='https://david-dm.org/eScienceCenter/Spacialist.svg' alt='Dependency Status' />
+    </a>
+</p>
+
 # Spacialist
 
 Spacialist is a customizable Web-based platform for collecting, managing, analyzing and publishing research data with a focus on the integration of object-related and spatial data for the digital humanities.
