@@ -68,16 +68,14 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 // EDITOR
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/editor')->group(function() {
     Route::get('/dm/entity_type/occurrence_count/{id}', 'EditorController@getEntityTypeOccurrenceCount')->where('id', '[0-9]+');
-    Route::get('/dm/attribute/occurrence_count/{aid}', 'EditorController@getAttributeOccurrenceCount')->where('aid', '[0-9]+');
-    Route::get('/dm/attribute/occurrence_count/{aid}/{ctid}', 'EditorController@getAttributeOccurrenceCount')->where('aid', '[0-9]+')->where('ctid', '[0-9]+');
+    Route::get('/dm/attribute/occurrence_count/{aid}', 'EditorController@getAttributeValueOccurrenceCount')->where('aid', '[0-9]+');
+    Route::get('/dm/attribute/occurrence_count/{aid}/{ctid}', 'EditorController@getAttributeValueOccurrenceCount')->where('aid', '[0-9]+')->where('ctid', '[0-9]+');
     Route::get('/dm/entity_type/top', 'EditorController@getTopEntityTypes');
-    Route::get('/dm/entity_type/parent/{cid}', 'EditorController@getEntityTypesByParent')->where('cid', '[0-9]+');
     Route::get('/dm/attribute', 'EditorController@getAttributes');
     Route::get('/dm/attribute_types', 'EditorController@getAttributeTypes');
     Route::get('/entity_type/{id}', 'EditorController@getEntityType')->where('id', '[0-9]+');
     Route::get('/entity_type/{id}/attribute', 'EditorController@getEntityTypeAttributes')->where('id', '[0-9]+');
     Route::get('/attribute/{id}/selection', 'EditorController@getAttributeSelection')->where('id', '[0-9]+');
-    Route::get('/dm/entity_type/{ctid}/attribute/{aid}/dependency', 'EditorController@getDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/dm/geometry', 'EditorController@getAvailableGeometryTypes');
 
     Route::post('/dm/entity_type', 'EditorController@addEntityType');

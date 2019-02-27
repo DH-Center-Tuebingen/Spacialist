@@ -24,7 +24,7 @@ class EditorController extends Controller {
         return response()->json($cnt);
     }
 
-    public function getAttributeOccurrenceCount($aid, $ctid = -1) {
+    public function getAttributeValueOccurrenceCount($aid, $ctid = -1) {
         $query = AttributeValue::where('attribute_id', $aid);
         if($ctid > -1) {
             $query->where('entity_type_id', $ctid);
@@ -152,26 +152,6 @@ class EditorController extends Controller {
             ], 403);
         }
         $entityTypes = EntityType::where('is_root', true)->get();
-        return response()->json($entityTypes);
-    }
-
-    public function getEntityTypesByParent($cid) {
-        $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
-            return response()->json([
-                'error' => __('You do not have the permission to view entity data')
-            ], 403);
-        }
-        try {
-            $parentEntity = Entity::findOrFail($cid);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity-type does not exist')
-            ], 400);
-        }
-        $id = $parentEntity->entity_type_id;
-        $relations = EntityTypeRelation::where('parent_id', $id)->pluck('child_id')->toArray();
-        $entityTypes = EntityType::find($relations);
         return response()->json($entityTypes);
     }
 
