@@ -29,6 +29,17 @@ abstract class TestCase extends BaseTestCase
         $this->getUserToken();
     }
 
+    protected function refreshToken($response) {
+        $this->token = substr($response->headers->get('authorization'), 7);
+    }
+
+    protected function getStreamedContent($response) {
+        ob_start();
+        $response->sendContent();
+        $content = ob_get_clean();
+        return $content;
+    }
+
     public function getUserToken() {
         if(!isset($this->user)) {
             $this->user = User::find(1);

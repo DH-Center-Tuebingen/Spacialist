@@ -21,6 +21,7 @@ class ApiEditorTest extends TestCase
             ])
             ->get('/api/v1/editor/dm/entity_type/occurrence_count/5');
 
+        $this->refreshToken($response);
         $response->assertStatus(200);
         $response->assertExactJson([3]);
     }
