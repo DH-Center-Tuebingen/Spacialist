@@ -11,6 +11,7 @@ use App\ThConceptLabel;
 use App\ThConcept;
 use App\ThLanguage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 
 class SearchController extends Controller {
@@ -29,28 +30,28 @@ class SearchController extends Controller {
             ], 403);
         }
         $q = $request->query('q');
-        if(starts_with($q, self::$shebangPrefix['bibliography'])) {
-            $matches = Bibliography::search(str_after($q, self::$shebangPrefix['bibliography']))->get();
+        if(Str::startsWith($q, self::$shebangPrefix['bibliography'])) {
+            $matches = Bibliography::search(Str::after($q, self::$shebangPrefix['bibliography']))->get();
             $matches->map(function($m) {
                 $m->group = 'bibliography';
                 return $m;
             });
-        } else if(starts_with($q, self::$shebangPrefix['entities'])) {
-            $matches = Entity::search(str_after($q, self::$shebangPrefix['entities']))->get();
+        } else if(Str::startsWith($q, self::$shebangPrefix['entities'])) {
+            $matches = Entity::search(Str::after($q, self::$shebangPrefix['entities']))->get();
             $matches->map(function($m) {
                 $m->group = 'entities';
                 return $m;
             });
-        } else if(starts_with($q, self::$shebangPrefix['files'])) {
-            $files = File::search(str_after($q, self::$shebangPrefix['files']));
+        } else if(Str::startsWith($q, self::$shebangPrefix['files'])) {
+            $files = File::search(Str::after($q, self::$shebangPrefix['files']));
             $matches = $files->get();
             $matches->map(function($m) {
                 $m->group = 'files';
                 $m->setFileInfo();
                 return $m;
             });
-        } else if(starts_with($q, self::$shebangPrefix['geodata'])) {
-            $matches = Geodata::search(str_after($q, self::$shebangPrefix['geodata']))->get();
+        } else if(Str::startsWith($q, self::$shebangPrefix['geodata'])) {
+            $matches = Geodata::search(Str::after($q, self::$shebangPrefix['geodata']))->get();
             $matches->map(function($m) {
                 $m->group = 'geodata';
                 return $m;

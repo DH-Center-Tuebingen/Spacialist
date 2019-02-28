@@ -8,6 +8,7 @@ use App\ThConcept;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use lsolesen\pel\Pel;
 use lsolesen\pel\PelJpeg;
 use lsolesen\pel\PelTiff;
@@ -861,25 +862,25 @@ class File extends Model
     }
 
     public function isImage() {
-        return starts_with($this->mime_type, 'image/');
+        return Str::startsWith($this->mime_type, 'image/');
     }
 
     public function isAudio() {
-        return starts_with($this->mime_type, 'audio/');
+        return Str::startsWith($this->mime_type, 'audio/');
     }
 
     public function isVideo() {
-        return starts_with($this->mime_type, 'video/');
+        return Str::startsWith($this->mime_type, 'video/');
     }
 
     public function isPdf() {
         return $this->mime_type == 'application/pdf' ||
-            ends_with($this->name, '.pdf');
+            Str::endsWith($this->name, '.pdf');
     }
 
     public function isXml() {
         return in_array($this->mime_type, ['application/xml', 'text/xml', 'text/xml-external-parsed-entity']) ||
-            ends_with($this->name, '.xml');
+            Str::endsWith($this->name, '.xml');
     }
 
     public function isHtml() {
@@ -888,7 +889,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -903,7 +904,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -918,7 +919,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -932,7 +933,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -943,12 +944,12 @@ class File extends Model
     public function isText() {
         $mimeTypes = ['application/javascript', 'application/json', 'application/x-latex', 'application/x-tex', 'text/comma-separated-values', 'text/csv', 'text/x-markdown', 'text/markdown'];
         $extensions = ['.txt', '.md', '.markdown', '.mkd', '.csv', '.json', '.css', '.htm', '.html', '.shtml', '.js', '.rtx', '.rtf', '.tsv', '.xml'];
-        $is = starts_with($this->mime_type, 'text/');
+        $is = Str::startsWith($this->mime_type, 'text/');
         if($is) return true;
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -962,7 +963,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -976,7 +977,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -990,7 +991,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
