@@ -1,5 +1,6 @@
 <template>
     <div class="h-100 d-flex flex-column">
+        <entity-breadcrumbs class="mb-2 small" :entity="selectedEntity" v-if="selectedEntity.parentIds.length > 1"></entity-breadcrumbs>
         <div class="d-flex align-items-center justify-content-between">
             <h3 class="mb-0" @mouseenter="onEntityHeaderHover(true)" @mouseleave="onEntityHeaderHover(false)">
                 <span v-if="!selectedEntity.editing">

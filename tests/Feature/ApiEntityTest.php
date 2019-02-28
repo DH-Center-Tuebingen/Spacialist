@@ -36,7 +36,8 @@ class ApiEntityTest extends TestCase
                 'lasteditor',
                 'created_at',
                 'updated_at',
-                'parentIds'
+                'parentIds',
+                'parentNames'
             ]
         ]);
     }
@@ -63,7 +64,8 @@ class ApiEntityTest extends TestCase
             'lasteditor' => 'Admin',
             'created_at' => '2017-12-20 17:10:34',
             'updated_at' => '2017-12-31 16:10:56',
-            'parentIds' => [1]
+            'parentIds' => [1],
+            'parentNames' => ['Site A']
         ]);
     }
 

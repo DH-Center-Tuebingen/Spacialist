@@ -58,6 +58,14 @@
     cursor: not-allowed;
 }
 
+.breadcrumb-item-slash {
+    + .breadcrumb-item-slash {
+    &::before {
+      content: quote("/");
+    }
+  }
+}
+
 .of-visible, .visible-overflow .v--modal {
     overflow: visible !important;
 }

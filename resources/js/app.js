@@ -605,6 +605,7 @@ import EntityTree from './components/EntityTree.vue';
 import EntityTypes from './components/EntityTypeList.vue';
 import OlMap from './components/OlMap.vue';
 import ColorGradient from './components/Gradient.vue';
+import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
 
 // Page Components
 import EntityReferenceModal from './components/EntityReferenceModal.vue';
@@ -622,6 +623,7 @@ Vue.component('entity-tree', EntityTree);
 Vue.component('entity-types', EntityTypes);
 Vue.component('ol-map', OlMap);
 Vue.component('color-gradient', ColorGradient);
+Vue.component('entity-breadcrumbs', EntityBreadcrumbs);
 Vue.component('entity-reference-modal', EntityReferenceModal);
 Vue.component('discard-changes-modal', DiscardChangesModal);
 Vue.component('about-dialog', AboutDialog);
@@ -735,6 +737,16 @@ Vue.filter('bytes', function(value, precision = 2) {
 Vue.filter('toFixed', function(value, precision = 2) {
     if(precision < 0) precision = 2;
     return value ? value.toFixed(precision) : value;
+});
+Vue.filter('truncate', function(str, length = 80, ellipses = '…') {
+    if(length < 0) length = 80;
+    if(str) {
+        if(str.length <= length) {
+            return str;
+        }
+        return str.slice(0, length) + ellipses;
+    }
+    return str;
 });
 Vue.filter('bibtexify', function(value, type) {
     let rendered = "<pre><code>";
