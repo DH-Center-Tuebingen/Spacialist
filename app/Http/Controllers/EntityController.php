@@ -212,24 +212,6 @@ class EntityController extends Controller {
         return response()->json($entity->parentIds);
     }
 
-    public function getChildren($id) {
-        $user = auth()->user();
-        if(!$user->can('view_concepts')) {
-            return response()->json([
-                'error' => __('You do not have the permission to get an entity\'s successors')
-            ], 403);
-        }
-        try {
-            $entity = Entity::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity does not exist')
-            ], 400);
-        }
-        $children = Entity::where('root_entity_id', $id)->get();
-        return response()->json($children);
-    }
-
     public function getEntitiesByParent($id) {
         return Entity::getEntitiesByParent($id);
     }
@@ -328,7 +310,7 @@ class EntityController extends Controller {
             ], 400);
         }
 
-        foreach($request->request as $pid => $patch) {
+        foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
             $attr = Attribute::find($aid);
@@ -339,7 +321,9 @@ class EntityController extends Controller {
                         ['attribute_id', '=', $aid]
                     ])->first();
                     $attrval->delete();
-                    return response()->json(null, 204);
+                    // also break outer foreach, no further action required
+                    // for deleted attribute values
+                    break 2;
                 case 'add':
                     $value = $patch['value'];
                     $attrval = new AttributeValue();
@@ -426,27 +410,25 @@ class EntityController extends Controller {
         $this->validate($request, AttributeValue::patchRules);
 
         try {
-            $entity = Entity::findOrFail($id);
+            Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist')
             ], 400);
         }
         try {
-            $attribute = Attribute::findOrFail($aid);
+            Attribute::findOrFail($aid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This attribute does not exist')
             ], 400);
         }
 
-        $attrs = AttributeValue::where('entity_id', $id)
+        $attrValue = AttributeValue::where('entity_id', $id)
             ->where('attribute_id', $aid)
-            ->get();
+            ->first();
         $values = $request->only(array_keys(AttributeValue::patchRules));
-        foreach($attrs as $a) {
-            $a->patch($values);
-        }
+        $attrValue->patch($values);
 
         return response()->json(null, 204);
     }
@@ -485,11 +467,27 @@ class EntityController extends Controller {
         }
         $this->validate($request, [
             'rank' => 'required|integer',
-            'parent_id' => 'nullable|integer|exists:entities,id|different:id',
+            'parent_id' => 'nullable|integer|exists:entities,id',
         ]);
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
 
         $rank = $request->get('rank');
         $parent_id = $request->get('parent_id');
+
+        try {
+            $parent = Entity::findOrFail($parent_id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
         Entity::patchRanks($rank, $id, $parent_id, $user);
         return response()->json(null, 204);
     }

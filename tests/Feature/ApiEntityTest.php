@@ -6,6 +6,7 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
+use App\AttributeValue;
 use App\Entity;
 
 class ApiEntityTest extends TestCase
@@ -13,7 +14,7 @@ class ApiEntityTest extends TestCase
     // Testing GET requests
 
     /**
-     * A basic test example.
+     * Test getting all top entities.
      *
      * @return void
      */
@@ -43,7 +44,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * Test getting entity (id=1).
      *
      * @return void
      */
@@ -70,7 +71,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * Test getting entity (id=2).
      *
      * @return void
      */
@@ -87,7 +88,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * Test getting non-existing entity.
      *
      * @return void
      */
@@ -102,7 +103,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * Test getting attribute values (id=15) of an entity-type (id=3).
      *
      * @return void
      */
@@ -137,7 +138,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * Test getting data of an entity (id=1).
      *
      * @return void
      */
@@ -169,7 +170,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * Test getting data of an non-existing entity.
      *
      * @return void
      */
@@ -187,7 +188,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * Test getting data of an attribute (id=15) of an entity (id=1).
      *
      * @return void
      */
@@ -219,7 +220,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * Test getting data with wrong attribute ID.
      *
      * @return void
      */
@@ -237,7 +238,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * Test getting IDs of all parents (and own id) of an entity (id=5).
      *
      * @return void
      */
@@ -255,7 +256,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-     * A basic test example.
+     * Test getting all sub-entities/children of an entity (id=2).
      *
      * @return void
      */
@@ -294,50 +295,10 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function testEntityChildrenEndpoint()
-    {
-        $response = $this->withHeaders([
-                'Authorization' => "Bearer $this->token"
-            ])
-            ->get('/api/v1/entity/2/children');
-
-        $response->assertJsonCount(3);
-        $response->assertJsonStructure([
-            [
-                'id',
-                'name',
-                'entity_type_id',
-                'root_entity_id',
-                'geodata_id',
-                'rank',
-                'lasteditor',
-                'created_at',
-                'updated_at',
-                'parentIds'
-            ]
-        ]);
-        $response->assertJson([
-            [
-                'id' => 3
-            ],
-            [
-                'id' => 4
-            ],
-            [
-                'id' => 5
-            ],
-        ]);
-    }
-
     // Testing POST requets
 
     /**
-    * A basic test example.
+    * Test adding a new entity.
     *
     * @return void
     */
@@ -378,10 +339,182 @@ class ApiEntityTest extends TestCase
         $this->assertEquals($cnt, 9);
     }
 
+    // Testing PATCH requets
+
+    /**
+    * Test modifying (add, replace, remove) attributes of an entity (id=4).
+    *
+    * @return void
+    */
+    public function testPatchAttributesEndpoint()
+    {
+        $entity = Entity::with('attributes')->find(4);
+
+        foreach($entity->attributes as $attr) {
+            if($attr->id == 11) {
+                $this->assertEquals(10, $attr->pivot->int_val);
+            }
+            else if($attr->id == 9) {
+                $val = json_decode($attr->pivot->json_val);
+                $this->assertEquals(45, $val->B);
+                $this->assertEquals(40, $val->H);
+                $this->assertEquals('cm', $val->unit);
+            }
+        }
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/entity/4/attributes', [
+            [
+                'params' => [
+                    'id' => 39,
+                    'aid' => 9,
+                    'cid' => 4
+                ],
+                'op' => 'remove'
+            ],
+            [
+                'params' => [
+                    'id' => 37,
+                    'aid' => 11,
+                    'cid' => 4
+                ],
+                'op' => 'replace',
+                'value' => 2
+            ],
+            [
+                'params' => [
+                    'aid' => 19,
+                    'cid' => 4
+                ],
+                'op' => 'add',
+                'value' => 'Test'
+            ]
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'id',
+            'name',
+            'entity_type_id',
+            'root_entity_id',
+            'geodata_id',
+            'rank',
+            'lasteditor',
+            'created_at',
+            'updated_at',
+            'parentIds'
+        ]);
+
+        $entity = Entity::with('attributes')->find(4);
+        foreach($entity->attributes as $attr) {
+            if($attr->id == 37) {
+                $this->assertEquals(2, $attr->value);
+            }
+            else if($attr->id == 39) {
+                $this->assertTrue(false);
+            } else if($attr->attribute_id == 19) {
+                $this->assertEquals('Test', $attr->value);
+            }
+        }
+    }
+
+    /**
+    * Test changing certainty of an attribute (id=5) of an entity (id=8).
+    *
+    * @return void
+    */
+    public function testPatchAttributeEndpoint()
+    {
+        $attrValue = AttributeValue::where('entity_id', 8)
+            ->where('attribute_id', 5)
+            ->first();
+        $this->assertEquals(100, $attrValue->certainty);
+        $this->assertNull($attrValue->certainty_description);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/entity/8/attribute/5', [
+            'certainty' => 37,
+            'certainty_description' => 'This is a test'
+        ]);
+
+        $response->assertStatus(204);
+
+        $attrValue = AttributeValue::where('entity_id', 8)
+            ->where('attribute_id', 5)
+            ->first();
+        $this->assertEquals(37, $attrValue->certainty);
+        $this->assertEquals('This is a test', $attrValue->certainty_description);
+    }
+
+    /**
+    * Test renaming an entity from 'Site A' to 'Site A_renamed'.
+    *
+    * @return void
+    */
+    public function testPatchRenameEntityEndpoint()
+    {
+        $entity = Entity::find(1);
+        $this->assertEquals('Site A', $entity->name);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/entity/1/name', [
+            'name' => 'Site A_renamed'
+        ]);
+
+        $response->assertStatus(204);
+
+        $entity = Entity::find(1);
+        $this->assertEquals('Site A_renamed', $entity->name);
+    }
+
+    /**
+    * Test moving an entity (id=1) to another entity (id=7).
+    *
+    * @return void
+    */
+    public function testPatchMoveEntityEndpoint()
+    {
+        $entity = Entity::find(1);
+        $this->assertEquals('Site A', $entity->name);
+        $this->assertNull($entity->root_entity_id);
+        $anotherEntity = Entity::find(7);
+        $this->assertEquals('Site B', $anotherEntity->name);
+        $this->assertNull($anotherEntity->root_entity_id);
+        $this->assertEquals(2, $anotherEntity->rank);
+        $YetAnotherEntity = Entity::find(8);
+        $this->assertEquals('Fund 12', $YetAnotherEntity->name);
+        $this->assertEquals(1, $YetAnotherEntity->rank);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/entity/1/rank', [
+            'rank' => 1,
+            'parent_id' => 7
+        ]);
+
+        $response->assertStatus(204);
+
+        $entity = Entity::find(1);
+        $anotherEntity = Entity::find(7);
+        $YetAnotherEntity = Entity::find(8);
+        $this->assertEquals(7, $entity->root_entity_id);
+        $this->assertEquals(7, $YetAnotherEntity->root_entity_id);
+        $this->assertEquals(1, $entity->rank);
+        $this->assertEquals(1, $anotherEntity->rank);
+        $this->assertEquals(2, $YetAnotherEntity->rank);
+    }
+
     // Testing DELETE requets
 
     /**
-    * A basic test example.
+    * Test deleting an entity (id=1) and all it's sub-entities.
     *
     * @return void
     */
@@ -402,7 +535,7 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-    * A basic test example.
+    * Test deleting an entity (id=8) with no sub-entities.
     *
     * @return void
     */

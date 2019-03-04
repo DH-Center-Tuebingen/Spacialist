@@ -13,10 +13,6 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1')->group(function() {
     Route::get('/pre', 'HomeController@getGlobalData');
     Route::get('/version', function() {
@@ -38,7 +34,6 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/entity_type/{ctid}/data/{aid}', 'EntityController@getDataForEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/data', 'EntityController@getData')->where('id', '[0-9]+');
     Route::get('/{id}/data/{aid}', 'EntityController@getData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
-    Route::get('/{id}/children', 'EntityController@getChildren')->where('id', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
     Route::get('/{id}/parentIds', 'EntityController@getParentIds')->where('id', '[0-9]+');
     Route::get('/byParent/{id}', 'EntityController@getEntitiesByParent')->where('id', '[0-9]+');
