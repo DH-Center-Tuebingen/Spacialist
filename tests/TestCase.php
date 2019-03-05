@@ -21,7 +21,7 @@ abstract class TestCase extends BaseTestCase
     public $user = null;
     public $token = null;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->user = null;
