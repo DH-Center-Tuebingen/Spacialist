@@ -543,7 +543,7 @@
                     targetNode.state.selected = true;
                     // Scroll tree to selected element
                     const elem = document.getElementById(`tree-node-${targetNode.id}`);
-                    VueScrollTo.scrollTo(elem, this.scrollTo.duration, this.scrollTo.options);
+                    this.$scrollTo(elem, this.scrollTo.duration, this.scrollTo.options);
                 });
             },
             deselectNode(id) {

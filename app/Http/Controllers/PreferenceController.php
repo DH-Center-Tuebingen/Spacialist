@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Preference;
+use App\User;
 use App\UserPreference;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -24,6 +25,15 @@ class PreferenceController extends Controller {
 
     public function getUserPreferences($id) {
         $user = auth()->user();
+
+        try {
+            User::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This user does not exist')
+            ], 400);
+        }
+
         if(!isset($user) || $user->id != $id) {
             return response()->json([
                 'error' => __('You are not allowed to access preferences of another user')

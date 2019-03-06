@@ -3,7 +3,7 @@
         <p class="alert alert-info">
             {{ $t('plugins.files.modal.detail.archive.info') }}
         </p>
-        <tree class="text-left col px-0 scroll-y-auto"
+        <tree class="text-left col px-0 scroll-y-auto node-w-100"
             :data="fileList"
             :draggable="false"
             @change="onSelect"
@@ -63,12 +63,12 @@
                 const vm = this;
                 const selectedFile = eventData.data;
                 // Download of folders is not supported
-                if(selectedFile.is_directory) return;
+                if(selectedFile.isDirectory) return;
                 const id = vm.file.id;
                 const p = selectedFile.filename;
                 const url = '/file/'+id+'/archive/download?p='+p;
                 $httpQueue.add(() => vm.$http.get(url).then(function(response) {
-                    vm.$createDownloadLink(response.data, selectedFile.clean_filename, true);
+                    vm.$createDownloadLink(response.data, selectedFile.cleanFilename, true);
                 }));
             },
             itemToggle(eventData) {

@@ -64,7 +64,8 @@ mix.js('resources/js/app.js', 'public/js')
            resolve: {
                alias: {
                    videojs: 'video.js',
-                   WaveSurfer: 'wavesurfer.js'
+                   WaveSurfer: 'wavesurfer.js',
+                   RecordRTC: 'recordrtc'
                }
            },
            plugins: [
@@ -82,3 +83,4 @@ mix.js('resources/js/app.js', 'public/js')
    });
    // TODO wait for webpack 5, since css extraction does not work with v4 and extract()
    // .extract();
+mix.copyDirectory('public/' + appPath + 'fonts', 'public/fonts');

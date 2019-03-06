@@ -275,6 +275,10 @@ const de = {
                 'added-attribute': {
                     title: 'Attribut hinzugefügt',
                     msg: '{name} erfolgreich zu {etName} hinzugefügt.'
+                },
+                attribute_deleted: {
+                    title: 'Attribut gelöscht',
+                    msg: '{name} erfolgreich gelöscht.'
                 }
             },
             attribute: {
@@ -421,6 +425,8 @@ const de = {
             'entity-layers': 'Entitäts-Ebenen',
             'geometry-name': 'Geometrie #{id}',
             'coords-in-epsg': 'Koordinaten in EPSG:{epsg}',
+            length: 'Länge',
+            area: 'Fläche',
             draw: {
                 point: {
                     desc: 'Punkt anlegen',

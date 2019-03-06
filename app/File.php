@@ -8,6 +8,7 @@ use App\ThConcept;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use lsolesen\pel\Pel;
 use lsolesen\pel\PelJpeg;
 use lsolesen\pel\PelTiff;
@@ -474,7 +475,7 @@ class File extends Model
         $archive = UnifiedArchive::open($path);
         $fileList = $this->getContainingFiles($archive->getFileNames(), $archive);
 
-        return self::convertFileListToArray($fileList);
+        return $fileList;
     }
 
     public function getArchivedFileContent($filepath) {
@@ -513,38 +514,48 @@ class File extends Model
     }
 
     private function getContainingFiles($files, $archive, $prefix = '') {
-        $tree = [];
-        $subfolders = [];
-        $folders = [];
+        $tree = new \stdClass();
+        $tree->children = [];
+        $tree->isDirectory = true;
         foreach($files as $file) {
-            $isInSubfolder = false;
-            foreach($subfolders as $fkey) {
-                if(starts_with($file, $fkey)) {
-                    $isInSubfolder = true;
-                    $subname = substr($file, strlen($fkey));
-                    $folders[$fkey][] = $subname;
-                    break;
+            // explode folders
+            $parentFolders = explode("/", $file);
+            $currentFile = array_pop($parentFolders);
+            $currentFolderString = '';
+            $currentFolder = $tree;
+            foreach($parentFolders as $pf) {
+                $currentFolderString .= "$pf/";
+                $index = false;
+                for($i=0; $i<count($currentFolder->children); $i++) {
+                    $curr = $currentFolder->children[$i];
+                    if($curr->isDirectory && $curr->cleanFilename == $pf) {
+                        $index = $i;
+                        break;
+                    }
                 }
-            }
-            if($isInSubfolder) continue;
-            $isDirectory = false;
-            // check if "file" is folder
-            if(ends_with($file, '/')) {
-                $isDirectory = true;
-                $subfolders[] = $file;
-                $folders[$file] = [];
-            } else {
-                $isDirectory = false;
+                if($index === false) {
+                    $newFolder = new \stdClass();
+                    $newFolder->children = [];
+                    $newFolder->isDirectory = true;
+                    $newFolder->path = $currentFolderString;
+                    $newFolder->compressedSize = 0;
+                    $newFolder->uncompressedSize = 0;
+                    $newFolder->modificationTime = time();
+                    $newFolder->isCompressed = false;
+                    $newFolder->filename = $currentFolderString;
+                    $newFolder->mtime = time();
+                    $newFolder->cleanFilename = $pf;
+                    $currentFolder->children[] = $newFolder;
+                    $index = count($currentFolder->children) - 1;
+                }
+                $currentFolder = $currentFolder->children[$index];
             }
             $data = $archive->getFileData($prefix.$file);
-            $data->is_directory = $isDirectory;
-            $data->clean_filename = $file;
-            $tree[$file] = $data;
+            $data->isDirectory = false;
+            $data->cleanFilename = $currentFile;
+            $currentFolder->children[] = $data;
         }
-        foreach($folders as $fkey => $subfiles) {
-            $tree[$fkey]->children = $this->getContainingFiles($subfiles, $archive, $prefix.$fkey);
-        }
-        return $tree;
+        return $tree->children;
     }
 
     public function deleteFile() {
@@ -851,25 +862,25 @@ class File extends Model
     }
 
     public function isImage() {
-        return starts_with($this->mime_type, 'image/');
+        return Str::startsWith($this->mime_type, 'image/');
     }
 
     public function isAudio() {
-        return starts_with($this->mime_type, 'audio/');
+        return Str::startsWith($this->mime_type, 'audio/');
     }
 
     public function isVideo() {
-        return starts_with($this->mime_type, 'video/');
+        return Str::startsWith($this->mime_type, 'video/');
     }
 
     public function isPdf() {
         return $this->mime_type == 'application/pdf' ||
-            ends_with($this->name, '.pdf');
+            Str::endsWith($this->name, '.pdf');
     }
 
     public function isXml() {
         return in_array($this->mime_type, ['application/xml', 'text/xml', 'text/xml-external-parsed-entity']) ||
-            ends_with($this->name, '.xml');
+            Str::endsWith($this->name, '.xml');
     }
 
     public function isHtml() {
@@ -878,7 +889,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -893,7 +904,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -908,7 +919,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -922,7 +933,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -933,12 +944,12 @@ class File extends Model
     public function isText() {
         $mimeTypes = ['application/javascript', 'application/json', 'application/x-latex', 'application/x-tex', 'text/comma-separated-values', 'text/csv', 'text/x-markdown', 'text/markdown'];
         $extensions = ['.txt', '.md', '.markdown', '.mkd', '.csv', '.json', '.css', '.htm', '.html', '.shtml', '.js', '.rtx', '.rtf', '.tsv', '.xml'];
-        $is = starts_with($this->mime_type, 'text/');
+        $is = Str::startsWith($this->mime_type, 'text/');
         if($is) return true;
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -952,7 +963,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -966,7 +977,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }
@@ -980,7 +991,7 @@ class File extends Model
         $is = in_array($this->mime_type, $mimeTypes);
         if($is) return true;
         foreach($extensions as $ext) {
-            if(ends_with($this->name, $ext)) {
+            if(Str::endsWith($this->name, $ext)) {
                 $is = true;
                 break;
             }

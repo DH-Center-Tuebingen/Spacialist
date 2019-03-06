@@ -607,6 +607,7 @@ import EntityTree from './components/EntityTree.vue';
 import EntityTypes from './components/EntityTypeList.vue';
 import OlMap from './components/OlMap.vue';
 import ColorGradient from './components/Gradient.vue';
+import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
 
 // Page Components
 import EntityReferenceModal from './components/EntityReferenceModal.vue';
@@ -624,6 +625,7 @@ Vue.component('entity-tree', EntityTree);
 Vue.component('entity-types', EntityTypes);
 Vue.component('ol-map', OlMap);
 Vue.component('color-gradient', ColorGradient);
+Vue.component('entity-breadcrumbs', EntityBreadcrumbs);
 Vue.component('entity-reference-modal', EntityReferenceModal);
 Vue.component('discard-changes-modal', DiscardChangesModal);
 Vue.component('about-dialog', AboutDialog);
@@ -651,6 +653,16 @@ Vue.filter('datestring', function(value, useLocale = true) {
             return mom.toLocaleString();
         }
         return mom.utc().toString();
+    }
+});
+Vue.filter('numPlus', function(value, length = 2) {
+    if(value) {
+        const v = Math.floor(value);
+        const max = Math.pow(10, length) - 1;
+        if(v > max) return `${max.toString(10)}+`;
+        else return v;
+    } else {
+        return value;
     }
 });
 Vue.filter('time', function(value, withHours) {
@@ -682,12 +694,36 @@ Vue.filter('time', function(value, withHours) {
         }
     }
 });
-Vue.filter('bytes', function(value, precision) {
+Vue.filter('length', function(value, precision = 2, isArea = false) {
     if(!value) return value;
-    precision = precision || 2;
 
-    let units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-    let bytes = parseFloat(value);
+    const units = isArea ? ['㎟', '㎠', '㎡', '㎢'] : ['mm', 'cm', 'm', 'km'];
+    const length = parseFloat(value);
+
+    let unitIndex;
+    if(!isFinite(value) || isNaN(length)) {
+        unitIndex = 0;
+    } else {
+        if(length < 10) {
+            unitIndex = 0;
+        } else if(length < 1000) {
+            unitIndex = 1;
+        } else if(length < 1000000) {
+            unitIndex = 2;
+        } else {
+            unitIndex = 3;
+        }
+    }
+
+    const unit = units[unitIndex];
+    const sizeInUnit = length / Math.pow(1000, unitIndex);
+    return sizeInUnit.toFixed(precision) +  ' ' + unit;
+});
+Vue.filter('bytes', function(value, precision = 2) {
+    if(!value) return value;
+
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const bytes = parseFloat(value);
 
     let unitIndex;
     if(!isFinite(value) || isNaN(bytes)) {
@@ -696,9 +732,23 @@ Vue.filter('bytes', function(value, precision) {
         unitIndex = Math.floor(Math.log(bytes) / Math.log(1024));
     }
 
-    let unit = units[unitIndex];
-    let sizeInUnit = bytes / Math.pow(1024, unitIndex);
+    const unit = units[unitIndex];
+    const sizeInUnit = bytes / Math.pow(1024, unitIndex);
     return sizeInUnit.toFixed(precision) +  ' ' + unit;
+});
+Vue.filter('toFixed', function(value, precision = 2) {
+    if(precision < 0) precision = 2;
+    return value ? value.toFixed(precision) : value;
+});
+Vue.filter('truncate', function(str, length = 80, ellipses = '…') {
+    if(length < 0) length = 80;
+    if(str) {
+        if(str.length <= length) {
+            return str;
+        }
+        return str.slice(0, length) + ellipses;
+    }
+    return str;
 });
 Vue.filter('bibtexify', function(value, type) {
     let rendered = "<pre><code>";
@@ -739,13 +789,15 @@ const app = new Vue({
                 this.preferences = response.data.preferences;
                 this.concepts = response.data.concepts;
                 this.entityTypes = response.data.entityTypes;
-                app.$auth.ready(_ => {
-                    // Check if user is logged in and set preferred language
-                    // instead of browser default
-                    if(app.$auth.check()) {
-                        Vue.i18n.locale = this.preferences['prefs.gui-language'];
-                    }
-                });
+                // Check if user is logged in and set preferred language
+                // instead of browser default
+                if(!app.$auth.ready()) {
+                    app.$auth.ready(_ => {
+                        app.$updateLanguage();
+                    });
+                } else {
+                    app.$updateLanguage();
+                }
                 const extensions = this.preferences['prefs.load-extensions'];
                 for(let k in extensions) {
                     if(!extensions[k] || (k != 'map' && k != 'files')) {

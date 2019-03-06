@@ -105,7 +105,8 @@ const en = {
                         wwwc: 'WW/WC'
                     },
                     archive: {
-                        info: 'Click on files to download them. Downloading folders is currently not supported.'
+                        info: 'Click on files to download them. Downloading folders is currently not supported.',
+                        files_in_folder: 'Contains <span class="font-weight-medium">{cnt}</span> files'
                     },
                     undef: {
                         info: `The mime-type <code>{mime}</code> of <span class="font-italic">{name}</span> is currently not supported in Spacialist.
@@ -138,6 +139,7 @@ const en = {
                 clipboard: {
                     title: '{name} - Confirm upload',
                     file_info: '@:plugins.files.modal.detail.metadata.title',
+                    toggle_edit_mode: 'Toggle Edit-Mode',
                     no_preview: 'No preview available for this file type.'
                 }
             },

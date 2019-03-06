@@ -22,7 +22,10 @@ class Entity extends Model
         'geodata_id',
     ];
 
-    protected $appends = ['parentIds'];
+    protected $appends = [
+        'parentIds',
+        'parentNames',
+    ];
 
     protected $searchable = [
         'columns' => [
@@ -133,18 +136,25 @@ class Entity extends Model
         return $this->belongsToMany('App\File', 'entity_files', 'entity_id', 'file_id');
     }
 
-    private function parentIds() {
+    private function parents() {
         $ancestors = $this->where('id', '=', $this->id)->get();
 
         while ($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
                 $parent = $this->where('id', '=', $ancestors->last()->root_entity_id)->get();
                 $ancestors = $ancestors->merge($parent);
             }
-        return $ancestors->pluck('id')->all();
+        return [
+            'ids' => $ancestors->pluck('id')->all(),
+            'names' => $ancestors->pluck('name')->all(),
+        ];
     }
 
     public function getParentIdsAttribute() {
-        return $this->parentIds();
+        return $this->parents()['ids'];
+    }
+
+    public function getParentNamesAttribute() {
+        return $this->parents()['names'];
     }
 
     private function ancestors() {

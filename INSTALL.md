@@ -190,11 +190,21 @@ After the `.env` file has been configured you should run the migrations to setup
 php artisan migrate
 ```
 
-To test your installation, simply open `http://yourdomain.tld/Spacialist/api`. You should see a website with Laravel's current version.
-Example:
+After your tables are set up, you need to create a new user to login and set the necessary permissions for this account. Luckily, Spacialist comes with a pre-defined account and permissions. Only thing you have to do is run
+```bash
+php artisan db:seed
 ```
-Laravel (5.5.33)
+
+We also have some demo data to play around with or get familiar with Spacialist. To add the demo data, run this command instead of `php artisan db:seed`:
+```bash
+php artisan db:seed --class=DemoSeeder
 ```
+
+Now you can login with:
+- **Email**: `admin@admin.com`
+- **Password**: `admin`
+
+**Important**: Since this is the same default password for all instances, we **strongly recommend** to change your password to something more secure. Even better is to create a new admin account with your actual email address and **delete** this default account.
 
 #### External storage
 Laravel supports different filesystems. Some of the most popular adapters:

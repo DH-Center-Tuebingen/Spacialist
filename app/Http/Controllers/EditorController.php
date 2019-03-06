@@ -24,7 +24,7 @@ class EditorController extends Controller {
         return response()->json($cnt);
     }
 
-    public function getAttributeOccurrenceCount($aid, $ctid = -1) {
+    public function getAttributeValueOccurrenceCount($aid, $ctid = -1) {
         $query = AttributeValue::where('attribute_id', $aid);
         if($ctid > -1) {
             $query->where('entity_type_id', $ctid);
@@ -155,26 +155,6 @@ class EditorController extends Controller {
         return response()->json($entityTypes);
     }
 
-    public function getEntityTypesByParent($cid) {
-        $user = auth()->user();
-        if(!$user->can('view_concept_props')) {
-            return response()->json([
-                'error' => __('You do not have the permission to view entity data')
-            ], 403);
-        }
-        try {
-            $parentEntity = Entity::findOrFail($cid);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity-type does not exist')
-            ], 400);
-        }
-        $id = $parentEntity->entity_type_id;
-        $relations = EntityTypeRelation::where('parent_id', $id)->pluck('child_id')->toArray();
-        $entityTypes = EntityType::find($relations);
-        return response()->json($entityTypes);
-    }
-
     public function getAttributes() {
         $user = auth()->user();
         if(!$user->can('view_concept_props')) {
@@ -272,6 +252,7 @@ class EditorController extends Controller {
         $cType->thesaurus_url = $curl;
         $cType->is_root = $is_root;
         $cType->save();
+        $cType = EntityType::find($cType->id);
 
         $layer = new AvailableLayer();
         $layer->name = '';
@@ -368,6 +349,8 @@ class EditorController extends Controller {
             }
         }
         $attr->columns = Attribute::where('parent_id', $attr->id)->get();
+
+        $attr = Attribute::find($attr->id);
         return response()->json($attr, 201);
     }
 
@@ -402,9 +385,9 @@ class EditorController extends Controller {
         $ca->attribute_id = $aid;
         $ca->position = $pos;
         $ca->save();
+        $ca = EntityAttribute::find($ca->id);
 
         $a = Attribute::find($aid);
-        $ca->datatype = $a->datatype;
 
         // If new attribute is serial, add attribute to all existing entities
         if($a->datatype == 'serial') {
@@ -418,11 +401,13 @@ class EditorController extends Controller {
             }
         }
 
-        return response()->json(DB::table('entity_types as c')
-                ->where('ca.id', $ca->id)
-                ->join('entity_attributes as ca', 'c.id', '=', 'ca.entity_type_id')
-                ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
-                ->first(), 201);
+        $ca->load('attribute');
+        return response()->json($ca, 201);
+        // return response()->json(DB::table('entity_types as c')
+        //         ->where('ca.id', $ca->id)
+        //         ->join('entity_attributes as ca', 'c.id', '=', 'ca.entity_type_id')
+        //         ->join('attributes as a', 'ca.attribute_id', '=', 'a.id')
+        //         ->first(), 201);
     }
 
     public function duplicateEntityType(Request $request, $ctid) {
@@ -458,20 +443,19 @@ class EditorController extends Controller {
             $newAttribute->save();
         }
 
-        foreach($entityType->sub_entity_types as $set) {
-            $newSet = EntityTypeRelation::where('parent_id', $set->pivot->parent_id)
-                ->where('child_id', $set->pivot->child_id)
-                ->first()
+        $relations = EntityTypeRelation::where('parent_id', $ctid)
+            ->orWhere('child_id', $ctid)
+            ->get();
+        foreach($relations as $rel) {
+            $newSet = $rel
                 ->replicate();
-            $newSet->parent_id = $duplicate->id;
+            if($newSet->parent_id == $ctid) {
+                $newSet->parent_id = $duplicate->id;
+            }
+            if($newSet->child_id == $ctid) {
+                $newSet->child_id = $duplicate->id;
+            }
             $newSet->save();
-        }
-
-        $childRelations = EntityTypeRelation::where('child_id', $ctid)->get();
-        foreach($childRelations as $relation) {
-            $newRelation = $relation->replicate();
-            $newRelation->child_id = $duplicate->id;
-            $newRelation->save();
         }
 
         $duplicate->load('sub_entity_types');
@@ -530,7 +514,7 @@ class EditorController extends Controller {
 
         // Same position, nothing to do
         if($ca->position == $pos) {
-            return response()->json();
+            return response()->json(null, 204);
         }
         if($ca->position < $pos) {
             $successors = EntityAttribute::where([
@@ -669,6 +653,14 @@ class EditorController extends Controller {
             $s->position--;
             $s->save();
         }
+
+        $entityIds = Entity::where('entity_type_id', $ctid)
+            ->pluck('id')
+            ->toArray();
+        AttributeValue::where('attribute_id', $aid)
+            ->whereIn('entity_id', $entityIds)
+            ->delete();
+
         return response()->json(null, 204);
     }
 }

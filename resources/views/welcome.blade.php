@@ -9,12 +9,12 @@
                 This Instance is maintained by <span class="font-italic">{{ $p['prefs.project-maintainer']->name }}</span> (<a href="mailto:{{ $p['prefs.project-maintainer']->email }}" target="_blank">{{ $p['prefs.project-maintainer']->email }}</a>)
             </p>
 
-            <h2 class="mt-5"><i class="far fa-fa fa-clipboard text-info"></i> What is {{ $p['prefs.project-name'] }} about?</h2>
+            <h2 class="mt-5"><i class="far fa-fw fa-clipboard text-info"></i> What is {{ $p['prefs.project-name'] }} about?</h2>
             <p>
                 {{ $p['prefs.project-maintainer']->description }}
             </p>
 
-            <h2 class="mt-5"><i class="fas fa-fa fa-shield-alt text-info"></i> External Access</h2>
+            <h2 class="mt-5"><i class="fas fa-fw fa-shield-alt text-info"></i> External Access</h2>
             <div>
                 @if ($p['prefs.project-maintainer']->public)
                 <p>

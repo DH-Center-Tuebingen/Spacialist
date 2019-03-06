@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.7 - Giza
+## 0.7 - Giza (Unreleased)
 ### Added
 - Screencast functionality (in Tools menu)
   - Save local or upload to Spacialist
@@ -17,6 +17,40 @@ All notable changes to this project will be documented in this file.
 - Do not fire upload-from-clipboard event in input fields
 - File modal container height
 - Conversion for image formats not supported by PHP
+
+## 0.6.3
+### Added
+- Entity as table column datatype
+- Entity type to entity detail form header
+- Demo Seeder (See [INSTALL.md](https://github.com/eScienceCenter/Spacialist/blob/0.6.3/INSTALL.md#migrations) for more details)
+- Show notification if attribute is deleted
+- Color indicator (based on entity layer color) to tree and entity-detail view (replaces monument icon)
+- Apply new preference values without reload
+- Editmode to upload from clipboard
+- Switch between card and list layout in file viewer
+### Changed
+- Sub-Entity count in tree is now displayed inside color indicator
+- Cleaned up geodata popup (Removed coordinate table, added length/area of geodata)
+- Moved file name to bottom of card, made font size smaller, display file name on hover
+- Reworked map popups (supports dynamic content such as hideable coordinate list; no more "click through")
+### Fixed
+- Use color picker for simple layer styling (GIS)
+- Deleting geodata on map
+- User locale after login
+- Font loading
+- Error on empty layer array in map
+- Unset preference handling
+- Use user's language/default language for retrieved concepts
+- Jump to selected element in tree
+- Empty table row after add
+- Search in other available languages for labels that have no match in user's language (to make concepts available as label that are not yet translated)
+- Align user menu dropdown to the right, so dropdown is not displayed outside document bounds
+- Position of user menu dropdown
+- Polishing file list layout
+- Compatibility with latest version of vue (2.6)
+- File modal container height
+### Removed/Deprecated
+- Monument icon in tree and entity-detail view
 
 ## 0.6.2
 ### Fixed

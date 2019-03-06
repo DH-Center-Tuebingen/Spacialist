@@ -8,6 +8,9 @@ package-lock.json
 thesaurex
 /db
 
+## Created by PHPUnit/Coveralls
+/build
+
 ## Created by Laravel
 composer.lock
 /node_modules
@@ -25,3 +28,4 @@ npm-debug.log
 yarn-error.log
 yarn.lock
 .env
+.env.testing
