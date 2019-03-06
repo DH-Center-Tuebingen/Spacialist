@@ -260,15 +260,16 @@
                 data.attribute_id = attribute.id;
                 data.position = index + 1;
                 $httpQueue.add(() => $http.post(`/editor/dm/entity_type/${ctid}/attribute`, data).then(response => {
+                    const res = response.data;
                     // Add element to attribute list
-                    attributes.splice(index, 0, response.data);
+                    attributes.splice(index, 0, res.attribute);
                     attribute.isDisabled = true;
-                    Vue.set(this.entityValues, response.data.id, '');
+                    Vue.set(this.entityValues, res.attribute.id, '');
                     // Update position attribute of successors
                     for(let i=index+1; i<attributes.length; i++) {
                         attributes[i].position++;
                     }
-                    const attrName = this.$translateConcept(response.data.thesaurus_url);
+                    const attrName = this.$translateConcept(res.attribute.thesaurus_url);
                     const etName = this.$translateConcept(this.entityType.thesaurus_url);
                     this.$showToast(
                         this.$t('main.datamodel.toasts.added-attribute.title'),

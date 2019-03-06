@@ -25,7 +25,7 @@
 
         <div class="dropdown-menu" style="display: flex; flex-direction: column;" v-show="hasItems">
             <a href="#" class="dropdown-item" v-for="(item, $item) in items" :class="activeClass($item)" @mousedown="hit" @mousemove="setActive($item)">
-                <span v-text="item.label"></span>
+                <span v-text="item.labels[0].label"></span>
             </a>
         </div>
     </div>
@@ -62,8 +62,8 @@
         },
         methods: {
             onHit(item) {
-                this.query = item.label;
-                if(this.onSelect) this.onSelect(item);
+                this.query = item.labels[0].label;
+                if(this.onSelect) this.onSelect(item.labels[0]);
                 this.closeSelect();
             },
             closeSelect() {

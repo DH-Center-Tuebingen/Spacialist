@@ -88,7 +88,8 @@ const de = {
                         wwwc: 'WW/WC'
                     },
                     archive: {
-                        info: 'Klicke auf Dateien um sie direkt herunterzuladen. Das Herunterladen ganzer Ordner wird noch nicht unterstützt.'
+                        info: 'Klicke auf Dateien um sie direkt herunterzuladen. Das Herunterladen ganzer Ordner wird noch nicht unterstützt.',
+                        files_in_folder: 'Enthält <span class="font-weight-medium">{cnt}</span> Dateien'
                     },
                     undef: {
                         info: `Der Dateityp <code>{mime}</code> von <span class="font-italic">{name}</span> wird im Moment nicht von Spacialist unterstützt.
@@ -121,6 +122,7 @@ const de = {
                 clipboard: {
                     title: '{name} - Upload bestätigen',
                     file_info: '@:plugins.files.modal.detail.metadata.title',
+                    toggle_edit_mode: 'Editiermodus umschalten',
                     no_preview: 'Für diesen Dateityp ist keine Vorschau verfügbar.'
                 }
             },

@@ -79,6 +79,7 @@ class BibliographyController extends Controller
 
         $bib = new Bibliography();
         $bib->fieldsFromRequest($request, $user);
+        $bib = Bibliography::find($bib->id);
 
         return response()->json($bib, 201);
     }
@@ -142,6 +143,7 @@ class BibliographyController extends Controller
         }
 
         $bib->fieldsFromRequest($request, $user);
+        $bib = Bibliography::find($bib->id);
 
         return response()->json($bib);
     }

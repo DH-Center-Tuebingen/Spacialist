@@ -11,6 +11,7 @@ use App\ThConceptLabel;
 use App\ThConcept;
 use App\ThLanguage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 
 class SearchController extends Controller {
@@ -29,35 +30,34 @@ class SearchController extends Controller {
             ], 403);
         }
         $q = $request->query('q');
-        if(starts_with($q, self::$shebangPrefix['bibliography'])) {
-            $matches = Bibliography::search(str_after($q, self::$shebangPrefix['bibliography']))->get();
+        if(Str::startsWith($q, self::$shebangPrefix['bibliography'])) {
+            $matches = Bibliography::search(Str::after($q, self::$shebangPrefix['bibliography']))->get();
             $matches->map(function($m) {
                 $m->group = 'bibliography';
                 return $m;
             });
-        } else if(starts_with($q, self::$shebangPrefix['entities'])) {
-            $matches = Entity::search(str_after($q, self::$shebangPrefix['entities']))->get();
+        } else if(Str::startsWith($q, self::$shebangPrefix['entities'])) {
+            $matches = Entity::search(Str::after($q, self::$shebangPrefix['entities']))->get();
             $matches->map(function($m) {
                 $m->group = 'entities';
                 return $m;
             });
-        } else if(starts_with($q, self::$shebangPrefix['files'])) {
-            $files = File::search(str_after($q, self::$shebangPrefix['files']));
+        } else if(Str::startsWith($q, self::$shebangPrefix['files'])) {
+            $files = File::search(Str::after($q, self::$shebangPrefix['files']));
             $matches = $files->get();
             $matches->map(function($m) {
                 $m->group = 'files';
                 $m->setFileInfo();
                 return $m;
             });
-        } else if(starts_with($q, self::$shebangPrefix['geodata'])) {
-            $matches = Geodata::search(str_after($q, self::$shebangPrefix['geodata']))->get();
+        } else if(Str::startsWith($q, self::$shebangPrefix['geodata'])) {
+            $matches = Geodata::search(Str::after($q, self::$shebangPrefix['geodata']))->get();
             $matches->map(function($m) {
                 $m->group = 'geodata';
                 return $m;
             });
         } else {
-            $files = File::search($q);
-            $files = $files->get();
+            $files = File::search($q)->get();
             $files->map(function($f) {
                 $f->group = 'files';
                 $f->setFileInfo();
@@ -104,13 +104,42 @@ class SearchController extends Controller {
     }
 
     public function searchInThesaurus(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts_th')) {
+            return response()->json([
+                'error' => __('You do not have the permission to search for concepts')
+            ], 403);
+        }
         $q = $request->query('q');
-        $lang = auth()->user()->getLanguage();
-        $langId = ThLanguage::where('short_name', $lang)->value('id');
-        $matches = ThConceptLabel::where('label', 'ilike', "%$q%")
-            ->where('language_id', $langId)
-            ->with('concept')
+        $lang = $user->getLanguage();
+
+        try {
+            $language = ThLanguage::where('short_name', $lang)->firstOrFail();
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Your language does not exist in ThesauRex'
+            ], 400);
+        }
+
+        $langId = $language->id;
+        $builder = th_tree_builder($lang);
+
+        $matches = $builder->whereHas('labels', function($query) use ($langId, $q){
+            $query->where('language_id', $langId)
+                ->where('label', 'ilike', "%$q%");
+        })
             ->get();
+
+        $foreignMatches = th_tree_builder($lang)
+            ->whereDoesntHave('labels', function($query) use ($langId) {
+                $query->where('language_id', $langId);
+            })
+            ->whereHas('labels', function($query) use ($q) {
+                $query->where('label', 'ilike', "%$q%");
+            })
+            ->get();
+
+        $matches = $matches->merge($foreignMatches);
         return response()->json($matches);
     }
 
@@ -125,6 +154,18 @@ class SearchController extends Controller {
             })
             ->with('thesaurus_concept')
             ->get();
+
+        $foreignMatches = Attribute::where('datatype', 'string-sc')
+            ->whereDoesntHave('thesaurus_concept.labels', function($query) use ($langId) {
+                $query->where('language_id', $langId);
+            })
+            ->whereHas('thesaurus_concept.labels', function($query) use ($q) {
+                $query->where('label', 'ilike', "%$q%");
+            })
+            ->with('thesaurus_concept')
+            ->get();
+
+        $matches = $matches->merge($foreignMatches);
         return response()->json($matches);
     }
 

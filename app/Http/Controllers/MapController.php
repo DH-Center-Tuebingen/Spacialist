@@ -15,6 +15,8 @@ use Phaza\LaravelPostgis\Geometries\MultiPolygon;
 use \wapmorgan\UnifiedArchive\UnifiedArchive;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+
+use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
@@ -343,11 +345,11 @@ class MapController extends Controller
         if($layer->type != 'all') {
             $typeMatched = false;
             $upperType = strtoupper($layer->type);
-            if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && ends_with($upperType, 'POLYGON')) {
+            if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && Str::endsWith($upperType, 'POLYGON')) {
                 $typeMatched = true;
-            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && ends_with($upperType, 'LINESTRING')) {
+            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && Str::endsWith($upperType, 'LINESTRING')) {
                 $typeMatched = true;
-            } else if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && ends_with($upperType, 'POINT')) {
+            } else if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && Str::endsWith($upperType, 'POINT')) {
                 $typeMatched = true;
             }
             if(!$typeMatched) {

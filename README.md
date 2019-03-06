@@ -1,6 +1,16 @@
-# Spacialist
+<p>
+    <a href='https://coveralls.io/github/eScienceCenter/Spacialist?branch=0.7-giza'>
+        <img src='https://coveralls.io/repos/github/eScienceCenter/Spacialist/badge.svg?branch=0.7-giza' alt='Coverage Status' />
+    </a>
+    <a href='https://travis-ci.com/eScienceCenter/Spacialist'>
+        <img src='https://travis-ci.com/eScienceCenter/Spacialist.svg?branch=0.7-giza' alt='Build Status' />
+    </a>
+    <a href='https://david-dm.org/eScienceCenter/Spacialist'>
+        <img src='https://david-dm.org/eScienceCenter/Spacialist.svg' alt='Dependency Status' />
+    </a>
+</p>
 
-[![Join the chat at https://gitter.im/eScienceCenter/Spacialist](https://badges.gitter.im/eScienceCenter/Spacialist.svg)](https://gitter.im/eScienceCenter/Spacialist?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# Spacialist
 
 Spacialist is a customizable Web-based platform for collecting, managing, analyzing and publishing research data with a focus on the integration of object-related and spatial data for the digital humanities.
 
@@ -8,9 +18,16 @@ Spacialist is a customizable Web-based platform for collecting, managing, analyz
 Installation procedures and system requirements are described [here](INSTALL.md).
 
 ## Testing
-1. Create a testing database and reference it in your `.env` file
-2. Run migrations and seeds (`db:seed`)
-3. Run `vendor/bin/phpunit`
+All PHPUnit tests are based on the `DemoSeeder` seed. To run tests, follow these steps:
+
+1. Create a new database and a `.env.testing` file (`cp .env .env.testing`) and reference the DB in your `.env.testing` or, if you don't have/want one, in your `.env` file
+2. Run migrations
+  a. For `.env.testing`: `php artisan migrate --env=testing`
+  b. For `.env`: `php artisan migrate`
+3. Run seeds
+  a. For `.env.testing`: `php artisan db:seed --class=DemoSeeder --env=testing`
+  b. For `.env`: `php artisan db:seed --class=DemoSeeder`
+4. Run `vendor/bin/phpunit`
 
 ## Screenshots
 For all screenshots have a look at the [screenshot folder][scr_folder]

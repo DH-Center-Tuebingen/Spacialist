@@ -18,3 +18,24 @@
 
     border-radius: $border-radius;
 }
+
+
+.node-w-100 .tree-node {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+}
+
+.node-w-100 .tree-children {
+    width: 100% !important;
+}
+
+.node-w-100 .tree-node .tree-anchor {
+    flex-basis: 0 !important;
+    flex-grow: 1 !important;
+    max-width: 100% !important;
+}
+
+.node-w-100 .tree-node .tree-children {
+    break-before: always !important;
+}

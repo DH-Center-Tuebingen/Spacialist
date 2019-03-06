@@ -16,4 +16,8 @@ class EntityAttribute extends Model
         'entity_type_id',
         'attribute_id',
     ];
+
+    public function attribute() {
+        return $this->belongsTo('App\Attribute');
+    }
 }
