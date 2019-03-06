@@ -64,7 +64,8 @@ mix.js('resources/js/app.js', 'public/js')
            resolve: {
                alias: {
                    videojs: 'video.js',
-                   WaveSurfer: 'wavesurfer.js'
+                   WaveSurfer: 'wavesurfer.js',
+                   RecordRTC: 'recordrtc'
                }
            },
            plugins: [
