@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
@@ -12,6 +13,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+    use WithFaker;
     use DatabaseTransactions;
 
     protected $connectionsToTransact = [
