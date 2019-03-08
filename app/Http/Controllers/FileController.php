@@ -278,7 +278,7 @@ class FileController extends Controller
             'tags' => json_decode($request->get('tags'))
         ];
         $newFile = File::createFromUpload($file, $user, $metadata);
-        return response()->json($newFile);
+        return response()->json($newFile, 201);
     }
 
     public function patchContent(Request $request, $id) {

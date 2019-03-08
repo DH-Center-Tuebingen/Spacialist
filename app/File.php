@@ -293,8 +293,7 @@ class File extends Model
         fclose($filehandle);
 
         $mimeType = $input->getMimeType();
-        $fileUrl = sp_get_storage_file_path($filename);
-        $lastModified = date('Y-m-d H:i:s', filemtime($fileUrl));
+        $lastModified = date('Y-m-d H:i:s', Storage::lastModified($filename));
 
         $file = new File();
         $file->modified = $lastModified;
@@ -332,6 +331,7 @@ class File extends Model
         }
 
         if($file->isImage()) {
+            $fileUrl = sp_get_storage_file_path($filename);
             $nameNoExt = pathinfo($filename, PATHINFO_FILENAME);
             $thumbFilename = $nameNoExt . self::THUMB_SUFFIX . self::EXP_SUFFIX;
 
@@ -412,6 +412,8 @@ class File extends Model
             }
             $file->save();
         }
+        $file = File::find($file->id);
+        return $file;
     }
 
     public function setContent($fileObject) {
@@ -421,8 +423,7 @@ class File extends Model
             $filehandle
         );
         fclose($filehandle);
-        $fileUrl = sp_get_storage_file_path($this->name);
-        $lastModified = date('Y-m-d H:i:s', filemtime($fileUrl));
+        $lastModified = date('Y-m-d H:i:s', Storage::lastModified($this->name));
 
         $this->mime_type = $fileObject->getMimeType();
         $this->modified = $lastModified;
@@ -454,9 +455,9 @@ class File extends Model
     }
 
     public function setFileInfo() {
-        $this->url = sp_get_full_file_path($this->name);
+        $this->url = sp_get_public_url($this->name);
         if($this->isImage()) {
-            $this->thumb_url = sp_get_full_file_path($this->thumb);
+            $this->thumb_url = sp_get_public_url($this->thumb);
         }
 
         try {
@@ -516,7 +517,6 @@ class File extends Model
     private function getContainingFiles($files, $archive, $prefix = '') {
         $tree = new \stdClass();
         $tree->children = [];
-        $tree->isDirectory = true;
         foreach($files as $file) {
             // explode folders
             $parentFolders = explode("/", $file);
@@ -540,10 +540,10 @@ class File extends Model
                     $newFolder->path = $currentFolderString;
                     $newFolder->compressedSize = 0;
                     $newFolder->uncompressedSize = 0;
-                    $newFolder->modificationTime = time();
+                    $newFolder->modificationTime = 0;
                     $newFolder->isCompressed = false;
                     $newFolder->filename = $currentFolderString;
-                    $newFolder->mtime = time();
+                    $newFolder->mtime = 0;
                     $newFolder->cleanFilename = $pf;
                     $currentFolder->children[] = $newFolder;
                     $index = count($currentFolder->children) - 1;
@@ -559,11 +559,9 @@ class File extends Model
     }
 
     public function deleteFile() {
-        $url = sp_get_storage_file_path($this->name);
-        Storage::delete($url);
+        Storage::delete($this->name);
         if(isset($this->thumb)) {
-            $thumbUrl = sp_get_storage_file_path($this->thumb);
-            Storage::delete($thumbUrl);
+            Storage::delete($this->thumb);
         }
         $this->delete();
     }

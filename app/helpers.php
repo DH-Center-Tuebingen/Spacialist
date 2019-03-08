@@ -12,15 +12,15 @@ if(!function_exists('sp_parse_boolean')) {
     }
 }
 
-if(!function_exists('sp_get_full_file_path')) {
-    function sp_get_full_file_path($filename) {
-        return Storage::disk('public')->url(env('SP_FILE_PATH') .'/'. $filename);
+if(!function_exists('sp_get_public_url')) {
+    function sp_get_public_url($filename) {
+        return Storage::url($filename);
     }
 }
 
 if(!function_exists('sp_get_storage_file_path')) {
     function sp_get_storage_file_path($filename) {
-        return Storage::url(env('SP_FILE_PATH') .'/'. $filename);
+        return Storage::path($filename);
     }
 }
 
