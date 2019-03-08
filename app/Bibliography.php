@@ -41,7 +41,8 @@ class Bibliography extends Model
         'organization',
         'school',
         'series',
-        'citekey'
+        'citekey',
+        'lasteditor'
     ];
 
     protected $searchable = [

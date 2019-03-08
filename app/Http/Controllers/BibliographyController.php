@@ -85,6 +85,12 @@ class BibliographyController extends Controller
     }
 
     public function importBibtex(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('add_remove_bibliography')) {
+            return response()->json([
+                'error' => __('You do not have the permission to add new bibliography')
+            ], 403);
+        }
         $this->validate($request, [
             'file' => 'required|file'
         ]);
@@ -109,6 +115,7 @@ class BibliographyController extends Controller
             if($ckey == null || $ckey == '') {
                 $ckey = Bibliography::computeCitationKey($insArray);
             }
+            $insArray['lasteditor'] = $user->name;
             $bibliography = Bibliography::updateOrCreate(
                 ['citekey' => $ckey],
                 $insArray
