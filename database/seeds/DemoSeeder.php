@@ -33,12 +33,38 @@ class DemoSeeder extends Seeder
         $this->call(EntityTypesTableSeeder::class);
         $this->call(EntitiesTableSeeder::class);
         $this->call(FilesTableSeeder::class);
+        $this->call(FileTagsTableSeeder::class);
         $this->call(AvailableLayersTableSeeder::class);
         $this->call(EntityTypeRelationsTableSeeder::class);
         $this->call(EntityAttributesTableSeeder::class);
         $this->call(AttributeValuesTableSeeder::class);
         $this->call(EntityFilesTableSeeder::class);
         $this->call(ReferencesTableSeeder::class);
+
+        // Set different root for tags
+        \DB::table('preferences')
+            ->where('label', 'prefs.tag-root')
+            ->update(['default_value' => '{"uri": "https://spacialist.escience.uni-tuebingen.de/<user-project>/eigenschaften#20171220100251"}']);
+
+        // Move seeded test files to storage
+        $testFiles = [
+            'text1.txt',
+            'text2.txt',
+            'text3.txt',
+            'office_file.docx',
+            'spacialist_screenshot.png',
+            'test_img_edin.jpg',
+            'test_archive.zip',
+        ];
+        $path = storage_path() . "/framework/testing/";
+        foreach($testFiles as $f) {
+            $filehandle = fopen("$path$f", 'r');
+            Storage::put(
+                $f,
+                $filehandle
+            );
+            fclose($filehandle);
+        }
 
         if(\DB::connection()->getDriverName() === 'pgsql') {
             $this->call(FixSequencesSeeder::class);

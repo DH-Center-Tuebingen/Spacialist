@@ -63,7 +63,7 @@ class ApiPreferenceTest extends TestCase
             'prefs.tag-root' => [
                 'id' => 4,
                 'label' => 'prefs.tag-root',
-                'value' => 'http://thesaurus.archeoinf.de/lukanien#fototyp',
+                'value' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eigenschaften#20171220100251',
                 'allow_override' => false
             ],
             'prefs.load-extensions' => [
@@ -178,7 +178,7 @@ class ApiPreferenceTest extends TestCase
             'prefs.tag-root' => [
                 'id' => 4,
                 'label' => 'prefs.tag-root',
-                'value' => 'http://thesaurus.archeoinf.de/lukanien#fototyp',
+                'value' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eigenschaften#20171220100251',
                 'allow_override' => false
             ],
             'prefs.load-extensions' => [

@@ -21,7 +21,7 @@ class ApiBibliographyTest extends TestCase
             ->get('/api/v1/bibliography');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(0);
+        $response->assertJsonCount(61);
         $this->refreshToken($response);
 
         $response = $this->withHeaders([
@@ -82,7 +82,7 @@ class ApiBibliographyTest extends TestCase
             ->get('/api/v1/bibliography');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(1);
+        $response->assertJsonCount(62);
     }
 
     /**
@@ -95,7 +95,7 @@ class ApiBibliographyTest extends TestCase
     public function testAddExportPatchAndDeleteEndpoint()
     {
         $cnt = Bibliography::count();
-        $this->assertEquals(0, $cnt);
+        $this->assertEquals(61, $cnt);
 
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
@@ -109,7 +109,7 @@ class ApiBibliographyTest extends TestCase
 
         $response->assertStatus(201);
         $cnt = Bibliography::count();
-        $this->assertEquals(1, $cnt);
+        $this->assertEquals(62, $cnt);
 
         $this->refreshToken($response);
         $response = $this->withHeaders([
@@ -121,10 +121,10 @@ class ApiBibliographyTest extends TestCase
         $this->assertTrue($response->headers->get('content-type') == 'application/x-bibtex');
         $this->assertTrue($response->headers->get('content-disposition') == 'attachment; filename=export.bib');
         $content = $this->getStreamedContent($response);
-        $this->assertEquals("@article{Ph:0000,\n    title: {Test Article}\n    author: {PhpUnit}\n    pages: {10-15}\n}\n\n", $content);
+        $this->assertContains("@article{Ph:0000,\n    title: {Test Article}\n    author: {PhpUnit}\n    pages: {10-15}\n}\n\n", $content);
 
         $this->refreshToken($response);
-        $bib = Bibliography::first();
+        $bib = Bibliography::latest()->first();
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
             ])
@@ -180,7 +180,6 @@ class ApiBibliographyTest extends TestCase
         ]);
 
         $this->refreshToken($response);
-        $bib = Bibliography::first();
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
             ])
@@ -188,7 +187,7 @@ class ApiBibliographyTest extends TestCase
 
         $response->assertStatus(204);
         $cnt = Bibliography::count();
-        $this->assertEquals(0, $cnt);
+        $this->assertEquals(61, $cnt);
         $this->assertEquals("", $response->getContent());
     }
 }
