@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 use App\AttributeValue;
 use App\Entity;
+use App\Reference;
 
 class ApiEntityTest extends TestCase
 {
@@ -255,6 +256,82 @@ class ApiEntityTest extends TestCase
     }
 
     /**
+     * Test getting all references for an entity (id=1).
+     *
+     * @return void
+     */
+    public function testEntityReferencesEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/entity/1/reference');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(2);
+        $response->assertJsonStructure([
+            '*' => [
+                [
+                    'id',
+                    'entity_id',
+                    'attribute_id',
+                    'bibliography_id',
+                    'description',
+                    'lasteditor',
+                    'created_at',
+                    'updated_at',
+                    'bibliography'
+                ]
+            ]
+        ]);
+        $response->assertJson([
+            'https://spacialist.escience.uni-tuebingen.de/<user-project>/alternativer_name#20171220165047' => [
+                [
+                    'id' => 1,
+                    'entity_id' => 1,
+                    'attribute_id' => 15,
+                    'bibliography_id' => 1318,
+                    'description' => 'See Page 10',
+                    'lasteditor' => 'Admin',
+                    'created_at' => '2019-03-08 13:36:36',
+                    'updated_at' => '2019-03-08 13:36:36',
+                    'bibliography' => [
+                        'id' => 1318
+                    ],
+                ],
+                [
+                    'id' => 2,
+                    'entity_id' => 1,
+                    'attribute_id' => 15,
+                    'bibliography_id' => 1319,
+                    'description' => 'Picture on left side of page 12',
+                    'lasteditor' => 'Admin',
+                    'created_at' => '2019-03-08 13:36:48',
+                    'updated_at' => '2019-03-08 13:36:48',
+                    'bibliography' => [
+                        'id' => 1319
+                    ],
+                ],
+            ],
+            'https://spacialist.escience.uni-tuebingen.de/<user-project>/notizen#20171220105603' => [
+                [
+                    'id' => 3,
+                    'entity_id' => 1,
+                    'attribute_id' => 13,
+                    'bibliography_id' => 1323,
+                    'description' => 'Page 10ff is interesting',
+                    'lasteditor' => 'Admin',
+                    'created_at' => '2019-03-08 13:37:09',
+                    'updated_at' => '2019-03-08 13:37:09',
+                    'bibliography' => [
+                        'id' => 1323
+                    ],
+                ],
+            ]
+        ]);
+    }
+
+    /**
      * Test getting all sub-entities/children of an entity (id=2).
      *
      * @return void
@@ -336,6 +413,53 @@ class ApiEntityTest extends TestCase
 
         $cnt = Entity::count();
         $this->assertEquals($cnt, 9);
+    }
+
+    /**
+    * Test adding a new reference to an entity (id=2).
+    *
+    * @return void
+    */
+    public function testNewReferenceEndpoint()
+    {
+        $cnt = Reference::count();
+        $this->assertEquals($cnt, 3);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->post('/api/v1/entity/2/reference/14', [
+            'bibliography_id' => 1337,
+            'description' => 'This is a simple test',
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJsonStructure([
+            'id',
+            'entity_id',
+            'attribute_id',
+            'bibliography_id',
+            'description',
+            'lasteditor',
+            'created_at',
+            'updated_at',
+            'bibliography',
+        ]);
+        $response->assertJson([
+            'entity_id' => 2,
+            'attribute_id' => 14,
+            'bibliography_id' => 1337,
+            'description' => 'This is a simple test',
+            'lasteditor' => 'Admin',
+            'bibliography' => [
+                'id' => 1337,
+                'type' => 'article',
+                'citekey' => 'ScSh:20'
+            ],
+        ]);
+
+        $cnt = Reference::count();
+        $this->assertEquals($cnt, 4);
     }
 
     // Testing PATCH requets
@@ -510,6 +634,46 @@ class ApiEntityTest extends TestCase
         $this->assertEquals(2, $YetAnotherEntity->rank);
     }
 
+    /**
+    * Test editing the description of an entity (id=2).
+    *
+    * @return void
+    */
+    public function testPatchReferenceEndpoint()
+    {
+        $reference = Reference::find(2);
+        $this->assertEquals(1, $reference->entity_id);
+        $this->assertEquals(15, $reference->attribute_id);
+        $this->assertEquals(1319, $reference->bibliography_id);
+        $this->assertEquals('Picture on left side of page 12', $reference->description);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/entity/reference/2', [
+            'description' => 'Page 12 was wrong, it is Page 15!',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'id',
+            'entity_id',
+            'attribute_id',
+            'bibliography_id',
+            'description',
+            'lasteditor',
+            'created_at',
+            'updated_at',
+        ]);
+        $response->assertJson([
+            'entity_id' => 1,
+            'attribute_id' => 15,
+            'bibliography_id' => 1319,
+            'description' => 'Page 12 was wrong, it is Page 15!',
+            'lasteditor' => 'Admin',
+        ]);
+    }
+
     // Testing DELETE requets
 
     /**
@@ -570,5 +734,26 @@ class ApiEntityTest extends TestCase
         $response->assertExactJson([
             'error' => 'This entity does not exist'
         ]);
+    }
+
+    /**
+    * Test deleting an reference (id=1).
+    *
+    * @return void
+    */
+    public function testDeleteReferenceEndpoint()
+    {
+        $cnt = Reference::count();
+        $this->assertEquals($cnt, 3);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->delete('/api/v1/entity/reference/1');
+
+        $response->assertStatus(204);
+
+        $cnt = Reference::count();
+        $this->assertEquals($cnt, 2);
     }
 }
