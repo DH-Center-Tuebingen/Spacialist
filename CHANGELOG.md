@@ -7,10 +7,15 @@ All notable changes to this project will be documented in this file.
   - Save local or upload to Spacialist
 - Dynamic Parent-Element for `string-sc` (Single Choice Dropdown) datatype
   - Reference another SCD attribute in Data-Model-Editor to use it's value as Parent-Element
+- Parents Breadcrumb added to Entity Detail view header
+- Allow width expansion of attributes (Currently supported: Tabular)
+- PHPUnit tests (see [README.md](README.md#testing) for further instructions)
 ### Changed
-- Use (Tree-Shaking)[https://webpack.js.org/guides/tree-shaking/] in supported modules
+- Use [Tree-Shaking](https://webpack.js.org/guides/tree-shaking/) in supported modules
+- Update to Laravel 5.8
 ### Fixed
 - Do not fire upload-from-clipboard event in input fields
+- Update references in Reference Tab, Attribute Icons in Entity Detail View and Reference Modal
 
 ## 0.6.3
 ### Added
