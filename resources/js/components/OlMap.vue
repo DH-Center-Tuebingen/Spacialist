@@ -119,7 +119,7 @@
 
 <script>
     import { EventBus } from '../event-bus.js';
-    
+
     import 'ol/ol.css';
     import Collection from 'ol/Collection';
     import {defaults as defaultControls} from 'ol/control.js';
@@ -794,7 +794,7 @@
                 });
                 if(EventBus) {
                     EventBus.$on('entity-update', this.handleEntityUpdate);
-                    EventBus.$on('entity-delete', this.handleEntityDelete);
+                    EventBus.$on('entity-deleted', this.handleEntityDelete);
                 }
             },
             initMapProjection() {
@@ -1511,14 +1511,17 @@
                 const gid = props.id;
                 const eid = entity.id;
                 $http.delete(`/map/link/${gid}/${eid}`, {}).then(response => {
-                    feature.setProperties({
-                        entity: null
-                    });
-                    const layer = this.getUnlinkedLayer();
-                    this.featureStyles[feature.get('id')].default = this.createStyle(layer.color);
-                    this.updateStyles(feature);
-                    this.$emit('update:link', null, eid);
+                    this.afterUnlink(feature, eid);
                 });
+            },
+            afterUnlink(feature, eid) {
+                feature.setProperties({
+                    entity: null
+                });
+                const layer = this.getUnlinkedLayer();
+                this.featureStyles[feature.get('id')].default = this.createStyle(layer.color);
+                this.updateStyles(feature);
+                this.$emit('update:link', null, eid);
             },
             transformCoordinates(c, clist) {
                 if(!c[0] || !c[1]) {
@@ -1583,7 +1586,7 @@
                     return props.entity && props.entity.id == id;
                 });
                 if(feature) {
-                    this.unlink(feature, e.entity)
+                    this.afterUnlink(feature, id);
                 }
             },
             handleEntityUpdate(e) {

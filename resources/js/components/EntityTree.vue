@@ -435,6 +435,9 @@
                         'success'
                     );
                     vm.removeFromTree(entity, path);
+                    EventBus.$emit('entity-deleted', {
+                        entity: entity
+                    });
                 }));
             },
             removeFromTree(entity, path) {
