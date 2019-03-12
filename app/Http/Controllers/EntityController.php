@@ -424,9 +424,13 @@ class EntityController extends Controller {
             ], 400);
         }
 
-        $attrValue = AttributeValue::where('entity_id', $id)
-            ->where('attribute_id', $aid)
-            ->first();
+        $attrValue = AttributeValue::firstOrCreate([
+            'entity_id' => $id,
+            'attribute_id' => $aid,
+        ], [
+            'lasteditor' => $user->name
+        ]);
+        $attrValue->lasteditor = $user->name;
         $values = $request->only(array_keys(AttributeValue::patchRules));
         $attrValue->patch($values);
 

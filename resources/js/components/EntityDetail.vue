@@ -69,7 +69,7 @@
         <router-view
             v-can="'view_concept_props'"
             :bibliography="bibliography"
-            :refs="ref">
+            :refs="attributeReferences">
         </router-view>
     </div>
 </template>
@@ -88,7 +88,7 @@
                 });
             } else {
                 if(to.params.aid) {
-                    this.setModalValues(to.params.aid);
+                    this.setReferenceAttribute(to.params.aid);
                 }
                 next();
             }
@@ -172,10 +172,7 @@
                     Vue.set(this.selectedEntity, 'dependencies', data.dependencies);
 
                     const aid = this.$route.params.aid;
-                    if(aid) {
-                        this.setModalValues(aid);
-                    }
-
+                    this.setReferenceAttribute(aid);
                     Vue.set(this, 'dataLoaded', true);
                 }));
             },
@@ -342,11 +339,8 @@
                 this.dependencyInfoHovered = false;
                 $('#dependency-info').popover('dispose');
             },
-            setModalValues(aid) {
-                const attribute = this.selectedEntity.attributes.find(a => a.id == aid);
-                this.ref.refs = this.hasReferenceGroup(attribute.thesaurus_url) ? this.selectedEntity.references[attribute.thesaurus_url] : [];
-                this.ref.value = this.selectedEntity.data[aid];
-                this.ref.attribute = attribute;
+            setReferenceAttribute(aid) {
+                this.referenceAttribute = aid;
             },
             showMetadata(attribute) {
                 this.$router.push({
@@ -378,11 +372,7 @@
                 dataLoaded: false,
                 dependencyInfoHovered: false,
                 hiddenAttributes: 0,
-                ref: {
-                    refs: {},
-                    value: {},
-                    attribute: {}
-                }
+                referenceAttribute: null
             }
         },
         computed: {
@@ -400,6 +390,21 @@
                 return {
                     color: colors.backgroundColor
                 };
+            },
+            attributeReferences() {
+                let data = {
+                    refs: [],
+                    value: {},
+                    attribute: {}
+                };
+                if(this.referenceAttribute) {
+                    const attribute = this.selectedEntity.attributes.find(a => a.id == this.referenceAttribute);
+                    if(!attribute) return data;
+                    data.refs = this.hasReferenceGroup(attribute.thesaurus_url) ? this.selectedEntity.references[attribute.thesaurus_url] : [];
+                    data.value = this.selectedEntity.data[this.referenceAttribute];
+                    data.attribute = attribute;
+                }
+                return data;
             }
         },
         watch: {

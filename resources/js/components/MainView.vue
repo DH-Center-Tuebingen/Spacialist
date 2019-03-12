@@ -129,7 +129,7 @@
                     this.selectedEntity = response.data;
                     return $http.get(`/entity/${id}/reference`);
                 }).then(response => {
-                    this.selectedEntity.references = response.data;
+                    Vue.set(this.selectedEntity, 'references', response.data);
                 }));
             },
             resetEntity() {
@@ -142,12 +142,18 @@
                     this.selectedEntity = entityData;
                 }
                 if(entityReferences) {
-                    this.selectedEntity.references = entityReferences;
+                    if(Array.isArray(entityReferences) && !entityReferences.length) {
+                        entityReferences = {};
+                    }
+                    Vue.set(this.selectedEntity, 'references', entityReferences);
+                } else {
+                    Vue.set(this.selectedEntity, 'references', {});
                 }
                 if(openTab) {
                     this.setTabOrPlugin(openTab);
                 }
                 EventBus.$on('entity-update', this.handleEntityUpdate);
+                EventBus.$on('references-updated', this.handleReferenceUpdate);
                 this.initFinished = true;
                 return new Promise(r => r(null));
             },
@@ -214,6 +220,32 @@
                         default:
                             vm.$throwError({message: `Unknown event type ${e.type} received.`});
                     }
+                }
+            },
+            handleReferenceUpdate(e) {
+                const r = e.reference;
+                const grp = this.selectedEntity.references[e.group];
+                switch(e.action) {
+                    case 'add':
+                        if(!grp) {
+                            Vue.set(this.selectedEntity.references, e.group, []);
+                        }
+                        this.selectedEntity.references[e.group].push(r);
+                        break;
+                    case 'delete':
+                        const idx = grp.findIndex(ref => ref.id == r.id);
+                        if(idx > -1) {
+                            this.selectedEntity.references[e.group].splice(idx, 1);
+                        }
+                        if(!grp.length) {
+                            Vue.delete(this.selectedEntity.references, e.group);
+                        }
+                        break;
+                    case 'edit':
+                        let ref = grp.find(ref => ref.id == r.id);
+                        ref.description = r.description;
+                        ref.updated_at = r.updated_at;
+                        break;
                 }
             }
         },
