@@ -41,7 +41,7 @@
                         </span>
                     </sup>
                 </label>
-                <div class="col-md-9">
+                <div :class="expanded[attribute.id]">
                     <input class="form-control" :disabled="attribute.isDisabled" v-if="attribute.datatype == 'string'" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
                     <input class="form-control-plaintext" v-else-if="attribute.datatype == 'serial'" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" readonly v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
                     <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model.number="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
@@ -135,9 +135,7 @@
                     <div v-else-if="attribute.datatype == 'dimension'">
                         <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
-                    <div v-else-if="attribute.datatype == 'table'">
-                        <tabular :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :selections="localSelections" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""/>
-                    </div>
+                    <tabular v-else-if="attribute.datatype == 'table'" :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :selections="localSelections" :attribute="attribute" :disabled="attribute.isDisabled" @expanded="onAttributeExpand" v-validate=""/>
                     <div v-else-if="attribute.datatype == 'sql'">
                         <div v-if="isArray(localValues[attribute.id].value)">
                             <div class="table-responsive">
@@ -310,6 +308,9 @@
                     }
                 }
                 this.checkDependency(aid);
+            },
+            onAttributeExpand(e) {
+                Vue.set(this.expanded, e.id, e.state ? ['col-md-12'] : ['col-md-9']);
             },
             updateDatepicker(aid, fieldname) {
                 const vm = this;
@@ -528,6 +529,7 @@
                 },
                 hiddenByDependency: {},
                 hovered: [],
+                expanded: {},
                 uniqueId: Math.random().toString(36),
                 selectedAttribute: -1,
                 initialGeoValues: [],
@@ -538,6 +540,7 @@
         created() {
             for(let i=0; i<this.localAttributes.length; i++) {
                 this.hovered.push(false);
+                Vue.set(this.expanded, this.localAttributes[i].id, ['col-md-9']);
             }
         },
         computed: {
