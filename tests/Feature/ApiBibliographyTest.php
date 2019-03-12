@@ -6,6 +6,8 @@ use Tests\TestCase;
 
 use App\Bibliography;
 
+use Illuminate\Http\UploadedFile;
+
 class ApiBibliographyTest extends TestCase
 {
     /**
@@ -83,6 +85,107 @@ class ApiBibliographyTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJsonCount(62);
+    }
+
+    /**
+     * Test getting count of references for a bibliography entry (id=1319)
+     * @return void
+     */
+    public function testGetReferenceCountEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/bibliography/1319/ref_count');
+
+        $response->assertStatus(200);
+        $response->assertExactJson([1]);
+    }
+
+    /**
+     * Test importing a bibtex file
+     * @return void
+     */
+    public function testImportBibtexEndpoint()
+    {
+        $cnt = Bibliography::count();
+        $this->assertEquals(61, $cnt);
+
+        $name = 'import.bib';
+        $path = storage_path() . "/framework/testing/$name";
+        $file = new UploadedFile($path, $name, 'application/x-bibtex', null, true);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/bibliography/import', [
+                'file' => $file
+            ]);
+
+        // dd($response);
+
+        $response->assertStatus(201);
+        $response->assertJsonCount(2);
+        $response->assertJsonStructure([
+            [
+                'id',
+                'type',
+                'citekey',
+                'title',
+                'author',
+                'editor',
+                'journal',
+                'year',
+                'pages',
+                'volume',
+                'number',
+                'booktitle',
+                'publisher',
+                'address',
+                'misc',
+                'howpublished',
+                'annote',
+                'chapter',
+                'crossref',
+                'edition',
+                'institution',
+                'key',
+                'month',
+                'note',
+                'organization',
+                'school',
+                'series',
+                'lasteditor',
+                'created_at',
+                'updated_at',
+            ]
+        ]);
+        $response->assertJson([
+            [
+                'type' => 'book',
+                'citekey' => 'Te:1984',
+                'author' => 'Test Author',
+                'journal' => null,
+                'pages' => '1--3',
+                'title' => 'Test Booktitle',
+                'booktitle' => 'Test Book I',
+                'volume' => '3',
+                'year' => '1984',
+            ],
+            [
+                'type' => 'article',
+                'citekey' => 'Te:1337',
+                'author' => 'Test Author',
+                'journal' => 'Test Journal',
+                'pages' => '13--37',
+                'title' => 'Test Title',
+                'volume' => '1',
+                'year' => '1337',
+                'institution' => null,
+            ],
+        ]);
+        $cnt = Bibliography::count();
+        $this->assertEquals(63, $cnt);
     }
 
     /**

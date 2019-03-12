@@ -121,7 +121,7 @@ class BibliographyController extends Controller
                 $insArray
             );
             if($bibliography->wasRecentlyCreated) {
-                $newEntries[] = $bibliography;
+                $newEntries[] = Bibliography::find($bibliography->id);
             }
         }
         return response()->json($newEntries, 201);
