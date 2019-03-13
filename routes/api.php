@@ -89,10 +89,10 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // USER
-Route::get('/v1/auth/refresh', 'UserController@refreshToken');
 Route::post('/v1/auth/login', 'UserController@login');
 
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1')->group(function() {
+    Route::get('/auth/refresh', 'UserController@refreshToken');
     Route::get('/auth/user', 'UserController@getUser');
     Route::get('/user', 'UserController@getUsers');
     Route::get('/role', 'UserController@getRoles');

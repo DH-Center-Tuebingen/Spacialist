@@ -22,8 +22,8 @@ class UserController extends Controller
 
     public function refreshToken() {
         return response()->json([
-                'status' => 'success'
-            ]);
+            'status' => 'success'
+        ]);
     }
 
     public function getUser(Request $request) {
