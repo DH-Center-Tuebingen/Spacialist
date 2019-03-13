@@ -378,8 +378,8 @@ class MapController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'feature' => 'required|json',
-            'srid' => 'required|integer'
+            'geometry' => 'required|json',
+            'srid' => 'required|integer|exists:spatial_ref_sys,srid'
         ]);
 
         try {
@@ -389,7 +389,7 @@ class MapController extends Controller
                 'error' => __('This geodata does not exist')
             ], 400);
         }
-        $geodata->updateGeometry(json_decode($request->get('feature')), $request->get('srid'), $user);
+        $geodata->updateGeometry($request->get('geometry'), $request->get('srid'), $user);
     }
 
     public function updateLayer($id, Request $request) {
