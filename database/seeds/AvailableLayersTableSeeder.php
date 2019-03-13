@@ -155,7 +155,7 @@ class AvailableLayersTableSeeder extends Seeder
             array (
                 'id' => 9,
                 'name' => 'OpenStreetMap',
-                'url' => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                'url' => 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                 'type' => 'xyz',
                 'subdomains' => NULL,
                 'attribution' => '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
