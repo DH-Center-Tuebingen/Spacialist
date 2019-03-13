@@ -215,6 +215,7 @@ class FileController extends Controller
             )
             SELECT *
             FROM top
+            ORDER BY id
         ");
         return response()->json($tags);
     }
@@ -314,10 +315,10 @@ class FileController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'files' => 'required|json'
+            'files' => 'required|array'
         ]);
 
-        $ids = json_decode($request->get('files'));
+        $ids = $request->input('files', []);
         $files = File::whereIn('id', $ids)->get();
         $archive = File::createArchiveFromList($files);
         // get raw parsed content
@@ -397,9 +398,6 @@ class FileController extends Controller
         }
 
         $tags = $request->input('tags', []);
-        $tags = array_map(function($t) {
-            return $t['id'];
-        }, $tags);
 
         // Delete all entries where tags no longer set
         FileTag::where('file_id', $file->id)
@@ -447,7 +445,7 @@ class FileController extends Controller
 
         $file->link($request->get('entity_id'), $user);
 
-        return response()->json();
+        return response()->json(null, 204);
     }
 
     // DELETE

@@ -191,9 +191,11 @@ class File extends Model
         $files = self::with(['entities', 'tags'])
             ->whereHas('entities', function($query) use($cid, $filters) {
                 $query->where('entity_id', $cid);
-                $subs = $filters['sub_entities'];
-                if(isset($subs) && sp_parse_boolean($subs)) {
-                    $query->orWhere('root_entity_id', $cid);
+                if(array_key_exists('sub_entities', $filters)) {
+                    $subs = $filters['sub_entities'];
+                    if(isset($subs) && sp_parse_boolean($subs)) {
+                        $query->orWhere('root_entity_id', $cid);
+                    }
                 }
             })
             ->orderBy('id', 'asc');

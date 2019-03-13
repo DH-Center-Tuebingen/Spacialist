@@ -3,11 +3,12 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use Illuminate\Http\UploadedFile;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
-
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
+use App\EntityFile;
 use App\File;
 
 class ApiFileTest extends TestCase
@@ -18,7 +19,9 @@ class ApiFileTest extends TestCase
         'text3.txt',
         'office_file.docx',
         'spacialist_screenshot.png',
+        'spacialist_screenshot_thumb.jpg',
         'test_img_edin.jpg',
+        'test_img_edin_thumb.jpg',
         'test_archive.zip',
     ];
 
@@ -204,7 +207,6 @@ class ApiFileTest extends TestCase
      */
     public function testGetJpgFileEndpoint()
     {
-        $file = File::find(5);
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
             ])
@@ -272,7 +274,6 @@ class ApiFileTest extends TestCase
      */
     public function testGetArchiveFileListEndpoint()
     {
-        $file = File::find(5);
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
             ])
@@ -364,6 +365,22 @@ class ApiFileTest extends TestCase
                 'cleanFilename' => 'folder'
             ],
         ]);
+    }
+
+    /**
+     * Test getting content of a file inside an archive (id=6).
+     *
+     * @return void
+     */
+    public function testGetArchivedFileEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/file/6/archive/download?p=folder/folder_text1.txt');
+
+        $response->assertStatus(200);
+        $this->assertEquals(\base64_encode("This is a test file inside a folder. Awesome!\n"), $response->getContent());
     }
 
     /**
@@ -482,5 +499,643 @@ class ApiFileTest extends TestCase
                 'url',
             ]
         ]);
+    }
+
+    /**
+     * Test getting supported file categories.
+     *
+     * @return void
+     */
+    public function testFileCategoriesEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/file/filter/category');
+
+        $response->assertStatus(200);
+        $response->assertExactJson([
+            ['key' => 'image', 'label' => 'Image'],
+            ['key' => 'audio', 'label' => 'Audio File'],
+            ['key' => 'video', 'label' => 'Video File'],
+            ['key' => 'pdf', 'label' => 'PDF'],
+            ['key' => 'xml', 'label' => 'XML'],
+            ['key' => 'html', 'label' => 'HTML'],
+            ['key' => '3d', 'label' => '3D File'],
+            ['key' => 'dicom', 'label' => 'DICOM File'],
+            ['key' => 'archive', 'label' => 'Archive'],
+            ['key' => 'text', 'label' => 'Text File'],
+            ['key' => 'document', 'label' => 'Office Documents'],
+            ['key' => 'spreadsheet', 'label' => 'Spreadsheets'],
+            ['key' => 'presentation', 'label' => 'Presentation Files'],
+        ]);
+    }
+
+    /**
+     * Test getting stored camera names.
+     *
+     * @return void
+     */
+    public function testFileCamerasEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/file/filter/camera');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(2);
+        $response->assertExactJson([
+            'Canon EOS 650D (Canon)',
+            'Null',
+        ]);
+    }
+
+    /**
+     * Test getting stored created dates of files.
+     *
+     * @return void
+     */
+    public function testFileDatesEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/file/filter/date');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(4);
+        $response->assertExactJson([
+            ['is' => 'date', 'value' => '2017-06-18'],
+            ['is' => 'date', 'value' => '2019-03-08'],
+            ['is' => 'year', 'value' => '2017'],
+            ['is' => 'year', 'value' => '2019'],
+        ]);
+    }
+
+    /**
+     * Test getting available tags.
+     *
+     * @return void
+     */
+    public function testGetTagsEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/file/tags');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(14);
+        $response->assertJson([
+            ['id' => 15],
+            ['id' => 16],
+            ['id' => 17],
+            ['id' => 18],
+            ['id' => 19],
+            ['id' => 20],
+            ['id' => 23],
+            ['id' => 24],
+            ['id' => 25],
+            ['id' => 26],
+            ['id' => 27],
+            ['id' => 28],
+            ['id' => 43],
+            ['id' => 47],
+        ]);
+    }
+
+    // Testing POST requests
+
+    /**
+     * Test file upload.
+     *
+     * @return void
+     */
+    public function testFileUploadEndpoint()
+    {
+        $this->createFiles(1, 1, true, true);
+    }
+
+    /**
+     * Test getting all files.
+     *
+     * @return void
+     */
+    public function testGetAllFilesUnfilteredEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file');
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'current_page',
+            'data',
+            'first_page_url',
+            'last_page',
+            'last_page_url',
+            'next_page_url',
+            'prev_page_url',
+            'from',
+            'to',
+            'total',
+            'per_page',
+            'path',
+        ]);
+        $response->assertJson([
+            'current_page' => 1,
+            'data' => [
+                ['name' => 'text3.txt'],
+                ['name' => 'text2.txt'],
+                ['name' => 'text1.txt'],
+                ['name' => 'spacialist_screenshot.png'],
+                ['name' => 'test_img_edin.jpg'],
+                ['name' => 'test_archive.zip'],
+                ['name' => 'office_file.docx'],
+            ],
+            'first_page_url' => '/file?page=1',
+            'last_page' => 1,
+            'last_page_url' => '/file?page=1',
+            'next_page_url' => null,
+            'prev_page_url' => null,
+            'from' => 1,
+            'to' => 7,
+            'total' => 7,
+            'per_page' => 15,
+            'path' => '/file'
+        ]);
+    }
+
+    /**
+     * Test getting all files by categories.
+     *
+     * @return void
+     */
+    public function testGetAllFilesByCategoryEndpoint()
+    {
+        $categories = [
+            'image' => [
+                ['name' => 'spacialist_screenshot.png'],
+                ['name' => 'test_img_edin.jpg'],
+            ],
+            'audio' => [],
+            'video' => [],
+            'pdf' => [],
+            'xml' => [],
+            'html' => [],
+            '3d' => [],
+            'dicom' => [],
+            'archive' => [
+                ['name' => 'test_archive.zip'],
+            ],
+            'text' => [
+                ['name' => 'text3.txt'],
+                ['name' => 'text2.txt'],
+                ['name' => 'text1.txt'],
+            ],
+            'document' => [
+                ['name' => 'office_file.docx'],
+            ],
+            'spreadsheet' => [],
+            'presentation' => [],
+        ];
+
+        foreach($categories as $c => $data) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->post('/api/v1/file', [
+                    'filters' => [
+                        'categories' => [
+                            $c
+                        ]
+                    ]
+                ]);
+
+            $response->assertStatus(200);
+            $response->assertJson([
+                'data' => $data
+            ]);
+            $this->assertEquals(count($data), count($response->decodeResponseJson()['data']));
+
+            $this->refreshToken($response);
+        }
+    }
+
+    /**
+     * Test getting all files by camera (canon eos 650d) and (nikon d700).
+     *
+     * @return void
+     */
+    public function testGetAllFilesByCameraEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file', [
+                'filters' => [
+                    'cameras' => [
+                        'Canon EOS 650D (Canon)'
+                    ]
+                ]
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                ['name' => 'test_img_edin.jpg'],
+            ]
+        ]);
+
+        $this->refreshToken($response);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file', [
+                'filters' => [
+                    'cameras' => [
+                        'Nikon D700 (Nikon)'
+                    ]
+                ]
+            ]);
+
+        $response->assertStatus(200);
+        $content = $response->decodeResponseJson();
+        $this->assertEquals(0, count($content['data']));
+    }
+
+    /**
+     * Test getting all files by date/year.
+     *
+     * @return void
+     */
+    public function testGetAllFilesByDateEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file', [
+                'filters' => [
+                    'dates' => [
+                        ['is' => 'year', 'value' => '2017']
+                    ]
+                ]
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                ['name' => 'test_img_edin.jpg'],
+            ]
+        ]);
+
+        $this->refreshToken($response);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file', [
+                'filters' => [
+                    'dates' => [
+                        ['is' => 'year', 'value' => '2018']
+                    ]
+                ]
+            ]);
+
+        $response->assertStatus(200);
+        $content = $response->decodeResponseJson();
+        $this->assertEquals(0, count($content['data']));
+    }
+
+    /**
+     * Test getting all unlinked files.
+     *
+     * @return void
+     */
+    public function testGetUnlinkedFilesUnfilteredEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file/unlinked');
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                ['name' => 'text3.txt'],
+                ['name' => 'office_file.docx'],
+            ]
+        ]);
+        $content = $response->decodeResponseJson();
+        $this->assertEquals(2, count($content['data']));
+    }
+
+    /**
+     * Test getting all files linked to an entity (id=3) and to another (id=2) including files of sub-entities.
+     *
+     * @return void
+     */
+    public function testGetLinkedFilesUnfilteredEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file/linked/3');
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                ['name' => 'spacialist_screenshot.png'],
+                ['name' => 'test_archive.zip'],
+            ]
+        ]);
+        $content = $response->decodeResponseJson();
+        $this->assertEquals(2, count($content['data']));
+
+        $this->refreshToken($response);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file/linked/2', [
+                'filters' => [
+                    'sub_entities' => true
+                ]
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                ['name' => 'text2.txt'],
+                ['name' => 'text1.txt'],
+                ['name' => 'spacialist_screenshot.png'],
+                ['name' => 'test_archive.zip'],
+            ]
+        ]);
+        $content = $response->decodeResponseJson();
+        $this->assertEquals(4, count($content['data']));
+    }
+
+    /**
+     * Test patching content of a file (id=3).
+     *
+     * @return void
+     */
+    public function testPatchFileContentEndpoint()
+    {
+        // Paste content of file text2.txt into text1.txt
+        $name = 'text2.txt';
+        $path = storage_path() . "/framework/testing/$name";
+        $file = new UploadedFile($path, $name, 'text/plain', null, true);
+        $fileContent = Storage::get('text1.txt');
+        $this->assertEquals("This is test file #1 for Spacialist.\n", $fileContent);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file/3/patch', [
+                'file' => $file
+            ]);
+
+        $fileContent = Storage::get('text1.txt');
+        $this->assertEquals("The second test file for Spacialist\n", $fileContent);
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'id',
+            'name',
+            'modified',
+            'created',
+            'cameraname',
+            'thumb',
+            'copyright',
+            'description',
+            'mime_type',
+            'lasteditor',
+            'created_at',
+            'updated_at',
+        ]);
+        $response->assertJson([
+            'id' => 3,
+            'name' => 'text1.txt',
+            'cameraname' => null,
+            'thumb' => null,
+            'copyright' => null,
+            'description' => null,
+            'mime_type' => 'text/plain',
+            'lasteditor' => 'Admin',
+        ]);
+
+        $this->refreshToken($response);
+
+        // Paste content of file test_img_edin.jpg into text1.txt
+        $name = 'test_img_edin.jpg';
+        $path = storage_path() . "/framework/testing/$name";
+        $file = new UploadedFile($path, $name, 'image/jpeg', null, true);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file/3/patch', [
+                'file' => $file
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'id' => 3,
+            'name' => 'text1.txt',
+            'cameraname' => null,
+            'thumb' => null,
+            'copyright' => null,
+            'description' => null,
+            'mime_type' => 'image/jpeg',
+            'lasteditor' => 'Admin',
+        ]);
+    }
+
+    /**
+     * Test exporting files (ids=1, 2, 3).
+     *
+     * @return void
+     */
+    public function testExportingFilesEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file/export', [
+                'files' => [1, 2, 3, 5]
+            ]);
+
+        $response->assertStatus(200);
+
+        // Create temp file from base64 response and open it using build-in
+        // ZipArchive
+        $content = $response->getContent();
+        $path = \tempnam(\sys_get_temp_dir(), 'test');
+        file_put_contents($path, base64_decode($content));
+        $za = new \ZipArchive();
+        $za->open($path);
+
+        $this->assertEquals(4, $za->numFiles);
+
+        // Get all names from the archive and test it against names of the files (1, 2, 3)
+        $names = [];
+        for($i=0; $i<$za->numFiles; $i++) {
+            $stat = $za->statIndex($i);
+            $names[] = $stat['name'];
+        }
+
+        $this->assertEquals([
+            'text3.txt',
+            'text2.txt',
+            'text1.txt',
+            'test_img_edin.jpg',
+        ], $names);
+    }
+
+    // Testing PATCH requests
+
+    /**
+     * Test patching a property (description and name) of a file (id=1)
+     *
+     * @return void
+     */
+    public function testPatchPropertyEndpoint()
+    {
+        $file = File::find(1);
+        $this->assertEquals(null, $file->description);
+        $this->assertEquals('text3.txt', $file->name);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->patch('/api/v1/file/1/property', [
+                'description' => 'This is just a test file.',
+                'name' => 'test_file.txt'
+            ]);
+
+        $response->assertStatus(200);
+        $file = File::find(1);
+        $this->assertEquals('This is just a test file.', $file->description);
+        $this->assertEquals('test_file.txt', $file->name);
+    }
+
+    /**
+     * Test patching tags of a file (id=2)
+     *
+     * @return void
+     */
+    public function testPatchTagEndpoint()
+    {
+        $file = File::with('tags')->find(2);
+        $this->assertEquals(3, count($file->tags));
+        $this->assertEquals('text2.txt', $file->name);
+        $this->assertEquals(18, $file->tags[0]->id);
+        $this->assertEquals(19, $file->tags[1]->id);
+        $this->assertEquals(26, $file->tags[2]->id);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->patch('/api/v1/file/2/tag', [
+                'tags' => [18, 19, 20, 25],
+            ]);
+
+        $response->assertStatus(204);
+        $file = File::with('tags')->find(2);
+        $this->assertEquals(4, count($file->tags));
+        $this->assertEquals('text2.txt', $file->name);
+        $this->assertEquals(18, $file->tags[0]->id);
+        $this->assertEquals(19, $file->tags[1]->id);
+        $this->assertEquals(20, $file->tags[2]->id);
+        $this->assertEquals(25, $file->tags[3]->id);
+    }
+
+    // Testing PUT requests
+
+    /**
+     * Test linking a file (id=1) to an entity (id=2)
+     *
+     * @return void
+     */
+    public function testLinkToEntityEndpoint()
+    {
+        $this->assertTrue(!EntityFile::where('file_id', 1)->where('entity_id', 2)->exists());
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->put('/api/v1/file/1/link', [
+                'entity_id' => 2
+            ]);
+
+        $response->assertStatus(204);
+        $this->assertTrue(EntityFile::where('file_id', 1)->where('entity_id', 2)->exists());
+    }
+
+    // Testing DELETE requests
+
+    /**
+     * Test deleting a file (id=4)
+     *
+     * @return void
+     */
+    public function testDeleteFileEndpoint()
+    {
+        $linkCnt = EntityFile::count();
+        $this->assertEquals(5, $linkCnt);
+        $fileCount = File::count();
+        $this->assertEquals(7, $fileCount);
+        try {
+            Storage::get('spacialist_screenshot.png');
+            $this->assertTrue(true);
+        } catch(FileNotFoundException $e) {
+            $this->assertTrue(false);
+        }
+        try {
+            Storage::get('spacialist_screenshot_thumb.jpg');
+            $this->assertTrue(true);
+        } catch(FileNotFoundException $e) {
+            $this->assertTrue(false);
+        }
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->delete('/api/v1/file/4');
+
+        $response->assertStatus(204);
+        $linkCnt = EntityFile::count();
+        $this->assertEquals(4, $linkCnt);
+        $fileCount = File::count();
+        $this->assertEquals(6, $fileCount);
+        try {
+            Storage::get('spacialist_screenshot.png');
+            $this->assertTrue(false);
+        } catch(FileNotFoundException $e) {
+            $this->assertTrue(true);
+        }
+        try {
+            Storage::get('spacialist_screenshot_thumb.jpg');
+            $this->assertTrue(false);
+        } catch(FileNotFoundException $e) {
+            $this->assertTrue(true);
+        }
+    }
+
+    /**
+     * Test deleting a file link from (id=4) to entity (id=3)
+     *
+     * @return void
+     */
+    public function testUnlinkFileEndpoint()
+    {
+        $linkCnt = EntityFile::count();
+        $this->assertEquals(5, $linkCnt);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->delete('/api/v1/file/4/link/3');
+
+        $response->assertStatus(204);
+        $linkCnt = EntityFile::count();
+        $this->assertEquals(4, $linkCnt);
     }
 }
