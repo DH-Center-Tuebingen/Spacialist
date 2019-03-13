@@ -135,7 +135,7 @@ class MapController extends Controller
                 'error' => __('This layer does not exist')
             ]);
         }
-        $query = Geodata::with(['entity']);
+        $query = Geodata::with(['entity'])->orderBy('id');
         if($layer->type == 'unlinked') {
             $query->doesntHave('entity');
         } else if(isset($layer->entity_type_id)) {
