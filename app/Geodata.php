@@ -41,7 +41,7 @@ class Geodata extends Model
         return self::$availableGeometryTypes;
     }
 
-    public function updateGeometry($geometryAsStr, $srid, $user) {
+    public function patch($geometryAsStr, $srid, $user) {
         $wkt = \DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geometryAsStr')), $srid), 4326)) AS wkt")[0]->wkt;
         $parsedWkt = self::parseWkt($wkt);
         if(!isset($parsedWkt)) return;

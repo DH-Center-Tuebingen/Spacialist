@@ -3,10 +3,10 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-// use Illuminate\Contracts\Filesystem\FileNotFoundException;
-// use Illuminate\Foundation\Testing\WithoutMiddleware;
-// use Illuminate\Http\UploadedFile;
-// use Illuminate\Support\Facades\Storage;
+
+use App\Entity;
+use App\Geodata;
+use App\AvailableLayer;
 
 class ApiMapTest extends TestCase
 {
@@ -66,7 +66,7 @@ class ApiMapTest extends TestCase
             ],
         ]);
         $content = $response->decodeResponseJson();
-        $this->assertEquals(7, count($content['layers']));
+        $this->assertEquals(8, count($content['layers']));
         $this->assertEquals(3, count($content['geodata']));
     }
 
@@ -290,5 +290,294 @@ class ApiMapTest extends TestCase
             'srtext' => 'PROJCS["WGS 84 / Cape Verde National",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["standard_parallel_1",15],PARAMETER["standard_parallel_2",16.66666666666667],PARAMETER["latitude_of_origin",15.83333333333333],PARAMETER["central_meridian",-24],PARAMETER["false_easting",161587.83],PARAMETER["false_northing",128511.202],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["M",EAST],AXIS["P",NORTH],AUTHORITY["EPSG","4826"]]',
             'proj4text' => '+proj=lcc +lat_1=15 +lat_2=16.66666666666667 +lat_0=15.83333333333333 +lon_0=-24 +x_0=161587.83 +y_0=128511.202 +datum=WGS84 +units=m +no_defs ',
         ]);
+    }
+
+    /**
+     * Test exporting an layer (id=4) as geojson (default)
+     *
+     * @return void
+     */
+    public function testExportLayerEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/map/export/4');
+        $response->assertStatus(200);
+        $collection = json_decode(base64_decode($response->getContent()), true);
+        $sub = [
+            'type' => 'FeatureCollection',
+            'features' => [
+                [
+                    'type' => 'Feature',
+                    'properties' => [
+                        'id' => 3,
+                        'color' => null
+                    ],
+                    'geometry' => [
+                        'type' => 'Point',
+                        'coordinates' => [
+                            0 => 8.917369,
+                            1 => 48.541572
+                        ]
+                    ]
+                ],
+                [
+                    'type' => 'Feature',
+                    'properties' => [
+                        'id' => 2,
+                        'color' => null
+                    ],
+                    'geometry' => [
+                        'type' => 'Point',
+                        'coordinates' => [
+                            0 => 8.911312,
+                            1 => 48.544157
+                        ]
+                    ]
+                ],
+            ]
+        ];
+        $this->assertArraySubset($sub, $collection);
+    }
+
+    // Testing POST requests
+
+    /**
+     * Test adding a new geometry
+     *
+     * @return void
+     */
+    public function testAddGeometryEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/map', [
+                'collection' => '{"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [6.123, 55.357]}}]}',
+                'srid' => 4326
+            ]);
+        $response->assertStatus(200);
+        $geodata = Geodata::latest()->first();
+        $this->assertEquals(55.3570, $geodata->geom->getLat());
+        $this->assertEquals(6.123, $geodata->geom->getLng());
+    }
+
+    /**
+     * Test get definition of an srid code by it's text (EPSG:4826 (WGS84))
+     *
+     * @return void
+     */
+    public function testGetEpsgByTextEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/map/epsg/text', [
+                'srtext' => 'PROJCS["WGS 84 / Cape Verde National",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["standard_parallel_1",15],PARAMETER["standard_parallel_2",16.66666666666667],PARAMETER["latitude_of_origin",15.83333333333333],PARAMETER["central_meridian",-24],PARAMETER["false_easting",161587.83],PARAMETER["false_northing",128511.202],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["M",EAST],AXIS["P",NORTH],AUTHORITY["EPSG","4826"]]'
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'srid',
+            'auth_name',
+            'auth_srid',
+            'srtext',
+            'proj4text',
+        ]);
+        $response->assertExactJson([
+            'srid' => 4826,
+            'auth_name' => 'EPSG',
+            'auth_srid' => 4826,
+            'srtext' => 'PROJCS["WGS 84 / Cape Verde National",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["standard_parallel_1",15],PARAMETER["standard_parallel_2",16.66666666666667],PARAMETER["latitude_of_origin",15.83333333333333],PARAMETER["central_meridian",-24],PARAMETER["false_easting",161587.83],PARAMETER["false_northing",128511.202],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["M",EAST],AXIS["P",NORTH],AUTHORITY["EPSG","4826"]]',
+            'proj4text' => '+proj=lcc +lat_1=15 +lat_2=16.66666666666667 +lat_0=15.83333333333333 +lon_0=-24 +x_0=161587.83 +y_0=128511.202 +datum=WGS84 +units=m +no_defs ',
+        ]);
+    }
+
+    /**
+     * Test adding a new layer
+     *
+     * @return void
+     */
+    public function testAddLayerEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/map/layer', [
+                'name' => 'Test Layer',
+                'is_overlay' => false
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'id',
+            'name',
+            'url',
+            'type',
+            'subdomains',
+            'attribution',
+            'opacity',
+            'layers',
+            'styles',
+            'format',
+            'version',
+            'visible',
+            'is_overlay',
+            'api_key',
+            'layer_type',
+            'position',
+            'entity_type_id',
+            'color',
+            'created_at',
+            'updated_at',
+        ]);
+        $response->assertJson([
+            'name' => 'Test Layer',
+            'url' => '',
+            'type' => '',
+            'subdomains' => null,
+            'attribution' => null,
+            'opacity' => '1',
+            'layers' => null,
+            'styles' => null,
+            'format' => null,
+            'version' => null,
+            'visible' => true,
+            'is_overlay' => false,
+            'api_key' => null,
+            'layer_type' => null,
+            'position' => 3,
+            'entity_type_id' => null,
+        ]);
+    }
+
+    /**
+     * Test unlinking a geodate (id=2) from entity (id=1) and re-linking it to another entity (id=3)
+     *
+     * @return void
+     */
+    public function testLinkAndUnlinkEndpoint()
+    {
+        $oldEntity = Entity::find(1);
+        $this->assertEquals(2, $oldEntity->geodata_id);
+        $newEntity = Entity::find(3);
+        $this->assertNull($newEntity->geodata_id);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->delete('/api/v1/map/link/2/1');
+
+        $response->assertStatus(204);
+        $oldEntity = Entity::find(1);
+        $this->assertNull($oldEntity->geodata_id);
+
+        $this->refreshToken($response);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/map/link/2/3');
+
+        $newEntity = Entity::find(3);
+        $this->assertEquals(2, $newEntity->geodata_id);
+    }
+
+    /**
+     * Test patching a geometry (id=2)
+     *
+     * @return void
+     */
+    public function testPatchGeodataEndpoint()
+    {
+        $geodata = Geodata::find(2);
+        $this->assertEquals(48.544157, $geodata->geom->getLat());
+        $this->assertEquals(8.911312, $geodata->geom->getLng());
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->patch('/api/v1/map/2', [
+                'geometry' => '{"type": "Point", "coordinates": [8.915, 48.48]}',
+                'srid' => 4326
+            ]);
+        $response->assertStatus(204);
+        $geodata = Geodata::find(2);
+        $this->assertEquals(48.48, $geodata->geom->getLat());
+        $this->assertEquals(8.915000, $geodata->geom->getLng());
+    }
+
+    /**
+     * Test patching a layer (id=10)
+     *
+     * @return void
+     */
+    public function testPatchLayerEndpoint()
+    {
+        $layerOne = AvailableLayer::find(9);
+        $layerTwo = AvailableLayer::find(10);
+        $this->assertEquals('OSM', $layerTwo->name);
+        $this->assertTrue(!$layerTwo->visible);
+        $this->assertTrue($layerOne->visible);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->patch('/api/v1/map/layer/10', [
+                'name' => 'Was OSM',
+                'url' => 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                'type' => 'xyz',
+                'visible' => true,
+            ]);
+
+        $response->assertStatus(204);
+        $layerOne = AvailableLayer::find(9);
+        $layerTwo = AvailableLayer::find(10);
+        $this->assertEquals('Was OSM', $layerTwo->name);
+        $this->assertTrue($layerTwo->visible);
+        $this->assertTrue(!$layerOne->visible);
+    }
+
+    // Testing DELETE requests
+
+    /**
+     * Test deleting a geometry (id=3)
+     *
+     * @return void
+     */
+    public function testDeleteGeodataEndpoint()
+    {
+        $cnt = Geodata::count();
+        $this->assertEquals(3, $cnt);
+        $linkedEntity = Entity::find(7);
+        $this->assertEquals(3, $linkedEntity->geodata_id);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->delete('/api/v1/map/3');
+
+        $response->assertStatus(204);
+        $cnt = Geodata::count();
+        $this->assertEquals(2, $cnt);
+        $linkedEntity = Entity::find(7);
+        $this->assertNull($linkedEntity->geodata_id);
+    }
+
+    /**
+     * Test deleting a layer (id=10)
+     *
+     * @return void
+     */
+    public function testDeleteLayerEndpoint()
+    {
+        $cnt = AvailableLayer::count();
+        $this->assertEquals(8, $cnt);
+        $this->assertTrue(AvailableLayer::find(10)->exists());
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->delete('/api/v1/map/layer/10');
+
+        $response->assertStatus(204);
+        $cnt = AvailableLayer::count();
+        $this->assertEquals(7, $cnt);
+        $this->assertNull(AvailableLayer::find(10));
     }
 }

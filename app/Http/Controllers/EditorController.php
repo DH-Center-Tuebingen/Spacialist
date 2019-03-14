@@ -254,17 +254,15 @@ class EditorController extends Controller {
         $cType->save();
         $cType = EntityType::find($cType->id);
 
-        $layer = new AvailableLayer();
-        $layer->name = '';
-        $layer->url = '';
-        $layer->type = $geomtype;
-        $layer->opacity = 1;
-        $layer->visible = true;
-        $layer->is_overlay = true;
-        $layer->position = AvailableLayer::where('is_overlay', '=', true)->max('position') + 1;
-        $layer->entity_type_id = $cType->id;
-        $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-        $layer->save();
+        $layer = AvailableLayer::createFromArray([
+            'name' => '',
+            'url' => '',
+            'type' => $geomtype,
+            'opacity' => 1,
+            'visible' => true,
+            'is_overlay' => true,
+            'entity_type_id' => $cType->id
+        ]);
 
         return response()->json($cType, 201);
     }

@@ -170,9 +170,32 @@ class AvailableLayersTableSeeder extends Seeder
                 'updated_at' => '2017-12-31 16:06:25',
                 'api_key' => NULL,
                 'layer_type' => NULL,
-                'position' => NULL,
+                'position' => 1,
                 'entity_type_id' => NULL,
                 'color' => '#05EE1D',
+            ),
+            7 =>
+            array (
+                'id' => 10,
+                'name' => 'OSM',
+                'url' => 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                'type' => 'xyz',
+                'subdomains' => NULL,
+                'attribution' => '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+                'opacity' => '1',
+                'layers' => NULL,
+                'styles' => NULL,
+                'format' => NULL,
+                'version' => NULL,
+                'visible' => false,
+                'is_overlay' => false,
+                'created_at' => '2017-12-31 16:05:05',
+                'updated_at' => '2017-12-31 16:06:25',
+                'api_key' => NULL,
+                'layer_type' => NULL,
+                'position' => 2,
+                'entity_type_id' => NULL,
+                'color' => '#15D892',
             )
         ));
     }

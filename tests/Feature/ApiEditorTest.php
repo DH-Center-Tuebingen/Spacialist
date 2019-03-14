@@ -761,7 +761,7 @@ class ApiEditorTest extends TestCase
         $avCnt = AttributeValue::count();
         $this->assertEquals(25, $avCnt);
         $alCnt = AvailableLayer::count();
-        $this->assertEquals(7, $alCnt);
+        $this->assertEquals(8, $alCnt);
 
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
@@ -779,7 +779,7 @@ class ApiEditorTest extends TestCase
         $avCnt = AttributeValue::count();
         $this->assertEquals(7, $avCnt);
         $alCnt = AvailableLayer::count();
-        $this->assertEquals(6, $alCnt);
+        $this->assertEquals(7, $alCnt);
     }
 
     /**
