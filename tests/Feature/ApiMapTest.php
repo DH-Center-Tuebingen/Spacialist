@@ -4,9 +4,10 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 
+use App\AvailableLayer;
 use App\Entity;
 use App\Geodata;
-use App\AvailableLayer;
+use App\User;
 
 class ApiMapTest extends TestCase
 {
@@ -579,5 +580,89 @@ class ApiMapTest extends TestCase
         $cnt = AvailableLayer::count();
         $this->assertEquals(7, $cnt);
         $this->assertNull(AvailableLayer::find(10));
+    }
+
+    // Testing exceptions and permissions
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testPermissions()
+    {
+        User::first()->detachRoles();
+
+        $calls = [
+            ['url' => '', 'error' => 'You do not have the permission to view the geo data', 'verb' => 'get'],
+            ['url' => '/layer', 'error' => 'You do not have the permission to view layers', 'verb' => 'get'],
+            ['url' => '/layer/entity', 'error' => 'You do not have the permission to view layers', 'verb' => 'get'],
+            ['url' => '/layer/1', 'error' => 'You do not have the permission to view a layer', 'verb' => 'get'],
+            ['url' => '/layer/1/geometry', 'error' => 'You do not have the permission to view geodata', 'verb' => 'get'],
+            ['url' => '/export/1', 'error' => 'You do not have the permission to export layers', 'verb' => 'get'],
+            ['url' => '', 'error' => 'You do not have the permission to add geometric data', 'verb' => 'post'],
+            ['url' => '/link/1/1', 'error' => 'You do not have the permission to link geo data', 'verb' => 'post'],
+            ['url' => '/1', 'error' => 'You do not have the permission to edit geometric data', 'verb' => 'patch'],
+            ['url' => '/layer/1', 'error' => 'You do not have the permission to update layers', 'verb' => 'patch'],
+            ['url' => '/1', 'error' => 'You do not have the permission to delete geo data', 'verb' => 'delete'],
+            ['url' => '/layer/1', 'error' => 'You do not have the permission to delete layers', 'verb' => 'delete'],
+            ['url' => '/link/1/1', 'error' => 'You do not have the permission to unlink geo data', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/map' . $c['url']);
+
+            $response->assertStatus(403);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testExceptions()
+    {
+        $calls = [
+            ['url' => '/layer/99', 'error' => 'This layer does not exist', 'verb' => 'get'],
+            ['url' => '/layer/99/geometry', 'error' => 'This layer does not exist', 'verb' => 'get'],
+            ['url' => '/export/99', 'error' => 'This layer does not exist', 'verb' => 'get'],
+            ['url' => '/export/9', 'error' => 'This layer does not support export', 'verb' => 'get'],
+            ['url' => '/link/99/1', 'error' => 'This geodata does not exist', 'verb' => 'post'],
+            ['url' => '/link/3/99', 'error' => 'This entity does not exist', 'verb' => 'post'],
+            ['url' => '/link/3/2', 'error' => 'This entity is already linked to a geo object', 'verb' => 'post'],
+            ['url' => '/99', 'error' => 'This geodata does not exist', 'verb' => 'patch'],
+            ['url' => '/layer/99', 'error' => 'This layer does not exist', 'verb' => 'patch'],
+            ['url' => '/99', 'error' => 'This geodata does not exist', 'verb' => 'delete'],
+            ['url' => '/layer/99', 'error' => 'This layer does not exist', 'verb' => 'delete'],
+            ['url' => '/layer/4', 'error' => 'This layer can not be deleted', 'verb' => 'delete'],
+            ['url' => '/link/99/1', 'error' => 'This geodata does not exist', 'verb' => 'delete'],
+            ['url' => '/link/3/99', 'error' => 'This entity does not exist', 'verb' => 'delete'],
+            ['url' => '/link/3/1', 'error' => 'The entity is not linked to the provided geo object', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/map' . $c['url'], [
+                    'geometry' => '{}',
+                    'srid' => 4326
+                ]);
+
+            $response->assertStatus(400);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
     }
 }

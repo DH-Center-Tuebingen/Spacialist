@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use App\Preference;
+
 class ApiTest extends TestCase
 {
     /**
@@ -15,6 +17,18 @@ class ApiTest extends TestCase
     public function testApiRoot()
     {
         $response = $this->get('/');
+
+        $response->assertStatus(200);
+    }
+
+    /**
+     * Test welcome page.
+     *
+     * @return void
+     */
+    public function testWelcomePage()
+    {
+        $response = $this->get('/welcome');
 
         $response->assertStatus(200);
     }

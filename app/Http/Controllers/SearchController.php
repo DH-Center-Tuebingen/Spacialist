@@ -10,6 +10,8 @@ use App\Geodata;
 use App\ThConceptLabel;
 use App\ThConcept;
 use App\ThLanguage;
+
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

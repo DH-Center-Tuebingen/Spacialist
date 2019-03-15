@@ -5,7 +5,7 @@ use App\Bibliography;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RenanBr\BibTexParser\Listener;
-use RenanBr\BibTexParser\ParseException;
+use RenanBr\BibTexParser\Exception\ParserException;
 use RenanBr\BibTexParser\Parser;
 
 class BibliographyController extends Controller
@@ -101,7 +101,7 @@ class BibliographyController extends Controller
         $parser->addListener($listener);
         try {
             $parser->parseFile($file->getRealPath());
-        } catch(ParseException $e) {
+        } catch(ParserException $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ], 400);
@@ -109,11 +109,12 @@ class BibliographyController extends Controller
         $entries = $listener->export();
         $newEntries = [];
         foreach($entries as $entry) {
-            $ckey = $entry['citation-key'];
             $insArray = array_intersect_key($entry, Bibliography::patchRules);
             // set citation key if none is present
-            if($ckey == null || $ckey == '') {
+            if(!array_key_exists('citation-key', $entry) || $entry['citation-key'] == '') {
                 $ckey = Bibliography::computeCitationKey($insArray);
+            } else {
+                $ckey = $entry['citation-key'];
             }
             $insArray['lasteditor'] = $user->name;
             $bibliography = Bibliography::updateOrCreate(
@@ -161,7 +162,7 @@ class BibliographyController extends Controller
         $user = auth()->user();
         if(!$user->can('add_remove_bibliography')) {
             return response()->json([
-                'error' => __('You do not have the permission to remove bibliogra entries')
+                'error' => __('You do not have the permission to remove bibliography entries')
             ], 403);
         }
         try {

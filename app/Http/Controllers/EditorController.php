@@ -467,7 +467,7 @@ class EditorController extends Controller {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
-                'error' => __('You do not have the permission to reorder attributes')
+                'error' => __('You do not have the permission to modify entity-type labels')
             ], 403);
         }
         $this->validate($request, [
@@ -506,7 +506,7 @@ class EditorController extends Controller {
 
         if($ca === null){
             return response()->json([
-                'error' => __('No EntityAttribute found')
+                'error' => __('Entity Attribute not found')
             ], 400);
         }
 
@@ -607,7 +607,16 @@ class EditorController extends Controller {
                 'error' => __('You do not have the permission to delete entity types')
             ], 403);
         }
-        EntityType::find($id)->delete();
+
+        try {
+            $entityType = EntityType::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity-type does not exist')
+            ], 400);
+        }
+
+        $entityType->delete();
         return response()->json(null, 204);
     }
 
@@ -618,7 +627,15 @@ class EditorController extends Controller {
                 'error' => __('You do not have the permission to delete attributes')
             ], 403);
         }
-        Attribute::find($id)->delete();
+
+        try {
+            $attribute = Attribute::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This attribute does not exist')
+            ], 400);
+        }
+        $attribute->delete();
         return response()->json(null, 204);
     }
 
@@ -636,7 +653,7 @@ class EditorController extends Controller {
 
         if($ca === null){
             return response()->json([
-                'error' => __('No EntityAttribute found')
+                'error' => __('Entity Attribute not found')
             ], 400);
         }
 

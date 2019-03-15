@@ -56,7 +56,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => __('You do not have the permission to add geometric data')
+                'error' => __('You do not have the permission to view layers')
             ], 403);
         }
         $basic = $request->query('basic');
@@ -90,7 +90,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => __('You do not have the permission to add geometric data')
+                'error' => __('You do not have the permission to view layers')
             ], 403);
         }
         $entityLayers = AvailableLayer::with(['entity_type'])
@@ -106,7 +106,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => __('You do not have the permission to add geometric data')
+                'error' => __('You do not have the permission to view a layer')
             ], 403);
         }
         try {
@@ -124,7 +124,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => __('You do not have the permission to get layers')
+                'error' => __('You do not have the permission to view geodata')
             ], 403);
         }
 
@@ -133,7 +133,7 @@ class MapController extends Controller
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This layer does not exist')
-            ]);
+            ], 400);
         }
         $query = Geodata::with(['entity'])->orderBy('id');
         if($layer->type == 'unlinked') {
@@ -168,12 +168,12 @@ class MapController extends Controller
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This layer does not exist')
-            ]);
+            ], 400);
         }
         if(strtoupper($layer->type) != 'UNLINKED' && !isset($layer->entity_type_id)) {
             return response()->json([
                 'error' => __('This layer does not support export')
-            ]);
+            ], 400);
         }
         if(strtoupper($layer->type) == 'UNLINKED') {
             $geodataBuilder = Geodata::doesntHave('entity');

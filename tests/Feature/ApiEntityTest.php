@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 use App\AttributeValue;
 use App\Entity;
 use App\Reference;
+use App\User;
 
 class ApiEntityTest extends TestCase
 {
@@ -755,5 +756,70 @@ class ApiEntityTest extends TestCase
 
         $cnt = Reference::count();
         $this->assertEquals($cnt, 2);
+    }
+
+    // Testing exceptions and permissions
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testPermissions()
+    {
+        User::first()->detachRoles();
+
+        $calls = [
+            ['url' => '/99/reference', 'error' => 'You do not have the permission to view references', 'verb' => 'get'],
+            ['url' => '/99/reference/99', 'error' => 'You do not have the permission to add references', 'verb' => 'post'],
+            ['url' => '/reference/99', 'error' => 'You do not have the permission to edit references', 'verb' => 'patch'],
+            ['url' => '/reference/99', 'error' => 'You do not have the permission to delete references', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/entity' . $c['url']);
+
+            $response->assertStatus(403);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testExceptions()
+    {
+        $calls = [
+            ['url' => '/99/reference', 'error' => 'This entity does not exist', 'verb' => 'get'],
+            ['url' => '/99/reference/99', 'error' => 'This entity does not exist', 'verb' => 'post'],
+            ['url' => '/1/reference/99', 'error' => 'This attribute does not exist', 'verb' => 'post'],
+            ['url' => '/reference/99', 'error' => 'This reference does not exist', 'verb' => 'patch'],
+            ['url' => '/reference/99', 'error' => 'This reference does not exist', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/entity' . $c['url'], [
+                    'bibliography_id' => 1318,
+                    'description' => 'Test'
+                ]);
+
+            $response->assertStatus(400);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
     }
 }

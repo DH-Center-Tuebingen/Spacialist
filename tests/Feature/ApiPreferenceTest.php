@@ -306,4 +306,85 @@ class ApiPreferenceTest extends TestCase
         $pref = Preference::find(1);
         $this->assertEquals('{"language_key": "fr"}', $pref->default_value);
     }
+
+    /**
+     * Test patching a users preference.
+     *
+     * @return void
+     */
+    public function testPatchUserPreferenceEndpoint()
+    {
+        $data = [
+            'user_id' => 1,
+            'value' => '{"left": 2, "right": 2, "center": 8}',
+            'label' => 'prefs.columns',
+        ];
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/preference/2', $data);
+
+        $pref = User::with('preferences')->first()->preferences[0];
+        $this->assertEquals(2, $pref->pref_id);
+        $this->assertEquals(1, $pref->user_id);
+        $this->assertEquals('{"left": 2, "right": 2, "center": 8}', $pref->value);
+    }
+
+    // Testing exceptions and permissions
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testPermissions()
+    {
+        User::first()->detachRoles();
+
+        $calls = [
+            ['url' => '/99', 'error' => 'You do not have the permission to edit preferences', 'verb' => 'patch'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/preference' . $c['url']);
+
+            $response->assertStatus(403);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testExceptions()
+    {
+        $calls = [
+            ['url' => '/99', 'error' => 'This preference does not exist', 'verb' => 'patch'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/preference' . $c['url'], [
+                    'label' => 'prefs.columns'
+                ]);
+
+            $response->assertStatus(400);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
 }

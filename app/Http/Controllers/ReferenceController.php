@@ -27,6 +27,15 @@ class ReferenceController extends Controller {
                 'error' => __('You do not have the permission to view references')
             ], 403);
         }
+
+        try {
+            Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+
         $references = Reference::with(['attribute', 'bibliography'])->where('entity_id', $id)->get();
 
         $groupedReferences = [];
@@ -114,7 +123,7 @@ class ReferenceController extends Controller {
             $reference = Reference::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
-                'error' => __('No EntityAttribute found')
+                'error' => __('This reference does not exist')
             ], 400);
         }
         $reference->delete();

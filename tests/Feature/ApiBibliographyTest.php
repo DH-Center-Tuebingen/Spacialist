@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 
 use App\Bibliography;
+use App\User;
 
 use Illuminate\Http\UploadedFile;
 
@@ -122,12 +123,10 @@ class ApiBibliographyTest extends TestCase
                 'file' => $file
             ]);
 
-        // dd($response);
-
         $response->assertStatus(201);
-        $response->assertJsonCount(2);
+        $response->assertJsonCount(3);
         $response->assertJsonStructure([
-            [
+            '*' => [
                 'id',
                 'type',
                 'citekey',
@@ -162,6 +161,16 @@ class ApiBibliographyTest extends TestCase
         ]);
         $response->assertJson([
             [
+                'type' => 'article',
+                'citekey' => 'Sh:1969',
+                'author' => 'Shelah, Saharon',
+                'journal' => 'Journal of Combinatorial Theory',
+                'pages' => '298--300',
+                'title' => '{Note on a min-max problem of Leo Moser}',
+                'volume' => '6',
+                'year' => '1969',
+            ],
+            [
                 'type' => 'book',
                 'citekey' => 'Te:1984',
                 'author' => 'Test Author',
@@ -185,7 +194,26 @@ class ApiBibliographyTest extends TestCase
             ],
         ]);
         $cnt = Bibliography::count();
-        $this->assertEquals(63, $cnt);
+        $this->assertEquals(64, $cnt);
+
+
+        $this->refreshToken($response);
+
+        $name = 'import_wrong_structure.bib';
+        $path = storage_path() . "/framework/testing/$name";
+        $file = new UploadedFile($path, $name, 'application/x-bibtex', null, true);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/bibliography/import', [
+                'file' => $file
+            ]);
+
+        $response->assertStatus(400);
+        $response->assertExactJson([
+            'error' => "Unexpected character '\\0' at line 10 column 1"
+        ]);
     }
 
     /**
@@ -292,5 +320,68 @@ class ApiBibliographyTest extends TestCase
         $cnt = Bibliography::count();
         $this->assertEquals(61, $cnt);
         $this->assertEquals("", $response->getContent());
+    }
+
+    // Testing exceptions and permissions
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testPermissions()
+    {
+        User::first()->detachRoles();
+
+        $calls = [
+            ['url' => '', 'error' => 'You do not have the permission to add new bibliography', 'verb' => 'post'],
+            ['url' => '/import', 'error' => 'You do not have the permission to add new bibliography', 'verb' => 'post'],
+            ['url' => '/1319', 'error' => 'You do not have the permission to edit existing bibliography', 'verb' => 'patch'],
+            ['url' => '/1319', 'error' => 'You do not have the permission to remove bibliography entries', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/bibliography' . $c['url']);
+
+            $response->assertStatus(403);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testExceptions()
+    {
+        $calls = [
+            ['url' => '/99/ref_count', 'error' => 'This bibliography item does not exist', 'verb' => 'get'],
+            ['url' => '/99', 'error' => 'This bibliography item does not exist', 'verb' => 'patch'],
+            ['url' => '/99', 'error' => 'This bibliography item does not exist', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/bibliography' . $c['url'], [
+                    'type' => 'required',
+                    'title' => 'required',
+                ]);
+
+            $response->assertStatus(400);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
     }
 }

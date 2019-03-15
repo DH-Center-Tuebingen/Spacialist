@@ -11,6 +11,7 @@ use App\Entity;
 use App\EntityAttribute;
 use App\EntityType;
 use App\ThConcept;
+use App\User;
 
 class ApiEditorTest extends TestCase
 {
@@ -332,6 +333,27 @@ class ApiEditorTest extends TestCase
         $this->assertEquals(14, $deps[0]->dependant);
         $this->assertEquals('=', $deps[0]->operator);
         $this->assertEquals('placeholder', $deps[0]->value);
+    }
+
+    /**
+     * Test getting entries of a dropdown attribute (id=14).
+     *
+     * @return void
+     */
+    public function testGetAttributeSelectionEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/editor/attribute/14/selection');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(3);
+        $response->assertJson([
+            ['id' => 52],
+            ['id' => 53],
+            ['id' => 54],
+        ]);
     }
 
     /**
@@ -783,6 +805,35 @@ class ApiEditorTest extends TestCase
     }
 
     /**
+     * Test deleting an attribute (id=12).
+     *
+     * @return void
+     */
+    public function testDeleteAttributeEndpoint()
+    {
+        $eaCnt = EntityAttribute::count();
+        $this->assertEquals(23, $eaCnt);
+        $avCnt = AttributeValue::count();
+        $this->assertEquals(25, $avCnt);
+        $aCnt = Attribute::count();
+        $this->assertEquals(18, $aCnt);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->delete('/api/v1/editor/dm/attribute/12');
+
+        $response->assertStatus(204);
+
+        $eaCnt = EntityAttribute::count();
+        $this->assertEquals(21, $eaCnt);
+        $avCnt = AttributeValue::count();
+        $this->assertEquals(21, $avCnt);
+        $aCnt = Attribute::count();
+        $this->assertEquals(17, $aCnt);
+    }
+
+    /**
      * Test deleting an attribute (id=11) from an entity type (id=5).
      *
      * @return void
@@ -846,6 +897,91 @@ class ApiEditorTest extends TestCase
             } else if($a->id == 13) {
                 $this->assertEquals(8, $a->pivot->position);
             }
+        }
+    }
+
+    // Testing exceptions and permissions
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testPermissions()
+    {
+        User::first()->detachRoles();
+
+        $calls = [
+            ['url' => '/entity_type/1', 'error' => 'You do not have the permission to get an entity type\'s data', 'verb' => 'get'],
+            ['url' => '/entity_type/1/attribute', 'error' => 'You do not have the permission to view entity data', 'verb' => 'get'],
+            ['url' => '/attribute/1/selection', 'error' => 'You do not have the permission to view entity data', 'verb' => 'get'],
+            ['url' => '/dm/entity_type/top', 'error' => 'You do not have the permission to view entity data', 'verb' => 'get'],
+            ['url' => '/dm/attribute', 'error' => 'You do not have the permission to view entity data', 'verb' => 'get'],
+            ['url' => '/dm/entity_type', 'error' => 'You do not have the permission to create a new entity type', 'verb' => 'post'],
+            ['url' => '/dm/1/relation', 'error' => 'You do not have the permission to modify entity relations', 'verb' => 'post'],
+            ['url' => '/dm/attribute', 'error' => 'You do not have the permission to add attributes', 'verb' => 'post'],
+            ['url' => '/dm/entity_type/1/attribute', 'error' => 'You do not have the permission to add attributes to an entity type', 'verb' => 'post'],
+            ['url' => '/dm/entity_type/1/duplicate', 'error' => 'You do not have the permission to duplicate an entity type', 'verb' => 'post'],
+            ['url' => '/dm/entity_type/1/label', 'error' => 'You do not have the permission to modify entity-type labels', 'verb' => 'patch'],
+            ['url' => '/dm/entity_type/1/attribute/1/position', 'error' => 'You do not have the permission to reorder attributes', 'verb' => 'patch'],
+            ['url' => '/dm/entity_type/1/attribute/1/dependency', 'error' => 'You do not have the permission to add/modify attribute dependencies', 'verb' => 'patch'],
+            ['url' => '/dm/entity_type/1', 'error' => 'You do not have the permission to delete entity types', 'verb' => 'delete'],
+            ['url' => '/dm/attribute/1', 'error' => 'You do not have the permission to delete attributes', 'verb' => 'delete'],
+            ['url' => '/dm/entity_type/1/attribute/1', 'error' => 'You do not have the permission to remove attributes from entity types', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/editor' . $c['url']);
+
+            $response->assertStatus(403);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testExceptions()
+    {
+        $calls = [
+            ['url' => '/entity_type/99', 'error' => 'This entity-type does not exist', 'verb' => 'get'],
+            ['url' => '/attribute/99/selection', 'error' => 'This attribute does not exist', 'verb' => 'get'],
+            ['url' => '/dm/99/relation', 'error' => 'This entity-type does not exist', 'verb' => 'post'],
+            ['url' => '/dm/entity_type/99/duplicate', 'error' => 'This entity-type does not exist', 'verb' => 'post'],
+            ['url' => '/dm/entity_type/99/label', 'error' => 'This entity-type does not exist', 'verb' => 'patch'],
+            ['url' => '/dm/entity_type/1/attribute/99/position', 'error' => 'Entity Attribute not found', 'verb' => 'patch'],
+            ['url' => '/dm/entity_type/1/attribute/99/dependency', 'error' => 'Entity Attribute not found', 'verb' => 'patch'],
+            ['url' => '/dm/entity_type/99', 'error' => 'This entity-type does not exist', 'verb' => 'delete'],
+            ['url' => '/dm/attribute/99', 'error' => 'This attribute does not exist', 'verb' => 'delete'],
+            ['url' => '/dm/entity_type/1/attribute/99', 'error' => 'Entity Attribute not found', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/editor' . $c['url'], [
+                    'label' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911',
+                    'position' => 1,
+                    'd_attribute' => 15,
+                    'd_operator' => '=',
+                    'd_value' => 'NoValue',
+                ]);
+
+            $response->assertStatus(400);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
         }
     }
 }
