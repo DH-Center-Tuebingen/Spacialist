@@ -25,7 +25,7 @@ class HomeController extends Controller
     {
         parent::__construct();
         if(!Preference::hasPublicAccess()) {
-            $this->middleware('auth')->except('welcome');
+            $this->middleware('auth')->except(['welcome', 'index']);
         }
         $this->middleware('guest')->only('welcome');
     }
@@ -70,40 +70,12 @@ class HomeController extends Controller
         return view('welcome');
     }
 
-    public function layer()
-    {
-        $baselayers = AvailableLayer::where('is_overlay', false)->orderBy('id')->get();
-        $overlays = AvailableLayer::with('entity_type')->where('is_overlay', true)->orderBy('id')->get();
-
-        return view('settings.editor.layer', ['baselayers' => $baselayers, 'overlays' => $overlays]);
-    }
-
-    public function gis()
-    {
-        $entityLayers = AvailableLayer::with(['entity_type'])
-            ->whereNotNull('entity_type_id')
-            ->orWhere('type', 'unlinked')
-            ->orderBy('id')
-            ->get();
-        foreach($entityLayers as &$layer) {
-            if(isset($layer->entity_type)) {
-                $layer->thesaurus_url = $layer->entity_type->thesaurus_url;
-            } else {
-                unset($layer->thesaurus_url);
-            }
-            unset($layer->entity_type);
-        }
-        $entityLayers = json_encode($entityLayers);
-
-        $data = [
-            'entityLayers' => $entityLayers
-        ];
-
-        return view('tools.gis', $data);
-    }
-
-    public function analysis()
-    {
-        return view('tools.analysis');
+    /**
+     * Show the landing page.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index() {
+        return view('home');
     }
 }
