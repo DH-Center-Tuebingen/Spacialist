@@ -51,7 +51,8 @@ if(!function_exists('sp_column_names')) {
                     ->where('table_name', $table)
                     ->where('table_schema', 'public')
                     ->get()
-                    ->pluck('column_name');
+                    ->pluck('column_name')
+                    ->toArray();
             default:
                 return Schema::getColumnListing($table);
         }

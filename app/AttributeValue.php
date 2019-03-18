@@ -87,11 +87,11 @@ class AttributeValue extends Model
         return $this->belongsTo('App\Attribute');
     }
 
-    public function entity_val() {
+    public function entity_value() {
         return $this->belongsTo('App\Entity', 'entity_val');
     }
 
-    public function thesaurus_val() {
+    public function concept() {
         return $this->belongsTo('App\ThConcept', 'thesaurus_val', 'concept_url');
     }
 }

@@ -114,11 +114,6 @@ class Bibliography extends Model
         }
 
         $this->citekey = self::computeCitationKey($this->toArray());
-        if($this->citekey === null) {
-            return response([
-                'error' => __('Could not compute citation key.')
-            ], 400);
-        }
         $this->lasteditor = $user->name;
         $this->save();
     }

@@ -3,7 +3,6 @@
 namespace App;
 
 class VersionInfo {
-    private static $file = '.VERSION';
     // Semantic versioning
     private $major;
     private $minor;
@@ -34,12 +33,12 @@ class VersionInfo {
 
             $this->time = $content[1];
         } else {
-            $this->major = 'x';
-            $this->minor = 'y';
-            $this->patch = 'z';
-            $this->release = 'vx.y.z';
-            $this->releaseName = 'Unreleased';
-            $this->releaseHash = 'NO HASH';
+            $this->major = '?';
+            $this->minor = '?';
+            $this->patch = '?';
+            $this->release = 'v?.?.?';
+            $this->releaseName = 'No Release Found';
+            $this->releaseHash = '?';
             $this->time = time();
             return;
         }
