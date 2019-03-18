@@ -46,93 +46,6 @@ class ApiFileTest extends TestCase
         }
     }
 
-    protected function createFiles($min=5, $max=10, $imagesOnly=false, $assert=false) {
-        $amount = rand($min, $max);
-        $ids = [];
-        for($i = 0; $i<$amount; $i++) {
-            if(!$imagesOnly) {
-                $ft = array_rand($this->fileTypes);
-                $type = $ft['type'];
-                $mime = $ft['mime'];
-                $cat = $ft['category'];
-            } else {
-                $type = 'jpg';
-                $mime = 'image/jpeg';
-                $cat = 'image';
-            }
-            $isImage = $type === 'jpg';
-            $basename = $this->faker->bothify('test_file_###???###???');
-            $filename = "$basename.$type";
-            if($isImage) {
-                $thumbname = $basename."_thumb.$type";
-                $file = UploadedFile::fake()->image($filename);
-                UploadedFile::fake()->image($thumbname);
-            } else {
-                $file = UploadedFile::fake()->create($filename);
-                $thumbname = null;
-            }
-
-            $desc = $this->faker->text();
-
-            $response = $this->withHeaders([
-                    'Authorization' => "Bearer $this->token"
-                ])
-                ->post('/api/v1/file/new', [
-                    'file' => $file,
-                    'description' => $desc
-                ]);
-
-            $uplFile = File::latest()->first();
-            $ids[] = $uplFile->id;
-
-            if($assert) {
-                Storage::assertExists($filename);
-                if($isImage) {
-                    Storage::assertExists($thumbname);
-                }
-
-                $response->assertStatus(201);
-                $response->assertJsonStructure([
-                    'id',
-                    'name',
-                    'modified',
-                    'created',
-                    'cameraname',
-                    'exif',
-                    'thumb',
-                    'copyright',
-                    'description',
-                    'mime_type',
-                    'lasteditor',
-                    'created_at',
-                    'updated_at',
-                    'category'
-                ]);
-
-                $response->assertExactJson([
-                    'id' => $uplFile->id,
-                    'name' => $filename,
-                    'modified' => $uplFile->modified,
-                    'created' => $uplFile->created,
-                    'cameraname' => null,
-                    'exif' => null,
-                    'thumb' => $thumbname,
-                    'copyright' => null,
-                    'description' => $desc,
-                    'mime_type' => $mime,
-                    'lasteditor' => 'Admin',
-                    'created_at' => "$uplFile->created_at",
-                    'updated_at' => "$uplFile->updated_at",
-                    'category' => $cat
-                ]);
-            }
-
-            $this->refreshToken($response);
-        }
-
-        return $ids;
-    }
-
     // Testing GET requests
 
     /**
@@ -615,7 +528,68 @@ class ApiFileTest extends TestCase
      */
     public function testFileUploadEndpoint()
     {
-        $this->createFiles(1, 1, true, true);
+        $type = 'png';
+        $mime = 'image/png';
+        $file = UploadedFile::fake()->image('spacialist_screenshot.png');
+        // UploadedFile::fake()->image($thumbname);
+
+        $desc = $this->faker->text();
+        $cr = $this->faker->text();
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file/new', [
+                'file' => $file,
+                'description' => $desc,
+                'copyright' => $cr,
+                'tags' => '[19, 20]',
+            ]);
+
+        $uplFile = File::with('tags')->latest()->first();
+
+        Storage::assertExists('spacialist_screenshot.1.png');
+        Storage::assertExists('spacialist_screenshot.1_thumb.jpg');
+
+        $response->assertStatus(201);
+        $response->assertJsonStructure([
+            'id',
+            'name',
+            'modified',
+            'created',
+            'cameraname',
+            'exif',
+            'thumb',
+            'copyright',
+            'description',
+            'mime_type',
+            'lasteditor',
+            'created_at',
+            'updated_at',
+            'category'
+        ]);
+
+        $response->assertExactJson([
+            'id' => $uplFile->id,
+            'name' => 'spacialist_screenshot.1.png',
+            'modified' => $uplFile->modified,
+            'created' => $uplFile->created,
+            'cameraname' => null,
+            'exif' => null,
+            'thumb' => 'spacialist_screenshot.1_thumb.jpg',
+            'copyright' => $cr,
+            'description' => $desc,
+            'mime_type' => 'image/png',
+            'lasteditor' => 'Admin',
+            'created_at' => "$uplFile->created_at",
+            'updated_at' => "$uplFile->updated_at",
+            'category' => 'image'
+        ]);
+
+        $this->assertArraySubset([
+            ['id' => 19],
+            ['id' => 20],
+        ], $uplFile->tags->toArray());
     }
 
     /**
@@ -1189,6 +1163,7 @@ class ApiFileTest extends TestCase
             $this->refreshToken($response);
         }
     }
+
     /**
      *
      *
@@ -1231,5 +1206,24 @@ class ApiFileTest extends TestCase
 
             $this->refreshToken($response);
         }
+    }
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testUnsupportedToHtmlFormat()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/file/1/as_html');
+
+        $response->assertStatus(200);
+        $response->assertExactJson([
+            'error' => 'HTML not supported for file type text/plain'
+        ]);
+
     }
 }

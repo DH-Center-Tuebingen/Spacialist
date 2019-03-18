@@ -505,17 +505,6 @@ class File extends Model
         ];
     }
 
-    private static function convertFileListToArray($fileList) {
-        $newList = array_values($fileList);
-        foreach($newList as $k => $entry) {
-            if(isset($entry->children)) {
-                $entry->children = self::convertFileListToArray($entry->children);
-                $newList[$k] = $entry;
-            }
-        }
-        return $newList;
-    }
-
     private function getContainingFiles($files, $archive, $prefix = '') {
         $tree = new \stdClass();
         $tree->children = [];

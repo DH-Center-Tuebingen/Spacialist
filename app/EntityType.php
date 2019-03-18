@@ -34,15 +34,15 @@ class EntityType extends Model
     }
 
     public function entities() {
-        return $this->hasMany('App\Entity');
+        return $this->hasMany('App\Entity')->orderBy('id');
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'entity_attributes')->withPivot('position');
+        return $this->belongsToMany('App\Attribute', 'entity_attributes')->withPivot('position')->orderBy('entity_attributes.position');
     }
 
     public function sub_entity_types() {
-        return $this->belongsToMany('App\EntityType', 'entity_type_relations', 'parent_id', 'child_id');
+        return $this->belongsToMany('App\EntityType', 'entity_type_relations', 'parent_id', 'child_id')->orderBy('entity_type_relations.child_id');
     }
 
     // This relationship is one-way, in case the has-relation is needed it must be implemented
