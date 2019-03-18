@@ -409,7 +409,50 @@ class ApiEntityTest extends TestCase
         $response->assertJson([
             'name' => 'Unit-Test Entity I',
             'entity_type_id' => 3,
-            'root_entity_id' => 1
+            'root_entity_id' => 1,
+            'rank' => 2,
+        ]);
+
+        $cnt = Entity::count();
+        $this->assertEquals($cnt, 9);
+    }
+
+    /**
+    * Test adding a new root entity.
+    *
+    * @return void
+    */
+    public function testNewRootEntityEndpoint()
+    {
+        $cnt = Entity::count();
+        $this->assertEquals($cnt, 8);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->post('/api/v1/entity', [
+            'name' => 'Unit-Test Entity I',
+            'entity_type_id' => 3,
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJsonStructure([
+            'id',
+            'name',
+            'entity_type_id',
+            'root_entity_id',
+            'geodata_id',
+            'rank',
+            'lasteditor',
+            'created_at',
+            'updated_at',
+            'parentIds'
+        ]);
+        $response->assertJson([
+            'name' => 'Unit-Test Entity I',
+            'entity_type_id' => 3,
+            'root_entity_id' => null,
+            'rank' => 4,
         ]);
 
         $cnt = Entity::count();
@@ -770,6 +813,18 @@ class ApiEntityTest extends TestCase
         User::first()->detachRoles();
 
         $calls = [
+            ['url' => '/top', 'error' => 'You do not have the permission to get entities', 'verb' => 'get'],
+            ['url' => '/1', 'error' => 'You do not have the permission to get a specific entity', 'verb' => 'get'],
+            ['url' => '/entity_type/3/data/14', 'error' => 'You do not have the permission to get an entity\'s data', 'verb' => 'get'],
+            ['url' => '/1/data/14', 'error' => 'You do not have the permission to get an entity\'s data', 'verb' => 'get'],
+            ['url' => '/1/parentIds', 'error' => 'You do not have the permission to get an entity\'s parent id\'s', 'verb' => 'get'],
+            ['url' => '', 'error' => 'You do not have the permission to add a new entity', 'verb' => 'post'],
+            ['url' => '/1/attributes', 'error' => 'You do not have the permission to modify an entity\'s data', 'verb' => 'patch'],
+            ['url' => '/1/attribute/13', 'error' => 'You do not have the permission to modify an entity\'s data', 'verb' => 'patch'],
+            ['url' => '/1/name', 'error' => 'You do not have the permission to modify an entity\'s data', 'verb' => 'patch'],
+            ['url' => '/1/rank', 'error' => 'You do not have the permission to modify an entity', 'verb' => 'patch'],
+            ['url' => '/1', 'error' => 'You do not have the permission to delete an entity', 'verb' => 'delete'],
+
             ['url' => '/99/reference', 'error' => 'You do not have the permission to view references', 'verb' => 'get'],
             ['url' => '/99/reference/99', 'error' => 'You do not have the permission to add references', 'verb' => 'post'],
             ['url' => '/reference/99', 'error' => 'You do not have the permission to edit references', 'verb' => 'patch'],
@@ -798,6 +853,33 @@ class ApiEntityTest extends TestCase
     public function testExceptions()
     {
         $calls = [
+            ['url' => '/99', 'error' => 'This entity does not exist', 'verb' => 'get'],
+            ['url' => '/entity_type/99/data/14', 'error' => 'This entity type does not exist', 'verb' => 'get'],
+            ['url' => '/entity_type/3/data/99', 'error' => 'This attribute does not exist', 'verb' => 'get'],
+            ['url' => '/99/parentIds', 'error' => 'This entity does not exist', 'verb' => 'get'],
+            ['url' => '', 'error' => 'This type is not an allowed sub-type.', 'verb' => 'post', 'data' => [
+                    'name' => 'Test Entity',
+                    'entity_type_id' => 3,
+                    'root_entity_id' => 2,
+                ]
+            ],
+            ['url' => '', 'error' => 'This type is not an allowed root-type.', 'verb' => 'post', 'data' => [
+                    'name' => 'Test Entity',
+                    'entity_type_id' => 4,
+                ]
+            ],
+            ['url' => '/99/attributes', 'error' => 'This entity does not exist', 'verb' => 'patch'],
+            ['url' => '/99/attribute/13', 'error' => 'This entity does not exist', 'verb' => 'patch'],
+            ['url' => '/1/attribute/99', 'error' => 'This attribute does not exist', 'verb' => 'patch'],
+            ['url' => '/99/name', 'error' => 'This entity does not exist', 'verb' => 'patch', 'data' => [
+                    'name' => 'Test'
+                ]
+            ],
+            ['url' => '/99/rank', 'error' => 'This entity does not exist', 'verb' => 'patch', 'data' => [
+                    'rank' => 1,
+                ]
+            ],
+
             ['url' => '/99/reference', 'error' => 'This entity does not exist', 'verb' => 'get'],
             ['url' => '/99/reference/99', 'error' => 'This entity does not exist', 'verb' => 'post'],
             ['url' => '/1/reference/99', 'error' => 'This attribute does not exist', 'verb' => 'post'],
@@ -805,14 +887,16 @@ class ApiEntityTest extends TestCase
             ['url' => '/reference/99', 'error' => 'This reference does not exist', 'verb' => 'delete'],
         ];
 
+        $dummyData = [
+            'bibliography_id' => 1318,
+            'description' => 'Test'
+        ];
         foreach($calls as $c) {
+            $data = array_key_exists('data', $c) ? array_merge($dummyData, $c['data']) : $dummyData;
             $response = $this->withHeaders([
                     'Authorization' => "Bearer $this->token"
                 ])
-                ->json($c['verb'], '/api/v1/entity' . $c['url'], [
-                    'bibliography_id' => 1318,
-                    'description' => 'Test'
-                ]);
+                ->json($c['verb'], '/api/v1/entity' . $c['url'], $data);
 
             $response->assertStatus(400);
             $response->assertExactJson([

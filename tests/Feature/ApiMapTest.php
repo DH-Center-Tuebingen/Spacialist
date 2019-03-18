@@ -68,7 +68,7 @@ class ApiMapTest extends TestCase
         ]);
         $content = $response->decodeResponseJson();
         $this->assertEquals(8, count($content['layers']));
-        $this->assertEquals(3, count($content['geodata']));
+        $this->assertEquals(4, count($content['geodata']));
     }
 
     /**
@@ -265,6 +265,38 @@ class ApiMapTest extends TestCase
     }
 
     /**
+     * Test get geometries of unlinked layer (id=1)
+     *
+     * @return void
+     */
+    public function testGetUnlinkedLayerGeometriesEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/map/layer/1/geometry');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1);
+        $response->assertJsonStructure([
+            '*' => array_merge(
+                self::$geodataAttributes,
+                [
+                    'entity'
+                ]
+            )
+        ]);
+        $response->assertJson([
+            [
+                'id' => 6,
+                'entity' => null,
+                'created_at' => '2019-03-18 09:46:11',
+                'updated_at' => '2019-03-18 09:46:11',
+            ],
+        ]);
+    }
+
+    /**
      * Test get definition of an srid code (EPSG:4826 (WGS84))
      *
      * @return void
@@ -340,6 +372,22 @@ class ApiMapTest extends TestCase
             ]
         ];
         $this->assertArraySubset($sub, $collection);
+    }
+
+    /**
+     * Test exporting unlinked layer (id=1) as csv
+     *
+     * @return void
+     */
+    public function testExportUnlinkedLayerEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/map/export/1?type=csv&srid=31467');
+        $response->assertStatus(200);
+        $csv = base64_decode($response->getContent());
+        $this->assertEquals("X,Y,Z,id,color,lasteditor,created_at,updated_at\n3493381.81073401,5378579.86054217,-52.2681263582781,6,,Admin,2019/03/18 09:46:11,2019/03/18 09:46:11\n", $csv);
     }
 
     // Testing POST requests
@@ -546,7 +594,7 @@ class ApiMapTest extends TestCase
     public function testDeleteGeodataEndpoint()
     {
         $cnt = Geodata::count();
-        $this->assertEquals(3, $cnt);
+        $this->assertEquals(4, $cnt);
         $linkedEntity = Entity::find(7);
         $this->assertEquals(3, $linkedEntity->geodata_id);
         $response = $this->withHeaders([
@@ -556,7 +604,7 @@ class ApiMapTest extends TestCase
 
         $response->assertStatus(204);
         $cnt = Geodata::count();
-        $this->assertEquals(2, $cnt);
+        $this->assertEquals(3, $cnt);
         $linkedEntity = Entity::find(7);
         $this->assertNull($linkedEntity->geodata_id);
     }
@@ -601,6 +649,7 @@ class ApiMapTest extends TestCase
             ['url' => '/layer/1/geometry', 'error' => 'You do not have the permission to view geodata', 'verb' => 'get'],
             ['url' => '/export/1', 'error' => 'You do not have the permission to export layers', 'verb' => 'get'],
             ['url' => '', 'error' => 'You do not have the permission to add geometric data', 'verb' => 'post'],
+            ['url' => '/layer', 'error' => 'You do not have the permission to add layers', 'verb' => 'post'],
             ['url' => '/link/1/1', 'error' => 'You do not have the permission to link geo data', 'verb' => 'post'],
             ['url' => '/1', 'error' => 'You do not have the permission to edit geometric data', 'verb' => 'patch'],
             ['url' => '/layer/1', 'error' => 'You do not have the permission to update layers', 'verb' => 'patch'],

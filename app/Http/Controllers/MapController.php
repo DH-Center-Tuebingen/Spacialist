@@ -335,13 +335,7 @@ class MapController extends Controller
             ], 400);
         }
 
-        try {
-            $layer = AvailableLayer::where('entity_type_id', $entity->entity_type_id)->firstOrFail();
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('Entity layer not found')
-            ], 400);
-        }
+        $layer = AvailableLayer::where('entity_type_id', $entity->entity_type_id)->first();
 
         if($layer->type != 'all') {
             $typeMatched = false;

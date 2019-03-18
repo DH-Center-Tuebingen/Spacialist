@@ -28,7 +28,9 @@ class EntityController extends Controller {
     public function getTopEntities() {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
-            return response()->json([], 204);
+            return response()->json([
+                'error' => __('You do not have the permission to get entities')
+            ], 403);
         }
         $roots = Entity::getEntitiesByParent(null);
 
@@ -233,8 +235,8 @@ class EntityController extends Controller {
         if($isChild) {
             $parentCtid = Entity::find($rcid)->entity_type_id;
             $relation = EntityTypeRelation::where('parent_id', $parentCtid)
-                ->where('child_id', $request->get('entity_type_id'))->get();
-            if(!isset($relation)) {
+                ->where('child_id', $request->get('entity_type_id'))->exists();
+            if(!$relation) {
                 return response()->json([
                     'error' => __('This type is not an allowed sub-type.')
                 ], 400);
@@ -298,7 +300,7 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
-                'error' => __('You do not have the permission to modify an entity\' data')
+                'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
         }
 
@@ -485,13 +487,6 @@ class EntityController extends Controller {
         $rank = $request->get('rank');
         $parent_id = $request->get('parent_id');
 
-        try {
-            $parent = Entity::findOrFail($parent_id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity does not exist')
-            ], 400);
-        }
         Entity::patchRanks($rank, $id, $parent_id, $user);
         return response()->json(null, 204);
     }

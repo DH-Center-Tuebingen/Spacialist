@@ -124,6 +124,12 @@ class FileController extends Controller
     }
 
     public function getLinkCount($id) {
+        $user = auth()->user();
+        if(!$user->can('view_files')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get number of links of a specific file')
+            ], 403);
+        }
         try {
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -196,6 +202,12 @@ class FileController extends Controller
     }
 
     public function getTags() {
+        $user = auth()->user();
+        if(!$user->can('view_concepts_th')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get tags')
+            ], 403);
+        }
         $tagObj = Preference::where('label', 'prefs.tag-root')
             ->value('default_value');
         $tagUri = json_decode($tagObj)->uri;
@@ -311,7 +323,7 @@ class FileController extends Controller
         $user = auth()->user();
         if(!$user->can('view_files')) {
             return response()->json([
-                'error' => __('You do not have the permission to view files')
+                'error' => __('You do not have the permission to export files')
             ], 403);
         }
         $this->validate($request, [

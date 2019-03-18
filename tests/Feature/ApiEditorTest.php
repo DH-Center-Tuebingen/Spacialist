@@ -231,7 +231,7 @@ class ApiEditorTest extends TestCase
     }
 
     /**
-     * Test getting an entity type (id=4).
+     * Test getting an entity type (id=3).
      *
      * @return void
      */
@@ -240,7 +240,7 @@ class ApiEditorTest extends TestCase
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
             ])
-            ->get('/api/v1/editor/entity_type/4');
+            ->get('/api/v1/editor/entity_type/3');
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
@@ -252,11 +252,11 @@ class ApiEditorTest extends TestCase
             'sub_entity_types'
         ]);
         $response->assertJsonFragment([
-            'id' => 4,
-            'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/befund#20171220094916',
-            'is_root' => false,
-            'created_at' => '2017-12-20 10:03:15',
-            'updated_at' => '2017-12-20 10:03:15'
+            'id' => 3,
+            'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911',
+            'is_root' => true,
+            'created_at' => '2017-12-20 10:03:06',
+            'updated_at' => '2017-12-20 10:03:06'
         ]);
 
         $content = json_decode($response->getContent());

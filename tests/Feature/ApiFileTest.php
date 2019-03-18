@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 
 use App\EntityFile;
 use App\File;
+use App\User;
 
 class ApiFileTest extends TestCase
 {
@@ -1137,5 +1138,98 @@ class ApiFileTest extends TestCase
         $response->assertStatus(204);
         $linkCnt = EntityFile::count();
         $this->assertEquals(4, $linkCnt);
+    }
+
+    // Testing exceptions and permissions
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testPermissions()
+    {
+        User::first()->detachRoles();
+
+        $calls = [
+            ['url' => '/1', 'error' => 'You do not have the permission to view a specific file', 'verb' => 'get'],
+            ['url' => '/1/archive/list', 'error' => 'You do not have the permission to view a specific file', 'verb' => 'get'],
+            ['url' => '/1/archive/download', 'error' => 'You do not have the permission to download parts of a zip file', 'verb' => 'get'],
+            ['url' => '/1/as_html', 'error' => 'You do not have the permission to view a specific file as HTML', 'verb' => 'get'],
+            ['url' => '/1/sub_files', 'error' => 'You do not have the permission to view successors of a specific file', 'verb' => 'get'],
+            ['url' => '/1/link_count', 'error' => 'You do not have the permission to get number of links of a specific file', 'verb' => 'get'],
+            ['url' => '/filter/category', 'error' => 'You do not have the permission to get the file categories', 'verb' => 'get'],
+            ['url' => '/filter/camera', 'error' => 'You do not have the permission to get the camera names', 'verb' => 'get'],
+            ['url' => '/filter/date', 'error' => 'You do not have the permission to get the file dates', 'verb' => 'get'],
+            ['url' => '/tags', 'error' => 'You do not have the permission to get tags', 'verb' => 'get'],
+            ['url' => '/', 'error' => 'You do not have the permission to view files', 'verb' => 'post'],
+            ['url' => '/unlinked', 'error' => 'You do not have the permission to view files', 'verb' => 'post'],
+            ['url' => '/linked/1', 'error' => 'You do not have the permission to view files', 'verb' => 'post'],
+            ['url' => '/new', 'error' => 'You do not have the permission to upload files', 'verb' => 'post'],
+            ['url' => '/1/patch', 'error' => 'You do not have the permission to edit a file\'s content', 'verb' => 'post'],
+            ['url' => '/export', 'error' => 'You do not have the permission to export files', 'verb' => 'post'],
+            ['url' => '/1/property', 'error' => 'You do not have the permission to modify file properties', 'verb' => 'patch'],
+            ['url' => '/1/tag', 'error' => 'You do not have the permission to modify file properties', 'verb' => 'patch'],
+            ['url' => '/1/link', 'error' => 'You do not have the permission to link files', 'verb' => 'put'],
+            ['url' => '/1', 'error' => 'You do not have the permission to delete files', 'verb' => 'delete'],
+            ['url' => '/1/link/1', 'error' => 'You do not have the permission to unlink files', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/file' . $c['url']);
+
+            $response->assertStatus(403);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testExceptions()
+    {
+        $calls = [
+            ['url' => '/99', 'error' => 'This file does not exist', 'verb' => 'get'],
+            ['url' => '/99/archive/list', 'error' => 'This file does not exist', 'verb' => 'get'],
+            ['url' => '/99/archive/download', 'error' => 'This file does not exist', 'verb' => 'get'],
+            ['url' => '/99/as_html', 'error' => 'This file does not exist', 'verb' => 'get'],
+            ['url' => '/99/sub_files', 'error' => 'This entity does not exist', 'verb' => 'get'],
+            ['url' => '/99/link_count', 'error' => 'This file does not exist', 'verb' => 'get'],
+            ['url' => '/99/patch', 'error' => 'This file does not exist', 'verb' => 'post'],
+            ['url' => '/99/property', 'error' => 'This file does not exist', 'verb' => 'patch'],
+            ['url' => '/1/property', 'error' => 'There is already a file with this name', 'verb' => 'patch'],
+            ['url' => '/99/tag', 'error' => 'This file does not exist', 'verb' => 'patch'],
+            ['url' => '/99/link', 'error' => 'This file does not exist', 'verb' => 'put'],
+            ['url' => '/99', 'error' => 'This file does not exist', 'verb' => 'delete'],
+            ['url' => '/99/link/1', 'error' => 'This file does not exist', 'verb' => 'delete'],
+            ['url' => '/1/link/99', 'error' => 'This entity does not exist', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/file' . $c['url'], [
+                    'name' => 'text1.txt',
+                    'p' => '/text1.txt',
+                    'file' => UploadedFile::fake()->create('text4.txt'),
+                    'entity_id' => 3,
+                ]);
+
+            $response->assertStatus(400);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
     }
 }
