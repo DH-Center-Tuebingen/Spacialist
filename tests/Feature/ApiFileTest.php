@@ -520,10 +520,7 @@ class ApiFileTest extends TestCase
      */
     public function testFileUploadEndpoint()
     {
-        $type = 'png';
-        $mime = 'image/png';
-        $file = UploadedFile::fake()->image('spacialist_screenshot.png');
-        // UploadedFile::fake()->image($thumbname);
+        $file = UploadedFile::fake()->image('spacialist_screenshot.png', 350, 100);
 
         $desc = $this->faker->text();
         $cr = $this->faker->text();
@@ -582,6 +579,47 @@ class ApiFileTest extends TestCase
             ['id' => 19],
             ['id' => 20],
         ], $uplFile->tags->toArray());
+    }
+
+    /**
+     * Test jpg file upload with exif data.
+     *
+     * @return void
+     */
+    public function testJpgFileUploadEndpoint()
+    {
+        $path = storage_path() . "/framework/testing/test_img_edin.jpg";
+        $file = new UploadedFile($path, 'test_img_edin.jpg', 'image/jpeg', null, true);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file/new', [
+                'file' => $file,
+            ]);
+
+        $uplFile = File::latest()->first();
+
+        Storage::assertExists('test_img_edin.1.jpg');
+        Storage::assertExists('test_img_edin.1_thumb.jpg');
+
+        $response->assertStatus(201);
+        $response->assertJson([
+            'id' => $uplFile->id,
+            'name' => 'test_img_edin.1.jpg',
+            'cameraname' => 'Canon EOS 650D (Canon)',
+            'exif' => [],
+            'thumb' => 'test_img_edin.1_thumb.jpg',
+            'mime_type' => 'image/jpeg',
+            'lasteditor' => 'Admin',
+            'category' => 'image'
+        ]);
+        $content = $response->decodeResponseJson();
+        $exif = $content['exif'];
+        $this->assertEquals('Canon', $exif['Make']);
+        $this->assertEquals('Canon EOS 650D', $exif['Model']);
+        $this->assertEquals('Exif Version 2.3', $exif['Exif']['ExifVersion']);
+        $this->assertEquals('f/7.0', $exif['Exif']['ApertureValue']);
     }
 
     /**
@@ -735,11 +773,11 @@ class ApiFileTest extends TestCase
     }
 
     /**
-     * Test getting all files by date/year.
+     * Test getting all files by year.
      *
      * @return void
      */
-    public function testGetAllFilesByDateEndpoint()
+    public function testGetAllFilesByYearEndpoint()
     {
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
@@ -775,6 +813,60 @@ class ApiFileTest extends TestCase
         $response->assertStatus(200);
         $content = $response->decodeResponseJson();
         $this->assertEquals(0, count($content['data']));
+    }
+
+    /**
+     * Test getting all files by date.
+     *
+     * @return void
+     */
+    public function testGetAllFilesByDateEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file', [
+                'filters' => [
+                    'dates' => [
+                        ['is' => 'date', 'value' => '2017-06-18']
+                    ]
+                ]
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                ['name' => 'test_img_edin.jpg'],
+            ]
+        ]);
+    }
+
+    /**
+     * Test getting all files by tags.
+     *
+     * @return void
+     */
+    public function testGetAllFilesByTagsEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file', [
+                'filters' => [
+                    'tags' => [
+                        ['id' => 19],
+                        ['id' => 20],
+                    ]
+                ]
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                ['name' => 'text2.txt'],
+                ['name' => 'test_img_edin.jpg'],
+            ]
+        ]);
     }
 
     /**

@@ -708,6 +708,33 @@ class ApiEditorTest extends TestCase
             }
         }
 
+        // Testing again with higher position
+        $this->refreshToken($response);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->patch('/api/v1/editor/dm/entity_type/4/attribute/13/position', [
+                'position' => 1
+            ]);
+
+        $response->assertStatus(204);
+
+        $entityType = EntityType::find(3)->load('attributes');
+        foreach($entityType->attributes as $a) {
+            if($a->attribute_id == 14) {
+                $this->assertEquals(5, $a->pivot->position);
+            } else if($a->attribute_id == 16) {
+                $this->assertEquals(2, $a->pivot->position);
+            } else if($a->attribute_id == 17) {
+                $this->assertEquals(3, $a->pivot->position);
+            } else if($a->attribute_id == 10) {
+                $this->assertEquals(4, $a->pivot->position);
+            } else if($a->attribute_id == 13) {
+                $this->assertEquals(1, $a->pivot->position);
+            }
+        }
+
 
         // Testing again with same position (nothing should happen)
         $this->refreshToken($response);

@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 use App\Preference;
+use App\VersionInfo;
 
 class ApiTest extends TestCase
 {
@@ -89,6 +91,7 @@ class ApiTest extends TestCase
      */
     public function testVersionRequest()
     {
+        $vi = new VersionInfo();
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
             ])
@@ -101,5 +104,11 @@ class ApiTest extends TestCase
         $this->assertRegExp('/^v\d\.\d\.\d$/', $content['release']);
         $this->assertRegExp('/^v\d\.\d\.\d \(\w+\)$/', $content['readable']);
         $this->assertRegExp('/^v\d\.\d\.\d-\w+-g[a-f0-9]{7}$/', $content['full']);
+        $this->assertEquals($content['release'], 'v' . $vi->getMajor() . "." . $vi->getMinor() . "." . $vi->getPatch());
+
+        $hash = $vi->getReleaseHash();
+        if(isset($hash)) {
+            $this->assertTrue(Str::endsWith($content['full'], $hash));
+        }
     }
 }
