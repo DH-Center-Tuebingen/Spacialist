@@ -188,6 +188,7 @@ class ApiFileTest extends TestCase
      */
     public function testGetArchiveFileListEndpoint()
     {
+        echo date_default_timezone_get();
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
             ])
