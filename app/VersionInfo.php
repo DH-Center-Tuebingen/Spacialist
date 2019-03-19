@@ -33,12 +33,12 @@ class VersionInfo {
 
             $this->time = $content[1];
         } else {
-            $this->major = '?';
-            $this->minor = '?';
-            $this->patch = '?';
-            $this->release = 'v?.?.?';
-            $this->releaseName = 'No Release Found';
-            $this->releaseHash = '?';
+            $this->major = '0';
+            $this->minor = '0';
+            $this->patch = '0';
+            $this->release = 'v0.0.0';
+            $this->releaseName = 'Unreleased';
+            $this->releaseHash = null;
             $this->time = time();
             return;
         }
