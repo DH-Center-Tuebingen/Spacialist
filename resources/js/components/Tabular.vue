@@ -6,6 +6,9 @@
                     {{ $translateConcept(column.thesaurus_url) }}
                 </th>
                 <th>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" @click="emitExpandToggle()">
+                        <i class="fas fa-fw fa-expand"></i>
+                    </button>
                 </th>
             </tr>
         </thead>
@@ -133,6 +136,13 @@
             }
         },
         methods: {
+            emitExpandToggle() {
+                this.expanded = !this.expanded;
+                this.$emit('expanded', {
+                    id: this.attribute.id,
+                    state: this.expanded
+                });
+            },
             onInput(field, value) {
                 this.$emit('input', value);
                 if(field != null) {
@@ -170,7 +180,8 @@
         },
         data() {
             return {
-                newTableCols: {}
+                newTableCols: {},
+                expanded: false
             }
         }
     }

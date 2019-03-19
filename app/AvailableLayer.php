@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class AvailableLayer extends Model
 {
@@ -12,7 +13,13 @@ class AvailableLayer extends Model
      *
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'name',
+        'url',
+        'type',
+        'visible',
+        'is_overlay',
+    ];
 
     const patchRules = [
         'name' => 'string',
@@ -31,6 +38,54 @@ class AvailableLayer extends Model
         'layer_type' => 'nullable|string',
         'color' => 'color',
     ];
+
+    public function patch($props) {
+        // If updated baselayer's visibility is set to true, set all other base layer's visibility to false
+        if(
+            !$this->is_overlay &&
+            !$this->visible &&
+            array_key_exists('visible', $props) &&
+            $props['visible']
+        ) {
+            $layers = self::where('is_overlay', false)
+                ->where('id', '!=', $this->id)
+                ->where('visible', true)
+                ->update(['visible' => false]);
+        }
+        // only set props allowed in patch rules
+        // and exclude 'visible' as it is not settable
+        // (already defined in Illuminate\Database\Eloquent\Concerns\HidesAttributes)
+        $supportedProps = Arr::except(
+            Arr::only(
+                $props,
+                array_keys(self::patchRules)
+            ),
+            ['visible']
+        );
+        foreach($supportedProps as $key => $value) {
+            $this->{$key} = $value;
+        }
+        if(array_key_exists('visible', $props)) {
+            $this->update(['visible' => $props['visible']]);
+        }
+        $this->save();
+    }
+
+    public static function createFromArray($props) {
+        $layer = new self();
+        foreach($props as $k => $v) {
+            $layer->{$k} = $v;
+        }
+
+        if(!\array_key_exists('is_overlay', $props)) {
+            $props['is_overlay'] = true;
+        }
+        $layer->position = self::where('is_overlay', $props['is_overlay'])->max('position') + 1;
+        $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        $layer->save();
+
+        return self::find($layer->id);
+    }
 
     public function entity_type() {
         return $this->belongsTo('App\EntityType');

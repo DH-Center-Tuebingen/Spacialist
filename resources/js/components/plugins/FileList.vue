@@ -270,7 +270,7 @@
             },
             exportFiles(fileIds) {
                 const data = {
-                    files: JSON.stringify(fileIds)
+                    files: fileIds
                 };
                 $http.post(`file/export`, data).then(response => {
                     const filename = this.$getPreference('prefs.project-name') + '.zip';

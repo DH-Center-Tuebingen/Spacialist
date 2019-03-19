@@ -94,18 +94,39 @@
                             </span>
                         </dt>
                         <dd class="mb-0 mh-300p scroll-y-auto">
-                            <table class="table table-striped table-borderless table-sm mb-0" v-if="overlayInfo.showCoordinates">
-                                <tbody>
-                                    <tr v-for="c in coordinateList">
-                                        <td class="text-left">
-                                            {{ c.x | toFixed(4) }}
-                                        </td>
-                                        <td class="text-right">
-                                            {{ c.y | toFixed(4) }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div v-if="overlayInfo.showCoordinates">
+                                <table class="table table-striped table-borderless table-sm mb-0">
+                                    <tbody>
+                                        <tr v-for="c in coordinateList">
+                                            <td class="text-left">
+                                                <input type="number" class="form-control form-control-sm" step="0.000001" v-model.number="overlayInfo.editCoordinates[0]" v-if="overlayInfo.pointEditEnabled" />
+                                                <span v-else>
+                                                    {{ c.x | toFixed(4) }}
+                                                </span>
+                                            </td>
+                                            <td class="text-right">
+                                                <input type="number" class="form-control form-control-sm" step="0.000001" v-model.number="overlayInfo.editCoordinates[1]" v-if="overlayInfo.pointEditEnabled" />
+                                                <span v-else>
+                                                    {{ c.y | toFixed(4) }}
+                                                </span>
+                                            </td>
+                                            <td class="text-right clickable" v-if="isPointOverlay">
+                                                <div v-show="overlayInfo.pointEditEnabled">
+                                                    <a href="" @click.prevent="confirmPointCoordEdit">
+                                                        <i class="fas fa-fw fa-check" ></i>
+                                                    </a>
+                                                    <a href="" @click.prevent="cancelPointCoordEdit">
+                                                        <i class="fas fa-fw fa-times" ></i>
+                                                    </a>
+                                                </div>
+                                                <a href="" @click.prevent="enablePointCoordEdit" v-show="!overlayInfo.pointEditEnabled">
+                                                    <i class="fas fa-fw fa-edit" ></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </dd>
                     </dl>
                 </div>
@@ -119,7 +140,7 @@
 
 <script>
     import { EventBus } from '../event-bus.js';
-    
+
     import 'ol/ol.css';
     import Collection from 'ol/Collection';
     import {defaults as defaultControls} from 'ol/control.js';
@@ -144,6 +165,8 @@
 
     import WKT from 'ol/format/WKT';
     import GeoJSON from 'ol/format/GeoJSON';
+
+    import Point from 'ol/geom/Point';
 
     import DragRotate from 'ol/interaction/DragRotate';
     import DragZoom from 'ol/interaction/DragZoom';
@@ -794,7 +817,7 @@
                 });
                 if(EventBus) {
                     EventBus.$on('entity-update', this.handleEntityUpdate);
-                    EventBus.$on('entity-delete', this.handleEntityDelete);
+                    EventBus.$on('entity-deleted', this.handleEntityDelete);
                 }
             },
             initMapProjection() {
@@ -1389,6 +1412,31 @@
             cancelDeleteFeatures() {
                 this.setInteractionMode('', true);
             },
+            enablePointCoordEdit() {
+                this.overlayInfo.editCoordinates = [
+                    this.coordinateList[0].x,
+                    this.coordinateList[0].y
+                ];
+                this.overlayInfo.pointEditEnabled = true;
+            },
+            cancelPointCoordEdit() {
+                this.overlayInfo.editCoordinates = null;
+                this.overlayInfo.pointEditEnabled = false;
+            },
+            confirmPointCoordEdit() {
+                const newCoord = this.transformCoordinates([
+                    this.overlayInfo.editCoordinates[0],
+                    this.overlayInfo.editCoordinates[1]
+                ], undefined, true);
+                this.overlayInfo.pointEditEnabled = false;
+                this.overlayInfo.feature.setGeometry(new Point([
+                    newCoord.x, newCoord.y
+                ]));
+                const features = [this.overlayInfo.feature];
+                const wktFeatures = features.map(f => this.wktFormat.writeFeature(f));
+                this.onModifyend(features, wktFeatures);
+                this.updatePopup(this.overlayInfo.feature);
+            },
             initMeasureInteraction() {
                 this.measureSource = new Vector({
                     wrapX: false
@@ -1511,20 +1559,25 @@
                 const gid = props.id;
                 const eid = entity.id;
                 $http.delete(`/map/link/${gid}/${eid}`, {}).then(response => {
-                    feature.setProperties({
-                        entity: null
-                    });
-                    const layer = this.getUnlinkedLayer();
-                    this.featureStyles[feature.get('id')].default = this.createStyle(layer.color);
-                    this.updateStyles(feature);
-                    this.$emit('update:link', null, eid);
+                    this.afterUnlink(feature, eid);
                 });
             },
-            transformCoordinates(c, clist) {
+            afterUnlink(feature, eid) {
+                feature.setProperties({
+                    entity: null
+                });
+                const layer = this.getUnlinkedLayer();
+                this.featureStyles[feature.get('id')].default = this.createStyle(layer.color);
+                this.updateStyles(feature);
+                this.$emit('update:link', null, eid);
+            },
+            transformCoordinates(c, clist, rev = false) {
                 if(!c[0] || !c[1]) {
                     return null;
                 };
-                const transCoord = transformProj(c, 'EPSG:3857', `EPSG:${this.epsg.epsg}`);
+                let fromEpsg = rev ? `EPSG:${this.epsg.epsg}` : 'EPSG:3857';
+                let toEpsg = rev ? 'EPSG:3857' : `EPSG:${this.epsg.epsg}`;
+                const transCoord = transformProj(c, fromEpsg, toEpsg);
                 const fixedCoord = {
                     x: transCoord[0],
                     y: transCoord[1]
@@ -1569,6 +1622,7 @@
                         break;
                 }
 
+                this.overlayInfo.feature = f;
                 this.overlayInfo.type = geometry.getType();
                 this.overlayInfo.coordinates = geometry.getCoordinates();
 
@@ -1583,7 +1637,7 @@
                     return props.entity && props.entity.id == id;
                 });
                 if(feature) {
-                    this.unlink(feature, e.entity)
+                    this.afterUnlink(feature, id);
                 }
             },
             handleEntityUpdate(e) {
@@ -1630,7 +1684,10 @@
                     type: '',
                     size: '',
                     coordinates: [],
-                    showCoordinates: false
+                    feature: null,
+                    showCoordinates: false,
+                    pointEditEnabled: false,
+                    editCoordinates: null
                 },
                 hoverPopup: {},
                 lastHoveredFeature: {},
@@ -1700,7 +1757,6 @@
             coordinateList() {
                 const cs = this.overlayInfo.coordinates;
                 let coordList = [];
-                let coord;
                 switch(this.overlayInfo.type) {
                     case 'Point':
                         this.transformCoordinates(cs, coordList);

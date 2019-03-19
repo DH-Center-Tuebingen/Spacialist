@@ -4,12 +4,13 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 use Illuminate\Support\Facades\Storage;
 
 use App\File;
+use App\User;
+use App\ThLanguage;
 use App\Bibliography;
 
 class ApiSearchTest extends TestCase
@@ -353,6 +354,14 @@ class ApiSearchTest extends TestCase
             'relevance' => 15,
             'group' => 'bibliography'
         ]);
+
+        $this->refreshToken($response);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/search?q=48.541572');
+
+        $response->assertJsonCount(1);
     }
 
     /**
@@ -525,5 +534,66 @@ class ApiSearchTest extends TestCase
             ['id' => 43],
             ['id' => 47]
         ]);
+    }
+
+    // Testing exceptions and permissions
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testPermissions()
+    {
+        User::first()->detachRoles();
+
+        $calls = [
+            ['url' => '', 'error' => 'You do not have the permission to search global'],
+            ['url' => '/entity', 'error' => 'You do not have the permission to search for entities'],
+            ['url' => '/label', 'error' => 'You do not have the permission to search for concepts'],
+            ['url' => '/selection/12', 'error' => 'You do not have the permission to search for concepts'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->get('/api/v1/search' . $c['url']);
+
+            $response->assertStatus(403);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testExceptions()
+    {
+        $lang = User::first()->getLanguage();
+        ThLanguage::where('short_name', $lang)->delete();
+        $calls = [
+            ['url' => '/label', 'error' => 'Your language does not exist in ThesauRex'],
+            ['url' => '/selection/99', 'error' => 'This concept does not exist'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->get('/api/v1/search' . $c['url']);
+
+            $response->assertStatus(400);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
     }
 }

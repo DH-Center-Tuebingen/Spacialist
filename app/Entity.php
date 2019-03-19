@@ -109,7 +109,7 @@ class Entity extends Model
     }
 
     public function child_entities() {
-        return $this->hasMany('App\Entity', 'root_entity_id');
+        return $this->hasMany('App\Entity', 'root_entity_id')->orderBy('id');
     }
 
     public function entity_type() {
@@ -125,15 +125,15 @@ class Entity extends Model
     }
 
     public function bibliographies() {
-        return $this->belongsToMany('App\Bibliography', 'references', 'entity_id', 'bibliography_id')->withPivot('description', 'attribute_id');
+        return $this->belongsToMany('App\Bibliography', 'references', 'entity_id', 'bibliography_id')->withPivot('description', 'attribute_id')->orderBy('references.attribute_id')->orderBy('references.bibliography_id');
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'certainty_description', 'lasteditor', 'thesaurus_val', 'json_val', 'geography_val');
+        return $this->belongsToMany('App\Attribute', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'certainty_description', 'lasteditor', 'thesaurus_val', 'json_val', 'geography_val')->orderBy('attribute_values.attribute_id');
     }
 
     public function files() {
-        return $this->belongsToMany('App\File', 'entity_files', 'entity_id', 'file_id');
+        return $this->belongsToMany('App\File', 'entity_files', 'entity_id', 'file_id')->orderBy('entity_files.file_id');
     }
 
     private function parents() {

@@ -26,7 +26,7 @@
                     extensions="bib,bibtex"
                     ref="upload"
                     v-model="files"
-                    post-action="/api/v1/bibliography/import"
+                    :custom-action="importFile"
                     :directory="false"
                     :disabled="!$can('add_remove_bibliography|edit_bibliography')"
                     :multiple="false"
@@ -454,6 +454,11 @@
                         this.$refs.upload.active = true
                     }
                 }
+            },
+            importFile(file, component) {
+                let formData = new FormData();
+                formData.append('file', file.file);
+                return $http.post('bibliography/import', formData);
             },
             exportFile() {
                 $httpQueue.add(() => $http.get('bibliography/export').then(response => {

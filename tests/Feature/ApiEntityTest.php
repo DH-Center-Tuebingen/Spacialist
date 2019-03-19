@@ -3,11 +3,12 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 use App\AttributeValue;
 use App\Entity;
+use App\Reference;
+use App\User;
 
 class ApiEntityTest extends TestCase
 {
@@ -256,6 +257,82 @@ class ApiEntityTest extends TestCase
     }
 
     /**
+     * Test getting all references for an entity (id=1).
+     *
+     * @return void
+     */
+    public function testEntityReferencesEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->get('/api/v1/entity/1/reference');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(2);
+        $response->assertJsonStructure([
+            '*' => [
+                [
+                    'id',
+                    'entity_id',
+                    'attribute_id',
+                    'bibliography_id',
+                    'description',
+                    'lasteditor',
+                    'created_at',
+                    'updated_at',
+                    'bibliography'
+                ]
+            ]
+        ]);
+        $response->assertJson([
+            'https://spacialist.escience.uni-tuebingen.de/<user-project>/alternativer_name#20171220165047' => [
+                [
+                    'id' => 1,
+                    'entity_id' => 1,
+                    'attribute_id' => 15,
+                    'bibliography_id' => 1318,
+                    'description' => 'See Page 10',
+                    'lasteditor' => 'Admin',
+                    'created_at' => '2019-03-08 13:36:36',
+                    'updated_at' => '2019-03-08 13:36:36',
+                    'bibliography' => [
+                        'id' => 1318
+                    ],
+                ],
+                [
+                    'id' => 2,
+                    'entity_id' => 1,
+                    'attribute_id' => 15,
+                    'bibliography_id' => 1319,
+                    'description' => 'Picture on left side of page 12',
+                    'lasteditor' => 'Admin',
+                    'created_at' => '2019-03-08 13:36:48',
+                    'updated_at' => '2019-03-08 13:36:48',
+                    'bibliography' => [
+                        'id' => 1319
+                    ],
+                ],
+            ],
+            'https://spacialist.escience.uni-tuebingen.de/<user-project>/notizen#20171220105603' => [
+                [
+                    'id' => 3,
+                    'entity_id' => 1,
+                    'attribute_id' => 13,
+                    'bibliography_id' => 1323,
+                    'description' => 'Page 10ff is interesting',
+                    'lasteditor' => 'Admin',
+                    'created_at' => '2019-03-08 13:37:09',
+                    'updated_at' => '2019-03-08 13:37:09',
+                    'bibliography' => [
+                        'id' => 1323
+                    ],
+                ],
+            ]
+        ]);
+    }
+
+    /**
      * Test getting all sub-entities/children of an entity (id=2).
      *
      * @return void
@@ -332,11 +409,101 @@ class ApiEntityTest extends TestCase
         $response->assertJson([
             'name' => 'Unit-Test Entity I',
             'entity_type_id' => 3,
-            'root_entity_id' => 1
+            'root_entity_id' => 1,
+            'rank' => 2,
         ]);
 
         $cnt = Entity::count();
         $this->assertEquals($cnt, 9);
+    }
+
+    /**
+    * Test adding a new root entity.
+    *
+    * @return void
+    */
+    public function testNewRootEntityEndpoint()
+    {
+        $cnt = Entity::count();
+        $this->assertEquals($cnt, 8);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->post('/api/v1/entity', [
+            'name' => 'Unit-Test Entity I',
+            'entity_type_id' => 3,
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJsonStructure([
+            'id',
+            'name',
+            'entity_type_id',
+            'root_entity_id',
+            'geodata_id',
+            'rank',
+            'lasteditor',
+            'created_at',
+            'updated_at',
+            'parentIds'
+        ]);
+        $response->assertJson([
+            'name' => 'Unit-Test Entity I',
+            'entity_type_id' => 3,
+            'root_entity_id' => null,
+            'rank' => 4,
+        ]);
+
+        $cnt = Entity::count();
+        $this->assertEquals($cnt, 9);
+    }
+
+    /**
+    * Test adding a new reference to an entity (id=2).
+    *
+    * @return void
+    */
+    public function testNewReferenceEndpoint()
+    {
+        $cnt = Reference::count();
+        $this->assertEquals($cnt, 3);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->post('/api/v1/entity/2/reference/14', [
+            'bibliography_id' => 1337,
+            'description' => 'This is a simple test',
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJsonStructure([
+            'id',
+            'entity_id',
+            'attribute_id',
+            'bibliography_id',
+            'description',
+            'lasteditor',
+            'created_at',
+            'updated_at',
+            'bibliography',
+        ]);
+        $response->assertJson([
+            'entity_id' => 2,
+            'attribute_id' => 14,
+            'bibliography_id' => 1337,
+            'description' => 'This is a simple test',
+            'lasteditor' => 'Admin',
+            'bibliography' => [
+                'id' => 1337,
+                'type' => 'article',
+                'citekey' => 'ScSh:20'
+            ],
+        ]);
+
+        $cnt = Reference::count();
+        $this->assertEquals($cnt, 4);
     }
 
     // Testing PATCH requets
@@ -511,6 +678,46 @@ class ApiEntityTest extends TestCase
         $this->assertEquals(2, $YetAnotherEntity->rank);
     }
 
+    /**
+    * Test editing the description of an entity (id=2).
+    *
+    * @return void
+    */
+    public function testPatchReferenceEndpoint()
+    {
+        $reference = Reference::find(2);
+        $this->assertEquals(1, $reference->entity_id);
+        $this->assertEquals(15, $reference->attribute_id);
+        $this->assertEquals(1319, $reference->bibliography_id);
+        $this->assertEquals('Picture on left side of page 12', $reference->description);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/entity/reference/2', [
+            'description' => 'Page 12 was wrong, it is Page 15!',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'id',
+            'entity_id',
+            'attribute_id',
+            'bibliography_id',
+            'description',
+            'lasteditor',
+            'created_at',
+            'updated_at',
+        ]);
+        $response->assertJson([
+            'entity_id' => 1,
+            'attribute_id' => 15,
+            'bibliography_id' => 1319,
+            'description' => 'Page 12 was wrong, it is Page 15!',
+            'lasteditor' => 'Admin',
+        ]);
+    }
+
     // Testing DELETE requets
 
     /**
@@ -571,5 +778,132 @@ class ApiEntityTest extends TestCase
         $response->assertExactJson([
             'error' => 'This entity does not exist'
         ]);
+    }
+
+    /**
+    * Test deleting an reference (id=1).
+    *
+    * @return void
+    */
+    public function testDeleteReferenceEndpoint()
+    {
+        $cnt = Reference::count();
+        $this->assertEquals($cnt, 3);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->delete('/api/v1/entity/reference/1');
+
+        $response->assertStatus(204);
+
+        $cnt = Reference::count();
+        $this->assertEquals($cnt, 2);
+    }
+
+    // Testing exceptions and permissions
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testPermissions()
+    {
+        User::first()->detachRoles();
+
+        $calls = [
+            ['url' => '/top', 'error' => 'You do not have the permission to get entities', 'verb' => 'get'],
+            ['url' => '/1', 'error' => 'You do not have the permission to get a specific entity', 'verb' => 'get'],
+            ['url' => '/entity_type/3/data/14', 'error' => 'You do not have the permission to get an entity\'s data', 'verb' => 'get'],
+            ['url' => '/1/data/14', 'error' => 'You do not have the permission to get an entity\'s data', 'verb' => 'get'],
+            ['url' => '/1/parentIds', 'error' => 'You do not have the permission to get an entity\'s parent id\'s', 'verb' => 'get'],
+            ['url' => '', 'error' => 'You do not have the permission to add a new entity', 'verb' => 'post'],
+            ['url' => '/1/attributes', 'error' => 'You do not have the permission to modify an entity\'s data', 'verb' => 'patch'],
+            ['url' => '/1/attribute/13', 'error' => 'You do not have the permission to modify an entity\'s data', 'verb' => 'patch'],
+            ['url' => '/1/name', 'error' => 'You do not have the permission to modify an entity\'s data', 'verb' => 'patch'],
+            ['url' => '/1/rank', 'error' => 'You do not have the permission to modify an entity', 'verb' => 'patch'],
+            ['url' => '/1', 'error' => 'You do not have the permission to delete an entity', 'verb' => 'delete'],
+
+            ['url' => '/99/reference', 'error' => 'You do not have the permission to view references', 'verb' => 'get'],
+            ['url' => '/99/reference/99', 'error' => 'You do not have the permission to add references', 'verb' => 'post'],
+            ['url' => '/reference/99', 'error' => 'You do not have the permission to edit references', 'verb' => 'patch'],
+            ['url' => '/reference/99', 'error' => 'You do not have the permission to delete references', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/entity' . $c['url']);
+
+            $response->assertStatus(403);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testExceptions()
+    {
+        $calls = [
+            ['url' => '/99', 'error' => 'This entity does not exist', 'verb' => 'get'],
+            ['url' => '/entity_type/99/data/14', 'error' => 'This entity type does not exist', 'verb' => 'get'],
+            ['url' => '/entity_type/3/data/99', 'error' => 'This attribute does not exist', 'verb' => 'get'],
+            ['url' => '/99/parentIds', 'error' => 'This entity does not exist', 'verb' => 'get'],
+            ['url' => '', 'error' => 'This type is not an allowed sub-type.', 'verb' => 'post', 'data' => [
+                    'name' => 'Test Entity',
+                    'entity_type_id' => 3,
+                    'root_entity_id' => 2,
+                ]
+            ],
+            ['url' => '', 'error' => 'This type is not an allowed root-type.', 'verb' => 'post', 'data' => [
+                    'name' => 'Test Entity',
+                    'entity_type_id' => 4,
+                ]
+            ],
+            ['url' => '/99/attributes', 'error' => 'This entity does not exist', 'verb' => 'patch'],
+            ['url' => '/99/attribute/13', 'error' => 'This entity does not exist', 'verb' => 'patch'],
+            ['url' => '/1/attribute/99', 'error' => 'This attribute does not exist', 'verb' => 'patch'],
+            ['url' => '/99/name', 'error' => 'This entity does not exist', 'verb' => 'patch', 'data' => [
+                    'name' => 'Test'
+                ]
+            ],
+            ['url' => '/99/rank', 'error' => 'This entity does not exist', 'verb' => 'patch', 'data' => [
+                    'rank' => 1,
+                ]
+            ],
+
+            ['url' => '/99/reference', 'error' => 'This entity does not exist', 'verb' => 'get'],
+            ['url' => '/99/reference/99', 'error' => 'This entity does not exist', 'verb' => 'post'],
+            ['url' => '/1/reference/99', 'error' => 'This attribute does not exist', 'verb' => 'post'],
+            ['url' => '/reference/99', 'error' => 'This reference does not exist', 'verb' => 'patch'],
+            ['url' => '/reference/99', 'error' => 'This reference does not exist', 'verb' => 'delete'],
+        ];
+
+        $dummyData = [
+            'bibliography_id' => 1318,
+            'description' => 'Test'
+        ];
+        foreach($calls as $c) {
+            $data = array_key_exists('data', $c) ? array_merge($dummyData, $c['data']) : $dummyData;
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1/entity' . $c['url'], $data);
+
+            $response->assertStatus(400);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
     }
 }

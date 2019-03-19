@@ -32,18 +32,12 @@ class Reference extends Model
     public static function add($values, $user) {
         $reference = new self();
         foreach($values as $k => $v) {
-            // TODO remove after table/column renaming
-            if($k == 'bibliography_id') {
-                $reference->bibliography_id = $v;
-            } else {
-                $reference->{$k} = $v;
-            }
+            $reference->{$k} = $v;
         }
         $reference->lasteditor = $user->name;
         $reference->save();
-        $reference->bibliography; // Retrieve bibliography relation
 
-        return $reference;
+        return self::with('bibliography')->find($reference->id);
     }
 
     public function patch($values) {

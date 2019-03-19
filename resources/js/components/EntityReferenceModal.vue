@@ -131,6 +131,8 @@
 </template>
 
 <script>
+    import { EventBus } from '../event-bus.js';
+
     export default {
         props: {
             bibliography: {
@@ -160,6 +162,8 @@
                 if(!this.refs.value.certainty) {
                     Vue.set(this.refs.value, 'certainty', 100);
                 }
+                this.initialCertainty.value = this.refs.value.certainty;
+                this.initialCertainty.description = this.refs.value.certainty_description;
                 const curr = this.$route;
                 this.entityId = curr.params.id;
                 this.attributeId = curr.params.aid;
@@ -189,6 +193,8 @@
                     certainty_description: this.refs.value.certainty_description
                 };
                 $httpQueue.add(() => $http.patch(`/entity/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
+                    this.initialCertainty.value = this.refs.value.certainty;
+                    this.initialCertainty.description = this.refs.value.certainty_description;
                     const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
                     this.$showToast(
                         this.$t('main.entity.references.toasts.updated-certainty.title'),
@@ -208,10 +214,11 @@
                     description: item.description
                 };
                 $httpQueue.add(() => $http.post(`/entity/${this.entityId}/reference/${this.attributeId}`, data).then(response => {
-                    if(!this.refs.refs) {
-                        this.refs.refs = [];
-                    }
-                    this.refs.refs.push(response.data);
+                    EventBus.$emit('references-updated', {
+                        action: 'add',
+                        reference: response.data,
+                        group: this.refs.attribute.thesaurus_url
+                    });
                     item.bibliography = {};
                     item.description = '';
                 }));
@@ -222,7 +229,11 @@
                 $httpQueue.add(() => $http.delete(`/entity/reference/${id}`).then(response => {
                     const index = this.refs.refs.findIndex(r => r.id == reference.id);
                     if(index > -1) {
-                        this.refs.refs.splice(index, 1);
+                        EventBus.$emit('references-updated', {
+                            action: 'delete',
+                            reference: reference,
+                            group: this.refs.attribute.thesaurus_url
+                        });
                     }
                 }));
             },
@@ -237,8 +248,11 @@
                     description: editedReference.description
                 };
                 $httpQueue.add(() => $http.patch(`/entity/reference/${id}`, data).then(response => {
-                    ref.description = response.data.description;
-                    ref.updated_at = response.data.updated_at;
+                    EventBus.$emit('references-updated', {
+                        action: 'edit',
+                        reference: response.data,
+                        group: this.refs.attribute.thesaurus_url
+                    });
                     this.cancelEditReference();
                 }));
             },
@@ -252,6 +266,8 @@
                 this.$modal.hide('entity-references-modal');
             },
             routeBack() {
+                this.refs.value.certainty = this.initialCertainty.value;
+                this.refs.value.certainty_description = this.initialCertainty.description;
                 const curr = this.$route;
                 this.$router.push({
                     name: 'entitydetail',
@@ -269,6 +285,10 @@
                 editReference: {},
                 newItem: {
                     bibliography: {},
+                    description: ''
+                },
+                initialCertainty: {
+                    value: 100,
                     description: ''
                 }
             }

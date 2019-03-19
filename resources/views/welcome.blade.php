@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.laravel')
 
 @section('content')
     <div class="d-flex flex-row align-items-center h-100">
@@ -25,7 +25,7 @@
                 <p>
                     <i class="fas fa-fw fa-exclamation-circle text-warning"></i> This instance is not meant for public access. Please ask the maintainer for an account.
                 </p>
-                <a href="{{ route('login') }}" class="btn btn-outline-primary">Login</a>
+                <a href="{{ route('home') }}" class="btn btn-outline-primary">Login</a>
                 @endif
             </div>
         </div>

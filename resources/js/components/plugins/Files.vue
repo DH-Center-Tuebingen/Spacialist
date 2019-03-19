@@ -745,11 +745,7 @@
             },
             updateTags(file) {
                 const data = {
-                    tags: file.tags.map(t => {
-                        return {
-                            id: t.id
-                        };
-                    })
+                    tags: file.tags.map(t => t.id)
                 };
                 $http.patch(`file/${file.id}/tag`, data).then(response => {
                     const title = this.$t('plugins.files.modal.detail.toasts.tags-updated.title');

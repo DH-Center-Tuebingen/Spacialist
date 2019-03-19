@@ -17,8 +17,8 @@ class Attribute extends Model
         'datatype',
     ];
 
-    public function child() {
-        return $this->hasOne('App\Attribute', 'parent_id');
+    public function children() {
+        return $this->hasMany('App\Attribute', 'parent_id');
     }
 
     public function entities() {
