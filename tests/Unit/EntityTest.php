@@ -69,12 +69,12 @@ class EntityTest extends TestCase
         ], $entity->attributes->toArray());
         $this->assertArraySubset([
             [
-                'id' => 6,
-                'name' => 'test_archive.zip',
-            ],
-            [
                 'id' => 4,
                 'name' => 'spacialist_screenshot.png',
+            ],
+            [
+                'id' => 6,
+                'name' => 'test_archive.zip',
             ],
         ], $entity->files->toArray());
         $this->assertArraySubset([

@@ -188,7 +188,6 @@ class ApiFileTest extends TestCase
      */
     public function testGetArchiveFileListEndpoint()
     {
-        echo date_default_timezone_get();
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
             ])
@@ -209,49 +208,7 @@ class ApiFileTest extends TestCase
             ]
         ]);
 
-        $response->assertExactJson([
-            [
-                'isDirectory' => false,
-                'path' => 'text2.txt',
-                'compressedSize' => 38,
-                'compressed_size' => 38,
-                'uncompressedSize' => 36,
-                'uncompressed_size' => 36,
-                'modificationTime' => 1552044042,
-                'isCompressed' => true,
-                'is_compressed' => true,
-                'filename' => 'text2.txt',
-                'mtime' => 1552044042,
-                'cleanFilename' => 'text2.txt'
-            ],
-            [
-                'isDirectory' => false,
-                'path' => 'text3.txt',
-                'compressedSize' => 39,
-                'compressed_size' => 39,
-                'uncompressedSize' => 40,
-                'uncompressed_size' => 40,
-                'modificationTime' => 1552044062,
-                'isCompressed' => true,
-                'is_compressed' => true,
-                'filename' => 'text3.txt',
-                'mtime' => 1552044062,
-                'cleanFilename' => 'text3.txt'
-            ],
-            [
-                'isDirectory' => false,
-                'path' => 'test_img_edin.jpg',
-                'compressedSize' => 3391570,
-                'compressed_size' => 3391570,
-                'uncompressedSize' => 3407381,
-                'uncompressed_size' => 3407381,
-                'modificationTime' => 1498723284,
-                'isCompressed' => true,
-                'is_compressed' => true,
-                'filename' => 'test_img_edin.jpg',
-                'mtime' => 1498723284,
-                'cleanFilename' => 'test_img_edin.jpg'
-            ],
+        $response->assertJson([
             [
                 'children' => [
                     [
@@ -261,11 +218,9 @@ class ApiFileTest extends TestCase
                         'compressed_size' => 45,
                         'uncompressedSize' => 46,
                         'uncompressed_size' => 46,
-                        'modificationTime' => 1552049678,
                         'isCompressed' => true,
                         'is_compressed' => true,
                         'filename' => 'folder/folder_text1.txt',
-                        'mtime' => 1552049678,
                         'cleanFilename' => 'folder_text1.txt'
                     ]
                 ],
@@ -278,6 +233,42 @@ class ApiFileTest extends TestCase
                 'filename' => 'folder/',
                 'mtime' => 0,
                 'cleanFilename' => 'folder'
+            ],
+            [
+                'isDirectory' => false,
+                'path' => 'test_img_edin.jpg',
+                'compressedSize' => 3391570,
+                'compressed_size' => 3391570,
+                'uncompressedSize' => 3407381,
+                'uncompressed_size' => 3407381,
+                'isCompressed' => true,
+                'is_compressed' => true,
+                'filename' => 'test_img_edin.jpg',
+                'cleanFilename' => 'test_img_edin.jpg'
+            ],
+            [
+                'isDirectory' => false,
+                'path' => 'text2.txt',
+                'compressedSize' => 38,
+                'compressed_size' => 38,
+                'uncompressedSize' => 36,
+                'uncompressed_size' => 36,
+                'isCompressed' => true,
+                'is_compressed' => true,
+                'filename' => 'text2.txt',
+                'cleanFilename' => 'text2.txt'
+            ],
+            [
+                'isDirectory' => false,
+                'path' => 'text3.txt',
+                'compressedSize' => 39,
+                'compressed_size' => 39,
+                'uncompressedSize' => 40,
+                'uncompressed_size' => 40,
+                'isCompressed' => true,
+                'is_compressed' => true,
+                'filename' => 'text3.txt',
+                'cleanFilename' => 'text3.txt'
             ],
         ]);
     }

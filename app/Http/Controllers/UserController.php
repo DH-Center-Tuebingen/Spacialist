@@ -133,8 +133,8 @@ class UserController extends Controller
     }
 
     public function logout(Request $request) {
-        auth()->logout();
-        auth()->invalidate();
+        auth()->logout(true);
+        auth()->invalidate(true);
     }
 
     // PATCH

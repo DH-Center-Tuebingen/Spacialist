@@ -387,7 +387,21 @@ class ApiMapTest extends TestCase
             ->get('/api/v1/map/export/1?type=csv&srid=31467');
         $response->assertStatus(200);
         $csv = base64_decode($response->getContent());
-        $this->assertEquals("X,Y,Z,id,color,lasteditor,created_at,updated_at\n3493381.81073401,5378579.86054217,-52.2681263582781,6,,Admin,2019/03/18 09:46:11,2019/03/18 09:46:11\n", $csv);
+
+        // Do not compare whole string, because travis xenial build
+        // ships with gdal 1.11, which does not support round/truncate of numbers
+        $rows = str_getcsv($csv, "\n");
+        $header = $rows[0];
+        $data = str_getcsv($rows[1]);
+        $this->assertEquals('X,Y,Z,id,color,lasteditor,created_at,updated_at', $header);
+        $this->assertEquals(3493381.810734, round(floatval($data[0]), 6));
+        $this->assertEquals(5378579.860542, round(floatval($data[1]), 6));
+        $this->assertEquals(-52.268126, round(floatval($data[2]), 6));
+        $this->assertEquals('6', $data[3]);
+        $this->assertEquals('', $data[4]);
+        $this->assertEquals('Admin', $data[5]);
+        $this->assertEquals('2019/03/18 09:46:11', $data[6]);
+        $this->assertEquals('2019/03/18 09:46:11', $data[7]);
     }
 
     // Testing POST requests
