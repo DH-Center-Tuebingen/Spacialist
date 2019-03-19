@@ -28,10 +28,7 @@ class Preference extends Model
             ->get();
         $systemPrefs = self::whereNotIn('id', $userPrefs->pluck('pref_id')->toArray())
             ->get();
-        $prefs = $systemPrefs;
-        foreach($userPrefs as $p) {
-            $prefs[] = $p;
-        }
+        $prefs = $systemPrefs->merge($userPrefs);
         $prefObj = self::decodePreferences($prefs);
         return $prefObj;
     }
@@ -82,6 +79,40 @@ class Preference extends Model
                     'epsg' => $value->epsg,
                     'proj4' => $proj4
                 ];
+        }
+        return $value;
+    }
+
+    public static function encodePreference($label, $decodedValue) {
+        $value;
+        switch($label) {
+            case 'prefs.gui-language':
+                $value = json_encode(['language_key' => $decodedValue]);
+                break;
+            case 'prefs.columns':
+                $value = $decodedValue;
+                break;
+            case 'prefs.show-tooltips':
+                $value = json_encode(['show' => $decodedValue]);
+                break;
+            case 'prefs.tag-root':
+                $value = json_encode(['uri' => $decodedValue]);
+                break;
+            case 'prefs.load-extensions':
+                $value = $decodedValue;
+                break;
+            case 'prefs.link-to-thesaurex':
+                $value = json_encode(['url' => $decodedValue]);
+                break;
+            case 'prefs.project-name':
+                $value = json_encode(['name' => $decodedValue]);
+                break;
+            case 'prefs.project-maintainer':
+                $value = $decodedValue;
+                break;
+            case 'prefs.map-projection':
+                $value = $decodedValue;
+                break;
         }
         return $value;
     }

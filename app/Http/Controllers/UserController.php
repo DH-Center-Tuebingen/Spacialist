@@ -22,24 +22,18 @@ class UserController extends Controller
 
     public function refreshToken() {
         return response()->json([
-                'status' => 'success'
-            ]);
+            'status' => 'success'
+        ]);
     }
 
     public function getUser(Request $request) {
-        try {
-            $user = User::findOrFail(auth()->user()->id);
-            $user->setPermissions();
+        $user = User::find(auth()->user()->id);
+        $user->setPermissions();
 
-            return response()->json([
-                'status' => 'success',
-                'data' => $user
-            ]);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This user does not exist')
-            ], 400);
-        }
+        return response()->json([
+            'status' => 'success',
+            'data' => $user
+        ]);
     }
 
     public function getUsers() {
@@ -139,8 +133,8 @@ class UserController extends Controller
     }
 
     public function logout(Request $request) {
-        auth()->logout();
-        auth()->invalidate();
+        auth()->logout(true);
+        auth()->invalidate(true);
     }
 
     // PATCH

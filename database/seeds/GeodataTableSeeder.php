@@ -40,6 +40,15 @@ class GeodataTableSeeder extends Seeder
                 'lasteditor' => 'Admin',
                 'color' => NULL,
             ),
+            3 =>
+            array (
+                'id' => 6,
+                'geom' => '0101000020E610000066F4A3E194D12140EC1681B1BE454840',
+                'created_at' => '2019-03-18 09:46:11',
+                'updated_at' => '2019-03-18 09:46:11',
+                'lasteditor' => 'Admin',
+                'color' => NULL,
+            ),
         ));
     }
 }

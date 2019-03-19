@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 
 use App\User;
 use App\Role;
@@ -122,6 +121,7 @@ class ApiUserTest extends TestCase
      */
     public function testRefreshTokenEndpoint()
     {
+        $oldToken = $this->token;
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
             ])
@@ -132,6 +132,8 @@ class ApiUserTest extends TestCase
         $response->assertExactJson([
             'status' => 'success'
         ]);
+        $this->refreshToken($response);
+        $this->assertTrue($oldToken != $this->token);
     }
 
     // Testing POST requests
@@ -153,6 +155,27 @@ class ApiUserTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertTrue($response->headers->has('authorization'));
+    }
+
+    /**
+     * Test login with wrong credentials.
+     *
+     * @return void
+     */
+    public function testLoginWrongCredentialsEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/auth/login', [
+                'email' => 'admin@admin.com',
+                'password' => 'admin1337'
+            ]);
+
+        $response->assertStatus(400);
+        $response->assertExactJson([
+            'error' => 'Invalid Credentials'
+        ]);
     }
 
     /**
@@ -288,6 +311,21 @@ class ApiUserTest extends TestCase
     }
 
     /**
+     * Test patching user with empty request.
+     *
+     * @return void
+     */
+    public function testPatchUserWithoutDataEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->patch('/api/v1/user/1', []);
+
+        $response->assertStatus(204);
+    }
+
+    /**
      * Test patching role.
      *
      * @return void
@@ -326,6 +364,21 @@ class ApiUserTest extends TestCase
             'created_at' => '2017-12-20 09:47:35',
             'updated_at' => "$role->updated_at"
         ]);
+    }
+
+    /**
+     * Test patching role with empty request.
+     *
+     * @return void
+     */
+    public function testPatchRoleWithoutDataEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->patch('/api/v1/role/1', []);
+
+        $response->assertStatus(204);
     }
 
     /**
@@ -412,5 +465,94 @@ class ApiUserTest extends TestCase
         $response->assertExactJson([
             'error' => 'This role does not exist'
         ]);
+    }
+
+    // Testing exceptions and permissions
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testPermissions()
+    {
+        User::first()->detachRoles();
+
+        $calls = [
+            ['url' => '/user', 'error' => 'You do not have the permission to view users', 'verb' => 'get'],
+            ['url' => '/role', 'error' => 'You do not have the permission to view roles', 'verb' => 'get'],
+            ['url' => '/user', 'error' => 'You do not have the permission to add new users', 'verb' => 'post'],
+            ['url' => '/role', 'error' => 'You do not have the permission to add roles', 'verb' => 'post'],
+            ['url' => '/user/1', 'error' => 'You do not have the permission to set user roles', 'verb' => 'patch'],
+            ['url' => '/role/1', 'error' => 'You do not have the permission to set role permissions', 'verb' => 'patch'],
+            ['url' => '/user/1', 'error' => 'You do not have the permission to delete users', 'verb' => 'delete'],
+            ['url' => '/role/1', 'error' => 'You do not have the permission to delete roles', 'verb' => 'delete'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1' . $c['url']);
+
+            $response->assertStatus(403);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testExceptions()
+    {
+        $calls = [
+            ['url' => '/user/99', 'error' => 'This user does not exist', 'verb' => 'patch'],
+            ['url' => '/role/99', 'error' => 'This role does not exist', 'verb' => 'patch'],
+        ];
+
+        foreach($calls as $c) {
+            $response = $this->withHeaders([
+                    'Authorization' => "Bearer $this->token"
+                ])
+                ->json($c['verb'], '/api/v1' . $c['url'], [
+                    'description' => 'does not matter'
+                ]);
+
+            $response->assertStatus(400);
+            $response->assertExactJson([
+                'error' => $c['error']
+            ]);
+
+            $this->refreshToken($response);
+        }
+    }
+
+    /**
+     *
+     *
+     * @return void
+     */
+    public function testValidations()
+    {
+        $user = new User();
+        $user->name = 'Test';
+        $user->email = 'mail@example.com';
+        $user->password = 'not_safe';
+        $user->save();
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->patch('/api/v1/user/' . $user->id, [
+                'email' => 'admin@admin.com'
+            ]);
+
+        $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
     }
 }
