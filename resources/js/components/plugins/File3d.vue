@@ -83,6 +83,19 @@
             this.startup();
         },
         destroyed() {
+            window.removeEventListener('resize', this.onWindowResize, false);
+            this.renderer.domElement.removeEventListener('mousedown', this.onMouseDown, false);
+            // VR Events
+    		this.grabController.removeEventListener('triggerdown', this.onGrabDown);
+    		this.grabController.removeEventListener('triggerup', this.onGrabUp);
+            this.grabController.removeEventListener('thumbpadup', this.dimWorldLight);
+            // this.grabController.removeEventListener('axischanged', this.recognizeTouch);
+    		this.flashlightController.removeEventListener('triggerdown', this.onLightOn);
+    		this.flashlightController.removeEventListener('triggerup', this.onLightOff);
+    		this.flashlightController.removeEventListener('thumbpadup', this.dimFlashLight);
+
+            window.removeEventListener('vrdisplaypresentchange', this.vrDisplayStateChanged, false);
+
             for(let i=this.scene.children.length-1; i>=0; i--) {
                 let obj = this.scene.children[i];
                 if(obj.geometry) obj.geometry.dispose();
@@ -255,19 +268,16 @@
                 this.controls = new OrbitControls(this.camera, this.renderer.domElement);
             },
             initViveEventListeners: function() {
-                const vm = this;
                 // Vive Events
-        		vm.grabController.addEventListener('triggerdown', vm.onGrabDown);
-        		vm.grabController.addEventListener('triggerup', vm.onGrabUp);
-                vm.grabController.addEventListener('thumbpadup', vm.dimWorldLight);
+        		this.grabController.addEventListener('triggerdown', this.onGrabDown);
+        		this.grabController.addEventListener('triggerup', this.onGrabUp);
+                this.grabController.addEventListener('thumbpadup', this.dimWorldLight);
                 // this.grabController.addEventListener('axischanged', this.recognizeTouch);
-        		vm.flashlightController.addEventListener('triggerdown', vm.onLightOn);
-        		vm.flashlightController.addEventListener('triggerup', vm.onLightOff);
-        		vm.flashlightController.addEventListener('thumbpadup', vm.dimFlashLight);
+        		this.flashlightController.addEventListener('triggerdown', this.onLightOn);
+        		this.flashlightController.addEventListener('triggerup', this.onLightOff);
+        		this.flashlightController.addEventListener('thumbpadup', this.dimFlashLight);
 
-                window.addEventListener('vrdisplaypresentchange', function(event) {
-                    vm.renderer.vr.enabled = event.display.isPresenting;
-                }, false);
+                window.addEventListener('vrdisplaypresentchange', this.vrDisplayStateChanged, false);
             },
             initViveControls: function() {
                 const vm = this;
@@ -618,6 +628,11 @@
         		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
         		this.flashlightIntensity = event.axes[0] + 1;
         		if(this.flashlightOn) this.flashlight.intensity = this.flashlightIntensity;
+            },
+            vrDisplayStateChanged(event) {
+                if(this.renderer) {
+                    this.renderer.vr.enabled = event.display.isPresenting;
+                }
             },
             dimWorldLight: function(event) {
         		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
