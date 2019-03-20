@@ -1,11 +1,11 @@
 <template>
-    <div class="h-100 row of-hidden" v-if="initFinished">
+    <div class="h-100 row overflow-hidden" v-if="initFinished">
         <div class="col-md-2 h-100 d-flex flex-column">
             <button type="button" class="btn btn-outline-secondary" @click.prevent="openImportModal">
                 <i class="fas fa-fw fa-download"></i> {{ $t('plugins.map.gis.import.button') }}
             </button>
             <div class="col d-flex flex-column h-100 pt-2">
-                <div class="col of-hidden d-flex flex-column">
+                <div class="col overflow-hidden d-flex flex-column">
                     <h4>
                         {{ $t('plugins.map.gis.available-layers') }}
                     </h4>
@@ -15,7 +15,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="col of-hidden d-flex flex-column pt-2">
+                <div class="col overflow-hidden d-flex flex-column pt-2">
                     <h4>{{ $t('plugins.map.gis.selected-layers') }}</h4>
                     <p class="alert alert-info" v-show="!Object.keys(selectedLayers).length" v-html="$t('plugins.map.gis.info')">
 

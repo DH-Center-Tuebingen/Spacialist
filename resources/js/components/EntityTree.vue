@@ -15,7 +15,7 @@
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="requestAddNewEntity()">
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
-            <div class="mb-2 d-flex flex-row justify-content-between">
+            <div class="mb-2 d-flex flex-row flex-wrap justify-content-between">
                 <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'asc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.asc.rank')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-sort-numeric-down"></i>
                 </button>

@@ -37,7 +37,7 @@
         </div>
         <div infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk" class="row col scroll-y-auto">
             <div class="row col" v-if="grid">
-                <div class="col-sm-6 col-md-4 mb-3 clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
+                <div class="col-md-12 col-lg-6 col-xl-4 mb-3 clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
                     <div class="card text-center">
                         <div style="height: 200px;">
                             <div class="card-hover-overlay h-100">

@@ -282,10 +282,10 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body row col text-center of-hidden">
+                <div class="modal-body row col text-center overflow-hidden">
                     <div class="col-md-6 d-flex flex-column">
                         <component
-                            class="col px-0 of-hidden"
+                            class="col px-0 overflow-hidden"
                             id="file-container"
                             :entity="localEntity"
                             :file="selectedFile"

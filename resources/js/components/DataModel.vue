@@ -1,5 +1,5 @@
 <template>
-    <div class="row d-flex flex-row of-hidden h-100" v-can="'duplicate_edit_concepts|view_concept_props'">
+    <div class="row d-flex flex-row overflow-hidden h-100" v-can="'duplicate_edit_concepts|view_concept_props'">
         <div class="col-md-5 h-100 d-flex flex-column">
             <h4>{{ $t('main.datamodel.attribute.title') }}</h4>
             <button type="button" class="btn btn-success mb-2" @click="onCreateAttribute">

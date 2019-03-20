@@ -17,7 +17,7 @@
                 <i class="fas fa-fw fa-exchange-alt"></i> {{ $t('plugins.files.modal.detail.toggle-md') }}
             </button>
         </div>
-        <div class="d-flex mt-2 col px-0 of-hidden">
+        <div class="d-flex mt-2 col px-0 overflow-hidden">
             <div class="col px-1" v-if="editMode">
                 <textarea v-validate="" name="editTextarea" class="w-100 h-100 p-2" v-model="content"></textarea>
             </div>
