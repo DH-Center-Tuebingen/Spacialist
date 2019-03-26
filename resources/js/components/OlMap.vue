@@ -1389,6 +1389,7 @@
                     };
                     newFeature.setStyle(this.featureStyles[fid].default);
                     entLayer.getSource().addFeature(newFeature);
+                    this.features[fid] = newFeature;
                 });
             },
             updateFeatures() {
