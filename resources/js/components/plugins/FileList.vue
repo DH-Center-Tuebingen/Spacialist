@@ -46,7 +46,7 @@
                                 </div>
                             </div>
                             <div class="card-hover h-100">
-                                <img class="card-img w-auto h-auto mw-100 mh-100" v-if="file.category == 'image'" :src="file.url">
+                                <img class="card-img w-auto h-auto mw-100 mh-100" v-if="file.category == 'image'" :src="file.thumb_url">
                                 <div class="card-img w-100" v-else></div>
                                 <div class="card-img-overlay d-flex flex-column justify-content-end" style="height: 200px;">
                                     <div class="card-text pb-4">
@@ -181,7 +181,7 @@
                             <i class="fas fa-fw fa-file-alt w-32p h-32p"></i>
                         </div>
                         <div v-else-if="file.category == 'image'" class="w-32p h-32p">
-                            <img class="mh-100 mw-100" :src="file.url" />
+                            <img class="mh-100 mw-100" :src="file.thumb_url" />
                         </div>
                         <div v-else-if="file.category == 'undefined'">
                             <i
