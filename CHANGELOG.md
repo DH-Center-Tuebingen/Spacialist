@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - Update references in Reference Tab, Attribute Icons in Entity Detail View and Reference Modal
 - Several styles and translations
 - Popup not working for newly added and linked geodata on click on linked entity
+- Adding first entity with a serial attribute
 
 ## 0.6.3
 ### Added

@@ -269,6 +269,7 @@ class EntityController extends Controller {
                 ->where('datatype', 'serial')
                 ->get();
         foreach($serialAttributes as $s) {
+            $nextValue = 1;
             $cleanedRegex = preg_replace('/(.*)(%\d*d)(.*)/i', '/$1(\d+)$3/i', $s->text);
 
             // get last added
@@ -276,12 +277,15 @@ class EntityController extends Controller {
                 ->orderBy('created_at', 'desc')
                 ->skip(1)
                 ->first();
-            $lastValue = AttributeValue::where('attribute_id', $s->id)
-                ->where('entity_id', $lastEntity->id)
-                ->first();
-            $nextValue = intval(preg_replace($cleanedRegex, '$1', $lastValue->str_val));
-            $nextValue++;
-
+            if(isset($lastEntity)) {
+                $lastValue = AttributeValue::where('attribute_id', $s->id)
+                    ->where('entity_id', $lastEntity->id)
+                    ->first();
+                if(isset($lastValue)) {
+                    $nextValue = intval(preg_replace($cleanedRegex, '$1', $lastValue->str_val));
+                    $nextValue++;
+                }
+            }
 
             Entity::addSerial($entity->id, $s->id, $s->text, $nextValue, $user->name);
         }
