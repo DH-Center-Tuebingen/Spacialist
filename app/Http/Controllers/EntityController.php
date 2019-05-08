@@ -85,9 +85,6 @@ class EntityController extends Controller {
         $data = [];
         foreach($values as $value) {
             switch($value->attribute->datatype) {
-                case 'string-sc':
-                    $value->thesaurus_val = ThConcept::where('concept_url', $value->thesaurus_val)->first();
-                    break;
                 case 'entity':
                     $value->name = Entity::find($value->entity_val)->name;
                     break;
