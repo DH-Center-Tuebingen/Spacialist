@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## 0.7 - Giza (Unreleased)
 ### Added
+- Time Period datatype (epoch datatype without dropdown)
 - Screencast functionality (in Tools menu)
   - Save local or upload to Spacialist
 - Dynamic Parent-Element for `string-sc` (Single Choice Dropdown) datatype
@@ -16,6 +17,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Do not fire upload-from-clipboard event in input fields
 - Update references in Reference Tab, Attribute Icons in Entity Detail View and Reference Modal
+- Several styles and translations
+- Popup not working for newly added and linked geodata on click on linked entity
 
 ## 0.6.3
 ### Added
