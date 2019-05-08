@@ -374,9 +374,22 @@ class EntityController extends Controller {
                     $attrval->json_val = json_encode($thesaurus_urls);
                     break;
                 case 'epoch':
+                case 'timeperiod':
                 case 'dimension':
                 case 'list':
                 case 'table':
+                    // check for invalid time spans
+                    if($attr->datatype == 'epoch' || $attr->datatype == 'timeperiod') {
+                        if(
+                            ($value['startLabel'] == 'AD' && $value['endLabel'] == 'BC')
+                            ||
+                            ($value['startLabel'] == $value['endLabel'] && $value['start'] > $value['end'])
+                        ) {
+                            return response()->json([
+                                'error' => __('Start date of a time period must not be after it\'s end date')
+                            ], 422);
+                        }
+                    }
                     $attrval->json_val = json_encode($value);
                     break;
                 case 'entity':

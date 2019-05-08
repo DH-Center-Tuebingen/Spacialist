@@ -196,6 +196,9 @@ class EditorController extends Controller {
                 'datatype' => 'epoch'
             ],
             [
+                'datatype' => 'timeperiod'
+            ],
+            [
                 'datatype' => 'date'
             ],
             [

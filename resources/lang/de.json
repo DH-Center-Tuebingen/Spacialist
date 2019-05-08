@@ -106,5 +106,7 @@
     "Could not compute citation key.": "Konnte Zitations-Schlüssel nicht berechnen.",
     "This tag does not exist": "Dieses Schlagwort existiert nicht",
     "HTML not supported for file type": "HTML wird für den Dateityp :mime nicht unterstützt",
-    "Presentations not yet supported!": "Präsentationen werden noch nicht unterstützt!"
+    "Presentations not yet supported!": "Präsentationen werden noch nicht unterstützt!",
+
+    "Start date of a time period must not be after it's end date": "Das Startdatum einer Zeitspanne darf nicht nach ihrem Enddatum liegen"
 }

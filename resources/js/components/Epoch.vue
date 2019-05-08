@@ -15,11 +15,11 @@
                     </a>
                 </ul>
             </div>
-            <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('start', $event.target.value)" v-model="start">
+            <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('start', start)" v-model.number="start">
             <div class="input-group-prepend input-group-append">
                 <span class="input-group-text">-</span>
             </div>
-            <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('end', $event.target.value)" v-model="end">
+            <input type="number" step="1" min="0" pattern="[0-9]+" class="form-control text-center" :disabled="disabled" aria-label="" @input="onInput('end', end)" v-model.number="end">
             <div class="input-group-append">
                 <button type="button" class="btn btn-outline-secondary dropdown-toggle" :disabled="disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span v-if="endLabel">
@@ -39,6 +39,7 @@
             label="concept_url"
             track-by="id"
             @input="onInput('epoch', epoch)"
+            v-if="hasEpochList"
             v-model="epoch"
             :allowEmpty="true"
             :closeOnSelect="true"
@@ -69,12 +70,19 @@
         props: {
             name: String,
             value: {
+                required: false,
                 type: Object,
                 default: _ => new Object(),
             },
             epochs: {
+                required: false,
                 type: Array,
                 default: _ => new Array(),
+            },
+            type: {
+                required: false,
+                type: String,
+                default: 'epoch',
             },
             disabled: {
                 type: Boolean,
@@ -108,6 +116,11 @@
                 endLabel: this.value.endLabel,
                 end: this.value.end,
                 epoch: this.value.epoch,
+            }
+        },
+        computed: {
+            hasEpochList() {
+                return this.type !== 'timeperiod';
             }
         }
     }

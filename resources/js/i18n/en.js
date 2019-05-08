@@ -93,6 +93,7 @@ const en = {
             percentage: 'Percentage',
             entity: 'Entity',
             epoch: 'Time Period and Epoch',
+            timeperiod: 'Time Period',
             date: 'Date',
             dimension: 'Dimensions (BxHxT)',
             list: 'List',

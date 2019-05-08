@@ -142,6 +142,7 @@
                             switch(data.attributes[i].datatype) {
                                 case 'dimension':
                                 case 'epoch':
+                                case 'timeperiod':
                                     val.value = {};
                                     break;
                                 case 'table':
@@ -226,7 +227,16 @@
                         'success'
                     );
                     this.setModificationFields(response.data);
-                }));
+                }).catch(error => {
+                    const r = error.response;
+                    this.$showToast(
+                        `${r.status}: ${r.statusText}`,
+                        r.data.error,
+                        'error',
+                        5000
+                    );
+                })
+            );
             },
             deleteEntity(entity) {
                 EventBus.$emit('entity-delete', {
