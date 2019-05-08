@@ -21,6 +21,7 @@ All notable changes to this project will be documented in this file.
 - Popup not working for newly added and linked geodata on click on linked entity
 - Adding first entity with a serial attribute
 - Sub-Entity counter for first added sub-entity
+- Linking geodata to entity-types with allowed geometry type 'any'
 
 ## 0.6.3
 ### Added

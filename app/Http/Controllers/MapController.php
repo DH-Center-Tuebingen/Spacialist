@@ -337,7 +337,7 @@ class MapController extends Controller
 
         $layer = AvailableLayer::where('entity_type_id', $entity->entity_type_id)->first();
 
-        if($layer->type != 'all') {
+        if($layer->type != 'any') {
             $typeMatched = false;
             $upperType = strtoupper($layer->type);
             if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && Str::endsWith($upperType, 'POLYGON')) {
