@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Use [Tree-Shaking](https://webpack.js.org/guides/tree-shaking/) in supported modules
 - Update to Laravel 5.8
+- Rework search components (should no longer logout on fast typing)
 ### Fixed
 - Do not fire upload-from-clipboard event in input fields
 - Update references in Reference Tab, Attribute Icons in Entity Detail View and Reference Modal
@@ -22,6 +23,7 @@ All notable changes to this project will be documented in this file.
 - Adding first entity with a serial attribute
 - Sub-Entity counter for first added sub-entity
 - Linking geodata to entity-types with allowed geometry type 'any'
+- Hide file export checkbox/button if user doesn't have permission
 
 ## 0.6.3
 ### Added
