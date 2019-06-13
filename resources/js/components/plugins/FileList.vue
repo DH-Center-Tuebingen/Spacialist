@@ -27,7 +27,7 @@
                     <i class="fas fa-fw fa-th"></i>
                 </span>
             </a>
-            <button class="btn btn-sm btn-outline-primary" v-show="fileCount" @click="exportFiles(selectedFiles)">
+            <button class="btn btn-sm btn-outline-primary" v-show="fileCount" @click="exportFiles(selectedFiles)" v-if="$can('export_files')">
                 {{
                     $t('plugins.files.header.export.selected', {
                         cnt: fileCount
@@ -114,7 +114,7 @@
                                     <i class="fas fa-fw fa-tags text-info"></i>
                                 </span>
                             </div>
-                            <div class="position-absolute top-0 left-0 m-2">
+                            <div class="position-absolute top-0 left-0 m-2" v-if="$can('export_files')">
                                 <input type="checkbox" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
                             </div>
                         </div>
@@ -136,7 +136,7 @@
             </div>
             <ul class="list-group mb-2 w-100" v-else>
                 <li class="list-group-item px-3 py-2 w-100 d-flex flex-row justify-content-start align-items-center clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
-                    <input type="checkbox" class="mr-2" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
+                    <input type="checkbox" class="mr-2" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" v-if="$can('export_files')" />
                     <div class="mr-2">
                         <div v-if="file.category == 'xml'">
                             <i class="fas fa-fw fa-file-code w-32p h-32p"></i>
@@ -269,6 +269,7 @@
                 return file.tags;
             },
             exportFiles(fileIds) {
+                if(!this.$can('export_files')) return;
                 const data = {
                     files: fileIds
                 };
