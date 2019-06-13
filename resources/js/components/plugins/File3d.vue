@@ -49,7 +49,6 @@
         MeshPhongMaterial,
         MTLLoader,
         OBJLoader,
-        Octree,
         OrbitControls,
         PCFSoftShadowMap,
         PDBLoader,
@@ -245,7 +244,6 @@
                 if(this.labelRenderer) {
                     this.labelRenderer.render(this.scene, this.camera);
                 }
-                this.octree.update();
             },
             initEventListeners: function() {
                 window.addEventListener('resize', this.onWindowResize, false);
@@ -344,11 +342,6 @@
                     }
                     object.castShadow = true;
                     object.receiveShadow = true;
-					for(let i=0; i<object.children.length; i++) {
-						this.octree.add(object.children[i], {
-							useFaces: false
-						});
-					}
                     this.group.add(object);
                     this.onWindowResize();
                 },
@@ -369,9 +362,6 @@
                             node.castShadow = true;
                             node.receiveShadow = true;
                         }
-						this.octree.add(node, {
-							useFaces: false
-						});
                     });
 
                     let animations = gltf.animations;
@@ -424,12 +414,6 @@
                     object => { // onSuccess
                         object.castShadow = true;
                         object.receiveShadow = true;
-                        for(var i=0; i<object.children.length; i++) {
-                            var child = object.children[i];
-                            this.octree.add(child, {
-                                useFaces: false
-                            });
-                        }
                         this.group.add(object);
                         this.onWindowResize();
                     },
@@ -454,9 +438,6 @@
                             node.castShadow = true;
                             node.receiveShadow = true;
                         }
-                        this.octree.add(node, {
-                            useFaces: false
-                        });
                     });
                     this.group.add(object);
                     this.onWindowResize();
@@ -514,11 +495,6 @@
                         object.position.copy(position);
                         object.position.multiplyScalar(1);
                         object.scale.multiplyScalar(0.33);
-                        for(let j=0; j<object.children.length; j++) {
-        					vm.octree.add(object.children[j], {
-        						useFaces: false
-        					});
-        				}
                         vm.group.add(object);
 
                         let atom = json.atoms[i];
@@ -552,11 +528,6 @@
                         object.position.lerp(end, 0.5);
                         object.scale.set(0.1, 0.1, start.distanceTo(end));
                         object.lookAt(end);
-                        for(let j=0; j<object.children.length; j++) {
-        					vm.octree.add(object.children[j], {
-        						useFaces: false
-        					});
-        				}
                         vm.group.add(object);
                     }
                     vm.onWindowResize();
@@ -569,9 +540,7 @@
         		this.tempMatrix.identity().extractRotation(controller.matrixWorld);
         		this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
         		this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
-                const octreeObjects = this.octree.search(this.raycaster.ray.origin, this.raycaster.ray.far, true, this.raycaster.ray.direction);
-                return this.raycaster.intersectOctreeObjects(octreeObjects);
-        		// return this.raycaster.intersectObjects(group.children, true);
+        		return this.raycaster.intersectObjects(group.children, true);
         	},
             //EventListeners
             onMouseDown: function() {
@@ -607,11 +576,6 @@
         			let object = controller.userData.selected;
         			object.matrix.premultiply(controller.matrixWorld);
         			object.matrix.decompose(object.position, object.quaternion, object.scale);
-                    for(let i=0; i<object.children.length; i++) {
-        				this.octree.add(object.children[i], {
-        					useFaces: false
-        				});
-        			}
         			this.group.add(object);
         			controller.userData.selected = undefined;
         		}
@@ -673,12 +637,6 @@
                 directionalLight: {},
                 heimisphereLight: {},
                 group: {},
-                octree: new Octree({
-            		undeferred: false,
-            		depthMax: Infinity,
-            		objectsThreshold: 8,
-            		overlapPct: 0.15
-            	}),
                 raycaster: new Raycaster(),
                 renderer: {},
                 scene: {},

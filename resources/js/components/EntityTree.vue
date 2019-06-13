@@ -73,7 +73,6 @@
 
     import * as treeUtility from 'tree-vue-component';
     import { VueContext } from 'vue-context';
-    import { transliterate as tr, slugify } from 'transliteration';
     import AddNewEntityModal from './modals/AddNewEntity.vue';
     import DeleteEntityModal from './modals/DeleteEntity.vue';
 

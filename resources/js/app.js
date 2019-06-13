@@ -294,7 +294,7 @@ dom.watch(); // search for <i> tags to replace with <svg>
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-const PQueue = require('p-queue');
+const {default: PQueue} = require('p-queue');
 require('typeface-raleway');
 require('typeface-source-code-pro');
 require('popper.js');
