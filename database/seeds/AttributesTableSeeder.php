@@ -209,7 +209,7 @@ class AttributesTableSeeder extends Seeder
             array (
                 'id' => 18,
                 'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/lagerstatte#20171220165727',
-                'datatype' => 'context',
+                'datatype' => 'entity',
                 'thesaurus_root_url' => NULL,
                 'created_at' => '2017-12-20 16:57:50',
                 'updated_at' => '2017-12-20 16:57:50',

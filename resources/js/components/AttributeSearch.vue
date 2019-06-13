@@ -7,7 +7,7 @@
             autocomplete="off"
             class="form-control"
             v-model="query"
-            :placeholder="placeholder"
+            :placeholder="$t(placeholder)"
             @blur="closeSelect"
             @input="debounce"
             @keydown.down="down"
@@ -32,21 +32,10 @@
 </template>
 
 <script>
-    import VueTypeahead from 'vue-typeahead';
-    import debounce from 'debounce';
+    import TypeaheadSearch from './TypeaheadSearch.vue';
 
     export default {
-        extends: VueTypeahead,
-        props: {
-            placeholder: {
-                type: String,
-                default: 'Search...'
-            },
-            onSelect: {
-                type: Function,
-                required: false
-            }
-        },
+        extends: TypeaheadSearch,
         data () {
             return {
                 src: 'search/attribute',
@@ -56,9 +45,6 @@
             }
         },
         computed: {
-            debounce () {
-                return debounce(this.update, 250)
-            }
         },
         methods: {
             onHit(item) {

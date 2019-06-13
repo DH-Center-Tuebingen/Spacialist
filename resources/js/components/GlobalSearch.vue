@@ -32,8 +32,7 @@
 </template>
 
 <script>
-    import VueTypeahead from 'vue-typeahead';
-    import debounce from 'debounce';
+    import TypeaheadSearch from './TypeaheadSearch.vue';
 
     import SearchResultBibliography from './SearchResultBibliography.vue';
     import SearchResultEntity from './SearchResultEntity.vue';
@@ -41,25 +40,30 @@
     import SearchResultGeodata from './SearchResultGeodata.vue';
 
     export default {
-        extends: VueTypeahead,
+        extends: TypeaheadSearch,
         components: {
             'search-result-bibliography': SearchResultBibliography,
             'search-result-entities': SearchResultEntity,
             'search-result-files': SearchResultFile,
             'search-result-geodata': SearchResultGeodata
         },
-        props: {
-            placeholder: {
-                type: String,
-                default: 'global.search'
-            },
-            value: {
-                type: String,
-                required: false
+        data () {
+            return {
+                src: 'search',
+                minChars: 3,
+                shebangLength: 3, // is always '!' + letter + space
+                selectFirst: false
             }
         },
         mounted() {
-            this.query = this.value;
+        },
+        computed: {
+            hasShebang() {
+                if(!this.query.length) {
+                    return false;
+                }
+                return !!this.query.match(/^!\w\s/);
+            }
         },
         methods: {
             update() {
@@ -145,25 +149,6 @@
             closeSelect() {
                 this.items = [];
                 this.loading = false;
-            }
-        },
-        data () {
-            return {
-                src: 'search',
-                minChars: 3,
-                shebangLength: 3, // is always '!' + letter + space
-                selectFirst: false
-            }
-        },
-        computed: {
-            debounce() {
-                return debounce(this.update, 250)
-            },
-            hasShebang() {
-                if(!this.query.length) {
-                    return false;
-                }
-                return !!this.query.match(/^!\w\s/);
             }
         }
     }

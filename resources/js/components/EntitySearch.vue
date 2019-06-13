@@ -35,16 +35,11 @@
 </template>
 
 <script>
-    import VueTypeahead from 'vue-typeahead';
-    import debounce from 'debounce';
+    import TypeaheadSearch from './TypeaheadSearch.vue';
 
     export default {
-        extends: VueTypeahead,
+        extends: TypeaheadSearch,
         props: {
-            placeholder: {
-                type: String,
-                default: 'global.search'
-            },
             onSelect: {
                 type: Function,
                 required: false
@@ -57,10 +52,6 @@
                 required: false,
                 type: Boolean
             },
-            value: {
-                type: String,
-                required: false
-            }
         },
         data () {
             return {
@@ -71,12 +62,8 @@
             }
         },
         mounted() {
-            this.query = this.value;
         },
         computed: {
-            debounce () {
-                return debounce(this.update, 250)
-            }
         },
         methods: {
             onHit(item) {

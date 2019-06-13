@@ -40,29 +40,10 @@
 </template>
 
 <script>
-    import VueTypeahead from 'vue-typeahead';
-    import debounce from 'debounce';
+    import TypeaheadSearch from './TypeaheadSearch.vue';
 
     export default {
-        extends: VueTypeahead,
-        props: {
-            placeholder: {
-                type: String,
-                default: 'global.search'
-            },
-            onMultiselect: {
-                type: Function,
-                required: false
-            },
-            onClear: {
-                type: Function,
-                required: false
-            },
-            value: {
-                type: String,
-                required: false
-            }
-        },
+        extends: TypeaheadSearch,
         data () {
             return {
                 src: 'search/entity',
@@ -70,13 +51,7 @@
                 selectFirst: false
             }
         },
-        mounted() {
-            this.query = this.value;
-        },
         computed: {
-            debounce () {
-                return debounce(this.update, 250)
-            }
         },
         methods: {
             onHit(item) {
@@ -90,10 +65,6 @@
                 });
                 this.reset();
             },
-            clearItem() {
-                if(this.onClear) this.onClear();
-                this.reset();
-            },
             hit() {
                 if(this.current !== -1) {
                     this.onHit(this.items[this.current]);
@@ -104,11 +75,6 @@
                     }
                 }
             },
-            blur() {
-                if(this.current !== -1) {
-                    this.reset();
-                }
-            }
         }
     }
 </script>
