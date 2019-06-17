@@ -75,6 +75,52 @@
                     </component>
                     <div v-if="mapLayers && parsed">
                         <hr />
+                        <form class="form-inline mb-3">
+                            <div class="form-group mr-2 overlay-all">
+                                <label for="root_element" class="sr-only">
+                                    {{ $t('plugins.map.gis.import.metadata.root_element') }}
+                                </label>
+                                <entity-search
+                                    v-validate=""
+                                    id="root_element"
+                                    name="root_element"
+                                    placeholder="plugins.map.gis.import.metadata.root_element"
+                                    :on-select="selection => metadata.root_element = selection"
+                                    :value="metadata.root_element.name">
+                                </entity-search>
+                            </div>
+                            <div class="form-group mr-2 overlay-all">
+                                <label for="type" class="sr-only">
+                                    {{ $t('plugins.map.gis.import.metadata.entity_type') }}
+                                </label>
+                                <entity-type-search
+                                    v-validate=""
+                                    id="type"
+                                    name="type"
+                                    placeholder="plugins.map.gis.import.metadata.entity_type"
+                                    :on-select="selection => metadata.type = selection"
+                                    :value="$translateConcept(metadata.type.thesaurus_url)">
+                                </entity-type-search>
+                            </div>
+                            <div class="form-group mr-2 overlay-all">
+                                <label for="name_column" class="sr-only">
+                                    {{ $t('plugins.map.gis.import.metadata.name_column') }}
+                                </label>
+                                <multiselect
+                                    id="name_column"
+                                    name="name_column"
+                                    v-model="metadata.name_column"
+                                    :closeOnSelect="true"
+                                    :hideSelected="false"
+                                    :multiple="false"
+                                    :options="possibleNameColumns"
+                                    :placeholder="$t('plugins.map.gis.import.metadata.name_column')"
+                                    :select-label="$t('global.select.select')"
+                                    :deselect-label="$t('global.select.deselect')">
+                                </multiselect>
+                            </div>
+                        </form>
+                        <hr />
                     </div>
                     <div class="row modal-map col" v-if="mapLayers && parsed">
                         <div class="col-md-8 h-100">
@@ -192,7 +238,12 @@
                 const srid = epsgCode.split(':')[1];
                 const data = {
                     collection: JSON.stringify(collection),
-                    srid: srid
+                    srid: srid,
+                    metadata: JSON.stringify({
+                        name_column: this.metadata.name_column,
+                        root_element_id: (this.metadata.root_element) ? this.metadata.root_element.id : -1,
+                        entity_type_id: (this.metadata.type) ? this.metadata.type.id : -1
+                    })
                 };
                 $http.post('map', data).then(reponse => {
                     this.$showToast(
@@ -222,17 +273,33 @@
                 showFileList: true,
                 mapEpsg: {},
                 mapLayers: {},
-                parsed: false
+                parsed: false,
+                metadata: {
+                    name_column: '',
+                    root_element: {name: ''},
+                    type: {thesaurus_url: ''}
+                }
             }
         },
         computed: {
-            activeImportType: function() {
+            possibleNameColumns() {
+                if(this.featureCollection.features && this.featureCollection.features.length) {
+                    console.log("feature collection found!");
+                    const f = this.featureCollection.features[0];
+                    const p = Object.keys(f.properties);
+                    console.log(p);
+                    return p;
+                }
+                console.log("not found...");
+                return [];
+            },
+            activeImportType() {
                 return `map-${this.activeTab}-importer`;
             },
-            hasMultipleFiles: function() {
+            hasMultipleFiles() {
                 return this.activeTab == 'shape';
             },
-            allowedMimeTypes: function() {
+            allowedMimeTypes() {
                 switch(this.activeTab) {
                     case 'csv':
                         return 'text/csv';
@@ -244,7 +311,7 @@
                         return 'application/geo+json,application/vnd.geo+json,application/json';
                 }
             },
-            allowedExtensions: function() {
+            allowedExtensions() {
                 switch(this.activeTab) {
                     case 'csv':
                         return ['csv'];

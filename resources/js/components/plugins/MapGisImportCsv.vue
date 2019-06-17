@@ -196,11 +196,14 @@
                     const rows = this.dsv.parse(content);
                     const srid = this.epsgCode.split(':')[1];
                     rows.forEach(r => {
+                        let props = {...r};
+                        delete props[this.wktColumn.label];
                         const wktString = r[this.wktColumn.label];
                         const geometry = wkx.Geometry.parse(`SRID=${srid};${wktString}`);
                         features.push({
                             type: 'Feature',
-                            geometry: geometry.toGeoJSON()
+                            geometry: geometry.toGeoJSON(),
+                            properties: props
                         });
                     });
                     if(this.afterParse) {

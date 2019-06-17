@@ -266,10 +266,11 @@ class MapController extends Controller
         }
         $this->validate($request, [
             'collection' => 'required|json',
-            'srid' => 'required|integer'
+            'srid' => 'required|integer',
+            'metadata' => 'nullable|json',
         ]);
 
-        $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'), $user);
+        $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'), json_decode($request->get('metadata')), $user);
         return response()->json($objs);
     }
 
