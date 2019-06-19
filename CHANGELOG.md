@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - Hide file export checkbox/button if user doesn't have permission
 - Reset fields in add entity-type modal after closing modal
 - AD/BC dropdowns overlapping dropdowns of other attributes
+- Non-visible selection list for entity search in file linking tab
 
 ## 0.6.3
 ### Added
