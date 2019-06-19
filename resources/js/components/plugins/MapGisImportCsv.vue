@@ -174,7 +174,9 @@
                 let content = this.fileContent;
                 // If csv has no header, we add one, because csv2geojson needs one
                 if(!this.hasHeader) {
-                    let header = this.selectionColumns.join(this.delimiter.value);
+                    // map over selection columns to only get
+                    // array of labels before join
+                    let header = this.selectionColumns.map(c => c.label).join(this.delimiter.value);
                     content = `${header}\n${content}`;
                 }
                 if(this.pointType == 'point') {
