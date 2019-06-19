@@ -399,6 +399,7 @@
                 }));
             },
             hideNewEntityTypeModal() {
+                this.newEntityType = {};
                 this.$modal.hide('new-entity-type-modal');
             },
             hideDeleteEntityTypeModal() {

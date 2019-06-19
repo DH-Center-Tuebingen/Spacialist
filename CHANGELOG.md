@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - Sub-Entity counter for first added sub-entity
 - Linking geodata to entity-types with allowed geometry type 'any'
 - Hide file export checkbox/button if user doesn't have permission
+- Reset fields in add entity-type modal after closing modal
 
 ## 0.6.3
 ### Added
