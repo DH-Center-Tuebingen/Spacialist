@@ -26,6 +26,7 @@ All notable changes to this project will be documented in this file.
 - Linking geodata to entity-types with allowed geometry type 'any'
 - Hide file export checkbox/button if user doesn't have permission
 - Reset fields in add entity-type modal after closing modal
+- AD/BC dropdowns overlapping dropdowns of other attributes
 
 ## 0.6.3
 ### Added
