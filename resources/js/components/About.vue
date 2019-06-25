@@ -35,7 +35,7 @@
                 <hr />
                 <h5>{{ $tc('main.about.contributor', 2) }}</h5>
                 <div class="row">
-                    <div v-for="contributor in contributors" class="col-md-6">
+                    <div v-for="contributor in $options.contributors" class="col-md-6">
                         {{ contributor.name }}
                     </div>
                 </div>
@@ -64,6 +64,26 @@
 
 <script>
     export default {
+        contributors: [
+            {
+                name: 'Vinzenz Rosenkranz'
+            },
+            {
+                name: 'Benjamin Mitzkus'
+            },
+            {
+                name: 'Dirk Seidensticker'
+            },
+            {
+                name: 'Benjamin Glissmann'
+            },
+            {
+                name: 'Michael Derntl'
+            },
+            {
+                name: 'Matthias Lang'
+            }
+        ],
         mounted() {},
         methods: {
             init() {
@@ -77,26 +97,6 @@
         data() {
             return {
                 version: {},
-                contributors: [
-                    {
-                        name: 'Vinzenz Rosenkranz'
-                    },
-                    {
-                        name: 'Benjamin Mitzkus'
-                    },
-                    {
-                        name: 'Dirk Seidensticker'
-                    },
-                    {
-                        name: 'Benjamin Glissmann'
-                    },
-                    {
-                        name: 'Michael Derntl'
-                    },
-                    {
-                        name: 'Matthias Lang'
-                    }
-                ]
             }
         },
         created() {

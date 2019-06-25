@@ -122,6 +122,16 @@
     }
 
     export default {
+        scrollTo: {
+            duration: 500,
+            options: {
+                container: '#entity-tree',
+                force: false,
+                cancelable: true,
+                x: false,
+                y: true
+            }
+        },
         name: 'EntityTree',
         components: {
             'tree-node': TreeNode,
@@ -545,7 +555,7 @@
                     targetNode.state.selected = true;
                     // Scroll tree to selected element
                     const elem = document.getElementById(`tree-node-${targetNode.id}`);
-                    this.$scrollTo(elem, this.scrollTo.duration, this.scrollTo.options);
+                    this.$scrollTo(elem, this.$options.scrollTo.duration, this.$options.scrollTo.options);
                 });
             },
             deselectNode(id) {
@@ -578,16 +588,6 @@
                     by: 'rank',
                     dir: 'asc'
                 },
-                scrollTo: {
-                    duration: 500,
-                    options: {
-                        container: '#entity-tree',
-                        force: false,
-                        cancelable: true,
-                        x: false,
-                        y: true
-                    }
-                }
             }
         },
         computed: {
