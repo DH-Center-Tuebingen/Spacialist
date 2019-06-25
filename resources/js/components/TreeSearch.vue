@@ -26,7 +26,7 @@
             </span>
         </div>
 
-        <div class="dropdown-menu" style="display: flex; flex-direction: column;" v-show="hasItems">
+        <div class="dropdown-menu d-flex flex-column search-result-list" v-show="hasItems">
             <a href="#" class="dropdown-item" v-for="(item, $item) in items" :class="activeClass($item)" @mousedown="hit" @mousemove="setActive($item)">
                 <span>{{item.name}}</span>
                 <ol class="breadcrumb mb-0 p-0 pb-1 bg-none small">
@@ -47,8 +47,6 @@
         data () {
             return {
                 src: 'search/entity',
-                minChars: 2,
-                selectFirst: false
             }
         },
         computed: {

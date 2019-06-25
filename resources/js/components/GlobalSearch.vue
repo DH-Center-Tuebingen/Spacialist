@@ -23,7 +23,7 @@
             </span>
         </div>
 
-        <div class="dropdown-menu" style="display: flex; flex-direction: column; max-height: 50vh; overflow-y: auto;" v-show="hasItems">
+        <div class="dropdown-menu d-flex flex-column search-result-list" style="max-height: 50vh;" v-show="hasItems">
             <a href="#" class="dropdown-item px-1" v-for="(item, k) in items" :class="activeClass(k)" @mousedown="hit" @mousemove="setActive(k)">
                 <component :is="'search-result-'+item.group" :data="item"></component>
             </a>
@@ -50,9 +50,7 @@
         data () {
             return {
                 src: 'search',
-                minChars: 3,
                 shebangLength: 3, // is always '!' + letter + space
-                selectFirst: false
             }
         },
         mounted() {

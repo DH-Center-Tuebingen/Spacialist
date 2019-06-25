@@ -65,8 +65,6 @@
                 let cancel = new Promise((resolve) => this.cancel = resolve);
                 let request = this.$httpQueue.add(() => this.$http.get(src, { params }));
 
-                console.log("fetching!");
-
                 return Promise.race([cancel, request]);
             },
             clearItem() {
