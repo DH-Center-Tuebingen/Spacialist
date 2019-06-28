@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Allow width expansion of attributes (Currently supported: Tabular)
 - PHPUnit tests (see [README.md](README.md#testing) for further instructions)
 - Option to set root element, entity-type and column as entity name in GIS importer
+- Also search for author in reference modal
 ### Changed
 - Use [Tree-Shaking](https://webpack.js.org/guides/tree-shaking/) in supported modules
 - Update to Laravel 5.8
