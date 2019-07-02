@@ -67,7 +67,7 @@
         "proj4": "^2.5.0",
         "screenfull": "^4.2.0",
         "shpjs": "^3.4.2",
-        "three-full": "^17.1.0",
+        "three": "^0.106.2",
         "tree-vue-component": "^5.5.0",
         "typeface-raleway": "0.0.54",
         "typeface-source-code-pro": "0.0.71",

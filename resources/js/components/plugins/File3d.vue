@@ -27,16 +27,10 @@
         AmbientLight,
         AnimationMixer,
         BoxBufferGeometry,
-        ColladaLoader,
         Color,
         Clock,
-        CSS2DObject,
-        CSS2DRenderer,
-        DDSLoader,
         DirectionalLight,
         DoubleSide,
-        FBXLoader,
-        GLTFLoader,
         Geometry,
         GridHelper,
         Group,
@@ -44,24 +38,30 @@
         IcosahedronBufferGeometry,
         Line,
         Loader,
+        LOD,
         Matrix4,
         Mesh,
         MeshPhongMaterial,
-        MTLLoader,
-        OBJLoader,
-        OrbitControls,
         PCFSoftShadowMap,
-        PDBLoader,
         PerspectiveCamera,
         Raycaster,
         Scene,
+        SpotLight,
         TextureLoader,
         Vector3,
-        ViveController,
         WebGLRenderer,
-    } from 'three-full';
-    import {SpotLight} from 'three-full/sources/lights/SpotLight.js';
-    import {WebVR} from 'three-full/sources/vr/WebVR.js';
+    } from 'three';
+    import { ViveController } from 'three/examples/jsm/vr/ViveController.js';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+    import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
+    import { DDSLoader } from 'three/examples/jsm/loaders/DDSLoader.js';
+    import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+    import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
+    import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+    import { PDBLoader } from 'three/examples/jsm/loaders/PDBLoader.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+    import { WebVR } from 'three/examples/js/vr/WebVR.js';
 
     export default {
         props: {
@@ -428,18 +428,39 @@
                 const url = file.url;
                 const loader = new FBXLoader();
                 loader.load(url, object => {
+                    if(this.isGroupLod(object)) {
+                        let lod = new LOD();
+                        for(let i=0; i<object.children.length; i++) {
+                            let node = object.children[i];
+                            if(node.isMesh) {
+                                node.castShadow = true;
+                                node.receiveShadow = true;
+                                node.updateMatrix();
+                                node.matrixAutoUpdate = false;
+                                lod.addLevel(node, (i+1) * 10);
+                            }
+                        }
+                        lod.position.x = 0;
+                        lod.position.y = 0;
+                        lod.position.z = 0;
+                        lod.updateMatrix();
+                        lod.matrixAutoUpdate = false;
+                        // LOD has to be in scene, not group
+                        this.scene.add(lod);
+                    } else {
+                        object.traverse(node => {
+                            if(node.isMesh) {
+                                node.castShadow = true;
+                                node.receiveShadow = true;
+                            }
+                        });
+                        this.group.add(object);
+                    }
                     this.animationMixer = new AnimationMixer(object);
                     // Play first animation if available
                     if(object.animations && object.animations.length) {
                         animationMixer.clipAction(object.animations[0]).play();
                     }
-                    object.traverse(node => {
-                        if(node.isMesh) {
-                            node.castShadow = true;
-                            node.receiveShadow = true;
-                        }
-                    });
-                    this.group.add(object);
                     this.onWindowResize();
                 }, event => {
                     this.updateProgress(event);
@@ -542,6 +563,19 @@
         		this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
         		return this.raycaster.intersectObjects(group.children, true);
         	},
+            isGroupLod(objectGroup) {
+                if(objectGroup.type != 'Group') return;
+                if(!objectGroup.children) return;
+                const regex = RegExp('(LOD|lod)\\d+$');
+                let isLod = true;
+                for(let i=0; i<objectGroup.children.length; i++) {
+                    const c = objectGroup.children[i];
+                    if(!regex.test(c.name)) {
+                        isLod = false;
+                    }
+                }
+                return isLod;
+            },
             //EventListeners
             onMouseDown: function() {
 
