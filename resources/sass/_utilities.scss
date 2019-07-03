@@ -78,10 +78,6 @@
     word-break: break-all;
 }
 
-.of-hidden {
-    overflow: hidden;
-}
-
 .scroll-x-hidden {
     overflow-x: hidden;
 }
@@ -104,4 +100,8 @@
 
 .bg-none {
     background: none !important;
+}
+
+.object-fit-cover {
+    object-fit: cover;
 }

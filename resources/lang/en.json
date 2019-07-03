@@ -107,5 +107,7 @@
     "Could not compute citation key.": "Could not compute citation key.",
     "This tag does not exist": "This tag does not exist",
     "HTML not supported for file type": "HTML not supported for file type :mime",
-    "Presentations not yet supported!": "Presentations not yet supported!"
+    "Presentations not yet supported!": "Presentations not yet supported!",
+
+    "Start date of a time period must not be after it's end date": "Start date of a time period must not be after it's end date"
 }

@@ -66,6 +66,11 @@ const en = {
                     geojson: {
                         label: 'GeoJSON'
                     },
+                    metadata: {
+                        entity_type: 'Entity-Type',
+                        root_element: 'Root-Element',
+                        name_column: 'Column for Name',
+                    }
                 },
                 'available-layers': 'Available Layers',
                 'selected-layers': 'Selected Layers',

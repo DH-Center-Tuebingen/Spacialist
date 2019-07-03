@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## 0.7 - Giza (Unreleased)
 ### Added
+- Time Period datatype (epoch datatype without dropdown)
 - Screencast functionality (in Tools menu)
   - Save local or upload to Spacialist
 - Image manipulation
@@ -13,15 +14,28 @@ All notable changes to this project will be documented in this file.
 - Parents Breadcrumb added to Entity Detail view header
 - Allow width expansion of attributes (Currently supported: Tabular)
 - PHPUnit tests (see [README.md](README.md#testing) for further instructions)
+- Option to set root element, entity-type and column as entity name in GIS importer
+- Also search for author in reference modal
+- Add LOD support to 3D file viewer
 ### Changed
 - Use [Tree-Shaking](https://webpack.js.org/guides/tree-shaking/) in supported modules
 - Improved fullscreen handler code
 - Update to Laravel 5.8
+- Rework search components (should no longer logout on fast typing)
 ### Fixed
 - Do not fire upload-from-clipboard event in input fields
 - Update references in Reference Tab, Attribute Icons in Entity Detail View and Reference Modal
 - File modal container height
 - Conversion for image formats not supported by PHP
+- Several styles and translations
+- Popup not working for newly added and linked geodata on click on linked entity
+- Adding first entity with a serial attribute
+- Sub-Entity counter for first added sub-entity
+- Linking geodata to entity-types with allowed geometry type 'any'
+- Hide file export checkbox/button if user doesn't have permission
+- Reset fields in add entity-type modal after closing modal
+- AD/BC dropdowns overlapping dropdowns of other attributes
+- Non-visible selection list for entity search in file linking tab
 
 ## 0.6.3
 ### Added

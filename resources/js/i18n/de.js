@@ -93,6 +93,7 @@ const de = {
             percentage: 'Prozentangabe',
             entity: 'Entität',
             epoch: 'Zeitspanne & Epoche',
+            timeperiod: 'Zeitspanne',
             date: 'Datum',
             dimension: 'Abmessungen (BxHxT)',
             list: 'Liste',

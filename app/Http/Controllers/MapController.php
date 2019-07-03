@@ -266,10 +266,11 @@ class MapController extends Controller
         }
         $this->validate($request, [
             'collection' => 'required|json',
-            'srid' => 'required|integer'
+            'srid' => 'required|integer',
+            'metadata' => 'nullable|json',
         ]);
 
-        $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'), $user);
+        $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'), json_decode($request->get('metadata')), $user);
         return response()->json($objs);
     }
 
@@ -337,7 +338,7 @@ class MapController extends Controller
 
         $layer = AvailableLayer::where('entity_type_id', $entity->entity_type_id)->first();
 
-        if($layer->type != 'all') {
+        if($layer->type != 'any') {
             $typeMatched = false;
             $upperType = strtoupper($layer->type);
             if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && Str::endsWith($upperType, 'POLYGON')) {

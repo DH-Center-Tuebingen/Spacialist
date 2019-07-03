@@ -26,7 +26,7 @@
             </span>
         </div>
 
-        <div class="dropdown-menu" style="display: flex; flex-direction: column;" v-show="hasItems">
+        <div class="dropdown-menu d-flex flex-column search-result-list" v-if="hasItems">
             <a href="#" class="dropdown-item" v-for="(item, $item) in items" :class="activeClass($item)" @mousedown="hit" @mousemove="setActive($item)">
                 <span v-text="item.name"></span>
             </a>
@@ -35,16 +35,11 @@
 </template>
 
 <script>
-    import VueTypeahead from 'vue-typeahead';
-    import debounce from 'debounce';
+    import TypeaheadSearch from './TypeaheadSearch.vue';
 
     export default {
-        extends: VueTypeahead,
+        extends: TypeaheadSearch,
         props: {
-            placeholder: {
-                type: String,
-                default: 'global.search'
-            },
             onSelect: {
                 type: Function,
                 required: false
@@ -57,26 +52,15 @@
                 required: false,
                 type: Boolean
             },
-            value: {
-                type: String,
-                required: false
-            }
         },
         data () {
             return {
                 src: 'search/entity',
-                limit: 5,
-                minChars: 3,
-                selectFirst: false
             }
         },
         mounted() {
-            this.query = this.value;
         },
         computed: {
-            debounce () {
-                return debounce(this.update, 250)
-            }
         },
         methods: {
             onHit(item) {

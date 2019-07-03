@@ -15,7 +15,7 @@
             <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="requestAddNewEntity()">
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.tree.add') }}
             </button>
-            <div class="mb-2 d-flex flex-row justify-content-between">
+            <div class="mb-2 d-flex flex-row flex-wrap justify-content-between">
                 <button type="button" class="btn btn-sm btn-outline-secondary" @click="setSort('rank', 'asc')" data-toggle="popover" :data-content="$t('main.entity.tree.sorts.asc.rank')" data-trigger="hover" data-placement="bottom">
                     <i class="fas fa-fw fa-sort-numeric-down"></i>
                 </button>
@@ -73,7 +73,6 @@
 
     import * as treeUtility from 'tree-vue-component';
     import { VueContext } from 'vue-context';
-    import { transliterate as tr, slugify } from 'transliteration';
     import AddNewEntityModal from './modals/AddNewEntity.vue';
     import DeleteEntityModal from './modals/DeleteEntity.vue';
 
@@ -123,6 +122,16 @@
     }
 
     export default {
+        scrollTo: {
+            duration: 500,
+            options: {
+                container: '#entity-tree',
+                force: false,
+                cancelable: true,
+                x: false,
+                y: true
+            }
+        },
         name: 'EntityTree',
         components: {
             'tree-node': TreeNode,
@@ -546,7 +555,7 @@
                     targetNode.state.selected = true;
                     // Scroll tree to selected element
                     const elem = document.getElementById(`tree-node-${targetNode.id}`);
-                    this.$scrollTo(elem, this.scrollTo.duration, this.scrollTo.options);
+                    this.$scrollTo(elem, this.$options.scrollTo.duration, this.$options.scrollTo.options);
                 });
             },
             deselectNode(id) {
@@ -579,16 +588,6 @@
                     by: 'rank',
                     dir: 'asc'
                 },
-                scrollTo: {
-                    duration: 500,
-                    options: {
-                        container: '#entity-tree',
-                        force: false,
-                        cancelable: true,
-                        x: false,
-                        y: true
-                    }
-                }
             }
         },
         computed: {

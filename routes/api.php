@@ -55,6 +55,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/search')->group(function() {
     Route::get('', 'SearchController@searchGlobal');
     Route::get('/entity', 'SearchController@searchEntityByName');
+    Route::get('/entity-type', 'SearchController@searchEntityTypes');
     Route::get('/label', 'SearchController@searchInThesaurus');
     Route::get('/attribute', 'SearchController@searchInAttributes');
     Route::get('/selection/{id}', 'SearchController@getConceptChildren')->where('id', '[0-9]+');

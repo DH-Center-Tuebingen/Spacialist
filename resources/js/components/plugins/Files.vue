@@ -282,10 +282,10 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body row col text-center of-hidden">
+                <div class="modal-body row col text-center">
                     <div class="col-md-6 d-flex flex-column">
                         <component
-                            class="col px-0 of-hidden"
+                            class="col px-0 overflow-hidden"
                             id="file-container"
                             :entity="localEntity"
                             :file="selectedFile"
@@ -727,7 +727,12 @@
             }
         },
         activated() {
-            this.linkedFilesChanged();
+            if(this.selectedEntity.id) {
+                this.linkedFiles.apiUrl = '/file/linked/' + this.selectedEntity.id;
+                this.setAction('linkedFiles', true);
+            } else {
+                this.linkedFilesChanged();
+            }
             if(this.$route.query.f) {
                 this.openFile(this.$route.query.f);
             }
@@ -941,9 +946,9 @@
                 }
             },
             linkedFilesChanged() {
+                this.resetFiles('linkedFiles');
                 if(!this.selectedEntity.id) return;
                 this.linkedFiles.apiUrl = '/file/linked/' + this.selectedEntity.id;
-                this.resetFiles('linkedFiles');
                 this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
             },
             handleClipboardPaste(e) {
@@ -1005,10 +1010,11 @@
                     this.showFileModal(response.data);
                 }));
             },
-            setAction(id) {
+            setAction(id, dontLoad = false) {
                 // disable linked tab if no entity is selected
                 if(id == 'linkedFiles' && !this.localEntity.id) return;
                 this.selectedTopAction = id;
+                if(dontLoad) return;
                 // If it is the first time the action is set, load images
                 if(this[id] && !Object.keys(this[id].pagination).length) {
                     this.getNextFiles(id);

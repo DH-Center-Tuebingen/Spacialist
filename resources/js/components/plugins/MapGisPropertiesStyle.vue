@@ -1,12 +1,12 @@
 <template>
-    <div class="col-md-6 px-0 h-100 d-flex flex-column" v-if="initFinished">
+    <div class="col-md-12 px-0 h-100 d-flex flex-column" v-if="initFinished">
         <div class="col scroll-y-auto">
             <form role="form" name="layerStylingForm" id="layerStylingForm" @submit.prevent="apply">
                 <div class="form-group row">
-                    <label class="col-form-label col-md-6 text-right" for="style-style">
+                    <label class="col-form-label col-md-3 text-right" for="style-style">
                         {{ $t('plugins.map.gis.props.style.title') }}:
                     </label>
-                    <div class="col-md-6">
+                    <div class="col-md-9">
                         <multiselect
                             id="style-style"
                             label="label"
@@ -25,10 +25,10 @@
                 </div>
                 <div v-if="styleActive">
                     <div class="form-group row" v-if="isAttributeBased">
-                        <label class="col-form-label col-md-6 text-right" for="style-attribute">
+                        <label class="col-form-label col-md-3 text-right" for="style-attribute">
                             {{ $t('global.attribute') }}:
                         </label>
-                        <div class="col-md-6">
+                        <div class="col-md-9">
                             <multiselect
                                 id="style-attribute"
                                 name="style-attribute"
@@ -47,10 +47,10 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-6 text-right" for="style-colors">
+                        <label class="col-form-label col-md-3 text-right" for="style-colors">
                             {{ $t('plugins.map.gis.props.style.color-ramp') }}:
                         </label>
-                        <div class="col-md-6" v-if="isAttributeBased">
+                        <div class="col-md-9" v-if="isAttributeBased">
                             <multiselect
                                 id="style-colors"
                                 name="style-colors"
@@ -80,23 +80,23 @@
                                 </template>
                             </multiselect>
                         </div>
-                        <div class="col-md-6" v-else-if="isColor">
+                        <div class="col-md-9" v-else-if="isColor">
                             <input type="color" class="form-control" @change="convertColorToRamp" />
                         </div>
                     </div>
                     <div class="form-group row" v-if="isGraduated">
-                        <label class="col-form-label col-md-6 text-right" for="style-classes">
+                        <label class="col-form-label col-md-3 text-right" for="style-classes">
                             {{ $t('plugins.map.gis.props.style.classes') }}:
                         </label>
-                        <div class="col-md-6">
+                        <div class="col-md-9">
                             <input class="form-control" type="number" id="style-classes" name="style-classes" min="1" v-model.number="numberOfClasses" />
                         </div>
                     </div>
                     <div class="form-group row" v-if="isGraduated">
-                        <label class="col-form-label col-md-6 text-right" for="style-graduated-mode">
+                        <label class="col-form-label col-md-3 text-right" for="style-graduated-mode">
                             {{ $t('global.mode') }}:
                         </label>
-                        <div class="col-md-6">
+                        <div class="col-md-9">
                             <multiselect
                                 id="style-graduated-mode"
                                 label="label"
@@ -114,18 +114,18 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-6 text-right" for="style-size">
+                        <label class="col-form-label col-md-3 text-right" for="style-size">
                             {{ $t('global.size') }}:
                         </label>
-                        <div class="col-md-6">
+                        <div class="col-md-9">
                             <input class="form-control" type="number" id="style-size" name="style-size" min="1" v-model.number="size" />
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-form-label col-md-6 text-right" for="style-transparency">
+                        <label class="col-form-label col-md-3 text-right" for="style-transparency">
                             {{ $t('global.transparency') }}:
                         </label>
-                        <div class="col-md-6 d-flex">
+                        <div class="col-md-9 d-flex">
                             <input class="form-control" type="range" id="style-transparency" name="style-transparency" min="0" max="1" step="0.01" v-model="transparency" />
                             <span class="ml-3">{{ transparency }}</span>
                         </div>
