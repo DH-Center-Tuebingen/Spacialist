@@ -38,6 +38,7 @@
         IcosahedronBufferGeometry,
         Line,
         Loader,
+        _Math,
         LOD,
         Matrix4,
         Mesh,
@@ -48,6 +49,8 @@
         Scene,
         SpotLight,
         TextureLoader,
+        TransformControls,
+        Vector2,
         Vector3,
         WebGLRenderer,
     } from 'three';
@@ -113,8 +116,18 @@
         },
         methods: {
             setScale() {
-                const s = this.guiConfig.scale;
-                this.group.scale.set(s, s, s);
+                if(!this.activeMesh) return;
+                const sx = this.guiConfig.scaleX;
+                const sy = this.guiConfig.scaleY;
+                const sz = this.guiConfig.scaleZ;
+                this.activeMesh.scale.set(sx, sy, sz);
+            },
+            setPosition() {
+                if(!this.activeMesh) return;
+                const px = this.guiConfig.positionX;
+                const py = this.guiConfig.positionY;
+                const pz = this.guiConfig.positionZ;
+                this.activeMesh.position.set(px, py, pz);
             },
             getFileType: function(file) {
                 if(file.mime_type == 'model/vnd.collada+xml') {
@@ -152,12 +165,27 @@
             },
             init: function() {
                 this.gui = new dat.GUI({
-                    autoPlace: false
+                    autoPlace: false,
+                    hideable: true,
+                    closed: true
                 });
                 this.guiConfig = {
-                    scale: this.scale
+                    scaleX: this.scale,
+                    scaleY: this.scale,
+                    scaleZ: this.scale,
+                    positionX: 0,
+                    positionY: 0,
+                    positionZ: 0
                 };
-                this.gui.add(this.guiConfig, 'scale', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['scaleX'] = this.gui.add(this.guiConfig, 'scaleX', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['scaleY'] = this.gui.add(this.guiConfig, 'scaleY', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['scaleZ'] = this.gui.add(this.guiConfig, 'scaleZ', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['positionX'] = this.gui.add(this.guiConfig, 'positionX', -100, 100, 0.01).onChange(this.setPosition);
+                this.guiCtrl['positionY'] = this.gui.add(this.guiConfig, 'positionY', -100, 100, 0.01).onChange(this.setPosition);
+                this.guiCtrl['positionZ'] = this.gui.add(this.guiConfig, 'positionZ', -100, 100, 0.01).onChange(this.setPosition);
+
+                // initially hide gui
+                dat.GUI.toggleHide();
 
                 this.container = document.getElementById(this.containerId);
                 document.getElementById('file-controls').appendChild(this.gui.domElement);
@@ -174,7 +202,9 @@
         		this.renderer.gammaInput = true;
         		this.renderer.gammaOutput = true;
                 this.camera = new PerspectiveCamera(45, this.containerWidth/this.containerHeight, 0.1, 2000);
-                this.camera.position.set(7, 5, 7);
+                this.camera.position.set(5, 0, 0);
+                this.camera.lookAt(new Vector3(0, 0, 0));
+                this.camera.up.set(0, 1, 0);
 
                 this.scene = new Scene();
                 this.group = new Group();
@@ -190,7 +220,59 @@
                 this.container.appendChild(this.renderer.domElement);
                 this.scene.add(this.camera);
                 this.scene.add(this.group);
-        		this.scene.add(new GridHelper(10, 20));
+        		this.scene.add(new GridHelper(100, 10));
+            },
+            selectObject(object) {
+                dat.GUI.toggleHide();
+                if(object) {
+                    this.addTransformControlsTo(object);
+                } else {
+                    this.removeTransformControls();
+                }
+            },
+            addTransformControlsTo(mesh) {
+                this.activeMesh = mesh;
+                this.scene.add(this.transformControls);
+                this.transformControls.attach(mesh);
+                this.transformControls.enabled = true;
+                this.controls.target = mesh.position;
+                this.controls.update();
+            },
+            removeTransformControls() {
+                this.transformControls.detach();
+                this.activeMesh = null;
+                this.scene.remove(this.transformControls);
+                this.transformControls.enabled = false;
+                this.controls.target = new Vector3(0, 0, 0);
+                this.controls.update();
+            },
+            zoomToObject(object) {
+                const offset = 1.25;
+                if(!object.geometry.boundingBox) {
+                    object.geometry.computeBoundingBox();
+                }
+                const bbox = object.geometry.boundingBox;
+                const center = bbox.getCenter();
+                let size = bbox.getSize();
+                size.multiply(object.scale);
+
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const fov = this.camera.fov * (Math.PI/180);
+                const z = Math.abs(maxDim / Math.sin(fov/2));
+
+                this.scene.updateMatrixWorld();
+                const objWP = object.getWorldPosition();
+
+                const dir = this.camera.position.sub(objWP);
+                const unitDir = dir.normalize();
+                unitDir.multiplyScalar(z);
+                let newPos = new Vector3();
+                newPos.add(objWP);
+                newPos.add(unitDir);
+                this.camera.position.copy(newPos);
+                this.camera.lookAt(object.position);
+	            this.camera.updateProjectionMatrix();
+                this.controls.update();
             },
             loadAllSubModels: function() {
                 const vm = this;
@@ -247,6 +329,8 @@
             initEventListeners: function() {
                 window.addEventListener('resize', this.onWindowResize, false);
                 this.renderer.domElement.addEventListener('mousedown', this.onMouseDown, false);
+                this.renderer.domElement.addEventListener('mousemove', this.onMouseMove, false);
+                this.renderer.domElement.addEventListener('mouseup', this.onMouseUp, false);
             },
             initLights: function() {
                 this.hemisphereLight = new HemisphereLight(0x808080, 0x606060);
@@ -263,6 +347,71 @@
             },
             initControls: function() {
                 this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+                this.transformControls = new TransformControls(this.camera, this.renderer.domElement);
+                this.transformControls.enabled = false;
+
+                this.transformControls.addEventListener('change', _ => {
+                    if(this.transformControls.object) {
+                        const s = this.transformControls.object.scale;
+                        const p = this.transformControls.object.position;
+                        this.guiConfig.scaleX = s.x;
+                        this.guiConfig.scaleY = s.y;
+                        this.guiConfig.scaleZ = s.z;
+                        this.guiConfig.positionX = p.x;
+                        this.guiConfig.positionY = p.y;
+                        this.guiConfig.positionZ = p.z;
+                        for(let k in this.guiCtrl) {
+                            this.guiCtrl[k].updateDisplay();
+                        }
+                    }
+                    this.render();
+                });
+                // Disable orbit controls on gizmo drag
+                this.transformControls.addEventListener('dragging-changed', event => {
+                    this.controls.enabled = !event.value;
+                });
+                window.addEventListener('keydown', event => {
+                    if(event.target.tagName.toUpperCase() == 'INPUT') return;
+                    if(event.target.tagName.toUpperCase() == 'TEXTAREA') return;
+                    switch(event.keyCode) {
+                        case 17: // CTRL
+                            this.transformControls.setTranslationSnap(1);
+							this.transformControls.setRotationSnap(_Math.degToRad(15));
+                            break;
+                        case 32: // SPACE
+                            if(this.transformControls.enabled) {
+                                this.removeTransformControls();
+                            }
+                            break;
+                        case 81: // Q
+                            this.transformControls.setSpace(this.transformControls.space === 'local' ? 'world' : 'local');
+                            break;
+                        case 87: // W
+                            this.transformControls.setMode("translate");
+                            break;
+                        case 69: // E
+                            this.transformControls.setMode("rotate");
+                            break;
+                        case 82: // R
+                            this.transformControls.setMode("scale");
+                            break;
+                        case 70: // F
+                            if(this.transformControls.enabled) {
+                                this.zoomToObject(this.activeMesh);
+                            }
+                            break;
+                    }
+                });
+                window.addEventListener('keyup', event => {
+                    if(event.target.tagName.toUpperCase() == 'INPUT') return;
+                    if(event.target.tagName.toUpperCase() == 'TEXTAREA') return;
+                    switch(event.keyCode) {
+                        case 17: // CTRL
+                            this.transformControls.setTranslationSnap(null);
+							this.transformControls.setRotationSnap(null);
+                            break;
+                    }
+                });
             },
             initViveEventListeners: function() {
                 // Vive Events
@@ -326,23 +475,12 @@
             loadCollada: function(file) {
                 const loader = new ColladaLoader();
                 loader.load(file.url, collada => {
-                    let object = collada.scene;
-                    let material;
-                    let children;
-                    let parent = object;
-                    do {
-                        children = parent.children;
-                        if(!children || !children[0]) break;
-                        material = children[0].material;
-                        parent = children[0];
-                    } while(!material);
-                    if(material) {
-                        material.side = DoubleSide;
+                    const object = collada.scene;
+                    if(object.rotation.x != 0) {
+                        this.$showToast('Import Note', 'Your collada file has an up axis different from Y_UP.', 'warn', 5000)
+                        object.rotation.x = 0;
                     }
-                    object.castShadow = true;
-                    object.receiveShadow = true;
-                    this.group.add(object);
-                    this.onWindowResize();
+                    this.addModelToScene(object);
                 },
                 event => { // onProgress
                     this.updateProgress(event);
@@ -353,26 +491,9 @@
             loadGltf: function(file) {
                 const loader = new GLTFLoader();
                 loader.load(file.url, data => {
-                    let gltf = data;
-                    let object = gltf.scene;
-
-                    object.traverse(node => {
-                        if(node.isMesh) {
-                            node.castShadow = true;
-                            node.receiveShadow = true;
-                        }
-                    });
-
-                    let animations = gltf.animations;
-                    if(animations && animations.length > 0) {
-                        this.animationMixer = new AnimationMixer(object);
-                        // Play first animation if available
-                        if(animations && animations.length) {
-                            animationMixer.clipAction(animations[0]).play();
-                        }
-                    }
-                    this.group.add(object);
-                    this.onWindowResize();
+                    const gltf = data;
+                    const object = gltf.scene;
+                    this.addModelToScene(object, gltf.animations);
                 }, event => {
                     this.updateProgress(event);
                 }, error => {
@@ -411,10 +532,7 @@
                 objLoader.setPath(path);
                 objLoader.load(filename,
                     object => { // onSuccess
-                        object.castShadow = true;
-                        object.receiveShadow = true;
-                        this.group.add(object);
-                        this.onWindowResize();
+                        this.addModelToScene(object);
                     },
                     event => { // onProgress
                         this.updateProgress(event);
@@ -427,40 +545,7 @@
                 const url = file.url;
                 const loader = new FBXLoader();
                 loader.load(url, object => {
-                    if(this.isGroupLod(object)) {
-                        let lod = new LOD();
-                        for(let i=0; i<object.children.length; i++) {
-                            let node = object.children[i];
-                            if(node.isMesh) {
-                                node.castShadow = true;
-                                node.receiveShadow = true;
-                                node.updateMatrix();
-                                node.matrixAutoUpdate = false;
-                                lod.addLevel(node, (i+1) * 10);
-                            }
-                        }
-                        lod.position.x = 0;
-                        lod.position.y = 0;
-                        lod.position.z = 0;
-                        lod.updateMatrix();
-                        lod.matrixAutoUpdate = false;
-                        // LOD has to be in scene, not group
-                        this.scene.add(lod);
-                    } else {
-                        object.traverse(node => {
-                            if(node.isMesh) {
-                                node.castShadow = true;
-                                node.receiveShadow = true;
-                            }
-                        });
-                        this.group.add(object);
-                    }
-                    this.animationMixer = new AnimationMixer(object);
-                    // Play first animation if available
-                    if(object.animations && object.animations.length) {
-                        animationMixer.clipAction(object.animations[0]).play();
-                    }
-                    this.onWindowResize();
+                    this.addModelToScene(object);
                 }, event => {
                     this.updateProgress(event);
                 }, event => {
@@ -556,6 +641,38 @@
                     vm.updateProgress(event);
                 });
             },
+            addModelToScene(model, extAnimations) {
+                this.animationMixer = new AnimationMixer(model);
+                // Play first animation if available
+                const animations = extAnimations ? extAnimations : model.animations;
+                if(animations && animations.length) {
+                    animationMixer.clipAction(animations[0]).play();
+                }
+
+                model.traverse(node => {
+                    if(node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                        if(node.material) {
+                            node.material.side = DoubleSide;
+                        }
+                        node.geometry.computeBoundingBox();
+                        const offset = node.geometry.boundingBox.getCenter();
+                        node.geometry.applyMatrix(new Matrix4().makeTranslation(-offset.x, -offset.y, -offset.z));
+                        node.position.copy(offset);
+                    }
+                    this.raycastTargets.push(node);
+                });
+                this.group.add(model);
+                this.onWindowResize();
+            },
+            intersectAtClick(event) {
+                this.mouse.x = (event.layerX / this.renderer.domElement.clientWidth) * 2 - 1;
+                this.mouse.y = -(event.layerY / this.renderer.domElement.clientHeight) * 2 + 1;
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+
+                return this.raycaster.intersectObjects(this.raycastTargets);
+            },
             getIntersections: function(controller) {
         		this.tempMatrix.identity().extractRotation(controller.matrixWorld);
         		this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
@@ -576,8 +693,36 @@
                 return isLod;
             },
             //EventListeners
-            onMouseDown: function() {
-
+            // track if primary button is pressed
+            onMouseDown(event) {
+                // only capture left (primary) button click
+                if(event.buttons !== 1) return;
+                // do not capture event, if transform controls are active
+                if(this.transformControls.enabled) return;
+                this.mouseDown = event.buttons;
+            },
+            // track if primary button is dragged
+            onMouseMove(event) {
+                // only capture left (primary) button click
+                if(event.buttons !== 1) return;
+                // do not capture event, if transform controls are active
+                if(this.transformControls.enabled) return;
+                if(this.mouseDown !== 1) return;
+                this.mouseMoving = true;
+            },
+            // handle click only if primary button and not dragged
+            onMouseUp(event) {
+                if(this.mouseMoving || this.mouseDown !== 1) {
+                    this.mouseDown = 0;
+                    this.mouseMoving = false;
+                    return;
+                }
+                // do not capture event, if transform controls are active
+                if(this.transformControls.enabled) return;
+                const intersections = this.intersectAtClick(event);
+                if(intersections.length) {
+                    this.selectObject(intersections[0].object);
+                }
             },
             onWindowResize: function() {
                 this.containerWidth = this.renderer.domElement.parentElement.clientWidth;
@@ -659,17 +804,24 @@
                 // three
                 scale: 1,
                 gui: null,
+                guiCtrl: {},
                 guiConfig: null,
                 animationClock: new Clock(),
                 animationId: -1,
                 animationMixer: {},
                 camera: {},
                 controls: {},
+                transformControls: {},
+                activeMesh: null,
                 containerWidth: 200,
                 containerHeight: 100,
                 directionalLight: {},
                 heimisphereLight: {},
                 group: {},
+                raycastTargets: [],
+                mouse: new Vector2(),
+                mouseDown: 0,
+                mouseMoving: false,
                 raycaster: new Raycaster(),
                 renderer: {},
                 scene: {},
