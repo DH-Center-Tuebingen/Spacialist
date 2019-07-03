@@ -21,8 +21,6 @@
 </template>
 
 <script>
-    import * as dat from 'dat.gui';
-
     import {
         AmbientLight,
         AnimationMixer,
@@ -38,7 +36,7 @@
         IcosahedronBufferGeometry,
         Line,
         Loader,
-        _Math,
+        Math as TMath,
         LOD,
         Matrix4,
         Mesh,
@@ -49,13 +47,13 @@
         Scene,
         SpotLight,
         TextureLoader,
-        TransformControls,
         Vector2,
         Vector3,
         WebGLRenderer,
     } from 'three';
     import { ViveController } from 'three/examples/jsm/vr/ViveController.js';
     import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+    import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
     import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
     import { DDSLoader } from 'three/examples/jsm/loaders/DDSLoader.js';
     import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
@@ -64,6 +62,7 @@
     import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
     import { PDBLoader } from 'three/examples/jsm/loaders/PDBLoader.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+    import * as dat from 'three/examples/jsm/libs/dat.gui.module.js';
     import { WebVR } from 'three/examples/js/vr/WebVR.js';
 
     export default {
@@ -284,7 +283,7 @@
                 }));
             },
             loadModel: function(file) {
-                let fileType = this.getFileType(file);
+                const fileType = this.getFileType(file);
                 if(!fileType) return;
                 switch(fileType) {
                     case 'dae':
@@ -376,7 +375,7 @@
                     switch(event.keyCode) {
                         case 17: // CTRL
                             this.transformControls.setTranslationSnap(1);
-							this.transformControls.setRotationSnap(_Math.degToRad(15));
+							this.transformControls.setRotationSnap(TMath.degToRad(15));
                             break;
                         case 32: // SPACE
                             if(this.transformControls.enabled) {
@@ -642,14 +641,22 @@
                 });
             },
             addModelToScene(model, extAnimations) {
-                this.animationMixer = new AnimationMixer(model);
                 // Play first animation if available
                 const animations = extAnimations ? extAnimations : model.animations;
                 if(animations && animations.length) {
-                    animationMixer.clipAction(animations[0]).play();
+                    this.animationMixer = new AnimationMixer(model);
+                    this.animationMixer.clipAction(animations[0]).play();
                 }
 
-                model.traverse(node => {
+                const mid = model.uuid;
+                const isLod = this.hasModelLods(model);
+                let lod = new LOD();
+
+                for(let i=0; i<model.children.length; i++) {
+                    let node = model.children[i].clone();
+                    if(isLod) {
+                        this.lodParts[node.uuid] = mid;
+                    }
                     if(node.isMesh) {
                         node.castShadow = true;
                         node.receiveShadow = true;
@@ -660,10 +667,18 @@
                         const offset = node.geometry.boundingBox.getCenter();
                         node.geometry.applyMatrix(new Matrix4().makeTranslation(-offset.x, -offset.y, -offset.z));
                         node.position.copy(offset);
+                        if(isLod) {
+                            lod.addLevel(node, (i+1) * 10);
+                        }
                     }
                     this.raycastTargets.push(node);
-                });
-                this.group.add(model);
+                }
+                if(isLod) {
+                    this.lodGroup[mid] = lod;
+                    this.group.add(lod);
+                } else {
+                    this.group.add(model);
+                }
                 this.onWindowResize();
             },
             intersectAtClick(event) {
@@ -679,18 +694,32 @@
         		this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
         		return this.raycaster.intersectObjects(group.children, true);
         	},
-            isGroupLod(objectGroup) {
-                if(objectGroup.type != 'Group') return;
-                if(!objectGroup.children) return;
+            hasModelLods(objectGroup) {
+                if(objectGroup.type != 'Group') return false;
+                if(!objectGroup.children) return false;
                 const regex = RegExp('(LOD|lod)\\d+$');
                 let isLod = true;
                 for(let i=0; i<objectGroup.children.length; i++) {
                     const c = objectGroup.children[i];
                     if(!regex.test(c.name)) {
                         isLod = false;
+                        break;
                     }
                 }
                 return isLod;
+            },
+            isLodGroup(model) {
+                return !!this.lodGroup[model.uuid];
+            },
+            isPartOfLodGroup(mesh) {
+                const part = this.lodParts[mesh.uuid];
+                if(!part)  return false;
+                return !!this.lodGroup[part];
+            },
+            getLodGroup(mesh) {
+                // TODO throw error instead?
+                if(!this.isPartOfLodGroup(mesh)) return {};
+                return this.lodGroup[this.lodParts[mesh.uuid]];
             },
             //EventListeners
             // track if primary button is pressed
@@ -721,7 +750,12 @@
                 if(this.transformControls.enabled) return;
                 const intersections = this.intersectAtClick(event);
                 if(intersections.length) {
-                    this.selectObject(intersections[0].object);
+                    // if current model is part of a LOD group, select group
+                    let mesh = intersections[0].object;
+                    if(!this.isLodGroup(mesh) && this.isPartOfLodGroup(mesh)) {
+                        mesh = this.getLodGroup(mesh);
+                    }
+                    this.selectObject(mesh);
                 }
             },
             onWindowResize: function() {
@@ -818,6 +852,8 @@
                 directionalLight: {},
                 heimisphereLight: {},
                 group: {},
+                lodGroup: {},
+                lodParts: {},
                 raycastTargets: [],
                 mouse: new Vector2(),
                 mouseDown: 0,
@@ -838,6 +874,7 @@
         },
         watch: {
             file(newFile, oldFile) {
+                if(newFile && oldFile && newFile.id == oldFile.id) return;
                 this.loadModel(newFile);
             }
         }
