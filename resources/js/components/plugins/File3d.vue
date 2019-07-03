@@ -75,7 +75,7 @@
             },
             fullscreenHandler: {
                 required: false,
-                type: Function
+                type: Object
             }
         },
         mounted() {
@@ -224,8 +224,7 @@
             },
             toggleFullscreen() {
                 if(!this.fullscreenHandler) return;
-                const element = document.getElementById(this.containerId);
-                this.fullscreenHandler(element)
+                this.fullscreenHandler.toggle(document.getElementById(this.containerId))
             },
             animate: function() {
                 this.animationId = requestAnimationFrame(this.animate);

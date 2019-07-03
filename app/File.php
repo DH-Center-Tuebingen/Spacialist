@@ -350,7 +350,7 @@ class File extends Model
                         break;
                     default:
                         // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
-                        $im = new Imagick($fileUrl);
+                        $im = new \Imagick($fileUrl);
                         $fileUrl = sp_get_storage_file_path($nameNoExt . self::EXP_SUFFIX);
                         $im->setImageFormat(self::EXP_FORMAT);
                         $im->writeImage($fileUrl);

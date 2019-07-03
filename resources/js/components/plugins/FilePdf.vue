@@ -47,7 +47,7 @@
             },
             fullscreenHandler: {
                 required: false,
-                type: Function
+                type: Object
             }
         },
         mounted() {
@@ -88,8 +88,7 @@
             },
             toggleFullscreen() {
                 if(!this.fullscreenHandler) return;
-                const element = document.getElementById('file-container');
-                this.fullscreenHandler(element)
+                this.fullscreenHandler.toggle(document.getElementById('file-container'))
             }
         },
         data() {

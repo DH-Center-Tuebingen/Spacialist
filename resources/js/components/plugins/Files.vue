@@ -289,9 +289,10 @@
                             id="file-container"
                             :entity="localEntity"
                             :file="selectedFile"
-                            :fullscreen-handler="toggleFullscreen"
+                            :fullscreen-handler="fullscreenHandler"
                             :is="fileCategoryComponent"
-                            :storage-config="storageConfig">
+                            :storage-config="storageConfig"
+                            @update-file-content="updateFileContent">
                         </component>
                         <div class="d-flex flex-row justify-content-between mt-2">
                             <button type="button" class="btn btn-outline-secondary" :disabled="isFirstFile" @click="gotoPreviousFile(selectedFile)">
@@ -878,6 +879,26 @@
                     });
                 }
             },
+            updateFileContent(event) {
+                const file = event.file;
+                const content = event.content;
+                let id = file.id;
+                let blob;
+                if(content instanceof Blob) {
+                    blob = content;
+                } else {
+                    blob = new Blob([content], {type: file.mime_type});
+                }
+                let data = new FormData();
+                data.append('file', blob, file.name);
+                $http.post(`/file/${id}/patch`, data, {
+                    headers: { 'content-type': false }
+                }).then(response => {
+                    if(event.onSuccess) {
+                        event.onSuccess(response, file);
+                    }
+                });
+            },
             onFileHeaderHover(active) {
                 // If edit mode is enabled, do not disable it on hover
                 if(this.selectedFile.editing) return;
@@ -910,9 +931,19 @@
                 this.selectedFile.editing = false;
             },
             toggleFullscreen(element) {
-                if(!screenfull.enabled) return;
-                if(!element) return;
-                screenfull.toggle(element);
+                if(!screenfull.enabled) return new Promise(r => r(null));
+                if(!element) return new Promise(r => r(null));
+                return screenfull.toggle(element);
+            },
+            addToggleListener(callback) {
+                if(screenfull.enabled) {
+                    screenfull.on('change', callback);
+                }
+            },
+            removeToggleListener(callback) {
+                if(screenfull.enabled) {
+                    screenfull.off('change', callback);
+                }
             },
             linkedFilesChanged() {
                 this.resetFiles('linkedFiles');
@@ -1414,6 +1445,11 @@
                 editingProperty: {
                     key: '',
                     value: ''
+                },
+                fullscreenHandler: {
+                    toggle: this.toggleFullscreen,
+                    add: this.addToggleListener,
+                    remove: this.removeToggleListener
                 },
                 fileHeaderHovered: false,
                 newFilename: '',

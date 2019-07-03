@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 - Time Period datatype (epoch datatype without dropdown)
 - Screencast functionality (in Tools menu)
   - Save local or upload to Spacialist
+- Image manipulation
+  - Supports several filters (blur, sharpen, color-based filters, ...)
+  - Manipulations can be stored
 - Dynamic Parent-Element for `string-sc` (Single Choice Dropdown) datatype
   - Reference another SCD attribute in Data-Model-Editor to use it's value as Parent-Element
 - Parents Breadcrumb added to Entity Detail view header
@@ -16,11 +19,14 @@ All notable changes to this project will be documented in this file.
 - Add LOD support to 3D file viewer
 ### Changed
 - Use [Tree-Shaking](https://webpack.js.org/guides/tree-shaking/) in supported modules
+- Improved fullscreen handler code
 - Update to Laravel 5.8
 - Rework search components (should no longer logout on fast typing)
 ### Fixed
 - Do not fire upload-from-clipboard event in input fields
 - Update references in Reference Tab, Attribute Icons in Entity Detail View and Reference Modal
+- File modal container height
+- Conversion for image formats not supported by PHP
 - Several styles and translations
 - Popup not working for newly added and linked geodata on click on linked entity
 - Adding first entity with a serial attribute
