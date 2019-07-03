@@ -75,6 +75,7 @@ import {
     faList,
     faLongArrowAltDown,
     faLongArrowAltUp,
+    faMagic,
     faMapMarkedAlt,
     faMapMarkerAlt,
     faMicrochip,
@@ -233,6 +234,7 @@ library.add(
     faList,
     faLongArrowAltDown,
     faLongArrowAltUp,
+    faMagic,
     faMapMarkedAlt,
     faMapMarkerAlt,
     faMicrochip,
@@ -294,7 +296,7 @@ dom.watch(); // search for <i> tags to replace with <svg>
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-const PQueue = require('p-queue');
+const {default: PQueue} = require('p-queue');
 require('typeface-raleway');
 require('typeface-source-code-pro');
 require('popper.js');
@@ -595,6 +597,7 @@ Vue.component('file-upload', VueUploadComponent);
 // Extended Components
 import GlobalSearch from './components/GlobalSearch.vue';
 import EntitySearch from './components/EntitySearch.vue';
+import EntityTypeSearch from './components/EntityTypeSearch.vue';
 import LabelSearch from './components/LabelSearch.vue';
 import AttributeSearch from './components/AttributeSearch.vue';
 import CsvTable from './components/CsvTable.vue';
@@ -615,6 +618,7 @@ import ErrorModal from './components/Error.vue';
 
 Vue.component('global-search', GlobalSearch);
 Vue.component('entity-search', EntitySearch);
+Vue.component('entity-type-search', EntityTypeSearch);
 Vue.component('label-search', LabelSearch);
 Vue.component('attribute-search', AttributeSearch);
 Vue.component('csv-table', CsvTable);

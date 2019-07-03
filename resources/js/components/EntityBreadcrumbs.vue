@@ -2,8 +2,8 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb my-0 px-2 py-1">
             <li class="breadcrumb-item breadcrumb-item-slash" :class="{'active': p.last}" v-for="p in parsedList">
-                <span v-if="p.last" :title="p.name">
-                    {{ p.name | truncate(25) }}
+                <span v-if="p.last" :title="p.name"><!--
+                    -->{{ p.name | truncate(25) }}
                 </span>
                 <router-link v-else :to="{name: 'entitydetail', params: {id: p.id}}" append :title="p.name">
                     {{ p.name | truncate(25) }}

@@ -11,7 +11,7 @@
             @end="dropped"
             @start="dragged">
             <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" v-show="!hiddenByDependency[attribute.id]">
-                <label class="col-form-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
+                <label class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
                     <div v-show="hoverState[i]">
                         <a v-show="onReorder" href="" @click.prevent="" class="reorder-handle" data-toggle="popover" :data-content="$t('global.resort')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-sort text-secondary"></i>
@@ -129,8 +129,8 @@
                     <div v-else-if="attribute.datatype == 'list'">
                         <list :entries="localValues[attribute.id].value" :disabled="attribute.isDisabled" :on-change="value => onChange(null, value, attribute.id)" :name="'attribute-'+attribute.id" v-validate="" />
                     </div>
-                    <div v-else-if="attribute.datatype == 'epoch'">
-                        <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :epochs="localSelections[attribute.id]" :disabled="attribute.isDisabled" v-validate=""/>
+                    <div v-else-if="attribute.datatype == 'epoch' || attribute.datatype == 'timeperiod'">
+                        <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :epochs="localSelections[attribute.id]" :type="attribute.datatype" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
                     <div v-else-if="attribute.datatype == 'dimension'">
                         <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled" v-validate=""/>

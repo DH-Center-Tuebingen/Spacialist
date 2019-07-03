@@ -50,6 +50,81 @@ class Entity extends Model
         // 'geodata_id'        => 'integer|exists:geodata,id'
     ];
 
+    public static function create($fields, $entityTypeId, $user, $rootEntityId = null) {
+        $isChild = isset($rootEntityId);
+        if($isChild) {
+            $parentCtid = self::find($rootEntityId)->entity_type_id;
+            $relation = EntityTypeRelation::where('parent_id', $parentCtid)
+                ->where('child_id', $entityTypeId)->exists();
+            if(!$relation) {
+                return response()->json([
+                    'error' => __('This type is not an allowed sub-type.')
+                ], 400);
+            }
+        } else {
+            if(!EntityType::find($entityTypeId)->is_root) {
+                return [
+                    'type' => 'error',
+                    'msg' => __('This type is not an allowed root-type.'),
+                    'code' => 400
+                ];
+            }
+        }
+
+        $entity = new self();
+        $rank;
+        if($isChild) {
+            $rank = self::where('root_entity_id', $rootEntityId)->max('rank') + 1;
+            $entity->root_entity_id = $rootEntityId;
+        } else {
+            $rank = self::whereNull('root_entity_id')->max('rank') + 1;
+        }
+        $entity->rank = $rank;
+
+        foreach($fields as $key => $value) {
+            $entity->{$key} = $value;
+        }
+        $entity->entity_type_id = $entityTypeId;
+        $entity->lasteditor = $user->name;
+        $entity->save();
+
+        // TODO workaround to get all (optional, not part of request) attributes
+        $entity = self::find($entity->id);
+
+        $serialAttributes = $entity->entity_type
+                ->attributes()
+                ->where('datatype', 'serial')
+                ->get();
+        foreach($serialAttributes as $s) {
+            $nextValue = 1;
+            $cleanedRegex = preg_replace('/(.*)(%\d*d)(.*)/i', '/$1(\d+)$3/i', $s->text);
+
+            // get last added
+            $lastEntity = self::where('entity_type_id', $entity->entity_type_id)
+                ->orderBy('created_at', 'desc')
+                ->skip(1)
+                ->first();
+            if(isset($lastEntity)) {
+                $lastValue = AttributeValue::where('attribute_id', $s->id)
+                    ->where('entity_id', $lastEntity->id)
+                    ->first();
+                if(isset($lastValue)) {
+                    $nextValue = intval(preg_replace($cleanedRegex, '$1', $lastValue->str_val));
+                    $nextValue++;
+                }
+            }
+
+            self::addSerial($entity->id, $s->id, $s->text, $nextValue, $user->name);
+        }
+
+        $entity->children_count = 0;
+
+        return [
+            'type' => 'entity',
+            'entity' => $entity
+        ];
+    }
+
     public static function getEntitiesByParent($id = null) {
         $entities = self::withCount(['child_entities as children_count']);
         if(!isset($id)) {

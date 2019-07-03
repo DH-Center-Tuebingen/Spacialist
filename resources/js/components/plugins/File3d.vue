@@ -27,16 +27,10 @@
         AmbientLight,
         AnimationMixer,
         BoxBufferGeometry,
-        ColladaLoader,
         Color,
         Clock,
-        CSS2DObject,
-        CSS2DRenderer,
-        DDSLoader,
         DirectionalLight,
         DoubleSide,
-        FBXLoader,
-        GLTFLoader,
         Geometry,
         GridHelper,
         Group,
@@ -45,26 +39,32 @@
         Line,
         Loader,
         _Math,
+        LOD,
         Matrix4,
         Mesh,
         MeshPhongMaterial,
-        MTLLoader,
-        OBJLoader,
-        OrbitControls,
         PCFSoftShadowMap,
-        PDBLoader,
         PerspectiveCamera,
         Raycaster,
         Scene,
+        SpotLight,
         TextureLoader,
         TransformControls,
         Vector2,
         Vector3,
-        ViveController,
         WebGLRenderer,
-    } from 'three-full';
-    import {SpotLight} from 'three-full/sources/lights/SpotLight.js';
-    import {WebVR} from 'three-full/sources/vr/WebVR.js';
+    } from 'three';
+    import { ViveController } from 'three/examples/jsm/vr/ViveController.js';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+    import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
+    import { DDSLoader } from 'three/examples/jsm/loaders/DDSLoader.js';
+    import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+    import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
+    import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+    import { PDBLoader } from 'three/examples/jsm/loaders/PDBLoader.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+    import { WebVR } from 'three/examples/js/vr/WebVR.js';
 
     export default {
         props: {
@@ -78,13 +78,26 @@
             },
             fullscreenHandler: {
                 required: false,
-                type: Function
+                type: Object
             }
         },
         mounted() {
             this.startup();
         },
         destroyed() {
+            window.removeEventListener('resize', this.onWindowResize, false);
+            this.renderer.domElement.removeEventListener('mousedown', this.onMouseDown, false);
+            // VR Events
+    		this.grabController.removeEventListener('triggerdown', this.onGrabDown);
+    		this.grabController.removeEventListener('triggerup', this.onGrabUp);
+            this.grabController.removeEventListener('thumbpadup', this.dimWorldLight);
+            // this.grabController.removeEventListener('axischanged', this.recognizeTouch);
+    		this.flashlightController.removeEventListener('triggerdown', this.onLightOn);
+    		this.flashlightController.removeEventListener('triggerup', this.onLightOff);
+    		this.flashlightController.removeEventListener('thumbpadup', this.dimFlashLight);
+
+            window.removeEventListener('vrdisplaypresentchange', this.vrDisplayStateChanged, false);
+
             for(let i=this.scene.children.length-1; i>=0; i--) {
                 let obj = this.scene.children[i];
                 if(obj.geometry) obj.geometry.dispose();
@@ -293,8 +306,7 @@
             },
             toggleFullscreen() {
                 if(!this.fullscreenHandler) return;
-                const element = document.getElementById(this.containerId);
-                this.fullscreenHandler(element)
+                this.fullscreenHandler.toggle(document.getElementById(this.containerId))
             },
             animate: function() {
                 this.animationId = requestAnimationFrame(this.animate);
@@ -402,19 +414,16 @@
                 });
             },
             initViveEventListeners: function() {
-                const vm = this;
                 // Vive Events
-        		vm.grabController.addEventListener('triggerdown', vm.onGrabDown);
-        		vm.grabController.addEventListener('triggerup', vm.onGrabUp);
-                vm.grabController.addEventListener('thumbpadup', vm.dimWorldLight);
+        		this.grabController.addEventListener('triggerdown', this.onGrabDown);
+        		this.grabController.addEventListener('triggerup', this.onGrabUp);
+                this.grabController.addEventListener('thumbpadup', this.dimWorldLight);
                 // this.grabController.addEventListener('axischanged', this.recognizeTouch);
-        		vm.flashlightController.addEventListener('triggerdown', vm.onLightOn);
-        		vm.flashlightController.addEventListener('triggerup', vm.onLightOff);
-        		vm.flashlightController.addEventListener('thumbpadup', vm.dimFlashLight);
+        		this.flashlightController.addEventListener('triggerdown', this.onLightOn);
+        		this.flashlightController.addEventListener('triggerup', this.onLightOff);
+        		this.flashlightController.addEventListener('thumbpadup', this.dimFlashLight);
 
-                window.addEventListener('vrdisplaypresentchange', function(event) {
-                    vm.renderer.vr.enabled = event.display.isPresenting;
-                }, false);
+                window.addEventListener('vrdisplaypresentchange', this.vrDisplayStateChanged, false);
             },
             initViveControls: function() {
                 const vm = this;
@@ -670,6 +679,19 @@
         		this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
         		return this.raycaster.intersectObjects(group.children, true);
         	},
+            isGroupLod(objectGroup) {
+                if(objectGroup.type != 'Group') return;
+                if(!objectGroup.children) return;
+                const regex = RegExp('(LOD|lod)\\d+$');
+                let isLod = true;
+                for(let i=0; i<objectGroup.children.length; i++) {
+                    const c = objectGroup.children[i];
+                    if(!regex.test(c.name)) {
+                        isLod = false;
+                    }
+                }
+                return isLod;
+            },
             //EventListeners
             // track if primary button is pressed
             onMouseDown(event) {
@@ -748,6 +770,11 @@
         		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
         		this.flashlightIntensity = event.axes[0] + 1;
         		if(this.flashlightOn) this.flashlight.intensity = this.flashlightIntensity;
+            },
+            vrDisplayStateChanged(event) {
+                if(this.renderer) {
+                    this.renderer.vr.enabled = event.display.isPresenting;
+                }
             },
             dimWorldLight: function(event) {
         		// thumbpad values are from -1 to 1, intesity goes from 0 to 2

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Attribute;
 use App\Bibliography;
 use App\Entity;
+use App\EntityType;
 use App\File;
 use App\Geodata;
 use App\ThConceptLabel;
@@ -102,6 +103,34 @@ class SearchController extends Controller {
             ->orderBy('name')
             ->get();
         $matches->each->append(['ancestors']);
+        return response()->json($matches);
+    }
+
+    public function searchEntityTypes(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to search for entities')
+            ], 403);
+        }
+        $q = $request->query('q');
+        $lang = $user->getLanguage();
+
+        try {
+            $language = ThLanguage::where('short_name', $lang)->firstOrFail();
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Your language does not exist in ThesauRex'
+            ], 400);
+        }
+
+        $langId = $language->id;
+        $matches = EntityType::with(['thesaurus_concept'])
+            ->whereHas('thesaurus_concept.labels', function($query) use ($langId, $q) {
+                $query->where('language_id', $langId)
+                    ->where('label', 'ilike', "%$q%");
+            })
+            ->get();
         return response()->json($matches);
     }
 

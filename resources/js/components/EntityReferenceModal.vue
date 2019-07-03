@@ -83,16 +83,19 @@
                     <div class="row">
                         <div class="col-md-6">
                             <multiselect
+                                id="bibliography-search"
                                 label="title"
                                 track-by="id"
                                 v-model="newItem.bibliography"
                                 :closeOnSelect="true"
                                 :hideSelected="true"
+                                :internal-search="false"
                                 :multiple="false"
-                                :options="bibliography"
+                                :options="matchingBibliography"
                                 :placeholder="$t('global.select.placehoder')"
                                 :select-label="$t('global.select.select')"
-                                :deselect-label="$t('global.select.deselect')">
+                                :deselect-label="$t('global.select.deselect')"
+                                @search-change="onBibliographySearchChanged">
                                 <template slot="singleLabel" slot-scope="props">
                                     <span class="option__desc">
                                         <span class="option__title">
@@ -207,6 +210,23 @@
                     );
                 }));
             },
+            onBibliographySearchChanged(query) {
+                if(!!query && query.length) {
+                    this.matchingBibliography = this.bibliography.filter(b => {
+                        let matchesTitle = false;
+                        let matchesAuthor = false;
+                        if(b.title) {
+                            matchesTitle = b.title.toLowerCase().includes(query.toLowerCase());
+                        }
+                        if(b.author) {
+                            matchesAuthor = b.author.toLowerCase().includes(query.toLowerCase());
+                        }
+                        return matchesTitle || matchesAuthor;
+                    });
+                } else {
+                    this.matchingBibliography = this.bibliography.slice();
+                }
+            },
             onAddReference(item) {
                 if(!this.$can('add_remove_bibliography')) return;
                 const data = {
@@ -290,7 +310,8 @@
                 initialCertainty: {
                     value: 100,
                     description: ''
-                }
+                },
+                matchingBibliography: this.bibliography.slice()
             }
         },
         computed: {

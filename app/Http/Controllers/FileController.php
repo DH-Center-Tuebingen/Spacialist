@@ -321,7 +321,7 @@ class FileController extends Controller
 
     public function exportFiles(Request $request) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('export_files')) {
             return response()->json([
                 'error' => __('You do not have the permission to export files')
             ], 403);

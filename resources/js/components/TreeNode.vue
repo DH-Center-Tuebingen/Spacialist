@@ -1,10 +1,10 @@
 <template>
     <div @dragenter="onDragEnter" @dragleave="onDragLeave" :id="`tree-node-${data.id}`">
         <span style="width: 2em; display: inline-block; text-align: center;">
-            <span v-if="data.children_count" class="badge badge-pill" style="font-size: 9px;" :style="colorStyles" :title="data.children_count">
+            <span v-show="data.children_count" class="badge badge-pill" style="font-size: 9px;" :style="colorStyles" :title="data.children_count">
                 {{ data.children_count | numPlus(3) }}
             </span>
-            <span v-else :style="colorStyles">
+            <span v-show="!data.children_count" :style="colorStyles">
                 <i class="fas fa-circle fa-sm"></i>
             </span>
         </span>

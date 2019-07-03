@@ -8,16 +8,16 @@
         class="form-control"
         v-model="query"
         :placeholder="$t(placeholder)"
-        @blur="blur"
+        @blur="closeSelect"
         @input="debounce"
         @keydown.down="down"
         @keydown.enter="hit"
-        @keydown.esc="clearItem"
+        @keydown.esc="reset"
         @keydown.up="up"/>
         <div class="input-group-append">
-            <span class="input-group-text clickable" @click="clearItem">
+            <button class="btn btn-outline-secondary" type="button" @click="clearItem">
                 <i class="fas fa-fw fa-times"></i>
-            </span>
+            </button>
             <span class="input-group-text multiselect-search">
                 <i class="fas fa-spinner fa-spin" v-if="loading"></i>
                 <template v-else>
@@ -26,14 +26,9 @@
             </span>
         </div>
 
-        <div class="dropdown-menu d-flex flex-column search-result-list" v-if="hasItems">
+        <div class="dropdown-menu" style="display: flex; flex-direction: column;" v-show="hasItems">
             <a href="#" class="dropdown-item" v-for="(item, $item) in items" :class="activeClass($item)" @mousedown="hit" @mousemove="setActive($item)">
-                <span>{{item.name}}</span>
-                <ol class="breadcrumb mb-0 p-0 pb-1 bg-none small">
-                    <li class="breadcrumb-item" v-for="a in item.ancestors">
-                        <span>{{ a }}</span>
-                    </li>
-              </ol>
+                <span v-text="$translateConcept(item.thesaurus_url)"></span>
             </a>
         </div>
     </div>
@@ -44,35 +39,48 @@
 
     export default {
         extends: TypeaheadSearch,
+        props: {
+            onSelect: {
+                type: Function,
+                required: false
+            },
+            resetInput: {
+                required: false,
+                type: Boolean
+            },
+        },
         data () {
             return {
-                src: 'search/entity',
+                src: 'search/entity-type',
+                limit: 5,
+                minChars: 3,
+                selectFirst: false
             }
+        },
+        mounted() {
         },
         computed: {
         },
         methods: {
             onHit(item) {
-                const vm = this;
-                this.$router.push({
-                    name: 'entitydetail',
-                    params: {
-                        id: item.id
-                    },
-                    query: this.$route.query
-                });
+                this.query = item ? item.name : undefined;
+                if(this.onSelect) this.onSelect(item);
+                this.closeSelect();
+                if(this.resetInput) this.reset();
+            },
+            clearItem() {
+                if(this.onSelect) this.onSelect();
                 this.reset();
             },
-            hit() {
-                if(this.current !== -1) {
-                    this.onHit(this.items[this.current]);
-                } else {
-                    if(this.onMultiselect) {
-                        this.onMultiselect(this.items);
-                        this.items = [];
-                    }
-                }
-            },
+            closeSelect() {
+                this.items = [];
+                this.loading = false;
+            }
+        },
+        watch: {
+            value(newValue, oldValue) {
+                this.query = newValue;
+            }
         }
     }
 </script>

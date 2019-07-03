@@ -1,20 +1,20 @@
 <template>
-    <div class="row h-100 of-hidden" v-if="initFinished">
-        <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100" v-can="'view_concepts'">
+    <div class="row h-100 overflow-hidden" v-if="initFinished">
+        <div :class="`h-100 d-flex flex-column col-md-${$getPreference('prefs.columns').left}`" id="tree-container" v-can="'view_concepts'" v-if="$getPreference('prefs.columns').left > 0">
             <entity-tree
                 class="col px-0"
                 :selected-entity="selectedEntity">
             </entity-tree>
         </div>
-        <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100" v-can="'view_concepts|view_concept_props'">
-            <router-view class="h-100"
+        <div :class="`h-100 border-left border-right col-md-${$getPreference('prefs.columns').center}`" id="attribute-container" v-can="'view_concepts|view_concept_props'" v-if="$getPreference('prefs.columns').center > 0">
+            <router-view
                 :selected-entity="selectedEntity"
                 :bibliography="bibliography"
                 @detail-updated="setDetailDirty"
             >
             </router-view>
         </div>
-        <div :class="'col-md-'+$getPreference('prefs.columns').right" id="addon-container" class="d-flex flex-column">
+        <div :class="`h-100 d-flex flex-column col-md-${$getPreference('prefs.columns').right}`" id="addon-container" v-if="$getPreference('prefs.columns').right > 0">
             <ul class="nav nav-tabs">
                 <li class="nav-item" v-for="plugin in $getTabPlugins()">
                     <router-link class="nav-link" :class="{active: tab == plugin.key}" :to="{ query: { tab: plugin.key }}" append>

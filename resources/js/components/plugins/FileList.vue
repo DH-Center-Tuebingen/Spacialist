@@ -27,7 +27,7 @@
                     <i class="fas fa-fw fa-th"></i>
                 </span>
             </a>
-            <button class="btn btn-sm btn-outline-primary" v-show="fileCount" @click="exportFiles(selectedFiles)">
+            <button class="btn btn-sm btn-outline-primary" v-show="fileCount" @click="exportFiles(selectedFiles)" v-if="$can('export_files')">
                 {{
                     $t('plugins.files.header.export.selected', {
                         cnt: fileCount
@@ -37,7 +37,7 @@
         </div>
         <div infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk" class="row col scroll-y-auto">
             <div class="row col" v-if="grid">
-                <div class="col-sm-6 col-md-4 mb-3 clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
+                <div class="col-md-12 col-lg-6 col-xl-4 mb-3 clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
                     <div class="card text-center">
                         <div style="height: 200px;">
                             <div class="card-hover-overlay h-100">
@@ -46,7 +46,7 @@
                                 </div>
                             </div>
                             <div class="card-hover h-100">
-                                <img class="card-img w-auto h-auto mw-100 mh-100" v-if="file.category == 'image'" :src="file.url">
+                                <img class="card-img w-100 h-100 object-fit-cover" v-if="file.category == 'image'" :src="file.thumb_url">
                                 <div class="card-img w-100" v-else></div>
                                 <div class="card-img-overlay d-flex flex-column justify-content-end" style="height: 200px;">
                                     <div class="card-text pb-4">
@@ -114,7 +114,7 @@
                                     <i class="fas fa-fw fa-tags text-info"></i>
                                 </span>
                             </div>
-                            <div class="position-absolute top-0 left-0 m-2">
+                            <div class="position-absolute top-0 left-0 m-2" v-if="$can('export_files')">
                                 <input type="checkbox" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
                             </div>
                         </div>
@@ -136,7 +136,7 @@
             </div>
             <ul class="list-group mb-2 w-100" v-else>
                 <li class="list-group-item px-3 py-2 w-100 d-flex flex-row justify-content-start align-items-center clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
-                    <input type="checkbox" class="mr-2" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
+                    <input type="checkbox" class="mr-2" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" v-if="$can('export_files')" />
                     <div class="mr-2">
                         <div v-if="file.category == 'xml'">
                             <i class="fas fa-fw fa-file-code w-32p h-32p"></i>
@@ -181,7 +181,7 @@
                             <i class="fas fa-fw fa-file-alt w-32p h-32p"></i>
                         </div>
                         <div v-else-if="file.category == 'image'" class="w-32p h-32p">
-                            <img class="mh-100 mw-100" :src="file.url" />
+                            <img class="w-100 h-100 object-fit-cover" :src="file.thumb_url" />
                         </div>
                         <div v-else-if="file.category == 'undefined'">
                             <i
@@ -269,6 +269,7 @@
                 return file.tags;
             },
             exportFiles(fileIds) {
+                if(!this.$can('export_files')) return;
                 const data = {
                     files: fileIds
                 };

@@ -85,9 +85,6 @@ class EntityController extends Controller {
         $data = [];
         foreach($values as $value) {
             switch($value->attribute->datatype) {
-                case 'string-sc':
-                    $value->thesaurus_val = ThConcept::where('concept_url', $value->thesaurus_val)->first();
-                    break;
                 case 'entity':
                     $value->name = Entity::find($value->entity_val)->name;
                     break;
@@ -229,69 +226,20 @@ class EntityController extends Controller {
         }
         $this->validate($request, Entity::rules);
 
-        $isChild = $request->has('root_entity_id');
-        $rcid = $request->get('root_entity_id');
+        $fields = $request->only(array_keys(Entity::rules));
+        $etid = $request->get('entity_type_id');
+        $reid = $request->get('root_entity_id');
 
-        if($isChild) {
-            $parentCtid = Entity::find($rcid)->entity_type_id;
-            $relation = EntityTypeRelation::where('parent_id', $parentCtid)
-                ->where('child_id', $request->get('entity_type_id'))->exists();
-            if(!$relation) {
-                return response()->json([
-                    'error' => __('This type is not an allowed sub-type.')
-                ], 400);
-            }
+        $res = Entity::create($fields, $etid, $user, $reid);
+
+        if($res['type'] === 'entity') {
+            return response()->json($res['entity'], 201);
         } else {
-            if(!EntityType::find($request->get('entity_type_id'))->is_root) {
-                return response()->json([
-                    'error' => __('This type is not an allowed root-type.')
-                ], 400);
-            }
+            return response()->json([
+                'error' => $res['msg']
+            ], $res['code']);
         }
 
-        $entity = new Entity();
-        $rank;
-        if($isChild) {
-            $rank = Entity::where('root_entity_id', '=', $rcid)->max('rank') + 1;
-        } else {
-            $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
-        }
-        $entity->rank = $rank;
-
-        foreach($request->only(array_keys(Entity::rules)) as $key => $value) {
-            $entity->{$key} = $value;
-        }
-        $entity->lasteditor = $user->name;
-        $entity->save();
-
-        // TODO workaround to get all (optional, not part of request) attributes
-        $entity = Entity::find($entity->id);
-
-        $serialAttributes = $entity->entity_type
-                ->attributes()
-                ->where('datatype', 'serial')
-                ->get();
-        foreach($serialAttributes as $s) {
-            $cleanedRegex = preg_replace('/(.*)(%\d*d)(.*)/i', '/$1(\d+)$3/i', $s->text);
-
-            // get last added
-            $lastEntity = Entity::where('entity_type_id', $entity->entity_type_id)
-                ->orderBy('created_at', 'desc')
-                ->skip(1)
-                ->first();
-            $lastValue = AttributeValue::where('attribute_id', $s->id)
-                ->where('entity_id', $lastEntity->id)
-                ->first();
-            $nextValue = intval(preg_replace($cleanedRegex, '$1', $lastValue->str_val));
-            $nextValue++;
-
-
-            Entity::addSerial($entity->id, $s->id, $s->text, $nextValue, $user->name);
-        }
-
-        $entity->children_count = 0;
-
-        return response()->json($entity, 201);
     }
 
     // PATCH
@@ -377,9 +325,22 @@ class EntityController extends Controller {
                     $attrval->json_val = json_encode($thesaurus_urls);
                     break;
                 case 'epoch':
+                case 'timeperiod':
                 case 'dimension':
                 case 'list':
                 case 'table':
+                    // check for invalid time spans
+                    if($attr->datatype == 'epoch' || $attr->datatype == 'timeperiod') {
+                        if(
+                            ($value['startLabel'] == 'AD' && $value['endLabel'] == 'BC')
+                            ||
+                            ($value['startLabel'] == $value['endLabel'] && $value['start'] > $value['end'])
+                        ) {
+                            return response()->json([
+                                'error' => __('Start date of a time period must not be after it\'s end date')
+                            ], 422);
+                        }
+                    }
                     $attrval->json_val = json_encode($value);
                     break;
                 case 'entity':

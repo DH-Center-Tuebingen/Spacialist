@@ -282,16 +282,17 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body row col text-center of-hidden">
+                <div class="modal-body row col text-center">
                     <div class="col-md-6 d-flex flex-column">
                         <component
-                            class="col px-0 of-hidden"
+                            class="col px-0 overflow-hidden"
                             id="file-container"
                             :entity="localEntity"
                             :file="selectedFile"
-                            :fullscreen-handler="toggleFullscreen"
+                            :fullscreen-handler="fullscreenHandler"
                             :is="fileCategoryComponent"
-                            :storage-config="storageConfig">
+                            :storage-config="storageConfig"
+                            @update-file-content="updateFileContent">
                         </component>
                         <div class="d-flex flex-row justify-content-between mt-2">
                             <button type="button" class="btn btn-outline-secondary" :disabled="isFirstFile" @click="gotoPreviousFile(selectedFile)">
@@ -726,7 +727,12 @@
             }
         },
         activated() {
-            this.linkedFilesChanged();
+            if(this.selectedEntity.id) {
+                this.linkedFiles.apiUrl = '/file/linked/' + this.selectedEntity.id;
+                this.setAction('linkedFiles', true);
+            } else {
+                this.linkedFilesChanged();
+            }
             if(this.$route.query.f) {
                 this.openFile(this.$route.query.f);
             }
@@ -873,6 +879,26 @@
                     });
                 }
             },
+            updateFileContent(event) {
+                const file = event.file;
+                const content = event.content;
+                let id = file.id;
+                let blob;
+                if(content instanceof Blob) {
+                    blob = content;
+                } else {
+                    blob = new Blob([content], {type: file.mime_type});
+                }
+                let data = new FormData();
+                data.append('file', blob, file.name);
+                $http.post(`/file/${id}/patch`, data, {
+                    headers: { 'content-type': false }
+                }).then(response => {
+                    if(event.onSuccess) {
+                        event.onSuccess(response, file);
+                    }
+                });
+            },
             onFileHeaderHover(active) {
                 // If edit mode is enabled, do not disable it on hover
                 if(this.selectedFile.editing) return;
@@ -905,14 +931,24 @@
                 this.selectedFile.editing = false;
             },
             toggleFullscreen(element) {
-                if(!screenfull.enabled) return;
-                if(!element) return;
-                screenfull.toggle(element);
+                if(!screenfull.enabled) return new Promise(r => r(null));
+                if(!element) return new Promise(r => r(null));
+                return screenfull.toggle(element);
+            },
+            addToggleListener(callback) {
+                if(screenfull.enabled) {
+                    screenfull.on('change', callback);
+                }
+            },
+            removeToggleListener(callback) {
+                if(screenfull.enabled) {
+                    screenfull.off('change', callback);
+                }
             },
             linkedFilesChanged() {
+                this.resetFiles('linkedFiles');
                 if(!this.selectedEntity.id) return;
                 this.linkedFiles.apiUrl = '/file/linked/' + this.selectedEntity.id;
-                this.resetFiles('linkedFiles');
                 this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
             },
             handleClipboardPaste(e) {
@@ -974,10 +1010,11 @@
                     this.showFileModal(response.data);
                 }));
             },
-            setAction(id) {
+            setAction(id, dontLoad = false) {
                 // disable linked tab if no entity is selected
                 if(id == 'linkedFiles' && !this.localEntity.id) return;
                 this.selectedTopAction = id;
+                if(dontLoad) return;
                 // If it is the first time the action is set, load images
                 if(this[id] && !Object.keys(this[id].pagination).length) {
                     this.getNextFiles(id);
@@ -1408,6 +1445,11 @@
                 editingProperty: {
                     key: '',
                     value: ''
+                },
+                fullscreenHandler: {
+                    toggle: this.toggleFullscreen,
+                    add: this.addToggleListener,
+                    remove: this.removeToggleListener
                 },
                 fileHeaderHovered: false,
                 newFilename: '',

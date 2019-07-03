@@ -7,7 +7,7 @@
             autocomplete="off"
             class="form-control"
             v-model="query"
-            :placeholder="placeholder"
+            :placeholder="$t(placeholder)"
             @blur="closeSelect"
             @input="debounce"
             @keydown.down="down"
@@ -23,7 +23,7 @@
             </span>
         </div>
 
-        <div class="dropdown-menu" style="display: flex; flex-direction: column;" v-show="hasItems">
+        <div class="dropdown-menu d-flex flex-column search-result-list" v-if="hasItems">
             <a href="#" class="dropdown-item" v-for="(item, $item) in items" :class="activeClass($item)" @mousedown="hit" @mousemove="setActive($item)">
                 <span v-text="item.labels[0].label"></span>
             </a>
@@ -32,16 +32,11 @@
 </template>
 
 <script>
-    import VueTypeahead from 'vue-typeahead';
-    import debounce from 'debounce';
+    import TypeaheadSearch from './TypeaheadSearch.vue';
 
     export default {
-        extends: VueTypeahead,
+        extends: TypeaheadSearch,
         props: {
-            placeholder: {
-                type: String,
-                default: 'Search...'
-            },
             onSelect: {
                 type: Function,
                 required: false
@@ -50,15 +45,9 @@
         data () {
             return {
                 src: 'search/label',
-                limit: 5,
-                minChars: 3,
-                selectFirst: false
             }
         },
         computed: {
-            debounce () {
-                return debounce(this.update, 250)
-            }
         },
         methods: {
             onHit(item) {

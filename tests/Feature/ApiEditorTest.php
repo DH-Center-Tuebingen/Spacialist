@@ -169,7 +169,7 @@ class ApiEditorTest extends TestCase
             ->get('/api/v1/editor/dm/attribute_types');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(17);
+        $response->assertJsonCount(18);
         $response->assertJsonStructure([
             '*' => [
                 'datatype'
@@ -199,6 +199,9 @@ class ApiEditorTest extends TestCase
             ],
             [
                 'datatype' => 'epoch'
+            ],
+            [
+                'datatype' => 'timeperiod'
             ],
             [
                 'datatype' => 'date'
