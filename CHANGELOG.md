@@ -6,14 +6,18 @@ All notable changes to this project will be documented in this file.
 - Time Period datatype (epoch datatype without dropdown)
 - Screencast functionality (in Tools menu)
   - Save local or upload to Spacialist
-- 3D editor
-  - Click on objects to select
-    - Move, rotate, scale objects using handler or GUI
-    - Press `f` to focus on object
-    - Add LOD support
-- Image manipulation
-  - Supports several filters (blur, sharpen, color-based filters, ...)
-  - Manipulations can be stored
+- File modal
+  - 3D editor
+    - Click on objects to select
+      - Move, rotate, scale objects using handler or GUI
+      - Press `f` to focus on object
+      - Add LOD support
+  - Images
+    - Image manipulation
+      - Supports several filters (blur, sharpen, color-based filters, ...)
+      - Manipulations can be stored
+  - PDF
+    - print button
 - Dynamic Parent-Element for `string-sc` (Single Choice Dropdown) datatype
   - Reference another SCD attribute in Data-Model-Editor to use it's value as Parent-Element
 - Parents Breadcrumb added to Entity Detail view header

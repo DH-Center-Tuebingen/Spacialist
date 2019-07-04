@@ -23,8 +23,14 @@
             <button type="button" class="btn btn-link" v-if="fullscreenHandler" @click="toggleFullscreen">
                 <i class="fas fa-fw fa-expand"></i>
             </button>
+            <button type="button" class="btn btn-link" @click="printPdf()">
+                <i class="fas fa-fw fa-print"></i>
+            </button>
         </div>
-        <pdf class="col px-0 scroll-y-auto scroll-x-hidden"
+        <pdf
+            class="col px-0 scroll-y-auto scroll-x-hidden"
+            id="pdf-container"
+            ref="pdfComp"
             :page="page"
             :rotate="rotation"
             :src="file.url"
@@ -89,7 +95,10 @@
             toggleFullscreen() {
                 if(!this.fullscreenHandler) return;
                 this.fullscreenHandler.toggle(document.getElementById('file-container'))
-            }
+            },
+            printPdf() {
+                this.$refs.pdfComp.print(300);
+            },
         },
         data() {
             return {
