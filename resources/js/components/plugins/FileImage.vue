@@ -116,14 +116,23 @@
                 </button>
             </div>
             <div class="px-0":class="panelClasses.image">
-                <canvas v-if="fabricSupported" id="file-container-canvas" class="w-100 h-100"></canvas>
-                <img v-else :src="localUrl" class="modal-image" />
-                <button v-if="fabricSupported" type="button" class="btn btn-sm btn-secondary position-absolute m-2" style="left: 0; top: 0;" @click="toggleFilterPanel">
-                    <i class="fas fa-fw fa-magic"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-secondary position-absolute m-2" style="right: 0; top: 0;" v-if="fullscreenHandler" @click="toggleFullscreen">
-                    <i class="fas fa-fw fa-expand"></i>
-                </button>
+                <canvas v-if="fabricSupported" id="file-container-container" class="w-100 h-100"></canvas>
+                <img v-else :src="localUrl" class="modal-image" id="file-container-container" />
+                <div class="d-flex justify-content-between w-100 position-absolute p-2" style="top: 0;">
+                    <div>
+                        <button v-if="fabricSupported" type="button" class="btn btn-sm btn-secondary" @click="toggleFilterPanel">
+                            <i class="fas fa-fw fa-magic"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-secondary" @click="onOCR">
+                            OCR
+                        </button>
+                        <button type="button" class="btn btn-sm btn-secondary" v-if="fullscreenHandler" @click="toggleFullscreen">
+                            <i class="fas fa-fw fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -151,22 +160,27 @@
                 this.fullscreenHandler.add(this.onFullscreenChange);
             }
 
-            this.canvas = new fabric.Canvas('file-container-canvas', {
-                enableRetinaScaling: true
-            });
+            if(this.fabricSupported) {
+                this.canvas = new fabric.Canvas('file-container-container', {
+                    enableRetinaScaling: true
+                });
 
-            const el = this.canvas.getElement().parentElement;
-            el.classList.add('w-100');
-            el.classList.add('h-100');
-            this.resizeCanvasTo(el);
+                const el = this.canvas.getElement().parentElement;
+                el.classList.add('w-100');
+                el.classList.add('h-100');
+                this.resizeCanvasTo(el);
 
-            this.filters = fabric.Image.filters;
+                this.filters = fabric.Image.filters;
 
-            this.loadImageFromUrl(this.localUrl);
+                this.loadImageFromUrl(this.localUrl);
+            }
         },
         destroyed() {
             if(this.fullscreenHandler) {
                 this.fullscreenHandler.remove(this.onFullscreenChange);
+            }
+            if(this.fabricSupported) {
+                this.canvas.clear();
             }
         },
         methods: {
@@ -343,6 +357,12 @@
                     fabric.filterBackend = fabric.initFilterBackend();
                     this.setImage(this.scaledImg);
                     this.canvas.renderAll();
+                });
+            },
+            onOCR() {
+                const elem = document.getElementById('file-container-container');
+                this.$emit('handle-ocr', {
+                    image: elem
                 });
             },
             toggleFullscreen() {

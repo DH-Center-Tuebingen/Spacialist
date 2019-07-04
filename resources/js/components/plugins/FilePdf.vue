@@ -26,6 +26,9 @@
             <button type="button" class="btn btn-link" @click="printPdf()">
                 <i class="fas fa-fw fa-print"></i>
             </button>
+            <button type="button" class="btn btn-link" @click="onOCR">
+                OCR
+            </button>
         </div>
         <pdf
             class="col px-0 scroll-y-auto scroll-x-hidden"
@@ -98,6 +101,12 @@
             },
             printPdf() {
                 this.$refs.pdfComp.print(300);
+            },
+            onOCR() {
+                const elem = document.getElementById('pdf-container').getElementsByTagName('canvas')[0];
+                this.$emit('handle-ocr', {
+                    image: elem
+                });
             },
         },
         data() {

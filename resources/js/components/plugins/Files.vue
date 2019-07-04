@@ -292,6 +292,7 @@
                             :fullscreen-handler="fullscreenHandler"
                             :is="fileCategoryComponent"
                             :storage-config="storageConfig"
+                            @handle-ocr="handleOCR"
                             @update-file-content="updateFileContent">
                         </component>
                         <div class="d-flex flex-row justify-content-between mt-2">
@@ -679,6 +680,7 @@
 <script>
     import { EventBus } from '../../event-bus.js';
     import * as screenfull from 'screenfull';
+    import { TesseractWorker } from 'tesseract.js';
 
     import FileList from './FileList.vue';
 
@@ -696,6 +698,7 @@
     import FileConfirmUploadModal from './FileConfirmUploadModal.vue';
 
     export default {
+        tesseractWorker: new TesseractWorker(),
         components: {
             'file-list': FileList,
             'file-image': FileImage,
@@ -878,6 +881,18 @@
                         query: query
                     });
                 }
+            },
+            handleOCR(event) {
+                this.$options.tesseractWorker
+                    .recognize(event.image)
+                    .then(result => {
+                        console.log(result.text);
+                        const f = new File([result.text], 'ocr-result.txt', {
+                            type: 'text/plain'
+                        });
+                        this.$options.tesseractWorker.terminate();
+                        this.confirmClipboardUpload(f);
+                    });
             },
             updateFileContent(event) {
                 const file = event.file;

@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
       - Manipulations can be stored
   - PDF
     - print button
+  - OCR support (PDF and Images)
 - Dynamic Parent-Element for `string-sc` (Single Choice Dropdown) datatype
   - Reference another SCD attribute in Data-Model-Editor to use it's value as Parent-Element
 - Parents Breadcrumb added to Entity Detail view header
