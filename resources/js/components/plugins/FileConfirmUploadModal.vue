@@ -19,7 +19,7 @@
                                 {{ $t('plugins.files.modal.clipboard.toggle_edit_mode') }}
                             </button>
                         </div>
-                        <div class="col px-0 mt-2">
+                        <div class="col px-0 mt-2 overflow-hidden">
                             <pre class="text-left w-100 h-100 mb-0" v-if="!editMode" v-highlightjs="content"><code class="h-100 text-prewrap word-break-all"></code></pre>
                             <textarea class="w-100 h-100 p-2" v-else v-model="content" @input="fileEdited = true"></textarea>
                         </div>
