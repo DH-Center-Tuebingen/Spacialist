@@ -432,9 +432,15 @@
             }
         },
         watch: {
-            localUrl(newUrl, oldUrl) {
-                this.canvas.clear();
-                this.loadImageFromUrl(newUrl);
+            file(newFile, oldFile) {
+                // if neither file nor content changed
+                if(newFile.id == oldFile.id && newFile.modified == oldFile.modified) {
+                    return;
+                }
+                if(this.fabricSupported) {
+                    this.canvas.clear();
+                    this.loadImageFromUrl(this.localUrl);
+                }
             }
         }
     }
