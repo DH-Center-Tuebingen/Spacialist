@@ -133,15 +133,16 @@
         </div>
         <div class="col px-0" v-show="isAction('linkedFiles')">
             <form>
-                <div class="form-check">
-                    <input type="checkbox" id="sub-entities-check" class="form-check-input" v-model="includeSubEntities" @change="applyFilters('linkedFiles')"/>
-                    <label class="form-check-label" for="sub-entities-check">
-                        {{ $t('plugins.files.include-sub-files') }}
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" id="sub-entities-check" class="custom-control-input" v-model="includeSubEntities" @change="applyFilters('linkedFiles')"/>
+                    <label class="custom-control-label" for="sub-entities-check">
+                        {{ $t('plugins.files.include-sub-files') }} <i class="fas fa-fw fa-sitemap"></i>
                     </label>
                 </div>
             </form>
             <file-list
                 :context-menu="contextMenu"
+                :entity-id="selectedEntity.id"
                 :files="linkedFiles.files"
                 :file-state="linkedFiles.fileState"
                 :is-fetching="linkedFiles.fetchingFiles"

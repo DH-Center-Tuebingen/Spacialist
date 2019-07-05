@@ -150,7 +150,8 @@ const en = {
         'allow-override': 'Allow Override?',
         tag: 'Tag | Tags',
         set: 'Set',
-        'has-tags': 'Has no tags | Has one tag | Has {cnt} tags'
+        'has-tags': 'Has no tags | Has one tag | Has {cnt} tags',
+        'from-subentity': 'Is from Sub-Entity'
     },
     main: {
         entity: {

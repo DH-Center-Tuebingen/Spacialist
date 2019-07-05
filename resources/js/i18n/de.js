@@ -150,7 +150,8 @@ const de = {
         'allow-override': 'Überschreibbar?',
         tag: 'Schlagwort | Schlagworte',
         set: 'Setzen',
-        'has-tags': 'Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte'
+        'has-tags': 'Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte',
+        'from-subentity': 'Gehört zu einer Sub-Entität'
     },
     main: {
         entity: {
