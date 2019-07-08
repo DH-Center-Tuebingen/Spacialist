@@ -59,7 +59,8 @@
     import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
     import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
     import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
-    import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+    import { OBJLoader2 } from 'three/examples/jsm/loaders/OBJLoader2.js';
+    import { MtlObjBridge } from 'three/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js';
     import { PDBLoader } from 'three/examples/jsm/loaders/PDBLoader.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
     import * as dat from 'three/examples/jsm/libs/dat.gui.module.js';
@@ -428,13 +429,12 @@
                 const vm = this;
                 // TODO only init if VR enabled?
                 this.initViveEventListeners();
-                let ctrlLoader = new OBJLoader();
-                ctrlLoader.setPath('./img/');
-                ctrlLoader.load('vr_controller_vive_1_5.obj', function(object) {
+                let ctrlLoader = new OBJLoader2();
+                ctrlLoader.load('./img/vr_controller_vive_1_5.obj', function(object) {
                     let txtLoader = new TextureLoader();
                     txtLoader.setPath('./img/vive-controller/');
                     let controllerModel = object.children[0];
-                    controllerModel.material.map = txtLoader.load('onepointfive_texture.png');
+                    controllerModel.material.map = txtLoader.load('./img/onepointfive_texture.png');
                     vm.grabController.add(object.clone());
                     vm.flashlightController.add(object.clone());
                 });
@@ -514,7 +514,6 @@
                 // try to load mtl file
                 mtlLoader.load(mtlname, materials => {
                     // load obj file with loaded materials
-                    materials.preload();
                     this.loadObjModel(path, filename, materials);
                 }, event => {
                     this.updateProgress(event);
@@ -524,12 +523,12 @@
                 });
             },
             loadObjModel: function(path, filename, materials) {
-                let objLoader = new OBJLoader();
+                let objLoader = new OBJLoader2();
+                objLoader.setModelName(filename);
                 if(materials) {
-                    objLoader.setMaterials(materials);
+                    objLoader.addMaterials(MtlObjBridge.addMaterialsFromMtlLoader(materials));
                 }
-                objLoader.setPath(path);
-                objLoader.load(filename,
+                objLoader.load(path + filename,
                     object => { // onSuccess
                         this.addModelToScene(object);
                     },
