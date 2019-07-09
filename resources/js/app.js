@@ -757,9 +757,10 @@ Vue.filter('truncate', function(str, length = 80, ellipses = '…') {
 Vue.filter('bibtexify', function(value, type) {
     let rendered = "<pre><code>";
     if(type) {
-        rendered += "@"+type+" {";
+        rendered += "@"+type+" {"
+        if(value['citekey']) rendered += value['citekey'] + ",";
         for(let k in value) {
-            if(value[k] == null || value[k] == '') continue;
+            if(value[k] == null || value[k] == '' || k == 'citekey') continue;
             rendered += "    <br />";
             rendered += "    " + k + " = \"" + value[k] + "\"";
         }
