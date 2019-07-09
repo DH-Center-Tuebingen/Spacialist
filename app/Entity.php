@@ -57,9 +57,11 @@ class Entity extends Model
             $relation = EntityTypeRelation::where('parent_id', $parentCtid)
                 ->where('child_id', $entityTypeId)->exists();
             if(!$relation) {
-                return response()->json([
-                    'error' => __('This type is not an allowed sub-type.')
-                ], 400);
+                return [
+                    'type' => 'error',
+                    'msg' => __('This type is not an allowed sub-type.'),
+                    'code' => 400
+                ];
             }
         } else {
             if(!EntityType::find($entityTypeId)->is_root) {
