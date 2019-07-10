@@ -2,11 +2,11 @@
     <div class="pr-1">
         <draggable
             class="h-100"
+            v-bind="dragOpts"
             v-model="localAttributes"
             :class="{'drag-container': !disableDrag}"
             :clone="clone"
             :move="move"
-            :options="dragOpts"
             @add="added"
             @end="dropped"
             @start="dragged">
