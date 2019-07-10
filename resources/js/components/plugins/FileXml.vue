@@ -14,7 +14,7 @@
                 <i class="fab fa-fw fa-html5"></i> {{ $t('plugins.files.modal.detail.toggle-html') }}
             </button>
         </div>
-        <div class="d-flex mt-2 w-100 col px-0">
+        <div class="d-flex mt-2 w-100 flex-grow-1 overflow-hidden">
             <div class="col px-1" v-if="editMode">
                 <textarea v-validate="" name="editTextarea" class="w-100 h-100 p-2" v-model="content"></textarea>
             </div>

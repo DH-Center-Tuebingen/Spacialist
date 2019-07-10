@@ -283,10 +283,10 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body row col text-center">
-                    <div class="col-md-6 d-flex flex-column">
+                <div class="modal-body row flex-grow-1 text-center overflow-hidden">
+                    <div class="col-md-6 d-flex flex-column h-100">
                         <component
-                            class="col px-0 overflow-hidden"
+                            class="flex-grow-1 overflow-hidden"
                             id="file-container"
                             :entity="localEntity"
                             :file="selectedFile"
@@ -305,7 +305,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="col-md-6 d-flex flex-column">
+                    <div class="col-md-6 d-flex flex-column h-100">
                         <ul class="nav nav-tabs nav-fill">
                             <li class="nav-item">
                                 <a href="#" class="nav-link" :class="{active: modalTab == 'properties'}" @click.prevent="modalTab = 'properties'">
@@ -887,7 +887,6 @@
                 this.$options.tesseractWorker
                     .recognize(event.image)
                     .then(result => {
-                        console.log(result.text);
                         const f = new File([result.text], 'ocr-result.txt', {
                             type: 'text/plain'
                         });

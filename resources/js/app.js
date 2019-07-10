@@ -12,6 +12,7 @@ import {
     faQuestionCircle
 } from '@fortawesome/free-regular-svg-icons';
 import {
+    faAdjust,
     faAngleDoubleLeft,
     faAngleDoubleRight,
     faAngleDown,
@@ -40,6 +41,7 @@ import {
     faCopy,
     faCopyright,
     faCubes,
+    faDotCircle,
     faDownload,
     faDrawPolygon,
     faEdit,
@@ -90,6 +92,7 @@ import {
     faQuestion,
     faRedoAlt,
     faRoad,
+    faRuler,
     faRulerCombined,
     faSave,
     faSearch,
@@ -172,6 +175,7 @@ library.add(
     faVuejs,
     faClipboard,
     faQuestionCircle,
+    faAdjust,
     faAngleDoubleLeft,
     faAngleDoubleRight,
     faAngleDown,
@@ -200,6 +204,7 @@ library.add(
     faCopy,
     faCopyright,
     faCubes,
+    faDotCircle,
     faDownload,
     faDrawPolygon,
     faEdit,
@@ -251,6 +256,7 @@ library.add(
     faQuestionCircle,
     faRedoAlt,
     faRoad,
+    faRuler,
     faRulerCombined,
     faSave,
     faSearch,
