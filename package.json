@@ -90,7 +90,7 @@
         "vue-typeahead": "^2.3.2",
         "vue-upload-component": "^2.8.16",
         "vuedraggable": "^2.17.0",
-        "wavesurfer.js": "^2.1.1",
+        "wavesurfer.js": "^3.0.0",
         "wkx": "^0.4.5"
     }
 }

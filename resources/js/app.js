@@ -129,7 +129,7 @@ import {
     faUser,
     faUserEdit,
     faUsers,
-    faVolumeOff,
+    faVolumeMute,
     faVolumeUp
 } from '@fortawesome/free-solid-svg-icons';
 import VModal from 'vue-js-modal';
@@ -293,7 +293,7 @@ library.add(
     faUser,
     faUserEdit,
     faUsers,
-    faVolumeOff,
+    faVolumeMute,
     faVolumeUp
 );
 dom.watch(); // search for <i> tags to replace with <svg>
