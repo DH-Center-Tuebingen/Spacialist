@@ -160,6 +160,7 @@
                 // Release devices
                 this.rtc.player.record().stopDevice();
                 this.onRecordingFinished(this.rtc.data, dur);
+                this.rtc.player.record().removeRecording();
             });
         },
         methods: {
