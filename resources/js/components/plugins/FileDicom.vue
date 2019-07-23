@@ -40,7 +40,6 @@
                         </dd>
                         <dt>
                             {{ $t('plugins.files.modal.detail.dicom.controls.voi') }}
-                            VOI (Values of Interest)
                         </dt>
                         <dd v-html="$t('plugins.files.modal.detail.dicom.controls.voi-desc')">
                         </dd>
