@@ -18,7 +18,7 @@ const de = {
                     active: 'keine Filter aktiv | ein Filter aktiv | {cnt} Filter aktiv'
                 },
                 export: {
-                    selected: 'Ausgewählte Dateien exportieren ({cnt})'
+                    selected: 'Ausgewählte Dateien exportieren <span class="badge badge-secondary">{cnt}</span>'
                 }
             },
             image_filters: {

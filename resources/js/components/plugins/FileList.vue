@@ -27,13 +27,17 @@
                     <i class="fas fa-fw fa-th"></i>
                 </span>
             </a>
-            <button class="btn btn-sm btn-outline-primary" v-show="fileCount" @click="exportFiles(selectedFiles)" v-if="$can('export_files')">
-                {{
-                    $t('plugins.files.header.export.selected', {
-                        cnt: fileCount
-                    })
-                }}
-            </button>
+            <div class="dropdown" v-if="fileCount">
+                <span id="selected-files-actions" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                </span>
+                <div class="dropdown-menu" aria-labelledby="selected-files-actions">
+                    <a class="dropdown-item" href="#" v-if="$can('export_files')" @click.prevent="exportFiles(selectedFiles)">
+                        <i class="fas fa-fw fa-download text-info"></i>
+                        <span v-html="$t('plugins.files.header.export.selected', {cnt: fileCount})"></span>
+                    </a>
+                </div>
+            </div>
         </div>
         <div infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk" class="row col scroll-y-auto">
             <div class="row col align-content-start" v-if="grid">
@@ -276,6 +280,7 @@
             }
         },
         mounted() {
+            console.log(this.contextMenu);
         },
         methods: {
             getFileLinks(file) {
