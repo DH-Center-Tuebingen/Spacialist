@@ -588,6 +588,149 @@ class ApiEntityTest extends TestCase
     }
 
     /**
+    * Test setting wrong values for epoch attribute of an entity (id=2).
+    *
+    * @return void
+    */
+    public function testPatchWrongAttributesEndpoint()
+    {
+        $entity = Entity::with('attributes')->find(2);
+
+        foreach($entity->attributes as $attr) {
+            if($attr->id == 17) {
+                $val = json_decode($attr->pivot->json_val);
+                $this->assertEquals(340, $val->start);
+                $this->assertEquals(300, $val->end);
+                $this->assertEquals('bc', $val->startLabel);
+                $this->assertEquals('bc', $val->endLabel);
+            }
+        }
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/entity/2/attributes', [
+            [
+                'params' => [
+                    'id' => 62,
+                    'aid' => 17,
+                    'cid' => 2
+                ],
+                'op' => 'replace',
+                'value' => [
+                    'startLabel' => 'ad',
+                    'endLabel' => 'bc',
+                    'start' => 400,
+                    'end' => 150,
+                    'epoch' => [
+                        'concept_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eisenzeit#20171220165409'
+                    ]
+                ]
+            ],
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertExactJson([
+            'error' => 'Start date of a time period must not be after it\'s end date'
+        ]);
+        $this->refreshToken($response);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/entity/2/attributes', [
+            [
+                'params' => [
+                    'id' => 62,
+                    'aid' => 17,
+                    'cid' => 2
+                ],
+                'op' => 'replace',
+                'value' => [
+                    'startLabel' => 'ad',
+                    'endLabel' => 'ad',
+                    'start' => 400,
+                    'end' => 150,
+                    'epoch' => [
+                        'concept_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eisenzeit#20171220165409'
+                    ]
+                ]
+            ],
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertExactJson([
+            'error' => 'Start date of a time period must not be after it\'s end date'
+        ]);
+        $this->refreshToken($response);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/entity/2/attributes', [
+            [
+                'params' => [
+                    'id' => 62,
+                    'aid' => 17,
+                    'cid' => 2
+                ],
+                'op' => 'replace',
+                'value' => [
+                    'startLabel' => 'bc',
+                    'endLabel' => 'bc',
+                    'start' => 100,
+                    'end' => 150,
+                    'epoch' => [
+                        'concept_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eisenzeit#20171220165409'
+                    ]
+                ]
+            ],
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertExactJson([
+            'error' => 'Start date of a time period must not be after it\'s end date'
+        ]);
+        $this->refreshToken($response);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->patch('/api/v1/entity/2/attributes', [
+            [
+                'params' => [
+                    'id' => 62,
+                    'aid' => 17,
+                    'cid' => 2
+                ],
+                'op' => 'replace',
+                'value' => [
+                    'startLabel' => 'bc',
+                    'endLabel' => 'bc',
+                    'start' => 400,
+                    'end' => 300,
+                    'epoch' => [
+                        'concept_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/eisenzeit#20171220165409'
+                    ]
+                ]
+            ],
+        ]);
+
+        $response->assertStatus(200);
+
+        $entity = Entity::with('attributes')->find(2);
+        foreach($entity->attributes as $attr) {
+            if($attr->id == 17) {
+                $val = json_decode($attr->pivot->json_val);
+                $this->assertEquals(400, $val->start);
+                $this->assertEquals(300, $val->end);
+                $this->assertEquals('bc', $val->startLabel);
+                $this->assertEquals('bc', $val->endLabel);
+            }
+        }
+    }
+
+    /**
     * Test changing certainty of an attribute (id=5) of an entity (id=8).
     *
     * @return void

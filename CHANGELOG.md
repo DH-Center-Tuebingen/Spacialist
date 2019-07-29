@@ -46,6 +46,7 @@ All notable changes to this project will be documented in this file.
 - AD/BC dropdowns overlapping dropdowns of other attributes
 - Non-visible selection list for entity search in file linking tab
 - Overflowing container in file upload modal (upload from clipboard)
+- Storing dates in epoch (if start and end are BC)
 
 ## 0.6.3
 ### Added

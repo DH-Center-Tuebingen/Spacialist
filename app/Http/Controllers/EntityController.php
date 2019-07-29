@@ -331,10 +331,16 @@ class EntityController extends Controller {
                 case 'table':
                     // check for invalid time spans
                     if($attr->datatype == 'epoch' || $attr->datatype == 'timeperiod') {
+                        $sl = strtoupper($value['startLabel']);
+                        $el = strtoupper($value['endLabel']);
+                        $s = $value['start'];
+                        $e = $value['end'];
                         if(
-                            ($value['startLabel'] == 'AD' && $value['endLabel'] == 'BC')
+                            ($sl == 'AD' && $el == 'BC')
                             ||
-                            ($value['startLabel'] == $value['endLabel'] && $value['start'] > $value['end'])
+                            ($sl == 'BC' && $el == 'BC' && $s < $e)
+                            ||
+                            ($sl == 'AD' && $el == 'AD' && $s > $e)
                         ) {
                             return response()->json([
                                 'error' => __('Start date of a time period must not be after it\'s end date')
