@@ -1362,35 +1362,43 @@
                 });
             },
             drawFeature(feature) {
-                if(this.reset) {
-                    let source = this.vector.getSource();
-                    if(source.getFeatures().length) {
-                        source.clear();
-                    }
-                }
                 this.snap.addFeature(feature);
-                this.onDrawend(feature, this.wktFormat.writeFeature(feature)).then(newFeature => {
-                    if(!newFeature) return;
-                    this.vector.getSource().removeFeature(feature);
-                    let layer;
-                    const ent = newFeature.get('entity');
-                    if(ent) {
-                        layer = this.getLayer(ent.entity_type_id)
-                    } else {
-                        layer = this.getUnlinkedLayer();
-                    }
-                    const entLayer = this.getEntityLayerById(layer.id);
-                    const fid = newFeature.get('id');
-                    const defaultStyle = this.createStyle(layer.color);
-                    this.featureStyles[fid] = {
-                        default: defaultStyle,
-                        label: null,
-                        style: null
-                    };
-                    newFeature.setStyle(this.featureStyles[fid].default);
-                    entLayer.getSource().addFeature(newFeature);
-                    this.features[fid] = newFeature;
-                });
+                this.onDrawend(feature, this.wktFormat.writeFeature(feature, {
+                    featureProjection: 'EPSG:3857',
+                    dataProjection: this.initProjection
+                }))
+                    .then(newFeature => {
+                        if(!newFeature) return;
+                        this.vector.getSource().removeFeature(feature);
+                        let layer;
+                        const ent = newFeature.get('entity');
+                        if(ent) {
+                            layer = this.getLayer(ent.entity_type_id)
+                        } else {
+                            layer = this.getUnlinkedLayer();
+                        }
+                        // FIXME while initWkt is only one layer
+                        const entLayer =
+                            this.initWkt.length ?
+                                this.getEntityLayers()[0] :
+                                this.getEntityLayerById(layer.id);
+                        const fid = newFeature.get('id');
+                        const defaultStyle = this.createStyle(layer ? layer.color : undefined);
+                        this.featureStyles[fid] = {
+                            default: defaultStyle,
+                            label: null,
+                            style: null
+                        };
+                        newFeature.setStyle(this.featureStyles[fid].default);
+                        let source = entLayer.getSource();
+                        if(this.reset) {
+                            if(source.getFeatures().length) {
+                                source.clear();
+                            }
+                        }
+                        source.addFeature(newFeature);
+                        this.features[fid] = newFeature;
+                    });
             },
             updateFeatures() {
                 const features = this.modify.getModifiedFeatures();

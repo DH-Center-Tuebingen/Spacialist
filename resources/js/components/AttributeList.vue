@@ -173,9 +173,12 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body d-flex flex-column">
-                    <ol-map class="h-100"
+                <div class="modal-body d-flex flex-column flex-grow-1 overflow-hidden">
+                    <ol-map class="flex-grow-1 overflow-hidden"
+                        :epsg="{epsg: '4326'}"
+                        :layers="wktLayers"
                         :init-wkt="initialGeoValues"
+                        :init-projection="'EPSG:4326'"
                         :on-deleteend="onGeoFeaturesDeleted"
                         :on-drawend="onGeoFeatureAdded"
                         :on-modifyend="onGeoFeaturesUpdated"
@@ -441,7 +444,18 @@
                     this.initialGeoValues = [];
                 }
                 this.selectedAttribute = aid;
-                this.$modal.show('geography-place-modal-'+this.uniqueId);
+                $http.get('map/layer?basic=1').then(response => {
+                    this.wktLayers = {};
+                    const bl = response.data.baselayers;
+                    const ol = response.data.overlays;
+                    bl.forEach(l => {
+                        this.wktLayers[l.id] = l;
+                    });
+                    ol.forEach(l => {
+                        this.wktLayers[l.id] = l;
+                    });
+                    this.$modal.show('geography-place-modal-'+this.uniqueId);
+                });
             },
             hideGeographyModal() {
                 this.$modal.hide('geography-place-modal-'+this.uniqueId);
@@ -456,6 +470,7 @@
             },
             onGeoFeatureAdded(feature, wkt) {
                 this.newGeoValue = wkt;
+                return new Promise(r => r(feature));
             },
             onGeoFeaturesUpdated(features, wkt) {
                 // We only have one possible feature.
@@ -533,6 +548,7 @@
                 uniqueId: Math.random().toString(36),
                 selectedAttribute: -1,
                 initialGeoValues: [],
+                wktLayers: {},
                 currentGeoValue: '',
                 newGeoValue: ''
             }
