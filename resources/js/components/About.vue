@@ -1,5 +1,5 @@
 <template>
-    <modal name="about-modal" height="auto" :scrollable="true" @opened="init">
+    <modal name="about-modal" height="auto" :scrollable="true" @before-open="preInit" @opened="init">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ $t('main.about.title') }}</h5>
@@ -86,9 +86,22 @@
         ],
         mounted() {},
         methods: {
+            preInit() {
+                if(!this.retrieved) {
+                    this.getVersion();
+                }
+            },
             init() {
                 // Enable popovers
                 $('#version-time').popover();
+            },
+            getVersion() {
+                $httpQueue.add(() => $http.get('/version').then(response => {
+                    this.retrieved = true;
+                    for(var k in response.data) {
+                        Vue.set(this.version, k, response.data[k]);
+                    }
+                }));
             },
             hideAboutModal() {
                 this.$modal.hide('about-modal');
@@ -97,14 +110,11 @@
         data() {
             return {
                 version: {},
+                retrieved: false
             }
         },
         created() {
-            $httpQueue.add(() => $http.get('/version').then(response => {
-                for(var k in response.data) {
-                    Vue.set(this.version, k, response.data[k]);
-                }
-            }));
+            this.getVersion();
         }
     }
 </script>
