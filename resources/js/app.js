@@ -310,7 +310,8 @@ require('typeface-source-code-pro');
 require('popper.js');
 require('bootstrap');
 window.Vue = require('vue');
-window._ = require('lodash');
+window._clone = require('lodash/clone');
+window._orderBy = require('lodash/orderBy');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
 require('./globals.js');
 

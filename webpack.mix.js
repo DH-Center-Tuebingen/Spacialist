@@ -34,14 +34,6 @@ const appPath = process.env.MIX_APP_PATH;
 mix.js('resources/js/app.js', 'public/js')
    .sass('resources/sass/app.scss', 'public/css')
    .copy(
-       'node_modules/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderWebWorker.min.js',
-       'public/js/cornerstoneWADOImageLoaderWebWorker.min.js'
-   )
-   .copy(
-       'node_modules/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderCodecs.min.js',
-       'public/js/cornerstoneWADOImageLoaderCodecs.min.js'
-   )
-   .copy(
        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
        'public/css'
    )
@@ -53,6 +45,9 @@ mix.js('resources/js/app.js', 'public/js')
    .webpackConfig({
       output: {
          publicPath: '/' + appPath
+      },
+      node: {
+         fs: 'empty'
       }
    })
    .webpackConfig(webpack => {

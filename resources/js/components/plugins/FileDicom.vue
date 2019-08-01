@@ -86,8 +86,8 @@
     import * as cornerstone from 'cornerstone-core';
     import * as cornerstoneMath from 'cornerstone-math';
     import * as cornerstoneTools from 'cornerstone-tools';
-    import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
     import * as dicomParser from 'dicom-parser';
+    import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
     import dicomUids from '../../plugins/dicomUids';
     import dicomTags from '../../plugins/dicomDict';
 
@@ -97,10 +97,12 @@
     cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
 
     const config = {
-        webWorkerPath : '../../js/cornerstoneWADOImageLoaderWebWorker.min.js',
+        maxWebWorkers: navigator.hardwareConcurrency || 1,
+        startWebWorkersOnDemand : true,
         taskConfiguration: {
             'decodeTask' : {
-                codecsPath: '../js/cornerstoneWADOImageLoaderCodecs.min.js'
+                initializeCodecsOnStartup: false,
+                usePDFJS: false
             }
         }
     };

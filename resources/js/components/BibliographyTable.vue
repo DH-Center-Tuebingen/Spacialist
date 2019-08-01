@@ -589,7 +589,7 @@
                     });
                 }
                 const size = Math.min(this.entriesLoaded, filteredEntries.length);
-                return _.orderBy(filteredEntries, this.orderColumn, this.orderType).slice(0, size);
+                return _orderBy(filteredEntries, this.orderColumn, this.orderType).slice(0, size);
             }
         },
         availableTypes: [

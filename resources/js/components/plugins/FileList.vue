@@ -279,9 +279,7 @@
                 type: Array
             }
         },
-        mounted() {
-            console.log(this.contextMenu);
-        },
+        mounted() {},
         methods: {
             getFileLinks(file) {
                 if(!this.showLinks) return [];

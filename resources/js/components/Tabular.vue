@@ -164,7 +164,7 @@
                 }
             },
             addTableRow(row) {
-                this.value.push(_.clone(row));
+                this.value.push(_clone(row));
                 for(let k in row) {
                     Vue.delete(row, k);
                 }
