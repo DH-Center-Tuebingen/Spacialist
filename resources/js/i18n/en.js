@@ -177,7 +177,7 @@ const en = {
                         type: 'Entity-Type - Ascending'
                     },
                     desc: {
-                        rank: 'Rank - Descending (Drag & Drop)',
+                        rank: 'Rank - Descending',
                         name: 'Name - Descending',
                         children: 'Count Sub-Entities - Descending',
                         type: 'Entity-Type - Descending'
