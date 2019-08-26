@@ -162,7 +162,6 @@ import VCalendar from 'v-calendar';
 import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
-import VTooltip from 'v-tooltip';
 import VueScrollTo from 'vue-scrollto';
 
 import { EventBus } from './event-bus.js';
@@ -336,13 +335,6 @@ Vue.use(Notifications);
 Vue.use(VCalendar, {
     firstDayOfWeek: 2,
     popoverVisibility: 'focus'
-});
-Vue.use(VTooltip, {
-    popover: {
-        defaultBaseClass: 'popover',
-        defaultInnerClass: 'popover-body',
-        defaultArrowClass: 'arrow'
-    }
 });
 Vue.use(VueScrollTo);
 
