@@ -297,6 +297,18 @@ library.add(
 );
 dom.watch(); // search for <i> tags to replace with <svg>
 
+// Override vue-routers push method to catch (and "suppress") it's errors
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location, onResolve, onReject) {
+    if(onResolve || onReject) {
+        return originalPush.call(this, location, onResolve, onReject);
+    }
+    return originalPush.call(this, location)
+        .catch(err =>
+            console.log("Error while pushing new route")
+        );
+}
+
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when

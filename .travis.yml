@@ -13,8 +13,8 @@ addons:
     - gdal-bin
 
 php:
-    - '7.1'
     - '7.2'
+    - '7.3'
 
 before_script:
     - mkdir -p build/logs

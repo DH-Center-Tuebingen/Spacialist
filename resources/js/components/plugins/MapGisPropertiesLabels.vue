@@ -9,14 +9,15 @@
                     <div class="col-md-9">
                         <input v-if="!isEntityLayer" class="form-control" type="text" id="label-text" name="label-text" v-model="label" />
                         <div v-else>
-                            <div class="d-flex flex-row justify-content-between form-group clickable mb-2" @click="useEntityName = !useEntityName">
-                                <span class="align-middle">
+                            <div class="d-flex flex-row justify-content-between form-group mb-2">
+                                <span @click="useEntityName = !useEntityName">
                                     {{ $t('plugins.map.gis.props.labels.use-entity-name') }}
                                 </span>
-                                <label class="cb-toggle mx-0 my-auto align-middle">
-                                    <input type="checkbox" id="apply-changes-toggle" v-model="useEntityName" />
-                                    <span class="slider slider-rounded slider-primary"></span>
-                                </label>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="use-entity-name-toggle" v-model="useEntityName" />
+                                    <label class="custom-control-label" for="use-entity-name-toggle">
+                                    </label>
+                                </div>
                             </div>
                             <multiselect
                                 label="thesaurus_url"
@@ -48,10 +49,11 @@
                             </span>
                         </span>
                     </div>
-                    <label class="cb-toggle mx-0 my-auto align-middle">
-                        <input type="checkbox" id="font-active-toggle" v-model="font.active" />
-                        <span class="slider slider-rounded slider-primary"></span>
-                    </label>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="font-options-toggle" v-model="font.active" />
+                        <label class="custom-control-label" for="font-options-toggle">
+                        </label>
+                    </div>
                 </h6>
                 <div v-show="displays.font">
                     <div class="form-group row">
@@ -135,10 +137,11 @@
                             </span>
                         </span>
                     </div>
-                    <label class="cb-toggle mx-0 my-auto align-middle">
-                        <input type="checkbox" id="buffer-active-toggle" v-model="buffer.active" />
-                        <span class="slider slider-rounded slider-primary"></span>
-                    </label>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="buffer-options-toggle" v-model="buffer.active" />
+                        <label class="custom-control-label" for="buffer-options-toggle">
+                        </label>
+                    </div>
                 </h6>
                 <div v-show="displays.buffer">
                     <div class="form-group row">
@@ -180,10 +183,11 @@
                             </span>
                         </span>
                     </div>
-                    <label class="cb-toggle mx-0 my-auto align-middle">
-                        <input type="checkbox" id="background-active-toggle" v-model="background.active" />
-                        <span class="slider slider-rounded slider-primary"></span>
-                    </label>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="background-options-toggle" v-model="background.active" />
+                        <label class="custom-control-label" for="background-options-toggle">
+                        </label>
+                    </div>
                 </h6>
                 <div v-show="displays.background">
                     <div class="form-group row">
@@ -249,10 +253,11 @@
                             </span>
                         </span>
                     </div>
-                    <label class="cb-toggle mx-0 my-auto align-middle">
-                        <input type="checkbox" id="position-active-toggle" v-model="position.active" />
-                        <span class="slider slider-rounded slider-primary"></span>
-                    </label>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="position-options-toggle" v-model="position.active" />
+                        <label class="custom-control-label" for="position-options-toggle">
+                        </label>
+                    </div>
                 </h6>
                 <div v-show="displays.position">
                     <div class="form-group row">

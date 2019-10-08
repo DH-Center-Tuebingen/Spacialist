@@ -43,13 +43,10 @@
                 </button>
             </li>
             <li class="list-inline-item">
-                <div class="clickable" @click="showAllFields = !showAllFields">
-                    <span class="align-middle">
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="show-all-fields-toggle" v-model="showAllFields" />
+                    <label class="custom-control-label" for="show-all-fields-toggle">
                         {{ $t('main.bibliography.show-all-fields') }}
-                    </span>
-                    <label class="cb-toggle mx-0 my-auto align-middle">
-                        <input type="checkbox" id="apply-changes-toggle" v-model="showAllFields" />
-                        <span class="slider slider-rounded slider-primary"></span>
                     </label>
                 </div>
             </li>

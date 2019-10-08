@@ -681,7 +681,7 @@
 <script>
     import { EventBus } from '../../event-bus.js';
     import * as screenfull from 'screenfull';
-    import { TesseractWorker } from 'tesseract.js';
+    import { createWorker as createTesseractWorker } from 'tesseract.js';
 
     import FileList from './FileList.vue';
 
@@ -699,7 +699,7 @@
     import FileConfirmUploadModal from './FileConfirmUploadModal.vue';
 
     export default {
-        tesseractWorker: new TesseractWorker(),
+        tesseractWorker: createTesseractWorker(),
         components: {
             'file-list': FileList,
             'file-image': FileImage,
@@ -946,17 +946,17 @@
                 this.selectedFile.editing = false;
             },
             toggleFullscreen(element) {
-                if(!screenfull.enabled) return new Promise(r => r(null));
+                if(!screenfull.isEnabled) return new Promise(r => r(null));
                 if(!element) return new Promise(r => r(null));
                 return screenfull.toggle(element);
             },
             addToggleListener(callback) {
-                if(screenfull.enabled) {
+                if(screenfull.isEnabled) {
                     screenfull.on('change', callback);
                 }
             },
             removeToggleListener(callback) {
-                if(screenfull.enabled) {
+                if(screenfull.isEnabled) {
                     screenfull.off('change', callback);
                 }
             },

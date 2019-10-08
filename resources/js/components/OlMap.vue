@@ -146,7 +146,7 @@
     import {defaults as defaultControls} from 'ol/control.js';
     import { getCenter as getExtentCenter, extend as extendExtent} from 'ol/extent';
     import Feature from 'ol/Feature';
-    import Graticule from 'ol/Graticule';
+    import Graticule from 'ol/layer/Graticule';
     import { defaults as defaultInteractions } from 'ol/interaction';
     import Map from 'ol/Map';
     import {unByKey} from 'ol/Observable.js';
@@ -531,7 +531,7 @@
                         displayInLayerSwitcher: true,
                         title: layerName,
                         visible: l.visible,
-                        opacity: l.opacity,
+                        opacity: parseFloat(l.opacity),
                         color: l.color,
                         layer: 'entity',
                         layer_id: l.id,
@@ -877,7 +877,7 @@
                     baseLayer: !l.is_overlay,
                     displayInLayerSwitcher: true,
                     visible: l.visible,
-                    opacity: l.opacity,
+                    opacity: parseFloat(l.opacity),
                     layer: 'osm',
                     source: source
                 });

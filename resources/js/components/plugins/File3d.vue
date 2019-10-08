@@ -35,7 +35,6 @@
         HemisphereLight,
         IcosahedronBufferGeometry,
         Line,
-        Loader,
         Math as TMath,
         LOD,
         Matrix4,
@@ -55,7 +54,6 @@
     import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
     import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
-    import { DDSLoader } from 'three/examples/jsm/loaders/DDSLoader.js';
     import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
     import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
     import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
@@ -64,7 +62,7 @@
     import { PDBLoader } from 'three/examples/jsm/loaders/PDBLoader.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
     import * as dat from 'three/examples/jsm/libs/dat.gui.module.js';
-    import { WebVR } from 'three/examples/js/vr/WebVR.js';
+    import { WEBVR } from 'three/examples/jsm/vr/WebVR.js';
 
     export default {
         props: {
@@ -213,7 +211,7 @@
                 this.initLights();
                 this.initControls();
                 if(navigator.getVRDisplays) {
-                    this.container.appendChild(WebVR.createButton(this.renderer));
+                    this.container.appendChild(WEBVR.createButton(this.renderer));
                     this.initViveControls();
                 }
 
@@ -235,7 +233,7 @@
                 this.scene.add(this.transformControls);
                 this.transformControls.attach(mesh);
                 this.transformControls.enabled = true;
-                this.controls.target = mesh.position;
+                this.controls.target = mesh.position.clone();
                 this.controls.update();
             },
             removeTransformControls() {
@@ -505,7 +503,6 @@
                 const filename = url.substr(sep);
                 // we assume that the mtl file has the same name as the obj file
                 const mtlname = filename.substr(0, filename.lastIndexOf('.')) + '.mtl';
-                Loader.Handlers.add(/\.dds$/i, new DDSLoader());
                 const mtlLoader = new MTLLoader();
                 mtlLoader.setMaterialOptions({
                     side: DoubleSide
@@ -668,9 +665,13 @@
                         node.position.copy(offset);
                         if(isLod) {
                             lod.addLevel(node, (i+1) * 10);
+                            this.raycastTargets.push(node);
+                        } else {
+                            // push original node if not a LoD, because
+                            // original model is added to group later
+                            this.raycastTargets.push(model.children[i]);
                         }
                     }
-                    this.raycastTargets.push(node);
                 }
                 if(isLod) {
                     this.lodGroup[mid] = lod;
