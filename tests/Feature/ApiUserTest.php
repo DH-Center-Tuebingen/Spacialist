@@ -342,9 +342,9 @@ class ApiUserTest extends TestCase
             ]);
 
         $role = Role::find(1);
-        $this->assertTrue($role->hasPermission('create_concepts'));
-        $this->assertTrue($role->hasPermission('delete_move_concepts'));
-        $this->assertTrue(!$role->hasPermission('duplicate_edit_concepts'));
+        $this->assertTrue($role->hasPermissionTo('create_concepts'));
+        $this->assertTrue($role->hasPermissionTo('delete_move_concepts'));
+        $this->assertTrue(!$role->hasPermissionTo('duplicate_edit_concepts'));
         $this->assertEquals(2, count($role->permissions));
         $response->assertStatus(200);
         $response->assertJsonStructure([
@@ -476,7 +476,7 @@ class ApiUserTest extends TestCase
      */
     public function testPermissions()
     {
-        User::first()->detachRoles();
+        User::first()->roles()->detach();
 
         $calls = [
             ['url' => '/user', 'error' => 'You do not have the permission to view users', 'verb' => 'get'],

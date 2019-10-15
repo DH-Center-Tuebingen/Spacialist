@@ -124,6 +124,7 @@ class UserController extends Controller
         $this->validate($request, Role::rules);
 
         $role = new Role();
+        $role->guard_name = 'web';
         foreach($request->only(array_keys(Role::rules)) as $key => $value) {
             $role->{$key} = $value;
         }
@@ -141,6 +142,7 @@ class UserController extends Controller
 
     public function patchUser(Request $request, $id) {
         $user = auth()->user();
+
         if(!$user->can('add_remove_role')) {
             return response()->json([
                 'error' => __('You do not have the permission to set user roles')
@@ -176,9 +178,9 @@ class UserController extends Controller
         }
 
         if($request->has('roles')) {
-            $user->detachRoles();
+            $user->roles()->detach();
             $roles = $request->get('roles');
-            $user->attachRoles($roles);
+            $user->assignRole($roles);
 
             // Update updated_at column
             $user->touch();
@@ -187,6 +189,9 @@ class UserController extends Controller
             $user->email = $request->get('email');
             $user->save();
         }
+
+        // return user without roles relation
+        $user->unsetRelation('roles');
 
         return response()->json($user);
     }
@@ -217,9 +222,9 @@ class UserController extends Controller
         }
 
         if($request->has('permissions')) {
-            $role->detachPermissions($role->permissions);
+            $role->permissions()->detach();
             $perms = $request->get('permissions');
-            $role->attachPermissions($perms);
+            $role->syncPermissions($perms);
 
             // Update updated_at column
             $role->touch();

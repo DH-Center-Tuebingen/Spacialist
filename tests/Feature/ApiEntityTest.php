@@ -953,7 +953,7 @@ class ApiEntityTest extends TestCase
      */
     public function testPermissions()
     {
-        User::first()->detachRoles();
+        User::first()->roles()->detach();
 
         $calls = [
             ['url' => '/top', 'error' => 'You do not have the permission to get entities', 'verb' => 'get'],

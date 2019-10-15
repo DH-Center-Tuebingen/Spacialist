@@ -12,7 +12,7 @@ class PermissionRoleTableSeeder extends Seeder
      */
     public function run()
     {
-        \DB::table('permission_role')->insert(array (
+        \DB::table('role_has_permissions')->insert(array (
             0 =>
             array (
                 'permission_id' => 1,

@@ -331,7 +331,7 @@ class ApiBibliographyTest extends TestCase
      */
     public function testPermissions()
     {
-        User::first()->detachRoles();
+        User::first()->roles()->detach();
 
         $calls = [
             ['url' => '', 'error' => 'You do not have the permission to add new bibliography', 'verb' => 'post'],

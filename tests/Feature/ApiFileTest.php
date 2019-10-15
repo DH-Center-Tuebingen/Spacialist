@@ -1207,7 +1207,7 @@ class ApiFileTest extends TestCase
      */
     public function testPermissions()
     {
-        User::first()->detachRoles();
+        User::first()->roles()->detach();
 
         $calls = [
             ['url' => '/1', 'error' => 'You do not have the permission to view a specific file', 'verb' => 'get'],

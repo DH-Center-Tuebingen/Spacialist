@@ -340,7 +340,7 @@ class ApiPreferenceTest extends TestCase
      */
     public function testPermissions()
     {
-        User::first()->detachRoles();
+        User::first()->roles()->detach();
 
         $calls = [
             ['url' => '/99', 'error' => 'You do not have the permission to edit preferences', 'verb' => 'patch'],

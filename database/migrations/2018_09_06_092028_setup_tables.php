@@ -747,8 +747,8 @@ class SetupTables extends Migration
         Schema::dropIfExists('roles');
         Schema::dropIfExists('references');
         Schema::dropIfExists('attribute_values');
-        Schema::dropIfExists('geodata');
         Schema::dropIfExists('entities');
+        Schema::dropIfExists('geodata');
         Schema::dropIfExists('entity_attributes');
         Schema::dropIfExists('entity_type_relations');
         Schema::dropIfExists('entity_types');

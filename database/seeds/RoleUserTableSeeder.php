@@ -12,11 +12,12 @@ class RoleUserTableSeeder extends Seeder
      */
     public function run()
     {
-        \DB::table('role_user')->insert(array (
+        \DB::table('model_has_roles')->insert(array (
             0 =>
             array (
-                'user_id' => 1,
                 'role_id' => 1,
+                'model_type' => 'App\User',
+                'model_id' => 1,
             ),
         ));
     }
