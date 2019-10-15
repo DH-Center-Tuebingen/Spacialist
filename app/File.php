@@ -135,6 +135,9 @@ class File extends Model
                         }
                     });
                     break;
+                case 'name':
+                    $builder->orWhere('name', 'ilike', "%$fs%");
+                    break;
                 case 'tags':
                     $builder->whereHas('tags', function($query) use ($fs) {
                         $query->where(function($subquery) use ($fs) {

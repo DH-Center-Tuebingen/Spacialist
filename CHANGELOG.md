@@ -29,8 +29,10 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Use [Tree-Shaking](https://webpack.js.org/guides/tree-shaking/) in supported modules
 - Improved fullscreen handler code
-- Update to Laravel 5.8
+- Update to Laravel 6.2
 - Rework search components (should no longer logout on fast typing)
+- Switched (unmaintained) permission package
+- Dependency updates
 ### Fixed
 - Do not fire upload-from-clipboard event in input fields
 - Update references in Reference Tab, Attribute Icons in Entity Detail View and Reference Modal
@@ -47,6 +49,10 @@ All notable changes to this project will be documented in this file.
 - Non-visible selection list for entity search in file linking tab
 - Overflowing container in file upload modal (upload from clipboard)
 - Storing dates in epoch (if start and end are BC)
+- Version Info modal after Login (without reload)
+- Several fixes in the Geometry Datatype modal
+### Removed/Deprecated
+- Unused/unmaintained packages
 
 ## 0.6.3
 ### Added

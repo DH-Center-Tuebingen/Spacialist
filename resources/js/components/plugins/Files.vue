@@ -43,6 +43,57 @@
             <div class="mb-2" v-show="showFilters">
                 <form v-on:submit.prevent="applyFilters(selectedTopAction)">
                     <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="tags">
+                            {{ $tc('global.tag', 2) }}:
+                        </label>
+                        <div class="col-md-9">
+                            <multiselect
+                                id="tags"
+                                label="concept_url"
+                                track-by="id"
+                                v-model="filterTags[selectedTopAction]"
+                                :allow-empty="true"
+                                :close-on-select="false"
+                                :custom-label="translateLabel"
+                                :hide-selected="true"
+                                :multiple="true"
+                                :options="tags"
+                                :placeholder="$t('global.select.placehoder')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
+                            </multiselect>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="names">
+                            {{ $t('plugins.files.header.rules.types.name') }}:
+                        </label>
+                        <div class="col-md-9">
+                            <input type="text" id="names" class="form-control" v-model="filterNames[selectedTopAction]" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="dates">
+                            {{ $t('plugins.files.header.rules.types.date') }}:
+                        </label>
+                        <div class="col-md-9">
+                            <multiselect
+                                id="dates"
+                                label="value"
+                                track-by="id"
+                                v-model="filterDates[selectedTopAction]"
+                                :allow-empty="true"
+                                :close-on-select="false"
+                                :hide-selected="true"
+                                :multiple="true"
+                                :options="filterDateList"
+                                :placeholder="$t('global.select.placehoder')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
+                            </multiselect>
+                        </div>
+                    </div>
+                    <div class="form-group row">
                         <label class="col-form-label col-md-3" for="filetypes">
                             {{ $t('plugins.files.header.rules.types.file') }}:
                         </label>
@@ -76,49 +127,6 @@
                                 :hide-selected="true"
                                 :multiple="true"
                                 :options="filterCameraList"
-                                :placeholder="$t('global.select.placehoder')"
-                                :select-label="$t('global.select.select')"
-                                :deselect-label="$t('global.select.deselect')">
-                            </multiselect>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-form-label col-md-3" for="dates">
-                            {{ $t('plugins.files.header.rules.types.date') }}:
-                        </label>
-                        <div class="col-md-9">
-                            <multiselect
-                                id="dates"
-                                label="value"
-                                track-by="id"
-                                v-model="filterDates[selectedTopAction]"
-                                :allow-empty="true"
-                                :close-on-select="false"
-                                :hide-selected="true"
-                                :multiple="true"
-                                :options="filterDateList"
-                                :placeholder="$t('global.select.placehoder')"
-                                :select-label="$t('global.select.select')"
-                                :deselect-label="$t('global.select.deselect')">
-                            </multiselect>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-form-label col-md-3" for="tags">
-                            {{ $tc('global.tag', 2) }}:
-                        </label>
-                        <div class="col-md-9">
-                            <multiselect
-                                id="tags"
-                                label="concept_url"
-                                track-by="id"
-                                v-model="filterTags[selectedTopAction]"
-                                :allow-empty="true"
-                                :close-on-select="false"
-                                :custom-label="translateLabel"
-                                :hide-selected="true"
-                                :multiple="true"
-                                :options="tags"
                                 :placeholder="$t('global.select.placehoder')"
                                 :select-label="$t('global.select.select')"
                                 :deselect-label="$t('global.select.deselect')">
@@ -793,6 +801,7 @@
                 count += vm.filterCameras[action].length;
                 count += vm.filterDates[action].length;
                 count += vm.filterTags[action].length;
+                count += vm.filterNames[action].length ? 1 : 0;
                 vm.filterCounts[action] = count;
                 vm.resetFiles(action);
                 vm.getNextFiles(action, filters);
@@ -804,7 +813,8 @@
                     categories: vm.filterTypes[action].map(f => f.key),
                     cameras: vm.filterCameras[action],
                     dates: vm.filterDates[action],
-                    tags: vm.filterTags[action]
+                    tags: vm.filterTags[action],
+                    name: vm.filterNames[action]
                     // strategy: vm.filterMatching[action]
                 };
                 if(action == 'linkedFiles') {
@@ -1498,6 +1508,11 @@
                     linkedFiles: [],
                     unlinkedFiles: [],
                     allFiles: []
+                },
+                filterNames: {
+                    linkedFiles: '',
+                    unlinkedFiles: '',
+                    allFiles: ''
                 },
                 filterTags: {
                     linkedFiles: [],

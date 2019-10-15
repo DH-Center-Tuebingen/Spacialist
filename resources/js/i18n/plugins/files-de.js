@@ -13,6 +13,7 @@ const de = {
                         file: 'Dateityp',
                         camera: 'Kameramodell',
                         date: 'Datum',
+                        name: 'Dateiname',
                     },
                     apply: 'Filter anwenden',
                     active: 'keine Filter aktiv | ein Filter aktiv | {cnt} Filter aktiv'
