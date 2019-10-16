@@ -13,10 +13,6 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1')->group(function() {
     Route::get('/pre', 'HomeController@getGlobalData');
     Route::get('/version', function() {
@@ -33,12 +29,11 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 
 // CONTEXT
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/entity')->group(function() {
-    Route::get('/top', 'EntityController@getTopEntities')->where('id', '[0-9]+');
+    Route::get('/top', 'EntityController@getTopEntities');
     Route::get('/{id}', 'EntityController@getEntity')->where('id', '[0-9]+');
     Route::get('/entity_type/{ctid}/data/{aid}', 'EntityController@getDataForEntityType')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/{id}/data', 'EntityController@getData')->where('id', '[0-9]+');
     Route::get('/{id}/data/{aid}', 'EntityController@getData')->where('id', '[0-9]+')->where('aid', '[0-9]+');
-    Route::get('/{id}/children', 'EntityController@getChildren')->where('id', '[0-9]+');
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
     Route::get('/{id}/parentIds', 'EntityController@getParentIds')->where('id', '[0-9]+');
     Route::get('/byParent/{id}', 'EntityController@getEntitiesByParent')->where('id', '[0-9]+');
@@ -60,22 +55,23 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/search')->group(function() {
     Route::get('', 'SearchController@searchGlobal');
     Route::get('/entity', 'SearchController@searchEntityByName');
+    Route::get('/entity-type', 'SearchController@searchEntityTypes');
     Route::get('/label', 'SearchController@searchInThesaurus');
+    Route::get('/attribute', 'SearchController@searchInAttributes');
+    Route::get('/selection/{id}', 'SearchController@getConceptChildren')->where('id', '[0-9]+');
 });
 
 // EDITOR
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/editor')->group(function() {
     Route::get('/dm/entity_type/occurrence_count/{id}', 'EditorController@getEntityTypeOccurrenceCount')->where('id', '[0-9]+');
-    Route::get('/dm/attribute/occurrence_count/{aid}', 'EditorController@getAttributeOccurrenceCount')->where('aid', '[0-9]+');
-    Route::get('/dm/attribute/occurrence_count/{aid}/{ctid}', 'EditorController@getAttributeOccurrenceCount')->where('aid', '[0-9]+')->where('ctid', '[0-9]+');
+    Route::get('/dm/attribute/occurrence_count/{aid}', 'EditorController@getAttributeValueOccurrenceCount')->where('aid', '[0-9]+');
+    Route::get('/dm/attribute/occurrence_count/{aid}/{ctid}', 'EditorController@getAttributeValueOccurrenceCount')->where('aid', '[0-9]+')->where('ctid', '[0-9]+');
     Route::get('/dm/entity_type/top', 'EditorController@getTopEntityTypes');
-    Route::get('/dm/entity_type/parent/{cid}', 'EditorController@getEntityTypesByParent')->where('cid', '[0-9]+');
     Route::get('/dm/attribute', 'EditorController@getAttributes');
     Route::get('/dm/attribute_types', 'EditorController@getAttributeTypes');
     Route::get('/entity_type/{id}', 'EditorController@getEntityType')->where('id', '[0-9]+');
     Route::get('/entity_type/{id}/attribute', 'EditorController@getEntityTypeAttributes')->where('id', '[0-9]+');
     Route::get('/attribute/{id}/selection', 'EditorController@getAttributeSelection')->where('id', '[0-9]+');
-    Route::get('/dm/entity_type/{ctid}/attribute/{aid}/dependency', 'EditorController@getDependency')->where('ctid', '[0-9]+')->where('aid', '[0-9]+');
     Route::get('/dm/geometry', 'EditorController@getAvailableGeometryTypes');
 
     Route::post('/dm/entity_type', 'EditorController@addEntityType');
@@ -94,10 +90,10 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 });
 
 // USER
-Route::get('/v1/auth/refresh', 'UserController@refreshToken');
 Route::post('/v1/auth/login', 'UserController@login');
 
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1')->group(function() {
+    Route::get('/auth/refresh', 'UserController@refreshToken');
     Route::get('/auth/user', 'UserController@getUser');
     Route::get('/user', 'UserController@getUsers');
     Route::get('/role', 'UserController@getRoles');

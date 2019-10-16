@@ -1,8 +1,137 @@
 import Multiselect from 'vue-multiselect';
 import { library, dom } from '@fortawesome/fontawesome-svg-core';
-import { fab } from '@fortawesome/free-brands-svg-icons';
-import { far } from '@fortawesome/free-regular-svg-icons';
-import { fas } from '@fortawesome/free-solid-svg-icons';
+import {
+    faFacebookSquare,
+    faGithub,
+    faHtml5,
+    faLaravel,
+    faVuejs
+} from '@fortawesome/free-brands-svg-icons';
+import {
+    faClipboard,
+    faQuestionCircle
+} from '@fortawesome/free-regular-svg-icons';
+import {
+    faAdjust,
+    faAngleDoubleLeft,
+    faAngleDoubleRight,
+    faAngleDown,
+    faAngleLeft,
+    faAngleRight,
+    faAngleUp,
+    faBan,
+    faBinoculars,
+    faBolt,
+    faBook,
+    faBookmark,
+    faCalculator,
+    faCalendarAlt,
+    faCamera,
+    faCaretDown,
+    faCaretUp,
+    faChartBar,
+    faCheck,
+    faCheckCircle,
+    faCircle,
+    faClock,
+    faClone,
+    faCog,
+    faCogs,
+    faComment,
+    faCopy,
+    faCopyright,
+    faCubes,
+    faDotCircle,
+    faDownload,
+    faDrawPolygon,
+    faEdit,
+    faEllipsisH,
+    faEnvelope,
+    faExchangeAlt,
+    faExclamation,
+    faExclamationCircle,
+    faExpand,
+    faExternalLinkAlt,
+    faEyeSlash,
+    faFile,
+    faFileAlt,
+    faFileArchive,
+    faFileAudio,
+    faFileCode,
+    faFileDownload,
+    faFileExcel,
+    faFileExport,
+    faFileImport,
+    faFileMedicalAlt,
+    faFilePdf,
+    faFilePowerpoint,
+    faFileUpload,
+    faFileVideo,
+    faFileWord,
+    faFolder,
+    faGlobeAfrica,
+    faInfoCircle,
+    faLayerGroup,
+    faLightbulb,
+    faLink,
+    faList,
+    faLongArrowAltDown,
+    faLongArrowAltUp,
+    faMagic,
+    faMapMarkedAlt,
+    faMapMarkerAlt,
+    faMicrochip,
+    faMonument,
+    faPalette,
+    faPaperPlane,
+    faPause,
+    faPaw,
+    faPlay,
+    faPlus,
+    faPrint,
+    faQuestion,
+    faRedoAlt,
+    faRoad,
+    faRuler,
+    faRulerCombined,
+    faSave,
+    faSearch,
+    faSearchPlus,
+    faShieldAlt,
+    faSignOutAlt,
+    faSitemap,
+    faSlidersH,
+    faSort,
+    faSortAlphaDown,
+    faSortAlphaUp,
+    faSortAmountDown,
+    faSortAmountUp,
+    faSortDown,
+    faSortNumericDown,
+    faSortNumericUp,
+    faSortUp,
+    faSpinner,
+    faStop,
+    faStopwatch,
+    faSun,
+    faSync,
+    faTable,
+    faTags,
+    faTasks,
+    faTh,
+    faTimes,
+    faTrash,
+    faUnderline,
+    faUndo,
+    faUndoAlt,
+    faUnlink,
+    faUnlockAlt,
+    faUser,
+    faUserEdit,
+    faUsers,
+    faVolumeMute,
+    faVolumeUp
+} from '@fortawesome/free-solid-svg-icons';
 import VModal from 'vue-js-modal';
 import Axios from 'axios';
 import VueRouter from 'vue-router';
@@ -33,11 +162,152 @@ import VCalendar from 'v-calendar';
 import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
-import VTooltip from 'v-tooltip';
 import VueScrollTo from 'vue-scrollto';
 
-library.add(fas, far, fab);
+import { EventBus } from './event-bus.js';
+
+library.add(
+    faFacebookSquare,
+    faGithub,
+    faHtml5,
+    faLaravel,
+    faVuejs,
+    faClipboard,
+    faQuestionCircle,
+    faAdjust,
+    faAngleDoubleLeft,
+    faAngleDoubleRight,
+    faAngleDown,
+    faAngleLeft,
+    faAngleRight,
+    faAngleUp,
+    faBan,
+    faBinoculars,
+    faBolt,
+    faBook,
+    faBookmark,
+    faCalculator,
+    faCalendarAlt,
+    faCamera,
+    faCaretDown,
+    faCaretUp,
+    faChartBar,
+    faCheck,
+    faCheckCircle,
+    faCircle,
+    faClock,
+    faClone,
+    faCog,
+    faCogs,
+    faComment,
+    faCopy,
+    faCopyright,
+    faCubes,
+    faDotCircle,
+    faDownload,
+    faDrawPolygon,
+    faEdit,
+    faEllipsisH,
+    faEnvelope,
+    faExchangeAlt,
+    faExclamation,
+    faExclamationCircle,
+    faExpand,
+    faExternalLinkAlt,
+    faEyeSlash,
+    faFile,
+    faFileAlt,
+    faFileArchive,
+    faFileAudio,
+    faFileCode,
+    faFileDownload,
+    faFileExcel,
+    faFileExport,
+    faFileImport,
+    faFileMedicalAlt,
+    faFilePdf,
+    faFilePowerpoint,
+    faFileUpload,
+    faFileVideo,
+    faFileWord,
+    faFolder,
+    faGlobeAfrica,
+    faInfoCircle,
+    faLayerGroup,
+    faLightbulb,
+    faLink,
+    faList,
+    faLongArrowAltDown,
+    faLongArrowAltUp,
+    faMagic,
+    faMapMarkedAlt,
+    faMapMarkerAlt,
+    faMicrochip,
+    faMonument,
+    faPalette,
+    faPaperPlane,
+    faPause,
+    faPaw,
+    faPlay,
+    faPlus,
+    faPrint,
+    faQuestion,
+    faQuestionCircle,
+    faRedoAlt,
+    faRoad,
+    faRuler,
+    faRulerCombined,
+    faSave,
+    faSearch,
+    faSearchPlus,
+    faShieldAlt,
+    faSignOutAlt,
+    faSitemap,
+    faSlidersH,
+    faSort,
+    faSortAlphaDown,
+    faSortAlphaUp,
+    faSortAmountDown,
+    faSortAmountUp,
+    faSortDown,
+    faSortNumericDown,
+    faSortNumericUp,
+    faSortUp,
+    faSpinner,
+    faStop,
+    faStopwatch,
+    faSun,
+    faSync,
+    faTable,
+    faTags,
+    faTasks,
+    faTh,
+    faTimes,
+    faTrash,
+    faUnderline,
+    faUndo,
+    faUndoAlt,
+    faUnlink,
+    faUnlockAlt,
+    faUser,
+    faUserEdit,
+    faUsers,
+    faVolumeMute,
+    faVolumeUp
+);
 dom.watch(); // search for <i> tags to replace with <svg>
+
+// Override vue-routers push method to catch (and "suppress") it's errors
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location, onResolve, onReject) {
+    if(onResolve || onReject) {
+        return originalPush.call(this, location, onResolve, onReject);
+    }
+    return originalPush.call(this, location)
+        .catch(err =>
+            console.log("Error while pushing new route")
+        );
+}
 
 /**
  * First we will load all of this project's JavaScript dependencies which
@@ -45,13 +315,14 @@ dom.watch(); // search for <i> tags to replace with <svg>
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-const PQueue = require('p-queue');
+const {default: PQueue} = require('p-queue');
 require('typeface-raleway');
 require('typeface-source-code-pro');
 require('popper.js');
 require('bootstrap');
 window.Vue = require('vue');
-window._ = require('lodash');
+window._clone = require('lodash/clone');
+window._orderBy = require('lodash/orderBy');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
 require('./globals.js');
 
@@ -76,13 +347,6 @@ Vue.use(Notifications);
 Vue.use(VCalendar, {
     firstDayOfWeek: 2,
     popoverVisibility: 'focus'
-});
-Vue.use(VTooltip, {
-    popover: {
-        defaultBaseClass: 'popover',
-        defaultInnerClass: 'popover-body',
-        defaultArrowClass: 'arrow'
-    }
 });
 Vue.use(VueScrollTo);
 
@@ -346,7 +610,9 @@ Vue.component('file-upload', VueUploadComponent);
 // Extended Components
 import GlobalSearch from './components/GlobalSearch.vue';
 import EntitySearch from './components/EntitySearch.vue';
+import EntityTypeSearch from './components/EntityTypeSearch.vue';
 import LabelSearch from './components/LabelSearch.vue';
+import AttributeSearch from './components/AttributeSearch.vue';
 import CsvTable from './components/CsvTable.vue';
 
 // Reusable Components
@@ -355,6 +621,7 @@ import EntityTree from './components/EntityTree.vue';
 import EntityTypes from './components/EntityTypeList.vue';
 import OlMap from './components/OlMap.vue';
 import ColorGradient from './components/Gradient.vue';
+import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
 
 // Page Components
 import EntityReferenceModal from './components/EntityReferenceModal.vue';
@@ -364,13 +631,16 @@ import ErrorModal from './components/Error.vue';
 
 Vue.component('global-search', GlobalSearch);
 Vue.component('entity-search', EntitySearch);
+Vue.component('entity-type-search', EntityTypeSearch);
 Vue.component('label-search', LabelSearch);
+Vue.component('attribute-search', AttributeSearch);
 Vue.component('csv-table', CsvTable);
 Vue.component('attributes', Attributes);
 Vue.component('entity-tree', EntityTree);
 Vue.component('entity-types', EntityTypes);
 Vue.component('ol-map', OlMap);
 Vue.component('color-gradient', ColorGradient);
+Vue.component('entity-breadcrumbs', EntityBreadcrumbs);
 Vue.component('entity-reference-modal', EntityReferenceModal);
 Vue.component('discard-changes-modal', DiscardChangesModal);
 Vue.component('about-dialog', AboutDialog);
@@ -485,12 +755,23 @@ Vue.filter('toFixed', function(value, precision = 2) {
     if(precision < 0) precision = 2;
     return value ? value.toFixed(precision) : value;
 });
+Vue.filter('truncate', function(str, length = 80, ellipses = '…') {
+    if(length < 0) length = 80;
+    if(str) {
+        if(str.length <= length) {
+            return str;
+        }
+        return str.slice(0, length) + ellipses;
+    }
+    return str;
+});
 Vue.filter('bibtexify', function(value, type) {
     let rendered = "<pre><code>";
     if(type) {
-        rendered += "@"+type+" {";
+        rendered += "@"+type+" {"
+        if(value['citekey']) rendered += value['citekey'] + ",";
         for(let k in value) {
-            if(value[k] == null || value[k] == '') continue;
+            if(value[k] == null || value[k] == '' || k == 'citekey') continue;
             rendered += "    <br />";
             rendered += "    " + k + " = \"" + value[k] + "\"";
         }
@@ -543,6 +824,7 @@ const app = new Vue({
                     let nameExt = name + '.js';
                     import('./plugins/' + nameExt).then(data => {
                         Vue.use(data.default);
+                        this.$addEnabledPlugin(name);
                     });
                 }
                 this.$getSpacialistPlugins('plugins');

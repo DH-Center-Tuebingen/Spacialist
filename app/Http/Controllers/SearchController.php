@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Attribute;
 use App\Bibliography;
 use App\Entity;
+use App\EntityType;
 use App\File;
 use App\Geodata;
 use App\ThConceptLabel;
+use App\ThConcept;
 use App\ThLanguage;
+
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 
 class SearchController extends Controller {
@@ -27,35 +33,34 @@ class SearchController extends Controller {
             ], 403);
         }
         $q = $request->query('q');
-        if(starts_with($q, self::$shebangPrefix['bibliography'])) {
-            $matches = Bibliography::search(str_after($q, self::$shebangPrefix['bibliography']))->get();
+        if(Str::startsWith($q, self::$shebangPrefix['bibliography'])) {
+            $matches = Bibliography::search(Str::after($q, self::$shebangPrefix['bibliography']))->get();
             $matches->map(function($m) {
                 $m->group = 'bibliography';
                 return $m;
             });
-        } else if(starts_with($q, self::$shebangPrefix['entities'])) {
-            $matches = Entity::search(str_after($q, self::$shebangPrefix['entities']))->get();
+        } else if(Str::startsWith($q, self::$shebangPrefix['entities'])) {
+            $matches = Entity::search(Str::after($q, self::$shebangPrefix['entities']))->get();
             $matches->map(function($m) {
                 $m->group = 'entities';
                 return $m;
             });
-        } else if(starts_with($q, self::$shebangPrefix['files'])) {
-            $files = File::search(str_after($q, self::$shebangPrefix['files']));
+        } else if(Str::startsWith($q, self::$shebangPrefix['files'])) {
+            $files = File::search(Str::after($q, self::$shebangPrefix['files']));
             $matches = $files->get();
             $matches->map(function($m) {
                 $m->group = 'files';
                 $m->setFileInfo();
                 return $m;
             });
-        } else if(starts_with($q, self::$shebangPrefix['geodata'])) {
-            $matches = Geodata::search(str_after($q, self::$shebangPrefix['geodata']))->get();
+        } else if(Str::startsWith($q, self::$shebangPrefix['geodata'])) {
+            $matches = Geodata::search(Str::after($q, self::$shebangPrefix['geodata']))->get();
             $matches->map(function($m) {
                 $m->group = 'geodata';
                 return $m;
             });
         } else {
-            $files = File::search($q);
-            $files = $files->get();
+            $files = File::search($q)->get();
             $files->map(function($f) {
                 $f->group = 'files';
                 $f->setFileInfo();
@@ -101,9 +106,43 @@ class SearchController extends Controller {
         return response()->json($matches);
     }
 
-    public function searchInThesaurus(Request $request) {
+    public function searchEntityTypes(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to search for entities')
+            ], 403);
+        }
         $q = $request->query('q');
-        $lang = auth()->user()->getLanguage();
+        $lang = $user->getLanguage();
+
+        try {
+            $language = ThLanguage::where('short_name', $lang)->firstOrFail();
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Your language does not exist in ThesauRex'
+            ], 400);
+        }
+
+        $langId = $language->id;
+        $matches = EntityType::with(['thesaurus_concept'])
+            ->whereHas('thesaurus_concept.labels', function($query) use ($langId, $q) {
+                $query->where('language_id', $langId)
+                    ->where('label', 'ilike', "%$q%");
+            })
+            ->get();
+        return response()->json($matches);
+    }
+
+    public function searchInThesaurus(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts_th')) {
+            return response()->json([
+                'error' => __('You do not have the permission to search for concepts')
+            ], 403);
+        }
+        $q = $request->query('q');
+        $lang = $user->getLanguage();
 
         try {
             $language = ThLanguage::where('short_name', $lang)->firstOrFail();
@@ -131,7 +170,52 @@ class SearchController extends Controller {
             })
             ->get();
 
-        $matches = $matches->union($foreignMatches);
+        $matches = $matches->merge($foreignMatches);
         return response()->json($matches);
+    }
+
+    public function searchInAttributes(Request $request) {
+        $q = $request->query('q');
+        $lang = auth()->user()->getLanguage();
+        $langId = ThLanguage::where('short_name', $lang)->value('id');
+        $matches = Attribute::where('datatype', 'string-sc')
+            ->whereHas('thesaurus_concept.labels', function($query) use($q, $langId) {
+                $query->where('label', 'ilike', "%$q%")
+                    ->where('language_id', $langId);
+            })
+            ->with('thesaurus_concept')
+            ->get();
+
+        $foreignMatches = Attribute::where('datatype', 'string-sc')
+            ->whereDoesntHave('thesaurus_concept.labels', function($query) use ($langId) {
+                $query->where('language_id', $langId);
+            })
+            ->whereHas('thesaurus_concept.labels', function($query) use ($q) {
+                $query->where('label', 'ilike', "%$q%");
+            })
+            ->with('thesaurus_concept')
+            ->get();
+
+        $matches = $matches->merge($foreignMatches);
+        return response()->json($matches);
+    }
+
+    public function getConceptChildren($id, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to search for concepts')
+            ], 403);
+        }
+
+        try {
+            $concept = ThConcept::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This concept does not exist')
+            ], 400);
+        }
+
+        return response()->json(ThConcept::getChildren($concept->concept_url, false));
     }
 }

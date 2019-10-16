@@ -5,7 +5,7 @@ use App\Bibliography;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use RenanBr\BibTexParser\Listener;
-use RenanBr\BibTexParser\ParseException;
+use RenanBr\BibTexParser\Exception\ParserException;
 use RenanBr\BibTexParser\Parser;
 
 class BibliographyController extends Controller
@@ -79,11 +79,18 @@ class BibliographyController extends Controller
 
         $bib = new Bibliography();
         $bib->fieldsFromRequest($request, $user);
+        $bib = Bibliography::find($bib->id);
 
         return response()->json($bib, 201);
     }
 
     public function importBibtex(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('add_remove_bibliography')) {
+            return response()->json([
+                'error' => __('You do not have the permission to add new bibliography')
+            ], 403);
+        }
         $this->validate($request, [
             'file' => 'required|file'
         ]);
@@ -94,7 +101,7 @@ class BibliographyController extends Controller
         $parser->addListener($listener);
         try {
             $parser->parseFile($file->getRealPath());
-        } catch(ParseException $e) {
+        } catch(ParserException $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ], 400);
@@ -102,18 +109,20 @@ class BibliographyController extends Controller
         $entries = $listener->export();
         $newEntries = [];
         foreach($entries as $entry) {
-            $ckey = $entry['citation-key'];
             $insArray = array_intersect_key($entry, Bibliography::patchRules);
             // set citation key if none is present
-            if($ckey == null || $ckey == '') {
+            if(!array_key_exists('citation-key', $entry) || $entry['citation-key'] == '') {
                 $ckey = Bibliography::computeCitationKey($insArray);
+            } else {
+                $ckey = $entry['citation-key'];
             }
+            $insArray['lasteditor'] = $user->name;
             $bibliography = Bibliography::updateOrCreate(
                 ['citekey' => $ckey],
                 $insArray
             );
             if($bibliography->wasRecentlyCreated) {
-                $newEntries[] = $bibliography;
+                $newEntries[] = Bibliography::find($bibliography->id);
             }
         }
         return response()->json($newEntries, 201);
@@ -142,6 +151,7 @@ class BibliographyController extends Controller
         }
 
         $bib->fieldsFromRequest($request, $user);
+        $bib = Bibliography::find($bib->id);
 
         return response()->json($bib);
     }
@@ -152,7 +162,7 @@ class BibliographyController extends Controller
         $user = auth()->user();
         if(!$user->can('add_remove_bibliography')) {
             return response()->json([
-                'error' => __('You do not have the permission to remove bibliogra entries')
+                'error' => __('You do not have the permission to remove bibliography entries')
             ], 403);
         }
         try {

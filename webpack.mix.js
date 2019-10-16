@@ -34,18 +34,6 @@ const appPath = process.env.MIX_APP_PATH;
 mix.js('resources/js/app.js', 'public/js')
    .sass('resources/sass/app.scss', 'public/css')
    .copy(
-       'node_modules/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderWebWorker.min.js',
-       'public/js/cornerstoneWADOImageLoaderWebWorker.min.js'
-   )
-   .copy(
-       'node_modules/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoaderCodecs.min.js',
-       'public/js/cornerstoneWADOImageLoaderCodecs.min.js'
-   )
-   .copy(
-       'node_modules/zlibjs/bin/inflate.min.js',
-       'public/js/inflate.min.js'
-   )
-   .copy(
        'node_modules/vue-multiselect/dist/vue-multiselect.min.css',
        'public/css'
    )
@@ -57,7 +45,28 @@ mix.js('resources/js/app.js', 'public/js')
    .webpackConfig({
       output: {
          publicPath: '/' + appPath
+      },
+      node: {
+         fs: 'empty'
       }
+   })
+   .webpackConfig(webpack => {
+       return {
+           resolve: {
+               alias: {
+                   videojs: 'video.js',
+                   WaveSurfer: 'wavesurfer.js',
+                   RecordRTC: 'recordrtc'
+               }
+           },
+           plugins: [
+               new webpack.ProvidePlugin({
+                   videojs: 'video.js/dist/video.cjs.js',
+                   RecordRTC: 'recordrtc',
+                   MediaStreamRecorder: ['recordrtc', 'MediaStreamRecorder']
+               })
+           ]
+       }
    })
    .autoload({
        jquery: ['$'],

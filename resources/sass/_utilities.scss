@@ -58,6 +58,14 @@
     cursor: not-allowed;
 }
 
+.breadcrumb-item-slash {
+    + .breadcrumb-item-slash {
+    &::before {
+      content: quote("/");
+    }
+  }
+}
+
 .of-visible, .visible-overflow .v--modal {
     overflow: visible !important;
 }
@@ -68,10 +76,6 @@
 
 .word-break-all {
     word-break: break-all;
-}
-
-.of-hidden {
-    overflow: hidden;
 }
 
 .scroll-x-hidden {
@@ -96,4 +100,8 @@
 
 .bg-none {
     background: none !important;
+}
+
+.object-fit-cover {
+    object-fit: cover;
 }

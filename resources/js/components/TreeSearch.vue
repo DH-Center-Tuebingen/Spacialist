@@ -26,7 +26,7 @@
             </span>
         </div>
 
-        <div class="dropdown-menu" style="display: flex; flex-direction: column;" v-show="hasItems">
+        <div class="dropdown-menu d-flex flex-column search-result-list" v-if="hasItems">
             <a href="#" class="dropdown-item" v-for="(item, $item) in items" :class="activeClass($item)" @mousedown="hit" @mousemove="setActive($item)">
                 <span>{{item.name}}</span>
                 <ol class="breadcrumb mb-0 p-0 pb-1 bg-none small">
@@ -40,43 +40,16 @@
 </template>
 
 <script>
-    import VueTypeahead from 'vue-typeahead';
-    import debounce from 'debounce';
+    import TypeaheadSearch from './TypeaheadSearch.vue';
 
     export default {
-        extends: VueTypeahead,
-        props: {
-            placeholder: {
-                type: String,
-                default: 'global.search'
-            },
-            onMultiselect: {
-                type: Function,
-                required: false
-            },
-            onClear: {
-                type: Function,
-                required: false
-            },
-            value: {
-                type: String,
-                required: false
-            }
-        },
+        extends: TypeaheadSearch,
         data () {
             return {
                 src: 'search/entity',
-                minChars: 2,
-                selectFirst: false
             }
-        },
-        mounted() {
-            this.query = this.value;
         },
         computed: {
-            debounce () {
-                return debounce(this.update, 250)
-            }
         },
         methods: {
             onHit(item) {
@@ -90,10 +63,6 @@
                 });
                 this.reset();
             },
-            clearItem() {
-                if(this.onClear) this.onClear();
-                this.reset();
-            },
             hit() {
                 if(this.current !== -1) {
                     this.onHit(this.items[this.current]);
@@ -104,11 +73,6 @@
                     }
                 }
             },
-            blur() {
-                if(this.current !== -1) {
-                    this.reset();
-                }
-            }
         }
     }
 </script>

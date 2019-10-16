@@ -23,8 +23,17 @@
             <button type="button" class="btn btn-link" v-if="fullscreenHandler" @click="toggleFullscreen">
                 <i class="fas fa-fw fa-expand"></i>
             </button>
+            <button type="button" class="btn btn-link" @click="printPdf()">
+                <i class="fas fa-fw fa-print"></i>
+            </button>
+            <button type="button" class="btn btn-link" @click="onOCR">
+                OCR
+            </button>
         </div>
-        <pdf class="col px-0 scroll-y-auto scroll-x-hidden"
+        <pdf
+            class="col px-0 scroll-y-auto scroll-x-hidden"
+            id="pdf-container"
+            ref="pdfComp"
             :page="page"
             :rotate="rotation"
             :src="file.url"
@@ -47,7 +56,7 @@
             },
             fullscreenHandler: {
                 required: false,
-                type: Function
+                type: Object
             }
         },
         mounted() {
@@ -88,9 +97,17 @@
             },
             toggleFullscreen() {
                 if(!this.fullscreenHandler) return;
-                const element = document.getElementById('file-container');
-                this.fullscreenHandler(element)
-            }
+                this.fullscreenHandler.toggle(document.getElementById('file-container'))
+            },
+            printPdf() {
+                this.$refs.pdfComp.print(300);
+            },
+            onOCR() {
+                const elem = document.getElementById('pdf-container').getElementsByTagName('canvas')[0];
+                this.$emit('handle-ocr', {
+                    image: elem
+                });
+            },
         },
         data() {
             return {

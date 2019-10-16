@@ -58,7 +58,11 @@ const en = {
             analysis: 'Data Analysis',
             thesaurex: 'ThesauRex',
             dbwebgen: 'dbWebGen',
-            external: 'External Tools'
+            external: 'External Tools',
+            record: {
+                start: 'Start Recording',
+                stop: 'Stop Recording'
+            }
         },
         settings: {
             title: 'Settings',
@@ -89,6 +93,7 @@ const en = {
             percentage: 'Percentage',
             entity: 'Entity',
             epoch: 'Time Period and Epoch',
+            timeperiod: 'Time Period',
             date: 'Date',
             dimension: 'Dimensions (BxHxT)',
             list: 'List',
@@ -113,6 +118,7 @@ const en = {
         font: 'Font',
         mode: 'Mode',
         size: 'Size',
+        duration: 'Duration',
         color: 'Color',
         format: 'Format',
         version: 'Version',
@@ -131,6 +137,8 @@ const en = {
         'updated-at': 'Updated',
         options: 'Options',
         type: 'Type',
+        'root-attribute': 'Parent-Attribute',
+        'root-attribute-toggle': 'Use value of an existing attribute as Parent-Element',
         'root-element': 'Parent-Element',
         recursive: 'All descendants (recursive)',
         content: 'Content',
@@ -142,7 +150,8 @@ const en = {
         'allow-override': 'Allow Override?',
         tag: 'Tag | Tags',
         set: 'Set',
-        'has-tags': 'Has no tags | Has one tag | Has {cnt} tags'
+        'has-tags': 'Has no tags | Has one tag | Has {cnt} tags',
+        'from-subentity': 'Is from Sub-Entity'
     },
     main: {
         entity: {
@@ -168,7 +177,7 @@ const en = {
                         type: 'Entity-Type - Ascending'
                     },
                     desc: {
-                        rank: 'Rank - Descending (Drag & Drop)',
+                        rank: 'Rank - Descending',
                         name: 'Name - Descending',
                         children: 'Count Sub-Entities - Descending',
                         type: 'Entity-Type - Descending'
@@ -181,6 +190,18 @@ const en = {
                 },
                 edit: {
                     title: 'Edit Entity - {name}'
+                },
+                screencast: {
+                    title: 'Save Screencast',
+                    info: 'Screencast recorded. What do you want to do with it?',
+                    actions: {
+                        local: {
+                            button: 'Store local'
+                        },
+                        server: {
+                            button: 'Store in Spacialist'
+                        }
+                    }
                 }
             },
             menu: {

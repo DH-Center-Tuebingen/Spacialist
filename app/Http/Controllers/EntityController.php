@@ -28,7 +28,9 @@ class EntityController extends Controller {
     public function getTopEntities() {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
-            return response()->json([], 204);
+            return response()->json([
+                'error' => __('You do not have the permission to get entities')
+            ], 403);
         }
         $roots = Entity::getEntitiesByParent(null);
 
@@ -67,6 +69,13 @@ class EntityController extends Controller {
                 'error' => __('This entity type does not exist')
             ], 400);
         }
+        try {
+            Attribute::findOrFail($aid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This attribute does not exist')
+            ], 400);
+        }
         $entities = Entity::where('entity_type_id', $ctid)->get();
         $entityIds = $entities->pluck('id')->toArray();
         $values = AttributeValue::with(['attribute'])
@@ -76,9 +85,6 @@ class EntityController extends Controller {
         $data = [];
         foreach($values as $value) {
             switch($value->attribute->datatype) {
-                case 'string-sc':
-                    $value->thesaurus_val = ThConcept::where('concept_url', $value->thesaurus_val)->first();
-                    break;
                 case 'entity':
                     $value->name = Entity::find($value->entity_val)->name;
                     break;
@@ -107,6 +113,13 @@ class EntityController extends Controller {
             ], 400);
         }
         if(isset($aid)) {
+            try {
+                Attribute::findOrFail($aid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This attribute does not exist')
+                ], 400);
+            }
             $attributes = AttributeValue::with(['attribute'])
                 ->where('entity_id', $id)
                 ->where('attribute_id', $aid)
@@ -198,24 +211,6 @@ class EntityController extends Controller {
         return response()->json($entity->parentIds);
     }
 
-    public function getChildren($id) {
-        $user = auth()->user();
-        if(!$user->can('view_concepts')) {
-            return response()->json([
-                'error' => __('You do not have the permission to get an entity\'s successors')
-            ], 403);
-        }
-        try {
-            $entity = Entity::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity does not exist')
-            ], 400);
-        }
-        $children = Entity::where('root_entity_id', $id)->get();
-        return response()->json($children);
-    }
-
     public function getEntitiesByParent($id) {
         return Entity::getEntitiesByParent($id);
     }
@@ -231,66 +226,20 @@ class EntityController extends Controller {
         }
         $this->validate($request, Entity::rules);
 
-        $isChild = $request->has('root_entity_id');
-        $rcid = $request->get('root_entity_id');
+        $fields = $request->only(array_keys(Entity::rules));
+        $etid = $request->get('entity_type_id');
+        $reid = $request->get('root_entity_id');
 
-        if($isChild) {
-            $parentCtid = Entity::find($rcid)->entity_type_id;
-            $relation = EntityTypeRelation::where('parent_id', $parentCtid)
-                ->where('child_id', $request->get('entity_type_id'))->get();
-            if(!isset($relation)) {
-                return response()->json([
-                    'error' => __('This type is not an allowed sub-type.')
-                ], 400);
-            }
+        $res = Entity::create($fields, $etid, $user, $reid);
+
+        if($res['type'] === 'entity') {
+            return response()->json($res['entity'], 201);
         } else {
-            if(!EntityType::find($request->get('entity_type_id'))->is_root) {
-                return response()->json([
-                    'error' => __('This type is not an allowed root-type.')
-                ], 400);
-            }
+            return response()->json([
+                'error' => $res['msg']
+            ], $res['code']);
         }
 
-        $entity = new Entity();
-        $rank;
-        if($isChild) {
-            $rank = Entity::where('root_entity_id', '=', $rcid)->max('rank') + 1;
-        } else {
-            $rank = Entity::whereNull('root_entity_id')->max('rank') + 1;
-        }
-        $entity->rank = $rank;
-
-        foreach($request->only(array_keys(Entity::rules)) as $key => $value) {
-            $entity->{$key} = $value;
-        }
-        $entity->lasteditor = $user->name;
-        $entity->save();
-
-        $serialAttributes = $entity->entity_type
-                ->attributes()
-                ->where('datatype', 'serial')
-                ->get();
-        foreach($serialAttributes as $s) {
-            $cleanedRegex = preg_replace('/(.*)(%\d*d)(.*)/i', '/$1(\d+)$3/i', $s->text);
-
-            // get last added
-            $lastEntity = Entity::where('entity_type_id', $entity->entity_type_id)
-                ->orderBy('created_at', 'desc')
-                ->skip(1)
-                ->first();
-            $lastValue = AttributeValue::where('attribute_id', $s->id)
-                ->where('entity_id', $lastEntity->id)
-                ->first();
-            $nextValue = intval(preg_replace($cleanedRegex, '$1', $lastValue->str_val));
-            $nextValue++;
-
-
-            Entity::addSerial($entity->id, $s->id, $s->text, $nextValue, $user->name);
-        }
-
-        $entity->children_count = 0;
-
-        return response()->json($entity, 201);
     }
 
     // PATCH
@@ -299,7 +248,7 @@ class EntityController extends Controller {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
-                'error' => __('You do not have the permission to modify an entity\' data')
+                'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
         }
 
@@ -311,7 +260,7 @@ class EntityController extends Controller {
             ], 400);
         }
 
-        foreach($request->request as $pid => $patch) {
+        foreach($request->request as $patch) {
             $op = $patch['op'];
             $aid = $patch['params']['aid'];
             $attr = Attribute::find($aid);
@@ -322,7 +271,9 @@ class EntityController extends Controller {
                         ['attribute_id', '=', $aid]
                     ])->first();
                     $attrval->delete();
-                    return response()->json(null, 204);
+                    // also break outer foreach, no further action required
+                    // for deleted attribute values
+                    break 2;
                 case 'add':
                     $value = $patch['value'];
                     $attrval = new AttributeValue();
@@ -374,9 +325,28 @@ class EntityController extends Controller {
                     $attrval->json_val = json_encode($thesaurus_urls);
                     break;
                 case 'epoch':
+                case 'timeperiod':
                 case 'dimension':
                 case 'list':
                 case 'table':
+                    // check for invalid time spans
+                    if($attr->datatype == 'epoch' || $attr->datatype == 'timeperiod') {
+                        $sl = strtoupper($value['startLabel']);
+                        $el = strtoupper($value['endLabel']);
+                        $s = $value['start'];
+                        $e = $value['end'];
+                        if(
+                            ($sl == 'AD' && $el == 'BC')
+                            ||
+                            ($sl == 'BC' && $el == 'BC' && $s < $e)
+                            ||
+                            ($sl == 'AD' && $el == 'AD' && $s > $e)
+                        ) {
+                            return response()->json([
+                                'error' => __('Start date of a time period must not be after it\'s end date')
+                            ], 422);
+                        }
+                    }
                     $attrval->json_val = json_encode($value);
                     break;
                 case 'entity':
@@ -409,27 +379,29 @@ class EntityController extends Controller {
         $this->validate($request, AttributeValue::patchRules);
 
         try {
-            $entity = Entity::findOrFail($id);
+            Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist')
             ], 400);
         }
         try {
-            $attribute = Attribute::findOrFail($aid);
+            Attribute::findOrFail($aid);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This attribute does not exist')
             ], 400);
         }
 
-        $attrs = AttributeValue::where('entity_id', $id)
-            ->where('attribute_id', $aid)
-            ->get();
+        $attrValue = AttributeValue::firstOrCreate([
+            'entity_id' => $id,
+            'attribute_id' => $aid,
+        ], [
+            'lasteditor' => $user->name
+        ]);
+        $attrValue->lasteditor = $user->name;
         $values = $request->only(array_keys(AttributeValue::patchRules));
-        foreach($attrs as $a) {
-            $a->patch($values);
-        }
+        $attrValue->patch($values);
 
         return response()->json(null, 204);
     }
@@ -468,11 +440,20 @@ class EntityController extends Controller {
         }
         $this->validate($request, [
             'rank' => 'required|integer',
-            'parent_id' => 'nullable|integer|exists:entities,id|different:id',
+            'parent_id' => 'nullable|integer|exists:entities,id',
         ]);
+
+        try {
+            $entity = Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
 
         $rank = $request->get('rank');
         $parent_id = $request->get('parent_id');
+
         Entity::patchRanks($rank, $id, $parent_id, $user);
         return response()->json(null, 204);
     }

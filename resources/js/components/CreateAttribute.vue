@@ -31,7 +31,26 @@
                 </multiselect>
             </div>
         </div>
-        <div class="form-group" v-show="needsRootElement">
+        <div class="form-group col-md-12" v-if="isStringSc">
+            <div class="custom-control custom-switch">
+                <!-- <label class="custom-control-label" for="root-type-toggle">Select static element</label> -->
+                <input type="checkbox" class="custom-control-input" id="root-type-toggle" v-model="rootTypeToggle" />
+                <label class="custom-control-label" for="root-type-toggle">
+                    {{ $t('global.root-attribute-toggle') }}
+                </label>
+            </div>
+        </div>
+        <div class="form-group" v-show="isStringSc && rootTypeToggle">
+            <label class="col-form-label col-md-3">
+                {{ $t('global.root-attribute') }}
+            </label>
+            <div class="col-md-9">
+                <attribute-search
+                    :on-select="setAttributeRootId">
+                </attribute-search>
+            </div>
+        </div>
+        <div class="form-group" v-show="needsRootElement && !rootTypeToggle">
             <label class="col-form-label col-md-3">
                 {{ $t('global.root-element') }}:
             </label>
@@ -41,7 +60,7 @@
                 ></label-search>
             </div>
         </div>
-        <div class="form-group" v-show="allowsRestriction">
+        <div class="form-group" v-show="allowsRestriction && !rootTypeToggle">
             <label class="col-form-label px-3" for="allow-restrictions">
                 {{ $t('global.recursive') }}:
             </label>
@@ -89,6 +108,7 @@
             create() {
                 if(!this.needsRootElement) {
                     Vue.delete(this.newAttribute, 'root');
+                    Vue.delete(this.newAttribute, 'root_id');
                 }
                 if(!this.needsTextElement && !this.needsTextareaElement) {
                     Vue.delete(this.newAttribute, 'textContent');
@@ -113,13 +133,17 @@
             },
             setAttributeRoot(label) {
                 Vue.set(this.newAttribute, 'root', label);
+            },
+            setAttributeRootId(label) {
+                Vue.set(this.newAttribute, 'root_id', label.id);
             }
         },
         data() {
             return {
                 newAttribute: {
                     recursive: true
-                }
+                },
+                rootTypeToggle: false
             }
         },
         computed: {
@@ -137,6 +161,9 @@
                         this.newAttribute.type.datatype == 'string-mc' ||
                         this.newAttribute.type.datatype == 'epoch'
                     );
+            },
+            isStringSc() {
+                return this.newAttribute.type && this.newAttribute.type.datatype == 'string-sc';
             },
             needsRootElement: function() {
                 return this.newAttribute.type &&
@@ -158,19 +185,22 @@
                         this.newAttribute.type.datatype == 'sql'
                     );
             },
+            hasRootElement() {
+                if(!this.needsRootElement) return true;
+                return (
+                    this.newAttribute.root &&
+                    this.newAttribute.root.id > 0
+                ) || (
+                    this.newAttribute.type.datatype == 'string-sc' &&
+                    this.newAttribute.root_id
+                );
+            },
             validated: function() {
                 let isValid = this.newAttribute.label &&
                     this.newAttribute.type &&
                     this.newAttribute.label.id > 0 &&
                     this.newAttribute.type.datatype.length > 0 &&
-                    (
-                        !this.needsRootElement ||
-                        (
-                            this.needsRootElement &&
-                            this.newAttribute.root &&
-                            this.newAttribute.root.id > 0
-                        )
-                    ) &&
+                    this.hasRootElement &&
                     (
                         !this.needsTextareaElement ||
                         (

@@ -1,5 +1,6 @@
 <template>
     <div class="h-100 d-flex flex-column">
+        <entity-breadcrumbs class="mb-2 small" :entity="selectedEntity" v-if="selectedEntity.parentIds.length > 1"></entity-breadcrumbs>
         <div class="d-flex align-items-center justify-content-between">
             <h3 class="mb-0" @mouseenter="onEntityHeaderHover(true)" @mouseleave="onEntityHeaderHover(false)">
                 <span v-if="!selectedEntity.editing">
@@ -68,12 +69,14 @@
         <router-view
             v-can="'view_concept_props'"
             :bibliography="bibliography"
-            :refs="ref">
+            :refs="attributeReferences">
         </router-view>
     </div>
 </template>
 
 <script>
+    import { EventBus } from '../event-bus.js';
+
     export default {
         beforeRouteEnter(to, from, next) {
             next(vm => vm.getEntityData(vm.selectedEntity));
@@ -85,7 +88,7 @@
                 });
             } else {
                 if(to.params.aid) {
-                    this.setModalValues(to.params.aid);
+                    this.setReferenceAttribute(to.params.aid);
                 }
                 next();
             }
@@ -99,10 +102,6 @@
                 required: false,
                 type: Array,
                 default: () => []
-            },
-            eventBus: {
-                required: true,
-                type: Object
             },
             onDelete: {
                 required: false,
@@ -143,6 +142,7 @@
                             switch(data.attributes[i].datatype) {
                                 case 'dimension':
                                 case 'epoch':
+                                case 'timeperiod':
                                     val.value = {};
                                     break;
                                 case 'table':
@@ -173,10 +173,7 @@
                     Vue.set(this.selectedEntity, 'dependencies', data.dependencies);
 
                     const aid = this.$route.params.aid;
-                    if(aid) {
-                        this.setModalValues(aid);
-                    }
-
+                    this.setReferenceAttribute(aid);
                     Vue.set(this, 'dataLoaded', true);
                 }));
             },
@@ -230,10 +227,19 @@
                         'success'
                     );
                     this.setModificationFields(response.data);
-                }));
+                }).catch(error => {
+                    const r = error.response;
+                    this.$showToast(
+                        `${r.status}: ${r.statusText}`,
+                        r.data.error,
+                        'error',
+                        5000
+                    );
+                })
+            );
             },
             deleteEntity(entity) {
-                this.eventBus.$emit('entity-delete', {
+                EventBus.$emit('entity-delete', {
                     entity: entity
                 });
             },
@@ -253,7 +259,7 @@
                         name: name
                     };
                     $httpQueue.add(() => $http.patch(`entity/${entity.id}/name`, data).then(response => {
-                        this.eventBus.$emit('entity-update', {
+                        EventBus.$emit('entity-update', {
                             type: 'name',
                             entity_id: entity.id,
                             value: name
@@ -343,11 +349,8 @@
                 this.dependencyInfoHovered = false;
                 $('#dependency-info').popover('dispose');
             },
-            setModalValues(aid) {
-                const attribute = this.selectedEntity.attributes.find(a => a.id == aid);
-                this.ref.refs = this.hasReferenceGroup(attribute.thesaurus_url) ? this.selectedEntity.references[attribute.thesaurus_url] : [];
-                this.ref.value = this.selectedEntity.data[aid];
-                this.ref.attribute = attribute;
+            setReferenceAttribute(aid) {
+                this.referenceAttribute = aid;
             },
             showMetadata(attribute) {
                 this.$router.push({
@@ -379,11 +382,7 @@
                 dataLoaded: false,
                 dependencyInfoHovered: false,
                 hiddenAttributes: 0,
-                ref: {
-                    refs: {},
-                    value: {},
-                    attribute: {}
-                }
+                referenceAttribute: null
             }
         },
         computed: {
@@ -401,6 +400,21 @@
                 return {
                     color: colors.backgroundColor
                 };
+            },
+            attributeReferences() {
+                let data = {
+                    refs: [],
+                    value: {},
+                    attribute: {}
+                };
+                if(this.referenceAttribute) {
+                    const attribute = this.selectedEntity.attributes.find(a => a.id == this.referenceAttribute);
+                    if(!attribute) return data;
+                    data.refs = this.hasReferenceGroup(attribute.thesaurus_url) ? this.selectedEntity.references[attribute.thesaurus_url] : [];
+                    data.value = this.selectedEntity.data[this.referenceAttribute];
+                    data.attribute = attribute;
+                }
+                return data;
             }
         },
         watch: {

@@ -58,7 +58,11 @@ const de = {
             analysis: 'Datenanalyse',
             thesaurex: 'ThesauRex',
             dbwebgen: 'dbWebGen',
-            external: 'Externe Werkzeuge'
+            external: 'Externe Werkzeuge',
+            record: {
+                start: 'Aufnahme starten',
+                stop: 'Aufnahme beenden'
+            }
         },
         settings: {
             title: 'Einstellungen',
@@ -89,6 +93,7 @@ const de = {
             percentage: 'Prozentangabe',
             entity: 'Entität',
             epoch: 'Zeitspanne & Epoche',
+            timeperiod: 'Zeitspanne',
             date: 'Datum',
             dimension: 'Abmessungen (BxHxT)',
             list: 'Liste',
@@ -113,6 +118,7 @@ const de = {
         font: 'Schrift',
         mode: 'Modus',
         size: 'Größe',
+        duration: 'Dauer',
         color: 'Farbe',
         format: 'Format',
         version: 'Version',
@@ -131,6 +137,8 @@ const de = {
         'updated-at': 'Aktualisert',
         options: 'Optionen',
         type: 'Typ',
+        'root-attribute': 'Eltern-Attribut',
+        'root-attribute-toggle': 'Wert eines vorhandenen Attributs als Eltern-Element verwenden',
         'root-element': 'Eltern-Element',
         recursive: 'Alle Kind-Elemente (Rekursiv)',
         content: 'Inhalt',
@@ -142,7 +150,8 @@ const de = {
         'allow-override': 'Überschreibbar?',
         tag: 'Schlagwort | Schlagworte',
         set: 'Setzen',
-        'has-tags': 'Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte'
+        'has-tags': 'Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte',
+        'from-subentity': 'Gehört zu einer Sub-Entität'
     },
     main: {
         entity: {
@@ -181,6 +190,18 @@ const de = {
                 },
                 edit: {
                     title: 'Entität editieren - {name}'
+                },
+                screencast: {
+                    title: 'Screencast speichern',
+                    info: 'Screencast erfolgreich aufgenommen. Was möchtest du damit tun?',
+                    actions: {
+                        local: {
+                            button: 'Lokal speichern'
+                        },
+                        server: {
+                            button: 'In Spacialist speichern'
+                        }
+                    }
                 }
             },
             menu: {

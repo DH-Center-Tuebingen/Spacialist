@@ -83,16 +83,19 @@
                     <div class="row">
                         <div class="col-md-6">
                             <multiselect
+                                id="bibliography-search"
                                 label="title"
                                 track-by="id"
                                 v-model="newItem.bibliography"
                                 :closeOnSelect="true"
                                 :hideSelected="true"
+                                :internal-search="false"
                                 :multiple="false"
-                                :options="bibliography"
+                                :options="matchingBibliography"
                                 :placeholder="$t('global.select.placehoder')"
                                 :select-label="$t('global.select.select')"
-                                :deselect-label="$t('global.select.deselect')">
+                                :deselect-label="$t('global.select.deselect')"
+                                @search-change="onBibliographySearchChanged">
                                 <template slot="singleLabel" slot-scope="props">
                                     <span class="option__desc">
                                         <span class="option__title">
@@ -131,6 +134,8 @@
 </template>
 
 <script>
+    import { EventBus } from '../event-bus.js';
+
     export default {
         props: {
             bibliography: {
@@ -160,6 +165,8 @@
                 if(!this.refs.value.certainty) {
                     Vue.set(this.refs.value, 'certainty', 100);
                 }
+                this.initialCertainty.value = this.refs.value.certainty;
+                this.initialCertainty.description = this.refs.value.certainty_description;
                 const curr = this.$route;
                 this.entityId = curr.params.id;
                 this.attributeId = curr.params.aid;
@@ -189,6 +196,8 @@
                     certainty_description: this.refs.value.certainty_description
                 };
                 $httpQueue.add(() => $http.patch(`/entity/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
+                    this.initialCertainty.value = this.refs.value.certainty;
+                    this.initialCertainty.description = this.refs.value.certainty_description;
                     const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
                     this.$showToast(
                         this.$t('main.entity.references.toasts.updated-certainty.title'),
@@ -201,6 +210,23 @@
                     );
                 }));
             },
+            onBibliographySearchChanged(query) {
+                if(!!query && query.length) {
+                    this.matchingBibliography = this.bibliography.filter(b => {
+                        let matchesTitle = false;
+                        let matchesAuthor = false;
+                        if(b.title) {
+                            matchesTitle = b.title.toLowerCase().includes(query.toLowerCase());
+                        }
+                        if(b.author) {
+                            matchesAuthor = b.author.toLowerCase().includes(query.toLowerCase());
+                        }
+                        return matchesTitle || matchesAuthor;
+                    });
+                } else {
+                    this.matchingBibliography = this.bibliography.slice();
+                }
+            },
             onAddReference(item) {
                 if(!this.$can('add_remove_bibliography')) return;
                 const data = {
@@ -208,10 +234,11 @@
                     description: item.description
                 };
                 $httpQueue.add(() => $http.post(`/entity/${this.entityId}/reference/${this.attributeId}`, data).then(response => {
-                    if(!this.refs.refs) {
-                        this.refs.refs = [];
-                    }
-                    this.refs.refs.push(response.data);
+                    EventBus.$emit('references-updated', {
+                        action: 'add',
+                        reference: response.data,
+                        group: this.refs.attribute.thesaurus_url
+                    });
                     item.bibliography = {};
                     item.description = '';
                 }));
@@ -222,7 +249,11 @@
                 $httpQueue.add(() => $http.delete(`/entity/reference/${id}`).then(response => {
                     const index = this.refs.refs.findIndex(r => r.id == reference.id);
                     if(index > -1) {
-                        this.refs.refs.splice(index, 1);
+                        EventBus.$emit('references-updated', {
+                            action: 'delete',
+                            reference: reference,
+                            group: this.refs.attribute.thesaurus_url
+                        });
                     }
                 }));
             },
@@ -237,8 +268,11 @@
                     description: editedReference.description
                 };
                 $httpQueue.add(() => $http.patch(`/entity/reference/${id}`, data).then(response => {
-                    ref.description = response.data.description;
-                    ref.updated_at = response.data.updated_at;
+                    EventBus.$emit('references-updated', {
+                        action: 'edit',
+                        reference: response.data,
+                        group: this.refs.attribute.thesaurus_url
+                    });
                     this.cancelEditReference();
                 }));
             },
@@ -252,6 +286,8 @@
                 this.$modal.hide('entity-references-modal');
             },
             routeBack() {
+                this.refs.value.certainty = this.initialCertainty.value;
+                this.refs.value.certainty_description = this.initialCertainty.description;
                 const curr = this.$route;
                 this.$router.push({
                     name: 'entitydetail',
@@ -270,7 +306,12 @@
                 newItem: {
                     bibliography: {},
                     description: ''
-                }
+                },
+                initialCertainty: {
+                    value: 100,
+                    description: ''
+                },
+                matchingBibliography: this.bibliography.slice()
             }
         },
         computed: {

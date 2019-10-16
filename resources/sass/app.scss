@@ -26,23 +26,17 @@
 // v-modal
 @import "modal";
 
-// v-tooltip
-@import "popover";
-
 // dat.gui
 @import "datgui";
 
-// slider
-@import "slider";
-
 // color gradient
 @import "gradient";
+
+// Search components
+@import "search";
 
 // Spacialist utility classes
 @import "utilities";
 
 // Spacialist specific
 @import "style";
-
-// Data Analysis Plugin
-@import "dataanalysis";

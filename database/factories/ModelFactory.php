@@ -127,7 +127,7 @@ $factory->define(App\Attribute::class, function(Faker $faker) {
     return [
         'thesaurus_url' => $concept->concept_url,
         'thesaurus_root_url' => $faker->optional()->randomElement([$root_concept->concept_url]),
-        'datatype' => $faker->randomElement(['string', 'list', 'date', 'stringf', 'epoch', 'string-sc', 'string-mc', 'dimension', 'integer', 'boolean', 'percentage', 'context', 'geography', 'double']),
+        'datatype' => $faker->randomElement(['string', 'list', 'date', 'stringf', 'epoch', 'timeperiod', 'string-sc', 'string-mc', 'dimension', 'integer', 'boolean', 'percentage', 'context', 'geography', 'double']),
     ];
 });
 
@@ -317,6 +317,7 @@ $factory->define(App\AttributeValue::class, function(Faker $faker) {
             $val = $faker->randomElement([0,1]);
             break;
         case 'epoch':
+        case 'timeperiod':
         case 'dimension':
             $dt = 'json_val';
             // TODO: json_val

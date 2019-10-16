@@ -22,24 +22,18 @@ class UserController extends Controller
 
     public function refreshToken() {
         return response()->json([
-                'status' => 'success'
-            ]);
+            'status' => 'success'
+        ]);
     }
 
     public function getUser(Request $request) {
-        try {
-            $user = User::findOrFail(auth()->user()->id);
-            $user->setPermissions();
+        $user = User::find(auth()->user()->id);
+        $user->setPermissions();
 
-            return response()->json([
-                'status' => 'success',
-                'data' => $user
-            ]);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This user does not exist')
-            ], 400);
-        }
+        return response()->json([
+            'status' => 'success',
+            'data' => $user
+        ]);
     }
 
     public function getUsers() {
@@ -115,6 +109,7 @@ class UserController extends Controller
         $user->email = Str::lower($email);
         $user->password = $password;
         $user->save();
+        $user = User::find($user->id);
 
         return response()->json($user);
     }
@@ -129,21 +124,25 @@ class UserController extends Controller
         $this->validate($request, Role::rules);
 
         $role = new Role();
+        $role->guard_name = 'web';
         foreach($request->only(array_keys(Role::rules)) as $key => $value) {
             $role->{$key} = $value;
         }
         $role->save();
+        $role = Role::find($role->id);
         return response()->json($role);
     }
 
     public function logout(Request $request) {
-        auth()->logout();
+        auth()->logout(true);
+        auth()->invalidate(true);
     }
 
     // PATCH
 
     public function patchUser(Request $request, $id) {
         $user = auth()->user();
+
         if(!$user->can('add_remove_role')) {
             return response()->json([
                 'error' => __('You do not have the permission to set user roles')
@@ -179,11 +178,9 @@ class UserController extends Controller
         }
 
         if($request->has('roles')) {
-            $user->detachRoles($user->roles);
+            $user->roles()->detach();
             $roles = $request->get('roles');
-            foreach($roles as $roleId) {
-                $user->attachRole($roleId);
-            }
+            $user->assignRole($roles);
 
             // Update updated_at column
             $user->touch();
@@ -192,6 +189,9 @@ class UserController extends Controller
             $user->email = $request->get('email');
             $user->save();
         }
+
+        // return user without roles relation
+        $user->unsetRelation('roles');
 
         return response()->json($user);
     }
@@ -222,11 +222,11 @@ class UserController extends Controller
         }
 
         if($request->has('permissions')) {
-            $role->detachPermissions($role->permissions);
+            $role->permissions()->detach();
             $perms = $request->get('permissions');
-            foreach($perms as $permId) {
-                $role->attachPermission($permId);
-            }
+            $role->syncPermissions($perms);
+
+            // Update updated_at column
             $role->touch();
         }
         if($request->has('display_name')) {
@@ -251,7 +251,16 @@ class UserController extends Controller
                 'error' => __('You do not have the permission to delete users')
             ], 403);
         }
-        User::find($id)->delete();
+
+        try {
+            $delUser = User::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This user does not exist')
+            ], 400);
+        }
+
+        $delUser->delete();
         return response()->json(null, 204);
     }
 
@@ -262,7 +271,16 @@ class UserController extends Controller
                 'error' => __('You do not have the permission to delete roles')
             ], 403);
         }
-        Role::find($id)->delete();
+
+        try {
+            $delRole = Role::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This role does not exist')
+            ], 400);
+        }
+
+        $delRole->delete();
         return response()->json(null, 204);
     }
 

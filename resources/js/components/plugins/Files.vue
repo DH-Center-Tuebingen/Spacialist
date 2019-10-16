@@ -43,6 +43,57 @@
             <div class="mb-2" v-show="showFilters">
                 <form v-on:submit.prevent="applyFilters(selectedTopAction)">
                     <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="tags">
+                            {{ $tc('global.tag', 2) }}:
+                        </label>
+                        <div class="col-md-9">
+                            <multiselect
+                                id="tags"
+                                label="concept_url"
+                                track-by="id"
+                                v-model="filterTags[selectedTopAction]"
+                                :allow-empty="true"
+                                :close-on-select="false"
+                                :custom-label="translateLabel"
+                                :hide-selected="true"
+                                :multiple="true"
+                                :options="tags"
+                                :placeholder="$t('global.select.placehoder')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
+                            </multiselect>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="names">
+                            {{ $t('plugins.files.header.rules.types.name') }}:
+                        </label>
+                        <div class="col-md-9">
+                            <input type="text" id="names" class="form-control" v-model="filterNames[selectedTopAction]" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-md-3" for="dates">
+                            {{ $t('plugins.files.header.rules.types.date') }}:
+                        </label>
+                        <div class="col-md-9">
+                            <multiselect
+                                id="dates"
+                                label="value"
+                                track-by="id"
+                                v-model="filterDates[selectedTopAction]"
+                                :allow-empty="true"
+                                :close-on-select="false"
+                                :hide-selected="true"
+                                :multiple="true"
+                                :options="filterDateList"
+                                :placeholder="$t('global.select.placehoder')"
+                                :select-label="$t('global.select.select')"
+                                :deselect-label="$t('global.select.deselect')">
+                            </multiselect>
+                        </div>
+                    </div>
+                    <div class="form-group row">
                         <label class="col-form-label col-md-3" for="filetypes">
                             {{ $t('plugins.files.header.rules.types.file') }}:
                         </label>
@@ -82,49 +133,6 @@
                             </multiselect>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label class="col-form-label col-md-3" for="dates">
-                            {{ $t('plugins.files.header.rules.types.date') }}:
-                        </label>
-                        <div class="col-md-9">
-                            <multiselect
-                                id="dates"
-                                label="value"
-                                track-by="id"
-                                v-model="filterDates[selectedTopAction]"
-                                :allow-empty="true"
-                                :close-on-select="false"
-                                :hide-selected="true"
-                                :multiple="true"
-                                :options="filterDateList"
-                                :placeholder="$t('global.select.placehoder')"
-                                :select-label="$t('global.select.select')"
-                                :deselect-label="$t('global.select.deselect')">
-                            </multiselect>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-form-label col-md-3" for="tags">
-                            {{ $tc('global.tag', 2) }}:
-                        </label>
-                        <div class="col-md-9">
-                            <multiselect
-                                id="tags"
-                                label="concept_url"
-                                track-by="id"
-                                v-model="filterTags[selectedTopAction]"
-                                :allow-empty="true"
-                                :close-on-select="false"
-                                :custom-label="translateLabel"
-                                :hide-selected="true"
-                                :multiple="true"
-                                :options="tags"
-                                :placeholder="$t('global.select.placehoder')"
-                                :select-label="$t('global.select.select')"
-                                :deselect-label="$t('global.select.deselect')">
-                            </multiselect>
-                        </div>
-                    </div>
                     <button type="submit" class="btn btn-outline-success">
                         {{ $t('plugins.files.header.rules.apply') }}
                     </button>
@@ -133,15 +141,16 @@
         </div>
         <div class="col px-0" v-show="isAction('linkedFiles')">
             <form>
-                <div class="form-check">
-                    <input type="checkbox" id="sub-entities-check" class="form-check-input" v-model="includeSubEntities" @change="applyFilters('linkedFiles')"/>
-                    <label class="form-check-label" for="sub-entities-check">
-                        {{ $t('plugins.files.include-sub-files') }}
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" id="sub-entities-check" class="custom-control-input" v-model="includeSubEntities" @change="applyFilters('linkedFiles')"/>
+                    <label class="custom-control-label" for="sub-entities-check">
+                        {{ $t('plugins.files.include-sub-files') }} <i class="fas fa-fw fa-sitemap"></i>
                     </label>
                 </div>
             </form>
             <file-list
                 :context-menu="contextMenu"
+                :entity-id="selectedEntity.id"
                 :files="linkedFiles.files"
                 :file-state="linkedFiles.fileState"
                 :is-fetching="linkedFiles.fetchingFiles"
@@ -282,16 +291,18 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body row col text-center of-hidden">
-                    <div class="col-md-6 d-flex flex-column">
+                <div class="modal-body row flex-grow-1 text-center overflow-hidden">
+                    <div class="col-md-6 d-flex flex-column h-100">
                         <component
-                            class="col px-0 of-hidden"
+                            class="flex-grow-1 overflow-hidden"
                             id="file-container"
                             :entity="localEntity"
                             :file="selectedFile"
-                            :fullscreen-handler="toggleFullscreen"
+                            :fullscreen-handler="fullscreenHandler"
                             :is="fileCategoryComponent"
-                            :storage-config="storageConfig">
+                            :storage-config="storageConfig"
+                            @handle-ocr="handleOCR"
+                            @update-file-content="updateFileContent">
                         </component>
                         <div class="d-flex flex-row justify-content-between mt-2">
                             <button type="button" class="btn btn-outline-secondary" :disabled="isFirstFile" @click="gotoPreviousFile(selectedFile)">
@@ -302,7 +313,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="col-md-6 d-flex flex-column">
+                    <div class="col-md-6 d-flex flex-column h-100">
                         <ul class="nav nav-tabs nav-fill">
                             <li class="nav-item">
                                 <a href="#" class="nav-link" :class="{active: modalTab == 'properties'}" @click.prevent="modalTab = 'properties'">
@@ -676,7 +687,9 @@
 </template>
 
 <script>
+    import { EventBus } from '../../event-bus.js';
     import * as screenfull from 'screenfull';
+    import { createWorker as createTesseractWorker } from 'tesseract.js';
 
     import FileList from './FileList.vue';
 
@@ -693,8 +706,8 @@
 
     import FileConfirmUploadModal from './FileConfirmUploadModal.vue';
 
-
     export default {
+        tesseractWorker: createTesseractWorker(),
         components: {
             'file-list': FileList,
             'file-image': FileImage,
@@ -726,7 +739,12 @@
             }
         },
         activated() {
-            this.linkedFilesChanged();
+            if(this.selectedEntity.id) {
+                this.linkedFiles.apiUrl = '/file/linked/' + this.selectedEntity.id;
+                this.setAction('linkedFiles', true);
+            } else {
+                this.linkedFilesChanged();
+            }
             if(this.$route.query.f) {
                 this.openFile(this.$route.query.f);
             }
@@ -734,6 +752,7 @@
         mounted() {
             this.initFilters();
             this.initTags();
+            EventBus.$on('files-uploaded', this.handleFileUpload);
         },
         methods: {
             initTags() {
@@ -743,11 +762,7 @@
             },
             updateTags(file) {
                 const data = {
-                    tags: file.tags.map(t => {
-                        return {
-                            id: t.id
-                        };
-                    })
+                    tags: file.tags.map(t => t.id)
                 };
                 $http.patch(`file/${file.id}/tag`, data).then(response => {
                     const title = this.$t('plugins.files.modal.detail.toasts.tags-updated.title');
@@ -786,6 +801,7 @@
                 count += vm.filterCameras[action].length;
                 count += vm.filterDates[action].length;
                 count += vm.filterTags[action].length;
+                count += vm.filterNames[action].length ? 1 : 0;
                 vm.filterCounts[action] = count;
                 vm.resetFiles(action);
                 vm.getNextFiles(action, filters);
@@ -797,7 +813,8 @@
                     categories: vm.filterTypes[action].map(f => f.key),
                     cameras: vm.filterCameras[action],
                     dates: vm.filterDates[action],
-                    tags: vm.filterTags[action]
+                    tags: vm.filterTags[action],
+                    name: vm.filterNames[action]
                     // strategy: vm.filterMatching[action]
                 };
                 if(action == 'linkedFiles') {
@@ -876,6 +893,37 @@
                     });
                 }
             },
+            handleOCR(event) {
+                this.$options.tesseractWorker
+                    .recognize(event.image)
+                    .then(result => {
+                        const f = new File([result.text], 'ocr-result.txt', {
+                            type: 'text/plain'
+                        });
+                        this.$options.tesseractWorker.terminate();
+                        this.confirmClipboardUpload(f);
+                    });
+            },
+            updateFileContent(event) {
+                const file = event.file;
+                const content = event.content;
+                let id = file.id;
+                let blob;
+                if(content instanceof Blob) {
+                    blob = content;
+                } else {
+                    blob = new Blob([content], {type: file.mime_type});
+                }
+                let data = new FormData();
+                data.append('file', blob, file.name);
+                $http.post(`/file/${id}/patch`, data, {
+                    headers: { 'content-type': false }
+                }).then(response => {
+                    if(event.onSuccess) {
+                        event.onSuccess(response, file);
+                    }
+                });
+            },
             onFileHeaderHover(active) {
                 // If edit mode is enabled, do not disable it on hover
                 if(this.selectedFile.editing) return;
@@ -908,17 +956,30 @@
                 this.selectedFile.editing = false;
             },
             toggleFullscreen(element) {
-                if(!screenfull.enabled) return;
-                if(!element) return;
-                screenfull.toggle(element);
+                if(!screenfull.isEnabled) return new Promise(r => r(null));
+                if(!element) return new Promise(r => r(null));
+                return screenfull.toggle(element);
+            },
+            addToggleListener(callback) {
+                if(screenfull.isEnabled) {
+                    screenfull.on('change', callback);
+                }
+            },
+            removeToggleListener(callback) {
+                if(screenfull.isEnabled) {
+                    screenfull.off('change', callback);
+                }
             },
             linkedFilesChanged() {
+                this.resetFiles('linkedFiles');
                 if(!this.selectedEntity.id) return;
                 this.linkedFiles.apiUrl = '/file/linked/' + this.selectedEntity.id;
-                this.resetFiles('linkedFiles');
                 this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
             },
             handleClipboardPaste(e) {
+                const tag = e.target.tagName.toLowerCase();
+                // do not handle if pasted in input field
+                if(tag == 'input' || tag == 'textarea') return;
                 let items = e.clipboardData.items;
                 for(let i=0; i<items.length; i++) {
                     let c = items[i];
@@ -941,34 +1002,44 @@
                 });
             },
             uploadFileFromClipboard(event) {
-                this.uploadFile(event.file).then(response => {
+                this.uploadFile({file: event.file}).then(response => {
                     this.onFilesUploaded(this.unlinkedFiles);
                     this.onFilesUploaded(this.allFiles);
                 });
             },
             uploadFile(file, component) {
-                let formData = new FormData();
-                formData.append('file', file.file ? file.file : file);
-                if(this.toUpload.copyright.length) {
-                    formData.append('copyright', this.toUpload.copyright);
+                return this.$uploadFile(file, this.toUpload);
+            },
+            handleFileUpload(event) {
+                let affects = [];
+                if(event.new) {
+                    affects.push('unlinkedFiles');
+                    affects.push('allFiles');
+                } else {
+                    if(event.linkedFiles) {
+                        affects.push('linkedFiles');
+                    }
+                    if(event.unlinkedFiles) {
+                        affects.push('unlinkedFiles');
+                    }
+                    if(event.allFiles) {
+                        affects.push('allFiles');
+                    }
                 }
-                if(this.toUpload.description.length) {
-                    formData.append('description', this.toUpload.description);
-                }
-                if(this.toUpload.tags.length) {
-                    formData.append('tags', JSON.stringify(this.toUpload.tags.map(t => t.id)));
-                }
-                return $http.post('file/new', formData);
+                affects.forEach(a => {
+                    this.onFilesUploaded(this[a]);
+                });
             },
             openFile(id) {
                 $httpQueue.add(() => $http.get(`/file/${id}`).then(response => {
                     this.showFileModal(response.data);
                 }));
             },
-            setAction(id) {
+            setAction(id, dontLoad = false) {
                 // disable linked tab if no entity is selected
                 if(id == 'linkedFiles' && !this.localEntity.id) return;
                 this.selectedTopAction = id;
+                if(dontLoad) return;
                 // If it is the first time the action is set, load images
                 if(this[id] && !Object.keys(this[id].pagination).length) {
                     this.getNextFiles(id);
@@ -1400,6 +1471,11 @@
                     key: '',
                     value: ''
                 },
+                fullscreenHandler: {
+                    toggle: this.toggleFullscreen,
+                    add: this.addToggleListener,
+                    remove: this.removeToggleListener
+                },
                 fileHeaderHovered: false,
                 newFilename: '',
                 selectedFile: {},
@@ -1432,6 +1508,11 @@
                     linkedFiles: [],
                     unlinkedFiles: [],
                     allFiles: []
+                },
+                filterNames: {
+                    linkedFiles: '',
+                    unlinkedFiles: '',
+                    allFiles: ''
                 },
                 filterTags: {
                     linkedFiles: [],

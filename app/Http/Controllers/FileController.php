@@ -124,6 +124,12 @@ class FileController extends Controller
     }
 
     public function getLinkCount($id) {
+        $user = auth()->user();
+        if(!$user->can('view_files')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get number of links of a specific file')
+            ], 403);
+        }
         try {
             $file = File::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -196,6 +202,12 @@ class FileController extends Controller
     }
 
     public function getTags() {
+        $user = auth()->user();
+        if(!$user->can('view_concepts_th')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get tags')
+            ], 403);
+        }
         $tagObj = Preference::where('label', 'prefs.tag-root')
             ->value('default_value');
         $tagUri = json_decode($tagObj)->uri;
@@ -215,6 +227,7 @@ class FileController extends Controller
             )
             SELECT *
             FROM top
+            ORDER BY id
         ");
         return response()->json($tags);
     }
@@ -278,7 +291,7 @@ class FileController extends Controller
             'tags' => json_decode($request->get('tags'))
         ];
         $newFile = File::createFromUpload($file, $user, $metadata);
-        return response()->json($newFile);
+        return response()->json($newFile, 201);
     }
 
     public function patchContent(Request $request, $id) {
@@ -308,16 +321,16 @@ class FileController extends Controller
 
     public function exportFiles(Request $request) {
         $user = auth()->user();
-        if(!$user->can('view_files')) {
+        if(!$user->can('export_files')) {
             return response()->json([
-                'error' => __('You do not have the permission to view files')
+                'error' => __('You do not have the permission to export files')
             ], 403);
         }
         $this->validate($request, [
-            'files' => 'required|json'
+            'files' => 'required|array'
         ]);
 
-        $ids = json_decode($request->get('files'));
+        $ids = $request->input('files', []);
         $files = File::whereIn('id', $ids)->get();
         $archive = File::createArchiveFromList($files);
         // get raw parsed content
@@ -397,9 +410,6 @@ class FileController extends Controller
         }
 
         $tags = $request->input('tags', []);
-        $tags = array_map(function($t) {
-            return $t['id'];
-        }, $tags);
 
         // Delete all entries where tags no longer set
         FileTag::where('file_id', $file->id)
@@ -447,7 +457,7 @@ class FileController extends Controller
 
         $file->link($request->get('entity_id'), $user);
 
-        return response()->json();
+        return response()->json(null, 204);
     }
 
     // DELETE

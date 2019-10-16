@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Preference;
+use App\User;
 use App\UserPreference;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -24,6 +25,15 @@ class PreferenceController extends Controller {
 
     public function getUserPreferences($id) {
         $user = auth()->user();
+
+        try {
+            User::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This user does not exist')
+            ], 400);
+        }
+
         if(!isset($user) || $user->id != $id) {
             return response()->json([
                 'error' => __('You are not allowed to access preferences of another user')
@@ -37,13 +47,6 @@ class PreferenceController extends Controller {
 
     // PATCH
     public function patchPreference(Request $request, $id) {
-        $this->validate($request, [
-            'label' => 'required|string|exists:preferences,label',
-            'value' => 'nullable',
-            'user_id' => 'nullable|integer|exists:users,id',
-            'allow_override' => 'nullable|boolean_string'
-        ]);
-
         $user = auth()->user();
         $uid = $request->get('user_id');
         if(!$user->can('edit_preferences') && !isset($uid)) {
@@ -51,6 +54,13 @@ class PreferenceController extends Controller {
                 'error' => __('You do not have the permission to edit preferences')
             ], 403);
         }
+
+        $this->validate($request, [
+            'label' => 'required|string|exists:preferences,label',
+            'value' => 'nullable',
+            'user_id' => 'nullable|integer|exists:users,id',
+            'allow_override' => 'nullable|boolean_string'
+        ]);
 
         $label = $request->get('label');
         $value = $request->get('value');
@@ -64,7 +74,7 @@ class PreferenceController extends Controller {
             ], 400);
         }
 
-        $encodedValue = $this->encodePreference($label, $value);
+        $encodedValue = Preference::encodePreference($label, $value);
 
         if(isset($uid)) {
             $userPref = UserPreference::where('pref_id', $id)->where('user_id', $uid)->first();
@@ -95,39 +105,4 @@ class PreferenceController extends Controller {
     // PUT
 
     // DELETE
-
-    // OTHER FUNCTIONS
-    private function encodePreference($label, $decodedValue) {
-        $value;
-        switch($label) {
-            case 'prefs.gui-language':
-                $value = json_encode(['language_key' => $decodedValue]);
-                break;
-            case 'prefs.columns':
-                $value = $decodedValue;
-                break;
-            case 'prefs.show-tooltips':
-                $value = json_encode(['show' => $decodedValue]);
-                break;
-            case 'prefs.tag-root':
-                $value = json_encode(['uri' => $decodedValue]);
-                break;
-            case 'prefs.load-extensions':
-                $value = $decodedValue;
-                break;
-            case 'prefs.link-to-thesaurex':
-                $value = json_encode(['url' => $decodedValue]);
-                break;
-            case 'prefs.project-name':
-                $value = json_encode(['name' => $decodedValue]);
-                break;
-            case 'prefs.project-maintainer':
-                $value = $decodedValue;
-                break;
-            case 'prefs.map-projection':
-                $value = $decodedValue;
-                break;
-        }
-        return $value;
-    }
 }

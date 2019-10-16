@@ -1,22 +1,20 @@
 <template>
-    <div class="row h-100 of-hidden" v-if="initFinished">
-        <div :class="'col-md-'+$getPreference('prefs.columns').left" id="tree-container" class="d-flex flex-column h-100" v-can="'view_concepts'">
+    <div class="row h-100 overflow-hidden" v-if="initFinished">
+        <div :class="`h-100 d-flex flex-column col-md-${$getPreference('prefs.columns').left}`" id="tree-container" v-can="'view_concepts'" v-if="$getPreference('prefs.columns').left > 0">
             <entity-tree
                 class="col px-0"
-                :event-bus="eventBus"
                 :selected-entity="selectedEntity">
             </entity-tree>
         </div>
-        <div :class="'col-md-'+$getPreference('prefs.columns').center" style="border-right: 1px solid #ddd; border-left: 1px solid #ddd;" id="attribute-container" class="h-100" v-can="'view_concepts|view_concept_props'">
-            <router-view class="h-100"
+        <div :class="`h-100 border-left border-right col-md-${$getPreference('prefs.columns').center}`" id="attribute-container" v-can="'view_concepts|view_concept_props'" v-if="$getPreference('prefs.columns').center > 0">
+            <router-view
                 :selected-entity="selectedEntity"
                 :bibliography="bibliography"
-                :event-bus="eventBus"
                 @detail-updated="setDetailDirty"
             >
             </router-view>
         </div>
-        <div :class="'col-md-'+$getPreference('prefs.columns').right" id="addon-container" class="d-flex flex-column">
+        <div :class="`h-100 d-flex flex-column col-md-${$getPreference('prefs.columns').right}`" id="addon-container" v-if="$getPreference('prefs.columns').right > 0">
             <ul class="nav nav-tabs">
                 <li class="nav-item" v-for="plugin in $getTabPlugins()">
                     <router-link class="nav-link" :class="{active: tab == plugin.key}" :to="{ query: { tab: plugin.key }}" append>
@@ -33,7 +31,6 @@
                 <keep-alive>
                     <component
                         :selected-entity="selectedEntity"
-                        :event-bus="eventBus"
                         :entity-data-loaded="dataLoaded"
                         :is="activePlugin"
                         :params="$route.query"
@@ -71,6 +68,7 @@
 </template>
 
 <script>
+    import { EventBus } from '../event-bus.js';
     import { mapFields } from 'vee-validate';
 
     export default {
@@ -131,7 +129,7 @@
                     this.selectedEntity = response.data;
                     return $http.get(`/entity/${id}/reference`);
                 }).then(response => {
-                    this.selectedEntity.references = response.data;
+                    Vue.set(this.selectedEntity, 'references', response.data);
                 }));
             },
             resetEntity() {
@@ -144,12 +142,18 @@
                     this.selectedEntity = entityData;
                 }
                 if(entityReferences) {
-                    this.selectedEntity.references = entityReferences;
+                    if(Array.isArray(entityReferences) && !entityReferences.length) {
+                        entityReferences = {};
+                    }
+                    Vue.set(this.selectedEntity, 'references', entityReferences);
+                } else {
+                    Vue.set(this.selectedEntity, 'references', {});
                 }
                 if(openTab) {
                     this.setTabOrPlugin(openTab);
                 }
-                this.eventBus.$on('entity-update', this.handleEntityUpdate);
+                EventBus.$on('entity-update', this.handleEntityUpdate);
+                EventBus.$on('references-updated', this.handleReferenceUpdate);
                 this.initFinished = true;
                 return new Promise(r => r(null));
             },
@@ -217,6 +221,32 @@
                             vm.$throwError({message: `Unknown event type ${e.type} received.`});
                     }
                 }
+            },
+            handleReferenceUpdate(e) {
+                const r = e.reference;
+                const grp = this.selectedEntity.references[e.group];
+                switch(e.action) {
+                    case 'add':
+                        if(!grp) {
+                            Vue.set(this.selectedEntity.references, e.group, []);
+                        }
+                        this.selectedEntity.references[e.group].push(r);
+                        break;
+                    case 'delete':
+                        const idx = grp.findIndex(ref => ref.id == r.id);
+                        if(idx > -1) {
+                            this.selectedEntity.references[e.group].splice(idx, 1);
+                        }
+                        if(!grp.length) {
+                            Vue.delete(this.selectedEntity.references, e.group);
+                        }
+                        break;
+                    case 'edit':
+                        let ref = grp.find(ref => ref.id == r.id);
+                        ref.description = r.description;
+                        ref.updated_at = r.updated_at;
+                        break;
+                }
             }
         },
         data() {
@@ -229,7 +259,6 @@
                 defaultKey: undefined,
                 plugins: this.$getTabPlugins(),
                 activePlugin: '',
-                eventBus: new Vue(),
                 discardModal: 'discard-changes-modal',
                 discardState: {
                     dirty: false,

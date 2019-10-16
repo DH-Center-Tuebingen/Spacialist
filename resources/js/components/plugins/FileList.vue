@@ -27,17 +27,21 @@
                     <i class="fas fa-fw fa-th"></i>
                 </span>
             </a>
-            <button class="btn btn-sm btn-outline-primary" v-show="fileCount" @click="exportFiles(selectedFiles)">
-                {{
-                    $t('plugins.files.header.export.selected', {
-                        cnt: fileCount
-                    })
-                }}
-            </button>
+            <div class="dropdown" v-if="fileCount">
+                <span id="selected-files-actions" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                </span>
+                <div class="dropdown-menu" aria-labelledby="selected-files-actions">
+                    <a class="dropdown-item" href="#" v-if="$can('export_files')" @click.prevent="exportFiles(selectedFiles)">
+                        <i class="fas fa-fw fa-download text-info"></i>
+                        <span v-html="$t('plugins.files.header.export.selected', {cnt: fileCount})"></span>
+                    </a>
+                </div>
+            </div>
         </div>
         <div infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk" class="row col scroll-y-auto">
-            <div class="row col" v-if="grid">
-                <div class="col-sm-6 col-md-4 mb-3 clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
+            <div class="row col align-content-start" v-if="grid">
+                <div class="col-md-12 col-lg-6 col-xl-4 mb-3 clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
                     <div class="card text-center">
                         <div style="height: 200px;">
                             <div class="card-hover-overlay h-100">
@@ -46,7 +50,7 @@
                                 </div>
                             </div>
                             <div class="card-hover h-100">
-                                <img class="card-img w-auto h-auto mw-100 mh-100" v-if="file.category == 'image'" :src="file.url">
+                                <img class="card-img w-100 h-100 object-fit-cover" v-if="file.category == 'image'" :src="file.thumb_url">
                                 <div class="card-img w-100" v-else></div>
                                 <div class="card-img-overlay d-flex flex-column justify-content-end" style="height: 200px;">
                                     <div class="card-text pb-4">
@@ -110,11 +114,14 @@
                                 <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has-links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
                                     <i class="fas fa-fw fa-link text-info"></i>
                                 </span>
+                                <span v-if="isFromSubEntity(file)" :title="$tc('global.from-subentity')">
+                                    <i class="fas fa-fw fa-sitemap text-info"></i>
+                                </span>
                                 <span v-if="getFileTags(file).length" :title="$tc('global.has-tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
                                     <i class="fas fa-fw fa-tags text-info"></i>
                                 </span>
                             </div>
-                            <div class="position-absolute top-0 left-0 m-2">
+                            <div class="position-absolute top-0 left-0 m-2" v-if="$can('export_files')">
                                 <input type="checkbox" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
                             </div>
                         </div>
@@ -135,62 +142,75 @@
                 </div>
             </div>
             <ul class="list-group mb-2 w-100" v-else>
-                <li class="list-group-item px-3 py-2 w-100 d-flex flex-row justify-content-start align-items-center clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
-                    <input type="checkbox" class="mr-2" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" />
-                    <div class="mr-2">
-                        <div v-if="file.category == 'xml'">
-                            <i class="fas fa-fw fa-file-code w-32p h-32p"></i>
+                <li class="list-group-item px-3 py-2 w-100 d-flex flex-row justify-content-between clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
+                    <div class="d-flex justify-content-start align-items-center">
+                        <input type="checkbox" class="mr-2" @click.stop="" :id="file.id" :value="file.id" v-model="selectedFiles" v-if="$can('export_files')" />
+                        <div class="mr-2">
+                            <div v-if="file.category == 'xml'">
+                                <i class="fas fa-fw fa-file-code w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == 'html'">
+                                <i
+                                class="fab fa-fw fa-html5"
+                                data-fa-transform="shrink-9 down-2"
+                                data-fa-mask="fas fa-fw fa-file w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == 'archive'">
+                                <i class="fas fa-fw fa-file-archive w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == 'pdf'">
+                                <i class="fas fa-fw fa-file-pdf w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == 'audio'">
+                                <i class="fas fa-fw fa-file-audio w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == 'video'">
+                                <i class="fas fa-fw fa-file-video w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == 'spreadsheet'">
+                                <i class="fas fa-fw fa-file-excel w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == 'document'">
+                                <i class="fas fa-fw fa-file-word w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == 'presentation'">
+                                <i class="fas fa-fw fa-file-powerpoint w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == '3d'">
+                                <i
+                                class="fas fa-fw fa-cubes w-32p h-32p"
+                                data-fa-transform="shrink-9 down-2"
+                                data-fa-mask="fas fa-fw fa-file"></i>
+                            </div>
+                            <div v-else-if="file.category == 'dicom'">
+                                <i class="fas fa-fw fa-file-medical-alt w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == 'text'">
+                                <i class="fas fa-fw fa-file-alt w-32p h-32p"></i>
+                            </div>
+                            <div v-else-if="file.category == 'image'" class="w-32p h-32p">
+                                <img class="w-100 h-100 object-fit-cover" :src="file.thumb_url" />
+                            </div>
+                            <div v-else-if="file.category == 'undefined'">
+                                <i
+                                class="fas fa-fw fa-question w-32p h-32p"
+                                data-fa-transform="shrink-9 down-2"
+                                data-fa-mask="fas fa-fw fa-file"></i>
+                            </div>
                         </div>
-                        <div v-else-if="file.category == 'html'">
-                            <i
-                            class="fab fa-fw fa-html5"
-                            data-fa-transform="shrink-9 down-2"
-                            data-fa-mask="fas fa-fw fa-file w-32p h-32p"></i>
-                        </div>
-                        <div v-else-if="file.category == 'archive'">
-                            <i class="fas fa-fw fa-file-archive w-32p h-32p"></i>
-                        </div>
-                        <div v-else-if="file.category == 'pdf'">
-                            <i class="fas fa-fw fa-file-pdf w-32p h-32p"></i>
-                        </div>
-                        <div v-else-if="file.category == 'audio'">
-                            <i class="fas fa-fw fa-file-audio w-32p h-32p"></i>
-                        </div>
-                        <div v-else-if="file.category == 'video'">
-                            <i class="fas fa-fw fa-file-video w-32p h-32p"></i>
-                        </div>
-                        <div v-else-if="file.category == 'spreadsheet'">
-                            <i class="fas fa-fw fa-file-excel w-32p h-32p"></i>
-                        </div>
-                        <div v-else-if="file.category == 'document'">
-                            <i class="fas fa-fw fa-file-word w-32p h-32p"></i>
-                        </div>
-                        <div v-else-if="file.category == 'presentation'">
-                            <i class="fas fa-fw fa-file-powerpoint w-32p h-32p"></i>
-                        </div>
-                        <div v-else-if="file.category == '3d'">
-                            <i
-                            class="fas fa-fw fa-cubes w-32p h-32p"
-                            data-fa-transform="shrink-9 down-2"
-                            data-fa-mask="fas fa-fw fa-file"></i>
-                        </div>
-                        <div v-else-if="file.category == 'dicom'">
-                            <i class="fas fa-fw fa-file-medical-alt w-32p h-32p"></i>
-                        </div>
-                        <div v-else-if="file.category == 'text'">
-                            <i class="fas fa-fw fa-file-alt w-32p h-32p"></i>
-                        </div>
-                        <div v-else-if="file.category == 'image'" class="w-32p h-32p">
-                            <img class="mh-100 mw-100" :src="file.url" />
-                        </div>
-                        <div v-else-if="file.category == 'undefined'">
-                            <i
-                            class="fas fa-fw fa-question w-32p h-32p"
-                            data-fa-transform="shrink-9 down-2"
-                            data-fa-mask="fas fa-fw fa-file"></i>
-                        </div>
+                        {{ file.name }}
                     </div>
-                    {{ file.name }}
+                    <div class="d-flex justify-content-end align-items-center">
+                        <span v-if="showLinks && getFileLinks(file).length" :title="$tc('global.has-links', getFileLinks(file).length, {cnt: getFileLinks(file).length})">
+                            <i class="fas fa-fw fa-link text-info"></i>
+                        </span>
+                        <span v-if="isFromSubEntity(file)" class="ml-2" :title="$tc('global.from-subentity')">
+                            <i class="fas fa-fw fa-sitemap text-info"></i>
+                        </span>
+                        <span v-if="getFileTags(file).length" class="ml-2" :title="$tc('global.has-tags', getFileTags(file).length, {cnt: getFileTags(file).length})">
+                            <i class="fas fa-fw fa-tags text-info"></i>
+                        </span>
+                    </div>
                 </li>
                 <li class="list-group-item w-100 d-flex flex-row justify-content-start align-items-center" v-if="fileState.toLoad">
                     <i class="fas fa-fw fa-sync mr-2 ml-4 w-32p h-32p" :class="{'fa-spin': isFetching}"></i>
@@ -230,6 +250,10 @@
                 required: true,
                 type: Array
             },
+            entityId: {
+                required: false,
+                type: Number
+            },
             onClick: {
                 required: true,
                 type: Function
@@ -255,8 +279,7 @@
                 type: Array
             }
         },
-        mounted() {
-        },
+        mounted() {},
         methods: {
             getFileLinks(file) {
                 if(!this.showLinks) return [];
@@ -265,12 +288,17 @@
                 }
                 return file.entities;
             },
+            isFromSubEntity(file) {
+                if(!this.entityId || !file || !file.entities) return false;
+                return file.entities.findIndex(e => e.id == this.entityId) == -1;
+            },
             getFileTags(file) {
                 return file.tags;
             },
             exportFiles(fileIds) {
+                if(!this.$can('export_files')) return;
                 const data = {
-                    files: JSON.stringify(fileIds)
+                    files: fileIds
                 };
                 $http.post(`file/export`, data).then(response => {
                     const filename = this.$getPreference('prefs.project-name') + '.zip';

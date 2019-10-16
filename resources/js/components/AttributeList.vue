@@ -2,16 +2,16 @@
     <div class="pr-1">
         <draggable
             class="h-100"
+            v-bind="dragOpts"
             v-model="localAttributes"
             :class="{'drag-container': !disableDrag}"
             :clone="clone"
             :move="move"
-            :options="dragOpts"
             @add="added"
             @end="dropped"
             @start="dragged">
             <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" v-show="!hiddenByDependency[attribute.id]">
-                <label class="col-form-label col-md-3 d-flex flex-row justify-content-between" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
+                <label class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
                     <div v-show="hoverState[i]">
                         <a v-show="onReorder" href="" @click.prevent="" class="reorder-handle" data-toggle="popover" :data-content="$t('global.resort')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-sort text-secondary"></i>
@@ -41,7 +41,7 @@
                         </span>
                     </sup>
                 </label>
-                <div class="col-md-9">
+                <div :class="expanded[attribute.id]">
                     <input class="form-control" :disabled="attribute.isDisabled" v-if="attribute.datatype == 'string'" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
                     <input class="form-control-plaintext" v-else-if="attribute.datatype == 'serial'" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" readonly v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
                     <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model.number="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
@@ -115,27 +115,27 @@
                             :customLabel="translateLabel"
                             :disabled="attribute.isDisabled"
                             :hideSelected="true"
+                            :loading="dd.loading[attribute.id]"
                             :multiple="false"
-                            :options="localSelections[attribute.id] || []"
+                            :options="dd.selections[attribute.id] || []"
                             :name="'attribute-'+attribute.id"
                             :placeholder="$t('global.select.placehoder')"
                             :select-label="$t('global.select.select')"
                             :deselect-label="$t('global.select.deselect')"
+                            @open="getOptions(attribute)"
                             @input="(value, id) => checkDependency(attribute.id)">
                         </multiselect>
                     </div>
                     <div v-else-if="attribute.datatype == 'list'">
                         <list :entries="localValues[attribute.id].value" :disabled="attribute.isDisabled" :on-change="value => onChange(null, value, attribute.id)" :name="'attribute-'+attribute.id" v-validate="" />
                     </div>
-                    <div v-else-if="attribute.datatype == 'epoch'">
-                        <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :epochs="localSelections[attribute.id]" :disabled="attribute.isDisabled" v-validate=""/>
+                    <div v-else-if="attribute.datatype == 'epoch' || attribute.datatype == 'timeperiod'">
+                        <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :epochs="localSelections[attribute.id]" :type="attribute.datatype" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
                     <div v-else-if="attribute.datatype == 'dimension'">
                         <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled" v-validate=""/>
                     </div>
-                    <div v-else-if="attribute.datatype == 'table'">
-                        <tabular :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :selections="localSelections" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""/>
-                    </div>
+                    <tabular v-else-if="attribute.datatype == 'table'" :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :selections="localSelections" :attribute="attribute" :disabled="attribute.isDisabled" @expanded="onAttributeExpand" v-validate=""/>
                     <div v-else-if="attribute.datatype == 'sql'">
                         <div v-if="isArray(localValues[attribute.id].value)">
                             <div class="table-responsive">
@@ -173,9 +173,12 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body d-flex flex-column">
-                    <ol-map class="h-100"
+                <div class="modal-body d-flex flex-column flex-grow-1 overflow-hidden">
+                    <ol-map class="flex-grow-1 overflow-hidden"
+                        :epsg="{epsg: '4326'}"
+                        :layers="wktLayers"
                         :init-wkt="initialGeoValues"
+                        :init-projection="'EPSG:4326'"
                         :on-deleteend="onGeoFeaturesDeleted"
                         :on-drawend="onGeoFeatureAdded"
                         :on-modifyend="onGeoFeaturesUpdated"
@@ -309,6 +312,9 @@
                 }
                 this.checkDependency(aid);
             },
+            onAttributeExpand(e) {
+                Vue.set(this.expanded, e.id, e.state ? ['col-md-12'] : ['col-md-9']);
+            },
             updateDatepicker(aid, fieldname) {
                 const vm = this;
                 vm.correctTimezone(aid);
@@ -344,6 +350,35 @@
                     activeClasses.push('text-success');
                 }
                 return activeClasses;
+            },
+            getOptions(attribute) {
+                if(attribute.root_attribute_id) {
+                    const rootAttr = this.localAttributes.find(a => a.id == attribute.root_attribute_id);
+                    if(!rootAttr) {
+                        Vue.set(this.dd.selections, attribute.id, []); // TODO set info
+                        return;
+                    }
+                    const rootValue = this.localValues[attribute.root_attribute_id];
+                    if(!rootValue || !rootValue.value) {
+                        Vue.set(this.dd.selections, attribute.id, []); // TODO set info
+                        return;
+                    }
+                    const rootId = rootValue.value.id;
+                    // if value of root value has not changed since last time,
+                    // keep current selection
+                    if(this.dd.idCache[attribute.id] == rootId) {
+                        return;
+                    }
+                    this.dd.loading[attribute.id] = true;
+                    $httpQueue.add(() => $http.get(`search/selection/${rootValue.value.id}`).then(response => {
+                        this.dd.loading[attribute.id] = false;
+                        this.dd.idCache[attribute.id] = rootId;
+                        Vue.set(this.dd.selections, attribute.id, response.data);
+                    }));
+                } else {
+                    const selection = this.localSelections[attribute.id] || [];
+                    Vue.set(this.dd.selections, attribute.id, selection);
+                }
             },
             checkDependency(aid) {
                 if(!this.dependencies) return;
@@ -409,7 +444,18 @@
                     this.initialGeoValues = [];
                 }
                 this.selectedAttribute = aid;
-                this.$modal.show('geography-place-modal-'+this.uniqueId);
+                $http.get('map/layer?basic=1').then(response => {
+                    this.wktLayers = {};
+                    const bl = response.data.baselayers;
+                    const ol = response.data.overlays;
+                    bl.forEach(l => {
+                        this.wktLayers[l.id] = l;
+                    });
+                    ol.forEach(l => {
+                        this.wktLayers[l.id] = l;
+                    });
+                    this.$modal.show('geography-place-modal-'+this.uniqueId);
+                });
             },
             hideGeographyModal() {
                 this.$modal.hide('geography-place-modal-'+this.uniqueId);
@@ -424,6 +470,7 @@
             },
             onGeoFeatureAdded(feature, wkt) {
                 this.newGeoValue = wkt;
+                return new Promise(r => r(feature));
             },
             onGeoFeaturesUpdated(features, wkt) {
                 // We only have one possible feature.
@@ -490,11 +537,18 @@
         },
         data() {
             return {
+                dd: {
+                    selections: {},
+                    idCache: {},
+                    loading: {}
+                },
                 hiddenByDependency: {},
                 hovered: [],
+                expanded: {},
                 uniqueId: Math.random().toString(36),
                 selectedAttribute: -1,
                 initialGeoValues: [],
+                wktLayers: {},
                 currentGeoValue: '',
                 newGeoValue: ''
             }
@@ -502,6 +556,7 @@
         created() {
             for(let i=0; i<this.localAttributes.length; i++) {
                 this.hovered.push(false);
+                Vue.set(this.expanded, this.localAttributes[i].id, ['col-md-9']);
             }
         },
         computed: {

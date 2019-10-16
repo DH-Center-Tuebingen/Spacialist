@@ -5,7 +5,6 @@
             :init-geojson="geojson"
             :init-projection="'EPSG:4326'"
             :layers="layers"
-            :event-bus="eventBus"
             :on-deleteend="deleteFeatures"
             :on-drawend="addFeature"
             :on-modifyend="updateFeatures"
@@ -25,10 +24,6 @@
     export default {
         props: {
             selectedEntity: {
-                type: Object,
-                required: true
-            },
-            eventBus: {
                 type: Object,
                 required: true
             }
@@ -93,13 +88,12 @@
                 });
             },
             updateFeatures(features, wkt) {
-                const vm = this;
                 features.forEach(f => {
-                    let data = {
-                        feature: vm.geoJsonFormat.writeFeature(f),
+                    const data = {
+                        geometry: this.geoJsonFormat.writeGeometry(f.getGeometry()),
                         srid: 3857
                     };
-                    vm.$http.patch(`/map/${f.getProperties().id}`, data).then(function(response) {
+                    $http.patch(`/map/${f.getProperties().id}`, data).then(response => {
 
                     });
                 });

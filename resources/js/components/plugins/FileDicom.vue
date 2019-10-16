@@ -1,11 +1,28 @@
 <template>
     <div class="d-flex flex-column h-100">
-        <div class="d-flex flex-row col pl-0">
-            <div id="dicom-wrapper" class="col pl-0">
+        <!-- <div class="d-flex flex-row col px-0"> -->
+        <div class="row flex-grow-1 overflow-hidden">
+            <!-- <div id="dicom-wrapper" class="col px-0"> -->
+            <div id="dicom-wrapper" class="col-6 h-100">
                 <div id="dicom-image" class="h-100" oncontextmenu="return false;">
                 </div>
+                <div class="position-absolute top-0 w-100 p-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="activateTool('Wwwc')">
+                        <i class="fas fa-fw fa-adjust"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="activateTool('Length')">
+                        <i class="fas fa-fw fa-ruler"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="activateTool('Magnify')">
+                        <i class="fas fa-fw fa-search-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="activateTool('CircleRoi')">
+                        <i class="fas fa-fw fa-dot-circle"></i>
+                    </button>
+                </div>
             </div>
-            <div class="text-left col d-flex flex-column">
+            <!-- <div class="text-left col d-flex flex-column"> -->
+            <div class="text-left col-6 d-flex flex-column h-100">
                 <div id="dicom-controls">
                     <h4>
                         {{ $t('plugins.files.modal.detail.dicom.controls.title') }}
@@ -23,13 +40,12 @@
                         </dd>
                         <dt>
                             {{ $t('plugins.files.modal.detail.dicom.controls.voi') }}
-                            VOI (Values of Interest)
                         </dt>
                         <dd v-html="$t('plugins.files.modal.detail.dicom.controls.voi-desc')">
                         </dd>
                     </dl>
                 </div>
-                <div id="dicom-metadata" class="col scroll-y-auto">
+                <div id="dicom-metadata" class="d-flex flex-column flex-grow-1 overflow-hidden">
                     <h4>{{ $t('plugins.files.modal.detail.dicom.metadata.title') }}</h4>
                     <form>
                         <div class="form-group">
@@ -43,7 +59,7 @@
                             </div>
                         </div>
                     </form>
-                    <ul>
+                    <ul class="text-break scroll-y-auto mb-0">
                         <li v-for="(data, name) in filteredMetadata">
                             <strong>{{name}}</strong>: {{data}}
                         </li>
@@ -66,11 +82,12 @@
 </template>
 
 <script>
+    import 'hammerjs';
     import * as cornerstone from 'cornerstone-core';
     import * as cornerstoneMath from 'cornerstone-math';
     import * as cornerstoneTools from 'cornerstone-tools';
-    import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
     import * as dicomParser from 'dicom-parser';
+    import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
     import dicomUids from '../../plugins/dicomUids';
     import dicomTags from '../../plugins/dicomDict';
 
@@ -80,16 +97,29 @@
     cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
 
     const config = {
-        webWorkerPath : '../../js/cornerstoneWADOImageLoaderWebWorker.min.js',
+        maxWebWorkers: navigator.hardwareConcurrency || 1,
+        startWebWorkersOnDemand : true,
         taskConfiguration: {
             'decodeTask' : {
-                codecsPath: '../js/cornerstoneWADOImageLoaderCodecs.min.js'
+                initializeCodecsOnStartup: false,
+                usePDFJS: false
             }
         }
     };
     cornerstoneWADOImageLoader.webWorkerManager.initialize(config);
 
     export default {
+        tools: {
+            WwwcTool: cornerstoneTools.WwwcTool,
+            PanTool: cornerstoneTools.PanTool,
+            ZoomTool: cornerstoneTools.ZoomTool,
+            ZoomMouseWheelTool: cornerstoneTools.ZoomMouseWheelTool,
+            ScaleOverlayTool: cornerstoneTools.ScaleOverlayTool,
+            CircleRoiTool: cornerstoneTools.CircleRoiTool,
+            LengthTool: cornerstoneTools.LengthTool,
+            MagnifyTool: cornerstoneTools.MagnifyTool,
+            available: ['Wwwc', 'Length', 'Magnify', 'CircleRoi']
+        },
         props: {
             file: {
                 required: true,
@@ -98,10 +128,27 @@
         },
         mounted() {
             this.$nextTick(function() {
+                cornerstoneTools.init();
+
                 this.elem = document.getElementById('dicom-image');
                 cornerstone.enable(this.elem, {
                     renderer: 'webgl'
                 });
+
+                cornerstoneTools.addTool(this.$options.tools.WwwcTool);
+                cornerstoneTools.addTool(this.$options.tools.PanTool);
+                cornerstoneTools.addTool(this.$options.tools.ZoomTool);
+                cornerstoneTools.addTool(this.$options.tools.ZoomMouseWheelTool);
+                cornerstoneTools.addTool(this.$options.tools.ScaleOverlayTool);
+                cornerstoneTools.addTool(this.$options.tools.LengthTool);
+                cornerstoneTools.addTool(this.$options.tools.MagnifyTool);
+                cornerstoneTools.addTool(this.$options.tools.CircleRoiTool);
+
+                cornerstoneTools.setToolActive("Wwwc", { mouseButtonMask: 1 }); // Left & Touch
+                cornerstoneTools.setToolActive("Pan", { mouseButtonMask: 4 }); // Middle
+                cornerstoneTools.setToolActive("Zoom", { mouseButtonMask: 2 }); // Right
+                cornerstoneTools.setToolActive("ZoomMouseWheel", {});
+                cornerstoneTools.setToolActive("ScaleOverlay", {});
 
                 this.elem.addEventListener('cornerstoneimagerendered', this.onImageRendered);
 
@@ -113,17 +160,6 @@
                 cornerstone.loadAndCacheImage(url).then((image) => {
                     const viewport = cornerstone.getViewport(this.elem);
                     cornerstone.displayImage(this.elem, image, viewport);
-                    cornerstoneTools.mouseInput.enable(this.elem);
-                    // cornerstoneTools.touchInput.enable(this.elem);
-                    cornerstoneTools.mouseWheelInput.enable(this.elem);
-                    cornerstoneTools.keyboardInput.enable(this.elem);
-
-                    cornerstoneTools.wwwc.activate(this.elem, 1) // left click
-                    cornerstoneTools.pan.activate(this.elem, 2) // middle click
-                    cornerstoneTools.zoom.activate(this.elem, 4) // right click
-                    cornerstoneTools.zoomWheel.activate(this.elem);
-
-                    cornerstoneTools.scaleOverlayTool.enable(this.elem);
 
                     this.parseMetadata(image.data);
                 });
@@ -137,10 +173,17 @@
                 this.wc = Math.round(eventData.viewport.voi.windowCenter);
                 this.zoom = parseInt(eventData.viewport.scale*100);
             },
+            activateTool(name) {
+                cornerstoneTools.setToolPassive(this.activeTool);
+                this.activeTool = name;
+                cornerstoneTools.setToolActive(this.activeTool, {
+                    mouseButtonMask: 1
+                });
+            },
             saveAsImage() {
                 // saveAs returns png, thus replace file extension with png
                 const filename = this.file.name.substr(0, this.file.name.lastIndexOf('.')) + '.png';
-                cornerstoneTools.saveAs(this.elem, filename);
+                cornerstoneTools.SaveAs(this.elem, filename);
             },
             parseMetadata(metadata) {
                 const elems = metadata.elements;
@@ -239,7 +282,8 @@
                 wc: 0,
                 zoom: 100,
                 metadata: {},
-                metadataQuery: ''
+                metadataQuery: '',
+                activeTool: 'Wwwc'
             }
         },
         computed: {

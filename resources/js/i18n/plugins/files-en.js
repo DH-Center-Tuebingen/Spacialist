@@ -13,13 +13,31 @@ const en = {
                         file: 'File Type',
                         camera: 'Camera Model',
                         date: 'Date',
+                        name: 'File Name',
                     },
                     apply: 'Apply Filters',
                     active: 'no filter active | one filter active | {cnt} filters active'
                 },
                 export: {
-                    selected: 'export selected files ({cnt})'
+                    selected: 'export selected files <span class="badge badge-secondary">{cnt}</span>'
                 }
+            },
+            image_filters: {
+                grayscale: 'Grayscale',
+                bw: 'Black & White',
+                invert: 'Invert',
+                sepia: 'Sepia',
+                remove_color: 'Remove Color',
+                brightness: 'Brightness',
+                contrast: 'Contrast',
+                hue: 'Hue',
+                saturation: 'Saturation',
+                noise: 'Noise',
+                pixelate: 'Pixelate',
+                blur: 'Blur',
+                sharpen: 'Sharpen',
+                emboss: 'Emboss',
+                save: 'Save Changes'
             },
             toasts: {
                 deleted: {
@@ -89,7 +107,7 @@ const en = {
                     },
                     archive: {
                         info: 'Click on files to download them. Downloading folders is currently not supported.',
-                        files_in_folder: 'Contains <span class="font-weight-medium">{cnt}</span> files'
+                        files_in_folder: 'Contains <span class="font-weight-medium">no</span> files | Contains <span class="font-weight-medium">one</span> file | Contains <span class="font-weight-medium">{cnt}</span> files'
                     },
                     undef: {
                         info: `The mime-type <code>{mime}</code> of <span class="font-italic">{name}</span> is currently not supported in Spacialist.

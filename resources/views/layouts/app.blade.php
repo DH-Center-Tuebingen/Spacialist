@@ -19,7 +19,6 @@
     <div id="app" class="d-flex flex-column"></div>
 
     <!-- Scripts -->
-    <script src="js/inflate.min.js"></script>
     <script src="js/manifest.js"></script>
     <script src="js/vendor.js"></script>
     <script src="js/app.js"></script>

@@ -15,6 +15,8 @@ use Phaza\LaravelPostgis\Geometries\MultiPolygon;
 use \wapmorgan\UnifiedArchive\UnifiedArchive;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+
+use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
@@ -54,7 +56,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => __('You do not have the permission to add geometric data')
+                'error' => __('You do not have the permission to view layers')
             ], 403);
         }
         $basic = $request->query('basic');
@@ -88,7 +90,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => __('You do not have the permission to add geometric data')
+                'error' => __('You do not have the permission to view layers')
             ], 403);
         }
         $entityLayers = AvailableLayer::with(['entity_type'])
@@ -104,7 +106,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => __('You do not have the permission to add geometric data')
+                'error' => __('You do not have the permission to view a layer')
             ], 403);
         }
         try {
@@ -122,7 +124,7 @@ class MapController extends Controller
         $user = auth()->user();
         if(!$user->can('view_geodata')) {
             return response()->json([
-                'error' => __('You do not have the permission to get layers')
+                'error' => __('You do not have the permission to view geodata')
             ], 403);
         }
 
@@ -131,9 +133,9 @@ class MapController extends Controller
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This layer does not exist')
-            ]);
+            ], 400);
         }
-        $query = Geodata::with(['entity']);
+        $query = Geodata::with(['entity'])->orderBy('id');
         if($layer->type == 'unlinked') {
             $query->doesntHave('entity');
         } else if(isset($layer->entity_type_id)) {
@@ -166,12 +168,12 @@ class MapController extends Controller
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This layer does not exist')
-            ]);
+            ], 400);
         }
         if(strtoupper($layer->type) != 'UNLINKED' && !isset($layer->entity_type_id)) {
             return response()->json([
                 'error' => __('This layer does not support export')
-            ]);
+            ], 400);
         }
         if(strtoupper($layer->type) == 'UNLINKED') {
             $geodataBuilder = Geodata::doesntHave('entity');
@@ -264,10 +266,11 @@ class MapController extends Controller
         }
         $this->validate($request, [
             'collection' => 'required|json',
-            'srid' => 'required|integer'
+            'srid' => 'required|integer',
+            'metadata' => 'nullable|json',
         ]);
 
-        $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'), $user);
+        $objs = Geodata::createFromFeatureCollection(json_decode($request->get('collection')), $request->get('srid'), json_decode($request->get('metadata')), $user);
         return response()->json($objs);
     }
 
@@ -291,15 +294,16 @@ class MapController extends Controller
             'is_overlay' => 'nullable|boolean_string'
         ]);
 
-        $name = $request->get('name');
         $isOverlay = $request->has('is_overlay') && $request->get('is_overlay') == 'true';
-        $layer = new AvailableLayer();
-        $layer->name = $name;
-        $layer->url = '';
-        $layer->type = '';
-        $layer->is_overlay = $isOverlay;
-        $layer->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-        $layer->save();
+
+        $layer = AvailableLayer::createFromArray([
+            'name' => $request->get('name'),
+            'url' => '',
+            'type' => '',
+            'opacity' => 1,
+            'visible' => true,
+            'is_overlay' => $isOverlay,
+        ]);
 
         return response()->json($layer);
     }
@@ -332,22 +336,16 @@ class MapController extends Controller
             ], 400);
         }
 
-        try {
-            $layer = AvailableLayer::where('entity_type_id', $entity->entity_type_id)->firstOrFail();
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('Entity layer not found')
-            ], 400);
-        }
+        $layer = AvailableLayer::where('entity_type_id', $entity->entity_type_id)->first();
 
-        if($layer->type != 'all') {
+        if($layer->type != 'any') {
             $typeMatched = false;
             $upperType = strtoupper($layer->type);
-            if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && ends_with($upperType, 'POLYGON')) {
+            if(($geodata->geom instanceof Polygon || $geodata->geom instanceof MultiPolygon) && Str::endsWith($upperType, 'POLYGON')) {
                 $typeMatched = true;
-            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && ends_with($upperType, 'LINESTRING')) {
+            } else if(($geodata->geom instanceof LineString || $geodata->geom instanceof MultiLineString) && Str::endsWith($upperType, 'LINESTRING')) {
                 $typeMatched = true;
-            } else if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && ends_with($upperType, 'POINT')) {
+            } else if(($geodata->geom instanceof Point || $geodata->geom instanceof MultiPoint) && Str::endsWith($upperType, 'POINT')) {
                 $typeMatched = true;
             }
             if(!$typeMatched) {
@@ -376,8 +374,8 @@ class MapController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'feature' => 'required|json',
-            'srid' => 'required|integer'
+            'geometry' => 'required|json',
+            'srid' => 'required|integer|exists:spatial_ref_sys,srid'
         ]);
 
         try {
@@ -387,7 +385,9 @@ class MapController extends Controller
                 'error' => __('This geodata does not exist')
             ], 400);
         }
-        $geodata->updateGeometry(json_decode($request->get('feature')), $request->get('srid'), $user);
+        $geodata->patch($request->get('geometry'), $request->get('srid'), $user);
+
+        return response()->json(null, 204);
     }
 
     public function updateLayer($id, Request $request) {
@@ -406,24 +406,7 @@ class MapController extends Controller
             ], 400);
         }
 
-        // If updated baselayer's visibility is set to true, set all other base layer's visibility to false
-        if(!$layer->is_overlay && !$layer->visible && $request->has('visible') && $request->get('visible') == 'true') {
-            $layers = AvailableLayer::where('is_overlay', '=', false)
-                ->where('id', '!=', $layer->id)
-                ->where('visible', true)
-                ->get();
-            foreach($layers as $l) {
-                $l->visible = false;
-                $l->save();
-            }
-        }
-        foreach($request->only(array_keys(AvailableLayer::patchRules)) as $key => $value) {
-            // cast boolean strings
-            if($value == 'true') $value = true;
-            else if($value == 'false') $value = false;
-            $layer->{$key} = $value;
-        }
-        $layer->save();
+        $layer->patch($request->toArray());
         return response()->json(null, 204);
     }
 

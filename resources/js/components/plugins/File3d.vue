@@ -21,48 +21,48 @@
 </template>
 
 <script>
-    import * as dat from 'dat.gui';
-
     import {
         AmbientLight,
         AnimationMixer,
         BoxBufferGeometry,
-        ColladaLoader,
         Color,
         Clock,
-        CSS2DObject,
-        CSS2DRenderer,
-        DDSLoader,
         DirectionalLight,
         DoubleSide,
-        FBXLoader,
-        GLTFLoader,
         Geometry,
         GridHelper,
         Group,
         HemisphereLight,
         IcosahedronBufferGeometry,
         Line,
-        Loader,
+        Math as TMath,
+        LOD,
         Matrix4,
         Mesh,
         MeshPhongMaterial,
-        MTLLoader,
-        OBJLoader,
-        Octree,
-        OrbitControls,
         PCFSoftShadowMap,
-        PDBLoader,
         PerspectiveCamera,
         Raycaster,
         Scene,
+        SpotLight,
         TextureLoader,
+        Vector2,
         Vector3,
-        ViveController,
         WebGLRenderer,
-    } from 'three-full';
-    import {SpotLight} from 'three-full/sources/lights/SpotLight.js';
-    import {WebVR} from 'three-full/sources/vr/WebVR.js';
+    } from 'three';
+    import { ViveController } from 'three/examples/jsm/vr/ViveController.js';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+    import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
+    import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
+    import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+    import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
+    import { OBJLoader2 } from 'three/examples/jsm/loaders/OBJLoader2.js';
+    import { MtlObjBridge } from 'three/examples/jsm/loaders/obj2/bridge/MtlObjBridge.js';
+    import { PDBLoader } from 'three/examples/jsm/loaders/PDBLoader.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+    import * as dat from 'three/examples/jsm/libs/dat.gui.module.js';
+    import { WEBVR } from 'three/examples/jsm/vr/WebVR.js';
 
     export default {
         props: {
@@ -76,13 +76,26 @@
             },
             fullscreenHandler: {
                 required: false,
-                type: Function
+                type: Object
             }
         },
         mounted() {
             this.startup();
         },
         destroyed() {
+            window.removeEventListener('resize', this.onWindowResize, false);
+            this.renderer.domElement.removeEventListener('mousedown', this.onMouseDown, false);
+            // VR Events
+    		this.grabController.removeEventListener('triggerdown', this.onGrabDown);
+    		this.grabController.removeEventListener('triggerup', this.onGrabUp);
+            this.grabController.removeEventListener('thumbpadup', this.dimWorldLight);
+            // this.grabController.removeEventListener('axischanged', this.recognizeTouch);
+    		this.flashlightController.removeEventListener('triggerdown', this.onLightOn);
+    		this.flashlightController.removeEventListener('triggerup', this.onLightOff);
+    		this.flashlightController.removeEventListener('thumbpadup', this.dimFlashLight);
+
+            window.removeEventListener('vrdisplaypresentchange', this.vrDisplayStateChanged, false);
+
             for(let i=this.scene.children.length-1; i>=0; i--) {
                 let obj = this.scene.children[i];
                 if(obj.geometry) obj.geometry.dispose();
@@ -101,8 +114,18 @@
         },
         methods: {
             setScale() {
-                const s = this.guiConfig.scale;
-                this.group.scale.set(s, s, s);
+                if(!this.activeMesh) return;
+                const sx = this.guiConfig.scaleX;
+                const sy = this.guiConfig.scaleY;
+                const sz = this.guiConfig.scaleZ;
+                this.activeMesh.scale.set(sx, sy, sz);
+            },
+            setPosition() {
+                if(!this.activeMesh) return;
+                const px = this.guiConfig.positionX;
+                const py = this.guiConfig.positionY;
+                const pz = this.guiConfig.positionZ;
+                this.activeMesh.position.set(px, py, pz);
             },
             getFileType: function(file) {
                 if(file.mime_type == 'model/vnd.collada+xml') {
@@ -140,12 +163,27 @@
             },
             init: function() {
                 this.gui = new dat.GUI({
-                    autoPlace: false
+                    autoPlace: false,
+                    hideable: true,
+                    closed: true
                 });
                 this.guiConfig = {
-                    scale: this.scale
+                    scaleX: this.scale,
+                    scaleY: this.scale,
+                    scaleZ: this.scale,
+                    positionX: 0,
+                    positionY: 0,
+                    positionZ: 0
                 };
-                this.gui.add(this.guiConfig, 'scale', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['scaleX'] = this.gui.add(this.guiConfig, 'scaleX', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['scaleY'] = this.gui.add(this.guiConfig, 'scaleY', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['scaleZ'] = this.gui.add(this.guiConfig, 'scaleZ', 0.01, 100, 0.01).onChange(this.setScale);
+                this.guiCtrl['positionX'] = this.gui.add(this.guiConfig, 'positionX', -100, 100, 0.01).onChange(this.setPosition);
+                this.guiCtrl['positionY'] = this.gui.add(this.guiConfig, 'positionY', -100, 100, 0.01).onChange(this.setPosition);
+                this.guiCtrl['positionZ'] = this.gui.add(this.guiConfig, 'positionZ', -100, 100, 0.01).onChange(this.setPosition);
+
+                // initially hide gui
+                dat.GUI.toggleHide();
 
                 this.container = document.getElementById(this.containerId);
                 document.getElementById('file-controls').appendChild(this.gui.domElement);
@@ -162,7 +200,9 @@
         		this.renderer.gammaInput = true;
         		this.renderer.gammaOutput = true;
                 this.camera = new PerspectiveCamera(45, this.containerWidth/this.containerHeight, 0.1, 2000);
-                this.camera.position.set(7, 5, 7);
+                this.camera.position.set(5, 0, 0);
+                this.camera.lookAt(new Vector3(0, 0, 0));
+                this.camera.up.set(0, 1, 0);
 
                 this.scene = new Scene();
                 this.group = new Group();
@@ -171,14 +211,66 @@
                 this.initLights();
                 this.initControls();
                 if(navigator.getVRDisplays) {
-                    this.container.appendChild(WebVR.createButton(this.renderer));
+                    this.container.appendChild(WEBVR.createButton(this.renderer));
                     this.initViveControls();
                 }
 
                 this.container.appendChild(this.renderer.domElement);
                 this.scene.add(this.camera);
                 this.scene.add(this.group);
-        		this.scene.add(new GridHelper(10, 20));
+        		this.scene.add(new GridHelper(100, 10));
+            },
+            selectObject(object) {
+                dat.GUI.toggleHide();
+                if(object) {
+                    this.addTransformControlsTo(object);
+                } else {
+                    this.removeTransformControls();
+                }
+            },
+            addTransformControlsTo(mesh) {
+                this.activeMesh = mesh;
+                this.scene.add(this.transformControls);
+                this.transformControls.attach(mesh);
+                this.transformControls.enabled = true;
+                this.controls.target = mesh.position.clone();
+                this.controls.update();
+            },
+            removeTransformControls() {
+                this.transformControls.detach();
+                this.activeMesh = null;
+                this.scene.remove(this.transformControls);
+                this.transformControls.enabled = false;
+                this.controls.target = new Vector3(0, 0, 0);
+                this.controls.update();
+            },
+            zoomToObject(object) {
+                const offset = 1.25;
+                if(!object.geometry.boundingBox) {
+                    object.geometry.computeBoundingBox();
+                }
+                const bbox = object.geometry.boundingBox;
+                const center = bbox.getCenter();
+                let size = bbox.getSize();
+                size.multiply(object.scale);
+
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const fov = this.camera.fov * (Math.PI/180);
+                const z = Math.abs(maxDim / Math.sin(fov/2));
+
+                this.scene.updateMatrixWorld();
+                const objWP = object.getWorldPosition();
+
+                const dir = this.camera.position.sub(objWP);
+                const unitDir = dir.normalize();
+                unitDir.multiplyScalar(z);
+                let newPos = new Vector3();
+                newPos.add(objWP);
+                newPos.add(unitDir);
+                this.camera.position.copy(newPos);
+                this.camera.lookAt(object.position);
+	            this.camera.updateProjectionMatrix();
+                this.controls.update();
             },
             loadAllSubModels: function() {
                 const vm = this;
@@ -190,7 +282,7 @@
                 }));
             },
             loadModel: function(file) {
-                let fileType = this.getFileType(file);
+                const fileType = this.getFileType(file);
                 if(!fileType) return;
                 switch(fileType) {
                     case 'dae':
@@ -212,8 +304,7 @@
             },
             toggleFullscreen() {
                 if(!this.fullscreenHandler) return;
-                const element = document.getElementById(this.containerId);
-                this.fullscreenHandler(element)
+                this.fullscreenHandler.toggle(document.getElementById(this.containerId))
             },
             animate: function() {
                 this.animationId = requestAnimationFrame(this.animate);
@@ -232,11 +323,12 @@
                 if(this.labelRenderer) {
                     this.labelRenderer.render(this.scene, this.camera);
                 }
-                this.octree.update();
             },
             initEventListeners: function() {
                 window.addEventListener('resize', this.onWindowResize, false);
                 this.renderer.domElement.addEventListener('mousedown', this.onMouseDown, false);
+                this.renderer.domElement.addEventListener('mousemove', this.onMouseMove, false);
+                this.renderer.domElement.addEventListener('mouseup', this.onMouseUp, false);
             },
             initLights: function() {
                 this.hemisphereLight = new HemisphereLight(0x808080, 0x606060);
@@ -253,33 +345,94 @@
             },
             initControls: function() {
                 this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+                this.transformControls = new TransformControls(this.camera, this.renderer.domElement);
+                this.transformControls.enabled = false;
+
+                this.transformControls.addEventListener('change', _ => {
+                    if(this.transformControls.object) {
+                        const s = this.transformControls.object.scale;
+                        const p = this.transformControls.object.position;
+                        this.guiConfig.scaleX = s.x;
+                        this.guiConfig.scaleY = s.y;
+                        this.guiConfig.scaleZ = s.z;
+                        this.guiConfig.positionX = p.x;
+                        this.guiConfig.positionY = p.y;
+                        this.guiConfig.positionZ = p.z;
+                        for(let k in this.guiCtrl) {
+                            this.guiCtrl[k].updateDisplay();
+                        }
+                    }
+                    this.render();
+                });
+                // Disable orbit controls on gizmo drag
+                this.transformControls.addEventListener('dragging-changed', event => {
+                    this.controls.enabled = !event.value;
+                });
+                window.addEventListener('keydown', event => {
+                    if(event.target.tagName.toUpperCase() == 'INPUT') return;
+                    if(event.target.tagName.toUpperCase() == 'TEXTAREA') return;
+                    switch(event.keyCode) {
+                        case 17: // CTRL
+                            this.transformControls.setTranslationSnap(1);
+							this.transformControls.setRotationSnap(TMath.degToRad(15));
+                            break;
+                        case 32: // SPACE
+                            if(this.transformControls.enabled) {
+                                this.removeTransformControls();
+                            }
+                            break;
+                        case 81: // Q
+                            this.transformControls.setSpace(this.transformControls.space === 'local' ? 'world' : 'local');
+                            break;
+                        case 87: // W
+                            this.transformControls.setMode("translate");
+                            break;
+                        case 69: // E
+                            this.transformControls.setMode("rotate");
+                            break;
+                        case 82: // R
+                            this.transformControls.setMode("scale");
+                            break;
+                        case 70: // F
+                            if(this.transformControls.enabled) {
+                                this.zoomToObject(this.activeMesh);
+                            }
+                            break;
+                    }
+                });
+                window.addEventListener('keyup', event => {
+                    if(event.target.tagName.toUpperCase() == 'INPUT') return;
+                    if(event.target.tagName.toUpperCase() == 'TEXTAREA') return;
+                    switch(event.keyCode) {
+                        case 17: // CTRL
+                            this.transformControls.setTranslationSnap(null);
+							this.transformControls.setRotationSnap(null);
+                            break;
+                    }
+                });
             },
             initViveEventListeners: function() {
-                const vm = this;
                 // Vive Events
-        		vm.grabController.addEventListener('triggerdown', vm.onGrabDown);
-        		vm.grabController.addEventListener('triggerup', vm.onGrabUp);
-                vm.grabController.addEventListener('thumbpadup', vm.dimWorldLight);
+        		this.grabController.addEventListener('triggerdown', this.onGrabDown);
+        		this.grabController.addEventListener('triggerup', this.onGrabUp);
+                this.grabController.addEventListener('thumbpadup', this.dimWorldLight);
                 // this.grabController.addEventListener('axischanged', this.recognizeTouch);
-        		vm.flashlightController.addEventListener('triggerdown', vm.onLightOn);
-        		vm.flashlightController.addEventListener('triggerup', vm.onLightOff);
-        		vm.flashlightController.addEventListener('thumbpadup', vm.dimFlashLight);
+        		this.flashlightController.addEventListener('triggerdown', this.onLightOn);
+        		this.flashlightController.addEventListener('triggerup', this.onLightOff);
+        		this.flashlightController.addEventListener('thumbpadup', this.dimFlashLight);
 
-                window.addEventListener('vrdisplaypresentchange', function(event) {
-                    vm.renderer.vr.enabled = event.display.isPresenting;
-                }, false);
+                window.addEventListener('vrdisplaypresentchange', this.vrDisplayStateChanged, false);
             },
             initViveControls: function() {
                 const vm = this;
                 // TODO only init if VR enabled?
                 this.initViveEventListeners();
-                let ctrlLoader = new OBJLoader();
-                ctrlLoader.setPath('./img/');
-                ctrlLoader.load('vr_controller_vive_1_5.obj', function(object) {
+                let ctrlLoader = new OBJLoader2();
+                ctrlLoader.load('./img/vr_controller_vive_1_5.obj', function(object) {
                     let txtLoader = new TextureLoader();
                     txtLoader.setPath('./img/vive-controller/');
                     let controllerModel = object.children[0];
-                    controllerModel.material.map = txtLoader.load('onepointfive_texture.png');
+                    controllerModel.material.map = txtLoader.load('./img/onepointfive_texture.png');
                     vm.grabController.add(object.clone());
                     vm.flashlightController.add(object.clone());
                 });
@@ -319,28 +472,12 @@
             loadCollada: function(file) {
                 const loader = new ColladaLoader();
                 loader.load(file.url, collada => {
-                    let object = collada.scene;
-                    let material;
-                    let children;
-                    let parent = object;
-                    do {
-                        children = parent.children;
-                        if(!children || !children[0]) break;
-                        material = children[0].material;
-                        parent = children[0];
-                    } while(!material);
-                    if(material) {
-                        material.side = DoubleSide;
+                    const object = collada.scene;
+                    if(object.rotation.x != 0) {
+                        this.$showToast('Import Note', 'Your collada file has an up axis different from Y_UP.', 'warn', 5000)
+                        object.rotation.x = 0;
                     }
-                    object.castShadow = true;
-                    object.receiveShadow = true;
-					for(let i=0; i<object.children.length; i++) {
-						this.octree.add(object.children[i], {
-							useFaces: false
-						});
-					}
-                    this.group.add(object);
-                    this.onWindowResize();
+                    this.addModelToScene(object);
                 },
                 event => { // onProgress
                     this.updateProgress(event);
@@ -351,29 +488,9 @@
             loadGltf: function(file) {
                 const loader = new GLTFLoader();
                 loader.load(file.url, data => {
-                    let gltf = data;
-                    let object = gltf.scene;
-
-                    object.traverse(node => {
-                        if(node.isMesh) {
-                            node.castShadow = true;
-                            node.receiveShadow = true;
-                        }
-						this.octree.add(node, {
-							useFaces: false
-						});
-                    });
-
-                    let animations = gltf.animations;
-                    if(animations && animations.length > 0) {
-                        this.animationMixer = new AnimationMixer(object);
-                        // Play first animation if available
-                        if(animations && animations.length) {
-                            animationMixer.clipAction(animations[0]).play();
-                        }
-                    }
-                    this.group.add(object);
-                    this.onWindowResize();
+                    const gltf = data;
+                    const object = gltf.scene;
+                    this.addModelToScene(object, gltf.animations);
                 }, event => {
                     this.updateProgress(event);
                 }, error => {
@@ -386,7 +503,6 @@
                 const filename = url.substr(sep);
                 // we assume that the mtl file has the same name as the obj file
                 const mtlname = filename.substr(0, filename.lastIndexOf('.')) + '.mtl';
-                Loader.Handlers.add(/\.dds$/i, new DDSLoader());
                 const mtlLoader = new MTLLoader();
                 mtlLoader.setMaterialOptions({
                     side: DoubleSide
@@ -395,7 +511,6 @@
                 // try to load mtl file
                 mtlLoader.load(mtlname, materials => {
                     // load obj file with loaded materials
-                    materials.preload();
                     this.loadObjModel(path, filename, materials);
                 }, event => {
                     this.updateProgress(event);
@@ -405,23 +520,14 @@
                 });
             },
             loadObjModel: function(path, filename, materials) {
-                let objLoader = new OBJLoader();
+                let objLoader = new OBJLoader2();
+                objLoader.setModelName(filename);
                 if(materials) {
-                    objLoader.setMaterials(materials);
+                    objLoader.addMaterials(MtlObjBridge.addMaterialsFromMtlLoader(materials));
                 }
-                objLoader.setPath(path);
-                objLoader.load(filename,
+                objLoader.load(path + filename,
                     object => { // onSuccess
-                        object.castShadow = true;
-                        object.receiveShadow = true;
-                        for(var i=0; i<object.children.length; i++) {
-                            var child = object.children[i];
-                            this.octree.add(child, {
-                                useFaces: false
-                            });
-                        }
-                        this.group.add(object);
-                        this.onWindowResize();
+                        this.addModelToScene(object);
                     },
                     event => { // onProgress
                         this.updateProgress(event);
@@ -434,22 +540,7 @@
                 const url = file.url;
                 const loader = new FBXLoader();
                 loader.load(url, object => {
-                    this.animationMixer = new AnimationMixer(object);
-                    // Play first animation if available
-                    if(object.animations && object.animations.length) {
-                        animationMixer.clipAction(object.animations[0]).play();
-                    }
-                    object.traverse(node => {
-                        if(node.isMesh) {
-                            node.castShadow = true;
-                            node.receiveShadow = true;
-                        }
-                        this.octree.add(node, {
-                            useFaces: false
-                        });
-                    });
-                    this.group.add(object);
-                    this.onWindowResize();
+                    this.addModelToScene(object);
                 }, event => {
                     this.updateProgress(event);
                 }, event => {
@@ -504,11 +595,6 @@
                         object.position.copy(position);
                         object.position.multiplyScalar(1);
                         object.scale.multiplyScalar(0.33);
-                        for(let j=0; j<object.children.length; j++) {
-        					vm.octree.add(object.children[j], {
-        						useFaces: false
-        					});
-        				}
                         vm.group.add(object);
 
                         let atom = json.atoms[i];
@@ -542,11 +628,6 @@
                         object.position.lerp(end, 0.5);
                         object.scale.set(0.1, 0.1, start.distanceTo(end));
                         object.lookAt(end);
-                        for(let j=0; j<object.children.length; j++) {
-        					vm.octree.add(object.children[j], {
-        						useFaces: false
-        					});
-        				}
                         vm.group.add(object);
                     }
                     vm.onWindowResize();
@@ -555,17 +636,127 @@
                     vm.updateProgress(event);
                 });
             },
+            addModelToScene(model, extAnimations) {
+                // Play first animation if available
+                const animations = extAnimations ? extAnimations : model.animations;
+                if(animations && animations.length) {
+                    this.animationMixer = new AnimationMixer(model);
+                    this.animationMixer.clipAction(animations[0]).play();
+                }
+
+                const mid = model.uuid;
+                const isLod = this.hasModelLods(model);
+                let lod = new LOD();
+
+                for(let i=0; i<model.children.length; i++) {
+                    let node = model.children[i].clone();
+                    if(isLod) {
+                        this.lodParts[node.uuid] = mid;
+                    }
+                    if(node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                        if(node.material) {
+                            node.material.side = DoubleSide;
+                        }
+                        node.geometry.computeBoundingBox();
+                        const offset = node.geometry.boundingBox.getCenter();
+                        node.geometry.applyMatrix(new Matrix4().makeTranslation(-offset.x, -offset.y, -offset.z));
+                        node.position.copy(offset);
+                        if(isLod) {
+                            lod.addLevel(node, (i+1) * 10);
+                            this.raycastTargets.push(node);
+                        } else {
+                            // push original node if not a LoD, because
+                            // original model is added to group later
+                            this.raycastTargets.push(model.children[i]);
+                        }
+                    }
+                }
+                if(isLod) {
+                    this.lodGroup[mid] = lod;
+                    this.group.add(lod);
+                } else {
+                    this.group.add(model);
+                }
+                this.onWindowResize();
+            },
+            intersectAtClick(event) {
+                this.mouse.x = (event.layerX / this.renderer.domElement.clientWidth) * 2 - 1;
+                this.mouse.y = -(event.layerY / this.renderer.domElement.clientHeight) * 2 + 1;
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+
+                return this.raycaster.intersectObjects(this.raycastTargets);
+            },
             getIntersections: function(controller) {
         		this.tempMatrix.identity().extractRotation(controller.matrixWorld);
         		this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
         		this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
-                const octreeObjects = this.octree.search(this.raycaster.ray.origin, this.raycaster.ray.far, true, this.raycaster.ray.direction);
-                return this.raycaster.intersectOctreeObjects(octreeObjects);
-        		// return this.raycaster.intersectObjects(group.children, true);
+        		return this.raycaster.intersectObjects(group.children, true);
         	},
+            hasModelLods(objectGroup) {
+                if(objectGroup.type != 'Group') return false;
+                if(!objectGroup.children) return false;
+                const regex = RegExp('(LOD|lod)\\d+$');
+                let isLod = true;
+                for(let i=0; i<objectGroup.children.length; i++) {
+                    const c = objectGroup.children[i];
+                    if(!regex.test(c.name)) {
+                        isLod = false;
+                        break;
+                    }
+                }
+                return isLod;
+            },
+            isLodGroup(model) {
+                return !!this.lodGroup[model.uuid];
+            },
+            isPartOfLodGroup(mesh) {
+                const part = this.lodParts[mesh.uuid];
+                if(!part)  return false;
+                return !!this.lodGroup[part];
+            },
+            getLodGroup(mesh) {
+                // TODO throw error instead?
+                if(!this.isPartOfLodGroup(mesh)) return {};
+                return this.lodGroup[this.lodParts[mesh.uuid]];
+            },
             //EventListeners
-            onMouseDown: function() {
-
+            // track if primary button is pressed
+            onMouseDown(event) {
+                // only capture left (primary) button click
+                if(event.buttons !== 1) return;
+                // do not capture event, if transform controls are active
+                if(this.transformControls.enabled) return;
+                this.mouseDown = event.buttons;
+            },
+            // track if primary button is dragged
+            onMouseMove(event) {
+                // only capture left (primary) button click
+                if(event.buttons !== 1) return;
+                // do not capture event, if transform controls are active
+                if(this.transformControls.enabled) return;
+                if(this.mouseDown !== 1) return;
+                this.mouseMoving = true;
+            },
+            // handle click only if primary button and not dragged
+            onMouseUp(event) {
+                if(this.mouseMoving || this.mouseDown !== 1) {
+                    this.mouseDown = 0;
+                    this.mouseMoving = false;
+                    return;
+                }
+                // do not capture event, if transform controls are active
+                if(this.transformControls.enabled) return;
+                const intersections = this.intersectAtClick(event);
+                if(intersections.length) {
+                    // if current model is part of a LOD group, select group
+                    let mesh = intersections[0].object;
+                    if(!this.isLodGroup(mesh) && this.isPartOfLodGroup(mesh)) {
+                        mesh = this.getLodGroup(mesh);
+                    }
+                    this.selectObject(mesh);
+                }
             },
             onWindowResize: function() {
                 this.containerWidth = this.renderer.domElement.parentElement.clientWidth;
@@ -597,11 +788,6 @@
         			let object = controller.userData.selected;
         			object.matrix.premultiply(controller.matrixWorld);
         			object.matrix.decompose(object.position, object.quaternion, object.scale);
-                    for(let i=0; i<object.children.length; i++) {
-        				this.octree.add(object.children[i], {
-        					useFaces: false
-        				});
-        			}
         			this.group.add(object);
         			controller.userData.selected = undefined;
         		}
@@ -618,6 +804,11 @@
         		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
         		this.flashlightIntensity = event.axes[0] + 1;
         		if(this.flashlightOn) this.flashlight.intensity = this.flashlightIntensity;
+            },
+            vrDisplayStateChanged(event) {
+                if(this.renderer) {
+                    this.renderer.vr.enabled = event.display.isPresenting;
+                }
             },
             dimWorldLight: function(event) {
         		// thumbpad values are from -1 to 1, intesity goes from 0 to 2
@@ -647,23 +838,26 @@
                 // three
                 scale: 1,
                 gui: null,
+                guiCtrl: {},
                 guiConfig: null,
                 animationClock: new Clock(),
                 animationId: -1,
                 animationMixer: {},
                 camera: {},
                 controls: {},
+                transformControls: {},
+                activeMesh: null,
                 containerWidth: 200,
                 containerHeight: 100,
                 directionalLight: {},
                 heimisphereLight: {},
                 group: {},
-                octree: new Octree({
-            		undeferred: false,
-            		depthMax: Infinity,
-            		objectsThreshold: 8,
-            		overlapPct: 0.15
-            	}),
+                lodGroup: {},
+                lodParts: {},
+                raycastTargets: [],
+                mouse: new Vector2(),
+                mouseDown: 0,
+                mouseMoving: false,
                 raycaster: new Raycaster(),
                 renderer: {},
                 scene: {},
@@ -680,6 +874,7 @@
         },
         watch: {
             file(newFile, oldFile) {
+                if(newFile && oldFile && newFile.id == oldFile.id) return;
                 this.loadModel(newFile);
             }
         }

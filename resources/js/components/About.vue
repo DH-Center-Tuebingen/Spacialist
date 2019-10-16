@@ -1,5 +1,5 @@
 <template>
-    <modal name="about-modal" height="auto" :scrollable="true" @opened="init">
+    <modal name="about-modal" height="auto" :scrollable="true" @before-open="preInit" @opened="init">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ $t('main.about.title') }}</h5>
@@ -35,7 +35,7 @@
                 <hr />
                 <h5>{{ $tc('main.about.contributor', 2) }}</h5>
                 <div class="row">
-                    <div v-for="contributor in contributors" class="col-md-6">
+                    <div v-for="contributor in $options.contributors" class="col-md-6">
                         {{ contributor.name }}
                     </div>
                 </div>
@@ -64,11 +64,44 @@
 
 <script>
     export default {
+        contributors: [
+            {
+                name: 'Vinzenz Rosenkranz'
+            },
+            {
+                name: 'Benjamin Mitzkus'
+            },
+            {
+                name: 'Dirk Seidensticker'
+            },
+            {
+                name: 'Benjamin Glissmann'
+            },
+            {
+                name: 'Michael Derntl'
+            },
+            {
+                name: 'Matthias Lang'
+            }
+        ],
         mounted() {},
         methods: {
+            preInit() {
+                if(!this.retrieved) {
+                    this.getVersion();
+                }
+            },
             init() {
                 // Enable popovers
                 $('#version-time').popover();
+            },
+            getVersion() {
+                $httpQueue.add(() => $http.get('/version').then(response => {
+                    this.retrieved = true;
+                    for(var k in response.data) {
+                        Vue.set(this.version, k, response.data[k]);
+                    }
+                }));
             },
             hideAboutModal() {
                 this.$modal.hide('about-modal');
@@ -77,34 +110,11 @@
         data() {
             return {
                 version: {},
-                contributors: [
-                    {
-                        name: 'Vinzenz Rosenkranz'
-                    },
-                    {
-                        name: 'Benjamin Mitzkus'
-                    },
-                    {
-                        name: 'Dirk Seidensticker'
-                    },
-                    {
-                        name: 'Benjamin Glissmann'
-                    },
-                    {
-                        name: 'Michael Derntl'
-                    },
-                    {
-                        name: 'Matthias Lang'
-                    }
-                ]
+                retrieved: false
             }
         },
         created() {
-            $httpQueue.add(() => $http.get('/version').then(response => {
-                for(var k in response.data) {
-                    Vue.set(this.version, k, response.data[k]);
-                }
-            }));
+            this.getVersion();
         }
     }
 </script>

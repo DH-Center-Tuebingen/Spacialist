@@ -13,13 +13,31 @@ const de = {
                         file: 'Dateityp',
                         camera: 'Kameramodell',
                         date: 'Datum',
+                        name: 'Dateiname',
                     },
                     apply: 'Filter anwenden',
                     active: 'keine Filter aktiv | ein Filter aktiv | {cnt} Filter aktiv'
                 },
                 export: {
-                    selected: 'Ausgewählte Dateien exportieren ({cnt})'
+                    selected: 'Ausgewählte Dateien exportieren <span class="badge badge-secondary">{cnt}</span>'
                 }
+            },
+            image_filters: {
+                grayscale: 'Graustufen',
+                bw: 'Schwarz-Weiß',
+                invert: 'Invertieren',
+                sepia: 'Sepia',
+                remove_color: 'Farbe entfernen',
+                brightness: 'Helligkeit',
+                contrast: 'Kontrast',
+                hue: 'Farbton',
+                saturation: 'Sättigung',
+                noise: 'Rauschen',
+                pixelate: 'Pixeln',
+                blur: 'Unschärfe',
+                sharpen: 'Schärfe',
+                emboss: 'Prägen',
+                save: 'Änderungen speichern'
             },
             toasts: {
                 deleted: {
@@ -89,7 +107,7 @@ const de = {
                     },
                     archive: {
                         info: 'Klicke auf Dateien um sie direkt herunterzuladen. Das Herunterladen ganzer Ordner wird noch nicht unterstützt.',
-                        files_in_folder: 'Enthält <span class="font-weight-medium">{cnt}</span> Dateien'
+                        files_in_folder: 'Enthält <span class="font-weight-medium">keine</span> Dateien | Enthält <span class="font-weight-medium">eine</span> Datei | Enthält <span class="font-weight-medium">{cnt}</span> Dateien'
                     },
                     undef: {
                         info: `Der Dateityp <code>{mime}</code> von <span class="font-italic">{name}</span> wird im Moment nicht von Spacialist unterstützt.

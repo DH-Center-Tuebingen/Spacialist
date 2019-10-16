@@ -17,7 +17,7 @@
                 <i class="fas fa-fw fa-exchange-alt"></i> {{ $t('plugins.files.modal.detail.toggle-md') }}
             </button>
         </div>
-        <div class="d-flex mt-2 col px-0 of-hidden">
+        <div class="d-flex mt-2 flex-grow-1 w-100 overflow-hidden">
             <div class="col px-1" v-if="editMode">
                 <textarea v-validate="" name="editTextarea" class="w-100 h-100 p-2" v-model="content"></textarea>
             </div>
@@ -116,17 +116,16 @@
                 }));
             },
             updateFile(file, content) {
-                const vm = this;
-                let id = file.id;
-                let blob = new Blob([content], {type: file.mime_type});
-                let data = new FormData();
-                data.append('file', blob, file.name);
-                vm.$http.post('/file/'+id+'/patch', data, {
-                    headers: { 'content-type': false }
-                }).then(function(response) {
-                    Vue.set(vm.file, 'modified', response.data.modified);
-                    vm.setPristine();
+                this.$emit('update-file-content', {
+                    file: file,
+                    content: content,
+                    onSuccess: this.onUpdateFile
                 });
+            },
+            onUpdateFile(response, file) {
+                Vue.set(file, 'modified', response.data.modified);
+                Vue.set(file, 'modified_unix', response.data.modified_unix);
+                this.setPristine();
             },
             setPristine() {
                 this.$validator.flag('editTextarea', {

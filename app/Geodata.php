@@ -41,9 +41,8 @@ class Geodata extends Model
         return self::$availableGeometryTypes;
     }
 
-    public function updateGeometry($feature, $srid, $user) {
-        $geom = json_encode($feature->geometry);
-        $wkt = \DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geom')), $srid), 4326)) AS wkt")[0]->wkt;
+    public function patch($geometryAsStr, $srid, $user) {
+        $wkt = \DB::select("SELECT ST_AsText(ST_Transform(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('$geometryAsStr')), $srid), 4326)) AS wkt")[0]->wkt;
         $parsedWkt = self::parseWkt($wkt);
         if(!isset($parsedWkt)) return;
         $this->geom = $parsedWkt;
@@ -51,8 +50,20 @@ class Geodata extends Model
         $this->save();
     }
 
-    public static function createFromFeatureCollection($collection, $srid, $user) {
+    public static function createFromFeatureCollection($collection, $srid, $metadata, $user) {
         $objs = [];
+        $hasRoot = isset($metadata->root_element_id) && $metadata->root_element_id > 0;
+        $isLinked = isset($metadata->entity_type_id) && $metadata->entity_type_id > 0;
+        $setName = isset($metadata->name_column) && $metadata->name_column !== '';
+        if($hasRoot) {
+            $root = $metadata->root_element_id;
+        }
+        if($isLinked) {
+            $type = $metadata->entity_type_id;
+        }
+        if($setName) {
+            $nameCol = $metadata->name_column;
+        }
         foreach($collection->features as $feature) {
             $geom = json_encode($feature->geometry);
             // ST_GeomFromGeoJSON doesn't support srid...
@@ -63,6 +74,22 @@ class Geodata extends Model
             $geodata->geom = $parsedWkt;
             $geodata->lasteditor = $user->name;
             $geodata->save();
+
+            // if name column and entity type is specified, create new entity
+            if($setName && $isLinked) {
+                $fields = [
+                    'name' => $feature->properties->{$nameCol},
+                    'geodata_id' => $geodata->id,
+                ];
+                $res = Entity::create($fields, $type, $user, $hasRoot ? $root : null);
+
+                if($res['type'] === 'error') {
+                    return response()->json([
+                        'error' => $res['msg']
+                    ], $res['code']);
+                }
+            }
+
             $geodata->entity;
             $objs[] = $geodata;
         }
