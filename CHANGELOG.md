@@ -1,7 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.7 - Giza (Unreleased)
+## 0.7.1
+### Added
+- Seeder for basic map setup
+### Fixed
+- Replaced function calls of old roles package in RolesPermissionsSeeder and AdminUserSeeder
+
+## 0.7 - Giza
 ### Added
 - Time Period datatype (epoch datatype without dropdown)
 - Screencast functionality (in Tools menu)
