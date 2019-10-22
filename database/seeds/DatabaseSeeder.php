@@ -15,5 +15,6 @@ class DatabaseSeeder extends Seeder
         $this->call('LanguageTableSeeder');
         $this->call('RolesPermissionsSeeder');
         $this->call('AdminUserSeeder');
+        $this->call('MapSeeder');
     }
 }

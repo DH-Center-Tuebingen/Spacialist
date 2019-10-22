@@ -46,7 +46,7 @@ class RolesPermissionsSeeder extends Seeder
             $create_concepts->description = 'create concepts';
             $create_concepts->guard_name = 'web';
             $create_concepts->save();
-            $admin->attachPermission($create_concepts);
+            $admin->givePermissionTo($create_concepts);
         }
         // Delete/move concepts
         if(Permission::where('name', 'delete_move_concepts')->first() === null) {
@@ -56,7 +56,7 @@ class RolesPermissionsSeeder extends Seeder
             $delete_move_concepts->description = 'delete and move previously added concepts';
             $delete_move_concepts->guard_name = 'web';
             $delete_move_concepts->save();
-            $admin->attachPermission($delete_move_concepts);
+            $admin->givePermissionTo($delete_move_concepts);
         }
         // Dpulicate/edit concepts
         if(Permission::where('name', 'duplicate_edit_concepts')->first() === null) {
@@ -66,7 +66,7 @@ class RolesPermissionsSeeder extends Seeder
             $duplicate_edit_concepts->description = 'duplicate and edit previously added concepts';
             $duplicate_edit_concepts->guard_name = 'web';
             $duplicate_edit_concepts->save();
-            $admin->attachPermission($duplicate_edit_concepts);
+            $admin->givePermissionTo($duplicate_edit_concepts);
         }
         // View concepts
         if(Permission::where('name', 'view_concepts')->first() === null) {
@@ -76,8 +76,8 @@ class RolesPermissionsSeeder extends Seeder
             $view_concepts->description = 'View a list of previously added concepts';
             $view_concepts->guard_name = 'web';
             $view_concepts->save();
-            $admin->attachPermission($view_concepts);
-            $guest->attachPermission($view_concepts);
+            $admin->givePermissionTo($view_concepts);
+            $guest->givePermissionTo($view_concepts);
         }
         // View concept properties
         if(Permission::where('name', 'view_concept_props')->first() === null) {
@@ -87,8 +87,8 @@ class RolesPermissionsSeeder extends Seeder
             $view_concept_props->description = 'View a list of previously added concepts';
             $view_concept_props->guard_name = 'web';
             $view_concept_props->save();
-            $admin->attachPermission($view_concept_props);
-            $guest->attachPermission($view_concept_props);
+            $admin->givePermissionTo($view_concept_props);
+            $guest->givePermissionTo($view_concept_props);
         }
         // Edit bibliography
         if(Permission::where('name', 'edit_bibliography')->first() === null) {
@@ -98,7 +98,7 @@ class RolesPermissionsSeeder extends Seeder
             $edit_bibliography->description = 'edit bibliography entries';
             $edit_bibliography->guard_name = 'web';
             $edit_bibliography->save();
-            $admin->attachPermission($edit_bibliography);
+            $admin->givePermissionTo($edit_bibliography);
         }
         // Add/remove bibliography
         if(Permission::where('name', 'add_remove_bibliography')->first() === null) {
@@ -108,7 +108,7 @@ class RolesPermissionsSeeder extends Seeder
             $add_remove_bibliography->description = 'add and remove bibliography entries';
             $add_remove_bibliography->guard_name = 'web';
             $add_remove_bibliography->save();
-            $admin->attachPermission($add_remove_bibliography);
+            $admin->givePermissionTo($add_remove_bibliography);
         }
         // Manage files
         if(Permission::where('name', 'manage_files')->first() === null) {
@@ -118,7 +118,7 @@ class RolesPermissionsSeeder extends Seeder
             $manage_files->description = 'upload and remove files';
             $manage_files->guard_name = 'web';
             $manage_files->save();
-            $admin->attachPermission($manage_files);
+            $admin->givePermissionTo($manage_files);
         }
         // Link files
         if(Permission::where('name', 'link_files')->first() === null) {
@@ -128,7 +128,7 @@ class RolesPermissionsSeeder extends Seeder
             $link_files->description = 'link files to concepts';
             $link_files->guard_name = 'web';
             $link_files->save();
-            $admin->attachPermission($link_files);
+            $admin->givePermissionTo($link_files);
         }
         // Edit file properties
         if(Permission::where('name', 'edit_file_props')->first() === null) {
@@ -138,7 +138,7 @@ class RolesPermissionsSeeder extends Seeder
             $edit_file_props->description = 'edit the properties of uploaded files';
             $edit_file_props->guard_name = 'web';
             $edit_file_props->save();
-            $admin->attachPermission($edit_file_props);
+            $admin->givePermissionTo($edit_file_props);
         }
         // View files
         if(Permission::where('name', 'view_files')->first() === null) {
@@ -148,8 +148,8 @@ class RolesPermissionsSeeder extends Seeder
             $view_files->description = 'view uploaded files';
             $view_files->guard_name = 'web';
             $view_files->save();
-            $admin->attachPermission($view_files);
-            $guest->attachPermission($view_files);
+            $admin->givePermissionTo($view_files);
+            $guest->givePermissionTo($view_files);
         }
         // Export files
         if(Permission::where('name', 'export_files')->first() === null) {
@@ -159,7 +159,7 @@ class RolesPermissionsSeeder extends Seeder
             $export_files->description = 'export files in different resolutions and formats';
             $export_files->guard_name = 'web';
             $export_files->save();
-            $admin->attachPermission($export_files);
+            $admin->givePermissionTo($export_files);
         }
         // View geodata
         if(Permission::where('name', 'view_geodata')->first() === null) {
@@ -169,8 +169,8 @@ class RolesPermissionsSeeder extends Seeder
             $view_geodata->description = 'view geodata';
             $view_geodata->guard_name = 'web';
             $view_geodata->save();
-            $admin->attachPermission($view_geodata);
-            $guest->attachPermission($view_geodata);
+            $admin->givePermissionTo($view_geodata);
+            $guest->givePermissionTo($view_geodata);
         }
         // Create/edit geodata
         if(Permission::where('name', 'create_edit_geodata')->first() === null) {
@@ -180,7 +180,7 @@ class RolesPermissionsSeeder extends Seeder
             $create_edit_geodata->description = 'create and edit uploaded geodata';
             $create_edit_geodata->guard_name = 'web';
             $create_edit_geodata->save();
-            $admin->attachPermission($create_edit_geodata);
+            $admin->givePermissionTo($create_edit_geodata);
         }
         // Upload/remove geodata
         if(Permission::where('name', 'upload_remove_geodata')->first() === null) {
@@ -190,7 +190,7 @@ class RolesPermissionsSeeder extends Seeder
             $upload_remove_geodata->description = 'upload new geodata files and remove existing geodata layers';
             $upload_remove_geodata->guard_name = 'web';
             $upload_remove_geodata->save();
-            $admin->attachPermission($upload_remove_geodata);
+            $admin->givePermissionTo($upload_remove_geodata);
         }
         // Link geodata
         if(Permission::where('name', 'link_geodata')->first() === null) {
@@ -200,7 +200,7 @@ class RolesPermissionsSeeder extends Seeder
             $link_geodata->description = 'link geodata to concepts or other elements';
             $link_geodata->guard_name = 'web';
             $link_geodata->save();
-            $admin->attachPermission($link_geodata);
+            $admin->givePermissionTo($link_geodata);
         }
         // View users
         if(Permission::where('name', 'view_users')->first() === null) {
@@ -210,7 +210,7 @@ class RolesPermissionsSeeder extends Seeder
             $view_users->description = 'view all existing users';
             $view_users->guard_name = 'web';
             $view_users->save();
-            $admin->attachPermission($view_users);
+            $admin->givePermissionTo($view_users);
         }
         // Create users
         if(Permission::where('name', 'create_users')->first() === null) {
@@ -220,7 +220,7 @@ class RolesPermissionsSeeder extends Seeder
             $create_users->description = 'create new users';
             $create_users->guard_name = 'web';
             $create_users->save();
-            $admin->attachPermission($create_users);
+            $admin->givePermissionTo($create_users);
         }
         // Delete users
         if(Permission::where('name', 'delete_users')->first() === null) {
@@ -230,7 +230,7 @@ class RolesPermissionsSeeder extends Seeder
             $delete_users->description = 'delete existing users';
             $delete_users->guard_name = 'web';
             $delete_users->save();
-            $admin->attachPermission($delete_users);
+            $admin->givePermissionTo($delete_users);
         }
         // Add/remove role
         if(Permission::where('name', 'add_remove_role')->first() === null) {
@@ -240,7 +240,7 @@ class RolesPermissionsSeeder extends Seeder
             $add_remove_role->description = 'add and remove roles from a user';
             $add_remove_role->guard_name = 'web';
             $add_remove_role->save();
-            $admin->attachPermission($add_remove_role);
+            $admin->givePermissionTo($add_remove_role);
         }
         // Change password
         if(Permission::where('name', 'change_password')->first() === null) {
@@ -250,7 +250,7 @@ class RolesPermissionsSeeder extends Seeder
             $change_password->description = 'change the password of a user';
             $change_password->guard_name = 'web';
             $change_password->save();
-            $admin->attachPermission($change_password);
+            $admin->givePermissionTo($change_password);
         }
         // Add and edit roles
         if(Permission::where('name', 'add_edit_role')->first() === null) {
@@ -260,7 +260,7 @@ class RolesPermissionsSeeder extends Seeder
             $add_edit_role->description = 'add and edit existing roles';
             $add_edit_role->guard_name = 'web';
             $add_edit_role->save();
-            $admin->attachPermission($add_edit_role);
+            $admin->givePermissionTo($add_edit_role);
         }
         // Delete roles
         if(Permission::where('name', 'delete_role')->first() === null) {
@@ -270,7 +270,7 @@ class RolesPermissionsSeeder extends Seeder
             $delete_role->description = 'delete existing roles';
             $delete_role->guard_name = 'web';
             $delete_role->save();
-            $admin->attachPermission($delete_role);
+            $admin->givePermissionTo($delete_role);
         }
         // Add and remove permissions
         if(Permission::where('name', 'add_remove_permission')->first() === null) {
@@ -280,7 +280,7 @@ class RolesPermissionsSeeder extends Seeder
             $add_remove_permission->description = 'add and remove permissions to/from roles';
             $add_remove_permission->guard_name = 'web';
             $add_remove_permission->save();
-            $admin->attachPermission($add_remove_permission);
+            $admin->givePermissionTo($add_remove_permission);
         }
         // Edit system preferences
         if(Permission::where('name', 'edit_preferences')->first() === null) {
@@ -290,7 +290,7 @@ class RolesPermissionsSeeder extends Seeder
             $edit_preferences->description = 'edit system preferences';
             $edit_preferences->guard_name = 'web';
             $edit_preferences->save();
-            $admin->attachPermission($edit_preferences);
+            $admin->givePermissionTo($edit_preferences);
         }
         // Add & Move thesaurus concepts
         if(Permission::where('name', 'add_move_concepts_th')->first() === null) {
@@ -300,7 +300,7 @@ class RolesPermissionsSeeder extends Seeder
             $add_move_concepts_th->description = 'add, move and add relations to concepts in thesaurex';
             $add_move_concepts_th->guard_name = 'web';
             $add_move_concepts_th->save();
-            $admin->attachPermission($add_move_concepts_th);
+            $admin->givePermissionTo($add_move_concepts_th);
         }
         // Delete thesaurus concepts
         if(Permission::where('name', 'delete_concepts_th')->first() === null) {
@@ -310,7 +310,7 @@ class RolesPermissionsSeeder extends Seeder
             $delete_concepts_th->description = 'delete concepts in thesaurex';
             $delete_concepts_th->guard_name = 'web';
             $delete_concepts_th->save();
-            $admin->attachPermission($delete_concepts_th);
+            $admin->givePermissionTo($delete_concepts_th);
         }
         // Edit thesaurus concepts
         if(Permission::where('name', 'edit_concepts_th')->first() === null) {
@@ -320,7 +320,7 @@ class RolesPermissionsSeeder extends Seeder
             $edit_concepts_th->description = 'edit (modify labels) concepts in thesaurex';
             $edit_concepts_th->guard_name = 'web';
             $edit_concepts_th->save();
-            $admin->attachPermission($edit_concepts_th);
+            $admin->givePermissionTo($edit_concepts_th);
         }
         // Export thesaurus concepts
         if(Permission::where('name', 'export_th')->first() === null) {
@@ -330,7 +330,7 @@ class RolesPermissionsSeeder extends Seeder
             $export_th->description = 'export (sub-)trees in thesaurex';
             $export_th->guard_name = 'web';
             $export_th->save();
-            $admin->attachPermission($export_th);
+            $admin->givePermissionTo($export_th);
         }
         // View thesaurus concepts
         if(Permission::where('name', 'view_concepts_th')->first() === null) {
@@ -340,8 +340,8 @@ class RolesPermissionsSeeder extends Seeder
             $view_concepts_th->description = 'view concepts in thesaurex';
             $view_concepts_th->guard_name = 'web';
             $view_concepts_th->save();
-            $admin->attachPermission($view_concepts_th);
-            $guest->attachPermission($view_concepts_th);
+            $admin->givePermissionTo($view_concepts_th);
+            $guest->givePermissionTo($view_concepts_th);
         }
     }
 }
