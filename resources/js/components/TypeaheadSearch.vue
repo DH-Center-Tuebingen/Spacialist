@@ -27,6 +27,11 @@
             value: {
                 type: String,
                 required: false
+            },
+            delay: {
+                type: Number,
+                required: false,
+                default: 500
             }
         },
         data () {
@@ -41,7 +46,7 @@
         },
         computed: {
             debounce () {
-                return debounce(this.update, 250)
+                return debounce(this.update, this.delay);
             }
         },
         methods: {
