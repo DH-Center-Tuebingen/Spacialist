@@ -62,6 +62,9 @@
                     ? Object.assign({ [this.queryParamName]: this.query }, this.data)
                     : this.data;
 
+                // FIXME workaround to not run all outdated search requests
+                // Clears whole queue, might clear unrelated queued requests
+                this.$httpQueue.clear();
                 let cancel = new Promise((resolve) => this.cancel = resolve);
                 let request = this.$httpQueue.add(() => this.$http.get(src, { params }));
 

@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.7.2
+### Fixed
+- Clear queue before sending another request in typeahead searches (should speed up tree search and others with large data sets)
+
 ## 0.7.1
 ### Added
 - Seeder for basic map setup
