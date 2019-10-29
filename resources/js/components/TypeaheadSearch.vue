@@ -27,6 +27,11 @@
             value: {
                 type: String,
                 required: false
+            },
+            delay: {
+                type: Number,
+                required: false,
+                default: 500
             }
         },
         data () {
@@ -41,7 +46,7 @@
         },
         computed: {
             debounce () {
-                return debounce(this.update, 250)
+                return debounce(this.update, this.delay);
             }
         },
         methods: {
@@ -62,6 +67,9 @@
                     ? Object.assign({ [this.queryParamName]: this.query }, this.data)
                     : this.data;
 
+                // FIXME workaround to not run all outdated search requests
+                // Clears whole queue, might clear unrelated queued requests
+                this.$httpQueue.clear();
                 let cancel = new Promise((resolve) => this.cancel = resolve);
                 let request = this.$httpQueue.add(() => this.$http.get(src, { params }));
 

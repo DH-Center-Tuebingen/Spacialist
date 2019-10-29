@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.7.2
+### Changed
+- Make debounce delay in TypeaheadSearch component a prop and increase default value (`250ms` => `500ms`)
+### Fixed
+- Clear queue before sending another request in typeahead searches (should speed up tree search and others with large data sets)
+
 ## 0.7.1
 ### Added
 - Seeder for basic map setup
