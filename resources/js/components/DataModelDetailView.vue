@@ -47,18 +47,21 @@
                 <hr />
             </form>
             <h4>{{ $t('main.datamodel.detail.attribute.title') }}</h4>
-            <attributes
-                class="col scroll-y-auto"
-                group="attributes"
-                :attributes="entityAttributes"
-                :values="entityValues"
-                :selections="entitySelections"
-                :on-add="addAttributeToEntityType"
-                :on-edit="onEditEntityAttribute"
-                :on-remove="onRemoveAttributeFromEntityType"
-                :on-reorder="reorderEntityAttribute"
-                :show-info="true">
-            </attributes>
+            <div class="col overflow-hidden">
+                <attributes
+                    v-if="initFinished"
+                    class="h-100 scroll-y-auto scroll-x-hidden"
+                    group="attributes"
+                    :attributes="entityAttributes"
+                    :values="entityValues"
+                    :selections="entitySelections"
+                    :on-add="addAttributeToEntityType"
+                    :on-edit="onEditEntityAttribute"
+                    :on-remove="onRemoveAttributeFromEntityType"
+                    :on-reorder="reorderEntityAttribute"
+                    :show-info="true">
+                </attributes>
+            </div>
         </div>
 
         <modal name="edit-entity-attribute-modal" height="auto" :scrollable="true">
@@ -211,6 +214,7 @@
         },
         methods: {
             init(id) {
+                this.initFinished = false;
                 this.entityAttributes = [];
                 this.entityType = this.$getEntityTypes()[id];
                 $httpQueue.add(() => $http.get(`/editor/entity_type/${id}/attribute`)
@@ -232,6 +236,7 @@
                             let index = this.entityAttributes.findIndex(a => a.id == id);
                             this.attributes[i].isDisabled = index > -1;
                         }
+                        this.initFinished = true;
                     }));
             },
             updateEntityType() {
@@ -468,6 +473,7 @@
         },
         data() {
             return {
+                initFinished: false,
                 entityType: {},
                 entityAttributes: [],
                 entitySelections: {},
