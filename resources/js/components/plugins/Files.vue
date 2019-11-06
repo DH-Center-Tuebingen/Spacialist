@@ -304,6 +304,16 @@
                             @handle-ocr="handleOCR"
                             @update-file-content="updateFileContent">
                         </component>
+                        <div class="progress" style="height: 1px;" v-if="ocrProgress < 1">
+                            <div
+                                class="progress-bar"
+                                role="progressbar"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                :aria-valuenow="ocrProgress"
+                                :style="`width: ${ocrProgress * 100}%`">
+                            </div>
+                        </div>
                         <div class="d-flex flex-row justify-content-between mt-2">
                             <button type="button" class="btn btn-outline-secondary" :disabled="isFirstFile" @click="gotoPreviousFile(selectedFile)">
                                 <i class="fas fa-fw fa-angle-left"></i> {{ $t('plugins.files.modal.detail.previous') }}
@@ -707,7 +717,6 @@
     import FileConfirmUploadModal from './FileConfirmUploadModal.vue';
 
     export default {
-        tesseractWorker: createTesseractWorker(),
         components: {
             'file-list': FileList,
             'file-image': FileImage,
@@ -738,7 +747,7 @@
                 type: Object
             }
         },
-        activated() {
+        async activated() {
             if(this.selectedEntity.id) {
                 this.linkedFiles.apiUrl = '/file/linked/' + this.selectedEntity.id;
                 this.setAction('linkedFiles', true);
@@ -748,11 +757,19 @@
             if(this.$route.query.f) {
                 this.openFile(this.$route.query.f);
             }
+
+            await this.tesseractWorker.load();
+            await this.tesseractWorker.loadLanguage('eng');
+            await this.tesseractWorker.initialize('eng');
+
         },
         mounted() {
             this.initFilters();
             this.initTags();
             EventBus.$on('files-uploaded', this.handleFileUpload);
+        },
+        async destroyed() {
+            await this.tesseractWorker.terminate();
         },
         methods: {
             initTags() {
@@ -893,16 +910,18 @@
                     });
                 }
             },
-            handleOCR(event) {
-                this.$options.tesseractWorker
-                    .recognize(event.image)
-                    .then(result => {
-                        const f = new File([result.text], 'ocr-result.txt', {
-                            type: 'text/plain'
-                        });
-                        this.$options.tesseractWorker.terminate();
-                        this.confirmClipboardUpload(f);
-                    });
+            updateOcrStatus(e) {
+                console.log(e);
+                if(e.status == 'recognizing text') {
+                    this.ocrProgress = e.progress;
+                }
+            },
+            async handleOCR(event) {
+                const result = await this.tesseractWorker.recognize(event.image);
+                const f = new File([result.data.text], 'ocr-result.txt', {
+                    type: 'text/plain'
+                });
+                this.confirmClipboardUpload(f);
             },
             updateFileContent(event) {
                 const file = event.file;
@@ -1476,6 +1495,10 @@
                     add: this.addToggleListener,
                     remove: this.removeToggleListener
                 },
+                tesseractWorker: createTesseractWorker({
+                    logger: this.updateOcrStatus
+                }),
+                ocrProgress: 1,
                 fileHeaderHovered: false,
                 newFilename: '',
                 selectedFile: {},

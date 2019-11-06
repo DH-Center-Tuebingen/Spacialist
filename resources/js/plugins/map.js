@@ -20,7 +20,7 @@ const SpacialistPluginMap = {
             Vue.router.addRoutes([
                 // deprecated pre-0.6 routes
                 {
-                    path: 'geodata/:id',
+                    path: '/geodata/:id',
                     redirect: to => {
                         return {
                             name: 'geodata',
@@ -31,7 +31,7 @@ const SpacialistPluginMap = {
                     }
                 },
                 {
-                    path: 'editor/layer',
+                    path: '/editor/layer',
                     redirect: { name: 'layeredit' },
                     children: [{
                         path: 'layer/:id',
@@ -46,7 +46,7 @@ const SpacialistPluginMap = {
                     }]
                 },
                 {
-                    path: 'editor/gis',
+                    path: '/editor/gis',
                     redirect: { name: 'home' } // TODO not home
                 },
                 // New routes

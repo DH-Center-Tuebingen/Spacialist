@@ -82,16 +82,17 @@
 </template>
 
 <script>
-    import 'hammerjs';
-    import * as cornerstone from 'cornerstone-core';
-    import * as cornerstoneMath from 'cornerstone-math';
-    import * as cornerstoneTools from 'cornerstone-tools';
-    import * as dicomParser from 'dicom-parser';
-    import * as cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
+    import Hammer from 'hammerjs';
+    import cornerstone from 'cornerstone-core';
+    import cornerstoneMath from 'cornerstone-math';
+    import cornerstoneTools from 'cornerstone-tools';
+    import dicomParser from 'dicom-parser';
+    import cornerstoneWADOImageLoader from 'cornerstone-wado-image-loader';
     import dicomUids from '../../plugins/dicomUids';
     import dicomTags from '../../plugins/dicomDict';
 
     cornerstoneTools.external.cornerstone = cornerstone;
+    cornerstoneTools.external.Hammer = Hammer;
     cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
     cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
     cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
