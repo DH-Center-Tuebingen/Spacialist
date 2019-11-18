@@ -31,6 +31,7 @@
                 this.asyncToggle();
             },
             onDragLeave(item) {
+                this.asyncToggle.clear();
             },
             doToggle() {
                 if(!this.data.state.opened && this.data.state.openable) {
