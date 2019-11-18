@@ -490,14 +490,7 @@
                    (target.state.dropPosition == DropPosition.inside && target.id == item.root_entity_id)) {
                     return false;
                 }
-                let dropEntityType;
-                if(dropData.targetPath.length == 1) {
-                    dropEntityType = {
-                        sub_entity_types: Object.values(vm.$getEntityTypes()).filter(f => f.is_root)
-                    }
-                } else {
-                    dropEntityType = vm.$getEntityType(target.entity_type_id);
-                }
+
                 // If currently dragged element is not allowed as root
                 // and dragged on element is a root element (no parent)
                 // do not allow drop
@@ -507,10 +500,16 @@
 
                 // Check if currently dragged entity type is allowed
                 // as subtype of current drop target
-                const index = dropEntityType.sub_entity_types.findIndex(ct => ct.id == dragEntityType.id);
+                let index;
+                if(dropData.targetPath.length == 1) {
+                    index = Object.values(vm.$getEntityTypes()).findIndex(et => et.is_root && et.id == dragEntityType.id);
+                } else {
+                    index = vm.$getEntityType(target.entity_type_id).sub_entity_types.findIndex(et => et.id == dragEntityType.id);
+                }
                 if(index == -1) {
                     return false;
                 }
+
                 // In any other cases allow drop
                 return true;
             },
