@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.7.3 (Unreleased)
+### Fixed
+- Weird layout for some attribute lists
+- Do not open tree elements instantly when hovering while drag&drop (a delay of 500ms is now used/respected)
+
 ## 0.7.2
 ### Changed
 - Make debounce delay in TypeaheadSearch component a prop and increase default value (`250ms` => `500ms`)
