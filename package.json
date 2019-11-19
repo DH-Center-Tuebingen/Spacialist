@@ -71,7 +71,7 @@
         "shpjs": "^3.4.3",
         "tesseract.js": "^2.0.0-beta.2",
         "three": "^0.110.0",
-        "tree-vue-component": "^5.7.0",
+        "tree-vue-component": "^5.8.3",
         "typeface-raleway": "0.0.75",
         "typeface-source-code-pro": "0.0.71",
         "v-calendar": "^0.9.7",
