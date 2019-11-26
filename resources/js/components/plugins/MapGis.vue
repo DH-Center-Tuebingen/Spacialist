@@ -56,12 +56,14 @@
             :on-update="applyPropertyModifications">
         </map-gis-properties-modal>
 
-        <vue-context ref="layerMenu" class="context-menu-wrapper">
-            <ul class="list-group list-group-vue-context" slot-scope="_">
-                <li class="list-group-item list-group-item-vue-context" v-for="entry in contextMenu" @click.prevent="entry.callback(_.data.layer)">
-                    <i :class="entry.iconClasses">{{entry.iconContent}}</i> {{entry.label}}
+        <vue-context ref="layerMenu">
+            <template slot-scope="_">
+                <li v-for="entry in contextMenu">
+                    <a href="" @click.prevent="entry.callback(_.data.layer)">
+                        <i :class="entry.iconClasses">{{entry.iconContent}}</i> {{entry.label}}
+                    </a>
                 </li>
-            </ul>
+            </template>
         </vue-context>
     </div>
 </template>

@@ -72,7 +72,6 @@
     import TreeSearch from './TreeSearch.vue';
 
     import * as treeUtility from 'tree-vue-component';
-    import { VueContext } from 'vue-context';
     import AddNewEntityModal from './modals/AddNewEntity.vue';
     import DeleteEntityModal from './modals/DeleteEntity.vue';
 
@@ -137,7 +136,6 @@
             'tree-node': TreeNode,
             'tree-contextmenu': TreeContextmenu,
             'tree-search': TreeSearch,
-            VueContext
         },
         props: {
             selectedEntity: {
