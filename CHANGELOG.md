@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Dropping entities when tree is scrolled
 ### Changed
 - Replace JS bibtex-parser
+- Replace debounce package with lodash's
 
 ## 0.7.2
 ### Changed

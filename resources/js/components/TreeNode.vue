@@ -15,8 +15,6 @@
 </template>
 
 <script>
-    import debounce from 'debounce';
-
     export default {
         props: {
             data: {
@@ -27,11 +25,11 @@
         methods: {
             onDragEnter() {
                 if(!this.data.dragAllowed()) return;
-                this.asyncToggle.clear();
+                this.asyncToggle.cancel();
                 this.asyncToggle();
             },
             onDragLeave(item) {
-                this.asyncToggle.clear();
+                this.asyncToggle.cancel();
             },
             doToggle() {
                 if(!this.data.state.opened && this.data.state.openable) {
@@ -45,7 +43,7 @@
         },
         computed: {
             asyncToggle() {
-                return debounce(this.doToggle, this.data.dragDelay || 500);
+                return _debounce(this.doToggle, this.data.dragDelay || 500);
             },
             colorStyles() {
                 const colors = this.$getEntityColors(this.data.entity_type_id);

@@ -55,7 +55,6 @@
         "cornerstone-wado-image-loader": "^3.0.0",
         "csv2geojson": "^5.1.1",
         "d3-dsv": "^1.1.0",
-        "debounce": "^1.2.0",
         "dicom-parser": "^1.8.3",
         "fabric": "^3.4.0",
         "file-system": "^2.2.2",
