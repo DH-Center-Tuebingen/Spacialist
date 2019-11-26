@@ -48,7 +48,7 @@
     },
     "dependencies": {
         "@mapbox/togeojson": "^0.16.0",
-        "bibtex-parse": "^1.0.0",
+        "@retorquere/bibtex-parser": "^2.0.0",
         "bootstrap": "^4.3.0",
         "cornerstone-core": "^2.3.0",
         "cornerstone-tools": "^4.6.2",

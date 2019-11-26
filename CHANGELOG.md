@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 - Weird layout for some attribute lists
 - Do not open tree elements instantly when hovering while drag&drop (a delay of 500ms is now used/respected)
 - Dropping entities when tree is scrolled
+### Changed
+- Replace JS bibtex-parser
 
 ## 0.7.2
 ### Changed
