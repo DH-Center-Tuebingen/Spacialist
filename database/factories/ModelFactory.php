@@ -4,6 +4,7 @@ use Phaza\LaravelPostgis\Geometries\Point;
 use Phaza\LaravelPostgis\Geometries\LineString;
 use Phaza\LaravelPostgis\Geometries\Polygon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Faker\Generator as Faker;
 
@@ -27,6 +28,7 @@ use Faker\Generator as Faker;
 $factory->defineAs(App\User::class, 'guest', function () {
     return [
         'name' => "Guest User",
+        'nickname' => "g_user",
         'email' => "udontneedtoseehisidentification@rebels.tld",
         'password' => Hash::make("thesearentthedroidsuarelookingfor"),
     ];
@@ -38,6 +40,7 @@ $factory->defineAs(App\User::class, 'guest', function () {
 $factory->define(App\User::class, function (Faker $faker) {
     return [
         'name' => $faker->name,
+        'nickname' => Str::lower($faker->firstName),
         'email' => $faker->email,
         'password' => $faker->password,
     ];

@@ -16,15 +16,18 @@
                     <form @submit.prevent="login">
                         <div class="form-group">
                             <label for="email" class="col-md-4 col-form-label">
-                                {{ $t('global.email') }}
-                                <i class="fas fa-fw fa-envelope"></i>
+                                {{ $t('global.email_or_nick') }}
+                                <i class="fas fa-fw fa-user"></i>
                             </label>
 
                             <div class="col-md-6">
-                                <input id="email" type="email" class="form-control" :class="$getValidClass(error, 'email')" v-model="user.email" name="email" required autofocus>
+                                <input id="email" type="text" class="form-control" :class="$getValidClass(error, 'email|nickname')" v-model="user.email" name="email" required autofocus>
 
                                 <div class="invalid-feedback">
                                     <span v-for="msg in error.email">
+                                        {{ msg }}
+                                    </span>
+                                    <span v-for="msg in error.nickname">
                                         {{ msg }}
                                     </span>
                                 </div>
@@ -109,11 +112,18 @@
         methods: {
             login() {
                 const vm = this;
+                let data = {
+                    password: vm.user.password
+                };
+                // dirty check if email field should be treated
+                // as actual email address or nickname
+                if(vm.user.email.includes('@')) {
+                    data.email = vm.user.email;
+                } else {
+                    data.nickname = vm.user.email;
+                }
                 vm.$auth.login({
-                    data: {
-                        email: vm.user.email,
-                        password: vm.user.password
-                    },
+                    data: data,
                     rememberMe: vm.user.remember,
                     redirect: vm.redirect,
                     success: _ => {

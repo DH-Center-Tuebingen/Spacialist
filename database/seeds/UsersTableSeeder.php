@@ -17,7 +17,8 @@ class UsersTableSeeder extends Seeder
             array (
                 'id' => 1,
                 'name' => 'Admin',
-                'email' => 'admin@admin.com',
+                'nickname' => 'admin',
+                'email' => 'admin@localhost',
                 'password' => '$2y$10$GTwOUwcsqgqL/J/0dxxkIenBLR3Pna9ZfIa7sVyPkJgQDwqLU0wqa',
                 'remember_token' => NULL,
                 'created_at' => '2017-12-20 09:47:36',
