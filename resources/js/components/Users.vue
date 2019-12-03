@@ -17,7 +17,7 @@
                         {{ user.name }}
                     </td>
                     <td>
-                        <input type="email" class="form-control" :class="$getValidClass(error, `email_${user.id}`)" v-model="user.email" v-validate="" :name="`email_${user.id}`" />
+                        <input type="email" class="form-control" :class="$getValidClass(error, `email_${user.id}`)" v-model="user.email" v-validate="" :name="`email_${user.id}`" required />
 
                         <div class="invalid-feedback">
                             <span v-for="msg in error[`email_${user.id}`]">
@@ -229,8 +229,12 @@
             onPatchUser(id) {
                 if(!this.$can('add_remove_role')) return new Promise(r => r());
                 if(!this.userDirty(id)) return new Promise(r => r());
-                let data = {};
                 let user = this.userList.find(u => u.id == id);
+                if(!user.email) {
+                    // TODO error message
+                    return;
+                }
+                let data = {};
                 if(this.isDirty(`roles_${id}`)) {
                     let roles = [];
                     for(let i=0; i<user.roles.length; i++) {
@@ -288,7 +292,9 @@
                 return false;
             },
             userDirty(uid) {
-                return this.isDirty(`roles_${uid}`) || this.isDirty(`email_${uid}`);
+                const u = this.userList.find(u => u.id == uid);
+                return this.isDirty(`roles_${uid}`) ||
+                    (this.isDirty(`email_${uid}`) && !!u.email);
             },
             setPristine(fieldname) {
                 this.$validator.flag(fieldname, {

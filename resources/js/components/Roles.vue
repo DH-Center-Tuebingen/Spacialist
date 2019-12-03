@@ -18,10 +18,10 @@
                         {{ role.name }}
                     </td>
                     <td>
-                        <input type="text" class="form-control" v-model="role.display_name" v-validate="" :name="`disp_${role.id}`" />
+                        <input type="text" class="form-control" v-model="role.display_name" v-validate="" required :name="`disp_${role.id}`" />
                     </td>
                     <td>
-                        <input type="text" class="form-control" v-model="role.description" v-validate="" :name="`desc_${role.id}`" />
+                        <input type="text" class="form-control" v-model="role.description" v-validate="" required :name="`desc_${role.id}`" />
                     </td>
                     <td>
                         <multiselect
@@ -212,6 +212,10 @@
                 if(!this.$can('add_edit_role')) return new Promise(r => r());
                 if(!this.roleDirty(id)) return new Promise(r => r());
                 let role = this.roleList.find(r => r.id == id);
+                if(!role.display_name || !role.description) {
+                    // TODO error message
+                    return;
+                }
                 let data = {};
                 if(this.isDirty(`perms_${id}`)) {
                     let permissions = [];
@@ -268,7 +272,10 @@
                 return false;
             },
             roleDirty(rid) {
-                return this.isDirty(`perms_${rid}`) || this.isDirty(`disp_${rid}`) || this.isDirty(`desc_${rid}`);
+                const r = this.roleList.find(r => r.id == rid);
+                return this.isDirty(`perms_${rid}`) ||
+                    (this.isDirty(`disp_${rid}`) && !!r.display_name) ||
+                    (this.isDirty(`desc_${rid}`) && !!r.description);
             },
             setPristine(fieldname) {
                 this.$validator.flag(fieldname, {

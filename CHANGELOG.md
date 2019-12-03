@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Weird layout for some attribute lists
 - Do not open tree elements instantly when hovering while drag&drop (a delay of 500ms is now used/respected)
 - Dropping entities when tree is scrolled
+- Do not allow to save a user/role without required fields set
 ### Changed
 - Replace JS bibtex-parser
 - Replace debounce package with lodash's
