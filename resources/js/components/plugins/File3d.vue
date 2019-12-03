@@ -50,7 +50,6 @@
         Vector3,
         WebGLRenderer,
     } from 'three';
-    import { ViveController } from 'three/examples/jsm/vr/ViveController.js';
     import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
     import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
@@ -210,7 +209,7 @@
                 this.initEventListeners();
                 this.initLights();
                 this.initControls();
-                if(navigator.getVRDisplays) {
+                if(navigator.getVRDisplays && !!this.renderer.vr) {
                     this.container.appendChild(WEBVR.createButton(this.renderer));
                     this.initViveControls();
                 }
@@ -424,7 +423,12 @@
                 window.addEventListener('vrdisplaypresentchange', this.vrDisplayStateChanged, false);
             },
             initViveControls: function() {
+                if(!this.renderer.vr) {
+                    return;
+                }
                 const vm = this;
+                this.grabController = this.renderer.vr.getController(0);
+                this.flashlightController = this.renderer.vr.getController(1);
                 // TODO only init if VR enabled?
                 this.initViveEventListeners();
                 let ctrlLoader = new OBJLoader2();

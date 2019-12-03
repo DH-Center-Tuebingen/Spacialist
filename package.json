@@ -49,7 +49,7 @@
     "dependencies": {
         "@mapbox/togeojson": "^0.16.0",
         "@retorquere/bibtex-parser": "^2.0.0",
-        "bootstrap": "^4.3.0",
+        "bootstrap": "^4.4.0",
         "cornerstone-core": "^2.3.0",
         "cornerstone-tools": "^4.6.2",
         "cornerstone-wado-image-loader": "^3.0.0",
@@ -69,7 +69,7 @@
         "screenfull": "^5.0.0",
         "shpjs": "^3.4.3",
         "tesseract.js": "^2.0.0-beta.2",
-        "three": "^0.110.0",
+        "three": "^0.111.0",
         "tree-vue-component": "^5.8.3",
         "typeface-raleway": "0.0.75",
         "typeface-source-code-pro": "0.0.71",
