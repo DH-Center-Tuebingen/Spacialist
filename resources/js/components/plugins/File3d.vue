@@ -61,7 +61,7 @@
     import { PDBLoader } from 'three/examples/jsm/loaders/PDBLoader.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
     import * as dat from 'three/examples/jsm/libs/dat.gui.module.js';
-    import { WEBVR } from 'three/examples/jsm/vr/WebVR.js';
+    import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
     export default {
         props: {
@@ -85,12 +85,12 @@
             window.removeEventListener('resize', this.onWindowResize, false);
             this.renderer.domElement.removeEventListener('mousedown', this.onMouseDown, false);
             // VR Events
-    		this.grabController.removeEventListener('triggerdown', this.onGrabDown);
-    		this.grabController.removeEventListener('triggerup', this.onGrabUp);
+    		this.grabController.removeEventListener('selectstart', this.onGrabDown);
+    		this.grabController.removeEventListener('selectend', this.onGrabUp);
             this.grabController.removeEventListener('thumbpadup', this.dimWorldLight);
             // this.grabController.removeEventListener('axischanged', this.recognizeTouch);
-    		this.flashlightController.removeEventListener('triggerdown', this.onLightOn);
-    		this.flashlightController.removeEventListener('triggerup', this.onLightOff);
+    		this.flashlightController.removeEventListener('selectstart', this.onLightOn);
+    		this.flashlightController.removeEventListener('selectend', this.onLightOff);
     		this.flashlightController.removeEventListener('thumbpadup', this.dimFlashLight);
 
             window.removeEventListener('vrdisplaypresentchange', this.vrDisplayStateChanged, false);
@@ -209,8 +209,8 @@
                 this.initEventListeners();
                 this.initLights();
                 this.initControls();
-                if(navigator.getVRDisplays && !!this.renderer.vr) {
-                    this.container.appendChild(WEBVR.createButton(this.renderer));
+                if(navigator.getVRDisplays) {
+                    this.container.appendChild(VRButton.createButton(this.renderer));
                     this.initViveControls();
                 }
 
@@ -412,13 +412,17 @@
             },
             initViveEventListeners: function() {
                 // Vive Events
-        		this.grabController.addEventListener('triggerdown', this.onGrabDown);
-        		this.grabController.addEventListener('triggerup', this.onGrabUp);
-                this.grabController.addEventListener('thumbpadup', this.dimWorldLight);
-                // this.grabController.addEventListener('axischanged', this.recognizeTouch);
-        		this.flashlightController.addEventListener('triggerdown', this.onLightOn);
-        		this.flashlightController.addEventListener('triggerup', this.onLightOff);
-        		this.flashlightController.addEventListener('thumbpadup', this.dimFlashLight);
+                if(this.grabController) {
+                    this.grabController.addEventListener('selectstart', this.onGrabDown);
+                    this.grabController.addEventListener('selectend', this.onGrabUp);
+                    this.grabController.addEventListener('thumbpadup', this.dimWorldLight);
+                    // this.grabController.addEventListener('axischanged', this.recognizeTouch);
+                }
+                if(this.flashlightController) {
+                    this.flashlightController.addEventListener('selectstart', this.onLightOn);
+                    this.flashlightController.addEventListener('selectend', this.onLightOff);
+                    this.flashlightController.addEventListener('thumbpadup', this.dimFlashLight);
+                }
 
                 window.addEventListener('vrdisplaypresentchange', this.vrDisplayStateChanged, false);
             },
@@ -429,48 +433,59 @@
                 const vm = this;
                 this.grabController = this.renderer.vr.getController(0);
                 this.flashlightController = this.renderer.vr.getController(1);
-                // TODO only init if VR enabled?
-                this.initViveEventListeners();
-                let ctrlLoader = new OBJLoader2();
-                ctrlLoader.load('./img/vr_controller_vive_1_5.obj', function(object) {
-                    let txtLoader = new TextureLoader();
-                    txtLoader.setPath('./img/vive-controller/');
-                    let controllerModel = object.children[0];
-                    controllerModel.material.map = txtLoader.load('./img/onepointfive_texture.png');
-                    vm.grabController.add(object.clone());
-                    vm.flashlightController.add(object.clone());
-                });
-                // Add Controller Rays
-                let geometry = new Geometry();
-                geometry.vertices.push(new Vector3(0, 0, 0));
-                geometry.vertices.push(new Vector3(0, 0, -1));
-                let line = new Line(geometry);
-                line.name = 'line';
-                line.scale.z = 5;
-                this.grabController.add(line.clone());
+                if(this.grabController || this.flashlightController) {
+                    this.initViveEventListeners();
+                    let ctrlLoader = new OBJLoader2();
+                    ctrlLoader.load('./img/vr_controller_vive_1_5.obj', function(object) {
+                        let txtLoader = new TextureLoader();
+                        txtLoader.setPath('./img/vive-controller/');
+                        let controllerModel = object.children[0];
+                        controllerModel.material.map = txtLoader.load('./img/onepointfive_texture.png');
+                        if(vm.grabController) {
+                            vm.grabController.add(object.clone());
+                        }
+                        if(vm.flashlightController) {
+                            vm.flashlightController.add(object.clone());
+                        }
+                    });
+                    // Add Controller Rays
+                    let geometry = new Geometry();
+                    geometry.vertices.push(new Vector3(0, 0, 0));
+                    geometry.vertices.push(new Vector3(0, 0, -1));
+                    let line = new Line(geometry);
+                    line.name = 'line';
+                    line.scale.z = 5;
 
-                this.flashlight = new SpotLight(0xffffff, 1, 5, 0.15, 1, 2);
-                this.flashlight.castShadow = true;
-        		this.flashlight.shadow.mapSize.width = 1024;
-        		this.flashlight.shadow.mapSize.height = 1024;
-        		this.flashlight.shadow.camera.near = 0.05;
-        		this.flashlight.shadow.camera.far = 1000;
-        		// switch light off, is triggered using button on the ctrl
-        		this.flashlight.intensity = 0;
-        		// position the light source right behind the ctrl
-        		this.flashlight.position.set(
-                    this.flashlightController.position.x,
-                    this.flashlightController.position.y,
-                    this.flashlightController.position.z + 0.05);
-        		this.flashlightController.add(this.flashlight);
+                    if(this.grabController) {
+                        this.grabController.add(line.clone());
+                        this.scene.add(this.grabController);
+                    }
 
-                // point the light source to the controller's "view" direction
-                let c2line = line.clone();
-                this.flashlightController.add(c2line);
-                this.flashlight.target = c2line;
-                this.flashlightController.add(this.flashlight.target);
-                this.scene.add(this.grabController);
-                this.scene.add(this.flashlightController);
+                    if(this.flashlightController) {
+                        this.flashlight = new SpotLight(0xffffff, 1, 5, 0.15, 1, 2);
+                        this.flashlight.castShadow = true;
+                        this.flashlight.shadow.mapSize.width = 1024;
+                        this.flashlight.shadow.mapSize.height = 1024;
+                        this.flashlight.shadow.camera.near = 0.05;
+                        this.flashlight.shadow.camera.far = 1000;
+                        // switch light off, is triggered using button on the ctrl
+                        this.flashlight.intensity = 0;
+                        // position the light source right behind the ctrl
+                        this.flashlight.position.set(
+                            this.flashlightController.position.x,
+                            this.flashlightController.position.y,
+                            this.flashlightController.position.z + 0.05
+                        );
+                        this.flashlightController.add(this.flashlight);
+
+                        // point the light source to the controller's "view" direction
+                        let c2line = line.clone();
+                        this.flashlightController.add(c2line);
+                        this.flashlight.target = c2line;
+                        this.flashlightController.add(this.flashlight.target);
+                        this.scene.add(this.flashlightController);
+                    }
+                }
             },
             // Loaders
             loadCollada: function(file) {
@@ -696,7 +711,7 @@
         		this.tempMatrix.identity().extractRotation(controller.matrixWorld);
         		this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
         		this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
-        		return this.raycaster.intersectObjects(group.children, true);
+        		return this.raycaster.intersectObjects(this.group.children, true);
         	},
             hasModelLods(objectGroup) {
                 if(objectGroup.type != 'Group') return false;
@@ -867,8 +882,8 @@
                 scene: {},
 	            tempMatrix: new Matrix4(),
                 // controllers
-                grabController: new ViveController(0),
-                flashlightController: new ViveController(1),
+                grabController: null,
+                flashlightController: null,
                 flashlight: {},
                 flashlightOn: false,
                 flashlightIntensity: 1,
