@@ -756,9 +756,14 @@ class SetupTables extends Migration
         Schema::dropIfExists('password_resets');
         Schema::dropIfExists('users');
         Schema::dropIfExists('th_concept_label');
+        Schema::dropIfExists('th_concept_label_master');
+        Schema::dropIfExists('th_concept_notes');
+        Schema::dropIfExists('th_concept_notes_master');
         Schema::dropIfExists('th_broaders');
+        Schema::dropIfExists('th_broaders_master');
         Schema::dropIfExists('th_language');
         Schema::dropIfExists('th_concept');
+        Schema::dropIfExists('th_concept_master');
         Schema::dropIfExists('files');
         Schema::dropIfExists('bibliography');
         Schema::getConnection()->statement('DROP EXTENSION postgis');

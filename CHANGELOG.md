@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.7.3 (Unreleased)
+### Added
+- CLI command to create new users/roles
+- Login using a nickname instead of e-mail address
 ### Fixed
 - Weird layout for some attribute lists
 - Do not open tree elements instantly when hovering while drag&drop (a delay of 500ms is now used/respected)
