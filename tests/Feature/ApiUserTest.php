@@ -36,7 +36,8 @@ class ApiUserTest extends TestCase
             'data' => [
                 'id' => 1,
                 'name' => 'Admin',
-                'email' => 'admin@admin.com',
+                'nickname' => 'admin',
+                'email' => 'admin@localhost',
                 'created_at' => '2017-12-20 09:47:36',
                 'updated_at' => '2017-12-20 09:47:36',
                 'permissions' => []
@@ -149,7 +150,7 @@ class ApiUserTest extends TestCase
                 'Authorization' => "Bearer $this->token"
             ])
             ->post('/api/v1/auth/login', [
-                'email' => 'admin@admin.com',
+                'email' => 'admin@localhost',
                 'password' => 'admin'
             ]);
 
@@ -168,7 +169,7 @@ class ApiUserTest extends TestCase
                 'Authorization' => "Bearer $this->token"
             ])
             ->post('/api/v1/auth/login', [
-                'email' => 'admin@admin.com',
+                'email' => 'admin@localhost',
                 'password' => 'admin1337'
             ]);
 
@@ -193,6 +194,7 @@ class ApiUserTest extends TestCase
             ->post('/api/v1/user', [
                 'email' => 'test@test.com',
                 'name' => 'Test User',
+                'nickname' => 'tuser',
                 'password' => 'test'
             ]);
 
@@ -211,6 +213,7 @@ class ApiUserTest extends TestCase
             'id' => $user->id,
             'email' => 'test@test.com',
             'name' => 'Test User',
+            'nickname' => 'tuser',
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at
         ]);
@@ -304,6 +307,7 @@ class ApiUserTest extends TestCase
         $response->assertExactJson([
             'id' => 1,
             'name' => 'Admin',
+            'nickname' => 'admin',
             'email' => 'test@test.com',
             'created_at' => '2017-12-20 09:47:36',
             'updated_at' => "$user->updated_at"
@@ -542,6 +546,7 @@ class ApiUserTest extends TestCase
     {
         $user = new User();
         $user->name = 'Test';
+        $user->nickname = 'test';
         $user->email = 'mail@example.com';
         $user->password = 'not_safe';
         $user->save();
@@ -550,7 +555,7 @@ class ApiUserTest extends TestCase
                 'Authorization' => "Bearer $this->token"
             ])
             ->patch('/api/v1/user/' . $user->id, [
-                'email' => 'admin@admin.com'
+                'email' => 'admin@localhost'
             ]);
 
         $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
