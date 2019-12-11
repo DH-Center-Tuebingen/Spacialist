@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Do not open tree elements instantly when hovering while drag&drop (a delay of 500ms is now used/respected)
 - Dropping entities when tree is scrolled
 - Do not allow to save a user/role without required fields set
+- Set max zoom level on map fit to fix blank map layer due to unsupported layer zoom
 ### Changed
 - Replace JS bibtex-parser
 - Replace debounce package with lodash's
