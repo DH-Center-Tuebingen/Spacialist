@@ -85,13 +85,17 @@
             window.removeEventListener('resize', this.onWindowResize, false);
             this.renderer.domElement.removeEventListener('mousedown', this.onMouseDown, false);
             // VR Events
-    		this.grabController.removeEventListener('selectstart', this.onGrabDown);
-    		this.grabController.removeEventListener('selectend', this.onGrabUp);
-            this.grabController.removeEventListener('thumbpadup', this.dimWorldLight);
-            // this.grabController.removeEventListener('axischanged', this.recognizeTouch);
-    		this.flashlightController.removeEventListener('selectstart', this.onLightOn);
-    		this.flashlightController.removeEventListener('selectend', this.onLightOff);
-    		this.flashlightController.removeEventListener('thumbpadup', this.dimFlashLight);
+            if(this.grabController) {
+                this.grabController.removeEventListener('selectstart', this.onGrabDown);
+                this.grabController.removeEventListener('selectend', this.onGrabUp);
+                this.grabController.removeEventListener('thumbpadup', this.dimWorldLight);
+                // this.grabController.removeEventListener('axischanged', this.recognizeTouch);
+            }
+            if(this.flashlightController) {
+                this.flashlightController.removeEventListener('selectstart', this.onLightOn);
+                this.flashlightController.removeEventListener('selectend', this.onLightOff);
+                this.flashlightController.removeEventListener('thumbpadup', this.dimFlashLight);
+            }
 
             window.removeEventListener('vrdisplaypresentchange', this.vrDisplayStateChanged, false);
 
