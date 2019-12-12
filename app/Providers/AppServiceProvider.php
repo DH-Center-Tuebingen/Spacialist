@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Preference;
+use App\ThConcept;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,6 +17,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $preferences = Preference::all();
+        $preferenceValues = [];
+        foreach($preferences as $p) {
+            $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
+        }
+
+        View::share('p', $preferenceValues);
+
         Validator::extend('boolean_string', function ($attribute, $value, $parameters, $validator) {
             $acceptable = [true, false, 0, 1, '0', '1', 'true', 'false', 'TRUE', 'FALSE'];
             return in_array($value, $acceptable, true);

@@ -329,10 +329,12 @@ const de = {
                 }
             },
             info: {
+                password_reset_link: 'Wenn diese Option aktiviert wird, müssen die <code>MAIL_*</code>-Werte in der <code>.env</code>-Datei gesetzt werden. <a href="https://github.com/eScienceCenter/Spacialist/blob/master/INSTALL.md#send-mails" target="_blank">Weitere Informationen</a>.',
                 columns: 'Die Summe der Werte der Spalten darf 12 nicht überschreiten.'
             },
             key: {
                 language: 'Sprache',
+                password_reset_link: 'Passwort per Link zurücksetzen',
                 columns: {
                     title: 'Spalten Hauptansicht',
                     left: 'Linke Spalte',

@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Dropping entities when tree is scrolled
 - Do not allow to save a user/role without required fields set
 - Set max zoom level on map fit to fix blank map layer due to unsupported layer zoom
+- "Send Reset-Mail" now actually sends reset mails (Please see [INSTALL.md](INSTALL.md#send-mails) for further details on how to set this up)
 ### Changed
 - Replace JS bibtex-parser
 - Replace debounce package with lodash's

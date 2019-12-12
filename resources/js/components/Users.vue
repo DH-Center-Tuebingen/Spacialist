@@ -60,7 +60,7 @@
                                 <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!$can('add_remove_role')" @click.prevent="onPatchUser(user.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> {{ $t('global.save') }}
                                 </a>
-                                <a class="dropdown-item" href="#" :disabled="!$can('change_password')" @click.prevent="updatePassword(user.id)">
+                                <a class="dropdown-item" href="#" v-if="$hasPreference('prefs.enable-password-reset-link')" :disabled="!$can('change_password')" @click.prevent="updatePassword(user.email)">
                                     <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
                                 </a>
                                 <a class="dropdown-item" href="#" :disabled="!$can('delete_users')" @click.prevent="requestDeleteUser(user.id)">
@@ -297,8 +297,14 @@
                     vm.hideDeleteUserModal();
                 });
             },
-            updatePassword(id) {
-                if(!vm.$can('change_password')) return;
+            updatePassword(email) {
+                if(!this.$can('change_password')) return;
+                const data = {
+                    email: email
+                };
+                $httpQueue.add(() => $http.post(`user/reset/password`, data).then(response => {
+                }).catch(e => {
+                }));
             },
             isDirty(fieldname) {
                 if(this.fields[fieldname]) {

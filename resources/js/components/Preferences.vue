@@ -34,8 +34,33 @@
             </tr>
             <tr>
                 <td>
+                    <strong>{{ $t('main.preference.key.password_reset_link') }}</strong>
+                    <p class="alert alert-info mt-3 w-50" v-html="$t('main.preference.info.password_reset_link')">
+                    </p>
+                </td>
+                <td>
+                    <form class="form-mb-0">
+                        <div class="form-group row">
+                            <label class="col-md-2 col-form-label"></label>
+                            <div class="col-md-10">
+                                <input type="checkbox" v-model="preferences['prefs.enable-password-reset-link'].value" />
+                            </div>
+                        </div>
+                    </form>
+                </td>
+                <td>
+                    <input type="checkbox"  v-model="preferences['prefs.enable-password-reset-link'].allow_override" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-success" :disabled="!$can('edit_preferences')" @click.prevent="savePreference(preferences['prefs.enable-password-reset-link'])">
+                        <i class="fas fa-fw fa-check"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <strong>{{ $t('main.preference.key.columns.title') }}</strong>
-                    <p class="alert alert-info mt-3">
+                    <p class="alert alert-info mt-3 w-50">
                         {{ $t('main.preference.info.columns') }}
                     </p>
                 </td>
