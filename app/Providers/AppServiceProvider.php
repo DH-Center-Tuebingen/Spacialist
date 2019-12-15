@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,6 +15,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Relation::morphMap([
+            'files' => 'App\File',
+        ]);
+
         Validator::extend('boolean_string', function ($attribute, $value, $parameters, $validator) {
             $acceptable = [true, false, 0, 1, '0', '1', 'true', 'false', 'TRUE', 'FALSE'];
             return in_array($value, $acceptable, true);

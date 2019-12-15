@@ -12,6 +12,13 @@ class AccessRule extends Model
      * @var array
      */
     protected $fillable = [
-        'object_id', 'object_type', 'group_id', 'rules',
+        'objectable_id', 'objectable_type', 'group_id', 'rules',
     ];
+
+    /**
+     * Get the owning commentable model.
+     */
+    public function objectable() {
+        return $this->morphTo();
+    }
 }

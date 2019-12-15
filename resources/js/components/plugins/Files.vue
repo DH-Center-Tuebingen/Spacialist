@@ -551,8 +551,8 @@
                                         </button>
                                     </form>
 
-                                    <ul class="list-group mx-0 mt-2" v-if="selectedFile.access && selectedFile.access.length">
-                                        <li class="list-group-item d-flex justify-content-between" v-for="group in selectedFile.access">
+                                    <ul class="list-group mx-0 mt-2" v-if="selectedFile.access_rules && selectedFile.access_rules.length">
+                                        <li class="list-group-item d-flex justify-content-between" v-for="group in selectedFile.access_rules">
                                             <a href="#" @click.prevent="">
                                                 <i class="fas fa-fw fa-users-cog"></i> {{ $getGroup(group.id).display_name }}
                                             </a>
@@ -1279,7 +1279,7 @@
             },
             addAccessRule(rule) {
                 console.log(rule);
-                console.log(this.selectedFile.access);
+                console.log(this.selectedFile.access_rules);
                 // rule.group.id
                 // rule.writeAccess
                 const newGrp = {
@@ -1288,7 +1288,7 @@
                     rules: rule.writeAccess ? 'rw' : 'r'
                 };
                 console.log(newGrp);
-                this.selectedFile.access.push(newGrp);
+                this.selectedFile.access_rules.push(newGrp);
             },
             requestDeleteFile(file) {
                 this.contextMenuFile = Object.assign({}, file);
@@ -1623,13 +1623,13 @@
             availableGroups() {
                 const allGroups = this.$getGroups();
 
-                if(!this.selectedFile || !this.selectedFile.access) {
+                if(!this.selectedFile || !this.selectedFile.access_rules) {
                     return allGroups;
                 }
 
                 let groups = [];
                 for(let k in allGroups) {
-                    const isSelected = !!this.selectedFile.access.some(a => a.group_id == k);
+                    const isSelected = !!this.selectedFile.access_rules.some(a => a.group_id == k);
                     if(!isSelected) {
                         groups.push(allGroups[k]);
                     }

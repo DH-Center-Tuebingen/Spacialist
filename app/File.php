@@ -6,6 +6,7 @@ use App\AccessRule;
 use App\EntityFile;
 use App\FileTag;
 use App\ThConcept;
+use App\Traits\UserAccessRestriction;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +24,7 @@ use Nicolaslopezj\Searchable\SearchableTrait;
 
 class File extends Model
 {
-    use SearchableTrait;
+    use SearchableTrait, UserAccessRestriction;
 
     protected $table = 'files';
     /**
@@ -45,7 +46,6 @@ class File extends Model
     protected $appends = [
         'category',
         'exif',
-        'access',
     ];
 
     protected $searchable = [
@@ -171,10 +171,11 @@ class File extends Model
         return $files;
     }
 
-    public static function getUnlinkedPaginate($page, $filters) {
-        $files = self::with(['entities', 'tags'])
+    public static function getUnlinkedPaginate($page, $filters, $user) {
+        $files = self::with(['entities', 'tags', 'access_rules'])
             ->orderBy('id', 'asc')
-            ->doesntHave('entities');
+            ->doesntHave('entities')
+            ->hasAccessTo($user);
         $files->where(function($subQuery) use ($filters) {
             self::applyFilters($subQuery, $filters);
         });
@@ -716,10 +717,8 @@ class File extends Model
         return $this->getExifData();
     }
 
-    public function getAccessAttribute() {
-        return AccessRule::where('object_id', $this->id)
-            ->where('object_type', 'File')
-            ->get();
+    public function access_rules() {
+        return $this->morphMany('App\AccessRule', 'objectable');
     }
 
     public function entities() {

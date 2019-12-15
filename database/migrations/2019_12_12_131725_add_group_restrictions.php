@@ -44,8 +44,8 @@ class AddGroupRestrictions extends Migration
 
         Schema::create('access_rules', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('object_id');
-            $table->text('object_type');
+            $table->integer('objectable_id');
+            $table->text('objectable_type');
             $table->integer('group_id');
             $table->text('rules')->nullable();
             $table->timestamps();
