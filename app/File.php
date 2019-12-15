@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\AccessRule;
 use App\EntityFile;
 use App\FileTag;
 use App\ThConcept;
@@ -43,7 +44,8 @@ class File extends Model
 
     protected $appends = [
         'category',
-        'exif'
+        'exif',
+        'access',
     ];
 
     protected $searchable = [
@@ -712,6 +714,12 @@ class File extends Model
 
     public function getExifAttribute() {
         return $this->getExifData();
+    }
+
+    public function getAccessAttribute() {
+        return AccessRule::where('object_id', $this->id)
+            ->where('object_type', 'File')
+            ->get();
     }
 
     public function entities() {

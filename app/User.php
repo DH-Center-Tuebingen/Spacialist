@@ -57,6 +57,10 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany('App\UserPreference');
     }
 
+    public function groups() {
+        return $this->belongsToMany('App\Group', 'user_groups', 'user_id', 'group_id')->orderBy('user_groups.group_id');
+    }
+
     // public function roles() {
     //     return $this->belongsToMany('App\Role', 'role_user', 'user_id', 'role_id');
     // }

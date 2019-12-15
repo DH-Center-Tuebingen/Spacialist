@@ -8,6 +8,7 @@ use App\AvailableLayer;
 use App\Bibliography;
 use App\Entity;
 use App\EntityType;
+use App\Group;
 use App\Permission;
 use App\Preference;
 use App\Role;
@@ -38,6 +39,9 @@ class HomeController extends Controller
                 $preferenceValues[$k] = $p->value;
             }
             $locale = auth()->user()->getLanguage();
+            $groups = Group::orderBy('id')
+                ->get()
+                ->getDictionary();
         } else {
             $preferences = Preference::all();
             $preferenceValues = [];
@@ -45,6 +49,7 @@ class HomeController extends Controller
                 $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
             }
             $locale = \App::getLocale();
+            $groups = [];
         }
 
         $concepts = ThConcept::getMap($locale);
@@ -57,7 +62,8 @@ class HomeController extends Controller
         return response()->json([
             'preferences' => $preferenceValues,
             'concepts' => $concepts,
-            'entityTypes' => $entityTypeMap
+            'entityTypes' => $entityTypeMap,
+            'groups' => $groups
         ]);
     }
 

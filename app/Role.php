@@ -10,6 +10,7 @@ class Role extends \Spatie\Permission\Models\Role
         'description'   => 'string|max:255',
     ];
     const patchRules = [
+        'permissions' => 'array',
         'display_name'  => 'string|max:255',
         'description'   => 'string|max:255',
     ];

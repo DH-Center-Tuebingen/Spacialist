@@ -68,6 +68,7 @@ const en = {
             title: 'Settings',
             users: 'User Management',
             roles: 'Role Management',
+            groups: 'Group Management',
             datamodel: 'Data-Model-Editor',
             system: 'System Preferences',
             about: 'About'
@@ -267,6 +268,20 @@ const en = {
                 }
             },
             'add-permission-placeholder': 'Add permissions'
+        },
+        group: {
+            'add-button': 'Add new Group',
+            toasts: {
+                updated: {
+                    title: 'Group updated',
+                    msg: '{name} successfully updated.'
+                }
+            },
+            modal: {
+                new: {
+                    title: 'New Group'
+                }
+            }
         },
         datamodel: {
             toasts: {

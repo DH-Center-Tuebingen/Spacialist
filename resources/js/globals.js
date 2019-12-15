@@ -181,6 +181,15 @@ Vue.prototype.$getEntityTypes = function() {
     return this.$root.$data.entityTypes;
 }
 
+Vue.prototype.$getGroup = function(id) {
+    console.log(this.$root.$data.groups, id);
+    return this.$root.$data.groups[id];
+}
+
+Vue.prototype.$getGroups = function() {
+    return this.$root.$data.groups;
+}
+
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
 Vue.prototype.$getEntityColors = function(id, alpha = 0.5) {
     const et = this.$getEntityType(id);

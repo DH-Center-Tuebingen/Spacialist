@@ -127,7 +127,9 @@ import {
     faUnlink,
     faUnlockAlt,
     faUser,
+    faUsersCog,
     faUserEdit,
+    faUserLock,
     faUsers,
     faVolumeMute,
     faVolumeUp
@@ -151,6 +153,7 @@ const BibliographyItemModal = () => import(/* webpackChunkName: "group-bib" */ '
 // Settings
 import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
+import Groups from './components/Groups.vue';
 import Preferences from './components/Preferences.vue';
 import UserPreferences from './components/UserPreferences.vue';
 const DataModel = () => import(/* webpackChunkName: "group-bib" */ './components/DataModel.vue')
@@ -290,6 +293,8 @@ library.add(
     faUnlink,
     faUnlockAlt,
     faUser,
+    faUsersCog,
+    faUserLock,
     faUserEdit,
     faUsers,
     faVolumeMute,
@@ -499,6 +504,14 @@ const router = new VueRouter({
             path: '/mg/roles',
             name: 'roles',
             component: Roles,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/mg/groups',
+            name: 'groups',
+            component: Groups,
             meta: {
                 auth: true
             }
@@ -805,6 +818,7 @@ const app = new Vue({
                 this.preferences = response.data.preferences;
                 this.concepts = response.data.concepts;
                 this.entityTypes = response.data.entityTypes;
+                this.groups = response.data.groups;
                 // Check if user is logged in and set preferred language
                 // instead of browser default
                 if(!app.$auth.ready()) {
@@ -840,6 +854,7 @@ const app = new Vue({
             preferences: {},
             concepts: {},
             entityTypes: {},
+            groups: {},
             plugins: {},
             onInit: null
         }

@@ -83,6 +83,9 @@
                             <router-link :to="{name: 'roles'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-shield-alt"></i> {{ $t('global.settings.roles') }}
                             </router-link>
+                            <router-link :to="{name: 'groups'}" class="dropdown-item">
+                                <i class="fas fa-fw fa-users-cog"></i> {{ $t('global.settings.groups') }}
+                            </router-link>
                             <router-link :to="{name: 'dme'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-sitemap"></i> {{ $t('global.settings.datamodel') }}
                             </router-link>

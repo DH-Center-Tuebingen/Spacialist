@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Group;
 use App\Permission;
 use App\Role;
 use App\User;
@@ -68,6 +69,20 @@ class UserController extends Controller
         ]);
     }
 
+    public function getGroups() {
+        $user = auth()->user();
+        if(!$user->can('view_users')) {
+            return response()->json([
+                'error' => __('You do not have the permission to view groups')
+            ], 403);
+        }
+        $groups = Group::orderBy('id')->get();
+
+        return response()->json([
+            'groups' => $groups,
+        ]);
+    }
+
     // POST
 
     public function login(Request $request) {
@@ -131,6 +146,24 @@ class UserController extends Controller
         $role->save();
         $role = Role::find($role->id);
         return response()->json($role);
+    }
+
+    public function addGroup(Request $request) {
+        $user = auth()->user();
+        if(!$user->can('add_edit_group')) {
+            return response()->json([
+                'error' => __('You do not have the permission to add groups')
+            ], 403);
+        }
+        $this->validate($request, Group::rules);
+
+        $group = new Group();
+        foreach($request->only(array_keys(Group::rules)) as $key => $value) {
+            $group->{$key} = $value;
+        }
+        $group->save();
+        $group = Group::find($group->id);
+        return response()->json($group);
     }
 
     public function logout(Request $request) {
@@ -203,11 +236,7 @@ class UserController extends Controller
                 'error' => __('You do not have the permission to set role permissions')
             ], 403);
         }
-        $this->validate($request, [
-            'permissions' => 'array',
-            'display_name' => 'string',
-            'description' => 'string'
-        ]);
+        $this->validate($request, Role::patchRules);
 
         if(!$this->hasInput($request)) {
             return response()->json(null, 204);
@@ -238,6 +267,38 @@ class UserController extends Controller
         $role->save();
 
         return response()->json($role);
+    }
+
+    public function patchGroup(Request $request, $id) {
+        $user = auth()->user();
+        if(!$user->can('add_edit_group')) {
+            return response()->json([
+                'error' => __('You do not have the permission to edit groups')
+            ], 403);
+        }
+        $this->validate($request, Group::patchRules);
+
+        if(!$this->hasInput($request)) {
+            return response()->json(null, 204);
+        }
+
+        try {
+            $group = Group::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This group does not exist')
+            ], 400);
+        }
+
+        if($request->has('display_name')) {
+            $group->display_name = $request->get('display_name');
+        }
+        if($request->has('description')) {
+            $group->description = $request->get('description');
+        }
+        $group->save();
+
+        return response()->json($group);
     }
 
     // PUT
@@ -281,6 +342,26 @@ class UserController extends Controller
         }
 
         $delRole->delete();
+        return response()->json(null, 204);
+    }
+
+    public function deleteGroup($id) {
+        $user = auth()->user();
+        if(!$user->can('delete_group')) {
+            return response()->json([
+                'error' => __('You do not have the permission to delete groups')
+            ], 403);
+        }
+
+        try {
+            $delGrp = Group::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This group does not exist')
+            ], 400);
+        }
+
+        $delGrp->delete();
         return response()->json(null, 204);
     }
 

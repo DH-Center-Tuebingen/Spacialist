@@ -68,6 +68,7 @@ const de = {
             title: 'Einstellungen',
             users: 'Benutzerverwaltung',
             roles: 'Rollenverwaltung',
+            groups: 'Gruppenverwaltung',
             datamodel: 'Datenmodell-Editor',
             system: 'System-Einstellungen',
             about: 'Über'
@@ -267,6 +268,20 @@ const de = {
                 }
             },
             'add-permission-placeholder': 'Berechtigungen hinzufügen'
+        },
+        group: {
+            'add-button': 'Neue Gruppe hinzufügen',
+            toasts: {
+                updated: {
+                    title: 'Gruppe aktualisiert',
+                    msg: '{name} wurde erfolgreich aktualisiert.'
+                }
+            },
+            modal: {
+                new: {
+                    title: 'Neue Gruppe'
+                }
+            }
         },
         datamodel: {
             toasts: {

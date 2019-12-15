@@ -64,6 +64,7 @@ const de = {
                     title: '{name} - Details',
                     properties: 'Eigenschaften',
                     links: 'Verknüpfungen',
+                    accessrules: 'Zugriffsregeln',
                     exif: 'Exif-Daten',
                     'toggle-edit': 'Editiermodus umschalten',
                     'toggle-highlight': 'Hervorhebung umschalten',

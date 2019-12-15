@@ -64,6 +64,7 @@ const en = {
                     title: '{name} - Details',
                     properties: 'Properties',
                     links: 'Links',
+                    accessrules: 'Access Rules',
                     exif: 'Exif-Data',
                     'toggle-edit': 'Toggle Edit-Mode',
                     'toggle-highlight': 'Toggle Highlighting',

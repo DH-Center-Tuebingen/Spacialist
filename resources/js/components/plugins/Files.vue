@@ -325,6 +325,11 @@
                                     <i class="fas fa-fw fa-link"></i> {{ $t('plugins.files.modal.detail.links') }}
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link" :class="{active: modalTab == 'accessrules'}" @click.prevent="modalTab = 'accessrules'">
+                                    <i class="fas fa-fw fa-user-lock"></i> {{ $t('plugins.files.modal.detail.accessrules') }}
+                                </a>
+                            </li>
                             <li class="nav-item" v-if="selectedFile.exif && hasExif">
                                 <a href="#" class="nav-link" :class="{active: modalTab == 'exif'}" @click.prevent="modalTab = 'exif'">
                                     <i class="fas fa-fw fa-camera"></i> {{ $t('plugins.files.modal.detail.exif') }}
@@ -510,6 +515,54 @@
                                     :on-select="selection => linkFile(selectedFile, selection)"
                                     :reset-input="true">
                                 </entity-search>
+                            </div>
+                        </div>
+                        <div v-show="modalTab == 'accessrules'" class="h-100">
+                            <div class="d-flex flex-column h-100 mx-4">
+                                <div class="my-3 col p-0 scroll-y-auto">
+                                    <h2>Restrict access to certain rules</h2>
+
+
+                                    <form role="form" @submit.prevent="addAccessRule(selectedAccessRule)">
+                                        <div class="form-group row">
+                                            <div class="col-md-9">
+                                                <multiselect
+                                                    id="access-rule-select"
+                                                    label="display_name"
+                                                    track-by="id"
+                                                    v-model="selectedAccessRule.group"
+                                                    :allow-empty="true"
+                                                    :close-on-select="false"
+                                                    :hide-selected="true"
+                                                    :multiple="false"
+                                                    :options="availableGroups"
+                                                    :placeholder="$t('global.select.placehoder')"
+                                                    :select-label="$t('global.select.select')"
+                                                    :deselect-label="$t('global.select.deselect')">
+                                                </multiselect>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <input type="checkbox" v-model="selectedAccessRule.writeAccess" />
+                                            </div>
+                                        </div>
+
+                                        <button type="submit">
+                                            Add group
+                                        </button>
+                                    </form>
+
+                                    <ul class="list-group mx-0 mt-2" v-if="selectedFile.access && selectedFile.access.length">
+                                        <li class="list-group-item d-flex justify-content-between" v-for="group in selectedFile.access">
+                                            <a href="#" @click.prevent="">
+                                                <i class="fas fa-fw fa-users-cog"></i> {{ $getGroup(group.id).display_name }}
+                                            </a>
+                                            <input type="checkbox" :checked="group.rules = 'rw'" />
+                                            <a href="#" class="text-body" @click.prevent="requestRemoveAccessRule(selectedFile, group)">
+                                                <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                         <div v-show="modalTab == 'exif'">
@@ -1224,6 +1277,19 @@
                     filesObj.pagination.next_page_url = filesObj.apiUrl + '?' + filesObj.apiPageParam + '=' + filesObj.pagination.current_page;
                 }
             },
+            addAccessRule(rule) {
+                console.log(rule);
+                console.log(this.selectedFile.access);
+                // rule.group.id
+                // rule.writeAccess
+                const newGrp = {
+                    id: rule.group.id,
+                    group_id: rule.group.id,
+                    rules: rule.writeAccess ? 'rw' : 'r'
+                };
+                console.log(newGrp);
+                this.selectedFile.access.push(newGrp);
+            },
             requestDeleteFile(file) {
                 this.contextMenuFile = Object.assign({}, file);
                 this.$modal.show('delete-file-modal');
@@ -1333,6 +1399,8 @@
                 this.editingProperty.value = '';
             },
             showFileModal(file) {
+                console.log(file);
+                console.log(this.$getGroups());
                 this.selectedFile.editing = false;
                 this.selectedFile = { ...this.selectedFile, ...file };
                 switch(file.category) {
@@ -1483,6 +1551,10 @@
                 contextMenuFile: {},
                 contextMenuEntity: {},
                 linkCount: 0,
+                selectedAccessRule: {
+                    group: {},
+                    writeAccess: false
+                },
                 fileCategoryComponent: '',
                 modalTab: 'properties',
                 fileProperties: [
@@ -1547,6 +1619,22 @@
                 }
 
                 return !!this.selectedFile.entities.find(c => c.id == this.selectedEntity.id);
+            },
+            availableGroups() {
+                const allGroups = this.$getGroups();
+
+                if(!this.selectedFile || !this.selectedFile.access) {
+                    return allGroups;
+                }
+
+                let groups = [];
+                for(let k in allGroups) {
+                    const isSelected = !!this.selectedFile.access.some(a => a.group_id == k);
+                    if(!isSelected) {
+                        groups.push(allGroups[k]);
+                    }
+                }
+                return groups;
             },
             isFirstFile: function() {
                 if(!this.selectedFile && !this.selectedFile.id) {
