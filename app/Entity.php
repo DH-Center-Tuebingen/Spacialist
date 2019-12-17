@@ -2,12 +2,13 @@
 
 namespace App;
 
+use App\Traits\UserAccessRestrictionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Nicolaslopezj\Searchable\SearchableTrait;
 
 class Entity extends Model
 {
-    use SearchableTrait;
+    use SearchableTrait, UserAccessRestrictionTrait;
 
     /**
      * The attributes that are assignable.
@@ -25,6 +26,7 @@ class Entity extends Model
     protected $appends = [
         'parentIds',
         'parentNames',
+        'hasWriteAccess',
     ];
 
     protected $searchable = [
@@ -53,7 +55,10 @@ class Entity extends Model
     public static function create($fields, $entityTypeId, $user, $rootEntityId = null) {
         $isChild = isset($rootEntityId);
         if($isChild) {
-            $parentCtid = self::find($rootEntityId)->entity_type_id;
+            $rootEntity = self::find($rootEntityId);
+            self::userHasWriteAccess($rootEntity);
+            $parentCtid = $rootEntity->entity_type_id;
+
             $relation = EntityTypeRelation::where('parent_id', $parentCtid)
                 ->where('child_id', $entityTypeId)->exists();
             if(!$relation) {
@@ -139,6 +144,7 @@ class Entity extends Model
 
     public static function patchRanks($rank, $id, $parent = null, $user) {
         $entity = Entity::find($id);
+        self::userHasWriteAccess($entity);
 
         $hasParent = isset($parent);
         $oldRank = $entity->rank;
@@ -177,6 +183,7 @@ class Entity extends Model
     }
 
     public static function addSerial($eid, $aid, $text, $ctr, $username) {
+        self::userHasWriteAccess(Entity::find($eid));
         $av = new AttributeValue();
         $av->entity_id = $eid;
         $av->attribute_id = $aid;
@@ -210,10 +217,15 @@ class Entity extends Model
     }
 
     public function files() {
-        return $this->belongsToMany('App\File', 'entity_files', 'entity_id', 'file_id')->orderBy('entity_files.file_id');
+        return $this->belongsToMany('App\File', 'entity_files', 'entity_id', 'file_id')->userHasAccessTo()->orderBy('entity_files.file_id');
+    }
+
+    public function access_rules() {
+        return $this->morphMany('App\AccessRule', 'objectable');
     }
 
     private function parents() {
+        // if(!$this->userHasReadAccess($this, true)) return [];
         $ancestors = $this->where('id', '=', $this->id)->get();
 
         while ($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
@@ -235,6 +247,7 @@ class Entity extends Model
     }
 
     private function ancestors() {
+        // if(!$this->userHasReadAccess($this, true)) return [];
         $ancestors = $this->where('id', '=', $this->root_entity_id)->get();
 
         while ($ancestors->last() && $ancestors->last()->root_entity_id !== null) {

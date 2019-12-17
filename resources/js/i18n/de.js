@@ -131,6 +131,7 @@ const de = {
         password: 'Passwort',
         'remember-me': 'Eingeloggt bleiben',
         description: 'Beschreibung',
+        groups: 'Gruppen',
         roles: 'Rollen',
         permissions: 'Berechtigungen',
         'added-at': 'Hinzugefügt',
@@ -252,7 +253,8 @@ const de = {
                     title: 'Neuer Benutzer'
                 }
             },
-            'add-role-placeholder': 'Rollen hinzufügen'
+            'add-role-placeholder': 'Rollen hinzufügen',
+            'add-group-placeholder': 'Gruppen hinzufügen'
         },
         role: {
             'add-button': 'Neue Rolle hinzufügen',

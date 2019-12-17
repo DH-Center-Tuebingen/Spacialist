@@ -10,7 +10,7 @@
                             <i id="dependency-info" class="fas fa-fw fa-xs fa-eye-slash"></i>
                         </span>
                     </small>
-                    <a href="#" v-if="entityHeaderHovered" class="text-dark" @click.prevent="enableEntityNameEditing()">
+                    <a href="#" v-if="selectedEntity.hasWriteAccess && entityHeaderHovered" class="text-dark" @click.prevent="enableEntityNameEditing()">
                         <i class="fas fa-fw fa-edit fa-xs"></i>
                     </a>
                 </span>
@@ -25,10 +25,10 @@
                 </form>
             </h3>
             <span>
-                <button type="submit" form="entity-attribute-form" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')">
+                <button type="submit" form="entity-attribute-form" class="btn btn-success" :disabled="!selectedEntity.hasWriteAccess || !isFormDirty || !$can('duplicate_edit_concepts')">
                     <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
                 </button>
-                <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="deleteEntity(selectedEntity)">
+                <button type="button" class="btn btn-danger" :disabled="!selectedEntity.hasWriteAccess || !$can('delete_move_concepts')" @click="deleteEntity(selectedEntity)">
                     <i class="fas fa-fw fa-trash"></i> {{ $t('global.delete') }}
                 </button>
             </span>
@@ -178,6 +178,7 @@
                 }));
             },
             saveEntity(entity) {
+                if(!this.selectedEntity.hasWriteAccess) return;
                 if(!this.$can('duplicate_edit_concepts')) return;
                 let cid = entity.id;
                 var patches = [];
@@ -239,6 +240,7 @@
             );
             },
             deleteEntity(entity) {
+                if(!this.selectedEntity.hasWriteAccess) return;
                 EventBus.$emit('entity-delete', {
                     entity: entity
                 });
@@ -247,6 +249,7 @@
                 this.entityHeaderHovered = hoverState;
             },
             enableEntityNameEditing() {
+                if(!this.selectedEntity.hasWriteAccess) return;
                 this.newEntityName = this.selectedEntity.name;
                 Vue.set(this.selectedEntity, 'editing', true);
             },

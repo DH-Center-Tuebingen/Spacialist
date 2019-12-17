@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\AccessRule;
+use App\Entity;
+use App\File;
 use App\Group;
 use App\Permission;
 use App\Role;
@@ -44,12 +47,14 @@ class UserController extends Controller
                 'error' => __('You do not have the permission to view users')
             ], 403);
         }
-        $users = User::with('roles')->orderBy('id')->get();
+        $users = User::with(['roles', 'groups'])->orderBy('id')->get();
         $roles = Role::orderBy('id')->get();
+        $groups = Group::orderBy('id')->get();
 
         return response()->json([
             'users' => $users,
-            'roles' => $roles
+            'roles' => $roles,
+            'groups' => $groups
         ]);
     }
 
@@ -183,6 +188,7 @@ class UserController extends Controller
         }
         $this->validate($request, [
             'roles' => 'array',
+            'groups' => 'array',
             'email' => 'email'
         ]);
 
@@ -218,6 +224,14 @@ class UserController extends Controller
             // Update updated_at column
             $user->touch();
         }
+        if($request->has('groups')) {
+            $user->groups()->detach();
+            $groups = $request->get('groups');
+            $user->groups()->attach($groups);
+
+            // Update updated_at column
+            $user->touch();
+        }
         if($request->has('email')) {
             $user->email = $request->get('email');
             $user->save();
@@ -225,6 +239,8 @@ class UserController extends Controller
 
         // return user without roles relation
         $user->unsetRelation('roles');
+        // return user without groups relation
+        $user->unsetRelation('groups');
 
         return response()->json($user);
     }
@@ -301,6 +317,61 @@ class UserController extends Controller
         return response()->json($group);
     }
 
+    public function restrictResourceAccess(Request $request, $gid) {
+        $user = auth()->user();
+        // TODO which permission?
+        if(!$user->can('add_edit_group')) {
+            return response()->json([
+                'error' => __('You do not have the permission to edit groups')
+            ], 403);
+        }
+        $this->validate($request, [
+            'file_id' => 'required_without:entity_id|integer|exists:files,id',
+            'entity_id' => 'required_without:file_id|integer|exists:entities,id',
+            'has_write' => 'required|boolean'
+        ]);
+
+        try {
+            Group::findOrFail($gid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This group does not exist')
+            ], 400);
+        }
+
+        $model;
+        if($request->has('file_id')) {
+            $fid = $request->get('file_id');
+            try {
+                $model = File::findOrFail($fid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This file does not exist')
+                ], 400);
+            }
+        }
+        if($request->has('entity_id')) {
+            $eid = $request->get('entity_id');
+            try {
+                $model = Entity::findOrFail($eid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This entity does not exist')
+                ], 400);
+            }
+        }
+        $model->userHasWriteAccess();
+
+        $ar = new AccessRule();
+        $ar->objectable_id = $model->id;
+        $ar->objectable_type = $model->getMorphClass();
+        $ar->group_id = $gid;
+        $ar->rules = $request->get('has_write') ? 'rw' : 'r';
+        $ar->save();
+
+        return response()->json($ar);
+    }
+
     // PUT
 
     // DELETE
@@ -362,6 +433,51 @@ class UserController extends Controller
         }
 
         $delGrp->delete();
+        return response()->json(null, 204);
+    }
+
+    public function removeResourceAccessRestriction($gid, $fid = null, $eid = null) {
+        $user = auth()->user();
+        if(!$user->can('add_edit_group')) {
+            return response()->json([
+                'error' => __('You do not have the permission to delete groups')
+            ], 403);
+        }
+
+        try {
+            Group::findOrFail($gid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This group does not exist')
+            ], 400);
+        }
+
+        $model;
+        if(isset($fid)) {
+            try {
+                $model = File::findOrFail($fid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This file does not exist')
+                ], 400);
+            }
+        }
+        if(isset($eid)) {
+            try {
+                $model = Entity::findOrFail($eid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This entity does not exist')
+                ], 400);
+            }
+        }
+        $model->userHasWriteAccess();
+
+        AccessRule::where('objectable_id', $model->id)
+            ->where('objectable_type', $model->getMorphClass())
+            ->where('group_id', $gid)
+            ->delete();
+
         return response()->json(null, 204);
     }
 

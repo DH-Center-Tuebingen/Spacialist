@@ -131,6 +131,7 @@ const en = {
         password: 'Password',
         'remember-me': 'Remember me',
         description: 'Description',
+        groups: 'Groups',
         roles: 'Roles',
         permissions: 'Permissions',
         'added-at': 'Added',
@@ -252,7 +253,8 @@ const en = {
                     title: 'New User'
                 }
             },
-            'add-role-placeholder': 'Add roles'
+            'add-role-placeholder': 'Add roles',
+            'add-group-placeholder': 'Add groups'
         },
         role: {
             'add-button': 'Add new Role',

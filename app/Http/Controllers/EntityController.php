@@ -259,6 +259,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
+        $entity->userHasWriteAccess();
 
         foreach($request->request as $patch) {
             $op = $patch['op'];
@@ -379,12 +380,14 @@ class EntityController extends Controller {
         $this->validate($request, AttributeValue::patchRules);
 
         try {
-            Entity::findOrFail($id);
+            $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This entity does not exist')
             ], 400);
         }
+        $entity->userHasWriteAccess();
+
         try {
             Attribute::findOrFail($aid);
         } catch(ModelNotFoundException $e) {
@@ -424,6 +427,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
+        $entity->userHasWriteAccess();
 
         $entity->name = $request->get('name');
         $entity->save();
@@ -450,6 +454,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
+        $entity->userHasWriteAccess();
 
         $rank = $request->get('rank');
         $parent_id = $request->get('parent_id');
@@ -474,6 +479,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
+        $entity->userHasWriteAccess();
         $entity->delete();
 
         return response()->json(null, 204);

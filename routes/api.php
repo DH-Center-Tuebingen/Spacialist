@@ -107,10 +107,13 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::patch('/user/{id}', 'UserController@patchUser');
     Route::patch('/role/{id}', 'UserController@patchRole');
     Route::patch('/group/{id}', 'UserController@patchGroup');
+    Route::patch('/restrict_to/{gid}', 'UserController@restrictResourceAccess')->where('gid', '[0-9]+');
 
     Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');
     Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');
     Route::delete('/group/{id}', 'UserController@deleteGroup')->where('id', '[0-9]+');
+    Route::delete('/restrict_to/{gid}/file/{fid}', 'UserController@removeResourceAccessRestriction')->where('gid', '[0-9]+')->where('fid', '[0-9]+');
+    Route::delete('/restrict_to/{gid}/entity/{eid}', 'UserController@removeResourceAccessRestriction')->where('gid', '[0-9]+')->where('eid', '[0-9]+');
 });
 
 // PREFERENCES

@@ -6,6 +6,7 @@
                     <th>{{ $t('global.name') }}</th>
                     <th>{{ $t('global.email') }}</th>
                     <th>{{ $t('global.roles') }}</th>
+                    <th>{{ $t('global.groups') }}</th>
                     <th>{{ $t('global.added-at') }}</th>
                     <th>{{ $t('global.updated-at') }}</th>
                     <th>{{ $t('global.options') }}</th>
@@ -38,6 +39,23 @@
                             :name="`roles_${user.id}`"
                             :options="roles"
                             :placeholder="$t('main.user.add-role-placeholder')"
+                            :select-label="$t('global.select.select')"
+                            :deselect-label="$t('global.select.deselect')">
+                        </multiselect>
+                    </td>
+                    <td>
+                        <multiselect
+                            label="display_name"
+                            track-by="id"
+                            v-model="user.groups"
+                            v-validate=""
+                            :closeOnSelect="false"
+                            :disabled="!$can('add_edit_group')"
+                            :hideSelected="true"
+                            :multiple="true"
+                            :name="`groups_${user.id}`"
+                            :options="groups"
+                            :placeholder="$t('main.user.add-group-placeholder')"
                             :select-label="$t('global.select.select')"
                             :deselect-label="$t('global.select.deselect')">
                         </multiselect>
@@ -178,7 +196,8 @@
             $httpQueue.add(() => $http.get('user').then(response => {
                 const users = response.data.users;
                 const roles = response.data.roles;
-                next(vm => vm.init(users, roles));
+                const groups = response.data.groups;
+                next(vm => vm.init(users, roles, groups));
             }));
         },
         beforeRouteLeave: function(to, from, next) {
@@ -205,9 +224,10 @@
         },
         mounted() {},
         methods: {
-            init(users, roles) {
+            init(users, roles, groups) {
                 this.userList = users;
                 this.roles = roles;
+                this.groups = groups;
             },
             showNewUserModal() {
                 if(!this.$can('create_users')) return;
@@ -227,16 +247,24 @@
                 });
             },
             onPatchUser(id) {
-                if(!this.$can('add_remove_role')) return new Promise(r => r());
                 if(!this.userDirty(id)) return new Promise(r => r());
                 let data = {};
                 let user = this.userList.find(u => u.id == id);
                 if(this.isDirty(`roles_${id}`)) {
+                    if(!this.$can('add_remove_role')) return new Promise(r => r());
                     let roles = [];
                     for(let i=0; i<user.roles.length; i++) {
                         roles.push(user.roles[i].id);
                     }
                     data.roles = roles;
+                }
+                if(this.isDirty(`groups_${id}`)) {
+                    if(!this.$can('add_edit_group')) return new Promise(r => r());
+                    let groups = [];
+                    for(let i=0; i<user.groups.length; i++) {
+                        groups.push(user.groups[i].id);
+                    }
+                    data.groups = groups;
                 }
                 if(this.isDirty(`email_${id}`)) {
                     data.email = user.email;
@@ -288,7 +316,9 @@
                 return false;
             },
             userDirty(uid) {
-                return this.isDirty(`roles_${uid}`) || this.isDirty(`email_${uid}`);
+                return this.isDirty(`roles_${uid}`) ||
+                    this.isDirty(`groups_${uid}`) ||
+                    this.isDirty(`email_${uid}`);
             },
             setPristine(fieldname) {
                 this.$validator.flag(fieldname, {
@@ -298,6 +328,7 @@
             },
             setUserPristine(uid) {
                 this.setPristine(`roles_${uid}`);
+                this.setPristine(`groups_${uid}`);
                 this.setPristine(`email_${uid}`);
             }
         },
@@ -305,7 +336,9 @@
             return {
                 userList: [],
                 roles: [],
+                groups: [],
                 userRoles: {},
+                userGroups: {},
                 newUser: {},
                 error: {},
                 selectedUser: {},

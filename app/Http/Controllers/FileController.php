@@ -254,7 +254,7 @@ class FileController extends Controller
             ], 403);
         }
         $filters = $request->input('filters', []);
-        $files = File::getUnlinkedPaginate($page, $filters, $user);
+        $files = File::getUnlinkedPaginate($page, $filters);
         return response()->json($files);
     }
 

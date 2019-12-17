@@ -182,7 +182,6 @@ Vue.prototype.$getEntityTypes = function() {
 }
 
 Vue.prototype.$getGroup = function(id) {
-    console.log(this.$root.$data.groups, id);
     return this.$root.$data.groups[id];
 }
 

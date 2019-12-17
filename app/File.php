@@ -6,7 +6,7 @@ use App\AccessRule;
 use App\EntityFile;
 use App\FileTag;
 use App\ThConcept;
-use App\Traits\UserAccessRestriction;
+use App\Traits\UserAccessRestrictionTrait;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +24,7 @@ use Nicolaslopezj\Searchable\SearchableTrait;
 
 class File extends Model
 {
-    use SearchableTrait, UserAccessRestriction;
+    use SearchableTrait, UserAccessRestrictionTrait;
 
     protected $table = 'files';
     /**
@@ -46,6 +46,7 @@ class File extends Model
     protected $appends = [
         'category',
         'exif',
+        'hasWriteAccess',
     ];
 
     protected $searchable = [
@@ -171,11 +172,10 @@ class File extends Model
         return $files;
     }
 
-    public static function getUnlinkedPaginate($page, $filters, $user) {
+    public static function getUnlinkedPaginate($page, $filters) {
         $files = self::with(['entities', 'tags', 'access_rules'])
             ->orderBy('id', 'asc')
-            ->doesntHave('entities')
-            ->hasAccessTo($user);
+            ->doesntHave('entities');
         $files->where(function($subQuery) use ($filters) {
             self::applyFilters($subQuery, $filters);
         });
@@ -421,6 +421,8 @@ class File extends Model
     }
 
     public function setContent($fileObject) {
+        $this->userHasWriteAccess($this);
+
         $filehandle = fopen($fileObject->getRealPath(), 'r');
         Storage::put(
             $this->name,
@@ -435,6 +437,8 @@ class File extends Model
     }
 
     public function rename($newName) {
+        $this->userHasWriteAccess($this);
+
         Storage::move($this->name, $newName);
         $this->name = $newName;
         if($this->isImage()) {
@@ -445,6 +449,9 @@ class File extends Model
     }
 
     public function link($eid, $user) {
+        $this->userHasWriteAccess($this);
+        $this->userHasWriteAccess(Entity::find($eid));
+
         $link = new EntityFile();
         $link->file_id = $this->id;
         $link->entity_id = $eid;
@@ -453,6 +460,9 @@ class File extends Model
     }
 
     public function unlink($eid) {
+        $this->userHasWriteAccess($this);
+        $this->userHasWriteAccess(Entity::find($eid));
+
         $link = EntityFile::where('entity_id', $eid)
             ->where('file_id', $this->id)
             ->delete();
@@ -475,7 +485,9 @@ class File extends Model
     }
 
     public function getArchiveFileList() {
+        $this->userHasReadAccess($this);
         if(!$this->isArchive()) return [];
+
         $path = sp_get_storage_file_path($this->name);
         $archive = UnifiedArchive::open($path);
         $fileList = $this->getContainingFiles($archive->getFileNames(), $archive);
@@ -484,6 +496,7 @@ class File extends Model
     }
 
     public function getArchivedFileContent($filepath) {
+        $this->userHasReadAccess($this);
         $path = sp_get_storage_file_path($this->name);
         $archive = UnifiedArchive::open($path);
         return base64_encode($archive->getFileContent($filepath));
@@ -497,6 +510,7 @@ class File extends Model
         // ];
         $nodes = [];
         foreach($fileList as $f) {
+            self::userHasReadAccess($f);
             $path = sp_get_storage_file_path($f->name);
             $nodes[$path] = $f->name;
         }
@@ -508,6 +522,7 @@ class File extends Model
     }
 
     private function getContainingFiles($files, $archive, $prefix = '') {
+        $this->userHasReadAccess($this);
         $tree = new \stdClass();
         $tree->children = [];
         foreach($files as $file) {
@@ -552,6 +567,7 @@ class File extends Model
     }
 
     public function deleteFile() {
+        $this->userHasWriteAccess($this);
         Storage::delete($this->name);
         if(isset($this->thumb)) {
             Storage::delete($this->thumb);
@@ -686,6 +702,8 @@ class File extends Model
     }
 
     public function asHtml() {
+        $this->userHasReadAccess($this);
+
         if(!$this->isDocument() && !$this->isSpreadsheet() && !$this->isPresentation()) {
             return [
                 'error' => __('HTML not supported for file type', ['mime' => $this->mime_type])
@@ -710,6 +728,7 @@ class File extends Model
     }
 
     public function linkCount() {
+        $this->userHasReadAccess($this);
         return EntityFile::where('file_id', $this->id)->count();
     }
 
@@ -751,6 +770,7 @@ class File extends Model
     }
 
     private function getExifData() {
+        if(!$this->userHasWriteAccess($this, true)) return null;
         if(!$this->isImage()) return null;
         try {
             $content = Storage::get($this->name);

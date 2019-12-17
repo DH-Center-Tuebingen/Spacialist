@@ -520,49 +520,64 @@
                         <div v-show="modalTab == 'accessrules'" class="h-100">
                             <div class="d-flex flex-column h-100 mx-4">
                                 <div class="my-3 col p-0 scroll-y-auto">
-                                    <h2>Restrict access to certain rules</h2>
-
-
-                                    <form role="form" @submit.prevent="addAccessRule(selectedAccessRule)">
-                                        <div class="form-group row">
-                                            <div class="col-md-9">
-                                                <multiselect
-                                                    id="access-rule-select"
-                                                    label="display_name"
-                                                    track-by="id"
-                                                    v-model="selectedAccessRule.group"
-                                                    :allow-empty="true"
-                                                    :close-on-select="false"
-                                                    :hide-selected="true"
-                                                    :multiple="false"
-                                                    :options="availableGroups"
-                                                    :placeholder="$t('global.select.placehoder')"
-                                                    :select-label="$t('global.select.select')"
-                                                    :deselect-label="$t('global.select.deselect')">
-                                                </multiselect>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <input type="checkbox" v-model="selectedAccessRule.writeAccess" />
-                                            </div>
-                                        </div>
-
-                                        <button type="submit">
-                                            Add group
-                                        </button>
-                                    </form>
-
-                                    <ul class="list-group mx-0 mt-2" v-if="selectedFile.access_rules && selectedFile.access_rules.length">
-                                        <li class="list-group-item d-flex justify-content-between" v-for="group in selectedFile.access_rules">
+                                    <ul class="list-group mx-0 mt-2 flex-grow-1 scroll-y-auto" v-if="selectedFile.access_rules && selectedFile.access_rules.length">
+                                        <li class="list-group-item d-flex justify-content-between" v-for="rule in selectedFile.access_rules">
                                             <a href="#" @click.prevent="">
-                                                <i class="fas fa-fw fa-users-cog"></i> {{ $getGroup(group.id).display_name }}
+                                                <i class="fas fa-fw fa-users-cog"></i> {{ $getGroup(rule.group_id).display_name }}
                                             </a>
-                                            <input type="checkbox" :checked="group.rules = 'rw'" />
-                                            <a href="#" class="text-body" @click.prevent="requestRemoveAccessRule(selectedFile, group)">
+                                            <template>
+                                                <span v-if="rule.rules == 'rw'">
+                                                    Write Access
+                                                </span>
+                                                <span v-else>
+                                                    Read-Only
+                                                </span>
+                                            </template>
+                                            <a href="#" class="text-body" @click.prevent="removeAccessRule(selectedFile, rule)" v-if="selectedFile.hasWriteAccess">
                                                 <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
                                             </a>
                                         </li>
                                     </ul>
+                                    <p class="alert alert-info" v-else>
+                                        {{ $t('plugins.files.modal.detail.no-groups') }}
+                                    </p>
                                 </div>
+
+                                <h5>Restrict access to certain groups</h5>
+
+                                <form role="form" @submit.prevent="addAccessRule(selectedFile, selectedAccessRule)">
+                                    <div class="form-group row">
+                                        <div class="col-md-9">
+                                            <multiselect
+                                                id="access-rule-select"
+                                                label="display_name"
+                                                track-by="id"
+                                                v-model="selectedAccessRule.group"
+                                                :allow-empty="true"
+                                                :close-on-select="false"
+                                                :hide-selected="true"
+                                                :multiple="false"
+                                                :options="availableGroups"
+                                                :placeholder="$t('global.select.placehoder')"
+                                                :select-label="$t('global.select.select')"
+                                                :deselect-label="$t('global.select.deselect')">
+                                            </multiselect>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="checkbox" v-model="selectedAccessRule.writeAccess" />
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success">
+                                        <span class="fa-stack d-inline">
+                                            <i class="fas fa-lock"></i>
+                                            <i class="fas fa-plus" data-fa-transform="shrink-4 left-9 down-10"></i>
+                                        </span>
+                                        <span class="stacked-icon-text">
+                                            Add group
+                                        </span>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                         <div v-show="modalTab == 'exif'">
@@ -1277,18 +1292,30 @@
                     filesObj.pagination.next_page_url = filesObj.apiUrl + '?' + filesObj.apiPageParam + '=' + filesObj.pagination.current_page;
                 }
             },
-            addAccessRule(rule) {
-                console.log(rule);
-                console.log(this.selectedFile.access_rules);
-                // rule.group.id
-                // rule.writeAccess
-                const newGrp = {
-                    id: rule.group.id,
-                    group_id: rule.group.id,
-                    rules: rule.writeAccess ? 'rw' : 'r'
+            addAccessRule(file, rule) {
+                const data = {
+                    file_id: file.id,
+                    has_write: rule.writeAccess
                 };
-                console.log(newGrp);
-                this.selectedFile.access_rules.push(newGrp);
+                $httpQueue.add(() => $http.patch(`restrict_to/${rule.group.id}`, data).then(response => {
+                    this.selectedFile.access_rules.push(response.data);
+                }));
+            },
+            removeAccessRule(file, rule) {
+                $httpQueue.add(() => $http.delete(`/restrict_to/${rule.group_id}/file/${file.id}`).then(response => {
+                    const idx = file.access_rules.findIndex(ar => ar.group_id == rule.group_id);
+                    if(idx) {
+                        file.access_rules.splice(idx, 1);
+                        this.$showToast(
+                            this.$t('plugins.files.toasts.restriction_removed.title'),
+                            this.$t('plugins.files.toasts.restriction_removed.msg', {
+                                name: file.name,
+                                group: this.$getGroup(rule.group_id).display_name
+                            }),
+                            'success'
+                        );
+                    }
+                }));
             },
             requestDeleteFile(file) {
                 this.contextMenuFile = Object.assign({}, file);
@@ -1399,8 +1426,6 @@
                 this.editingProperty.value = '';
             },
             showFileModal(file) {
-                console.log(file);
-                console.log(this.$getGroups());
                 this.selectedFile.editing = false;
                 this.selectedFile = { ...this.selectedFile, ...file };
                 switch(file.category) {
