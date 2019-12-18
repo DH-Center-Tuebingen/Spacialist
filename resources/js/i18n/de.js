@@ -132,6 +132,8 @@ const de = {
         'remember-me': 'Eingeloggt bleiben',
         description: 'Beschreibung',
         groups: 'Gruppen',
+        access_restricted_info: 'Zugang beschränkt',
+        access_restricted_no_groups: 'Noch keine Gruppen-Beschränkungen vorhanden.',
         roles: 'Rollen',
         permissions: 'Berechtigungen',
         'added-at': 'Hinzugefügt',
@@ -167,6 +169,14 @@ const de = {
                 deleted: {
                     title: 'Entität gelöscht',
                     msg: '{name} wurde erfolgreich gelöscht.'
+                },
+                restriction_added: {
+                    title: 'Beschränkung hinzugefügt',
+                    msg: 'Beschränkung für Gruppe {group} von {name} hinzugefügt'
+                },
+                restriction_removed: {
+                    title: 'Beschränkung entfernt',
+                    msg: 'Beschränkung für Gruppe {group} von {name} entfernt'
                 }
             },
             tree: {

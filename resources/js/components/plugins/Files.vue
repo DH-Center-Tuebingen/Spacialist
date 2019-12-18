@@ -520,7 +520,7 @@
                         <div v-show="modalTab == 'accessrules'" class="h-100">
                             <div class="d-flex flex-column h-100 mx-4">
                                 <div class="my-3 col p-0 scroll-y-auto">
-                                    <ul class="list-group mx-0 mt-2 flex-grow-1 scroll-y-auto" v-if="selectedFile.access_rules && selectedFile.access_rules.length">
+                                    <ul class="list-group mx-0 mt-2 flex-grow-1 scroll-y-auto" v-if="$hasAccessRules(selectedFile)">
                                         <li class="list-group-item d-flex justify-content-between" v-for="rule in selectedFile.access_rules">
                                             <a href="#" @click.prevent="">
                                                 <i class="fas fa-fw fa-users-cog"></i> {{ $getGroup(rule.group_id).display_name }}
@@ -539,7 +539,7 @@
                                         </li>
                                     </ul>
                                     <p class="alert alert-info" v-else>
-                                        {{ $t('plugins.files.modal.detail.no-groups') }}
+                                        {{ $t('global.access_restricted_no_groups') }}
                                     </p>
                                 </div>
 
@@ -1299,6 +1299,14 @@
                 };
                 $httpQueue.add(() => $http.patch(`restrict_to/${rule.group.id}`, data).then(response => {
                     this.selectedFile.access_rules.push(response.data);
+                    this.$showToast(
+                        this.$t('main.entity.toasts.restriction_removed.title'),
+                        this.$t('main.entity.toasts.restriction_removed.msg', {
+                            name: file.name,
+                            group: this.$getGroup(rule.group_id).display_name
+                        }),
+                        'success'
+                    );
                 }));
             },
             removeAccessRule(file, rule) {
@@ -1307,8 +1315,8 @@
                     if(idx) {
                         file.access_rules.splice(idx, 1);
                         this.$showToast(
-                            this.$t('plugins.files.toasts.restriction_removed.title'),
-                            this.$t('plugins.files.toasts.restriction_removed.msg', {
+                            this.$t('main.entity.toasts.restriction_removed.title'),
+                            this.$t('main.entity.toasts.restriction_removed.msg', {
                                 name: file.name,
                                 group: this.$getGroup(rule.group_id).display_name
                             }),
@@ -1646,20 +1654,7 @@
                 return !!this.selectedFile.entities.find(c => c.id == this.selectedEntity.id);
             },
             availableGroups() {
-                const allGroups = this.$getGroups();
-
-                if(!this.selectedFile || !this.selectedFile.access_rules) {
-                    return allGroups;
-                }
-
-                let groups = [];
-                for(let k in allGroups) {
-                    const isSelected = !!this.selectedFile.access_rules.some(a => a.group_id == k);
-                    if(!isSelected) {
-                        groups.push(allGroups[k]);
-                    }
-                }
-                return groups;
+                return this.$getAvailableGroups(this.selectedFile);
             },
             isFirstFile: function() {
                 if(!this.selectedFile && !this.selectedFile.id) {

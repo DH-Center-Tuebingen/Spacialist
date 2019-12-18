@@ -18,6 +18,7 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'files' => 'App\File',
             'entities' => 'App\Entity',
+            'geodata' => 'App\Geodata',
         ]);
 
         Validator::extend('boolean_string', function ($attribute, $value, $parameters, $validator) {

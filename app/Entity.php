@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Traits\AccessRestrictionScope;
 use App\Traits\UserAccessRestrictionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Nicolaslopezj\Searchable\SearchableTrait;
@@ -26,7 +27,6 @@ class Entity extends Model
     protected $appends = [
         'parentIds',
         'parentNames',
-        'hasWriteAccess',
     ];
 
     protected $searchable = [
@@ -220,18 +220,18 @@ class Entity extends Model
         return $this->belongsToMany('App\File', 'entity_files', 'entity_id', 'file_id')->userHasAccessTo()->orderBy('entity_files.file_id');
     }
 
-    public function access_rules() {
-        return $this->morphMany('App\AccessRule', 'objectable');
-    }
-
     private function parents() {
-        // if(!$this->userHasReadAccess($this, true)) return [];
-        $ancestors = $this->where('id', '=', $this->id)->get();
+        $self = $this->where('id', $this->id)->get();
+        $ancestors = $self;
 
-        while ($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
-                $parent = $this->where('id', '=', $ancestors->last()->root_entity_id)->get();
-                $ancestors = $ancestors->merge($parent);
+        while($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
+            $parent = $this->where('id', $ancestors->last()->root_entity_id)->get();
+            if($parent->isEmpty()) {
+                $ancestors = $self;
+                break;
             }
+            $ancestors = $ancestors->merge($parent);
+        }
         return [
             'ids' => $ancestors->pluck('id')->all(),
             'names' => $ancestors->pluck('name')->all(),
@@ -247,13 +247,16 @@ class Entity extends Model
     }
 
     private function ancestors() {
-        // if(!$this->userHasReadAccess($this, true)) return [];
-        $ancestors = $this->where('id', '=', $this->root_entity_id)->get();
+        $ancestors = $this->where('id', $this->root_entity_id)->get();
 
-        while ($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
-                $parent = $this->where('id', '=', $ancestors->last()->root_entity_id)->get();
-                $ancestors = $ancestors->merge($parent);
+        while($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
+            $parent = $this->where('id', '=', $ancestors->last()->root_entity_id)->get();
+            if($parent->isEmpty()) {
+                $ancestors = collect([]);
+                break;
             }
+            $ancestors = $ancestors->merge($parent);
+        }
         return $ancestors->reverse()->pluck('name')->all();
     }
 

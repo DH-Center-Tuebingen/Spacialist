@@ -189,6 +189,28 @@ Vue.prototype.$getGroups = function() {
     return this.$root.$data.groups;
 }
 
+Vue.prototype.$getAvailableGroups = function(model) {
+    const allGroups = this.$root.$data.groups;
+
+    if(!Vue.prototype.$hasAccessRules(model)) {
+        return Object.values(allGroups);
+    }
+
+    let groups = [];
+    for(let k in allGroups) {
+        const isSelected = !!model.access_rules.some(a => a.group_id == k);
+        if(!isSelected) {
+            groups.push(allGroups[k]);
+        }
+    }
+    return groups;
+}
+
+Vue.prototype.$hasAccessRules = function(model) {
+    return (model.access_rules_count && model.access_rules_count > 0) ||
+        (model.access_rules && model.access_rules.length > 0);
+}
+
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
 Vue.prototype.$getEntityColors = function(id, alpha = 0.5) {
     const et = this.$getEntityType(id);

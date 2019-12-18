@@ -46,7 +46,6 @@ class File extends Model
     protected $appends = [
         'category',
         'exif',
-        'hasWriteAccess',
     ];
 
     protected $searchable = [
@@ -173,7 +172,7 @@ class File extends Model
     }
 
     public static function getUnlinkedPaginate($page, $filters) {
-        $files = self::with(['entities', 'tags', 'access_rules'])
+        $files = self::with(['entities', 'tags'])
             ->orderBy('id', 'asc')
             ->doesntHave('entities');
         $files->where(function($subQuery) use ($filters) {
@@ -734,10 +733,6 @@ class File extends Model
 
     public function getExifAttribute() {
         return $this->getExifData();
-    }
-
-    public function access_rules() {
-        return $this->morphMany('App\AccessRule', 'objectable');
     }
 
     public function entities() {

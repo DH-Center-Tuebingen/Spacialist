@@ -21,4 +21,8 @@ class AccessRule extends Model
     public function objectable() {
         return $this->morphTo();
     }
+
+    public function group() {
+        return $this->belongsTo('App\Group');
+    }
 }

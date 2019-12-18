@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Traits\UserAccessRestrictionTrait;
 use Illuminate\Database\Eloquent\Model;
 use Phaza\LaravelPostgis\Geometries\Geometry;
 use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
@@ -12,6 +13,7 @@ class Geodata extends Model
 {
     use PostgisTrait;
     use SearchableTrait;
+    use UserAccessRestrictionTrait;
 
     protected $table = 'geodata';
     /**

@@ -132,6 +132,8 @@ const en = {
         'remember-me': 'Remember me',
         description: 'Description',
         groups: 'Groups',
+        access_restricted_info: 'Access restricted',
+        access_restricted_no_groups: 'No group restrictions added.',
         roles: 'Roles',
         permissions: 'Permissions',
         'added-at': 'Added',
@@ -167,6 +169,14 @@ const en = {
                 deleted: {
                     title: 'Entität gelöscht',
                     msg: '{name} wurde erfolgreich gelöscht.'
+                },
+                restriction_added: {
+                    title: 'Restriction added',
+                    msg: 'Restriction for group {group} to {name} added'
+                },
+                restriction_removed: {
+                    title: 'Restriction removed',
+                    msg: 'Restriction for group {group} to {name} removed'
                 }
             },
             tree: {

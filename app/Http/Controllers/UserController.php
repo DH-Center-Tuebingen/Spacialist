@@ -436,7 +436,19 @@ class UserController extends Controller
         return response()->json(null, 204);
     }
 
-    public function removeResourceAccessRestriction($gid, $fid = null, $eid = null) {
+    public function removeAccessRestrictionFromFile($gid, $fid) {
+        $this->removeResourceAccessRestriction($gid, [
+            'file_id' => $fid
+        ]);
+    }
+
+    public function removeAccessRestrictionFromEntity($gid, $eid) {
+        $this->removeResourceAccessRestriction($gid, [
+            'entity_id' => $eid
+        ]);
+    }
+
+    private function removeResourceAccessRestriction($gid, $type) {
         $user = auth()->user();
         if(!$user->can('add_edit_group')) {
             return response()->json([
@@ -453,18 +465,18 @@ class UserController extends Controller
         }
 
         $model;
-        if(isset($fid)) {
+        if(isset($type['file_id'])) {
             try {
-                $model = File::findOrFail($fid);
+                $model = File::findOrFail($type['file_id']);
             } catch(ModelNotFoundException $e) {
                 return response()->json([
                     'error' => __('This file does not exist')
                 ], 400);
             }
         }
-        if(isset($eid)) {
+        if(isset($type['entity_id'])) {
             try {
-                $model = Entity::findOrFail($eid);
+                $model = Entity::findOrFail($type['entity_id']);
             } catch(ModelNotFoundException $e) {
                 return response()->json([
                     'error' => __('This entity does not exist')

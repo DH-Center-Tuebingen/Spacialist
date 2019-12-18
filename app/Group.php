@@ -28,4 +28,8 @@ class Group extends Model
     public function users() {
         return $this->belongsToMany('App\User', 'user_groups', 'group_id', 'user_id')->orderBy('user_groups.user_id');
     }
+
+    public function access_rules() {
+        return $this->hasMany('App\AccessRule');
+    }
 }

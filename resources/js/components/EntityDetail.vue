@@ -51,6 +51,14 @@
                 <span class="font-weight-medium">
                     {{ selectedEntity.lasteditor }}
                 </span>
+                <span class="clickable" @click="openEntityAccessRulesModal(selectedEntity)" data-toggle="popover" :data-content="$t('global.access_restricted_info')" data-trigger="hover" data-placement="bottom">
+                    <span v-show="$hasAccessRules(selectedEntity)">
+                        <i class="fas fa-fw fa-lock"></i>
+                    </span>
+                    <span v-show="!$hasAccessRules(selectedEntity)">
+                        <i class="fas fa-fw fa-lock-open"></i>
+                    </span>
+                </span>
             </div>
         </div>
         <form id="entity-attribute-form" name="entity-attribute-form" class="col pl-0 pr-0 overflow-hidden" @submit.prevent="saveEntity(selectedEntity)">
@@ -75,6 +83,7 @@
 </template>
 
 <script>
+    import EntityAccessRulesModal from './modals/EntityAccessRulesModal.vue';
     import { EventBus } from '../event-bus.js';
 
     export default {
@@ -275,6 +284,13 @@
             cancelUpdateEntityName() {
                 Vue.set(this.selectedEntity, 'editing', false);
                 this.newEntityName = '';
+            },
+            openEntityAccessRulesModal(entity) {
+                this.$modal.show(EntityAccessRulesModal, {
+                    entity: entity
+                }, {
+                    height: 'auto'
+                });
             },
             getCleanValue(entry, attributes) {
                 if(!entry) return;

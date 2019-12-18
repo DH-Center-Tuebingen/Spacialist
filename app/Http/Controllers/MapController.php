@@ -44,7 +44,16 @@ class MapController extends Controller
         // layers: id => layer
         $layers = AvailableLayer::all()->getDictionary();
         // geoObjects: id => geoO
-        $geodata = Geodata::with(['entity'])->get()->getDictionary();
+        $geodata = Geodata::with('entity')->get()->getDictionary();
+
+        // TODO hacky workaround (should test on large db)
+        foreach($geodata as &$g) {
+            if(isset($g->entity)) {
+                if(!$g->entity->userHasReadAccess($g->entity, true)) {
+                    unset($g->entity);
+                }
+            }
+        }
 
         return response()->json([
             'layers' => $layers,
