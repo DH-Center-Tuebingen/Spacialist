@@ -42,9 +42,7 @@ trait UserAccessRestrictionTrait
     }
 
     public function initializeUserAccessRestrictionTrait() {
-        // $this->with[] = 'access_rules';
-
-        $this->withCount[] = 'access_rules';
+        $this->with[] = 'access_rules';
         $this->appends[] = 'hasWriteAccess';
     }
 

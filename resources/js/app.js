@@ -639,6 +639,7 @@ import EntityTypes from './components/EntityTypeList.vue';
 import OlMap from './components/OlMap.vue';
 import ColorGradient from './components/Gradient.vue';
 import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
+import GroupRestriction from './components/GroupRestriction.vue';
 
 // Page Components
 import EntityReferenceModal from './components/EntityReferenceModal.vue';
@@ -653,6 +654,7 @@ Vue.component('label-search', LabelSearch);
 Vue.component('attribute-search', AttributeSearch);
 Vue.component('csv-table', CsvTable);
 Vue.component('attributes', Attributes);
+Vue.component('group-restrictions', GroupRestriction);
 Vue.component('entity-tree', EntityTree);
 Vue.component('entity-types', EntityTypes);
 Vue.component('ol-map', OlMap);

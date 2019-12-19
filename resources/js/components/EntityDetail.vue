@@ -10,7 +10,7 @@
                             <i id="dependency-info" class="fas fa-fw fa-xs fa-eye-slash"></i>
                         </span>
                     </small>
-                    <a href="#" v-if="selectedEntity.hasWriteAccess && entityHeaderHovered" class="text-dark" @click.prevent="enableEntityNameEditing()">
+                    <a href="#" v-if="hasWriteAccess && entityHeaderHovered" class="text-dark" @click.prevent="enableEntityNameEditing()">
                         <i class="fas fa-fw fa-edit fa-xs"></i>
                     </a>
                 </span>
@@ -25,10 +25,10 @@
                 </form>
             </h3>
             <span>
-                <button type="submit" form="entity-attribute-form" class="btn btn-success" :disabled="!selectedEntity.hasWriteAccess || !isFormDirty || !$can('duplicate_edit_concepts')">
+                <button type="submit" form="entity-attribute-form" class="btn btn-success" :disabled="!hasWriteAccess || !isFormDirty || !$can('duplicate_edit_concepts')">
                     <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
                 </button>
-                <button type="button" class="btn btn-danger" :disabled="!selectedEntity.hasWriteAccess || !$can('delete_move_concepts')" @click="deleteEntity(selectedEntity)">
+                <button type="button" class="btn btn-danger" :disabled="!hasWriteAccess || !$can('delete_move_concepts')" @click="deleteEntity(selectedEntity)">
                     <i class="fas fa-fw fa-trash"></i> {{ $t('global.delete') }}
                 </button>
             </span>
@@ -51,7 +51,7 @@
                 <span class="font-weight-medium">
                     {{ selectedEntity.lasteditor }}
                 </span>
-                <span class="clickable" @click="openEntityAccessRulesModal(selectedEntity)" data-toggle="popover" :data-content="$t('global.access_restricted_info')" data-trigger="hover" data-placement="bottom">
+                <span class="clickable" @click="openEntityAccessRulesModal(selectedEntity)" data-toggle="popover" :data-content="$t('main.group.access_restriction_info')" data-trigger="hover" data-placement="bottom">
                     <span v-show="$hasAccessRules(selectedEntity)">
                         <i class="fas fa-fw fa-lock"></i>
                     </span>
@@ -187,7 +187,7 @@
                 }));
             },
             saveEntity(entity) {
-                if(!this.selectedEntity.hasWriteAccess) return;
+                if(!this.hasWriteAccess) return;
                 if(!this.$can('duplicate_edit_concepts')) return;
                 let cid = entity.id;
                 var patches = [];
@@ -249,7 +249,7 @@
             );
             },
             deleteEntity(entity) {
-                if(!this.selectedEntity.hasWriteAccess) return;
+                if(!this.hasWriteAccess) return;
                 EventBus.$emit('entity-delete', {
                     entity: entity
                 });
@@ -258,7 +258,7 @@
                 this.entityHeaderHovered = hoverState;
             },
             enableEntityNameEditing() {
-                if(!this.selectedEntity.hasWriteAccess) return;
+                if(!this.hasWriteAccess) return;
                 this.newEntityName = this.selectedEntity.name;
                 Vue.set(this.selectedEntity, 'editing', true);
             },
@@ -413,6 +413,9 @@
                     !!this.selectedEntity &&
                     !!this.selectedEntity.attributes &&
                     !!this.selectedEntity.selections
+            },
+            hasWriteAccess() {
+                return this.$hasWriteAccess(this.selectedEntity);
             },
             colorStyles() {
                 const colors = this.$getEntityColors(this.selectedEntity.entity_type_id, 0.75);

@@ -132,8 +132,6 @@ const en = {
         'remember-me': 'Remember me',
         description: 'Description',
         groups: 'Groups',
-        access_restricted_info: 'Access restricted',
-        access_restricted_no_groups: 'No group restrictions added.',
         roles: 'Roles',
         permissions: 'Permissions',
         'added-at': 'Added',
@@ -169,14 +167,6 @@ const en = {
                 deleted: {
                     title: 'Entität gelöscht',
                     msg: '{name} wurde erfolgreich gelöscht.'
-                },
-                restriction_added: {
-                    title: 'Restriction added',
-                    msg: 'Restriction for group {group} to {name} added'
-                },
-                restriction_removed: {
-                    title: 'Restriction removed',
-                    msg: 'Restriction for group {group} to {name} removed'
                 }
             },
             tree: {
@@ -282,16 +272,29 @@ const en = {
             'add-permission-placeholder': 'Add permissions'
         },
         group: {
+            access_restriction_info: 'Define group restrictions',
+            access_restriction_no_groups: 'No group restrictions added.',
             'add-button': 'Add new Group',
             toasts: {
                 updated: {
                     title: 'Group updated',
                     msg: '{name} successfully updated.'
+                },
+                restriction_added: {
+                    title: 'Restriction added',
+                    msg: 'Restriction for group {group} to {name} added'
+                },
+                restriction_removed: {
+                    title: 'Restriction removed',
+                    msg: 'Restriction for group {group} to {name} removed'
                 }
             },
             modal: {
                 new: {
                     title: 'New Group'
+                },
+                define: {
+                    title: 'Group restrictions'
                 }
             }
         },

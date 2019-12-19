@@ -31,7 +31,7 @@ class UserController extends Controller
     }
 
     public function getUser(Request $request) {
-        $user = User::find(auth()->user()->id);
+        $user = User::with(['roles', 'groups'])->find(auth()->user()->id);
         $user->setPermissions();
 
         return response()->json([

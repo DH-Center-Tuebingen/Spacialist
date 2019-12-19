@@ -206,9 +206,14 @@ Vue.prototype.$getAvailableGroups = function(model) {
     return groups;
 }
 
+Vue.prototype.$hasWriteAccess = function(model) {
+    if(!model || !model.hasWriteAccess) return false;
+    return true;
+}
+
 Vue.prototype.$hasAccessRules = function(model) {
-    return (model.access_rules_count && model.access_rules_count > 0) ||
-        (model.access_rules && model.access_rules.length > 0);
+    return (model.access_rules && model.access_rules.length > 0) ||
+        model.access_rules_count;
 }
 
 // Formula based on https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023

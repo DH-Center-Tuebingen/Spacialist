@@ -132,8 +132,6 @@ const de = {
         'remember-me': 'Eingeloggt bleiben',
         description: 'Beschreibung',
         groups: 'Gruppen',
-        access_restricted_info: 'Zugang beschränkt',
-        access_restricted_no_groups: 'Noch keine Gruppen-Beschränkungen vorhanden.',
         roles: 'Rollen',
         permissions: 'Berechtigungen',
         'added-at': 'Hinzugefügt',
@@ -169,14 +167,6 @@ const de = {
                 deleted: {
                     title: 'Entität gelöscht',
                     msg: '{name} wurde erfolgreich gelöscht.'
-                },
-                restriction_added: {
-                    title: 'Beschränkung hinzugefügt',
-                    msg: 'Beschränkung für Gruppe {group} von {name} hinzugefügt'
-                },
-                restriction_removed: {
-                    title: 'Beschränkung entfernt',
-                    msg: 'Beschränkung für Gruppe {group} von {name} entfernt'
                 }
             },
             tree: {
@@ -282,16 +272,29 @@ const de = {
             'add-permission-placeholder': 'Berechtigungen hinzufügen'
         },
         group: {
+            access_restriction_info: 'Lege Gruppen-Beschränkungen fest',
+            access_restriction_no_groups: 'Noch keine Gruppen-Beschränkungen vorhanden',
             'add-button': 'Neue Gruppe hinzufügen',
             toasts: {
                 updated: {
                     title: 'Gruppe aktualisiert',
                     msg: '{name} wurde erfolgreich aktualisiert.'
+                },
+                restriction_added: {
+                    title: 'Beschränkung hinzugefügt',
+                    msg: 'Beschränkung für Gruppe {group} von {name} hinzugefügt'
+                },
+                restriction_removed: {
+                    title: 'Beschränkung entfernt',
+                    msg: 'Beschränkung für Gruppe {group} von {name} entfernt'
                 }
             },
             modal: {
                 new: {
                     title: 'Neue Gruppe'
+                },
+                define: {
+                    title: 'Gruppenbeschränkungen'
                 }
             }
         },
