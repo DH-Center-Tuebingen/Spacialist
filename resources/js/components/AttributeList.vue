@@ -73,10 +73,23 @@
                         v-model="localValues[attribute.id].value"
                         v-validate=""
                         :max-date="new Date()"
-                        :name="'attribute-'+attribute.id"
-                        @input="updateDatepicker(attribute.id, 'attribute-'+attribute.id)">
-                        <div class="input-group date" slot-scope="{ inputValue, updateValue }">
-                            <input type="text" class="form-control" :disabled="attribute.isDisabled" :id="'attribute-'+attribute.id" :value="inputValue" @input="updateValue($event.target.value, { formatInput: false, hidePopover: false })" @change="updateValue($event.target.value, { formatInput: true, hidePopover: false }) "/>
+                        :name="'attribute-'+attribute.id">
+                        <div class="input-group date" slot-scope="{ inputProps, inputEvents }">
+                            <input
+                                type="text"
+                                class="form-control"
+                                v-bind="inputProps"
+                                @input="inputEvents($event.target.value, {
+                                    formatInput: true,
+                                    hidePopover: false
+                                })"
+                                @change="inputEvents($event.target.value, {
+                                    formatInput: true,
+                                    hidePopover: false
+                                })"
+                                :disabled="attribute.isDisabled"
+                                :id="'attribute-'+attribute.id"
+                            />
                             <div class="input-group-append input-group-addon">
                                 <button type="button" class="btn btn-outline-secondary">
                                     <i class="fas fa-fw fa-calendar-alt"></i>
@@ -316,18 +329,16 @@
                 Vue.set(this.expanded, e.id, e.state ? ['col-md-12'] : ['col-md-9']);
             },
             updateDatepicker(aid, fieldname) {
-                const vm = this;
-                vm.correctTimezone(aid);
-                vm.fields[fieldname].dirty = true;
-                vm.checkDependency(aid);
+                this.correctTimezone(aid);
+                this.fields[fieldname].dirty = true;
+                this.checkDependency(aid);
             },
             correctTimezone(aid) {
-                const vm = this;
-                const dtVal = vm.localValues[aid].value;
+                const dtVal = this.localValues[aid].value;
                 const offset = dtVal.getTimezoneOffset() * (-1);
                 let ms = Date.parse(dtVal.toUTCString());
                 ms += (offset * 60 * 1000);
-                vm.localValues[aid].value = new Date(ms);
+                this.localValues[aid].value = new Date(ms);
             },
             setEntitySearchResult(result, aid) {
                 if(result) {
