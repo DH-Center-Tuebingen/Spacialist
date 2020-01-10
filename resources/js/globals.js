@@ -189,16 +189,16 @@ Vue.prototype.$getGroups = function() {
     return this.$root.$data.groups;
 }
 
-Vue.prototype.$getAvailableGroups = function(model) {
+Vue.prototype.$getAvailableGroups = function(rules) {
     const allGroups = this.$root.$data.groups;
 
-    if(!Vue.prototype.$hasAccessRules(model)) {
+    if(!rules) {
         return Object.values(allGroups);
     }
 
     let groups = [];
     for(let k in allGroups) {
-        const isSelected = !!model.access_rules.some(a => a.group_id == k);
+        const isSelected = rules.findIndex(r => r.group_id == k) > -1;
         if(!isSelected) {
             groups.push(allGroups[k]);
         }

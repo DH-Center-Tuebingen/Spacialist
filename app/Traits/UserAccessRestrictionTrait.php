@@ -26,6 +26,23 @@ class AccessRestrictionScope implements Scope
                 $subQ->whereIn('group_id', $userGroups);
                 $subQ->whereNotNull('rules');
             })->orDoesntHave('access_rules');
+
+            /*
+              SELECT *
+              FROM public.access_rules
+              WHERE (objectable_id IN (7,8)
+              AND objectable_type = 'entities'
+              AND NOT (
+            	group_id in (2)
+            	  AND not exists (
+            		select *
+            		from access_rules
+            		WHERE objectable_id IN (7,8)
+            		AND objectable_type = 'entities'
+            		AND group_id in (1)
+            	  )
+              ));
+            */
         } else {
             $builder->whereDoesntHave('access_rules');
         }
@@ -42,7 +59,7 @@ trait UserAccessRestrictionTrait
     }
 
     public function initializeUserAccessRestrictionTrait() {
-        $this->with[] = 'access_rules';
+        $this->withCount[] = 'access_rules';
         $this->appends[] = 'hasWriteAccess';
     }
 

@@ -1565,9 +1565,6 @@
 
                 return !!this.selectedFile.entities.find(c => c.id == this.selectedEntity.id);
             },
-            availableGroups() {
-                return this.$getAvailableGroups(this.selectedFile);
-            },
             isFirstFile: function() {
                 if(!this.selectedFile && !this.selectedFile.id) {
                     return false;

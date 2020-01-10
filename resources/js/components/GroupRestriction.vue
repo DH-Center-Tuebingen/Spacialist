@@ -1,8 +1,8 @@
 <template>
-    <div>
+    <div v-if="rulesLoaded">
         <div class="my-3 p-0 scroll-y-auto">
             <ul class="list-group mx-0 mt-2 flex-grow-1 scroll-y-auto" v-if="$hasAccessRules(model)">
-                <li class="list-group-item d-flex justify-content-between" v-for="rule in model.access_rules">
+                <li class="list-group-item d-flex justify-content-between" v-for="rule in rules">
                     <a href="#" @click.prevent="">
                         <i class="fas fa-fw fa-users-cog"></i> {{ $getGroup(rule.group_id).display_name }}
                     </a>
@@ -74,6 +74,13 @@
                 type: String
             }
         },
+        mounted() {
+            this.rulesLoaded = false;
+            $httpQueue.add(() => $http.get(`/access_rules/${this.model.id}/${this.getEndpointByType()}`).then(response => {
+                this.rules = response.data.rules;
+                this.rulesLoaded = true;
+            }));
+        },
         methods: {
             getKeyByType() {
                 switch(this.type) {
@@ -102,7 +109,7 @@
                 };
                 data[typeIdKey] = this.model.id;
                 $httpQueue.add(() => $http.patch(`restrict_to/${rule.group.id}`, data).then(response => {
-                    this.model.access_rules.push(response.data);
+                    this.rules.push(response.data);
                     this.$showToast(
                         this.$t('main.group.toasts.restriction_removed.title'),
                         this.$t('main.group.toasts.restriction_removed.msg', {
@@ -114,10 +121,10 @@
                 }));
             },
             removeAccessRule(rule) {
-                $httpQueue.add(() => $http.delete(`/restrict_to/${rule.group_id}/${this.getEndpointByType()}/${this.model.id}`).then(response => {
-                    const idx = this.model.access_rules.findIndex(ar => ar.group_id == rule.group_id);
+                $httpQueue.add(() => $http.delete(`/restrict_to/${rule.group_id}/${this.model.id}/${this.getEndpointByType()}`).then(response => {
+                    const idx = this.rules.findIndex(ar => ar.group_id == rule.group_id);
                     if(idx) {
-                        this.model.access_rules.splice(idx, 1);
+                        this.rules.splice(idx, 1);
                         this.$showToast(
                             this.$t('main.group.toasts.restriction_removed.title'),
                             this.$t('main.group.toasts.restriction_removed.msg', {
@@ -132,6 +139,8 @@
         },
         data () {
             return {
+                rulesLoaded: false,
+                rules: null,
                 selectedAccessRule: {
                     group: {},
                     writeAccess: false
@@ -140,7 +149,8 @@
         },
         computed: {
             availableGroups() {
-                return this.$getAvailableGroups(this.model);
+                if(!this.rules) return [];
+                return this.$getAvailableGroups(this.rules);
             },
         }
     }

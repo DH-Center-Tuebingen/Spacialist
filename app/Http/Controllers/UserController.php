@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\AccessRule;
 use App\Entity;
 use App\File;
+use App\Geodata;
 use App\Group;
 use App\Permission;
 use App\Role;
@@ -85,6 +86,26 @@ class UserController extends Controller
 
         return response()->json([
             'groups' => $groups,
+        ]);
+    }
+
+    public function getAccessRules($id, $type) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get access rules')
+            ], 403);
+        }
+
+        $model = $this->getAccessRuleSupportedModel($id, $type);
+        if(!isset($model)) {
+            return response()->json([
+                'error' => __('This type does not support access restrictions')
+            ], 400);
+        }
+
+        return response()->json([
+            'rules' => $model->access_rules
         ]);
     }
 
@@ -436,19 +457,7 @@ class UserController extends Controller
         return response()->json(null, 204);
     }
 
-    public function removeAccessRestrictionFromFile($gid, $fid) {
-        $this->removeResourceAccessRestriction($gid, [
-            'file_id' => $fid
-        ]);
-    }
-
-    public function removeAccessRestrictionFromEntity($gid, $eid) {
-        $this->removeResourceAccessRestriction($gid, [
-            'entity_id' => $eid
-        ]);
-    }
-
-    private function removeResourceAccessRestriction($gid, $type) {
+    public function removeResourceAccessRestriction($gid, $mid, $type) {
         $user = auth()->user();
         if(!$user->can('add_edit_group')) {
             return response()->json([
@@ -464,24 +473,11 @@ class UserController extends Controller
             ], 400);
         }
 
-        $model;
-        if(isset($type['file_id'])) {
-            try {
-                $model = File::findOrFail($type['file_id']);
-            } catch(ModelNotFoundException $e) {
-                return response()->json([
-                    'error' => __('This file does not exist')
-                ], 400);
-            }
-        }
-        if(isset($type['entity_id'])) {
-            try {
-                $model = Entity::findOrFail($type['entity_id']);
-            } catch(ModelNotFoundException $e) {
-                return response()->json([
-                    'error' => __('This entity does not exist')
-                ], 400);
-            }
+        $model = $this->getAccessRuleSupportedModel($mid, $type);
+        if(!isset($model)) {
+            return response()->json([
+                'error' => __('This type does not support access restrictions')
+            ], 400);
         }
         $model->userHasWriteAccess();
 
@@ -495,4 +491,39 @@ class UserController extends Controller
 
     // OTHER FUNCTIONS
 
+    private function getAccessRuleSupportedModel($mid, $type) {
+        $model = null;
+
+        switch($type) {
+            case 'file':
+                try {
+                    $model = File::findOrFail($mid);
+                } catch(ModelNotFoundException $e) {
+                    return response()->json([
+                        'error' => __('This file does not exist')
+                    ], 400);
+                }
+                break;
+            case 'entity':
+                try {
+                    $model = Entity::findOrFail($mid);
+                } catch(ModelNotFoundException $e) {
+                    return response()->json([
+                        'error' => __('This entity does not exist')
+                    ], 400);
+                }
+                break;
+            case 'geodata':
+                try {
+                    $model = Geodata::findOrFail($mid);
+                } catch(ModelNotFoundException $e) {
+                    return response()->json([
+                        'error' => __('This geodata does not exist')
+                    ], 400);
+                }
+                break;
+        }
+
+        return $model;
+    }
 }
