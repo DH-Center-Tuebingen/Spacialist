@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\AccessRule;
+use App\Entity;
+use App\Group;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -26,40 +28,42 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        Gate::define('read-object', function($user, $objectModel) {
+        Gate::define('read-object', function($user, $objectModel, $options = []) {
             $id = $objectModel->id;
             $type = $objectModel->getMorphClass();
-            $ug = $user->groups()->pluck('id')->toArray();
+            $grps = isset($options['groups']) ? $options['groups'] : $user->groups()->pluck('id')->toArray();
+
 
             if($type == 'entities') {
-                $parents = $objectModel->getParentIdsAttribute();
+                $otherGroups = [];
+                foreach(Group::whereNotIn('id', $grps)->pluck('id')->toArray() as $g) {
+                    $otherGroups[] = "$g:rw";
+                    $otherGroups[] = "$g:r";
+                }
+                $otherGroups = "'" . implode("','", $otherGroups) . "'";
 
-                // get all rules for the user's groups
-                $rulesUserGroups = AccessRule::whereIn('objectable_id', $parents)
-                    ->where('objectable_type', $type)
-                    ->whereHas('group', function($q) use($ug) {
-                        $q->whereIn('id', $ug);
-                    })
-                    ->whereNotNull('rules')
-                    ->pluck('objectable_id');
-
-                // get all rules for the groups the user is not part of
-                $rulesOtherGroups = AccessRule::whereIn('objectable_id', $parents)
-                    ->where('objectable_type', $type)
-                    ->whereDoesntHave('group', function($q) use($ug) {
-                        $q->whereIn('id', $ug);
-                    })
-                    ->whereNotNull('rules')
-                    ->pluck('objectable_id');
-
-                // diff those rules to remove rules that allow access to both groups
-                // if all rules match both user groups and other groups,
-                // access is granted
-                return $rulesOtherGroups->diff($rulesUserGroups)->isEmpty();
+                $access = Entity::selectRaw("EXISTS (
+                	WITH RECURSIVE parent_rules AS (
+                		SELECT e.id, e.name, e.root_entity_id, ar.objectable_id, ar.objectable_type, ar.group_id, ar.rules, ARRAY[ar.group_id || ':' || ar.rules]::text[] AS path
+                		FROM entities e
+                		LEFT JOIN access_rules ar ON e.id = ar.objectable_id AND ar.objectable_type = 'entities'
+                		WHERE e.id = ?
+                		UNION ALL
+                		SELECT e2.id, e2.name, e2.root_entity_id, ar2.objectable_id, ar2.objectable_type, ar2.group_id, ar2.rules, path || (ar2.group_id || ':' || ar2.rules)
+                		FROM parent_rules pr
+                		JOIN entities e2 ON e2.id = pr.root_entity_id
+                		LEFT JOIN access_rules ar2 ON e2.id = ar2.objectable_id AND ar2.objectable_type = 'entities'
+                	)
+                	SELECT *
+                	FROM parent_rules
+                	WHERE root_entity_id IS NULL
+                	AND NOT path && ARRAY[$otherGroups]
+                ) as has_access", [$objectModel->id])->first();
+                return $access->has_access;
             } else {
                 return AccessRule::where('objectable_id', $id)
                     ->where('objectable_type', $type)
-                    ->whereIn('group_id', $ug)
+                    ->whereIn('group_id', $grps)
                     ->whereNotNull('rules')
                     ->exists()
                     ||
@@ -70,40 +74,42 @@ class AuthServiceProvider extends ServiceProvider
 
         });
 
-        Gate::define('modify-object', function($user, $objectModel) {
+        Gate::define('modify-object', function($user, $objectModel, $options = []) {
             $id = $objectModel->id;
             $type = $objectModel->getMorphClass();
-            $ug = $user->groups()->pluck('id')->toArray();
+            $grps = isset($options['groups']) ? $options['groups'] : $user->groups()->pluck('id')->toArray();
 
             if($type == 'entities') {
-                $parents = $objectModel->getParentIdsAttribute();
+                $otherGroups = [];
+                foreach(Group::whereNotIn('id', $grps)->pluck('id')->toArray() as $g) {
+                    $otherGroups[] = "$g:rw";
+                    $otherGroups[] = "$g:r";
+                }
+                $otherGroups = "'" . implode("','", $otherGroups) . "'";
 
-                // get all rules for the user's groups
-                $rulesUserGroups = AccessRule::whereIn('objectable_id', $parents)
-                    ->where('objectable_type', $type)
-                    ->whereHas('group', function($q) use($ug) {
-                        $q->whereIn('id', $ug);
-                    })
-                    ->where('rules', 'rw')
-                    ->pluck('objectable_id');
-
-                // get all rules for the groups the user is not part of
-                $rulesOtherGroups = AccessRule::whereIn('objectable_id', $parents)
-                    ->where('objectable_type', $type)
-                    ->whereDoesntHave('group', function($q) use($ug) {
-                        $q->whereIn('id', $ug);
-                    })
-                    ->where('rules', 'rw')
-                    ->pluck('objectable_id');
-
-                // diff those rules to remove rules that allow access to both groups
-                // if all rules match both user groups and other groups,
-                // access is granted
-                return $rulesOtherGroups->diff($rulesUserGroups)->isEmpty();
+                $access = Entity::selectRaw("EXISTS (
+                	WITH RECURSIVE parent_rules AS (
+                		SELECT e.id, e.name, e.root_entity_id, ar.objectable_id, ar.objectable_type, ar.group_id, ar.rules, ARRAY[ar.group_id || ':' || ar.rules]::text[] AS path
+                		FROM entities e
+                		LEFT JOIN access_rules ar ON e.id = ar.objectable_id AND ar.objectable_type = 'entities'
+                		WHERE e.id = ?
+                		UNION ALL
+                		SELECT e2.id, e2.name, e2.root_entity_id, ar2.objectable_id, ar2.objectable_type, ar2.group_id, ar2.rules, path || (ar2.group_id || ':' || ar2.rules)
+                		FROM parent_rules pr
+                		JOIN entities e2 ON e2.id = pr.root_entity_id
+                		LEFT JOIN access_rules ar2 ON e2.id = ar2.objectable_id AND ar2.objectable_type = 'entities'
+                	)
+                	SELECT *
+                	FROM parent_rules
+                	WHERE root_entity_id IS NULL
+                	AND NOT path && ARRAY[$otherGroups]
+                	AND (array_remove(path, null) = ARRAY[]::text[] OR (array_remove(path, null))[1] LIKE '_:rw')
+                ) as has_access", [$objectModel->id])->first();
+                return $access->has_access;
             } else {
                 return AccessRule::where('objectable_id', $id)
                     ->where('objectable_type', $type)
-                    ->whereIn('group_id', $ug)
+                    ->whereIn('group_id', $grps)
                     ->where('rules', 'rw')
                     ->exists()
                     ||

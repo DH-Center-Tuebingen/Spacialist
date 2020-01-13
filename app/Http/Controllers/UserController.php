@@ -383,6 +383,19 @@ class UserController extends Controller
         }
         $model->userHasWriteAccess();
 
+        // If target is an entity, the group must have at least
+        // read access to it's parent element
+        if($model->getMorphClass() == 'entities') {
+            // If target has no root entity (thus is a root entity itself)
+            // we can safely set access rules
+            if(isset($model->root_entity_id)) {
+                $rootEntity = Entity::find($model->root_entity_id);
+                $rootEntity->userHasReadAccess($rootEntity, [
+                    'groups' => [$gid]
+                ]);
+            }
+        }
+
         $ar = new AccessRule();
         $ar->objectable_id = $model->id;
         $ar->objectable_type = $model->getMorphClass();

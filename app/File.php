@@ -765,7 +765,7 @@ class File extends Model
     }
 
     private function getExifData() {
-        if(!$this->userHasWriteAccess($this, true)) return null;
+        if(!$this->userHasWriteAccess($this, ['as_bool' => true])) return null;
         if(!$this->isImage()) return null;
         try {
             $content = Storage::get($this->name);
