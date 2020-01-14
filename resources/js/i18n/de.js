@@ -131,7 +131,9 @@ const de = {
         password: 'Passwort',
         'remember-me': 'Eingeloggt bleiben',
         description: 'Beschreibung',
-        groups: 'Gruppen',
+        group: 'Gruppe | Gruppen',
+        read_only: 'Schreibgeschützt',
+        write_access: 'Schreibzugriff',
         roles: 'Rollen',
         permissions: 'Berechtigungen',
         'added-at': 'Hinzugefügt',
@@ -274,19 +276,13 @@ const de = {
         group: {
             access_restriction_info: 'Lege Gruppen-Beschränkungen fest',
             access_restriction_no_groups: 'Noch keine Gruppen-Beschränkungen vorhanden',
+            access_restriction_first_write_access: 'Die erste Gruppe benötigt Schreibzugriff, da das Objekt sonst für alle Benutzer nicht mehr veränderbar ist!',
+            access_restriction_heading: 'Gruppenbeschränkungen hinzufügen',
             'add-button': 'Neue Gruppe hinzufügen',
             toasts: {
                 updated: {
                     title: 'Gruppe aktualisiert',
                     msg: '{name} wurde erfolgreich aktualisiert.'
-                },
-                restriction_added: {
-                    title: 'Beschränkung hinzugefügt',
-                    msg: 'Beschränkung für Gruppe {group} von {name} hinzugefügt'
-                },
-                restriction_removed: {
-                    title: 'Beschränkung entfernt',
-                    msg: 'Beschränkung für Gruppe {group} von {name} entfernt'
                 }
             },
             modal: {

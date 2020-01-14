@@ -347,10 +347,13 @@ class UserController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'file_id' => 'required_without:entity_id|integer|exists:files,id',
-            'entity_id' => 'required_without:file_id|integer|exists:entities,id',
-            'has_write' => 'required|boolean'
+            'file_id' => 'required_without_all:entity_id,geodata_id|integer|exists:files,id',
+            'entity_id' => 'required_without_all:file_id,geodata_id|integer|exists:entities,id',
+            'geodata_id' => 'required_without_all:entity_id,file_id|integer|exists:geodata,id',
+            'write_access' => 'required|boolean'
         ]);
+
+        $writeAccess = $request->get('write_access');
 
         try {
             Group::findOrFail($gid);
@@ -381,6 +384,38 @@ class UserController extends Controller
                 ], 400);
             }
         }
+        if($request->has('geodata_id')) {
+            $geoid = $request->get('geodata_id');
+            try {
+                $model = Geodata::findOrFail($geoid);
+            } catch(ModelNotFoundException $e) {
+                return response()->json([
+                    'error' => __('This geodata does not exist')
+                ], 400);
+            }
+        }
+        if(!$writeAccess) {
+            // If no rules exist and new rule has no write access, abort
+            // adding rule
+            // otherwise the model would be locked "forever"
+            $ruleCount = AccessRule::where('objectable_id', $model->id)
+            ->where('objectable_type', $model->getMorphClass())
+            ->count();
+            if($ruleCount === 0) {
+                return response()->json([
+                    'error' => __('First group restriction must have write access')
+                ], 400);
+            }
+        }
+        $ruleExists = AccessRule::where('objectable_id', $model->id)
+            ->where('objectable_type', $model->getMorphClass())
+            ->where('group_id', $gid)
+            ->exists();
+        if($ruleExists) {
+            return response()->json([
+                'error' => __('This group restriction already exists')
+            ], 400);
+        }
         $model->userHasWriteAccess();
 
         // If target is an entity, the group must have at least
@@ -400,7 +435,7 @@ class UserController extends Controller
         $ar->objectable_id = $model->id;
         $ar->objectable_type = $model->getMorphClass();
         $ar->group_id = $gid;
-        $ar->rules = $request->get('has_write') ? 'rw' : 'r';
+        $ar->rules = $writeAccess ? 'rw' : 'r';
         $ar->save();
 
         return response()->json($ar);

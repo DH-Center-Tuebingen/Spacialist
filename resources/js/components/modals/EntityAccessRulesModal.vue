@@ -9,7 +9,8 @@
         <div class="modal-body">
             <group-restrictions
                 :model="entity"
-                :type="'entity'">
+                :type="'entity'"
+                @rules-modified="updateAccessRules">
             </group-restrictions>
         </div>
         <div class="modal-footer">
@@ -30,6 +31,16 @@ export default {
         },
     },
     methods: {
+        updateAccessRules(event) {
+            switch(event.action) {
+                case 'add':
+                    this.entity.access_rules_count++;
+                    break;
+                case 'delete':
+                    this.entity.access_rules_count--;
+                    break;
+            }
+        }
     },
     data() {
         return {

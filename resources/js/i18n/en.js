@@ -131,7 +131,9 @@ const en = {
         password: 'Password',
         'remember-me': 'Remember me',
         description: 'Description',
-        groups: 'Groups',
+        group: 'Group | Groups',
+        read_only: 'Read-Only',
+        write_access: 'Write access',
         roles: 'Roles',
         permissions: 'Permissions',
         'added-at': 'Added',
@@ -274,19 +276,13 @@ const en = {
         group: {
             access_restriction_info: 'Define group restrictions',
             access_restriction_no_groups: 'No group restrictions added.',
+            access_restriction_first_write_access: 'First group must have write access. Otherwise this object would be inaccessible for everyone!',
+            access_restriction_heading: 'Add group restriction',
             'add-button': 'Add new Group',
             toasts: {
                 updated: {
                     title: 'Group updated',
                     msg: '{name} successfully updated.'
-                },
-                restriction_added: {
-                    title: 'Restriction added',
-                    msg: 'Restriction for group {group} to {name} added'
-                },
-                restriction_removed: {
-                    title: 'Restriction removed',
-                    msg: 'Restriction for group {group} to {name} removed'
                 }
             },
             modal: {
