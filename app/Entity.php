@@ -56,7 +56,7 @@ class Entity extends Model
         $isChild = isset($rootEntityId);
         if($isChild) {
             $rootEntity = self::find($rootEntityId);
-            $rootEntity->userHasWriteAccess();
+            self::userHasWriteAccess($rootEntity);
             $parentCtid = $rootEntity->entity_type_id;
 
             $relation = EntityTypeRelation::where('parent_id', $parentCtid)
@@ -143,8 +143,8 @@ class Entity extends Model
     }
 
     public static function patchRanks($rank, $id, $parent = null, $user) {
-        $entity = Entity::find($id);
-        $entity->userHasWriteAccess();
+        $entity = self::find($id);
+        self::userHasWriteAccess($entity);
 
         $hasParent = isset($parent);
         $oldRank = $entity->rank;
@@ -183,8 +183,8 @@ class Entity extends Model
     }
 
     public static function addSerial($eid, $aid, $text, $ctr, $username) {
-        $entity = Entity::find($eid);
-        $entity->userHasWriteAccess();
+        $entity = self::find($eid);
+        self::userHasWriteAccess($entity);
         $av = new AttributeValue();
         $av->entity_id = $eid;
         $av->attribute_id = $aid;

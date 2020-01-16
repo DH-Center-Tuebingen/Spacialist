@@ -29,7 +29,7 @@ class AccessRestrictionScope implements Scope
                     $otherGroups[] = "$g:rw";
                     $otherGroups[] = "$g:r";
                 }
-                $otherGroups = "'".implode("','", $otherGroups)."'";
+                $otherGroups = "'" . implode("','", $otherGroups) . "'";
 
                 $builder->whereRaw("EXISTS (
                 	WITH RECURSIVE parent_rules AS (
@@ -78,10 +78,15 @@ trait UserAccessRestrictionTrait
         return $this->morphMany('App\AccessRule', 'objectable');
     }
 
-    public function userHasReadAccess($objectModel = null, $options = []) {
-        if(!isset($objectModel)) {
-            $objectModel = $this;
+    public static function userHasReadAccess($objectModel, $options = []) {
+        if(is_array($objectModel)) {
+            $objectModel = (object) [
+                'id' => $objectModel['id'],
+                'type' => $objectModel['type'],
+                'custom' => true
+            ];
         }
+
         if(isset($options['as_bool']) && $options['as_bool']) {
             return Gate::allows('read-object', $objectModel, $options);
         } else {
@@ -89,10 +94,15 @@ trait UserAccessRestrictionTrait
         }
     }
 
-    public function userHasWriteAccess($objectModel = null, $options = []) {
-        if(!isset($objectModel)) {
-            $objectModel = $this;
+    public static function userHasWriteAccess($objectModel, $options = []) {
+        if(is_array($objectModel)) {
+            $objectModel = (object) [
+                'id' => $objectModel['id'],
+                'type' => $objectModel['type'],
+                'custom' => true
+            ];
         }
+
         if(isset($options['as_bool']) && $options['as_bool']) {
             return Gate::allows('modify-object', $objectModel, $options);
         } else {
@@ -101,6 +111,6 @@ trait UserAccessRestrictionTrait
     }
 
     public function getHasWriteAccessAttribute() {
-        return $this->userHasWriteAccess($this, ['as_bool' => true]);
+        return self::userHasWriteAccess($this, ['as_bool' => true]);
     }
 }

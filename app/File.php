@@ -420,7 +420,7 @@ class File extends Model
     }
 
     public function setContent($fileObject) {
-        $this->userHasWriteAccess($this);
+        File::userHasWriteAccess($this);
 
         $filehandle = fopen($fileObject->getRealPath(), 'r');
         Storage::put(
@@ -436,7 +436,7 @@ class File extends Model
     }
 
     public function rename($newName) {
-        $this->userHasWriteAccess($this);
+        File::userHasWriteAccess($this);
 
         Storage::move($this->name, $newName);
         $this->name = $newName;
@@ -448,8 +448,8 @@ class File extends Model
     }
 
     public function link($eid, $user) {
-        $this->userHasWriteAccess($this);
-        $this->userHasWriteAccess(Entity::find($eid));
+        File::userHasWriteAccess($this);
+        File::userHasWriteAccess(Entity::find($eid));
 
         $link = new EntityFile();
         $link->file_id = $this->id;
@@ -459,8 +459,8 @@ class File extends Model
     }
 
     public function unlink($eid) {
-        $this->userHasWriteAccess($this);
-        $this->userHasWriteAccess(Entity::find($eid));
+        File::userHasWriteAccess($this);
+        File::userHasWriteAccess(Entity::find($eid));
 
         $link = EntityFile::where('entity_id', $eid)
             ->where('file_id', $this->id)
@@ -484,7 +484,7 @@ class File extends Model
     }
 
     public function getArchiveFileList() {
-        $this->userHasReadAccess($this);
+        File::userHasReadAccess($this);
         if(!$this->isArchive()) return [];
 
         $path = sp_get_storage_file_path($this->name);
@@ -495,7 +495,7 @@ class File extends Model
     }
 
     public function getArchivedFileContent($filepath) {
-        $this->userHasReadAccess($this);
+        File::userHasReadAccess($this);
         $path = sp_get_storage_file_path($this->name);
         $archive = UnifiedArchive::open($path);
         return base64_encode($archive->getFileContent($filepath));
@@ -521,7 +521,7 @@ class File extends Model
     }
 
     private function getContainingFiles($files, $archive, $prefix = '') {
-        $this->userHasReadAccess($this);
+        File::userHasReadAccess($this);
         $tree = new \stdClass();
         $tree->children = [];
         foreach($files as $file) {
@@ -566,7 +566,7 @@ class File extends Model
     }
 
     public function deleteFile() {
-        $this->userHasWriteAccess($this);
+        File::userHasWriteAccess($this);
         Storage::delete($this->name);
         if(isset($this->thumb)) {
             Storage::delete($this->thumb);
@@ -701,7 +701,7 @@ class File extends Model
     }
 
     public function asHtml() {
-        $this->userHasReadAccess($this);
+        File::userHasReadAccess($this);
 
         if(!$this->isDocument() && !$this->isSpreadsheet() && !$this->isPresentation()) {
             return [
@@ -727,7 +727,7 @@ class File extends Model
     }
 
     public function linkCount() {
-        $this->userHasReadAccess($this);
+        File::userHasReadAccess($this);
         return EntityFile::where('file_id', $this->id)->count();
     }
 
@@ -765,7 +765,7 @@ class File extends Model
     }
 
     private function getExifData() {
-        if(!$this->userHasWriteAccess($this, ['as_bool' => true])) return null;
+        if(!File::userHasWriteAccess($this, ['as_bool' => true])) return null;
         if(!$this->isImage()) return null;
         try {
             $content = Storage::get($this->name);

@@ -416,7 +416,7 @@ class UserController extends Controller
                 'error' => __('This group restriction already exists')
             ], 400);
         }
-        $model->userHasWriteAccess();
+        Entity::userHasWriteAccess($model);
 
         // If target is an entity, the group must have at least
         // read access to it's parent element
@@ -425,7 +425,7 @@ class UserController extends Controller
             // we can safely set access rules
             if(isset($model->root_entity_id)) {
                 $rootEntity = Entity::find($model->root_entity_id);
-                $rootEntity->userHasReadAccess($rootEntity, [
+                Entity::userHasReadAccess($rootEntity, [
                     'groups' => [$gid]
                 ]);
             }
@@ -527,7 +527,7 @@ class UserController extends Controller
                 'error' => __('This type does not support access restrictions')
             ], 400);
         }
-        $model->userHasWriteAccess();
+        Entity::userHasWriteAccess($model);
 
         AccessRule::where('objectable_id', $model->id)
             ->where('objectable_type', $model->getMorphClass())

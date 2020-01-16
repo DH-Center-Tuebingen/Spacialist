@@ -44,6 +44,7 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to get a specific entity')
             ], 403);
         }
+        Entity::userHasReadAccess(['id' => $id, 'type' => 'entities']);
         try {
             $entity = Entity::findOrFail($id);
         } catch(ModelNotFoundException $e) {
@@ -259,7 +260,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
-        $entity->userHasWriteAccess();
+        Entity::userHasWriteAccess($entity);
 
         foreach($request->request as $patch) {
             $op = $patch['op'];
@@ -386,7 +387,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
-        $entity->userHasWriteAccess();
+        Entity::userHasWriteAccess($entity);
 
         try {
             Attribute::findOrFail($aid);
@@ -427,7 +428,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
-        $entity->userHasWriteAccess();
+        Entity::userHasWriteAccess($entity);
 
         $entity->name = $request->get('name');
         $entity->save();
@@ -454,7 +455,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
-        $entity->userHasWriteAccess();
+        Entity::userHasWriteAccess($entity);
 
         $rank = $request->get('rank');
         $parent_id = $request->get('parent_id');
@@ -479,7 +480,7 @@ class EntityController extends Controller {
                 'error' => __('This entity does not exist')
             ], 400);
         }
-        $entity->userHasWriteAccess();
+        Entity::userHasWriteAccess($entity);
         $entity->delete();
 
         return response()->json(null, 204);

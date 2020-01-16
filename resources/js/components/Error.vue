@@ -12,7 +12,7 @@
                     <code>{{ request.method }}</code> Request <a :href="request.url">{{ request.url }}</a> failed with status <span class="font-weight-medium">{{ request.status }}</span>.
                 </p>
                 <p class="alert alert-danger col scroll-y-auto">
-                    Error Message: <span class="font-weight-light font-italic">{{ msg.error || msg }}</span>
+                    Error Message: <span class="font-weight-light font-italic">{{ msg.error || msg.message || msg }}</span>
                 </p>
                 <p class="alert alert-info">
                     If you think this is a bug, please have a look at our <a href="https://github.com/eScienceCenter/Spacialist/issues" target="_blank">issue tracker</a> on github to see if this has been already reported or <a href="https://github.com/eScienceCenter/Spacialist/issues?q=is:issue+is:closed" target="_blank">closed</a> in a later version (Your current version can be found in Settings > About Dialog <i class="fas fa-fw fa-info-circle"></i>). If it is neither reported nor closed, feel free to <a href="https://github.com/eScienceCenter/Spacialist/issues/new" target="_blank">open a new issue</a>.

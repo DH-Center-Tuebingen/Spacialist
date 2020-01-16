@@ -7,9 +7,11 @@ use App\Entity;
 use App\Group;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AuthServiceProvider extends ServiceProvider
 {
+    use HandlesAuthorization;
     /**
      * The policy mappings for the application.
      *
@@ -29,8 +31,9 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::define('read-object', function($user, $objectModel, $options = []) {
+            $custom = isset($objectModel->custom);
             $id = $objectModel->id;
-            $type = $objectModel->getMorphClass();
+            $type = $custom ? $objectModel->type : $objectModel->getMorphClass();
             $grps = isset($options['groups']) ? $options['groups'] : $user->groups()->pluck('id')->toArray();
 
 
@@ -59,9 +62,9 @@ class AuthServiceProvider extends ServiceProvider
                 	WHERE root_entity_id IS NULL
                 	AND NOT path && ARRAY[$otherGroups]
                 ) as has_access", [$objectModel->id])->first();
-                return $access->has_access;
+                $granted = $access->has_access;
             } else {
-                return AccessRule::where('objectable_id', $id)
+                $granted = AccessRule::where('objectable_id', $id)
                     ->where('objectable_type', $type)
                     ->whereIn('group_id', $grps)
                     ->whereNotNull('rules')
@@ -72,11 +75,18 @@ class AuthServiceProvider extends ServiceProvider
                     ->exists();
             }
 
+            if($granted) {
+                return true;
+            } else {
+                return $this->deny('You are not allowed to view this resource. Please ask your administrator to grant access.');
+            }
+
         });
 
         Gate::define('modify-object', function($user, $objectModel, $options = []) {
+            $custom = isset($objectModel->custom);
             $id = $objectModel->id;
-            $type = $objectModel->getMorphClass();
+            $type = $custom ? $objectModel->type : $objectModel->getMorphClass();
             $grps = isset($options['groups']) ? $options['groups'] : $user->groups()->pluck('id')->toArray();
 
             if($type == 'entities') {
@@ -105,9 +115,9 @@ class AuthServiceProvider extends ServiceProvider
                 	AND NOT path && ARRAY[$otherGroups]
                 	AND (array_remove(path, null) = ARRAY[]::text[] OR (array_remove(path, null))[1] LIKE '_:rw')
                 ) as has_access", [$objectModel->id])->first();
-                return $access->has_access;
+                $granted = $access->has_access;
             } else {
-                return AccessRule::where('objectable_id', $id)
+                $granted = AccessRule::where('objectable_id', $id)
                     ->where('objectable_type', $type)
                     ->whereIn('group_id', $grps)
                     ->where('rules', 'rw')
@@ -116,6 +126,12 @@ class AuthServiceProvider extends ServiceProvider
                 !AccessRule::where('objectable_id', $id)
                     ->where('objectable_type', $type)
                     ->exists();
+            }
+
+            if($granted) {
+                return true;
+            } else {
+                return $this->deny('You are not allowed to edit this resource. Please ask your administrator to grant access.');
             }
         });
     }
