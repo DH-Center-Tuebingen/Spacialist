@@ -46,6 +46,13 @@ class MapController extends Controller
         // geoObjects: id => geoO
         $geodata = Geodata::with('entity')->get()->getDictionary();
 
+        // Do not load unneccessary additional attributes
+        foreach($geodata as $g) {
+            if(isset($g->entity)) {
+                $g->entity->setAppends([]);
+            }
+        }
+
         return response()->json([
             'layers' => $layers,
             'geodata' => $geodata
@@ -144,6 +151,13 @@ class MapController extends Controller
             });
         }
         $geodata = $query->get();
+
+        // Do not load unneccessary additional attributes
+        foreach($geodata as $g) {
+            if(isset($g->entity)) {
+                $g->entity->setAppends([]);
+            }
+        }
 
         return response()->json($geodata);
     }
