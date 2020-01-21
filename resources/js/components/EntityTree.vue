@@ -68,7 +68,6 @@
 
 <script>
     import TreeNode from './TreeNode.vue';
-    import TreeContextmenu from './TreeContextmenu.vue';
     import TreeSearch from './TreeSearch.vue';
 
     import * as treeUtility from 'tree-vue-component';
@@ -105,15 +104,14 @@
             this.dragDelay = vm.dragDelay;
             this.dragAllowed = _ => vm.isDragAllowed;
             this.onToggle = vm.itemToggle;
-            this.contextmenu = TreeContextmenu;
             this.onContextMenuAdd = function(parent) {
                 vm.requestAddNewEntity(parent);
             };
-            this.onContextMenuDuplicate = function(entity, path) {
+            this.onContextMenuDuplicate = function(entity) {
                 const parent = entity.root_entity_id ? vm.entities[entity.root_entity_id] : null;
                 vm.onAdd(entity, parent);
             };
-            this.onContextMenuDelete = function(entity, path) {
+            this.onContextMenuDelete = function(entity) {
                 EventBus.$emit('entity-delete', {
                     entity: entity
                 });
@@ -135,7 +133,6 @@
         name: 'EntityTree',
         components: {
             'tree-node': TreeNode,
-            'tree-contextmenu': TreeContextmenu,
             'tree-search': TreeSearch,
             VueContext
         },

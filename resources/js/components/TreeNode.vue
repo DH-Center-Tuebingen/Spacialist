@@ -8,16 +8,41 @@
                 <i class="fas fa-circle fa-sm"></i>
             </span>
         </span>
-        <span>
+        <span @contextmenu.prevent="$refs.menu.open($event, data)">
             {{ data.name }}
         </span>
+
+        <vue-context
+            ref="menu"
+            :close-on-click="true"
+            :lazy="true">
+            <template slot-scope="child">
+                <li>
+                    <a href="#" class="dropdown-item" :class="actionClassStyles" @click.stop.prevent="actionWrapper(child.data.onContextMenuAdd, child.data)" @dblclick.stop.prevent>
+                        <i class="fas fa-fw fa-plus text-success"></i> Add new Sub-Entity to <span class="font-italic">{{ child.data.name }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="dropdown-item" :class="actionClassStyles" @click.stop.prevent="actionWrapper(child.data.onContextMenuDuplicate, child.data)" @dblclick.stop.prevent>
+                        <i class="fas fa-fw fa-copy text-info"></i> Duplicate <span class="font-italic">{{ child.data.name }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="dropdown-item" :class="actionClassStyles" @click.stop.prevent="actionWrapper(child.data.onContextMenuDelete, child.data)" @dblclick.stop.prevent>
+                        <i class="fas fa-fw fa-trash text-danger"></i> Delete <span class="font-italic">{{ child.data.name }}</span>
+                    </a>
+                </li>
+            </template>
+        </vue-context>
     </div>
 </template>
 
 <script>
     import debounce from 'debounce';
+    import { VueContext } from 'vue-context';
 
     export default {
+        components: { VueContext },
         props: {
             data: {
                 required: true,
@@ -32,11 +57,16 @@
             },
             onDragLeave(item) {
             },
+            actionWrapper(action, data) {
+                if(!data.hasWriteAccess) return;
+
+                return action(data);
+            },
             doToggle() {
                 if(!this.data.state.opened && this.data.state.openable) {
                     this.data.onToggle({data: this.data});
                 }
-            }
+            },
         },
         data() {
             return {
@@ -55,6 +85,11 @@
                         color: colors.backgroundColor
                     };
                 }
+            },
+            actionClassStyles() {
+                return {
+                    'text-muted': !this.data.hasWriteAccess
+                };
             }
         }
     }
