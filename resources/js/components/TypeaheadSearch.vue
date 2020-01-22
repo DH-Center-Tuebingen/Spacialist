@@ -3,7 +3,6 @@
 
 <script>
     import VueTypeahead from 'vue-typeahead';
-    import debounce from 'debounce';
 
     export default {
         extends: VueTypeahead,
@@ -45,8 +44,8 @@
             this.query = this.value;
         },
         computed: {
-            debounce () {
-                return debounce(this.update, this.delay);
+            defaultUpdate() {
+                return _debounce(this.update, this.delay);
             }
         },
         methods: {

@@ -14,10 +14,10 @@
             <tbody>
                 <tr v-for="user in userList">
                     <td>
-                        {{ user.name }}
+                        {{ user.name }} ({{ user.nickname }})
                     </td>
                     <td>
-                        <input type="email" class="form-control" :class="$getValidClass(error, `email_${user.id}`)" v-model="user.email" v-validate="" :name="`email_${user.id}`" />
+                        <input type="email" class="form-control" :class="$getValidClass(error, `email_${user.id}`)" v-model="user.email" v-validate="" :name="`email_${user.id}`" required />
 
                         <div class="invalid-feedback">
                             <span v-for="msg in error[`email_${user.id}`]">
@@ -60,7 +60,7 @@
                                 <a class="dropdown-item" href="#" v-if="userDirty(user.id)" :disabled="!$can('add_remove_role')" @click.prevent="onPatchUser(user.id)">
                                     <i class="fas fa-fw fa-check text-success"></i> {{ $t('global.save') }}
                                 </a>
-                                <a class="dropdown-item" href="#" :disabled="!$can('change_password')" @click.prevent="updatePassword(user.id)">
+                                <a class="dropdown-item" href="#" v-if="$hasPreference('prefs.enable-password-reset-link')" :disabled="!$can('change_password')" @click.prevent="updatePassword(user.email)">
                                     <i class="fas fa-fw fa-paper-plane text-info"></i> Send Reset-Mail
                                 </a>
                                 <a class="dropdown-item" href="#" :disabled="!$can('delete_users')" @click.prevent="requestDeleteUser(user.id)">
@@ -97,6 +97,21 @@
 
                                 <div class="invalid-feedback">
                                     <span v-for="msg in error.name">
+                                        {{ msg }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label col-md-3" for="nickname">
+                                {{ $t('global.nickname') }}
+                                <span class="text-danger">*</span>:
+                            </label>
+                            <div class="col-md-9">
+                                <input class="form-control" :class="$getValidClass(error, 'nickname')" type="text" id="nickname" v-model="newUser.nickname" required />
+
+                                <div class="invalid-feedback">
+                                    <span v-for="msg in error.nickname">
                                         {{ msg }}
                                     </span>
                                 </div>
@@ -229,8 +244,12 @@
             onPatchUser(id) {
                 if(!this.$can('add_remove_role')) return new Promise(r => r());
                 if(!this.userDirty(id)) return new Promise(r => r());
-                let data = {};
                 let user = this.userList.find(u => u.id == id);
+                if(!user.email) {
+                    // TODO error message
+                    return;
+                }
+                let data = {};
                 if(this.isDirty(`roles_${id}`)) {
                     let roles = [];
                     for(let i=0; i<user.roles.length; i++) {
@@ -278,8 +297,14 @@
                     vm.hideDeleteUserModal();
                 });
             },
-            updatePassword(id) {
-                if(!vm.$can('change_password')) return;
+            updatePassword(email) {
+                if(!this.$can('change_password')) return;
+                const data = {
+                    email: email
+                };
+                $httpQueue.add(() => $http.post(`user/reset/password`, data).then(response => {
+                }).catch(e => {
+                }));
             },
             isDirty(fieldname) {
                 if(this.fields[fieldname]) {
@@ -288,7 +313,9 @@
                 return false;
             },
             userDirty(uid) {
-                return this.isDirty(`roles_${uid}`) || this.isDirty(`email_${uid}`);
+                const u = this.userList.find(u => u.id == uid);
+                return this.isDirty(`roles_${uid}`) ||
+                    (this.isDirty(`email_${uid}`) && !!u.email);
             },
             setPristine(fieldname) {
                 this.$validator.flag(fieldname, {

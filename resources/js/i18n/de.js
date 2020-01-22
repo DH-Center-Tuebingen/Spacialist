@@ -125,8 +125,10 @@ const de = {
         label: 'Beschriftung',
         url: 'URL',
         name: 'Name',
+        nickname: 'Spitzname',
         'display-name': 'Anzeigename',
         email: 'E-Mail-Adresse',
+        email_or_nick: 'E-Mail-Adresse oder Name',
         password: 'Passwort',
         'remember-me': 'Eingeloggt bleiben',
         description: 'Beschreibung',
@@ -327,10 +329,12 @@ const de = {
                 }
             },
             info: {
+                password_reset_link: 'Wenn diese Option aktiviert wird, müssen die <code>MAIL_*</code>-Werte in der <code>.env</code>-Datei gesetzt werden. <a href="https://github.com/eScienceCenter/Spacialist/blob/master/INSTALL.md#send-mails" target="_blank">Weitere Informationen</a>.',
                 columns: 'Die Summe der Werte der Spalten darf 12 nicht überschreiten.'
             },
             key: {
                 language: 'Sprache',
+                password_reset_link: 'Passwort per Link zurücksetzen',
                 columns: {
                     title: 'Spalten Hauptansicht',
                     left: 'Linke Spalte',

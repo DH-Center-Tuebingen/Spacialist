@@ -5,16 +5,19 @@
             <button type="button" class="btn btn-success mb-2" @click="onCreateAttribute">
                 <i class="fas fa-fw fa-plus"></i> {{ $t('main.datamodel.attribute.add-button') }}
             </button>
-            <attributes
-                class="col scroll-y-auto"
-                group="attributes"
-                :attributes="attributeList"
-                :values="attributeListValues"
-                :selections="{}"
-                :is-source="true"
-                :on-delete="onDeleteAttribute"
-                :show-info="true">
-            </attributes>
+            <div class="col overflow-hidden">
+                <attributes
+                    v-if="initFinished"
+                    class="h-100 scroll-y-auto scroll-x-hidden"
+                    group="attributes"
+                    :attributes="attributeList"
+                    :values="attributeListValues"
+                    :selections="{}"
+                    :is-source="true"
+                    :on-delete="onDeleteAttribute"
+                    :show-info="true">
+                </attributes>
+            </div>
         </div>
         <div class="col-md-2 d-flex flex-column">
             <h4>{{ $t('main.datamodel.entity.title') }}</h4>

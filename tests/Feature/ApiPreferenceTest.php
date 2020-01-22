@@ -25,7 +25,7 @@ class ApiPreferenceTest extends TestCase
             ])
             ->get('/api/v1/preference');
 
-        $response->assertJsonCount(9);
+        $response->assertJsonCount(10);
         $response->assertJsonStructure([
             '*' => [
                 'id',
@@ -107,6 +107,12 @@ class ApiPreferenceTest extends TestCase
                     'proj4' => '+proj=longlat +datum=WGS84 +no_defs '
                 ],
                 'allow_override' => false
+            ],
+            'prefs.enable-password-reset-link' => [
+                'id' => 10,
+                'label' => 'prefs.enable-password-reset-link',
+                'value' => false,
+                'allow_override' => false
             ]
         ]);
     }
@@ -140,7 +146,7 @@ class ApiPreferenceTest extends TestCase
             ])
             ->get('/api/v1/preference/1');
 
-        $response->assertJsonCount(9);
+        $response->assertJsonCount(10);
         $response->assertJsonStructure([
             '*' => [
                 'id',
@@ -221,6 +227,12 @@ class ApiPreferenceTest extends TestCase
                     'epsg' => 4326,
                     'proj4' => '+proj=longlat +datum=WGS84 +no_defs '
                 ],
+                'allow_override' => false
+            ],
+            'prefs.enable-password-reset-link' => [
+                'id' => 10,
+                'label' => 'prefs.enable-password-reset-link',
+                'value' => false,
                 'allow_override' => false
             ]
         ]);

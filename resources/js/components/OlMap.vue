@@ -1255,7 +1255,9 @@
                     }
                 }
                 this.extent = extent;
-                this.map.getView().fit(this.extent);
+                this.map.getView().fit(this.extent, {
+                    maxZoom: 19 // set max zoom on fit to max osm zoom level
+                });
             },
             getEntityExtent() {
                 const layers = this.entityLayersGroup.getLayers();

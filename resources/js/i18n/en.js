@@ -125,8 +125,10 @@ const en = {
         label: 'Label',
         url: 'URL',
         name: 'Name',
+        nickname: 'Nickname',
         'display-name': 'Displayname',
         email: 'E-Mail Address',
+        email_or_nick: 'E-Mail Address or Nickname',
         password: 'Password',
         'remember-me': 'Remember me',
         description: 'Description',
@@ -327,10 +329,12 @@ const en = {
                 }
             },
             info: {
+                password_reset_link: 'If this option is enabled, you have to set the <code>MAIL_*</code> settings in your <code>.env</code> file. <a href="https://github.com/eScienceCenter/Spacialist/blob/master/INSTALL.md#send-mails" target="_blank">Further informations</a>.',
                 columns: 'The sum of the column values must not be higher than 12.'
             },
             key: {
                 language: 'Language',
+                password_reset_link: 'Enable Reset Password Link',
                 columns: {
                     title: 'Columns in Main View',
                     left: 'Left Column',

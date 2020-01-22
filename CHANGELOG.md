@@ -1,6 +1,21 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.7.3 (Unreleased)
+### Added
+- CLI command to create new users/roles
+- Login using a nickname instead of e-mail address
+### Fixed
+- Weird layout for some attribute lists
+- Do not open tree elements instantly when hovering while drag&drop (a delay of 500ms is now used/respected)
+- Dropping entities when tree is scrolled
+- Do not allow to save a user/role without required fields set
+- Set max zoom level on map fit to fix blank map layer due to unsupported layer zoom
+- "Send Reset-Mail" now actually sends reset mails (Please see [INSTALL.md](INSTALL.md#send-mails) for further details on how to set this up)
+### Changed
+- Replace JS bibtex-parser
+- Replace debounce package with lodash's
+
 ## 0.7.2
 ### Changed
 - Make debounce delay in TypeaheadSearch component a prop and increase default value (`250ms` => `500ms`)

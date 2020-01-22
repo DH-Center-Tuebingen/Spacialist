@@ -323,6 +323,7 @@ require('bootstrap');
 window.Vue = require('vue');
 window._clone = require('lodash/clone');
 window._orderBy = require('lodash/orderBy');
+window._debounce = require('lodash/debounce');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
 require('./globals.js');
 

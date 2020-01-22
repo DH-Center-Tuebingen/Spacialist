@@ -9,7 +9,7 @@
             v-model="query"
             :placeholder="$t(placeholder)"
             @blur="closeSelect"
-            @input="debounce"
+            @input="defaultUpdate"
             @keydown.down="down"
             @keydown.enter="hit"
             @keydown.esc="reset"

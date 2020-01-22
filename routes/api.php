@@ -99,6 +99,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/role', 'UserController@getRoles');
 
     Route::post('/user', 'UserController@addUser');
+    Route::post('/user/reset/password', 'Auth\\ForgotPasswordController@sendResetLinkEmail');
     Route::post('/role', 'UserController@addRole');
     Route::post('/auth/logout', 'UserController@logout');
 

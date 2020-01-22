@@ -8,9 +8,6 @@
 @import "~tree-component/dist/tree.min.css";
 @import "tree";
 
-// Datepicker
-@import "~v-calendar/lib/v-calendar.min.css";
-
 // vue-upload-component
 @import "upload";
 
@@ -18,7 +15,7 @@
 @import "multiselect";
 
 // entity menu
-@import "contextmenu";
+@import '~vue-context/src/sass/vue-context';
 
 // map
 @import "map";

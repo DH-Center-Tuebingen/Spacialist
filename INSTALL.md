@@ -154,6 +154,8 @@ MAIL_PORT=2525
 MAIL_USERNAME=null
 MAIL_PASSWORD=null
 MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=webmaster@localhost
+MAIL_FROM_NAME=Webmaster
 
 PUSHER_APP_ID=
 PUSHER_APP_KEY=
@@ -164,6 +166,9 @@ JWT_BLACKLIST_GRACE_PERIOD=0
 
 MIX_APP_PATH=
 ```
+
+#### Send Mails
+If you want to send mails to your users (e.g. password reset), you have to adjust the `MAIL_*` settings to match a smtp server from where you can send mails.
 
 ### Configure JavaScript
 Spacialist is based on several JavaScript libraries, which are bundled using Webpack (configuration is done using Laravel Mix, a webpack-wrapper for Laravel). Only the zipped releases contain the already bundled JavaScript libraries. All other users have to run webpack to bundle these libraries.

@@ -72,11 +72,18 @@ class UserController extends Controller
 
     public function login(Request $request) {
         $this->validate($request, [
-            'email' => 'required|email|max:255|exists:users,email',
+            'email' => 'required_without:nickname|email|max:255|exists:users,email',
+            'nickname' => 'required_without:email|alpha_num|max:255|exists:users,nickname',
             'password' => 'required'
         ]);
 
-        $credentials = request(['email', 'password']);
+        $creds = ['password'];
+        if($request->has('nickname')) {
+            $creds[] = 'nickname';
+        } else {
+            $creds[] = 'email';
+        }
+        $credentials = request($creds);
 
         if(!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => __('Invalid Credentials')], 400);
@@ -95,17 +102,20 @@ class UserController extends Controller
             ], 403);
         }
         $this->validate($request, [
-            'email' => 'required|email|max:255|unique:users,email',
+            'email' => 'required_without:nickname|email|max:255|unique:users,email',
+            'nickname' => 'required_without:email|alpha_dash|max:255|unique:users,nickname',
             'name' => 'required|string|max:255',
             'password' => 'required',
         ]);
 
         $name = $request->get('name');
+        $nickname = $request->get('nickname');
         $email = $request->get('email');
         $password = Hash::make($request->get('password'));
 
         $user = new User();
         $user->name = $name;
+        $user->nickname = $nickname;
         $user->email = Str::lower($email);
         $user->password = $password;
         $user->save();

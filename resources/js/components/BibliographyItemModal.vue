@@ -77,7 +77,7 @@
 </template>
 
 <script>
-    const bibtexParse = require('bibtex-parse');
+    import * as bibtexParser from '@retorquere/bibtex-parser';
 
     export default {
         props: {
@@ -122,16 +122,16 @@
             },
             fromBibtexEntry(str) {
                 try {
-                    const content = bibtexParse.parse(str);
+                    const content = bibtexParser.parse(str);
                     // only parse if str contains exactly one entry
-                    if(!content || content.length !== 1) return;
-                    const entry = content[0];
+                    if(!content || !content.entries || content.entries.length !== 1) return;
+                    const entry = content.entries[0];
                     const type = this.availableTypes.find(t => t.name == entry.type);
                     Vue.set(this.data, 'type', type);
-                    Vue.set(this.data.fields, 'citekey', entry.id);
-                    for(let k in entry.properties) {
-                        const p = entry.properties[k];
-                        Vue.set(this.data.fields, k, p.value);
+                    Vue.set(this.data.fields, 'citekey', entry.key);
+                    for(let k in entry.fields) {
+                        const p = entry.fields[k];
+                        Vue.set(this.data.fields, k, p.join(', '));
                     }
                 } catch(err) {
                 }

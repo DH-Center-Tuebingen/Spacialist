@@ -113,9 +113,16 @@ Vue.prototype.$getErrorMessages = function(error, msgObject, suffix = '') {
 }
 
 Vue.prototype.$getValidClass = function(msgObject, field) {
+    let isInvalid = false;
+    field.split('|').forEach(f => {
+        if(!!msgObject[f]) {
+            isInvalid = true;
+        }
+    });
+
     return {
         // 'is-valid': !msgObject[field],
-        'is-invalid': !!msgObject[field]
+        'is-invalid': isInvalid
     };
 }
 

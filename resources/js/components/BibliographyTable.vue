@@ -396,7 +396,6 @@
 
 <script>
     import infiniteScroll from 'vue-infinite-scroll';
-    import debounce from 'debounce';
 
     export default {
         directives: {
@@ -408,7 +407,7 @@
             }));
         },
         created() {
-            this.debouncedSearch = debounce(e => {
+            this.debouncedSearch = _debounce(e => {
                 this.query = e.target.value;
             }, this.debounceTimeout);
         },
