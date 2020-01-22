@@ -178,11 +178,11 @@ class FileController extends Controller
             ], 403);
         }
         $dates = File::distinct()
-            ->select(\DB::raw("DATE(created) AS created_date"))
+            ->selectRaw("DATE(created) AS created_date")
             ->orderBy('created_date', 'asc')
             ->pluck('created_date');
         $years = File::distinct()
-            ->select(\DB::raw("EXTRACT(year from created) AS created_year"))
+            ->selectRaw("EXTRACT(year from created) AS created_year")
             ->orderBy('created_year', 'asc')
             ->pluck('created_year');
         $dates = $dates->map(function($d) {
