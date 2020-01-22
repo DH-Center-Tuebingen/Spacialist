@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## 0.7.4
 ### Added
 - Bing Maps Support
+### Changed
+- Select newly created layer in Layer Editor
 
 ## 0.7.3
 ### Added
