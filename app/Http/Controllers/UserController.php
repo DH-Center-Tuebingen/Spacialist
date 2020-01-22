@@ -124,20 +124,6 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function sendResetPasswordMail(Request $request) {
-        $user = auth()->user();
-        if(!$user->can('change_password')) {
-            return response()->json([
-                'error' => __('You do not have the permission to reset passwords')
-            ], 403);
-        }
-        $this->validate($request, [
-            'email' => 'required|email|max:255|exists:users,email'
-        ]);
-
-        $this->sendResetLinkEmail($request);
-    }
-
     public function addRole(Request $request) {
         $user = auth()->user();
         if(!$user->can('add_edit_role')) {
