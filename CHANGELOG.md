@@ -1,7 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.7.3 (Unreleased)
+## 0.7.4
+### Added
+- Bing Maps Support
+
+## 0.7.3
 ### Added
 - CLI command to create new users/roles
 - Login using a nickname instead of e-mail address

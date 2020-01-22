@@ -34,19 +34,19 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="url" class="col-md-4 col-form-label">
-                        {{ $t('global.url') }}:
-                    </label>
-                    <div class="col-md-8">
-                        <input type="text" id="url" class="form-control" v-model="layer.url" required />
-                    </div>
-                </div>
-                <div class="form-group row">
                     <label for="type" class="col-md-4 col-form-label">
                         {{ $t('global.type') }}:
                     </label>
                     <div class="col-md-8">
                         <input type="text" id="type" class="form-control" v-model="layer.type" required />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="url" class="col-md-4 col-form-label">
+                        {{ $t('global.url') }}:
+                    </label>
+                    <div class="col-md-8">
+                        <input type="text" id="url" class="form-control" v-model="layer.url" />
                     </div>
                 </div>
                 <div class="form-group row">
