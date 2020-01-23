@@ -711,7 +711,8 @@
                         view: new View({
                             center: [0, 0],
                             projection: 'EPSG:3857',
-                            zoom: 2
+                            zoom: 2,
+                            extent: vm.defaultExtent
                         }),
                         overlays: [
                             vm.overlay,
