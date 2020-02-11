@@ -19,16 +19,16 @@
                 </div>
                 <form role="form" class="mt-2" @submit.prevent="onUpdateCertainty">
                     <div class="form-group">
-                        <textarea class="form-control" v-model="refs.value.certainty_description" :placeholder="$t('main.entity.references.certaintyc')"></textarea>
+                        <textarea class="form-control" v-model="refs.value.certainty_description" :disabled="disabled" :placeholder="$t('main.entity.references.certaintyc')"></textarea>
                     </div>
                     <div class="text-center">
-                        <button type="submit" class="btn btn-outline-success">
+                        <button type="submit" class="btn btn-outline-success" v-if="!disabled">
                             <i class="fas fa-fw fa-save"></i> {{ $t('main.entity.references.certaintyu') }}
                         </button>
                     </div>
                 </form>
-                <h4 class="mt-3">{{ $t('main.entity.references.bibliography.title') }}</h4>
-                <table class="table table-hover">
+                <h4 class="my-3">{{ $t('main.entity.references.bibliography.title') }}</h4>
+                <table class="table table-hover mt-0 mb-4" v-if="refs.refs.length > 0">
                     <tbody>
                         <tr class="d-flex flex-row" v-for="reference in refs.refs">
                             <td class="text-left py-2 col px-0 pl-1">
@@ -42,7 +42,7 @@
                             <td class="text-right p-2 col">
                                 <div class="d-flex flex-column">
                                     <div>
-                                        <p class="font-weight-light font-italic mb-0" v-if="editReference.id != reference.id">
+                                        <p class="font-weight-light font-italic mb-0" v-if="disabled || editReference.id != reference.id">
                                             {{ reference.description }}
                                         </p>
                                         <div class="d-flex" v-else>
@@ -61,7 +61,7 @@
                                 </div>
                             </td>
                             <td class="px-0 pr-1">
-                                <div class="dropdown">
+                                <div class="dropdown" v-if="!disabled">
                                     <span id="dropdownMenuButton" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fas fa-fw fa-ellipsis-h"></i>
                                     </span>
@@ -78,51 +78,56 @@
                         </tr>
                     </tbody>
                 </table>
-                <h5>{{ $t('main.entity.references.bibliography.add') }}</h5>
-                <form role="form" @submit.prevent="onAddReference(newItem)">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <multiselect
-                                id="bibliography-search"
-                                label="title"
-                                track-by="id"
-                                v-model="newItem.bibliography"
-                                :closeOnSelect="true"
-                                :hideSelected="true"
-                                :internal-search="false"
-                                :multiple="false"
-                                :options="matchingBibliography"
-                                :placeholder="$t('global.select.placehoder')"
-                                :select-label="$t('global.select.select')"
-                                :deselect-label="$t('global.select.deselect')"
-                                @search-change="onBibliographySearchChanged">
-                                <template slot="singleLabel" slot-scope="props">
-                                    <span class="option__desc">
-                                        <span class="option__title">
-                                            {{ props.option.title }}
+                <p class="alert alert-warning mt-0 mb-4" v-else>
+                    {{ $t('main.entity.references.bibliography.empty') }}
+                </p>
+                <template v-if="!disabled">
+                    <h5>{{ $t('main.entity.references.bibliography.add') }}</h5>
+                    <form role="form" @submit.prevent="onAddReference(newItem)">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <multiselect
+                                    id="bibliography-search"
+                                    label="title"
+                                    track-by="id"
+                                    v-model="newItem.bibliography"
+                                    :closeOnSelect="true"
+                                    :hideSelected="true"
+                                    :internal-search="false"
+                                    :multiple="false"
+                                    :options="matchingBibliography"
+                                    :placeholder="$t('global.select.placehoder')"
+                                    :select-label="$t('global.select.select')"
+                                    :deselect-label="$t('global.select.deselect')"
+                                    @search-change="onBibliographySearchChanged">
+                                    <template slot="singleLabel" slot-scope="props">
+                                        <span class="option__desc">
+                                            <span class="option__title">
+                                                {{ props.option.title }}
+                                            </span>
                                         </span>
-                                    </span>
-                                </template>
-                                <template slot="option" slot-scope="props">
-                                    <div class="option__desc">
-                                        <span class="option__title d-block">
-                                            {{ props.option.title }}
-                                        </span>
-                                        <span class="option__small">
-                                            {{ props.option.author }}, <span class="text-muted font-weight-light">{{ props.option.year}}</span>
-                                        </span>
-                                    </div>
-                                </template>
-                            </multiselect>
+                                    </template>
+                                    <template slot="option" slot-scope="props">
+                                        <div class="option__desc">
+                                            <span class="option__title d-block">
+                                                {{ props.option.title }}
+                                            </span>
+                                            <span class="option__small">
+                                                {{ props.option.author }}, <span class="text-muted font-weight-light">{{ props.option.year}}</span>
+                                            </span>
+                                        </div>
+                                    </template>
+                                </multiselect>
+                            </div>
+                            <div class="col-md-6">
+                                <textarea class="form-control" v-model="newItem.description" :placeholder="$t('main.entity.references.bibliography.comment')"></textarea>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <textarea class="form-control" v-model="newItem.description" :placeholder="$t('main.entity.references.bibliography.comment')"></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-outline-success col-md-12 mt-2" :disabled="addReferenceDisabled">
-                        <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.references.bibliography.add-button') }}
-                    </button>
-                </form>
+                        <button type="submit" class="btn btn-outline-success col-md-12 mt-2" :disabled="addReferenceDisabled">
+                            <i class="fas fa-fw fa-plus"></i> {{ $t('main.entity.references.bibliography.add-button') }}
+                        </button>
+                    </form>
+                </template>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click="hideModal">
@@ -141,6 +146,11 @@
             bibliography: {
                 required: true,
                 type: Array
+            },
+            disabled: {
+                required: false,
+                type: Boolean,
+                default: false
             },
             refs: {
                 required: true,
@@ -173,6 +183,7 @@
                 this.$modal.show('entity-references-modal');
             },
             setCertainty(event) {
+                if(this.disabled) return;
                 const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
                 const clickPos = event.layerX; // in px
                 const currentValue = this.refs.value.certainty;

@@ -40,6 +40,7 @@
                     </div>
                     <div v-else-if="column.datatype == 'entity'">
                         <entity-search
+                            :disabled="disabled"
                             :id="`attribute-${column.id}`"
                             :name="`attribute-${column.id}`"
                             :on-select="selection => setEntitySearchResult(selection, row, column.id, $index)"
@@ -79,6 +80,7 @@
                     </div>
                     <div v-else-if="column.datatype == 'entity'">
                         <entity-search
+                            :disabled="disabled"
                             :id="`attribute-${column.id}`"
                             :name="`attribute-${column.id}`"
                             :on-select="selection => setEntitySearchResult(selection, newTableCols, column.id)"

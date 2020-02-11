@@ -693,7 +693,13 @@
                             new LayerSwitcher(),
                             new OverviewMap(),
                             new Rotate(),
-                            new ScaleLine()
+                            new ScaleLine({
+                                units: 'metric',
+                                bar: true,
+                                steps: 4,
+                                text: true,
+                                minWidth: 150
+                            })
                         ]),
                         interactions: defaultInteractions().extend([
                             new DragRotate({

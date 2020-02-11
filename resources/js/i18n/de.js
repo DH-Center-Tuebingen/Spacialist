@@ -221,6 +221,7 @@ const de = {
                 bibliography: {
                     title: 'Quellen',
                     add: 'Neue Quellen hinzufügen',
+                    empty: 'Es wurden noch keine Quellen hinzugefügt',
                     comment: 'Kommentar',
                     'add-button': 'Quelle hinzufügen'
                 },

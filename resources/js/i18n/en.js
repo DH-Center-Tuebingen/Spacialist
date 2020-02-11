@@ -221,6 +221,7 @@ const en = {
                 bibliography: {
                     title: 'Literature',
                     add: 'Add new Reference',
+                    empty: 'No references have been added yet',
                     comment: 'Comment',
                     'add-button': 'Add Reference'
                 },

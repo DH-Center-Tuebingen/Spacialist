@@ -1,24 +1,30 @@
 <template>
     <div v-if="rulesLoaded">
-        <div class="mb-3 p-0 scroll-y-auto">
-            <ul class="list-group mx-0 flex-grow-1 scroll-y-auto" v-if="rules.length > 0">
-                <li class="list-group-item d-flex justify-content-between" v-for="rule in rules">
-                    <a href="#" @click.prevent="">
-                        <i class="fas fa-fw fa-users-cog"></i> {{ $getGroup(rule.group_id).display_name }}
-                    </a>
-                    <template>
-                        <span v-if="rule.rules == 'rw'">
-                            {{ $t('global.write_access') }}
-                        </span>
-                        <span v-else>
-                            {{ $t('global.read_only') }}
-                        </span>
-                    </template>
-                    <a href="#" class="text-body" @click.prevent="removeAccessRule(rule)" v-if="$hasWriteAccess(model)">
-                        <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
-                    </a>
-                </li>
-            </ul>
+        <div class="mb-3 px-3 scroll-y-auto">
+            <table class="table table-hover table-borderless scroll-y-auto m-0 text-muted" v-if="rules.length > 0">
+                <tbody>
+                    <tr v-for="rule in rules">
+                        <td>
+                            <i class="fas fa-fw fa-users-cog"></i> {{ $getGroup(rule.group_id).display_name }}
+                        </td>
+                        <td>
+                            <template>
+                                <span v-if="rule.rules == 'rw'">
+                                    {{ $t('global.write_access') }}
+                                </span>
+                                <span v-else>
+                                    {{ $t('global.read_only') }}
+                                </span>
+                            </template>
+                        </td>
+                        <td class="text-right">
+                            <a href="#" class="text-body" @click.prevent="removeAccessRule(rule)" v-if="$hasWriteAccess(model)">
+                                <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
             <p class="alert alert-info my-0" v-else>
                 {{ $t('main.group.access_restriction_no_groups') }}
             </p>

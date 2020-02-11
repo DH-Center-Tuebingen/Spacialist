@@ -8,6 +8,11 @@
     export default {
         extends: VueTypeahead,
         props: {
+            disabled: {
+                type: Boolean,
+                required: false,
+                default: false
+            },
             placeholder: {
                 type: String,
                 default: 'global.search'

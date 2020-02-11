@@ -642,7 +642,6 @@ import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
 import GroupRestriction from './components/GroupRestriction.vue';
 
 // Page Components
-import EntityReferenceModal from './components/EntityReferenceModal.vue';
 import DiscardChangesModal from './components/DiscardChangesModal.vue';
 import AboutDialog from './components/About.vue';
 import ErrorModal from './components/Error.vue';
@@ -660,7 +659,6 @@ Vue.component('entity-types', EntityTypes);
 Vue.component('ol-map', OlMap);
 Vue.component('color-gradient', ColorGradient);
 Vue.component('entity-breadcrumbs', EntityBreadcrumbs);
-Vue.component('entity-reference-modal', EntityReferenceModal);
 Vue.component('discard-changes-modal', DiscardChangesModal);
 Vue.component('about-dialog', AboutDialog);
 Vue.component('error-modal', ErrorModal);

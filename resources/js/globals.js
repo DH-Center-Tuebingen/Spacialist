@@ -38,8 +38,43 @@ Vue.directive('can', {
         }
     }
 });
+Vue.directive('groups', {
+    terminal: true,
+    update: function(el, binding, vnode) {
+        const m = binding.modifiers;
+        const v = binding.value;
+        if(!m) {
+            Vue.prototype.$setAttribute(el, 'disabled', !!v.d);
+            Vue.prototype.$setAttribute(el, 'readonly', !!v.r);
+            el.style.display = !!v.h ? 'none' : '';
+            return;
+        };
+        const acc = !v.m ? false : !Vue.prototype.$hasWriteAccess(v.m);
+        let val = false;
+        if(m.dis) {
+            val = m.and ? !!v.d && acc : !!v.d || acc;
+            Vue.prototype.$setAttribute(el, 'disabled', val);
+        }
+        if(m.ro) {
+            val = m.and ? !!v.r && acc : !!v.r || acc;
+            Vue.prototype.$setAttribute(el, 'readonly', val);
+        }
+        if(m.hide) {
+            val = m.and ? !!v.h && acc : !!v.h || acc;
+            el.style.display = val ? 'none' : '';
+        }
+    }
+});
 
 // Prototype
+Vue.prototype.$setAttribute = function(el, name, set) {
+    if(set) {
+        el.setAttribute(name, name);
+    } else {
+        el.removeAttribute(name);
+    }
+}
+
 Vue.prototype.$can = function(permissionString, oneOf) {
     oneOf = oneOf || false;
     const user = this.$auth.user();

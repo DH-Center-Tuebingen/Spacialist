@@ -24,11 +24,11 @@
                     </button>
                 </form>
             </h3>
-            <span>
-                <button type="submit" form="entity-attribute-form" class="btn btn-success" :disabled="!hasWriteAccess || !isFormDirty || !$can('duplicate_edit_concepts')">
+            <span v-groups.hide="{m: selectedEntity}">
+                <button type="submit" form="entity-attribute-form" class="btn btn-success" :disabled="!isFormDirty || !$can('duplicate_edit_concepts')">
                     <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
                 </button>
-                <button type="button" class="btn btn-danger" :disabled="!hasWriteAccess || !$can('delete_move_concepts')" @click="deleteEntity(selectedEntity)">
+                <button type="button" class="btn btn-danger" :disabled="!$can('delete_move_concepts')" @click="deleteEntity(selectedEntity)">
                     <i class="fas fa-fw fa-trash"></i> {{ $t('global.delete') }}
                 </button>
             </span>
@@ -77,6 +77,7 @@
         <router-view
             v-can="'view_concept_props'"
             :bibliography="bibliography"
+            :disabled="!selectedEntity.hasWriteAccess"
             :refs="attributeReferences">
         </router-view>
     </div>
@@ -169,7 +170,9 @@
                                     break;
                             }
                         }
-                        this.selectedEntity.attributes.push(data.attributes[i]);
+                        // disable attribute if user does not have write access
+                        // for the selected entity
+                        this.selectedEntity.attributes.push({...data.attributes[i], isDisabled: !this.selectedEntity.hasWriteAccess});
                     }
                     // if result is empty, php returns [] instead of {}
                     if(data.selections instanceof Array) {
@@ -286,6 +289,7 @@
                 this.newEntityName = '';
             },
             openEntityAccessRulesModal(entity) {
+                if(!this.hasWriteAccessTo(entity)) return;
                 this.$modal.show(EntityAccessRulesModal, {
                     entity: entity
                 }, {
@@ -380,6 +384,9 @@
                     },
                     query: this.$route.query
                 });
+            },
+            hasWriteAccessTo(entity) {
+                return this.$hasWriteAccess(entity);
             },
             hasReferenceGroup: function(group) {
                 if(!this.selectedEntity.references) return false;

@@ -61,6 +61,7 @@
                     <div v-else-if="attribute.datatype == 'entity'">
                         <entity-search
                             v-validate=""
+                            :disabled="attribute.isDisabled"
                             :id="'attribute-'+attribute.id"
                             :name="'attribute-'+attribute.id"
                             :on-select="selection => setEntitySearchResult(selection, attribute.id)"

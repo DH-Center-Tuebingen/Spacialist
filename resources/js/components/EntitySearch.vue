@@ -7,6 +7,7 @@
         autocomplete="off"
         class="form-control"
         v-model="query"
+        :disabled="disabled"
         :placeholder="$t(placeholder)"
         @blur="closeSelect"
         @input="debounce"
@@ -15,7 +16,7 @@
         @keydown.esc="reset"
         @keydown.up="up"/>
         <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" @click="clearItem">
+            <button class="btn btn-outline-secondary" type="button" :disabled="disabled" @click="clearItem">
                 <i class="fas fa-fw fa-times"></i>
             </button>
             <span class="input-group-text multiselect-search">
