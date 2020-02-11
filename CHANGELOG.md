@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Bing Maps Support
 ### Fixed
 - Accidentally moving map outside viewport
+- Ignore uppercase/lowercase letters in login form user names
 ### Changed
 - Select newly created layer in Layer Editor
 

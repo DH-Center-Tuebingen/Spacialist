@@ -3,6 +3,7 @@
 namespace App\Http\Middleware\Src;
 
 use Illuminate\Foundation\Http\Middleware\TransformsRequest;
+use Illuminate\Support\Str;
 
 class LowerStrings extends TransformsRequest
 {
@@ -43,6 +44,6 @@ class LowerStrings extends TransformsRequest
             }
         }
 
-        return is_string($value) ? strtolower($value) : $value;
+        return is_string($value) ? Str::lower($value) : $value;
     }
 }

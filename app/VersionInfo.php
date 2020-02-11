@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Support\Str;
+
 class VersionInfo {
     // Semantic versioning
     private $major;
@@ -61,7 +63,7 @@ class VersionInfo {
     }
 
     public function getFullRelease() {
-        $releaseName = strtolower($this->releaseName);
+        $releaseName = Str::lower($this->releaseName);
         $release = "$this->release-$releaseName";
         if(isset($this->releaseHash)) {
             $release .= "-$this->releaseHash";

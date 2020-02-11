@@ -115,7 +115,7 @@ class UserController extends Controller
 
         $user = new User();
         $user->name = $name;
-        $user->nickname = $nickname;
+        $user->nickname = Str::lower($nickname);
         $user->email = Str::lower($email);
         $user->password = $password;
         $user->save();
@@ -210,7 +210,7 @@ class UserController extends Controller
             $user->touch();
         }
         if($request->has('email')) {
-            $user->email = $request->get('email');
+            $user->email = Str::lower($request->get('email'));
             $user->save();
         }
 
