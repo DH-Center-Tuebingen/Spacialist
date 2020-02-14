@@ -4,10 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
+use App\Traits\ModerationTrait;
 
 class AttributeValue extends Model
 {
     use PostgisTrait;
+    use ModerationTrait;
 
     protected $table = 'attribute_values';
     /**

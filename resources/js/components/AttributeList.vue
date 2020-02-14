@@ -10,7 +10,7 @@
             @add="added"
             @end="dropped"
             @start="dragged">
-            <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" v-show="!hiddenByDependency[attribute.id]">
+            <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled, 'bg-danger': localValues[attribute.id].moderation_state == 'pending'}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" v-show="!hiddenByDependency[attribute.id]">
                 <label class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
                     <div v-show="hoverState[i]">
                         <a v-show="onReorder" href="" @click.prevent="" class="reorder-handle" data-toggle="popover" :data-content="$t('global.resort')" data-trigger="hover" data-placement="bottom">
@@ -177,6 +177,16 @@
                     <iconclass v-else-if="attribute.datatype == 'iconclass'" :name="`attribute-${attribute.id}`" @input="updateValue($event, attribute.id)" :value="localValues[attribute.id].value" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""></iconclass>
                     <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  :name="'attribute-'+attribute.id" v-validate="" @blur="checkDependency(attribute.id)"/>
                 </div>
+                <template v-if="localValues[attribute.id].moderation_state == 'pending'">
+                    <div class="">
+                        <button type="button" class="btn btn-success" @click="handleModeration('accept', attribute.id)">
+                            Nimm an!
+                        </button>
+                        <button type="button" class="btn btn-success" @click="handleModeration('deny', attribute.id)">
+                            Weg damit!
+                        </button>
+                    </div>
+                </template>
             </div>
         </draggable>
         <modal :name="'geography-place-modal-'+uniqueId" width="80%" height="80%">
@@ -311,6 +321,11 @@
             this.attributes.forEach(a => this.checkDependency(a.id));
         },
         methods: {
+            handleModeration(type, aid) {
+                $http.patch(`entity/1/attribute/${aid}/moderation/${type}`, {}).then(response => {
+                    // TODO update ui
+                });
+            },
             onEnter(i) {
                 Vue.set(this.hovered, i, this.hoverEnabled);
             },

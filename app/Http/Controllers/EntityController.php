@@ -127,6 +127,7 @@ class EntityController extends Controller {
         } else {
             $attributes = AttributeValue::with(['attribute'])
                 ->where('entity_id', $id)
+                ->withModerated() // TODO based on user permission ('handle_moderations')
                 ->get();
         }
 
@@ -403,6 +404,84 @@ class EntityController extends Controller {
         $attrValue->lasteditor = $user->name;
         $values = $request->only(array_keys(AttributeValue::patchRules));
         $attrValue->patch($values);
+
+        return response()->json(null, 204);
+    }
+
+    public function denyModeration($id, $aid, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify an entity\'s data')
+            ], 403);
+        }
+
+        try {
+            Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+        try {
+            Attribute::findOrFail($aid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This attribute does not exist')
+            ], 400);
+        }
+
+        $attrValue = AttributeValue::where('entity_id', $id)
+            ->where('attribute_id', $aid)
+            ->onlyModerated()
+            ->first();
+
+        if(!isset($attrValue)) {
+            return response()->json([
+                'error' => __('This attribute value does not exist')
+            ], 400);
+        }
+
+        $attrValue->moderate('deny');
+
+        return response()->json(null, 204);
+    }
+
+    public function acceptModeration($id, $aid, Request $request) {
+        $user = auth()->user();
+        if(!$user->can('duplicate_edit_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to modify an entity\'s data')
+            ], 403);
+        }
+
+        try {
+            Entity::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This entity does not exist')
+            ], 400);
+        }
+        try {
+            Attribute::findOrFail($aid);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This attribute does not exist')
+            ], 400);
+        }
+
+        $attrValue = AttributeValue::where('entity_id', $id)
+            ->where('attribute_id', $aid)
+            ->onlyModerated()
+            ->first();
+
+        if(!isset($attrValue)) {
+            return response()->json([
+                'error' => __('This attribute value does not exist')
+            ], 400);
+        }
+
+        $attrValue->moderate('accept');
 
         return response()->json(null, 204);
     }
