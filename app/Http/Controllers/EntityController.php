@@ -297,6 +297,7 @@ class EntityController extends Controller {
                 case 'stringf':
                 case 'string':
                 case 'geography':
+                case 'iconclass':
                     $attrval->str_val = $value;
                     break;
                 case 'double':

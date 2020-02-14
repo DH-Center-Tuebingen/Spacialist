@@ -174,6 +174,7 @@
                             {{ localValues[attribute.id].value }}
                         </div>
                     </div>
+                    <iconclass v-else-if="attribute.datatype == 'iconclass'" :name="`attribute-${attribute.id}`" @input="updateValue($event, attribute.id)" :value="localValues[attribute.id].value" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""></iconclass>
                     <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  :name="'attribute-'+attribute.id" v-validate="" @blur="checkDependency(attribute.id)"/>
                 </div>
             </div>
@@ -222,6 +223,7 @@
     import Epoch from './Epoch.vue';
     import List from './List.vue';
     import Tabular from './Tabular.vue';
+    import Iconclass from './Iconclass.vue';
 
     export default {
         props: {
@@ -295,7 +297,8 @@
             'dimension': Dimension,
             'epoch': Epoch,
             'list': List,
-            'tabular': Tabular
+            'tabular': Tabular,
+            'iconclass': Iconclass
         },
         inject: ['$validator'],
         beforeMount() {
@@ -324,6 +327,9 @@
                     }
                 }
                 this.checkDependency(aid);
+            },
+            updateValue(eventValue, aid) {
+                this.localValues[aid].value = eventValue;
             },
             onAttributeExpand(e) {
                 Vue.set(this.expanded, e.id, e.state ? ['col-md-12'] : ['col-md-9']);
