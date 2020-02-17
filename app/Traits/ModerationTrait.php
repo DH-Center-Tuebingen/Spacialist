@@ -128,7 +128,7 @@ trait ModerationTrait
      *
      * @return bool|null
      */
-    public function moderate($action = 'accept')
+    public function moderate($action = 'accept', $ignoreCopyOn = false, $returnDirty = false)
     {
         // If the restoring event does not return false, we will proceed with this
         // restore operation. Otherwise, we bail out so the developer will stop
@@ -138,6 +138,18 @@ trait ModerationTrait
         }
 
         if($action == 'accept') {
+            // if copyOn is set, delete entries with same values
+            // in columns defined in copyOn
+            if(isset($this->copyOn) && count($this->copyOn) > 0) {
+                $query = self::whereNull($this->getModerationStateColumn());
+
+                foreach($this->copyOn as $col) {
+                    $query->where($col, $this->{$col});
+                }
+
+                $query->delete();
+            }
+
             $this->{$this->getModerationStateColumn()} = null;
             // Once we have saved the model, we will fire the "restored" event so this
             // developer will do anything they need to after a restore operation is
@@ -152,6 +164,22 @@ trait ModerationTrait
             $this->delete();
 
             $result = null;
+        } else {
+            if(!$ignoreCopyOn && isset($this->copyOn) && count($this->copyOn) > 0) {
+                $copy = $this->replicate();
+                $copy->{$this->getModerationStateColumn()} = $action;
+                $copy->save();
+
+                $result = $copy;
+            } else {
+                $this->{$this->getModerationStateColumn()} = $action;
+
+                if($returnDirty) {
+                    $result = $this;
+                } else {
+                    $result = $this->save();
+                }
+            }
         }
 
         return $result;

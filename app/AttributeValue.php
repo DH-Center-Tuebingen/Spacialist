@@ -48,6 +48,11 @@ class AttributeValue extends Model
     protected $postgisFields = [
         'geography_val',
     ];
+    
+    protected $copyOn = [
+        'entity_id',
+        'attribute_id',
+    ];
 
     const patchRules = [
         'certainty' => 'integer|between:0,100',

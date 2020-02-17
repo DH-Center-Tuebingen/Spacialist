@@ -6,6 +6,7 @@
                     <th>{{ $t('global.name') }}</th>
                     <th>{{ $t('global.display-name') }}</th>
                     <th>{{ $t('global.description') }}</th>
+                    <th>{{ $t('global.moderation') }}</th>
                     <th>{{ $t('global.permissions') }}</th>
                     <th>{{ $t('global.created-at') }}</th>
                     <th>{{ $t('global.updated-at') }}</th>
@@ -22,6 +23,14 @@
                     </td>
                     <td>
                         <input type="text" class="form-control" v-model="role.description" v-validate="" required :name="`desc_${role.id}`" />
+                    </td>
+                    <td>
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" v-model="role.moderated" v-validate="" :id="`moderate_${role.id}`" :name="`moderate_${role.id}`" />
+                            <label class="form-check-label" :for="`moderate_${role.id}`">
+                                Moderate this role
+                            </label>
+                        </div>
                     </td>
                     <td>
                         <multiselect
@@ -230,6 +239,9 @@
                 if(this.isDirty(`desc_${id}`)) {
                     data.description = role.description;
                 }
+                if(this.isDirty(`moderate_${id}`)) {
+                    data.moderated = role.moderated;
+                }
                 return $httpQueue.add(() => $http.patch(`role/${id}`, data).then(response => {
                     this.setRolePristine(id);
                     role.updated_at = response.data.updated_at;
@@ -275,7 +287,8 @@
                 const r = this.roleList.find(r => r.id == rid);
                 return this.isDirty(`perms_${rid}`) ||
                     (this.isDirty(`disp_${rid}`) && !!r.display_name) ||
-                    (this.isDirty(`desc_${rid}`) && !!r.description);
+                    (this.isDirty(`desc_${rid}`) && !!r.description) ||
+                    this.isDirty(`moderate_${rid}`);
             },
             setPristine(fieldname) {
                 this.$validator.flag(fieldname, {
@@ -287,6 +300,7 @@
                 this.setPristine(`perms_${rid}`);
                 this.setPristine(`disp_${rid}`);
                 this.setPristine(`desc_${rid}`);
+                this.setPristine(`moderate_${rid}`);
             }
         },
         data() {

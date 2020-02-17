@@ -16,6 +16,9 @@ class AddModerationAttribute extends Migration
         Schema::table('attribute_values', function (Blueprint $table) {
             $table->text('moderation_state')->nullable();
         });
+        Schema::table('roles', function (Blueprint $table) {
+            $table->boolean('moderated')->default(false);
+        });
     }
 
     /**
@@ -27,6 +30,9 @@ class AddModerationAttribute extends Migration
     {
         Schema::table('attribute_values', function (Blueprint $table) {
             $table->dropColumn('moderation_state');
+        });
+        Schema::table('roles', function (Blueprint $table) {
+            $table->dropColumn('moderated');
         });
     }
 }

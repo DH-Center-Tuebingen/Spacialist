@@ -10,7 +10,7 @@
             @add="added"
             @end="dropped"
             @start="dragged">
-            <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled, 'bg-danger': localValues[attribute.id].moderation_state == 'pending'}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" v-show="!hiddenByDependency[attribute.id]">
+            <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled, 'alert-danger rounded mx-1 py-2': canModerate(attribute.id)}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" v-show="!hiddenByDependency[attribute.id]">
                 <label class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
                     <div v-show="hoverState[i]">
                         <a v-show="onReorder" href="" @click.prevent="" class="reorder-handle" data-toggle="popover" :data-content="$t('global.resort')" data-trigger="hover" data-placement="bottom">
@@ -47,7 +47,7 @@
                     <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model.number="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
                     <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model.number="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
                     <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'boolean'" type="checkbox" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @change="checkDependency(attribute.id)" />
-                    <textarea class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)"></textarea>
+                    <textarea class="form-control" :disabled="attribute.isDisabled || needsModeration(attribute.id)" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)"></textarea>
                     <div v-else-if="attribute.datatype == 'percentage'" class="d-flex">
                         <input class="custom-range" :disabled="attribute.isDisabled" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @mouseup="checkDependency(attribute.id)"/>
                         <span class="ml-3">{{ localValues[attribute.id].value }}%</span>
@@ -177,14 +177,28 @@
                     <iconclass v-else-if="attribute.datatype == 'iconclass'" :name="`attribute-${attribute.id}`" @input="updateValue($event, attribute.id)" :value="localValues[attribute.id].value" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""></iconclass>
                     <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  :name="'attribute-'+attribute.id" v-validate="" @blur="checkDependency(attribute.id)"/>
                 </div>
-                <template v-if="localValues[attribute.id].moderation_state == 'pending'">
-                    <div class="">
+                <template v-if="canModerate(attribute.id)">
+                    <div class="col-md-9 offset-md-3">
+                        <div class="my-2">
+                            Entered by <span class="font-weight-bold">{{ localValues[attribute.id].lasteditor }}</span> at {{ localValues[attribute.id].updated_at }}
+                        </div>
                         <button type="button" class="btn btn-success" @click="handleModeration('accept', attribute.id)">
-                            Nimm an!
+                            Accept Changes
                         </button>
-                        <button type="button" class="btn btn-success" @click="handleModeration('deny', attribute.id)">
-                            Weg damit!
+                        <button type="button" class="btn btn-danger" @click="handleModeration('deny', attribute.id)">
+                            Deny Changes
                         </button>
+                        <button type="button" class="btn btn-info" @click="toggleModerationData(attribute.id)">
+                            <span v-if="!showingOriginalValue">Show original data</span>
+                            <span v-else>Show moderated data</span>
+                        </button>
+                    </div>
+                </template>
+                <template v-else-if="needsModeration(attribute.id)">
+                    <div class="col-md-9 offset-md-3 mt-2">
+                        <p class="alert alert-warning m-0">
+                            This attribute is locked, because it's value is still in moderation and not accepted yet.
+                        </p>
                     </div>
                 </template>
             </div>
@@ -321,10 +335,30 @@
             this.attributes.forEach(a => this.checkDependency(a.id));
         },
         methods: {
-            handleModeration(type, aid) {
-                $http.patch(`entity/1/attribute/${aid}/moderation/${type}`, {}).then(response => {
-                    // TODO update ui
+            handleModeration(action, aid) {
+                if(!this.canModerate(aid)) return;
+                const data = {
+                    action: action
+                };
+                $http.patch(`entity/1/attribute/${aid}/moderation`, data).then(response => {
+                    Vue.delete(this.localValues[aid], 'moderation_state');
+                    if(this.showingOriginalValue) {
+                        this.toggleModerationData(aid);
+                    }
+
+                    if(action == 'accept') {
+                        Vue.delete(this.localValues[aid], 'original_value');
+                    } else if(action == 'deny') {
+                        Vue.set(this.localValues[aid], 'value', this.localValues[aid].original_value);
+                        Vue.delete(this.localValues[aid], 'original_value');
+                    }
                 });
+            },
+            toggleModerationData(aid) {
+                const tmp = this.localValues[aid].value;
+                Vue.set(this.localValues[aid], 'value', this.localValues[aid].original_value);
+                Vue.set(this.localValues[aid], 'original_value', tmp);
+                this.showingOriginalValue = !this.showingOriginalValue;
             },
             onEnter(i) {
                 Vue.set(this.hovered, i, this.hoverEnabled);
@@ -345,6 +379,12 @@
             },
             updateValue(eventValue, aid) {
                 this.localValues[aid].value = eventValue;
+            },
+            needsModeration(aid) {
+                return this.localValues[aid].moderation_state == 'pending' && this.$moderated();
+            },
+            canModerate(aid) {
+                return this.localValues[aid].moderation_state == 'pending' && !this.$moderated();
             },
             onAttributeExpand(e) {
                 Vue.set(this.expanded, e.id, e.state ? ['col-md-12'] : ['col-md-9']);
@@ -579,6 +619,7 @@
                 expanded: {},
                 uniqueId: Math.random().toString(36),
                 selectedAttribute: -1,
+                showingOriginalValue: false,
                 initialGeoValues: [],
                 wktLayers: {},
                 currentGeoValue: '',

@@ -127,7 +127,7 @@ class EntityController extends Controller {
         } else {
             $attributes = AttributeValue::with(['attribute'])
                 ->where('entity_id', $id)
-                ->withModerated() // TODO based on user permission ('handle_moderations')
+                ->withModerated()
                 ->get();
         }
 
@@ -145,6 +145,18 @@ class EntityController extends Controller {
             }
             $value = $a->getValue();
             $a->value = $value;
+            if(isset($data[$a->attribute_id])) {
+                $olda = $data[$a->attribute_id];
+                // check if stored entry is moderated one
+                // if so, add current value as original value
+                // otherwise, set stored entry as original value
+                if(isset($olda->moderation_state)) {
+                    $olda->original_value = $value;
+                    $a = $olda;
+                } else {
+                    $a->original_value = $olda->value;
+                }
+            }
             $data[$a->attribute_id] = $a;
         }
 
@@ -280,6 +292,9 @@ class EntityController extends Controller {
                     $attrval = new AttributeValue();
                     $attrval->entity_id = $id;
                     $attrval->attribute_id = $aid;
+                    if($user->isModerated()) {
+                        $attrval->moderate('pending', true, true);
+                    }
                     break;
                 case 'replace':
                     $value = $patch['value'];
@@ -287,6 +302,9 @@ class EntityController extends Controller {
                         ['entity_id', '=', $id],
                         ['attribute_id', '=', $aid]
                     ])->first();
+                    if($user->isModerated()) {
+                        $attrval = $attrval->moderate('pending');
+                    }
                     break;
                 default:
                     return response()->json([
@@ -408,13 +426,16 @@ class EntityController extends Controller {
         return response()->json(null, 204);
     }
 
-    public function denyModeration($id, $aid, Request $request) {
+    public function handleModeration($id, $aid, Request $request) {
         $user = auth()->user();
         if(!$user->can('duplicate_edit_concepts')) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
         }
+        $this->validate($request, [
+            'action' => 'required|string'
+        ]);
 
         try {
             Entity::findOrFail($id);
@@ -442,46 +463,13 @@ class EntityController extends Controller {
             ], 400);
         }
 
-        $attrValue->moderate('deny');
-
-        return response()->json(null, 204);
-    }
-
-    public function acceptModeration($id, $aid, Request $request) {
-        $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        $action = $request->get('action');
+        if($action != 'accept' && $action != 'deny') {
             return response()->json([
-                'error' => __('You do not have the permission to modify an entity\'s data')
-            ], 403);
-        }
-
-        try {
-            Entity::findOrFail($id);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This entity does not exist')
+                'error' => __('Unsupported moderation action')
             ], 400);
         }
-        try {
-            Attribute::findOrFail($aid);
-        } catch(ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This attribute does not exist')
-            ], 400);
-        }
-
-        $attrValue = AttributeValue::where('entity_id', $id)
-            ->where('attribute_id', $aid)
-            ->onlyModerated()
-            ->first();
-
-        if(!isset($attrValue)) {
-            return response()->json([
-                'error' => __('This attribute value does not exist')
-            ], 400);
-        }
-
-        $attrValue->moderate('accept');
+        $attrValue->moderate($action);
 
         return response()->json(null, 204);
     }
