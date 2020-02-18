@@ -161,7 +161,7 @@ const DataModelDetailView = () => import(/* webpackChunkName: "group-bib" */ './
 
 import VueUploadComponent from 'vue-upload-component';
 import moment from 'moment';
-import VCalendar from 'v-calendar';
+import DatePicker from 'vue2-datepicker';
 import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
@@ -358,10 +358,7 @@ Vue.use(VueI18n);
 Vue.use(VModal, {dynamic: true});
 Vue.use(VeeValidate);
 Vue.use(Notifications);
-Vue.use(VCalendar, {
-    firstDayOfWeek: 2,
-    popoverVisibility: 'focus'
-});
+Vue.use(DatePicker);
 Vue.use(VueScrollTo);
 
 const router = new VueRouter({

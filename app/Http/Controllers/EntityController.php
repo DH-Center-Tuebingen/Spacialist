@@ -335,7 +335,7 @@ class EntityController extends Controller {
                         ['attribute_id', '=', $aid]
                     ])->first();
                     if($user->isModerated()) {
-                        $attrval = $attrval->moderate('pending');
+                        $attrval = $attrval->moderate('pending', false, true);
                     }
                     break;
                 default:

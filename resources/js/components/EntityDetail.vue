@@ -62,7 +62,8 @@
                 :metadata-addon="hasReferenceGroup"
                 :selections="selectedEntity.selections"
                 :values="selectedEntity.data"
-                @attr-dep-change="updateDependencyCounter">
+                @attr-dep-change="updateDependencyCounter"
+                @handle-moderation="handleModeration">
             </attributes>
         </form>
 
@@ -346,6 +347,24 @@
 
                 this.selectedEntity.lasteditor = entity.lasteditor;
                 this.selectedEntity.updated_at = entity.updated_at;
+            },
+            handleModeration(event) {
+                const action = event.action;
+                const aid = event.attribute_id;
+                const eid = this.selectedEntity.id;
+                const data = {
+                    action: action
+                };
+                $http.patch(`entity/${eid}/attribute/${aid}/moderation`, data).then(response => {
+                    Vue.delete(this.selectedEntity.data[aid], 'moderation_state');
+
+                    if(action == 'accept') {
+                        Vue.delete(this.selectedEntity.data[aid], 'original_value');
+                    } else if(action == 'deny') {
+                        Vue.set(this.selectedEntity.data[aid], 'value', this.selectedEntity.data[aid].original_value);
+                        Vue.delete(this.selectedEntity.data[aid], 'original_value');
+                    }
+                });
             },
             updateDependencyCounter(event) {
                 this.hiddenAttributes = event.counter;

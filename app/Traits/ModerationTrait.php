@@ -180,9 +180,12 @@ trait ModerationTrait
             if(!$ignoreCopyOn && isset($this->copyOn) && count($this->copyOn) > 0) {
                 $copy = $this->replicate();
                 $copy->{$this->getModerationStateColumn()} = $action;
-                $copy->save();
 
-                $result = $copy;
+                if($returnDirty) {
+                    $result = $copy;
+                } else {
+                    $result = $copy->save();
+                }
             } else {
                 $this->{$this->getModerationStateColumn()} = $action;
 

@@ -67,36 +67,27 @@
                             :value="localValues[attribute.id].name">
                         </entity-search>
                     </div>
-                    <v-date-picker
-                        mode="single"
+                    <date-picker
+                        class="w-100"
                         v-else-if="attribute.datatype == 'date'"
-                        v-model="localValues[attribute.id].value"
                         v-validate=""
+                        :id="`attribute-${attribute.id}`"
+                        :disabled="attribute.isDisabled || modificationLocked(attribute.id)"
+                        :disabled-date="(date) => date > new Date()"
+                        :input-class="'form-control'"
                         :max-date="new Date()"
-                        :name="'attribute-'+attribute.id">
-                        <div class="input-group date" slot-scope="{ inputProps, inputEvents }">
-                            <input
-                                type="text"
-                                class="form-control"
-                                v-bind="inputProps"
-                                @input="inputEvents($event.target.value, {
-                                    formatInput: true,
-                                    hidePopover: false
-                                })"
-                                @change="inputEvents($event.target.value, {
-                                    formatInput: true,
-                                    hidePopover: false
-                                })"
-                                :disabled="attribute.isDisabled || modificationLocked(attribute.id)"
-                                :id="'attribute-'+attribute.id"
-                            />
-                            <div class="input-group-append input-group-addon">
-                                <button type="button" class="btn btn-outline-secondary">
-                                    <i class="fas fa-fw fa-calendar-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </v-date-picker>
+                        :name="`attribute-${attribute.id}`"
+                        :show-week-number="true"
+                        :value="localValues[attribute.id].value"
+                        :value-type="'date'"
+                        @input="setDateValue($event, attribute.id)">
+                        <template v-slot:icon-calendar>
+                            <i class="fas fa-fw fa-calendar-alt"></i>
+                        </template>
+                        <template v-slot:icon-clear>
+                            <i class="fas fa-fw fa-times"></i>
+                        </template>
+                    </date-picker>
                     <div v-else-if="attribute.datatype == 'string-mc'">
                         <multiselect
                             label="concept_url"
@@ -142,9 +133,7 @@
                     <div v-else-if="attribute.datatype == 'list'">
                         <list :entries="localValues[attribute.id].value" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" :on-change="value => onChange(null, value, attribute.id)" :name="'attribute-'+attribute.id" v-validate="" />
                     </div>
-                    <div v-else-if="attribute.datatype == 'epoch' || attribute.datatype == 'timeperiod'">
-                        <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :epochs="localSelections[attribute.id]" :type="attribute.datatype" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-validate=""/>
-                    </div>
+                    <epoch v-else-if="attribute.datatype == 'epoch' || attribute.datatype == 'timeperiod'" :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :epochs="localSelections[attribute.id]" :type="attribute.datatype" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-validate=""/>
                     <div v-else-if="attribute.datatype == 'dimension'">
                         <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-validate=""/>
                     </div>
@@ -352,21 +341,14 @@
         methods: {
             handleModeration(action, aid) {
                 if(!this.canModerate(aid)) return;
-                const data = {
-                    action: action
-                };
-                $http.patch(`entity/1/attribute/${aid}/moderation`, data).then(response => {
-                    Vue.delete(this.localValues[aid], 'moderation_state');
-                    if(this.showingOriginalValue[aid]) {
-                        this.toggleModerationData(aid);
-                    }
 
-                    if(action == 'accept') {
-                        Vue.delete(this.localValues[aid], 'original_value');
-                    } else if(action == 'deny') {
-                        Vue.set(this.localValues[aid], 'value', this.localValues[aid].original_value);
-                        Vue.delete(this.localValues[aid], 'original_value');
-                    }
+                if(this.showingOriginalValue[aid]) {
+                    this.toggleModerationData(aid);
+                }
+
+                this.$emit('handle-moderation', {
+                    action: action,
+                    attribute_id: aid
                 });
             },
             toggleModerationData(aid) {
@@ -374,6 +356,12 @@
                 Vue.set(this.localValues[aid], 'value', this.localValues[aid].original_value);
                 Vue.set(this.localValues[aid], 'original_value', tmp);
                 Vue.set(this.showingOriginalValue, aid, !this.showingOriginalValue[aid]);
+                // datepicker doesn't support this kind of value changing
+                // thus update it by hand
+                let attr = this.localAttributes.find(a => a.id == aid);
+                if(attr.datatype == 'date') {
+                    this.setDateValue(new Date(this.localValues[aid].value), aid, true);
+                }
             },
             onEnter(i) {
                 Vue.set(this.hovered, i, this.hoverEnabled);
@@ -407,17 +395,19 @@
             onAttributeExpand(e) {
                 Vue.set(this.expanded, e.id, e.state ? ['col-md-12'] : ['col-md-9']);
             },
-            updateDatepicker(aid, fieldname) {
-                this.correctTimezone(aid);
-                this.fields[fieldname].dirty = true;
-                this.checkDependency(aid);
+            setDateValue(value, aid, noChecks = false) {
+                const utcValue = this.getDateAsUTC(value);
+                this.localValues[aid].value = utcValue;
+                if(!noChecks) {
+                    this.fields[`attribute-${aid}`].dirty = true;
+                    this.checkDependency(aid);
+                }
             },
-            correctTimezone(aid) {
-                const dtVal = this.localValues[aid].value;
-                const offset = dtVal.getTimezoneOffset() * (-1);
-                let ms = Date.parse(dtVal.toUTCString());
+            getDateAsUTC(dt) {
+                const offset = dt.getTimezoneOffset() * (-1);
+                let ms = Date.parse(dt.toUTCString());
                 ms += (offset * 60 * 1000);
-                this.localValues[aid].value = new Date(ms);
+                return new Date(ms);
             },
             setEntitySearchResult(result, aid) {
                 if(result) {
