@@ -6,7 +6,7 @@
                     <th>{{ $t('global.name') }}</th>
                     <th>{{ $t('global.display-name') }}</th>
                     <th>{{ $t('global.description') }}</th>
-                    <th>{{ $t('global.moderation') }}</th>
+                    <th data-toggle="tooltip" data-placement="bottom" :title="$t('global.moderation_description')">{{ $t('global.moderation') }}</th>
                     <th>{{ $t('global.permissions') }}</th>
                     <th>{{ $t('global.created-at') }}</th>
                     <th>{{ $t('global.updated-at') }}</th>
@@ -27,9 +27,6 @@
                     <td>
                         <div class="form-group form-check">
                             <input type="checkbox" class="form-check-input" v-model="role.moderated" v-validate="" :id="`moderate_${role.id}`" :name="`moderate_${role.id}`" />
-                            <label class="form-check-label" :for="`moderate_${role.id}`">
-                                Moderate this role
-                            </label>
                         </div>
                     </td>
                     <td>
@@ -193,7 +190,9 @@
                 loadNext();
             }
         },
-        mounted() {},
+        mounted() {
+            $('[data-toggle="tooltip"]').tooltip();
+        },
         methods: {
             init(roles, permissions) {
                 this.roleList = roles;

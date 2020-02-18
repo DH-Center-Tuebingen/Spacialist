@@ -137,33 +137,45 @@ trait ModerationTrait
             return false;
         }
 
-        if($action == 'accept') {
-            // if copyOn is set, delete entries with same values
-            // in columns defined in copyOn
-            if(isset($this->copyOn) && count($this->copyOn) > 0) {
-                $query = self::whereNull($this->getModerationStateColumn());
+        $pendingDelete = $this->{$this->getModerationStateColumn()} == 'pending-delete';
 
-                foreach($this->copyOn as $col) {
-                    $query->where($col, $this->{$col});
+        if($action == 'accept') {
+            if($pendingDelete) {
+                $this->delete();
+                $result = null;
+            } else {
+                // if copyOn is set, delete entries with same values
+                // in columns defined in copyOn
+                if(isset($this->copyOn) && count($this->copyOn) > 0) {
+                    $query = self::whereNull($this->getModerationStateColumn());
+
+                    foreach($this->copyOn as $col) {
+                        $query->where($col, $this->{$col});
+                    }
+
+                    $query->delete();
                 }
 
-                $query->delete();
+                $this->{$this->getModerationStateColumn()} = null;
+                // Once we have saved the model, we will fire the "restored" event so this
+                // developer will do anything they need to after a restore operation is
+                // totally finished. Then we will return the result of the save call.
+                $this->exists = true;
+
+                $result = $this->save();
             }
-
-            $this->{$this->getModerationStateColumn()} = null;
-            // Once we have saved the model, we will fire the "restored" event so this
-            // developer will do anything they need to after a restore operation is
-            // totally finished. Then we will return the result of the save call.
-            $this->exists = true;
-
-            $result = $this->save();
 
             $this->fireModelEvent('moderated', false);
 
-        } else if($action == 'deny') {
-            $this->delete();
+        } else if($action == 'deny' || $pendingDelete) {
+            if($pendingDelete) {
+                $this->{$this->getModerationStateColumn()} = null;
+                $result = $this->save();
+            } else {
+                $this->delete();
+                $result = null;
+            }
 
-            $result = null;
         } else {
             if(!$ignoreCopyOn && isset($this->copyOn) && count($this->copyOn) > 0) {
                 $copy = $this->replicate();

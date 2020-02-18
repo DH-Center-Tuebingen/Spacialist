@@ -144,7 +144,12 @@ class EntityController extends Controller {
                     break;
             }
             $value = $a->getValue();
-            $a->value = $value;
+            if($a->moderation_state == 'pending-delete') {
+                $a->value = [];
+                $a->original_value = $value;
+            } else {
+                $a->value = $value;
+            }
             if(isset($data[$a->attribute_id])) {
                 $olda = $data[$a->attribute_id];
                 // check if stored entry is moderated one
@@ -283,11 +288,29 @@ class EntityController extends Controller {
                         ['entity_id', '=', $id],
                         ['attribute_id', '=', $aid]
                     ])->first();
-                    $attrval->delete();
+                    if(!isset($attrval)) {
+                        return response()->json([
+                            'error' => __('This attribute value does either not exist or is in moderation state.')
+                        ], 400);
+                    }
+                    if($user->isModerated()) {
+                        $attrval->moderate('pending-delete', true);
+                    } else {
+                        $attrval->delete();
+                    }
                     // also break outer foreach, no further action required
                     // for deleted attribute values
                     break 2;
                 case 'add':
+                    $alreadyAdded = AttributeValue::where('entity_id', $id)
+                        ->where('attribute_id', $aid)
+                        ->withModerated()
+                        ->exists();
+                    if($alreadyAdded) {
+                        return response()->json([
+                            'error' => __('There is already a value set for this attribute or it is in moderation state.')
+                        ], 400);
+                    }
                     $value = $patch['value'];
                     $attrval = new AttributeValue();
                     $attrval->entity_id = $id;
@@ -297,6 +320,15 @@ class EntityController extends Controller {
                     }
                     break;
                 case 'replace':
+                    $alreadyModerated = AttributeValue::where('entity_id', $id)
+                        ->where('attribute_id', $aid)
+                        ->onlyModerated()
+                        ->exists();
+                    if($alreadyModerated) {
+                        return response()->json([
+                            'error' => __('This attribute value is in moderation state. Please accept/deny it or ask a user with appropriate permissions to do so.')
+                        ], 400);
+                    }
                     $value = $patch['value'];
                     $attrval = AttributeValue::where([
                         ['entity_id', '=', $id],
@@ -428,7 +460,7 @@ class EntityController extends Controller {
 
     public function handleModeration($id, $aid, Request $request) {
         $user = auth()->user();
-        if(!$user->can('duplicate_edit_concepts')) {
+        if(!$user->can('duplicate_edit_concepts') || $user->isModerated()) {
             return response()->json([
                 'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);

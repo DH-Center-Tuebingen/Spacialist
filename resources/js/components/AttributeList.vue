@@ -11,7 +11,7 @@
             @end="dropped"
             @start="dragged">
             <div class="form-group row" :class="{'disabled not-allowed-handle': attribute.isDisabled, 'alert-danger rounded mx-1 py-2': canModerate(attribute.id)}" v-for="(attribute, i) in localAttributes" @mouseenter="onEnter(i)" @mouseleave="onLeave(i)" v-show="!hiddenByDependency[attribute.id]">
-                <label class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break" :for="'attribute-'+attribute.id" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled}">
+                <label class="col-form-label col-md-3 d-flex flex-row justify-content-between text-break" :for="`attribute-${attribute.id}`" :class="{'copy-handle': isSource&&!attribute.isDisabled, 'not-allowed-handle text-muted': attribute.isDisabled || modificationLocked(attribute.id)}">
                     <div v-show="hoverState[i]">
                         <a v-show="onReorder" href="" @click.prevent="" class="reorder-handle" data-toggle="popover" :data-content="$t('global.resort')" data-trigger="hover" data-placement="bottom">
                             <i class="fas fa-fw fa-sort text-secondary"></i>
@@ -42,19 +42,19 @@
                     </sup>
                 </label>
                 <div :class="expanded[attribute.id]">
-                    <input class="form-control" :disabled="attribute.isDisabled" v-if="attribute.datatype == 'string'" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
+                    <input class="form-control" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-if="attribute.datatype == 'string'" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
                     <input class="form-control-plaintext" v-else-if="attribute.datatype == 'serial'" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" readonly v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
-                    <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model.number="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
-                    <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model.number="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
-                    <input class="form-control" :disabled="attribute.isDisabled" v-else-if="attribute.datatype == 'boolean'" type="checkbox" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @change="checkDependency(attribute.id)" />
-                    <textarea class="form-control" :disabled="attribute.isDisabled || needsModeration(attribute.id)" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)"></textarea>
+                    <input class="form-control" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-else-if="attribute.datatype == 'double'" type="number" step="any" min="0" placeholder="0.0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model.number="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
+                    <input class="form-control" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-else-if="attribute.datatype == 'integer'" type="number" step="1" placeholder="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model.number="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
+                    <input class="form-control" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-else-if="attribute.datatype == 'boolean'" type="checkbox" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @change="checkDependency(attribute.id)" />
+                    <textarea class="form-control" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-else-if="attribute.datatype == 'stringf'" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)"></textarea>
                     <div v-else-if="attribute.datatype == 'percentage'" class="d-flex">
-                        <input class="custom-range" :disabled="attribute.isDisabled" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @mouseup="checkDependency(attribute.id)"/>
+                        <input class="custom-range" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" type="range" step="1" min="0" max="100" value="0" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" v-model="localValues[attribute.id].value" @mouseup="checkDependency(attribute.id)"/>
                         <span class="ml-3">{{ localValues[attribute.id].value }}%</span>
                     </div>
                     <div v-else-if="attribute.datatype == 'geography'">
-                        <input class="form-control" :disabled="attribute.isDisabled" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" :placeholder="$t('main.entity.attributes.add-wkt')" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
-                        <button type="button" class="btn btn-outline-secondary mt-2" :disabled="attribute.isDisabled" @click="openGeographyModal(attribute.id)">
+                        <input class="form-control" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" type="text" :id="'attribute-'+attribute.id" :name="'attribute-'+attribute.id" v-validate="" :placeholder="$t('main.entity.attributes.add-wkt')" v-model="localValues[attribute.id].value" @blur="checkDependency(attribute.id)" />
+                        <button type="button" class="btn btn-outline-secondary mt-2" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" @click="openGeographyModal(attribute.id)">
                             <i class="fas fa-fw fa-map-marker-alt"></i> {{ $t('main.entity.attributes.open-map') }}
                         </button>
                     </div>
@@ -87,7 +87,7 @@
                                     formatInput: true,
                                     hidePopover: false
                                 })"
-                                :disabled="attribute.isDisabled"
+                                :disabled="attribute.isDisabled || modificationLocked(attribute.id)"
                                 :id="'attribute-'+attribute.id"
                             />
                             <div class="input-group-append input-group-addon">
@@ -106,7 +106,7 @@
                             :allowEmpty="true"
                             :closeOnSelect="false"
                             :customLabel="translateLabel"
-                            :disabled="attribute.isDisabled"
+                            :disabled="attribute.isDisabled || modificationLocked(attribute.id)"
                             :hideSelected="true"
                             :multiple="true"
                             :options="localSelections[attribute.id] || []"
@@ -126,7 +126,7 @@
                             :allowEmpty="true"
                             :closeOnSelect="true"
                             :customLabel="translateLabel"
-                            :disabled="attribute.isDisabled"
+                            :disabled="attribute.isDisabled || modificationLocked(attribute.id)"
                             :hideSelected="true"
                             :loading="dd.loading[attribute.id]"
                             :multiple="false"
@@ -140,15 +140,15 @@
                         </multiselect>
                     </div>
                     <div v-else-if="attribute.datatype == 'list'">
-                        <list :entries="localValues[attribute.id].value" :disabled="attribute.isDisabled" :on-change="value => onChange(null, value, attribute.id)" :name="'attribute-'+attribute.id" v-validate="" />
+                        <list :entries="localValues[attribute.id].value" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" :on-change="value => onChange(null, value, attribute.id)" :name="'attribute-'+attribute.id" v-validate="" />
                     </div>
                     <div v-else-if="attribute.datatype == 'epoch' || attribute.datatype == 'timeperiod'">
-                        <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :epochs="localSelections[attribute.id]" :type="attribute.datatype" :disabled="attribute.isDisabled" v-validate=""/>
+                        <epoch :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :epochs="localSelections[attribute.id]" :type="attribute.datatype" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-validate=""/>
                     </div>
                     <div v-else-if="attribute.datatype == 'dimension'">
-                        <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled" v-validate=""/>
+                        <dimension :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-validate=""/>
                     </div>
-                    <tabular v-else-if="attribute.datatype == 'table'" :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :selections="localSelections" :attribute="attribute" :disabled="attribute.isDisabled" @expanded="onAttributeExpand" v-validate=""/>
+                    <tabular v-else-if="attribute.datatype == 'table'" :name="'attribute-'+attribute.id" :on-change="(field, value) => onChange(field, value, attribute.id)" :value="localValues[attribute.id].value" :selections="localSelections" :attribute="attribute" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" @expanded="onAttributeExpand" v-validate=""/>
                     <div v-else-if="attribute.datatype == 'sql'">
                         <div v-if="isArray(localValues[attribute.id].value)">
                             <div class="table-responsive">
@@ -174,30 +174,42 @@
                             {{ localValues[attribute.id].value }}
                         </div>
                     </div>
-                    <iconclass v-else-if="attribute.datatype == 'iconclass'" :name="`attribute-${attribute.id}`" @input="updateValue($event, attribute.id)" :value="localValues[attribute.id].value" :attribute="attribute" :disabled="attribute.isDisabled" v-validate=""></iconclass>
-                    <input class="form-control" :disabled="attribute.isDisabled" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  :name="'attribute-'+attribute.id" v-validate="" @blur="checkDependency(attribute.id)"/>
+                    <iconclass v-else-if="attribute.datatype == 'iconclass'" :name="`attribute-${attribute.id}`" @input="updateValue($event, attribute.id)" :value="localValues[attribute.id].value" :attribute="attribute" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-validate=""></iconclass>
+                    <input class="form-control" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  :name="'attribute-'+attribute.id" v-validate="" @blur="checkDependency(attribute.id)"/>
                 </div>
                 <template v-if="canModerate(attribute.id)">
                     <div class="col-md-9 offset-md-3">
-                        <div class="my-2">
-                            Entered by <span class="font-weight-bold">{{ localValues[attribute.id].lasteditor }}</span> at {{ localValues[attribute.id].updated_at }}
+                        <div class="my-2 d-flex flex-row justify-content-between">
+                            <moderation-info :data="localValues[attribute.id]"></moderation-info>
+                            <div class="dropdown">
+                                <span id="moderation-action-menu" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-fw fa-ellipsis-h"></i>
+                                </span>
+                                <div class="dropdown-menu" aria-labelledby="moderation-action-menu">
+                                    <a class="dropdown-item" href="#" @click.prevent="handleModeration('accept', attribute.id)">
+                                        <i class="fas fa-fw fa-user-check text-success"></i> {{ $t('main.role.moderation.accept_changes') }}
+                                    </a>
+                                    <a class="dropdown-item" href="#" @click.prevent="handleModeration('deny', attribute.id)">
+                                        <i class="fas fa-fw fa-user-times text-danger"></i> {{ $t('main.role.moderation.deny_changes') }}
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <button type="button" class="btn btn-success" @click="handleModeration('accept', attribute.id)">
-                            Accept Changes
-                        </button>
-                        <button type="button" class="btn btn-danger" @click="handleModeration('deny', attribute.id)">
-                            Deny Changes
-                        </button>
                         <button type="button" class="btn btn-info" @click="toggleModerationData(attribute.id)">
-                            <span v-if="!showingOriginalValue">Show original data</span>
-                            <span v-else>Show moderated data</span>
+                            <i class="fas fa-fw fa-paste"></i>
+                            <span v-if="!showingOriginalValue[attribute.id]">
+                                {{ $t('main.role.moderation.view_original_data') }}
+                            </span>
+                            <span v-else>
+                                {{ $t('main.role.moderation.view_modified_data') }}
+                            </span>
                         </button>
                     </div>
                 </template>
                 <template v-else-if="needsModeration(attribute.id)">
                     <div class="col-md-9 offset-md-3 mt-2">
                         <p class="alert alert-warning m-0">
-                            This attribute is locked, because it's value is still in moderation and not accepted yet.
+                            {{ $t('main.role.moderation.locked_state_info') }}
                         </p>
                     </div>
                 </template>
@@ -248,6 +260,8 @@
     import List from './List.vue';
     import Tabular from './Tabular.vue';
     import Iconclass from './Iconclass.vue';
+
+    import ModerationInfo from './ModerationInfo.vue';
 
     export default {
         props: {
@@ -322,7 +336,8 @@
             'epoch': Epoch,
             'list': List,
             'tabular': Tabular,
-            'iconclass': Iconclass
+            'iconclass': Iconclass,
+            'moderation-info': ModerationInfo
         },
         inject: ['$validator'],
         beforeMount() {
@@ -342,7 +357,7 @@
                 };
                 $http.patch(`entity/1/attribute/${aid}/moderation`, data).then(response => {
                     Vue.delete(this.localValues[aid], 'moderation_state');
-                    if(this.showingOriginalValue) {
+                    if(this.showingOriginalValue[aid]) {
                         this.toggleModerationData(aid);
                     }
 
@@ -358,7 +373,7 @@
                 const tmp = this.localValues[aid].value;
                 Vue.set(this.localValues[aid], 'value', this.localValues[aid].original_value);
                 Vue.set(this.localValues[aid], 'original_value', tmp);
-                this.showingOriginalValue = !this.showingOriginalValue;
+                Vue.set(this.showingOriginalValue, aid, !this.showingOriginalValue[aid]);
             },
             onEnter(i) {
                 Vue.set(this.hovered, i, this.hoverEnabled);
@@ -380,11 +395,14 @@
             updateValue(eventValue, aid) {
                 this.localValues[aid].value = eventValue;
             },
+            modificationLocked(aid) {
+                return this.localValues[aid].moderation_state && this.localValues[aid].moderation_state.startsWith('pending');
+            },
             needsModeration(aid) {
-                return this.localValues[aid].moderation_state == 'pending' && this.$moderated();
+                return this.localValues[aid].moderation_state && this.localValues[aid].moderation_state.startsWith('pending') && this.$moderated();
             },
             canModerate(aid) {
-                return this.localValues[aid].moderation_state == 'pending' && !this.$moderated();
+                return this.localValues[aid].moderation_state && this.localValues[aid].moderation_state.startsWith('pending') && !this.$moderated();
             },
             onAttributeExpand(e) {
                 Vue.set(this.expanded, e.id, e.state ? ['col-md-12'] : ['col-md-9']);
@@ -619,7 +637,7 @@
                 expanded: {},
                 uniqueId: Math.random().toString(36),
                 selectedAttribute: -1,
-                showingOriginalValue: false,
+                showingOriginalValue: {},
                 initialGeoValues: [],
                 wktLayers: {},
                 currentGeoValue: '',

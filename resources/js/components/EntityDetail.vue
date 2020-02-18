@@ -180,6 +180,7 @@
             saveEntity(entity) {
                 if(!this.$can('duplicate_edit_concepts')) return;
                 let cid = entity.id;
+                let pendings = [];
                 var patches = [];
                 for(let f in this.fields) {
                     if(this.fields.hasOwnProperty(f) && f.startsWith('attribute-')) {
@@ -198,9 +199,17 @@
                                     patch.op = "replace";
                                     patch.value = data.value;
                                     patch.value = this.getCleanValue(data, entity.attributes);
+                                    pendings.push({
+                                        op: 'replace',
+                                        id: aid
+                                    });
                                 } else {
                                     // value is empty, therefore it is a remove
                                     patch.op = "remove";
+                                    pendings.push({
+                                        op: 'remove',
+                                        id: aid
+                                    });
                                 }
                             } else {
                                 // there has been no entry in the database before, therefore it is an add operation
@@ -208,6 +217,10 @@
                                     patch.op = "add";
                                     data.attribute = entity.attributes.find(a => a.id == aid);
                                     patch.value = this.getCleanValue(data, entity.attributes);
+                                    pendings.push({
+                                        op: 'add',
+                                        id: aid
+                                    });
                                 } else {
                                     // there has been no entry in the database before and values are not different (should not happen ;))
                                     continue;
@@ -227,6 +240,13 @@
                         'success'
                     );
                     this.setModificationFields(response.data);
+                    // Lock all modified attributes if user needs to be moderated
+                    if(this.$moderated()) {
+                        for(let i=0; i<pendings.length; i++) {
+                            let p = pendings[i];
+                            entity.data[p.id].moderation_state = 'pending';
+                        }
+                    }
                 }).catch(error => {
                     const r = error.response;
                     this.$showToast(
