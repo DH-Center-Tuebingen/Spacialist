@@ -166,42 +166,15 @@
                     <iconclass v-else-if="attribute.datatype == 'iconclass'" :name="`attribute-${attribute.id}`" @input="updateValue($event, attribute.id)" :value="localValues[attribute.id].value" :attribute="attribute" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-validate=""></iconclass>
                     <input class="form-control" :disabled="attribute.isDisabled || modificationLocked(attribute.id)" v-else type="text" :id="'attribute-'+attribute.id" v-model="localValues[attribute.id].value"  :name="'attribute-'+attribute.id" v-validate="" @blur="checkDependency(attribute.id)"/>
                 </div>
-                <template v-if="canModerate(attribute.id)">
-                    <div class="col-md-9 offset-md-3">
-                        <div class="my-2 d-flex flex-row justify-content-between">
-                            <moderation-info :data="localValues[attribute.id]"></moderation-info>
-                            <div class="dropdown">
-                                <span id="moderation-action-menu" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-fw fa-ellipsis-h"></i>
-                                </span>
-                                <div class="dropdown-menu" aria-labelledby="moderation-action-menu">
-                                    <a class="dropdown-item" href="#" @click.prevent="handleModeration('accept', attribute.id)">
-                                        <i class="fas fa-fw fa-user-check text-success"></i> {{ $t('main.role.moderation.accept_changes') }}
-                                    </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="handleModeration('deny', attribute.id)">
-                                        <i class="fas fa-fw fa-user-times text-danger"></i> {{ $t('main.role.moderation.deny_changes') }}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-info" @click="toggleModerationData(attribute.id)">
-                            <i class="fas fa-fw fa-paste"></i>
-                            <span v-if="!showingOriginalValue[attribute.id]">
-                                {{ $t('main.role.moderation.view_original_data') }}
-                            </span>
-                            <span v-else>
-                                {{ $t('main.role.moderation.view_modified_data') }}
-                            </span>
-                        </button>
-                    </div>
-                </template>
-                <template v-else-if="needsModeration(attribute.id)">
-                    <div class="col-md-9 offset-md-3 mt-2">
-                        <p class="alert alert-warning m-0">
-                            {{ $t('main.role.moderation.locked_state_info') }}
-                        </p>
-                    </div>
-                </template>
+                <moderation-action
+                    class="w-100"
+                    :can-moderate="canModerate(attribute.id)"
+                    :require-moderation="needsModeration(attribute.id)"
+                    :element="attribute"
+                    :value="localValues[attribute.id]"
+                    @handle-moderation="handleModeration"
+                    @handle-data-toggle="handleDataToggle">
+                </moderation-action>
             </div>
         </draggable>
         <modal :name="'geography-place-modal-'+uniqueId" width="80%" height="80%">
@@ -250,7 +223,7 @@
     import Tabular from './Tabular.vue';
     import Iconclass from './Iconclass.vue';
 
-    import ModerationInfo from './ModerationInfo.vue';
+    import ModerationAction from './moderation/ModerationAction.vue';
 
     export default {
         props: {
@@ -326,7 +299,7 @@
             'list': List,
             'tabular': Tabular,
             'iconclass': Iconclass,
-            'moderation-info': ModerationInfo
+            'moderation-action': ModerationAction
         },
         inject: ['$validator'],
         beforeMount() {
@@ -339,9 +312,13 @@
             this.attributes.forEach(a => this.checkDependency(a.id));
         },
         methods: {
-            handleModeration(action, aid) {
-                if(!this.canModerate(aid)) return;
+            handleModeration(event) {
+                const action = event.action;
+                const aid = event.id;
 
+                // event handler in parent element expects modified value
+                // to be in .value and original value in .original_value
+                // thus we have to toggle if original value is in .value
                 if(this.showingOriginalValue[aid]) {
                     this.toggleModerationData(aid);
                 }
@@ -350,6 +327,9 @@
                     action: action,
                     attribute_id: aid
                 });
+            },
+            handleDataToggle(event) {
+                this.toggleModerationData(event.id);
             },
             toggleModerationData(aid) {
                 const tmp = this.localValues[aid].value;
