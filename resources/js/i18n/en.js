@@ -7,6 +7,7 @@ const en = {
         close: 'Close',
         add: 'Add',
         edit: 'Edit',
+        edited: 'edited',
         duplicate: 'Duplicate',
         resort: 'Re-sort',
         update: 'Update',
@@ -139,6 +140,8 @@ const en = {
         'created-at': 'Created',
         'updated-at': 'Updated',
         options: 'Options',
+        reply_to: 'Reply',
+        replying_to: 'In reply to {name}',
         type: 'Type',
         'root-attribute': 'Parent-Attribute',
         'root-attribute-toggle': 'Use value of an existing attribute as Parent-Element',
@@ -154,7 +157,14 @@ const en = {
         tag: 'Tag | Tags',
         set: 'Set',
         'has-tags': 'Has no tags | Has one tag | Has {cnt} tags',
-        'from-subentity': 'Is from Sub-Entity'
+        'from-subentity': 'Is from Sub-Entity',
+        comments: {
+            empty_list: 'No comments yet.',
+            hide: 'Hide comments',
+            show: 'Show comments',
+            hide_reply: 'Hide <span class="font-weight-bold">one</span> reply | Hide <span class="font-weight-bold">{cnt}</span> replies',
+            show_reply: 'Show <span class="font-weight-bold">one</span> reply | Show <span class="font-weight-bold">{cnt}</span> replies'
+        }
     },
     main: {
         entity: {
@@ -226,7 +236,7 @@ const en = {
                 toasts: {
                     'updated-certainty': {
                         title: 'Certainty updated',
-                        msg: 'Certainty of {name} successfully set to {i}% ({desc}).'
+                        msg: 'Certainty of {name} successfully set to {i}%.'
                     }
                 }
             },

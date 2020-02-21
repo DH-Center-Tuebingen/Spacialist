@@ -7,6 +7,7 @@ const de = {
         close: 'Schließen',
         add: 'Hinzufügen',
         edit: 'Editieren',
+        edited: 'editiert',
         duplicate: 'Duplizieren',
         resort: 'Umsortieren',
         update: 'Aktualisieren',
@@ -139,6 +140,8 @@ const de = {
         'created-at': 'Erstellt',
         'updated-at': 'Aktualisert',
         options: 'Optionen',
+        reply_to: 'Antworten',
+        replying_to: 'Antwort an {name}',
         type: 'Typ',
         'root-attribute': 'Eltern-Attribut',
         'root-attribute-toggle': 'Wert eines vorhandenen Attributs als Eltern-Element verwenden',
@@ -154,7 +157,14 @@ const de = {
         tag: 'Schlagwort | Schlagworte',
         set: 'Setzen',
         'has-tags': 'Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte',
-        'from-subentity': 'Gehört zu einer Sub-Entität'
+        'from-subentity': 'Gehört zu einer Sub-Entität',
+        comments: {
+            empty_list: 'Bisher keine Kommentare hinzugefügt.',
+            hide: 'Kommentare ausblenden',
+            show: 'Kommentare anzeigen',
+            hide_reply: '<span class="font-weight-bold">Eine</span> Antwort ausblenden | <span class="font-weight-bold">{cnt}</span> Antworten ausblenden',
+            show_reply: '<span class="font-weight-bold">Eine</span> Antwort anzeigen | <span class="font-weight-bold">{cnt}</span> Antworten anzeigen'
+        }
     },
     main: {
         entity: {
@@ -226,7 +236,7 @@ const de = {
                 toasts: {
                     'updated-certainty': {
                         title: 'Sicherheit aktualisiert',
-                        msg: 'Sicherheit von {name} erfolgreich auf {i}% ({desc}) gesetzt.'
+                        msg: 'Sicherheit von {name} erfolgreich auf {i}% gesetzt.'
                     }
                 }
             },

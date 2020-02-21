@@ -38,6 +38,7 @@ import {
     faCog,
     faCogs,
     faComment,
+    faComments,
     faCopy,
     faCopyright,
     faCubes,
@@ -91,6 +92,7 @@ import {
     faPrint,
     faQuestion,
     faRedoAlt,
+    faReply,
     faRoad,
     faRuler,
     faRulerCombined,
@@ -200,6 +202,7 @@ library.add(
     faCog,
     faCogs,
     faComment,
+    faComments,
     faCopy,
     faCopyright,
     faCubes,
@@ -254,6 +257,7 @@ library.add(
     faQuestion,
     faQuestionCircle,
     faRedoAlt,
+    faReply,
     faRoad,
     faRuler,
     faRulerCombined,
@@ -630,6 +634,7 @@ import EntityTypes from './components/EntityTypeList.vue';
 import OlMap from './components/OlMap.vue';
 import ColorGradient from './components/Gradient.vue';
 import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
+import CommentList from './components/CommentList.vue';
 
 // Page Components
 import EntityReferenceModal from './components/EntityReferenceModal.vue';
@@ -649,6 +654,7 @@ Vue.component('entity-types', EntityTypes);
 Vue.component('ol-map', OlMap);
 Vue.component('color-gradient', ColorGradient);
 Vue.component('entity-breadcrumbs', EntityBreadcrumbs);
+Vue.component('comment-list', CommentList);
 Vue.component('entity-reference-modal', EntityReferenceModal);
 Vue.component('discard-changes-modal', DiscardChangesModal);
 Vue.component('about-dialog', AboutDialog);
@@ -789,6 +795,29 @@ Vue.filter('bibtexify', function(value, type) {
     rendered += "</code></pre>";
     return rendered;
 });
+Vue.filter('mentionify', function(value) {
+    const template = `<span class="badge badge-primary">@{name}</span>`;
+    const unknownTemplate = `<span class="font-weight-bold">@{name}</span>`;
+    const mentionRegex = /@(\w|\d)+/gi;
+    let mentions = value.match(mentionRegex);
+    if(!mentions) return value;
+    mentions = mentions.filter((m, i) => mentions.indexOf(m) === i);
+    let newValue = value;
+    for(let i=0; i<mentions.length; i++) {
+        const elem = mentions[i];
+        const m = elem.substring(1);
+        const user = app.$getUser(m, 'nickname');
+        const replRegex = new RegExp(elem, 'g');
+        let name = m;
+        let tpl = unknownTemplate;
+        if(user) {
+            name = user.name;
+            tpl = template;
+        }
+        newValue = newValue.replace(replRegex, tpl.replace('{name}', name));
+    }
+    return newValue;
+});
 
 const app = new Vue({
     el: '#app',
@@ -813,6 +842,7 @@ const app = new Vue({
                 this.preferences = response.data.preferences;
                 this.concepts = response.data.concepts;
                 this.entityTypes = response.data.entityTypes;
+                this.users = response.data.users;
                 // Check if user is logged in and set preferred language
                 // instead of browser default
                 if(!app.$auth.ready()) {
@@ -848,6 +878,7 @@ const app = new Vue({
             preferences: {},
             concepts: {},
             entityTypes: {},
+            users: [],
             plugins: {},
             onInit: null
         }

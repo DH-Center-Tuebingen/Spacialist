@@ -62,6 +62,23 @@ Vue.prototype.$updateLanguage = function() {
     }
 };
 
+Vue.prototype.$userId = function() {
+    if(Vue.prototype.$auth.check()) {
+        return Vue.prototype.$auth.user().id;
+    } else {
+        return -1;
+    }
+};
+
+Vue.prototype.$getUser = function(value, attr = 'id') {
+    if(Vue.prototype.$auth.check()) {
+        const lValue = value.toLowerCase();
+        return this.$root.$data.users.find(u => u[attr].toLowerCase() == lValue);
+    } else {
+        return null;
+    }
+};
+
 Vue.prototype.$asyncFor = async function(arr, callback) {
     for(let i=0; i<arr.length; i++) {
         await callback(arr[i]);
