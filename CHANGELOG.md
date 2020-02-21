@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.8 - Helgö (Unreleased)
+### Added
+- Support to moderate additions/changes made by specific (moderated) roles
+
 ## 0.7.4
 ### Added
 - Bing Maps Support
