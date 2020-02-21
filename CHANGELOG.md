@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.8 - Helgö (Unreleased)
+### Added
+- Support to extend all data with a comment section
+### Changed
+- Replaced certainty description with new comment section
+
 ## 0.7.4
 ### Added
 - Bing Maps Support
