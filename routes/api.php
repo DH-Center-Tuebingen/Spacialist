@@ -37,6 +37,8 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/{id}/reference', 'ReferenceController@getByEntity')->where('id', '[0-9]+');
     Route::get('/{id}/parentIds', 'EntityController@getParentIds')->where('id', '[0-9]+');
     Route::get('/byParent/{id}', 'EntityController@getEntitiesByParent')->where('id', '[0-9]+');
+    Route::get('/{id}/comment/{aid}', 'EntityController@getComments')->where('id', '[0-9]+')->where('aid', '[0-9]+');
+    Route::get('/comment/{id}/reply', 'EntityController@getCommentReplies')->where('id', '[0-9]+');
 
     Route::post('', 'EntityController@addEntity');
     Route::post('/{id}/reference/{aid}', 'ReferenceController@addReference')->where('id', '[0-9]+')->where('aid', '[0-9]+');
@@ -46,9 +48,11 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::patch('/{id}/name', 'EntityController@patchName')->where('id', '[0-9]+');
     Route::patch('/{id}/rank', 'EntityController@moveEntity')->where('id', '[0-9]+');
     Route::patch('/reference/{id}', 'ReferenceController@patchReference')->where('id', '[0-9]+');
+    Route::patch('/comment/{id}', 'EntityController@patchComment')->where('id', '[0-9]+');
 
     Route::delete('/{id}', 'EntityController@deleteEntity')->where('id', '[0-9]+');
     Route::delete('/reference/{id}', 'ReferenceController@delete')->where('id', '[0-9]+');
+    Route::delete('{id}/attribute/{aid}/comment/{cid}', 'EntityController@deleteComment')->where('id', '[0-9]+')->where('aid', '[0-9]+')->where('cid', '[0-9]+');
 });
 
 // SEARCH

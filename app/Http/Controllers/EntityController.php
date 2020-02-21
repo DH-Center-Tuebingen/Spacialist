@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Attribute;
 use App\AttributeValue;
+use App\Comment;
 use App\Entity;
 use App\EntityAttribute;
 use App\EntityType;
@@ -12,6 +13,7 @@ use App\ThConcept;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Arr;
 
 class EntityController extends Controller {
     /**
@@ -215,6 +217,46 @@ class EntityController extends Controller {
         return Entity::getEntitiesByParent($id);
     }
 
+    public function getComments($id, $aid) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get comments')
+            ], 403);
+        }
+
+        try {
+            $attributeValue = AttributeValue::where('entity_id', $id)
+                ->where('attribute_id', $aid)
+                ->firstOrFail();
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This attribute value does not exist')
+            ], 400);
+        }
+        $comments = $attributeValue->comments;
+        $comments->loadCount('replies');
+        return response()->json($comments);
+    }
+
+    public function getCommentReplies($id) {
+        $user = auth()->user();
+        if(!$user->can('view_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to get comments')
+            ], 403);
+        }
+
+        try {
+            $comment = Comment::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This comment does not exist')
+            ], 400);
+        }
+        return response()->json($comment->replies);
+    }
+
     // POST
 
     public function addEntity(Request $request) {
@@ -377,7 +419,10 @@ class EntityController extends Controller {
                 'error' => __('You do not have the permission to modify an entity\'s data')
             ], 403);
         }
-        $this->validate($request, AttributeValue::patchRules);
+        $this->validate($request, array_merge(
+            AttributeValue::patchRules,
+            Comment::keys
+        ));
 
         try {
             Entity::findOrFail($id);
@@ -397,14 +442,34 @@ class EntityController extends Controller {
         $attrValue = AttributeValue::firstOrCreate([
             'entity_id' => $id,
             'attribute_id' => $aid,
-        ], [
-            'lasteditor' => $user->name
         ]);
+        // When attribute value already exists and nothing changed
+        // (same certainty and no new comment)
+        if(
+            !$attrValue->wasRecentlyCreated
+            &&
+            (
+                ($request->has('certainty') && $request->get('certainty') == $attrValue->certainty)
+                &&
+                !$request->filled('content')
+            )
+        ) {
+            return response()->json([
+                'error' => __('You must set at least a different certainty value or comment content')
+            ], 400);
+        }
         $attrValue->lasteditor = $user->name;
-        $values = $request->only(array_keys(AttributeValue::patchRules));
+        $values = $request->only(
+            Arr::except(
+                array_keys(AttributeValue::patchRules), array_keys(Comment::keys)
+            )
+        );
         $attrValue->patch($values);
+        $comment = $attrValue->addComment($request->only(array_keys(Comment::keys)));
 
-        return response()->json(null, 204);
+        return response()->json([
+            'comment' => $comment
+        ], 201);
     }
 
     public function patchName($id, Request $request) {
@@ -459,6 +524,31 @@ class EntityController extends Controller {
         return response()->json(null, 204);
     }
 
+    public function patchComment(Request $request, $id) {
+        $user = auth()->user();
+
+        $this->validate($request, Comment::patchKeys);
+
+        try {
+            $comment = Comment::where('id', $id)
+                ->where('user_id', $user->id)
+                ->firstOrFail();
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This comment does not exist')
+            ], 400);
+        }
+
+        $patchable = $request->only(array_keys(Comment::patchKeys));
+
+        foreach($patchable as $key => $val) {
+            info("Patching $key: $val");
+            $comment->{$key} = $val;
+        }
+        $comment->save();
+        return response()->json(null, 204);
+    }
+
     // DELETE
 
     public function deleteEntity($id) {
@@ -476,6 +566,28 @@ class EntityController extends Controller {
             ], 400);
         }
         $entity->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function deleteComment($id, $aid, $cid) {
+        $user = auth()->user();
+        if(!$user->can('delete_move_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to delete a comment')
+            ], 403);
+        }
+        try {
+            $attributeValue = AttributeValue::where('entity_id', $id)
+                ->where('attribute_id', $aid)
+                ->firstOrFail();
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This attribute value does not exist')
+            ], 400);
+        }
+
+        $attributeValue->removeComment($cid);
 
         return response()->json(null, 204);
     }
