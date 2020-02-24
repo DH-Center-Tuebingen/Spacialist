@@ -35,7 +35,7 @@
         HemisphereLight,
         IcosahedronBufferGeometry,
         Line,
-        Math as TMath,
+        MathUtils as TMath,
         LOD,
         Matrix4,
         Mesh,
@@ -684,7 +684,7 @@
                         }
                         node.geometry.computeBoundingBox();
                         const offset = node.geometry.boundingBox.getCenter();
-                        node.geometry.applyMatrix(new Matrix4().makeTranslation(-offset.x, -offset.y, -offset.z));
+                        node.geometry.applyMatrix4(new Matrix4().makeTranslation(-offset.x, -offset.y, -offset.z));
                         node.position.copy(offset);
                         if(isLod) {
                             lod.addLevel(node, (i+1) * 10);
