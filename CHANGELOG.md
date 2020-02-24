@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Bing Maps Support
 - [Iconclass](http://iconclass.org)-Attribute
+- Re-add dependency lock-files
 ### Fixed
 - Accidentally moving map outside viewport
 - Ignore uppercase/lowercase letters in login form user names
