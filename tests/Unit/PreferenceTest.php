@@ -84,6 +84,11 @@ class PreferenceTest extends TestCase
                 'value' => '{"epsg": "4326"}',
                 'testValue' => '{"epsg": "4326"}'
             ],
+            [
+                'label' => 'prefs.enable-password-reset-link',
+                'value' => false,
+                'testValue' => '{"use":false}'
+            ],
         ];
 
         foreach($preferences as $p) {
