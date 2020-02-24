@@ -21,14 +21,16 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'attribute_values' => 'App\AttributeValue'
         ]);
+        
+        View::composer('*', function($view) {
+            $preferences = Preference::all();
+            $preferenceValues = [];
+            foreach($preferences as $p) {
+                $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
+            }
 
-        $preferences = Preference::all();
-        $preferenceValues = [];
-        foreach($preferences as $p) {
-            $preferenceValues[$p->label] = Preference::decodePreference($p->label, json_decode($p->default_value));
-        }
-
-        View::share('p', $preferenceValues);
+            $view->with('p', $preferenceValues);
+        });
 
         Validator::extend('boolean_string', function ($attribute, $value, $parameters, $validator) {
             $acceptable = [true, false, 0, 1, '0', '1', 'true', 'false', 'TRUE', 'FALSE'];

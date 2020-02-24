@@ -159,6 +159,25 @@ class ApiUserTest extends TestCase
     }
 
     /**
+     * Test login with nickname.
+     *
+     * @return void
+     */
+    public function testLoginWithNicknameEndpoint()
+    {
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/auth/login', [
+                'nickname' => 'admin',
+                'password' => 'admin'
+            ]);
+
+        $response->assertStatus(200);
+        $this->assertTrue($response->headers->has('authorization'));
+    }
+
+    /**
      * Test login with wrong credentials.
      *
      * @return void
