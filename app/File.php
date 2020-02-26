@@ -281,11 +281,7 @@ class File extends Model
         $ext = $input->getClientOriginalExtension();
         // filename without extension, but with trailing '.'
         $baseFilename = substr($filename, 0, strlen($filename)-strlen($ext));
-        $cnt = 1;
-        while(Storage::exists($filename)) {
-            $filename = "$baseFilename$cnt.$ext";
-            $cnt++;
-        }
+        $filename = self::getUniqueFilename($baseFilename, $ext);
         $filehandle = fopen($input->getRealPath(), 'r');
         Storage::put(
             $filename,
@@ -334,7 +330,7 @@ class File extends Model
         if($file->isImage()) {
             $fileUrl = sp_get_storage_file_path($filename);
             $nameNoExt = pathinfo($filename, PATHINFO_FILENAME);
-            $thumbFilename = $nameNoExt . self::THUMB_SUFFIX . self::EXP_SUFFIX;
+            $thumbFilename = self::getUniqueFilename($nameNoExt . self::THUMB_SUFFIX, self::EXP_SUFFIX);
 
             $imageInfo = getimagesize($fileUrl);
             $width = $imageInfo[0];
@@ -354,7 +350,8 @@ class File extends Model
                     default:
                         // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
                         $im = new \Imagick($fileUrl);
-                        $fileUrl = sp_get_storage_file_path($nameNoExt . self::EXP_SUFFIX);
+                        $uniqueName = self::getUniqueFilename($nameNoExt, self::EXP_SUFFIX);
+                        $fileUrl = sp_get_storage_file_path($uniqueName);
                         $im->setImageFormat(self::EXP_FORMAT);
                         $im->writeImage($fileUrl);
                         $im->clear();
@@ -432,13 +429,17 @@ class File extends Model
     }
 
     public function rename($newName) {
+        if(Storage::exists($newName)) {
+            return false;
+        }
+
         Storage::move($this->name, $newName);
         $this->name = $newName;
         if($this->isImage()) {
             $nameNoExt = pathinfo($newName, PATHINFO_FILENAME);
             $this->thumb = $nameNoExt . self::THUMB_SUFFIX . self::EXP_SUFFIX;
         }
-        $this->save();
+        return $this->save();
     }
 
     public function link($eid, $user) {
@@ -914,5 +915,15 @@ class File extends Model
             }
         }
         return $is;
+    }
+
+    private static function getUniqueFilename($filename, $extension) {
+        $uniqueFilename = "$filename.$extension";
+        $cnt = 1;
+        while(Storage::exists($uniqueFilename)) {
+            $uniqueFilename = "$filename_$cnt.$ext";
+            $cnt++;
+        }
+        return $uniqueFilename;
     }
 }

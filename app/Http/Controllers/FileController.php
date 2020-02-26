@@ -384,7 +384,11 @@ class FileController extends Controller
         $file->save();
 
         if(isset($newName)) {
-            $file->rename($newName);
+            if($file->rename($newName) === false) {
+                return response()->json([
+                    'error' => __('There is already a file with this name')
+                ], 400);
+            };
             $file->setFileInfo();
         }
         return response()->json($file);
