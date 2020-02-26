@@ -279,8 +279,8 @@ class File extends Model
     public static function createFromUpload($input, $user, $metadata) {
         $filename = $input->getClientOriginalName();
         $ext = $input->getClientOriginalExtension();
-        // filename without extension, but with trailing '.'
-        $baseFilename = substr($filename, 0, strlen($filename)-strlen($ext));
+        // filename without extension and trailing '.'
+        $baseFilename = substr($filename, 0, strlen($filename) - (strlen($ext) + 1));
         $filename = self::getUniqueFilename($baseFilename, $ext);
         $filehandle = fopen($input->getRealPath(), 'r');
         Storage::put(
@@ -918,10 +918,29 @@ class File extends Model
     }
 
     private static function getUniqueFilename($filename, $extension) {
-        $uniqueFilename = "$filename.$extension";
-        $cnt = 1;
+        $cnt = 0;
+        $cutoff = 0;
+        if(preg_match('/.*\.(\d+)\.?/', $filename, $matches)) {
+            if(count($matches) > 1) {
+                $cnt = intval($matches[1]);
+            }
+            // cut off number and leading '.'
+            $cutoff += strlen($matches[1]) + 1;
+        }
+        if(Str::endsWith($filename, '.')) {
+            $cutoff++;
+        }
+        if($cutoff > 0) {
+            $filename = substr($filename, 0, -$cutoff);
+        }
+        if($cnt > 0) {
+            $uniqueFilename = "$filename.$cnt.$extension";
+            $cnt++;
+        } else {
+            $uniqueFilename = "$filename.$extension";
+        }
         while(Storage::exists($uniqueFilename)) {
-            $uniqueFilename = "$filename_$cnt.$ext";
+            $uniqueFilename = "$filename.$cnt.$extension";
             $cnt++;
         }
         return $uniqueFilename;
