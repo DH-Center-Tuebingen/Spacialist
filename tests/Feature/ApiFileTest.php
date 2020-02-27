@@ -16,6 +16,7 @@ class ApiFileTest extends TestCase
 {
     private static $testFiles = [
         'text1.txt',
+        'text1.2.txt',
         'text2.txt',
         'text3.txt',
         'office_file.docx',
@@ -24,11 +25,6 @@ class ApiFileTest extends TestCase
         'test_img_edin.jpg',
         'test_img_edin_thumb.jpg',
         'test_archive.zip',
-    ];
-
-    private $fileTypes = [
-        ['mime' => 'image/jpeg', 'type' => 'jpg', 'category' => 'image'],
-        ['mime' => 'text/plain', 'type' => 'txt', 'category' => 'text'],
     ];
 
     protected function setUp(): void
@@ -623,6 +619,40 @@ class ApiFileTest extends TestCase
     }
 
     /**
+     * Test file upload with existing file with name.
+     *
+     * @return void
+     */
+    public function testFileUploadExistingEndpoint()
+    {
+        $path = storage_path() . "/framework/testing/text1.2.txt";
+        $file = new UploadedFile($path, 'text1.2.txt', 'none/defined', null, true);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->post('/api/v1/file/new', [
+                'file' => $file,
+            ]);
+
+        $uplFile = File::latest()->first();
+
+        Storage::assertExists('text1.2.txt');
+        Storage::assertExists('text1.3.txt');
+
+        $response->assertStatus(201);
+        $response->assertJson([
+            'id' => $uplFile->id,
+            'name' => 'text1.3.txt',
+            'exif' => null,
+            'mime_type' => 'text/plain',
+            'lasteditor' => 'Admin',
+            'category' => 'text'
+        ]);
+        $this->assertTrue($uplFile->isText());
+    }
+
+    /**
      * Test getting all files.
      *
      * @return void
@@ -1077,6 +1107,34 @@ class ApiFileTest extends TestCase
         $file = File::find(1);
         $this->assertEquals('This is just a test file.', $file->description);
         $this->assertEquals('test_file.txt', $file->name);
+    }
+
+    /**
+     * Test patching a property (description and name) of a file (id=1)
+     *
+     * @return void
+     */
+    public function testPatchPropertyImageNameEndpoint()
+    {
+        $file = File::find(5);
+        $this->assertEquals('Edinburgh Castle', $file->description);
+        $this->assertEquals('Vinzenz Rosenkranz (CC BY-NC-SA 2.0)', $file->copyright);
+        $this->assertEquals('test_img_edin.jpg', $file->name);
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->patch('/api/v1/file/5/property', [
+                'name' => 'edinburgh_castle.jpg'
+            ]);
+
+        $response->assertStatus(200);
+        $file = File::find(5);
+        $this->assertEquals('Edinburgh Castle', $file->description);
+        $this->assertEquals('Vinzenz Rosenkranz (CC BY-NC-SA 2.0)', $file->copyright);
+        $this->assertEquals('edinburgh_castle.jpg', $file->name);
+        $this->assertEquals('edinburgh_castle_thumb.jpg', $file->thumb);
+        Storage::assertExists('edinburgh_castle.jpg');
+        Storage::assertExists('edinburgh_castle_thumb.jpg');
     }
 
     /**

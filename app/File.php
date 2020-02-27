@@ -437,7 +437,9 @@ class File extends Model
         $this->name = $newName;
         if($this->isImage()) {
             $nameNoExt = pathinfo($newName, PATHINFO_FILENAME);
-            $this->thumb = $nameNoExt . self::THUMB_SUFFIX . self::EXP_SUFFIX;
+            $newThumb = self::getUniqueFilename($nameNoExt . self::THUMB_SUFFIX, self::EXP_SUFFIX);
+            Storage::move($this->thumb, $newThumb);
+            $this->thumb = $newThumb;
         }
         return $this->save();
     }

@@ -371,7 +371,11 @@ class FileController extends Controller
         if($request->has('name')) {
             $newName = $request->get('name');
             $otherFileWithName = File::where('name', $newName)->first();
-            if(isset($otherFileWithName) && $otherFileWithName->id != $id) {
+            if(
+                (isset($otherFileWithName) && $otherFileWithName->id != $id)
+                ||
+                $file->rename($newName) === false
+            ) {
                 return response()->json([
                     'error' => __('There is already a file with this name')
                 ], 400);
@@ -382,15 +386,8 @@ class FileController extends Controller
             $file->{$key} = $value;
         }
         $file->save();
+        $file->setFileInfo();
 
-        if(isset($newName)) {
-            if($file->rename($newName) === false) {
-                return response()->json([
-                    'error' => __('There is already a file with this name')
-                ], 400);
-            };
-            $file->setFileInfo();
-        }
         return response()->json($file);
     }
 
