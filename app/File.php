@@ -329,7 +329,7 @@ class File extends Model
 
         if($file->isImage()) {
             $fileUrl = sp_get_storage_file_path($filename);
-            $nameNoExt = pathinfo($filename, PATHINFO_FILENAME);
+            $nameNoExt = $baseFilename;
             $thumbFilename = self::getUniqueFilename($nameNoExt . self::THUMB_SUFFIX, self::EXP_SUFFIX);
 
             $imageInfo = getimagesize($fileUrl);
@@ -918,7 +918,7 @@ class File extends Model
     private static function getUniqueFilename($filename, $extension) {
         $cnt = 0;
         $cutoff = 0;
-        if(preg_match('/.*\.(\d+)\.?/', $filename, $matches)) {
+        if(preg_match('/.*\.(\d+)\.?$/', $filename, $matches)) {
             if(count($matches) > 1) {
                 $cnt = intval($matches[1]);
             }
@@ -930,6 +930,9 @@ class File extends Model
         }
         if($cutoff > 0) {
             $filename = substr($filename, 0, -$cutoff);
+        }
+        if(Str::startsWith($extension, '.')) {
+            $extension = substr($extension, 1);
         }
         if($cnt > 0) {
             $uniqueFilename = "$filename.$cnt.$extension";

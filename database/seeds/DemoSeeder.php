@@ -53,7 +53,9 @@ class DemoSeeder extends Seeder
             'text3.txt',
             'office_file.docx',
             'spacialist_screenshot.png',
+            'spacialist_screenshot_thumb.jpg',
             'test_img_edin.jpg',
+            'test_img_edin_thumb.jpg',
             'test_archive.zip',
         ];
         $path = storage_path() . "/framework/testing/";

@@ -537,8 +537,8 @@ class ApiFileTest extends TestCase
 
         $uplFile = File::with('tags')->latest()->first();
 
-        Storage::assertExists('spacialist_screenshot.1.png');
-        Storage::assertExists('spacialist_screenshot.1_thumb.jpg');
+        Storage::assertExists('spacialist_screenshot.0.png');
+        Storage::assertExists('spacialist_screenshot_thumb.0.jpg');
 
         $response->assertStatus(201);
         $response->assertJsonStructure([
@@ -560,12 +560,12 @@ class ApiFileTest extends TestCase
 
         $response->assertExactJson([
             'id' => $uplFile->id,
-            'name' => 'spacialist_screenshot.1.png',
+            'name' => 'spacialist_screenshot.0.png',
             'modified' => $uplFile->modified,
             'created' => $uplFile->created,
             'cameraname' => null,
             'exif' => null,
-            'thumb' => 'spacialist_screenshot.1_thumb.jpg',
+            'thumb' => 'spacialist_screenshot_thumb.0.jpg',
             'copyright' => $cr,
             'description' => $desc,
             'mime_type' => 'image/png',
@@ -600,16 +600,16 @@ class ApiFileTest extends TestCase
 
         $uplFile = File::latest()->first();
 
-        Storage::assertExists('test_img_edin.1.jpg');
-        Storage::assertExists('test_img_edin.1_thumb.jpg');
+        Storage::assertExists('test_img_edin.0.jpg');
+        Storage::assertExists('test_img_edin_thumb.0.jpg');
 
         $response->assertStatus(201);
         $response->assertJson([
             'id' => $uplFile->id,
-            'name' => 'test_img_edin.1.jpg',
+            'name' => 'test_img_edin.0.jpg',
             'cameraname' => 'Canon EOS 650D (Canon)',
             'exif' => [],
-            'thumb' => 'test_img_edin.1_thumb.jpg',
+            'thumb' => 'test_img_edin_thumb.0.jpg',
             'mime_type' => 'image/jpeg',
             'lasteditor' => 'Admin',
             'category' => 'image'
