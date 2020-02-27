@@ -1,0 +1,1 @@
+This is a modified version of text1 to test renaming with counter
