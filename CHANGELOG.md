@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Accidentally moving map outside viewport
 - Ignore uppercase/lowercase letters in login form user names
 - Overwriting existing files/thumbnails
+- Error on file loading due to invalid exif data
 ### Changed
 - Select newly created layer in Layer Editor
 

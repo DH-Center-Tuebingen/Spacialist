@@ -754,8 +754,11 @@ class File extends Model
         } catch(PelDataWindowOffsetException $e) {
             return null;
         }
+        // Only JPEG is currently supported
+        if(!PelJpeg::isValid($data)) {
+            return null;
+        }
         try {
-            PelJpeg::isValid($data);
             $jpg = new PelJpeg();
             $jpg->load($data);
             $app1 = $jpg->getExif();
@@ -769,11 +772,6 @@ class File extends Model
         } catch(PelDataWindowOffsetException $e) {
             return null;
         } catch(PelJpegInvalidMarkerException $e) {
-            return null;
-        }
-        try {
-            PelTiff::isValid($data);
-        } catch(PelDataWindowOffsetException $e) {
             return null;
         }
         return null;
