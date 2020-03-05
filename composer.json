@@ -19,7 +19,7 @@
         "renanbr/bibtex-parser": "^2.0",
         "spatie/laravel-permission": "^3.3",
         "tecnickcom/tcpdf": "^6.3",
-        "tymon/jwt-auth": "1.0.0-rc.5",
+        "tymon/jwt-auth": "^1.0.0",
         "wapmorgan/unified-archive": "^0.1.1"
     },
     "require-dev": {
