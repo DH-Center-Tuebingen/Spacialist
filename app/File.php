@@ -38,7 +38,7 @@ class File extends Model
         'thumb',
         'copyright',
         'description',
-        'lasteditor',
+        'user_id',
     ];
 
     protected $appends = [
@@ -298,7 +298,7 @@ class File extends Model
 
         $file = new File();
         $file->modified = $lastModified;
-        $file->lasteditor = $user->name;
+        $file->user_id = $user->id;
         $file->mime_type = $mimeType;
         $file->name = $filename;
         $file->created = $lastModified;
@@ -445,7 +445,7 @@ class File extends Model
         $link = new EntityFile();
         $link->file_id = $this->id;
         $link->entity_id = $eid;
-        $link->lasteditor = $user->name;
+        $link->user_id = $user->id;
         $link->save();
     }
 
@@ -712,6 +712,10 @@ class File extends Model
 
     public function getExifAttribute() {
         return $this->getExifData();
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function entities() {

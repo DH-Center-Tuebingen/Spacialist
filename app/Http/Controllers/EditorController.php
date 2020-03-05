@@ -397,7 +397,7 @@ class EditorController extends Controller {
                 ->get();
             $ctr = 1;
             foreach($entites as $e) {
-                Entity::addSerial($e->id, $aid, $a->text, $ctr, $user->name);
+                Entity::addSerial($e->id, $aid, $a->text, $ctr, $user->id);
                 $ctr++;
             }
         }

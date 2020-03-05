@@ -24,6 +24,10 @@ class User extends Authenticatable implements JWTSubject
         'name', 'nickname', 'email', 'password',
     ];
 
+    protected $appends = [
+        'avatar_url',
+    ];
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -51,6 +55,11 @@ class User extends Authenticatable implements JWTSubject
             }
         }
         $this->permissions = $permissions;
+    }
+
+    public function getAvatarUrlAttribute() {
+
+        return isset($this->avatar) ? sp_get_public_url($this->avatar) : null;
     }
 
     public function preferences() {

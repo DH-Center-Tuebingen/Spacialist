@@ -74,7 +74,12 @@ const en = {
         },
         user: {
             settings: 'Preferences',
-            logout: 'Logout'
+            profile: 'Profile',
+            logout: 'Logout',
+            info_title: 'User Information',
+            member_since: 'Member since',
+            contact: 'Contact',
+            avatar: 'Avatar',
         },
         select: {
             placehoder: 'Select option',
@@ -129,6 +134,7 @@ const en = {
         'display-name': 'Displayname',
         email: 'E-Mail Address',
         email_or_nick: 'E-Mail Address or Nickname',
+        phonenumber: 'Phone number',
         password: 'Password',
         'remember-me': 'Remember me',
         description: 'Description',

@@ -11,6 +11,8 @@ class DemoSeeder extends Seeder
      */
     public function run()
     {
+        $this->call(UsersTableSeeder::class);
+
         $this->call(ThLanguageTableSeeder::class);
         $this->call(ThConceptTableSeeder::class);
         $this->call(ThConceptMasterTableSeeder::class);
@@ -21,7 +23,6 @@ class DemoSeeder extends Seeder
         $this->call(ThConceptNotesTableSeeder::class);
         $this->call(ThConceptNotesMasterTableSeeder::class);
 
-        $this->call(UsersTableSeeder::class);
         $this->call(PermissionsTableSeeder::class);
         $this->call(RolesTableSeeder::class);
         $this->call(PermissionRoleTableSeeder::class);

@@ -1,7 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.7.3 (Unreleased)
+## 0.8 - Helgö (Unreleased)
+### Added
+- User profile to allow users to edit their information
+  - Support for phone numbers and avatars
+
+## 0.7.3
 ### Added
 - CLI command to create new users/roles
 - Login using a nickname instead of e-mail address

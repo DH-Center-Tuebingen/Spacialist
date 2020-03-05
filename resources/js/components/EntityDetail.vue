@@ -48,9 +48,10 @@
                 </span>
                 -
                 <i class="fas fa-fw fa-user-edit"></i>
-                <span class="font-weight-medium">
-                    {{ selectedEntity.lasteditor }}
-                </span>
+                <a href="#" @click.prevent="$showUserInfo(selectedEntity.user)" class="font-weight-medium">
+                    {{ selectedEntity.user.name }}
+                    <user-avatar :user="selectedEntity.user" :size="20" style="vertical-align: middle;"></user-avatar>
+                </a>
             </div>
         </div>
         <form id="entity-attribute-form" name="entity-attribute-form" class="col pl-0 pr-0 overflow-hidden" @submit.prevent="saveEntity(selectedEntity)">
@@ -324,7 +325,7 @@
             setModificationFields(entity) {
                 if(!this.selectedEntity && !this.selectedEntity.id) return;
 
-                this.selectedEntity.lasteditor = entity.lasteditor;
+                this.selectedEntity.user = entity.user;
                 this.selectedEntity.updated_at = entity.updated_at;
             },
             updateDependencyCounter(event) {

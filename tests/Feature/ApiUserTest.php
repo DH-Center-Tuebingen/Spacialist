@@ -329,7 +329,10 @@ class ApiUserTest extends TestCase
             'nickname' => 'admin',
             'email' => 'test@test.com',
             'created_at' => '2017-12-20 09:47:36',
-            'updated_at' => "$user->updated_at"
+            'updated_at' => "$user->updated_at",
+            'avatar' => null,
+            'avatar_url' => null,
+            'phonenumber' => '+49 1234 12345',
         ]);
     }
 

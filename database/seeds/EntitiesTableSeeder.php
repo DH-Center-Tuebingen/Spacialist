@@ -12,6 +12,7 @@ class EntitiesTableSeeder extends Seeder
      */
     public function run()
     {
+        $user = \App\User::orderBy('id')->first();
         \DB::table('entities')->insert(array (
             0 =>
             array (
@@ -21,7 +22,7 @@ class EntitiesTableSeeder extends Seeder
                 'root_entity_id' => 2,
                 'created_at' => '2017-12-27 20:31:38',
                 'updated_at' => '2017-12-27 20:31:38',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'geodata_id' => NULL,
                 'rank' => 1,
             ),
@@ -33,7 +34,7 @@ class EntitiesTableSeeder extends Seeder
                 'root_entity_id' => 2,
                 'created_at' => '2017-12-27 20:31:54',
                 'updated_at' => '2017-12-27 20:31:54',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'geodata_id' => NULL,
                 'rank' => 2,
             ),
@@ -45,7 +46,7 @@ class EntitiesTableSeeder extends Seeder
                 'root_entity_id' => 2,
                 'created_at' => '2017-12-27 20:32:07',
                 'updated_at' => '2017-12-27 20:32:07',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'geodata_id' => NULL,
                 'rank' => 3,
             ),
@@ -57,7 +58,7 @@ class EntitiesTableSeeder extends Seeder
                 'root_entity_id' => NULL,
                 'created_at' => '2017-12-27 20:32:25',
                 'updated_at' => '2017-12-31 16:02:57',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'geodata_id' => NULL,
                 'rank' => 3,
             ),
@@ -69,7 +70,7 @@ class EntitiesTableSeeder extends Seeder
                 'root_entity_id' => 7,
                 'created_at' => '2017-12-31 16:03:12',
                 'updated_at' => '2017-12-31 16:03:12',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'geodata_id' => NULL,
                 'rank' => 1,
             ),
@@ -81,7 +82,7 @@ class EntitiesTableSeeder extends Seeder
                 'root_entity_id' => NULL,
                 'created_at' => '2017-12-31 16:02:55',
                 'updated_at' => '2017-12-31 16:10:50',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'geodata_id' => 3,
                 'rank' => 2,
             ),
@@ -93,7 +94,7 @@ class EntitiesTableSeeder extends Seeder
                 'root_entity_id' => NULL,
                 'created_at' => '2017-12-20 17:10:34',
                 'updated_at' => '2017-12-31 16:10:56',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'geodata_id' => 2,
                 'rank' => 1,
             ),
@@ -105,7 +106,7 @@ class EntitiesTableSeeder extends Seeder
                 'root_entity_id' => 1,
                 'created_at' => '2017-12-20 17:10:41',
                 'updated_at' => '2017-12-31 16:13:09',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'geodata_id' => 5,
                 'rank' => 1,
             ),

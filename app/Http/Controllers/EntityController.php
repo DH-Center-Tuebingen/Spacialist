@@ -353,18 +353,20 @@ class EntityController extends Controller {
                     $attrval->entity_val = $value;
                     break;
             }
-            $attrval->lasteditor = $user->name;
+            $attrval->user_id = $user->id;
             $attrval->save();
         }
 
-        // Save model if lasteditor changed
+        // Save model if last editor changed
         // Only update timestamps otherwise
-        $entity->lasteditor = $user->name;
+        $entity->user_id = $user->id;
         if($entity->isDirty()) {
             $entity->save();
         } else {
             $entity->touch();
         }
+
+        $entity->load('user');
 
         return response()->json($entity);
     }
@@ -397,9 +399,9 @@ class EntityController extends Controller {
             'entity_id' => $id,
             'attribute_id' => $aid,
         ], [
-            'lasteditor' => $user->name
+            'user_id' => $user->id
         ]);
-        $attrValue->lasteditor = $user->name;
+        $attrValue->user_id = $user->id;
         $values = $request->only(array_keys(AttributeValue::patchRules));
         $attrValue->patch($values);
 

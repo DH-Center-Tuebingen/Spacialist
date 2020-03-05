@@ -76,7 +76,7 @@ class ApiFileTest extends TestCase
             'copyright',
             'description',
             'mime_type',
-            'lasteditor',
+            'user_id',
             'created_at',
             'updated_at',
             'url',
@@ -101,7 +101,7 @@ class ApiFileTest extends TestCase
             'copyright' => null,
             'description' => null,
             'mime_type' => 'image/png',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
             'created_at' => '2019-03-08 13:13:11',
             'updated_at' => '2019-03-08 13:13:11',
             'url' => "/storage/spacialist_screenshot.png",
@@ -141,7 +141,7 @@ class ApiFileTest extends TestCase
             'copyright',
             'description',
             'mime_type',
-            'lasteditor',
+            'user_id',
             'created_at',
             'updated_at',
             'url',
@@ -168,7 +168,7 @@ class ApiFileTest extends TestCase
             'copyright' => 'Vinzenz Rosenkranz (CC BY-NC-SA 2.0)',
             'description' => 'Edinburgh Castle',
             'mime_type' => 'image/jpeg',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
             'created_at' => '2019-03-08 13:13:11',
             'updated_at' => '2019-03-08 13:13:12',
             'url' => "/storage/test_img_edin.jpg",
@@ -362,7 +362,7 @@ class ApiFileTest extends TestCase
                 'copyright' => null,
                 'description' => null,
                 'mime_type' => 'text/plain',
-                'lasteditor' => 'Admin',
+                'user_id' => 1,
                 'created_at' => '2019-03-08 13:13:11',
                 'updated_at' => '2019-03-08 13:13:11',
                 'category' => 'text',
@@ -395,7 +395,7 @@ class ApiFileTest extends TestCase
                 'copyright',
                 'description',
                 'mime_type',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at',
                 'category',
@@ -552,7 +552,7 @@ class ApiFileTest extends TestCase
             'copyright',
             'description',
             'mime_type',
-            'lasteditor',
+            'user_id',
             'created_at',
             'updated_at',
             'category'
@@ -569,7 +569,7 @@ class ApiFileTest extends TestCase
             'copyright' => $cr,
             'description' => $desc,
             'mime_type' => 'image/png',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
             'created_at' => "$uplFile->created_at",
             'updated_at' => "$uplFile->updated_at",
             'category' => 'image'
@@ -611,7 +611,7 @@ class ApiFileTest extends TestCase
             'exif' => [],
             'thumb' => 'test_img_edin.1_thumb.jpg',
             'mime_type' => 'image/jpeg',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
             'category' => 'image'
         ]);
         $content = $response->decodeResponseJson();
@@ -971,7 +971,7 @@ class ApiFileTest extends TestCase
             'copyright',
             'description',
             'mime_type',
-            'lasteditor',
+            'user_id',
             'created_at',
             'updated_at',
         ]);
@@ -983,7 +983,7 @@ class ApiFileTest extends TestCase
             'copyright' => null,
             'description' => null,
             'mime_type' => 'text/plain',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
         ]);
 
         $this->refreshToken($response);
@@ -1008,7 +1008,7 @@ class ApiFileTest extends TestCase
             'copyright' => null,
             'description' => null,
             'mime_type' => 'image/jpeg',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
         ]);
     }
 

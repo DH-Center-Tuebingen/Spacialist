@@ -74,7 +74,12 @@ const de = {
         },
         user: {
             settings: 'Einstellungen',
-            logout: 'Ausloggen'
+            profile: 'Profil',
+            logout: 'Ausloggen',
+            info_title: 'Benutzerinformationen',
+            member_since: 'Mitglied seit',
+            contact: 'Kontakt',
+            avatar: 'Avatar',
         },
         select: {
             placehoder: 'Option auswählen',
@@ -129,6 +134,7 @@ const de = {
         'display-name': 'Anzeigename',
         email: 'E-Mail-Adresse',
         email_or_nick: 'E-Mail-Adresse oder Name',
+        phonenumber: 'Telefonnummer',
         password: 'Passwort',
         'remember-me': 'Eingeloggt bleiben',
         description: 'Beschreibung',

@@ -310,7 +310,7 @@ class ApiEditorTest extends TestCase
                         'concept_url',
                         'concept_scheme',
                         'is_top_concept',
-                        'lasteditor',
+                        'user_id',
                         'created_at',
                         'updated_at'
                     ]
