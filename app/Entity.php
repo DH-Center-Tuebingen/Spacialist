@@ -4,10 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Nicolaslopezj\Searchable\SearchableTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Entity extends Model
 {
     use SearchableTrait;
+    use LogsActivity;
 
     /**
      * The attributes that are assignable.
@@ -35,6 +37,9 @@ class Entity extends Model
 
         ],
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logAttributes = ['*'];
 
     const rules = [
         'name'              => 'required|string',

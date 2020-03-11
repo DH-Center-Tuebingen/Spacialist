@@ -110,6 +110,7 @@ const de = {
             Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class="normal">%03d</code>.`
         },
         active: 'Aktiviert',
+        activity: 'Aktivitäten',
         visible: 'Sichtbar',
         invisible: 'Unsichtbar',
         opacity: 'Deckkraft',

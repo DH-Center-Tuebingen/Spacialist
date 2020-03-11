@@ -110,6 +110,7 @@ const en = {
             To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class="normal">%03d</code>.`
         },
         active: 'Active',
+        activity: 'Activity',
         visible: 'Visible',
         invisible: 'Invisible',
         opacity: 'Opacity',

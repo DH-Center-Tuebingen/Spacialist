@@ -83,6 +83,9 @@
                             <router-link :to="{name: 'roles'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-shield-alt"></i> {{ $t('global.settings.roles') }}
                             </router-link>
+                            <router-link :to="{name: 'globalactivity'}" class="dropdown-item">
+                                <i class="fas fa-fw fa-clock"></i> {{ $t('global.activity') }}
+                            </router-link>
                             <router-link :to="{name: 'dme'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-sitemap"></i> {{ $t('global.settings.datamodel') }}
                             </router-link>
@@ -105,6 +108,9 @@
                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdown">
                             <router-link :to="{name: 'userpreferences', params: { id: $auth.user().id }}" class="dropdown-item">
                                 <i class="fas fa-fw fa-cog"></i> {{ $t('global.user.settings') }}
+                            </router-link>
+                            <router-link :to="{name: 'useractivity', params: { id: $auth.user().id }}" class="dropdown-item">
+                                <i class="fas fa-fw fa-user-clock"></i> {{ $t('global.activity') }}
                             </router-link>
                             <a class="dropdown-item" href="#"
                                 @click="logout">

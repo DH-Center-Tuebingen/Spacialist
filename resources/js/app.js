@@ -127,6 +127,7 @@ import {
     faUnlink,
     faUnlockAlt,
     faUser,
+    faUserClock,
     faUserEdit,
     faUsers,
     faVolumeMute,
@@ -153,6 +154,8 @@ import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
 import Preferences from './components/Preferences.vue';
 import UserPreferences from './components/UserPreferences.vue';
+import UserActivity from './components/UserActivity.vue';
+import GlobalActivity from './components/GlobalActivity.vue';
 const DataModel = () => import(/* webpackChunkName: "group-bib" */ './components/DataModel.vue')
 const DataModelDetailView = () => import(/* webpackChunkName: "group-bib" */ './components/DataModelDetailView.vue')
 
@@ -290,6 +293,7 @@ library.add(
     faUnlink,
     faUnlockAlt,
     faUser,
+    faUserClock,
     faUserEdit,
     faUsers,
     faVolumeMute,
@@ -505,6 +509,14 @@ const router = new VueRouter({
             }
         },
         {
+            path: '/activity/g',
+            name: 'globalactivity',
+            component: GlobalActivity,
+            meta: {
+                auth: true
+            }
+        },
+        {
             path: '/editor/dm',
             name: 'dme',
             component: DataModel,
@@ -531,6 +543,14 @@ const router = new VueRouter({
             path: '/preferences/u/:id',
             name: 'userpreferences',
             component: UserPreferences,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/activity/u',
+            name: 'useractivity',
+            component: UserActivity,
             meta: {
                 auth: true
             }
@@ -617,6 +637,7 @@ import AttributeSearch from './components/AttributeSearch.vue';
 import CsvTable from './components/CsvTable.vue';
 
 // Reusable Components
+import ActivityLog from './components/ActivityLog.vue';
 import Attributes from './components/AttributeList.vue';
 import EntityTree from './components/EntityTree.vue';
 import EntityTypes from './components/EntityTypeList.vue';
@@ -636,6 +657,7 @@ Vue.component('entity-type-search', EntityTypeSearch);
 Vue.component('label-search', LabelSearch);
 Vue.component('attribute-search', AttributeSearch);
 Vue.component('csv-table', CsvTable);
+Vue.component('activity-log', ActivityLog);
 Vue.component('attributes', Attributes);
 Vue.component('entity-tree', EntityTree);
 Vue.component('entity-types', EntityTypes);
