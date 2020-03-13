@@ -166,6 +166,7 @@ import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
 import VueScrollTo from 'vue-scrollto';
+import InfiniteLoading from 'vue-infinite-loading';
 
 import { EventBus } from './event-bus.js';
 
@@ -351,6 +352,7 @@ Vue.use(VeeValidate);
 Vue.use(Notifications);
 Vue.use(DatePicker);
 Vue.use(VueScrollTo);
+Vue.use(InfiniteLoading);
 
 const router = new VueRouter({
     scrollBehavior(to, from, savedPosition) {

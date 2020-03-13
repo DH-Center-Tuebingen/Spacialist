@@ -51,7 +51,7 @@
                 </div>
             </li>
         </ul>
-        <div class="table-responsive col p-0">
+        <div class="table-responsive flex-grow-1">
             <table class="table table-sm table-striped table-hover">
                 <thead class="thead-light sticky-top">
                     <tr>
@@ -255,7 +255,7 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody v-infinite-scroll="getNextEntries">
+                <tbody>
                     <tr v-for="entry in orderedList">
                         <td>
                             {{ entry.type }}
@@ -350,6 +350,11 @@
                     </tr>
                 </tbody>
             </table>
+            <infinite-loading @infinite="getNextEntries">
+                <span slot="spinner"></span>
+                <span slot="no-more"></span>
+                <span slot="no-results"></span>
+            </infinite-loading>
         </div>
 
         <router-view
@@ -395,12 +400,7 @@
 </template>
 
 <script>
-    import infiniteScroll from 'vue-infinite-scroll';
-
     export default {
-        directives: {
-            infiniteScroll
-        },
         beforeRouteEnter(to, from, next) {
             $httpQueue.add(() => $http.get('bibliography').then(response => {
                 next(vm => vm.init(response.data));
@@ -416,9 +416,13 @@
             init(entries) {
                 this.allEntries = entries;
             },
-            getNextEntries() {
-                if(this.entriesLoaded == this.allEntries.length) return;
-                this.entriesLoaded = Math.min(this.entriesLoaded + this.chunkSize, this.allEntries.length);
+            getNextEntries($state) {
+                if(this.entriesLoaded == this.allEntries.length) {
+                    $state.complete();
+                } else {
+                    this.entriesLoaded = Math.min(this.entriesLoaded + this.chunkSize, this.allEntries.length);
+                    $state.loaded();
+                }
             },
             addEntry(entry) {
                 this.allEntries.push(entry);

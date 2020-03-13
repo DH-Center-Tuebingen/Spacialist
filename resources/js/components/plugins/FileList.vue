@@ -39,7 +39,7 @@
                 </div>
             </div>
         </div>
-        <div infinite-scroll-disabled="isFetching" v-infinite-scroll="onLoadChunk" class="row col scroll-y-auto">
+        <div class="row col scroll-y-auto">
             <div class="row col align-content-start" v-if="grid">
                 <div class="col-md-12 col-lg-6 col-xl-4 mb-3 clickable" v-for="file in files" :title="file.name" @click="onClick(file)" @contextmenu.prevent="$refs.fileMenu.open($event, {file: file})">
                     <div class="card text-center">
@@ -133,9 +133,6 @@
                             <div class="card-img" style="width: 100%; height: 200px;"></div>
                             <div class="card-img-overlay">
                                 <h4 class="card-title">Load {{fileState.toLoad}} more</h4>
-                                <div class="card-text pt-4">
-                                    <i class="fas fa-fw fa-sync fa-3x" :class="{'fa-spin': isFetching}"></i>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -213,10 +210,21 @@
                     </div>
                 </li>
                 <li class="list-group-item w-100 d-flex flex-row justify-content-start align-items-center" v-if="fileState.toLoad">
-                    <i class="fas fa-fw fa-sync mr-2 ml-4 w-32p h-32p" :class="{'fa-spin': isFetching}"></i>
                     Load {{fileState.toLoad}} more
                 </li>
             </ul>
+            <infinite-loading @infinite="onLoadChunk">
+                <span slot="spinner">
+                    <div class="card-text pt-4" v-if="grid">
+                        <i class="fas fa-fw fa-sync fa-3x fa-spin"></i>
+                    </div>
+                    <span v-else>
+                        <i class="fas fa-fw fa-sync mr-2 ml-4 w-32p h-32p fa-spin"></i>
+                    </span>
+                </span>
+                <span slot="no-more"></span>
+                <span slot="no-results"></span>
+            </infinite-loading>
         </div>
 
         <vue-context ref="fileMenu">
@@ -235,15 +243,11 @@
 </template>
 
 <script>
-    import infiniteScroll from 'vue-infinite-scroll';
     import { VueContext } from 'vue-context';
 
     export default {
         components: {
             VueContext
-        },
-        directives: {
-            infiniteScroll
         },
         props: {
             files: {
