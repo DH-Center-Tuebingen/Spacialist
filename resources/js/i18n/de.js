@@ -111,6 +111,10 @@ const de = {
         },
         active: 'Aktiviert',
         activity: 'Aktivitäten',
+        action: 'Aktion',
+        users: 'Benutzer',
+        timespan: '@:global.attributes.timeperiod',
+        element_class: 'Elementklasse',
         visible: 'Sichtbar',
         invisible: 'Unsichtbar',
         opacity: 'Deckkraft',
@@ -135,9 +139,10 @@ const de = {
         description: 'Beschreibung',
         roles: 'Rollen',
         permissions: 'Berechtigungen',
-        'added-at': 'Hinzugefügt',
-        'created-at': 'Erstellt',
-        'updated-at': 'Aktualisert',
+        added_at: 'Hinzugefügt',
+        created_at: 'Erstellt',
+        updated_at: 'Aktualisert',
+        timestamp: 'Zeitstempel',
         options: 'Optionen',
         type: 'Typ',
         'root-attribute': 'Eltern-Attribut',
@@ -158,7 +163,7 @@ const de = {
     },
     main: {
         entity: {
-            title: 'Entitäten',
+            title: 'Entität | Entitäten',
             count: 'Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten',
             toasts: {
                 updated: {
@@ -270,6 +275,14 @@ const de = {
                 }
             },
             'add-permission-placeholder': 'Berechtigungen hinzufügen'
+        },
+        activity: {
+            title: '@:global.activity',
+            title_project: 'Projekt-Aktivität | Projekt-Aktivitäten',
+            title_user: 'Deine Aktivität | Deine Aktivitäten',
+            no_results: 'Keine Ergebnisse gefunden.',
+            data: 'Daten',
+            apply_filter: 'Filter anwenden'
         },
         datamodel: {
             toasts: {

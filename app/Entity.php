@@ -22,6 +22,7 @@ class Entity extends Model
         'name',
         'lasteditor',
         'geodata_id',
+        'rank',
     ];
 
     protected $appends = [
@@ -39,7 +40,9 @@ class Entity extends Model
     ];
 
     protected static $logOnlyDirty = true;
-    protected static $logAttributes = ['*'];
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['lasteditor'];
 
     const rules = [
         'name'              => 'required|string',

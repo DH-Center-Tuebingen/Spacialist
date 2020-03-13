@@ -76,6 +76,8 @@ import {
     faLink,
     faList,
     faLongArrowAltDown,
+    faLongArrowAltLeft,
+    faLongArrowAltRight,
     faLongArrowAltUp,
     faMagic,
     faMapMarkedAlt,
@@ -242,6 +244,8 @@ library.add(
     faLink,
     faList,
     faLongArrowAltDown,
+    faLongArrowAltLeft,
+    faLongArrowAltRight,
     faLongArrowAltUp,
     faMagic,
     faMapMarkedAlt,
@@ -637,6 +641,7 @@ import CsvTable from './components/CsvTable.vue';
 
 // Reusable Components
 import ActivityLog from './components/ActivityLog.vue';
+import ActivityLogFilter from './components/ActivityLogFilter.vue';
 import Attributes from './components/AttributeList.vue';
 import EntityTree from './components/EntityTree.vue';
 import EntityTypes from './components/EntityTypeList.vue';
@@ -657,6 +662,7 @@ Vue.component('label-search', LabelSearch);
 Vue.component('attribute-search', AttributeSearch);
 Vue.component('csv-table', CsvTable);
 Vue.component('activity-log', ActivityLog);
+Vue.component('activity-log-filter', ActivityLogFilter);
 Vue.component('attributes', Attributes);
 Vue.component('entity-tree', EntityTree);
 Vue.component('entity-types', EntityTypes);
@@ -827,6 +833,7 @@ const app = new Vue({
                 this.preferences = response.data.preferences;
                 this.concepts = response.data.concepts;
                 this.entityTypes = response.data.entityTypes;
+                this.users = response.data.users;
                 // Check if user is logged in and set preferred language
                 // instead of browser default
                 if(!app.$auth.ready()) {
@@ -862,6 +869,7 @@ const app = new Vue({
             preferences: {},
             concepts: {},
             entityTypes: {},
+            users: [],
             plugins: {},
             onInit: null
         }

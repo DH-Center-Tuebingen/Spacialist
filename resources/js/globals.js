@@ -62,6 +62,14 @@ Vue.prototype.$updateLanguage = function() {
     }
 };
 
+Vue.prototype.$getUsers = function() {
+    if(Vue.prototype.$auth.check()) {
+        return this.$root.$data.users;
+    } else {
+        return [];
+    }
+};
+
 Vue.prototype.$asyncFor = async function(arr, callback) {
     for(let i=0; i<arr.length; i++) {
         await callback(arr[i]);

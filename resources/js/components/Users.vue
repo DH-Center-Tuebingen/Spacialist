@@ -6,8 +6,8 @@
                     <th>{{ $t('global.name') }}</th>
                     <th>{{ $t('global.email') }}</th>
                     <th>{{ $t('global.roles') }}</th>
-                    <th>{{ $t('global.added-at') }}</th>
-                    <th>{{ $t('global.updated-at') }}</th>
+                    <th>{{ $t('global.added_at') }}</th>
+                    <th>{{ $t('global.updated_at') }}</th>
                     <th>{{ $t('global.options') }}</th>
                 </tr>
             </thead>

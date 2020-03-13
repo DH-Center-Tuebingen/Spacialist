@@ -7,8 +7,8 @@
                     <th>{{ $t('global.display-name') }}</th>
                     <th>{{ $t('global.description') }}</th>
                     <th>{{ $t('global.permissions') }}</th>
-                    <th>{{ $t('global.created-at') }}</th>
-                    <th>{{ $t('global.updated-at') }}</th>
+                    <th>{{ $t('global.created_at') }}</th>
+                    <th>{{ $t('global.updated_at') }}</th>
                     <th>{{ $t('global.options') }}</th>
                 </tr>
             </thead>

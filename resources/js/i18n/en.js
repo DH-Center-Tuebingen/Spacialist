@@ -111,6 +111,10 @@ const en = {
         },
         active: 'Active',
         activity: 'Activity',
+        action: 'Action',
+        users: 'User | Users',
+        timespan: 'Time span',
+        element_class: 'Element class',
         visible: 'Visible',
         invisible: 'Invisible',
         opacity: 'Opacity',
@@ -135,9 +139,10 @@ const en = {
         description: 'Description',
         roles: 'Roles',
         permissions: 'Permissions',
-        'added-at': 'Added',
-        'created-at': 'Created',
-        'updated-at': 'Updated',
+        added_at: 'Added',
+        created_at: 'Created',
+        updated_at: 'Updated',
+        timestamp: 'Timestamp',
         options: 'Options',
         type: 'Type',
         'root-attribute': 'Parent-Attribute',
@@ -158,7 +163,7 @@ const en = {
     },
     main: {
         entity: {
-            title: 'Entities',
+            title: 'Entity | Entities',
             count: 'No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities',
             toasts: {
                 updated: {
@@ -270,6 +275,14 @@ const en = {
                 }
             },
             'add-permission-placeholder': 'Add permissions'
+        },
+        activity: {
+            title: '@:global.activity',
+            title_project: 'Project Activity | Project Activities',
+            title_user: 'Your Activity | Your Activities',
+            no_results: 'No results found.',
+            data: 'Data',
+            apply_filter: 'Apply filter'
         },
         datamodel: {
             toasts: {

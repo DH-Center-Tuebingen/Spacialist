@@ -4,10 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class AttributeValue extends Model
 {
     use PostgisTrait;
+    use LogsActivity;
 
     protected $table = 'attribute_values';
     /**
@@ -46,6 +48,11 @@ class AttributeValue extends Model
     protected $postgisFields = [
         'geography_val',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['lasteditor'];
 
     const patchRules = [
         'certainty' => 'integer|between:0,100',

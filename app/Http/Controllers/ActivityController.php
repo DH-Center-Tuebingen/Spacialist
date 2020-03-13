@@ -44,6 +44,12 @@ class ActivityController extends Controller
         return response()->json($actUser->actions);
     }
 
+    public function getLoggableModels() {
+        return response()->json(sp_loggable_models());
+    }
+
+    // POST
+
     public function getFiltered(Request $request, $page = 1) {
         $user = auth()->user();
         if(!$user->can('view_users')) {
@@ -52,6 +58,31 @@ class ActivityController extends Controller
             ], 403);
         }
 
-        return response()->json(Activity::with(['causer', 'subject'])->paginate());
+        $this->validate($request, [
+            'users' => 'array',
+            'timespan' => 'array',
+            'model' => 'text',
+        ]);
+
+        $query = Activity::with(['causer', 'subject'])
+            ->orderBy('updated_at');
+
+        if($request->has('users')) {
+            $query->whereIn('causer_id', $request->input('users'));
+        }
+        if($request->has('timespan')) {
+            $ts = $request->input('timespan');
+            if(isset($ts['from'])) {
+                $query->whereDate('updated_at', '>=', $ts['from']);
+            }
+            if(isset($ts['to'])) {
+                $query->whereDate('updated_at', '<=', $ts['to']);
+            }
+        }
+        if($request->has('model')) {
+            $query->where('subject_type', $request->input('model'));
+        }
+
+        return response()->json($query->paginate());
     }
 }

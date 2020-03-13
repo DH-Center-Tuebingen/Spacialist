@@ -245,10 +245,10 @@
                             {{ $t('main.bibliography.column.school') }}
                         </th>
                         <th v-if="showAllFields">
-                            {{ $t('global.created-at') }}
+                            {{ $t('global.created_at') }}
                         </th>
                         <th v-if="showAllFields">
-                            {{ $t('global.updated-at') }}
+                            {{ $t('global.updated_at') }}
                         </th>
                         <th>
                             {{ $t('global.options') }}

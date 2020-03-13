@@ -1,7 +1,7 @@
 <template>
     <div class="d-flex flex-column">
         <h3>
-            {{ $t('main.entity.title') }}
+            {{ $tc('main.entity.title', 2) }}
             <small class="badge badge-secondary font-weight-light align-middle font-size-50">
                 {{ $tc('main.entity.count', topLevelCount, {cnt: topLevelCount}) }}
             </small>

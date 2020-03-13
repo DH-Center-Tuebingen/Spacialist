@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Reference extends Model
 {
+    use LogsActivity;
+
     protected $table = 'references';
     /**
      * The attributes that are assignable.
@@ -19,6 +22,11 @@ class Reference extends Model
         'description',
         'lasteditor',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['lasteditor'];
 
     const rules = [
         'bibliography_id' => 'required|integer|exists:bibliography,id',

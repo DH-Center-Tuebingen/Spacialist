@@ -4,15 +4,27 @@ namespace App;
 
 use App\UserPreference;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Preference extends Model
 {
+    use LogsActivity;
+    
     /**
      * The attributes that are assignable.
      *
      * @var array
      */
     protected $fillable = [
+    ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = [
+        'id',
+        'label',
+        'default_value',
+        'allow_override'
     ];
 
     public static function getPreferences() {

@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class ThConceptLabel extends Model
 {
+    use LogsActivity;
+
     protected $table = 'th_concept_label';
     /**
      * The attributes that are assignable.
@@ -19,6 +22,11 @@ class ThConceptLabel extends Model
         'label',
         'concept_label_type',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['lasteditor'];
 
     public function concept() {
         return $this->belongsTo('App\ThConcept', 'concept_id');
