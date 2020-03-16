@@ -18,7 +18,7 @@ jobs:
         postgresql password: '' 
     - uses: actions/checkout@v2
     - name: Install gdal
-      run: apt install gdal-bin
+      run: sudo apt install gdal-bin
     - name: Copy .env
       run: php -r "file_exists('.env.testing') || copy('.env.travis', '.env.testing');"
     - name: Install Dependencies
