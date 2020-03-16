@@ -1,0 +1,44 @@
+name: Laravel
+
+on:
+  pull_request:
+    branches: [ * ]
+
+jobs:
+  laravel-tests:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Setup PostgreSQL with Postgis
+      uses: huaxk/postgis-action@v1.0.0
+      with:
+        postgresql db: 'myapp_test'
+        postgresql user: 'postgres'
+        postgresql password: '' 
+    - uses: actions/checkout@v2
+    - name: Install gdal
+      run: apt install gdal-bin
+    - name: Copy .env
+      run: php -r "file_exists('.env.testing') || copy('.env.travis', '.env.testing');"
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+    - name: Generate key
+      run: |
+        php artisan key:generate
+        php artisan jwt:secret --env=testing
+        php artisan migrate --env=testing
+        php artisan db:seed --class=DemoSeeder --env=testing
+    - name: Directory Permissions
+      run: chmod -R 777 storage bootstrap/cache
+    - name: Create Database
+      run: |
+        mkdir -p database
+        touch database/database.sqlite
+    - name: Execute tests (Unit and Feature tests) via PHPUnit
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
+      run: |
+        vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+        vendor/bin/php-coveralls -v
