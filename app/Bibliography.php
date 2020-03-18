@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Nicolaslopezj\Searchable\SearchableTrait;
 
 class Bibliography extends Model
@@ -130,7 +131,7 @@ class Bibliography extends Model
             $key = $fields['title'];
         }
         // Use first two letters of author/title as key with only first letter uppercase
-        $key = ucwords(mb_strtolower(substr($key, 0, 2))) . ':';
+        $key = ucwords(Str::lower(substr($key, 0, 2))) . ':';
         if(isset($fields['year'])) {
             $key .= $fields['year'];
         } else {

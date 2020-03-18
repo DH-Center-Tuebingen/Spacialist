@@ -69,10 +69,14 @@
                     name: vm.$t('plugins.map.layer-editor.unnamed-layer'),
                     is_overlay: is_overlay
                 };
-                vm.$http.post('/map/layer', data).then(function(response) {
-                    if(is_overlay) vm.overlays.push(response.data);
-                    else vm.baselayer.push(response.data);
-                });
+                $httpQueue.add(() => $http.post('/map/layer', data).then(response => {
+                    if(is_overlay) {
+                        this.overlays.push(response.data);
+                    } else {
+                        this.baselayer.push(response.data);
+                    }
+                    this.onLayerSelect(response.data);
+                }));
             },
             onLayerSelect(layer) {
                 this.$router.push({

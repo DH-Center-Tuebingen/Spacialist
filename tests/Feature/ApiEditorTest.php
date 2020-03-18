@@ -169,7 +169,7 @@ class ApiEditorTest extends TestCase
             ->get('/api/v1/editor/dm/attribute_types');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(18);
+        $response->assertJsonCount(19);
         $response->assertJsonStructure([
             '*' => [
                 'datatype'
@@ -229,6 +229,9 @@ class ApiEditorTest extends TestCase
             ],
             [
                 'datatype' => 'serial'
+            ],
+            [
+                'datatype' => 'iconclass'
             ]
         ]);
     }

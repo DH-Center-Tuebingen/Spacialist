@@ -2,7 +2,6 @@
 
 ### NPM ###
 node_modules
-package-lock.json
 
 ### Plugins ###
 thesaurex
@@ -12,7 +11,6 @@ thesaurex
 /build
 
 ## Created by Laravel
-composer.lock
 /node_modules
 /public
 /public/hot
