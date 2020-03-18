@@ -45,7 +45,13 @@ After switching to the new branch/release, you should get rid of the old depende
 1. Install all the required packages. For debian-based/apt systems you can use the following command
 
     ```bash
-    sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring php-gd ufraw memcached phpunit nodejs npm
+    sudo apt-get install git apache2 libapache2-mod-php unzip php composer postgresql postgis imagemagick php-pgsql php-imagick php-memcached php-mbstring php-gd php-zip php-xml ufraw memcached phpunit nodejs npm unzip
+    ```
+    If the required php modules are not enabled by default, you can enable them with
+    ```bash
+    a2enmod mod_proxy
+    a2enmod mod_rewrite
+    systemctl restart apache2.service
     ```
 
 2. Clone This Repository
@@ -55,6 +61,8 @@ After switching to the new branch/release, you should get rid of the old depende
     ```
 
 3. Download Dependencies
+
+    **Please note**: Before moving on, check your versions of composer (`composer -v`) and npm (`npm -v`). Older versions can cause problems (composer < 1.8, npm < 6.x). Update them manually if your OS has outdated versions.
 
     ```bash
     cd Spacialist

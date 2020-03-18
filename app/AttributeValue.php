@@ -3,7 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
+use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use App\Traits\CommentTrait;
 
 class AttributeValue extends Model
