@@ -3,7 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
+use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use App\Traits\ModerationTrait;
 
 class AttributeValue extends Model
@@ -48,7 +48,7 @@ class AttributeValue extends Model
     protected $postgisFields = [
         'geography_val',
     ];
-    
+
     protected $copyOn = [
         'entity_id',
         'attribute_id',
