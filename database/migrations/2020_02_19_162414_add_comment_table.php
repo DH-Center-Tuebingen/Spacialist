@@ -17,8 +17,6 @@ class AddCommentTable extends Migration
      */
     public function up()
     {
-        $values = AttributeValue::all();
-
         Schema::create('comments', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('user_id');
@@ -32,6 +30,8 @@ class AddCommentTable extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('reply_to')->references('id')->on('comments')->onDelete('cascade');
         });
+
+        $values = AttributeValue::all();
 
         foreach($values as $v) {
             try {
