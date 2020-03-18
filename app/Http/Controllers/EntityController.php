@@ -442,6 +442,8 @@ class EntityController extends Controller {
         $attrValue = AttributeValue::firstOrCreate([
             'entity_id' => $id,
             'attribute_id' => $aid,
+        ], [
+            'lasteditor' => $user->name
         ]);
         // When attribute value already exists and nothing changed
         // (same certainty and no new comment)

@@ -196,6 +196,7 @@
                 $http.get(`entity/${this.entityId}/comment/${this.attributeId}`).then(response => {
                     this.comments.length = 0;
                     this.comments = response.data;
+                }).finally(() => {
                     this.$modal.show('entity-references-modal');
                 })
             },
