@@ -224,6 +224,9 @@ class EditorController extends Controller {
             ],
             [
                 'datatype' => 'serial'
+            ],
+            [
+                'datatype' => 'iconclass'
             ]
         ]);
     }
