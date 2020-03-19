@@ -1,3 +1,10 @@
-.datepicker {
-    padding: .5rem;
+@import '~vue2-datepicker/scss/var.scss';
+
+.#{$namespace}-datepicker-main {
+  font: $font-size-base $font-family-sans-serif;
+  color: $text-color;
+  background-color: $body-bg;
+  border: 1px solid;
+  border-color: $input-border-color !important;
+  border-radius: $input-border-radius !important;
 }

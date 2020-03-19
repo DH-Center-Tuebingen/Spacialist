@@ -279,13 +279,9 @@ class File extends Model
     public static function createFromUpload($input, $user, $metadata) {
         $filename = $input->getClientOriginalName();
         $ext = $input->getClientOriginalExtension();
-        // filename without extension, but with trailing '.'
-        $baseFilename = substr($filename, 0, strlen($filename)-strlen($ext));
-        $cnt = 1;
-        while(Storage::exists($filename)) {
-            $filename = "$baseFilename$cnt.$ext";
-            $cnt++;
-        }
+        // filename without extension and trailing '.'
+        $baseFilename = substr($filename, 0, strlen($filename) - (strlen($ext) + 1));
+        $filename = self::getUniqueFilename($baseFilename, $ext);
         $filehandle = fopen($input->getRealPath(), 'r');
         Storage::put(
             $filename,
@@ -333,8 +329,8 @@ class File extends Model
 
         if($file->isImage()) {
             $fileUrl = sp_get_storage_file_path($filename);
-            $nameNoExt = pathinfo($filename, PATHINFO_FILENAME);
-            $thumbFilename = $nameNoExt . self::THUMB_SUFFIX . self::EXP_SUFFIX;
+            $nameNoExt = $baseFilename;
+            $thumbFilename = self::getUniqueFilename($nameNoExt . self::THUMB_SUFFIX, self::EXP_SUFFIX);
 
             $imageInfo = getimagesize($fileUrl);
             $width = $imageInfo[0];
@@ -354,7 +350,8 @@ class File extends Model
                     default:
                         // use imagemagick to convert from unsupported file format to jpg, which is supported by native php
                         $im = new \Imagick($fileUrl);
-                        $fileUrl = sp_get_storage_file_path($nameNoExt . self::EXP_SUFFIX);
+                        $uniqueName = self::getUniqueFilename($nameNoExt, self::EXP_SUFFIX);
+                        $fileUrl = sp_get_storage_file_path($uniqueName);
                         $im->setImageFormat(self::EXP_FORMAT);
                         $im->writeImage($fileUrl);
                         $im->clear();
@@ -432,13 +429,19 @@ class File extends Model
     }
 
     public function rename($newName) {
+        if(Storage::exists($newName)) {
+            return false;
+        }
+
         Storage::move($this->name, $newName);
         $this->name = $newName;
         if($this->isImage()) {
             $nameNoExt = pathinfo($newName, PATHINFO_FILENAME);
-            $this->thumb = $nameNoExt . self::THUMB_SUFFIX . self::EXP_SUFFIX;
+            $newThumb = self::getUniqueFilename($nameNoExt . self::THUMB_SUFFIX, self::EXP_SUFFIX);
+            Storage::move($this->thumb, $newThumb);
+            $this->thumb = $newThumb;
         }
-        $this->save();
+        return $this->save();
     }
 
     public function link($eid, $user) {
@@ -757,8 +760,11 @@ class File extends Model
         } catch(PelDataWindowOffsetException $e) {
             return null;
         }
+        // Only JPEG is currently supported
+        if(!PelJpeg::isValid($data)) {
+            return null;
+        }
         try {
-            PelJpeg::isValid($data);
             $jpg = new PelJpeg();
             $jpg->load($data);
             $app1 = $jpg->getExif();
@@ -772,11 +778,6 @@ class File extends Model
         } catch(PelDataWindowOffsetException $e) {
             return null;
         } catch(PelJpegInvalidMarkerException $e) {
-            return null;
-        }
-        try {
-            PelTiff::isValid($data);
-        } catch(PelDataWindowOffsetException $e) {
             return null;
         }
         return null;
@@ -918,5 +919,37 @@ class File extends Model
             }
         }
         return $is;
+    }
+
+    private static function getUniqueFilename($filename, $extension) {
+        $cnt = 0;
+        $cutoff = 0;
+        if(preg_match('/.*\.(\d+)\.?$/', $filename, $matches)) {
+            if(count($matches) > 1) {
+                $cnt = intval($matches[1]);
+            }
+            // cut off number and leading '.'
+            $cutoff += strlen($matches[1]) + 1;
+        }
+        if(Str::endsWith($filename, '.')) {
+            $cutoff++;
+        }
+        if($cutoff > 0) {
+            $filename = substr($filename, 0, -$cutoff);
+        }
+        if(Str::startsWith($extension, '.')) {
+            $extension = substr($extension, 1);
+        }
+        if($cnt > 0) {
+            $uniqueFilename = "$filename.$cnt.$extension";
+            $cnt++;
+        } else {
+            $uniqueFilename = "$filename.$extension";
+        }
+        while(Storage::exists($uniqueFilename)) {
+            $uniqueFilename = "$filename.$cnt.$extension";
+            $cnt++;
+        }
+        return $uniqueFilename;
     }
 }

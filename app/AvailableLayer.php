@@ -23,8 +23,8 @@ class AvailableLayer extends Model
 
     const patchRules = [
         'name' => 'string',
-        'url' => 'string',
         'type' => 'string',
+        'url' => 'nullable|string',
         'subdomains' => 'nullable|string',
         'attribution' => 'nullable|string',
         'opacity' => 'between_float:0,1',

@@ -112,7 +112,8 @@ const de = {
             <br />
             <code class="normal">Fund_%d_Stein</code> würde zu Fund_1_Stein, Fund_2_Stein, &hellip; führen.
             <br />
-            Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class="normal">%03d</code>.`
+            Um eine feste Breite (z.B. 3 für 002 anstatt 2) zu erzwingen, benutze <code class="normal">%03d</code>.`,
+            iconclass: 'Iconclass'
         },
         active: 'Aktiviert',
         visible: 'Sichtbar',
@@ -243,7 +244,10 @@ const de = {
                 bc: '@:main.entity.attributes.BC',
                 AD: 'n. Chr.',
                 ad: '@:main.entity.attributes.AD',
-                hidden: 'keine Attribute ausgeblendet | ein Attribut ausgeblendet | {cnt} Attribute ausgeblendet'
+                hidden: 'keine Attribute ausgeblendet | ein Attribut ausgeblendet | {cnt} Attribute ausgeblendet',
+                iconclass: {
+                    doesnt_exist: 'Diese Iconclass existiert nicht'
+                }
             }
         },
         user: {

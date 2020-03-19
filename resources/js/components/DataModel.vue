@@ -460,7 +460,7 @@
                 modalSelectedEntityType: {},
                 entityCount: 0,
                 allowedTableKeys: [
-                    'string', 'string-sc', 'integer', 'double', 'boolean', 'entity'
+                    'string', 'string-sc', 'integer', 'double', 'boolean', 'iconclass', 'entity'
                 ]
             }
         },

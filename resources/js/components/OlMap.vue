@@ -181,6 +181,7 @@
     import TileLayer from 'ol/layer/Tile';
     import VectorLayer from 'ol/layer/Vector';
 
+    import BingMaps from 'ol/source/BingMaps';
     import OSM from 'ol/source/OSM';
     import TileImage from 'ol/source/TileImage';
     import TileWMS from 'ol/source/TileWMS';
@@ -710,7 +711,8 @@
                         view: new View({
                             center: [0, 0],
                             projection: 'EPSG:3857',
-                            zoom: 2
+                            zoom: 2,
+                            extent: vm.defaultExtent
                         }),
                         overlays: [
                             vm.overlay,
@@ -864,6 +866,29 @@
                                 layers: l.layers,
                                 tiled: true
                             }
+                        });
+                        break;
+                    case 'bing':
+                        source = new BingMaps({
+                            key: l.api_key,
+                            /*
+                            # Supported
+                            - Aerial
+                            - AerialWithLabels (Deprecated)
+                            - AerialWithLabelsOnDemand
+                            - CanvasDark
+                            - CanvasLight
+                            - CanvasGray
+                            - RoadOnDemand
+                            # Not Supported?
+                            - Birdseye
+                            - BirdseyeWithLabels
+                            - BirdseyeV2
+                            - BirdseyeV2WithLabels
+                            - Streetside
+                             */
+                            imagerySet: l.layer_type,
+                            wrapX: false,
                         });
                         break;
                     default:

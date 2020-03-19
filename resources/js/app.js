@@ -162,7 +162,7 @@ const DataModelDetailView = () => import(/* webpackChunkName: "group-bib" */ './
 
 import VueUploadComponent from 'vue-upload-component';
 import moment from 'moment';
-import VCalendar from 'v-calendar';
+import DatePicker from 'vue2-datepicker';
 import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
@@ -334,6 +334,13 @@ window._debounce = require('lodash/debounce');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
 require('./globals.js');
 
+// Create Axios instance for external (API) calls
+Vue.prototype.$externalHttp = Axios.create({
+  headers: {
+    common: {},
+  },
+});
+
 Axios.defaults.baseURL = 'api/v1';
 
 /**
@@ -352,10 +359,7 @@ Vue.use(VueI18n);
 Vue.use(VModal, {dynamic: true});
 Vue.use(VeeValidate);
 Vue.use(Notifications);
-Vue.use(VCalendar, {
-    firstDayOfWeek: 2,
-    popoverVisibility: 'focus'
-});
+Vue.use(DatePicker);
 Vue.use(VueScrollTo);
 
 const router = new VueRouter({

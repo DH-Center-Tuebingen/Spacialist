@@ -6,6 +6,19 @@ All notable changes to this project will be documented in this file.
 - User profile to allow users to edit their information
   - Support for phone numbers and avatars
 
+## 0.7.4
+### Added
+- Bing Maps Support
+- [Iconclass](http://iconclass.org)-Attribute
+- Re-add dependency lock-files
+### Fixed
+- Accidentally moving map outside viewport
+- Ignore uppercase/lowercase letters in login form user names
+- Overwriting existing files/thumbnails
+- Error on file loading due to invalid exif data
+### Changed
+- Select newly created layer in Layer Editor
+
 ## 0.7.3
 ### Added
 - CLI command to create new users/roles
