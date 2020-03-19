@@ -59,4 +59,15 @@ class BibliographyTest extends TestCase
         $this->assertEquals('No Title', $newBib->title);
         $this->assertEquals('No:1999aa', $newBib->citekey);
     }
+
+    /**
+     * Test get last editor of first bibliography entry
+     *
+     * @return void
+     */
+    public function testGetBibliographyEntryLasteditor()
+    {
+        $entry = Bibliography::first();
+        $this->assertEquals(1, $entry->user->id);
+    }
 }

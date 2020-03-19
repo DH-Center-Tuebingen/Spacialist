@@ -38,4 +38,15 @@ class GeodataTest extends TestCase
         $this->assertEquals(1, $data->getLng());
         $this->assertEquals(3, $data->getAlt());
     }
+
+    /**
+     * Test get last editor of first geodata
+     *
+     * @return void
+     */
+    public function testGetGeodataLasteditor()
+    {
+        $geodata = Geodata::first();
+        $this->assertEquals(1, $geodata->user->id);
+    }
 }

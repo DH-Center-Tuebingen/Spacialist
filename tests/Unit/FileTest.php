@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use App\File;
+use App\EntityFile;
 
 class FileTest extends TestCase
 {
@@ -59,5 +60,18 @@ class FileTest extends TestCase
         $this->assertEquals(0, $files->count());
         $files = File::getSubFiles(2, 'presentation');
         $this->assertEquals(0, $files->count());
+    }
+
+    /**
+     * Test get last editor of first file
+     *
+     * @return void
+     */
+    public function testGetReferenceEntryLasteditor()
+    {
+        $file = File::first();
+        $this->assertEquals(1, $file->user->id);
+        $link = EntityFile::first();
+        $this->assertEquals(1, $link->user->id);
     }
 }

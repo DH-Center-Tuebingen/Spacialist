@@ -48,4 +48,15 @@ class AttributeValueTest extends TestCase
         $value = AttributeValue::getValueById(99, 2);
         $this->assertNull($value);
     }
+
+    /**
+     * Test get last editor of first attribute value
+     *
+     * @return void
+     */
+    public function testGetAttributeValueLasteditor()
+    {
+        $value = AttributeValue::first();
+        $this->assertEquals(1, $value->user->id);
+    }
 }
