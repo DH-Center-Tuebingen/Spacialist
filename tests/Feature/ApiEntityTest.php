@@ -741,14 +741,14 @@ class ApiEntityTest extends TestCase
             ->where('attribute_id', 5)
             ->first();
         $this->assertEquals(100, $attrValue->certainty);
-        $this->assertNull($attrValue->certainty_description);
+        $this->assertNull($attrValue->comments);
 
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])
         ->patch('/api/v1/entity/8/attribute/5', [
             'certainty' => 37,
-            'certainty_description' => 'This is a test'
+            'content' => 'This is a test'
         ]);
 
         $response->assertStatus(204);
@@ -757,7 +757,7 @@ class ApiEntityTest extends TestCase
             ->where('attribute_id', 5)
             ->first();
         $this->assertEquals(37, $attrValue->certainty);
-        $this->assertEquals('This is a test', $attrValue->certainty_description);
+        $this->assertEquals('This is a test', $attrValue->comments[0]->content);
     }
 
     /**

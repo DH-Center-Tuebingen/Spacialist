@@ -544,7 +544,6 @@ class EntityController extends Controller {
         $patchable = $request->only(array_keys(Comment::patchKeys));
 
         foreach($patchable as $key => $val) {
-            info("Patching $key: $val");
             $comment->{$key} = $val;
         }
         $comment->save();

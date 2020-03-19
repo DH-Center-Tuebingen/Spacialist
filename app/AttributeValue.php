@@ -29,7 +29,6 @@ class AttributeValue extends Model
         'str_val',
         'thesaurus_val',
         'certainty',
-        'certainty_description',
         'lasteditor',
     ];
 

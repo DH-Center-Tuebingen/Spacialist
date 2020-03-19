@@ -206,7 +206,7 @@ class Entity extends Model
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'certainty_description', 'lasteditor', 'thesaurus_val', 'json_val', 'geography_val')->orderBy('attribute_values.attribute_id');
+        return $this->belongsToMany('App\Attribute', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'lasteditor', 'thesaurus_val', 'json_val', 'geography_val')->orderBy('attribute_values.attribute_id');
     }
 
     public function files() {

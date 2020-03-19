@@ -252,6 +252,7 @@
                         this.cancelReplyTo();
                     } else {
                         this.comments.push(addedComment);
+                        this.refs.value.comments_count = this.comments.length;
                     }
                     this.certainty_description = null;
                     this.initialCertaintyValue = this.refs.value.certainty;
@@ -330,6 +331,8 @@
                     siblings.splice(idx, 1);
                     if(parent) {
                         parent.replies_count--;
+                    } else {
+                        this.refs.value.comments_count = this.comments.length;
                     }
                 });
             },
