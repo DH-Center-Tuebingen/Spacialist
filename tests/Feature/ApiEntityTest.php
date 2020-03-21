@@ -731,10 +731,10 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-    * Test changing certainty of an attribute (id=5) of an entity (id=8).
-    *
-    * @return void
-    */
+     * Test changing certainty of an attribute (id=5) of an entity (id=8).
+     *
+     * @return void
+     */
     public function testPatchAttributeEndpoint()
     {
         $attrValue = AttributeValue::where('entity_id', 8)
@@ -747,10 +747,10 @@ class ApiEntityTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])
-        ->patch('/api/v1/entity/8/attribute/5', [
-            'certainty' => 37,
-            'content' => 'This is a test'
-        ]);
+            ->patch('/api/v1/entity/8/attribute/5', [
+                'certainty' => 37,
+                'content' => 'This is a test'
+            ]);
 
         $response->assertStatus(201);
 
@@ -759,7 +759,92 @@ class ApiEntityTest extends TestCase
             ->first();
         $this->assertEquals(37, $attrValue->certainty);
         $this->assertEquals(1, $attrValue->comments_count);
+        $this->assertEquals(8, $attrValue->comments[0]->commentable->entity_id);
+        $this->assertEquals(37, $attrValue->comments[0]->commentable->certainty);
         $this->assertEquals('This is a test', $attrValue->comments[0]->content);
+
+        $this->refreshToken($response);
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+            ->patch('/api/v1/entity/8/attribute/5', [
+                'content' => 'This is a response to test',
+                'reply_to' => $attrValue->comments[0]->id
+            ]);
+
+        $response->assertStatus(201);
+
+        $attrValue = AttributeValue::where('entity_id', 8)
+            ->where('attribute_id', 5)
+            ->first();
+        $this->assertEquals(1, count($attrValue->comments[0]->replies));
+        $this->assertEquals('This is a response to test', $attrValue->comments[0]->replies[0]->content);
+
+        $this->assertTrue($attrValue->removeComment($attrValue->comments[0]->id));
+        $this->assertFalse($attrValue->removeComment($attrValue->comments[0]->id));
+    }
+
+    /**
+     * Test comments of an attribute (id=5) of an entity (id=8).
+     *
+     * @return void
+     */
+    public function testGetCommentsAndRepliesEndpoint()
+    {
+        $attrValue = AttributeValue::where('entity_id', 8)
+            ->where('attribute_id', 5)
+            ->first();
+        $this->assertEquals(0, $attrValue->comments_count);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+            ->patch('/api/v1/entity/8/attribute/5', [
+                'certainty' => 37,
+                'content' => 'This is a test',
+                'metadata' => [
+                    'certainty_from' => 100,
+                    'certainty_to' => 37
+                ]
+            ]);
+
+        $this->refreshToken($response);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+            ->patch('/api/v1/entity/8/attribute/5', [
+                'content' => 'This is a response to test',
+                'reply_to' => $attrValue->comments[0]->id
+            ]);
+
+        $this->refreshToken($response);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+            ->get('/api/v1/entity/8/comment/5');
+
+        $response->assertStatus(200);
+        $content = json_decode($response->getContent());
+        $this->assertEquals(37, $content[0]->metadata->certainty_to);
+        $this->assertNull($content[0]->reply_to);
+        $this->assertEquals(1, $content[0]->replies_count);
+        $this->assertEquals('This is a test', $content[0]->content);
+
+        $this->refreshToken($response);
+
+        $id = $content[0]->id;
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+            ->get("/api/v1/entity/comment/$id/reply");
+
+        $response->assertStatus(200);
+        $content = json_decode($response->getContent());
+        $this->assertEquals(1, count($content));
+        $this->assertEquals('This is a response to test', $content[0]->content);
+        $this->assertEquals($id, $content[0]->reply_to);
     }
 
     /**
@@ -970,6 +1055,9 @@ class ApiEntityTest extends TestCase
             ['url' => '/1/rank', 'error' => 'You do not have the permission to modify an entity', 'verb' => 'patch'],
             ['url' => '/1', 'error' => 'You do not have the permission to delete an entity', 'verb' => 'delete'],
 
+            ['url' => '/8/comment/5', 'error' => 'You do not have the permission to get comments', 'verb' => 'get'],
+            ['url' => '/comment/1/reply', 'error' => 'You do not have the permission to get comments', 'verb' => 'get'],
+
             ['url' => '/99/reference', 'error' => 'You do not have the permission to view references', 'verb' => 'get'],
             ['url' => '/99/reference/99', 'error' => 'You do not have the permission to add references', 'verb' => 'post'],
             ['url' => '/reference/99', 'error' => 'You do not have the permission to edit references', 'verb' => 'patch'],
@@ -1024,6 +1112,9 @@ class ApiEntityTest extends TestCase
                     'rank' => 1,
                 ]
             ],
+
+            ['url' => '/99/comment/99', 'error' => 'This attribute value does not exist', 'verb' => 'get'],
+            ['url' => '/comment/99/reply', 'error' => 'This comment does not exist', 'verb' => 'get'],
 
             ['url' => '/99/reference', 'error' => 'This entity does not exist', 'verb' => 'get'],
             ['url' => '/99/reference/99', 'error' => 'This entity does not exist', 'verb' => 'post'],
