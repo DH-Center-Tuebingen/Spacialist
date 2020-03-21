@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Comment;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
@@ -773,15 +774,6 @@ class ApiEntityTest extends TestCase
             ]);
 
         $response->assertStatus(201);
-
-        $attrValue = AttributeValue::where('entity_id', 8)
-            ->where('attribute_id', 5)
-            ->first();
-        $this->assertEquals(1, count($attrValue->comments[0]->replies));
-        $this->assertEquals('This is a response to test', $attrValue->comments[0]->replies[0]->content);
-
-        $this->assertTrue($attrValue->removeComment($attrValue->comments[0]->id));
-        $this->assertFalse($attrValue->removeComment($attrValue->comments[0]->id));
     }
 
     /**
@@ -818,6 +810,8 @@ class ApiEntityTest extends TestCase
                 'reply_to' => $attrValue->comments[0]->id
             ]);
 
+        $response->assertStatus(201);
+
         $this->refreshToken($response);
 
         $response = $this->withHeaders([
@@ -845,6 +839,15 @@ class ApiEntityTest extends TestCase
         $this->assertEquals(1, count($content));
         $this->assertEquals('This is a response to test', $content[0]->content);
         $this->assertEquals($id, $content[0]->reply_to);
+
+        $attrValue = AttributeValue::where('entity_id', 8)
+            ->where('attribute_id', 5)
+            ->first();
+        $this->assertEquals(1, count($attrValue->comments[0]->replies));
+        $this->assertEquals('This is a response to test', $attrValue->comments[0]->replies[0]->content);
+
+        $this->assertTrue($attrValue->removeComment($attrValue->comments[0]->id));
+        $this->assertFalse($attrValue->removeComment($attrValue->comments[0]->id));
     }
 
     /**
@@ -948,6 +951,34 @@ class ApiEntityTest extends TestCase
         ]);
     }
 
+    /**
+     * Test patching a (new) comment.
+     *
+     * @return void
+     */
+    public function testPatchCommentEndpoint()
+    {
+        $user = User::find(1);
+        $attrValue = AttributeValue::where('entity_id', 8)
+            ->where('attribute_id', 5)
+            ->first();
+        $this->assertEquals(0, $attrValue->comments_count);
+        $attrValue->addComment(['content' => 'test'], $user);
+        $comment = $attrValue->comments[0];
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+            ->patch('/api/v1/entity/comment/' . $comment->id, [
+                'content' => 'updated text',
+            ]);
+
+        $response->assertStatus(204);
+
+        $updComment = Comment::find($comment->id);
+        $this->assertEquals('updated text', $updComment->content);
+    }
+
     // Testing DELETE requets
 
     /**
@@ -1011,10 +1042,10 @@ class ApiEntityTest extends TestCase
     }
 
     /**
-    * Test deleting an reference (id=1).
-    *
-    * @return void
-    */
+     * Test deleting an reference (id=1).
+     *
+     * @return void
+     */
     public function testDeleteReferenceEndpoint()
     {
         $cnt = Reference::count();
@@ -1023,12 +1054,40 @@ class ApiEntityTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])
-        ->delete('/api/v1/entity/reference/1');
+            ->delete('/api/v1/entity/reference/1');
 
         $response->assertStatus(204);
 
         $cnt = Reference::count();
         $this->assertEquals($cnt, 2);
+    }
+
+    /**
+     * Test deleting a (new) comment.
+     *
+     * @return void
+     */
+    public function testDeleteCommentEndpoint()
+    {
+        $user = User::find(1);
+        $attrValue = AttributeValue::where('entity_id', 8)
+            ->where('attribute_id', 5)
+            ->first();
+        $attrValue->addComment(['content' => 'test'], $user);
+        $comment = $attrValue->comments[0];
+
+        $cnt = Comment::count();
+        $this->assertEquals(1, $cnt);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+            ->delete('/api/v1/entity/8/attribute/5/comment/' . $comment->id);
+
+        $response->assertStatus(204);
+
+        $cnt = Comment::count();
+        $this->assertEquals(0, $cnt);
     }
 
     // Testing exceptions and permissions
@@ -1057,6 +1116,11 @@ class ApiEntityTest extends TestCase
 
             ['url' => '/8/comment/5', 'error' => 'You do not have the permission to get comments', 'verb' => 'get'],
             ['url' => '/comment/1/reply', 'error' => 'You do not have the permission to get comments', 'verb' => 'get'],
+            ['url' => '/comment/1', 'error' => 'You do not have the permission to edit a comment', 'verb' => 'patch', 'data' => [
+                'content' => 'test'
+            ]],
+            ['url' => '/99/attribute/99/comment/99', 'error' => 'You do not have the permission to delete a comment', 'verb' => 'delete'],
+
 
             ['url' => '/99/reference', 'error' => 'You do not have the permission to view references', 'verb' => 'get'],
             ['url' => '/99/reference/99', 'error' => 'You do not have the permission to add references', 'verb' => 'post'],
@@ -1104,6 +1168,9 @@ class ApiEntityTest extends TestCase
             ['url' => '/99/attributes', 'error' => 'This entity does not exist', 'verb' => 'patch'],
             ['url' => '/99/attribute/13', 'error' => 'This entity does not exist', 'verb' => 'patch'],
             ['url' => '/1/attribute/99', 'error' => 'This attribute does not exist', 'verb' => 'patch'],
+            ['url' => '/1/attribute/15', 'error' => 'You must set at least a different certainty value or comment content', 'verb' => 'patch', 'data' => [
+                'certainty' => 100
+            ]],
             ['url' => '/99/name', 'error' => 'This entity does not exist', 'verb' => 'patch', 'data' => [
                     'name' => 'Test'
                 ]
@@ -1115,6 +1182,11 @@ class ApiEntityTest extends TestCase
 
             ['url' => '/99/comment/99', 'error' => 'This attribute value does not exist', 'verb' => 'get'],
             ['url' => '/comment/99/reply', 'error' => 'This comment does not exist', 'verb' => 'get'],
+            ['url' => '/comment/1', 'error' => 'This comment does not exist', 'verb' => 'patch', 'data' => [
+                'content' => 'test'
+            ]],
+            ['url' => '/99/attribute/99/comment/1', 'error' => 'This attribute value does not exist', 'verb' => 'delete'],
+            ['url' => '/8/attribute/5/comment/1', 'error' => 'This comment does not exist', 'verb' => 'delete'],
 
             ['url' => '/99/reference', 'error' => 'This entity does not exist', 'verb' => 'get'],
             ['url' => '/99/reference/99', 'error' => 'This entity does not exist', 'verb' => 'post'],

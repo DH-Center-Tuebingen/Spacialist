@@ -528,6 +528,11 @@ class EntityController extends Controller {
 
     public function patchComment(Request $request, $id) {
         $user = auth()->user();
+        if(!$user->can('delete_move_concepts')) {
+            return response()->json([
+                'error' => __('You do not have the permission to edit a comment')
+            ], 403);
+        }
 
         $this->validate($request, Comment::patchKeys);
 
@@ -588,7 +593,11 @@ class EntityController extends Controller {
             ], 400);
         }
 
-        $attributeValue->removeComment($cid);
+        if(!$attributeValue->removeComment($cid)) {
+            return response()->json([
+                'error' => __('This comment does not exist')
+            ], 400);
+        }
 
         return response()->json(null, 204);
     }
