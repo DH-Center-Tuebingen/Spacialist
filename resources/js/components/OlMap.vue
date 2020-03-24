@@ -74,7 +74,9 @@
                                 </span>
                             </dt>
                             <dd>
-                                {{ overlayInfo.size }}
+                                <span data-toggle="tooltip" :title="`${overlayInfo.size_in_m}${overlayInfo.size_unit}`">
+                                    {{ overlayInfo.size }}
+                                </span>
                             </dd>
                         </template>
                         <dt class="clickable" @click="overlayInfo.showCoordinates = !overlayInfo.showCoordinates">
@@ -153,7 +155,7 @@
     import Overlay from 'ol/Overlay';
     import { get as getProjection, addProjection, transform as transformProj } from 'ol/proj';
     import { register as registerProj } from 'ol/proj/proj4';
-    import {getArea, getLength} from 'ol/sphere.js';
+    import {getArea, getLength} from 'ol/sphere';
     import View from 'ol/View';
 
     import FullScreen from 'ol/control/FullScreen';
@@ -276,6 +278,7 @@
             // Enable popovers
             $(function () {
                 $('[data-toggle="popover"]').popover();
+                $('[data-toggle="tooltip"]').tooltip();
             });
         },
         methods: {
@@ -1650,11 +1653,17 @@
                 switch(geometry.getType()) {
                     case 'LineString':
                     case 'MultiLineString':
-                        this.overlayInfo.size = length(geometry.getLength()*1000, 2);
+                        this.overlayInfo.size_in_m = getLength(geometry);
+                        this.overlayInfo.size_unit = 'm';
+                        this.overlayInfo.size = length(this.overlayInfo.size_in_m, 2);
+                        // this.overlayInfo.size = length(geometry.getLength()*1000, 2);
                         break;
                     case 'Polygon':
                     case 'MultiPolygon':
-                        this.overlayInfo.size =  length(geometry.getArea()*1000, 2, true);
+                        this.overlayInfo.size_in_m = getArea(geometry);
+                        this.overlayInfo.size_unit = 'm²';
+                        this.overlayInfo.size = length(this.overlayInfo.size_in_m, 2, true);
+                        // this.overlayInfo.size =  length(geometry.getArea()*1000, 2, true);
                         break;
                 }
 
@@ -1719,6 +1728,8 @@
                     subname: '',
                     type: '',
                     size: '',
+                    size_in_m: '',
+                    size_unit: '',
                     coordinates: [],
                     feature: null,
                     showCoordinates: false,
