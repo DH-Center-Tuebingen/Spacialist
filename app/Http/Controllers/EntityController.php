@@ -298,9 +298,7 @@ class EntityController extends Controller {
                     } else {
                         $attrval->delete();
                     }
-                    // also break outer foreach, no further action required
-                    // for deleted attribute values
-                    break 2;
+                    break;
                 case 'add':
                     $alreadyAdded = AttributeValue::where('entity_id', $id)
                         ->where('attribute_id', $aid)
@@ -343,6 +341,10 @@ class EntityController extends Controller {
                         'error' => __('Unknown operation')
                     ], 400);
             }
+
+            // no further action required for deleted attribute values, continue with next patch
+            if($op == 'remove') continue;
+
             switch($attr->datatype) {
                 // for primitive types: just save them to the db
                 case 'stringf':
