@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.7.5 (Unreleased)
+### Fixed
+- Some attribute changes not saved, when one was a delete operation
+
 ## 0.7.4
 ### Added
 - Bing Maps Support
