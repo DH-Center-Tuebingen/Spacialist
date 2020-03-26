@@ -271,9 +271,7 @@ class EntityController extends Controller {
                         ['attribute_id', '=', $aid]
                     ])->first();
                     $attrval->delete();
-                    // also break outer foreach, no further action required
-                    // for deleted attribute values
-                    break 2;
+                    break;
                 case 'add':
                     $value = $patch['value'];
                     $attrval = new AttributeValue();
@@ -292,6 +290,10 @@ class EntityController extends Controller {
                         'error' => __('Unknown operation')
                     ], 400);
             }
+
+            // no further action required for deleted attribute values, continue with next patch
+            if($op == 'remove') continue;
+
             switch($attr->datatype) {
                 // for primitive types: just save them to the db
                 case 'stringf':
