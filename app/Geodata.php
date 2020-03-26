@@ -3,9 +3,9 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Phaza\LaravelPostgis\Geometries\Geometry;
-use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
-use Phaza\LaravelPostgis\Exceptions\UnknownWKTTypeException;
+use MStaack\LaravelPostgis\Geometries\Geometry;
+use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
+use MStaack\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 

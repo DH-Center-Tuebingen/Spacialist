@@ -5,5 +5,5 @@
 ## Project Contributors
 * Michael Derntl, University of Tübingen
 * Benjamin Glissmann, University of Tübingen
-* Matthias Lang, University of Tübingen
-* Dirk Seidensticker, University of Tübingen
+* Matthias Lang, University of Bonn
+* Dirk Seidensticker, University of Gent

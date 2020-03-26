@@ -107,7 +107,8 @@ const en = {
             <br />
             <code class="normal">Find_%d_Stone</code> would create Find_1_Stone, Find_2_Stone, &hellip;
             <br />
-            To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class="normal">%03d</code>.`
+            To add a fixed width (e.g. 3 for 002 instead of 2), you can use <code class="normal">%03d</code>.`,
+            iconclass: 'Iconclass'
         },
         active: 'Active',
         activity: 'Activity',
@@ -243,7 +244,10 @@ const en = {
                 bc: '@:main.entity.attributes.BC',
                 AD: 'AD',
                 ad: '@:main.entity.attributes.AD',
-                hidden: 'no attributes hidden | one attribute hidden | {cnt} attributes hidden'
+                hidden: 'no attributes hidden | one attribute hidden | {cnt} attributes hidden',
+                iconclass: {
+                    doesnt_exist: 'This iconclass does not exist'
+                }
             }
         },
         user: {

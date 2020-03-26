@@ -336,6 +336,13 @@ window._debounce = require('lodash/debounce');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
 require('./globals.js');
 
+// Create Axios instance for external (API) calls
+Vue.prototype.$externalHttp = Axios.create({
+  headers: {
+    common: {},
+  },
+});
+
 Axios.defaults.baseURL = 'api/v1';
 
 /**
