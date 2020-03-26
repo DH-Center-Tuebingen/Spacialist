@@ -11,6 +11,8 @@ class CreateActivityLogTable extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         Schema::connection(config('activitylog.database_connection'))->create(config('activitylog.table_name'), function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('log_name')->nullable();
@@ -26,6 +28,8 @@ class CreateActivityLogTable extends Migration
             $table->index(['subject_id', 'subject_type'], 'subject');
             $table->index(['causer_id', 'causer_type'], 'causer');
         });
+
+        activity()->enableLogging();
     }
 
     /**
@@ -33,6 +37,10 @@ class CreateActivityLogTable extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::connection(config('activitylog.database_connection'))->dropIfExists(config('activitylog.table_name'));
+
+        activity()->enableLogging();
     }
 }

@@ -14,6 +14,8 @@ class EnablePasswordResetLinkPreference extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         $preference = new Preference();
         $preference->label = 'prefs.enable-password-reset-link';
         $preference->default_value = json_encode([
@@ -21,6 +23,8 @@ class EnablePasswordResetLinkPreference extends Migration
         ]);
         $preference->allow_override = false;
         $preference->save();
+
+        activity()->enableLogging();
     }
 
     /**
@@ -30,7 +34,11 @@ class EnablePasswordResetLinkPreference extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Preference::where('label', 'prefs.enable-password-reset-link')
             ->delete();
+
+        activity()->enableLogging();
     }
 }
