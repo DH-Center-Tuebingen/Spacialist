@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## 0.7.6 (Unreleased)
 ### Added
 - Caching map styles to speed-up map performance
+### Fixed
+- Unnecessary loading of data of all entities in gis view, even if they don't have any geo object linked
 
 ## 0.7.5
 ### Fixed

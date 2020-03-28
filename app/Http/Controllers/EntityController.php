@@ -55,7 +55,7 @@ class EntityController extends Controller {
         return response()->json($entity);
     }
 
-    public function getDataForEntityType($ctid, $aid) {
+    public function getDataForEntityType(Request $request, $ctid, $aid) {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
@@ -76,7 +76,16 @@ class EntityController extends Controller {
                 'error' => __('This attribute does not exist')
             ], 400);
         }
-        $entities = Entity::where('entity_type_id', $ctid)->get();
+        $constraints = $request->query();
+        $entities = Entity::where('entity_type_id', $ctid);
+        foreach($constraints as $relatiion => $cons) {
+            if($cons == 'has') {
+                $entities->whereHas($relatiion);
+            } else if($cons == 'hasnot') {
+                $entities->whereDoesntHave($relatiion);
+            }
+        }
+        $entities = $entities->get();
         $entityIds = $entities->pluck('id')->toArray();
         $values = AttributeValue::with(['attribute'])
             ->whereIn('entity_id', $entityIds)
