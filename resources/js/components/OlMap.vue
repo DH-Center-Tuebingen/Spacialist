@@ -1371,25 +1371,31 @@
                     a *= fillAlphaMultiplier;
                 }
                 polygonFillColor = `rgba(${r}, ${g}, ${b}, ${a})`;
-                return new Style({
-                    fill: new Fill({
-                        color: polygonFillColor
-                    }),
-                    stroke: new Stroke({
-                        color: color,
-                        width: width
-                    }),
-                    image: new CircleStyle({
-                        radius: width*3,
+                const cacheKey = polygonFillColor.replace(/ /g, '');
+                let style = this.cachedStyles[cacheKey];
+                if(!style) {
+                    style = this.cachedStyles[cacheKey] = new Style({
                         fill: new Fill({
-                            color: color
+                            color: polygonFillColor
                         }),
                         stroke: new Stroke({
-                            color: 'rgba(0, 0, 0, 0.2)',
-                            width: 2
+                            color: color,
+                            width: width
+                        }),
+                        image: new CircleStyle({
+                            radius: width*3,
+                            fill: new Fill({
+                                color: color
+                            }),
+                            stroke: new Stroke({
+                                color: 'rgba(0, 0, 0, 0.2)',
+                                width: 2
+                            })
                         })
-                    })
-                });
+                    });
+                }
+
+                return style;
             },
             drawFeature(feature) {
                 this.snap.addFeature(feature);
@@ -1721,6 +1727,7 @@
                 entityLayersGroup: {},
                 entityLayers: [],
                 features: {},
+                cachedStyles: {},
                 vector: {}, // TODO replace
                 overlay: {},
                 overlayInfo: {

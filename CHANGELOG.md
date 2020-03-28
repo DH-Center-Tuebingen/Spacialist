@@ -1,7 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.7.5 (Unreleased)
+## 0.7.6 (Unreleased)
+### Added
+- Caching map styles to speed-up map performance
+
+## 0.7.5
 ### Fixed
 - Some attribute changes not saved, when one was a delete operation
 - Area/Length computation in map popups
