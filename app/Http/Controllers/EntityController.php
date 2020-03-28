@@ -104,6 +104,53 @@ class EntityController extends Controller {
             $data[$value->entity_id] = $value;
         }
 
+        $sqls = EntityAttribute::join('attributes', 'attributes.id', '=', 'attribute_id')
+            ->where('entity_type_id', $ctid)
+            ->where('datatype', 'sql')
+            ->get();
+        foreach($sqls as $sql) {
+            // if entity_id is referenced several times
+            // add an incrementing counter, so the
+            // references are unique (required by PDO)
+            $cnt = substr_count($sql->text, ':entity_id');
+            if($cnt > 1) {
+                $i = 0;
+                $text = preg_replace_callback('/:entity_id/', function($matches) use (&$i) {
+                    return $matches[0].'_'.$i++;
+                }, $sql->text);
+            } else {
+                $text = $sql->text;
+            }
+            foreach($entityIds as $eid) {
+                $safes = [];
+                if($cnt > 1) {
+                    for($i=0; $i<$cnt; $i++) {
+                        $safes[':entity_id_'.$i] = $eid;
+                    }
+                } else {
+                    $safes = [
+                        ':entity_id' => $eid
+                    ];
+                }
+                $sqlValue = \DB::select($text, $safes);
+                // Check if only one result exists
+                if(count($sqlValue) === 1) {
+                    // Get all column indices (keys) using the first row
+                    $valueKeys = array_keys(get_object_vars($sqlValue[0]));
+                    // Check if also only one key/column exists
+                    if(count($valueKeys) === 1) {
+                        // If only one row and one column exist,
+                        // return plain value instead of array
+                        $firstKey = $valueKeys[0];
+                        $sqlValue = $sqlValue[0]->{$firstKey};
+                    }
+                }
+                $data[$eid] = [
+                    'value' => $sqlValue
+                ];
+            }
+        }
+
         return response()->json($data);
     }
 
@@ -180,7 +227,6 @@ class EntityController extends Controller {
                     ':entity_id' => $id
                 ];
             }
-            $raw = \DB::raw($text);
             $sqlValue = \DB::select($text, $safes);
             // Check if only one result exists
             if(count($sqlValue) === 1) {

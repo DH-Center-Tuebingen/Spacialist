@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Caching map styles to speed-up map performance
 ### Fixed
 - Unnecessary loading of data of all entities in gis view, even if they don't have any geo object linked
+- Selection of sql attributes as label in gis view
 
 ## 0.7.5
 ### Fixed
