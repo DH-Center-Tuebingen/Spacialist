@@ -214,7 +214,7 @@ class Entity extends Model
     }
 
     private function parents() {
-        $ancestors = $this->where('id', '=', $this->id)->get();
+        $ancestors = collect([$this]);
 
         while ($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
                 $parent = $this->where('id', '=', $ancestors->last()->root_entity_id)->get();
@@ -234,17 +234,9 @@ class Entity extends Model
         return $this->parents()['names'];
     }
 
-    private function ancestors() {
-        $ancestors = $this->where('id', '=', $this->root_entity_id)->get();
-
-        while ($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
-                $parent = $this->where('id', '=', $ancestors->last()->root_entity_id)->get();
-                $ancestors = $ancestors->merge($parent);
-            }
-        return $ancestors->reverse()->pluck('name')->all();
-    }
-
     public function getAncestorsAttribute() {
-        return $this->ancestors();
+        $parents = array_reverse($this->parents()['names']);
+        array_pop($parents);
+        return $parents;
     }
 }

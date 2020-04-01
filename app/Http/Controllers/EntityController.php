@@ -9,6 +9,7 @@ use App\EntityAttribute;
 use App\EntityType;
 use App\EntityTypeRelation;
 use App\ThConcept;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -87,7 +88,9 @@ class EntityController extends Controller {
         }
         $entities = $entities->get();
         $entityIds = $entities->pluck('id')->toArray();
-        $values = AttributeValue::with(['attribute'])
+        $values = AttributeValue::whereHas('attribute', function(Builder $q) {
+                $q->where('datatype', '!=', 'sql');
+            })
             ->whereIn('entity_id', $entityIds)
             ->where('attribute_id', $aid)
             ->get();
@@ -104,22 +107,25 @@ class EntityController extends Controller {
             $data[$value->entity_id] = $value;
         }
 
-        $sqls = EntityAttribute::join('attributes', 'attributes.id', '=', 'attribute_id')
+        $sqls = EntityAttribute::whereHas('attribute', function(Builder $q) {
+                $q->where('datatype', 'sql');
+            })
             ->where('entity_type_id', $ctid)
-            ->where('datatype', 'sql')
+            ->where('attribute_id', $aid)
             ->get();
+
         foreach($sqls as $sql) {
             // if entity_id is referenced several times
             // add an incrementing counter, so the
             // references are unique (required by PDO)
-            $cnt = substr_count($sql->text, ':entity_id');
+            $cnt = substr_count($sql->attribute->text, ':entity_id');
             if($cnt > 1) {
                 $i = 0;
                 $text = preg_replace_callback('/:entity_id/', function($matches) use (&$i) {
                     return $matches[0].'_'.$i++;
-                }, $sql->text);
+                }, $sql->attribute->text);
             } else {
-                $text = $sql->text;
+                $text = $sql->attribute->text;
             }
             foreach($entityIds as $eid) {
                 $safes = [];
@@ -176,12 +182,16 @@ class EntityController extends Controller {
                     'error' => __('This attribute does not exist')
                 ], 400);
             }
-            $attributes = AttributeValue::with(['attribute'])
+            $attributes = AttributeValue::whereHas('attribute', function(Builder $q) {
+                    $q->where('datatype', '!=', 'sql');
+                })
                 ->where('entity_id', $id)
                 ->where('attribute_id', $aid)
                 ->get();
         } else {
-            $attributes = AttributeValue::with(['attribute'])
+            $attributes = AttributeValue::whereHas('attribute', function(Builder $q) {
+                    $q->where('datatype', '!=', 'sql');
+                })
                 ->where('entity_id', $id)
                 ->get();
         }
@@ -203,15 +213,20 @@ class EntityController extends Controller {
             $data[$a->attribute_id] = $a;
         }
 
-        $sqls = EntityAttribute::join('attributes', 'attributes.id', '=', 'attribute_id')
-            ->where('entity_type_id', $entity->entity_type_id)
-            ->where('datatype', 'sql')
-            ->get();
+        $sqls = EntityAttribute::whereHas('attribute', function(Builder $q) {
+                $q->where('datatype', 'sql');
+            })
+            ->where('entity_type_id', $entity->entity_type_id);
+        if(isset($aid)) {
+            $sqls->where('attribute_id', $aid);
+        }
+        $sqls = $sqls->get();
+
         foreach($sqls as $sql) {
             // if entity_id is referenced several times
             // add an incrementing counter, so the
             // references are unique (required by PDO)
-            $cnt = substr_count($sql->text, ':entity_id');
+            $cnt = substr_count($sql->attribute->text, ':entity_id');
             if($cnt > 1) {
                 $safes = [];
                 for($i=0; $i<$cnt; $i++) {
@@ -220,9 +235,9 @@ class EntityController extends Controller {
                 $i = 0;
                 $text = preg_replace_callback('/:entity_id/', function($matches) use (&$i) {
                     return $matches[0].'_'.$i++;
-                }, $sql->text);
+                }, $sql->attribute->text);
             } else {
-                $text = $sql->text;
+                $text = $sql->attribute->text;
                 $safes = [
                     ':entity_id' => $id
                 ];

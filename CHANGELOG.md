@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Unnecessary loading of data of all entities in gis view, even if they don't have any geo object linked
 - Selection of sql attributes as label in gis view
+- Loading speed of linked geo objects on map
 
 ## 0.7.5
 ### Fixed
