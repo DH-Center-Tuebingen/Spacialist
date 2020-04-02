@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.7.6 (Unreleased)
+## 0.7.6
 ### Added
 - Caching map styles to speed-up map performance
 ### Fixed
