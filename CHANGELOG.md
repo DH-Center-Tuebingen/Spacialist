@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.7.6
+### Added
+- Caching map styles to speed-up map performance
+### Fixed
+- Unnecessary loading of data of all entities in gis view, even if they don't have any geo object linked
+- Selection of sql attributes as label in gis view
+- Loading speed of linked geo objects on map
+
 ## 0.7.5
 ### Fixed
 - Some attribute changes not saved, when one was a delete operation
