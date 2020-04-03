@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.7.7 (Unreleased)
+### Fixed
+- Unnecessary initializing snapping to features on the map (snapping is now initialized when editing mode is activated and onyl for the current visible part of the map)
 
 ## 0.7.6
 ### Added
