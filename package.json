@@ -32,7 +32,7 @@
         "@fortawesome/free-solid-svg-icons": "^5.13.0",
         "@vue/babel-helper-vue-jsx-merge-props": "^1.0.0",
         "@vue/babel-plugin-transform-vue-jsx": "^1.1.2",
-        "@websanova/vue-auth": "^2.22.1-beta",
+        "@websanova/vue-auth": "^3.0.5-beta",
         "axios": "^0.19",
         "cross-env": "^7.0.0",
         "jquery": "^3.4",
