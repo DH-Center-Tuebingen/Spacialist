@@ -1156,7 +1156,7 @@
                     let nullValueFound = false;
                     if(!features.length) continue;
 
-                    if(opts.style.id == 'color') {let tr, tg, tb;
+                    if(opts.style.id === 'color') {let tr, tg, tb;
                         let r, g, b;
                         [r, g, b] = this.$rgb2hex(opts.color.to);
                         const color = { r: r, g: g, b: b };
@@ -1166,91 +1166,87 @@
                         continue;
                     }
 
-                    const ctid = features[0].getProperties().entity.entity_type_id;
-                    $httpQueue.add(() => $http.get(`entity/entity_type/${ctid}/data/${opts.attribute_id}`).then(response => {
-                        const data = response.data;
-                        let values = [];
-                        features.forEach(f => {
-                            const eid = f.getProperties().entity.id;
-                            const value = data[eid] ? data[eid].value : null;
-                            if(!value && value !== 0 && !nullValueFound) {
-                                nullValueFound = true;
-                                categories++;
-                            } else {
-                                if(opts.style.id == 'categorized') {
-                                    if(!buckets[value] && buckets[value] !== 0) {
-                                        buckets[value] = index;
-                                        index++;
-                                        categories++;
-                                    }
-                                }
-                            }
-                            values.push({
-                                value: value,
-                                feature: f
-                            });
-                        });
-
-                        if(opts.style.id == 'categorized') {
-                            values.sort((a, b) => a.value < b.value);
-                        } else if(opts.style.id == 'graduated') {
-                            categories = opts.classes;
-                            values.sort((a, b)  => a.value-b.value);
-                            const min = values[0].value;
-                            const max = values[values.length-1].value;
-                            if(opts.mode.id == 'equal_interval') {
-                                const bucketSize = (max-min)/categories;
-                                buckets = [];
-                                for(let i=1; i<=categories; i++) {
-                                    buckets.push(min + bucketSize*i);
+                    let values = [];
+                    features.forEach(f => {
+                        const eid = f.getProperties().entity.id;
+                        const value = opts.data[eid] ? opts.data[eid].value : null;
+                        if(!value && value !== 0 && !nullValueFound) {
+                            nullValueFound = true;
+                            categories++;
+                        } else {
+                            if(opts.style.id === 'categorized') {
+                                if(!buckets[value] && buckets[value] !== 0) {
+                                    buckets[value] = index;
+                                    index++;
+                                    categories++;
                                 }
                             }
                         }
-                        let fr, fg, fb;
-                        let tr, tg, tb;
-                        [fr, fg, fb] = this.$rgb2hex(opts.color.from);
-                        [tr, tg, tb] = this.$rgb2hex(opts.color.to);
-                        const from = { r: fr, g: fg, b: fb };
-                        const to = { r: tr, g: tg, b: tb };
-                        const gradients = this.getGradients(from, to, categories);
-                        let currentGradient;
-                        let overallBucketCount = 0;
-                        let currentBucket = 0;
-                        let currentBucketCount = 0;
-                        let currentBucketSize =  Math.floor(
-                            (currentBucket+1)*(1/categories) * values.length
-                        );
-                        values.forEach(v => {
-                            if(opts.style.id == 'categorized') {
-                                if(!v.value && v.value !== 0) {
-                                    currentGradient = gradients[gradients.length-1];
-                                } else {
-                                    currentGradient = gradients[buckets[v.value]];
-                                }
-                            } else if(opts.style.id == 'graduated') {
-                                if(opts.mode.id == 'equal_interval') {
-                                    for(let i=0; i<buckets.length; i++) {
-                                        if(v.value < buckets[i]) {
-                                            currentGradient = gradients[i];
-                                            break;
-                                        }
-                                    }
-                                } else if(opts.mode.id == 'quantile') {
-                                    if(currentBucketCount == currentBucketSize && currentBucket < gradients.length-1) {
-                                        currentBucketCount = 0;
-                                        currentBucket++;
-                                        currentBucketSize = Math.floor(
-                                            (currentBucket+1)*(1/categories) * values.length
-                                        ) - overallBucketCount;
-                                    }
-                                    currentGradient = gradients[currentBucket];
-                                    currentBucketCount++;
-                                    overallBucketCount++;
-                                }
-                            }
-                            this.applyStyle(v.feature, currentGradient, opts);
+                        values.push({
+                            value: value,
+                            feature: f
                         });
-                    }));
+                    });
+
+                    if(opts.style.id === 'categorized') {
+                        values.sort((a, b) => a.value < b.value);
+                    } else if(opts.style.id === 'graduated') {
+                        categories = opts.classes;
+                        values.sort((a, b)  => a.value-b.value);
+                        const min = values[0].value;
+                        const max = values[values.length-1].value;
+                        if(opts.mode.id === 'equal_interval') {
+                            const bucketSize = (max-min)/categories;
+                            buckets = [];
+                            for(let i=1; i<=categories; i++) {
+                                buckets.push(min + bucketSize*i);
+                            }
+                        }
+                    }
+                    let fr, fg, fb;
+                    let tr, tg, tb;
+                    [fr, fg, fb] = this.$rgb2hex(opts.color.from);
+                    [tr, tg, tb] = this.$rgb2hex(opts.color.to);
+                    const from = { r: fr, g: fg, b: fb };
+                    const to = { r: tr, g: tg, b: tb };
+                    const gradients = this.getGradients(from, to, categories);
+                    let currentGradient;
+                    let overallBucketCount = 0;
+                    let currentBucket = 0;
+                    let currentBucketCount = 0;
+                    let currentBucketSize =  Math.floor(
+                        (currentBucket+1)*(1/categories) * values.length
+                    );
+                    values.forEach(v => {
+                        if(opts.style.id === 'categorized') {
+                            if(!v.value && v.value !== 0) {
+                                currentGradient = gradients[gradients.length-1];
+                            } else {
+                                currentGradient = gradients[buckets[v.value]];
+                            }
+                        } else if(opts.style.id === 'graduated') {
+                            if(opts.mode.id === 'equal_interval') {
+                                for(let i=0; i<buckets.length; i++) {
+                                    if(v.value < buckets[i]) {
+                                        currentGradient = gradients[i];
+                                        break;
+                                    }
+                                }
+                            } else if(opts.mode.id === 'quantile') {
+                                if(currentBucketCount === currentBucketSize && currentBucket < gradients.length-1) {
+                                    currentBucketCount = 0;
+                                    currentBucket++;
+                                    currentBucketSize = Math.floor(
+                                        (currentBucket+1)*(1/categories) * values.length
+                                    ) - overallBucketCount;
+                                }
+                                currentGradient = gradients[currentBucket];
+                                currentBucketCount++;
+                                overallBucketCount++;
+                            }
+                        }
+                        this.applyStyle(v.feature, currentGradient, opts);
+                    });
                 }
             },
             applyStyle(feature, color, styleOptions) {

@@ -56,7 +56,8 @@
             },
             onUpdate: {
                 required: false,
-                type: Function
+                type: Function,
+                default: _ => {}
             }
         },
         components: {
