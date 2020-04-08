@@ -198,6 +198,8 @@
     import proj4 from 'proj4';
 
     import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
+    import Chart from 'ol-ext/style/Chart';
+
     import '../../sass/ol-ext-layerswitcher.scss';
 
     export default {
@@ -239,6 +241,10 @@
                 type: Object
             },
             layerLabels: {
+                required: false,
+                type: Object
+            },
+            layerCharts: {
                 required: false,
                 type: Object
             },
@@ -586,7 +592,8 @@
                         vm.featureStyles[geojson.props.id] = {
                             default: defaultStyle,
                             label: null,
-                            style: null
+                            style: null,
+                            charts: null
                         };
                         feature.setStyle(vm.featureStyles[geojson.props.id].default);
                         source.addFeature(feature);
@@ -978,6 +985,9 @@
                 if(styles.label) {
                     appliedStyles.push(styles.label);
                 }
+                if(styles.charts) {
+                    appliedStyles.push(styles.charts);
+                }
                 feature.setStyle(appliedStyles)
             },
             parseAndApplyStyle(options, feature) {
@@ -1107,6 +1117,27 @@
                 style.text = new Text(text);
                 const id = feature.getProperties().id;
                 this.featureStyles[id].label = new Style(style);
+                this.updateStyles(feature);
+            },
+            parseAndApplyCharts(options, feature) {
+                const id = feature.getProperties().id;
+                if(!feature.getProperties().entity) return;
+                const eid = feature.getProperties().entity.id;
+                if(!options.data[eid] || options.data[eid].length === 0) return;
+                const stroke = new Stroke({
+                    color: options.stroke ? options.stroke.color : '#ffffff',
+                    width: options.stroke ? options.stroke.width : 1
+                });
+                this.featureStyles[id].charts = new Style({
+                    image: new Chart({
+                        type: options.type,
+                        radius: options.radius,
+                        data: options.data[eid],
+                        rotateWithView: true,
+                        stroke: stroke,
+                        max: options.feature_options[eid].max
+                    })
+                });
                 this.updateStyles(feature);
             },
             applyLabels() {
@@ -1246,6 +1277,29 @@
                             }
                         }
                         this.applyStyle(v.feature, currentGradient, opts);
+                    });
+                }
+            },
+            applyCharts() {
+                // Reset all label styles
+                const allLayers = this.getEntityLayers();
+                allLayers.forEach(l => {
+                    const layerId = l.get('layer_id');
+                    if(!this.layerCharts[layerId]) {
+                        let features = l.getSource().getFeatures();
+                        features.forEach(f => {
+                            console.log(f)
+                            const id = f.getProperties().id;
+                            let styles = this.featureStyles[id];
+                            styles.charts = null;
+                            this.updateStyles(f);
+                        });
+                    }
+                });
+                for(let i in this.layerCharts) {
+                    let features = this.getEntityLayerFeatures(i);
+                    features.forEach(f => {
+                        this.parseAndApplyCharts(this.layerCharts[i], f);
                     });
                 }
             },
@@ -1419,7 +1473,8 @@
                         this.featureStyles[fid] = {
                             default: defaultStyle,
                             label: null,
-                            style: null
+                            style: null,
+                            charts: null
                         };
                         newFeature.setStyle(this.featureStyles[fid].default);
                         let source = entLayer.getSource();
@@ -1892,6 +1947,9 @@
             },
             layerStyles: function(newStyles, oldStyles) {
                 this.applyStyles();
+            },
+            layerCharts: function(newCharts, oldCharts) {
+                this.applyCharts();
             },
             zoomTo: function(newZoomLayerId, oldZoomLayerId) {
                 if(!newZoomLayerId) return;
