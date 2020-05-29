@@ -8,7 +8,7 @@
         "php": ">=7.2.0",
         "caouecs/laravel-lang": "~5.0",
         "fideloper/proxy": "~4.0",
-        "laravel/framework": "^6.16.0",
+        "laravel/framework": "^6.18.10",
         "laravel/tinker": "~1.0",
         "lsolesen/pel": "^0.9.8",
         "mstaack/laravel-postgis": "^5.0",
