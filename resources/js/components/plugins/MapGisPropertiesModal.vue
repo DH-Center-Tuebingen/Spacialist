@@ -20,12 +20,17 @@
                                 <i class="fas fa-fw fa-tags"></i> {{ $t('plugins.map.gis.props.labels.title') }}
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" :disabled="!isEntityLayer" :class="{active: activeTab == 'charts'}" @click.prevent="setActiveTab('charts')" href="#">
+                                <i class="fas fa-fw fa-chart-pie"></i> {{ $t('plugins.map.gis.props.diagrams.title') }}
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div class="col-md-10">
                     <keep-alive>
                         <component
-                            :attributes="attributes"
+                            :attributes="possibleAttributes"
                             :is-entity-layer="isEntityLayer"
                             :is="activeTabComponent"
                             :layer="layer"
@@ -46,6 +51,7 @@
 <script>
     import MapGisPropertiesStyle from './MapGisPropertiesStyle.vue';
     import MapGisPropertiesLabels from './MapGisPropertiesLabels.vue';
+    import MapGisPropertiesCharts from './MapGisPropertiesCharts.vue';
 
     export default {
         props: {
@@ -56,12 +62,14 @@
             },
             onUpdate: {
                 required: false,
-                type: Function
+                type: Function,
+                default: _ => {}
             }
         },
         components: {
             'map-gis-properties-style': MapGisPropertiesStyle,
-            'map-gis-properties-labels': MapGisPropertiesLabels
+            'map-gis-properties-labels': MapGisPropertiesLabels,
+            'map-gis-properties-charts': MapGisPropertiesCharts,
         },
         beforeMount() {},
         mounted() {},
@@ -75,6 +83,7 @@
                 }
             },
             setActiveTab(id) {
+                if(id === 'charts' && !this.isEntityLayer) return;
                 this.activeTab = id;
             },
             hide() {
@@ -94,6 +103,16 @@
             },
             isEntityLayer: function() {
                 return !!this.layer.entity_type;
+            },
+            possibleAttributes() {
+                switch(this.activeTab) {
+                    case 'charts':
+                        return this.attributes.filter(a => {
+                            return a.datatype === 'sql' || a.datatype === 'table';
+                        });
+                    default:
+                        return this.attributes;
+                }
             }
         }
     }

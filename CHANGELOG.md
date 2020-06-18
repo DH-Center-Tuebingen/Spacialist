@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.7.7 (Unreleased)
+### Added
+- Caching attribute data in GIS layer styles
+- Chart overlays to GIS layer styling
 ### Fixed
 - Unnecessary initializing snapping to features on the map (snapping is now initialized when editing mode is activated and onyl for the current visible part of the map)
 

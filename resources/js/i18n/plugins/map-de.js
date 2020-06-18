@@ -152,7 +152,30 @@ const de = {
                         apply: 'Beschriftungen anwenden'
                     },
                     diagrams: {
-                        title: 'Diagram'
+                        title: 'Diagramm',
+                        apply: 'Diagramme anzeigen',
+                        missing_sql_data: 'Für SQL-Attribute werden zunächst die Daten benötigt.',
+                        fetch_sql_data: 'SQL-Daten abrufen',
+                        data: {
+                            title: 'Daten',
+                            order: 'Wertebereich',
+                            order_row: 'Zeile (mit festgelegten Spalten)',
+                            order_columns: 'Eine Spalte',
+                            columns: 'Spalten',
+                            min_n_values: 'Mindestanzahl der Gesamtwerte',
+                            last_n_elements: 'Maximalanzahl der angezeigten Werte',
+                        },
+                        properties: {
+                            title: 'Eigenschaften',
+                            radius: 'Radius/Größe',
+                            type: 'Diagrammart',
+                            type_pie: 'Kuchen',
+                            type_pie3d: 'Kuchen 3D',
+                            type_donut: 'Donut',
+                            type_bar: 'Balken',
+                            stroke_color: 'Randfarbe',
+                            stroke_width: 'Randdicke',
+                        },
                     }
                 },
                 menu: {
