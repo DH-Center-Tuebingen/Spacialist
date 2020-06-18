@@ -361,21 +361,39 @@
                     }
                     let callback;
                     if(this.selectedAttribute && this.isEntityLayer) {
-                        const id = this.layer.entity_type_id;
-                        const aid = this.selectedAttribute.attribute_id;
-                        $httpQueue.add(() => $http.get(`entity/entity_type/${id}/data/${aid}?geodata=has`).then(response => {
+                        if(this.cachedData[this.cacheKey]) {
                             options.getText = feature => {
                                 const eid = feature.get('entity').id;
-                                const data = response.data[eid];
+                                const data = this.cachedData[this.cacheKey][eid];
                                 return data ? data.value : '';
                             };
+
                             if(this.onUpdate) {
                                 this.onUpdate(this.layer, {
                                     type: 'labeling',
                                     data: options
                                 });
                             }
-                        }));
+                        } else {
+                            const id = this.layer.entity_type_id;
+                            const aid = this.selectedAttribute.attribute_id;
+                            $httpQueue.add(() => $http.get(`entity/entity_type/${id}/data/${aid}?geodata=has`).then(response => {
+                                this.cachedData[this.cacheKey] = response.data;
+
+                                options.getText = feature => {
+                                    const eid = feature.get('entity').id;
+                                    const data = this.cachedData[this.cacheKey][eid];
+                                    return data ? data.value : '';
+                                };
+
+                                if(this.onUpdate) {
+                                    this.onUpdate(this.layer, {
+                                        type: 'labeling',
+                                        data: options
+                                    });
+                                }
+                            }));
+                        }
                     } else if(this.useEntityName) {
                         options.getText = feature => {
                             return feature.get('entity').name;
@@ -425,6 +443,7 @@
         },
         data() {
             return {
+                cachedData: {},
                 useEntityName: false,
                 selectedAttribute: null,
                 label: 'Text',
@@ -559,6 +578,11 @@
                     ],
                     placement: {}
                 }
+            }
+        },
+        computed: {
+            cacheKey() {
+                return `${this.layer.id}_${this.selectedAttribute.attribute_id}`;
             }
         }
     }
