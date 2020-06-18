@@ -664,13 +664,17 @@ Vue.component('error-modal', ErrorModal);
 Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm', useLocale = false, isDateString) {
     if(value) {
         let mom;
+        // assume input date is in utc
         if(isDateString) {
-            mom = moment(value);
+            mom = moment.utc(value);
         } else {
-            mom = moment.unix(Number(value));
+            // utc methonds needs timestamp in ms
+            mom = moment.utc(Number(value)*1000);
         }
-        if(!useLocale) {
-            mom = mom.utc();
+        // set currently used timezone
+        if(!!useLocale) {
+            const d = new Date();
+            mom.utcOffset(-d.getTimezoneOffset());
         }
         return mom.format(format);
     }
