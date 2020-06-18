@@ -639,11 +639,6 @@
                 // TODO add draw layer to map
                 // this.entityLayers.push(vm.vector);
 
-                this.snap = new Snap({
-                    features: this.getSnapFeatures()
-                });
-                this.map.addInteraction(this.snap);
-
                 this.initMeasureInteraction();
                 if(this.measurementActive) {
                     this.addMeasureInteraction();
@@ -961,17 +956,40 @@
             getEntityTypeById(ctid) {
                 return this.$getEntityType(ctid);
             },
-            getSnapFeatures() {
-                const vm = this;
-                const layers = vm.entityLayersGroup.getLayers();
+            getFeaturesInExtent(layer) {
+                const allLayers = !layer;
+                const currentExtent = this.map.getView().calculateExtent(this.map.getSize());
+
                 let features = [];
+
+                let layers;
+                if(allLayers) {
+                    layers = this.entityLayersGroup.getLayers();
+                } else {
+                    layers = [layer];
+                }
+
                 layers.forEach(lg => {
                     const src = lg.getSource();
-                    if(src) {
-                        features = features.concat(src.getFeatures());
+                    if(src && !!src.forEachFeatureInExtent) {
+                        src.forEachFeatureInExtent(currentExtent, f => {
+                            features.push(f);
+                        });
                     }
                 });
+
                 return new Collection(features);
+            },
+            updateSnap(features) {
+                if(!!this.snap) {
+                    this.map.removeInteraction(this.snap);
+                }
+                if(!!features) {
+                    this.snap = new Snap({
+                        features: features
+                    });
+                    this.map.addInteraction(this.snap);
+                }
             },
             updateStyles(feature) {
                 const id = feature.getProperties().id;
@@ -1383,6 +1401,13 @@
             setInteractionMode(mode, cancelled) {
                 let oldMode = this.interactionMode;
                 this.interactionMode = mode;
+                // only set snap features, when mode is set and not delete
+                // because delete does not need snapping
+                if(!!mode && mode != 'delete') {
+                    this.updateSnap(this.getFeaturesInExtent());
+                } else {
+                    this.updateSnap();
+                }
                 if(mode == 'draw') {
                     this.draw.setActive(true, this.drawType);
                     this.modify.setActive(false, cancelled);
