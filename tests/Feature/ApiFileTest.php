@@ -198,7 +198,6 @@ class ApiFileTest extends TestCase
                 'uncompressedSize',
                 'modificationTime',
                 'isCompressed',
-                'mtime',
                 'cleanFilename'
             ]
         ]);
@@ -224,7 +223,6 @@ class ApiFileTest extends TestCase
                 'uncompressedSize' => 0,
                 'modificationTime' => 0,
                 'isCompressed' => false,
-                'mtime' => 0,
                 'cleanFilename' => 'folder'
             ],
             [
