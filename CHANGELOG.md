@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Unnecessary initializing snapping to features on the map (snapping is now initialized when editing mode is activated and onyl for the current visible part of the map)
 - Drag & Drop in entity tree
 - Timezone of date filter
+- Proper error messages for incomplete data in time period and epoch datatypes
 
 ## 0.7.6
 ### Added
