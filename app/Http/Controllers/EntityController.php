@@ -99,11 +99,12 @@ class EntityController extends Controller {
             switch($value->attribute->datatype) {
                 case 'entity':
                     $value->name = Entity::find($value->entity_val)->name;
+                    $value->value = Entity::find($value->entity_val)->name;
                     break;
                 default:
+                    $value->value = $value->getValue();
                     break;
             }
-            $value->value = $value->getValue();
             $data[$value->entity_id] = $value;
         }
 

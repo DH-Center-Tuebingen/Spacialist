@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Drag & Drop in entity tree
 - Timezone of date filter
 - Proper error messages for incomplete data in time period and epoch datatypes
+- Display entity name in GIS layer labeling instead of ID
 
 ## 0.7.6
 ### Added
