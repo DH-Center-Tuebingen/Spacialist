@@ -209,11 +209,8 @@ class ApiFileTest extends TestCase
                         'isDirectory' => false,
                         'path' => 'folder/folder_text1.txt',
                         'compressedSize' => 45,
-                        'compressed_size' => 45,
                         'uncompressedSize' => 46,
-                        'uncompressed_size' => 46,
                         'isCompressed' => true,
-                        'is_compressed' => true,
                         'cleanFilename' => 'folder_text1.txt'
                     ]
                 ],
@@ -229,33 +226,24 @@ class ApiFileTest extends TestCase
                 'isDirectory' => false,
                 'path' => 'test_img_edin.jpg',
                 'compressedSize' => 3391570,
-                'compressed_size' => 3391570,
                 'uncompressedSize' => 3407381,
-                'uncompressed_size' => 3407381,
                 'isCompressed' => true,
-                'is_compressed' => true,
                 'cleanFilename' => 'test_img_edin.jpg'
             ],
             [
                 'isDirectory' => false,
                 'path' => 'text2.txt',
                 'compressedSize' => 38,
-                'compressed_size' => 38,
                 'uncompressedSize' => 36,
-                'uncompressed_size' => 36,
                 'isCompressed' => true,
-                'is_compressed' => true,
                 'cleanFilename' => 'text2.txt'
             ],
             [
                 'isDirectory' => false,
                 'path' => 'text3.txt',
                 'compressedSize' => 39,
-                'compressed_size' => 39,
                 'uncompressedSize' => 40,
-                'uncompressed_size' => 40,
                 'isCompressed' => true,
-                'is_compressed' => true,
                 'cleanFilename' => 'text3.txt'
             ],
         ]);
