@@ -65,7 +65,7 @@
                 // Download of folders is not supported
                 if(selectedFile.isDirectory) return;
                 const id = vm.file.id;
-                const p = selectedFile.filename;
+                const p = selectedFile.path;
                 const url = '/file/'+id+'/archive/download?p='+p;
                 $httpQueue.add(() => vm.$http.get(url).then(function(response) {
                     vm.$createDownloadLink(response.data, selectedFile.cleanFilename, true);

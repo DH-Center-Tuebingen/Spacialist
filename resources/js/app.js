@@ -30,6 +30,7 @@ import {
     faCaretDown,
     faCaretUp,
     faChartBar,
+    faChartPie,
     faCheck,
     faCheckCircle,
     faCircle,
@@ -135,6 +136,10 @@ import {
 import VModal from 'vue-js-modal';
 import Axios from 'axios';
 import VueRouter from 'vue-router';
+import auth from '@websanova/vue-auth';
+import authBearer from '@websanova/vue-auth/drivers/auth/bearer.js';
+import authHttp from './queued-axios-1.x-driver.js';
+import authRouter  from '@websanova/vue-auth/drivers/router/vue-router.2.x.js';
 
 import VueI18n from 'vue-i18n';
 import en from './i18n/en';
@@ -192,6 +197,7 @@ library.add(
     faCaretDown,
     faCaretUp,
     faChartBar,
+    faChartPie,
     faCheck,
     faCheckCircle,
     faCircle,
@@ -599,10 +605,10 @@ const i18n = new VueI18n({
 });
 Vue.i18n = i18n;
 
-Vue.use(require('@websanova/vue-auth'), {
-   auth: require('@websanova/vue-auth/drivers/auth/bearer.js'),
-   http: require('./queued-axios-1.x-driver.js'),
-   router: require('@websanova/vue-auth/drivers/router/vue-router.2.x.js'),
+Vue.use(auth, {
+   auth: authBearer,
+   http: authHttp,
+   router: authRouter,
    forbiddenRedirect: {
        name: 'home'
    },
@@ -658,13 +664,17 @@ Vue.component('error-modal', ErrorModal);
 Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm', useLocale = false, isDateString) {
     if(value) {
         let mom;
+        // assume input date is in utc
         if(isDateString) {
-            mom = moment(value);
+            mom = moment.utc(value);
         } else {
-            mom = moment.unix(Number(value));
+            // utc methonds needs timestamp in ms
+            mom = moment.utc(Number(value)*1000);
         }
-        if(!useLocale) {
-            mom = mom.utc();
+        // set currently used timezone
+        if(!!useLocale) {
+            const d = new Date();
+            mom.utcOffset(-d.getTimezoneOffset());
         }
         return mom.format(format);
     }
@@ -837,7 +847,7 @@ const app = new Vue({
                 // Check if user is logged in and set preferred language
                 // instead of browser default
                 if(!app.$auth.ready()) {
-                    app.$auth.ready(_ => {
+                    app.$auth.load().then(_ => {
                         app.$updateLanguage();
                     });
                 } else {

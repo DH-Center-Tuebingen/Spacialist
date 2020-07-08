@@ -198,6 +198,8 @@
     import proj4 from 'proj4';
 
     import LayerSwitcher from 'ol-ext/control/LayerSwitcher';
+    import Chart from 'ol-ext/style/Chart';
+
     import '../../sass/ol-ext-layerswitcher.scss';
 
     export default {
@@ -239,6 +241,10 @@
                 type: Object
             },
             layerLabels: {
+                required: false,
+                type: Object
+            },
+            layerCharts: {
                 required: false,
                 type: Object
             },
@@ -586,7 +592,8 @@
                         vm.featureStyles[geojson.props.id] = {
                             default: defaultStyle,
                             label: null,
-                            style: null
+                            style: null,
+                            charts: null
                         };
                         feature.setStyle(vm.featureStyles[geojson.props.id].default);
                         source.addFeature(feature);
@@ -631,11 +638,6 @@
 
                 // TODO add draw layer to map
                 // this.entityLayers.push(vm.vector);
-
-                this.snap = new Snap({
-                    features: this.getSnapFeatures()
-                });
-                this.map.addInteraction(this.snap);
 
                 this.initMeasureInteraction();
                 if(this.measurementActive) {
@@ -954,17 +956,40 @@
             getEntityTypeById(ctid) {
                 return this.$getEntityType(ctid);
             },
-            getSnapFeatures() {
-                const vm = this;
-                const layers = vm.entityLayersGroup.getLayers();
+            getFeaturesInExtent(layer) {
+                const allLayers = !layer;
+                const currentExtent = this.map.getView().calculateExtent(this.map.getSize());
+
                 let features = [];
+
+                let layers;
+                if(allLayers) {
+                    layers = this.entityLayersGroup.getLayers();
+                } else {
+                    layers = [layer];
+                }
+
                 layers.forEach(lg => {
                     const src = lg.getSource();
-                    if(src) {
-                        features = features.concat(src.getFeatures());
+                    if(src && !!src.forEachFeatureInExtent) {
+                        src.forEachFeatureInExtent(currentExtent, f => {
+                            features.push(f);
+                        });
                     }
                 });
+
                 return new Collection(features);
+            },
+            updateSnap(features) {
+                if(!!this.snap) {
+                    this.map.removeInteraction(this.snap);
+                }
+                if(!!features) {
+                    this.snap = new Snap({
+                        features: features
+                    });
+                    this.map.addInteraction(this.snap);
+                }
             },
             updateStyles(feature) {
                 const id = feature.getProperties().id;
@@ -977,6 +1002,9 @@
                 }
                 if(styles.label) {
                     appliedStyles.push(styles.label);
+                }
+                if(styles.charts) {
+                    appliedStyles.push(styles.charts);
                 }
                 feature.setStyle(appliedStyles)
             },
@@ -1109,6 +1137,27 @@
                 this.featureStyles[id].label = new Style(style);
                 this.updateStyles(feature);
             },
+            parseAndApplyCharts(options, feature) {
+                const id = feature.getProperties().id;
+                if(!feature.getProperties().entity) return;
+                const eid = feature.getProperties().entity.id;
+                if(!options.data[eid] || options.data[eid].length === 0) return;
+                const stroke = new Stroke({
+                    color: options.stroke ? options.stroke.color : '#ffffff',
+                    width: options.stroke ? options.stroke.width : 1
+                });
+                this.featureStyles[id].charts = new Style({
+                    image: new Chart({
+                        type: options.type,
+                        radius: options.radius,
+                        data: options.data[eid],
+                        rotateWithView: true,
+                        stroke: stroke,
+                        max: options.feature_options[eid].max
+                    })
+                });
+                this.updateStyles(feature);
+            },
             applyLabels() {
                 // Reset all label styles
                 const allLayers = this.getEntityLayers();
@@ -1156,7 +1205,7 @@
                     let nullValueFound = false;
                     if(!features.length) continue;
 
-                    if(opts.style.id == 'color') {let tr, tg, tb;
+                    if(opts.style.id === 'color') {let tr, tg, tb;
                         let r, g, b;
                         [r, g, b] = this.$rgb2hex(opts.color.to);
                         const color = { r: r, g: g, b: b };
@@ -1166,91 +1215,110 @@
                         continue;
                     }
 
-                    const ctid = features[0].getProperties().entity.entity_type_id;
-                    $httpQueue.add(() => $http.get(`entity/entity_type/${ctid}/data/${opts.attribute_id}`).then(response => {
-                        const data = response.data;
-                        let values = [];
-                        features.forEach(f => {
-                            const eid = f.getProperties().entity.id;
-                            const value = data[eid] ? data[eid].value : null;
-                            if(!value && value !== 0 && !nullValueFound) {
-                                nullValueFound = true;
-                                categories++;
-                            } else {
-                                if(opts.style.id == 'categorized') {
-                                    if(!buckets[value] && buckets[value] !== 0) {
-                                        buckets[value] = index;
-                                        index++;
-                                        categories++;
-                                    }
-                                }
-                            }
-                            values.push({
-                                value: value,
-                                feature: f
-                            });
-                        });
-
-                        if(opts.style.id == 'categorized') {
-                            values.sort((a, b) => a.value < b.value);
-                        } else if(opts.style.id == 'graduated') {
-                            categories = opts.classes;
-                            values.sort((a, b)  => a.value-b.value);
-                            const min = values[0].value;
-                            const max = values[values.length-1].value;
-                            if(opts.mode.id == 'equal_interval') {
-                                const bucketSize = (max-min)/categories;
-                                buckets = [];
-                                for(let i=1; i<=categories; i++) {
-                                    buckets.push(min + bucketSize*i);
+                    let values = [];
+                    features.forEach(f => {
+                        const eid = f.getProperties().entity.id;
+                        const value = opts.data[eid] ? opts.data[eid].value : null;
+                        if(!value && value !== 0 && !nullValueFound) {
+                            nullValueFound = true;
+                            categories++;
+                        } else {
+                            if(opts.style.id === 'categorized') {
+                                if(!buckets[value] && buckets[value] !== 0) {
+                                    buckets[value] = index;
+                                    index++;
+                                    categories++;
                                 }
                             }
                         }
-                        let fr, fg, fb;
-                        let tr, tg, tb;
-                        [fr, fg, fb] = this.$rgb2hex(opts.color.from);
-                        [tr, tg, tb] = this.$rgb2hex(opts.color.to);
-                        const from = { r: fr, g: fg, b: fb };
-                        const to = { r: tr, g: tg, b: tb };
-                        const gradients = this.getGradients(from, to, categories);
-                        let currentGradient;
-                        let overallBucketCount = 0;
-                        let currentBucket = 0;
-                        let currentBucketCount = 0;
-                        let currentBucketSize =  Math.floor(
-                            (currentBucket+1)*(1/categories) * values.length
-                        );
-                        values.forEach(v => {
-                            if(opts.style.id == 'categorized') {
-                                if(!v.value && v.value !== 0) {
-                                    currentGradient = gradients[gradients.length-1];
-                                } else {
-                                    currentGradient = gradients[buckets[v.value]];
-                                }
-                            } else if(opts.style.id == 'graduated') {
-                                if(opts.mode.id == 'equal_interval') {
-                                    for(let i=0; i<buckets.length; i++) {
-                                        if(v.value < buckets[i]) {
-                                            currentGradient = gradients[i];
-                                            break;
-                                        }
-                                    }
-                                } else if(opts.mode.id == 'quantile') {
-                                    if(currentBucketCount == currentBucketSize && currentBucket < gradients.length-1) {
-                                        currentBucketCount = 0;
-                                        currentBucket++;
-                                        currentBucketSize = Math.floor(
-                                            (currentBucket+1)*(1/categories) * values.length
-                                        ) - overallBucketCount;
-                                    }
-                                    currentGradient = gradients[currentBucket];
-                                    currentBucketCount++;
-                                    overallBucketCount++;
-                                }
-                            }
-                            this.applyStyle(v.feature, currentGradient, opts);
+                        values.push({
+                            value: value,
+                            feature: f
                         });
-                    }));
+                    });
+
+                    if(opts.style.id === 'categorized') {
+                        values.sort((a, b) => a.value < b.value);
+                    } else if(opts.style.id === 'graduated') {
+                        categories = opts.classes;
+                        values.sort((a, b)  => a.value-b.value);
+                        const min = values[0].value;
+                        const max = values[values.length-1].value;
+                        if(opts.mode.id === 'equal_interval') {
+                            const bucketSize = (max-min)/categories;
+                            buckets = [];
+                            for(let i=1; i<=categories; i++) {
+                                buckets.push(min + bucketSize*i);
+                            }
+                        }
+                    }
+                    let fr, fg, fb;
+                    let tr, tg, tb;
+                    [fr, fg, fb] = this.$rgb2hex(opts.color.from);
+                    [tr, tg, tb] = this.$rgb2hex(opts.color.to);
+                    const from = { r: fr, g: fg, b: fb };
+                    const to = { r: tr, g: tg, b: tb };
+                    const gradients = this.getGradients(from, to, categories);
+                    let currentGradient;
+                    let overallBucketCount = 0;
+                    let currentBucket = 0;
+                    let currentBucketCount = 0;
+                    let currentBucketSize =  Math.floor(
+                        (currentBucket+1)*(1/categories) * values.length
+                    );
+                    values.forEach(v => {
+                        if(opts.style.id === 'categorized') {
+                            if(!v.value && v.value !== 0) {
+                                currentGradient = gradients[gradients.length-1];
+                            } else {
+                                currentGradient = gradients[buckets[v.value]];
+                            }
+                        } else if(opts.style.id === 'graduated') {
+                            if(opts.mode.id === 'equal_interval') {
+                                for(let i=0; i<buckets.length; i++) {
+                                    if(v.value < buckets[i]) {
+                                        currentGradient = gradients[i];
+                                        break;
+                                    }
+                                }
+                            } else if(opts.mode.id === 'quantile') {
+                                if(currentBucketCount === currentBucketSize && currentBucket < gradients.length-1) {
+                                    currentBucketCount = 0;
+                                    currentBucket++;
+                                    currentBucketSize = Math.floor(
+                                        (currentBucket+1)*(1/categories) * values.length
+                                    ) - overallBucketCount;
+                                }
+                                currentGradient = gradients[currentBucket];
+                                currentBucketCount++;
+                                overallBucketCount++;
+                            }
+                        }
+                        this.applyStyle(v.feature, currentGradient, opts);
+                    });
+                }
+            },
+            applyCharts() {
+                // Reset all label styles
+                const allLayers = this.getEntityLayers();
+                allLayers.forEach(l => {
+                    const layerId = l.get('layer_id');
+                    if(!this.layerCharts[layerId]) {
+                        let features = l.getSource().getFeatures();
+                        features.forEach(f => {
+                            console.log(f)
+                            const id = f.getProperties().id;
+                            let styles = this.featureStyles[id];
+                            styles.charts = null;
+                            this.updateStyles(f);
+                        });
+                    }
+                });
+                for(let i in this.layerCharts) {
+                    let features = this.getEntityLayerFeatures(i);
+                    features.forEach(f => {
+                        this.parseAndApplyCharts(this.layerCharts[i], f);
+                    });
                 }
             },
             applyStyle(feature, color, styleOptions) {
@@ -1333,6 +1401,13 @@
             setInteractionMode(mode, cancelled) {
                 let oldMode = this.interactionMode;
                 this.interactionMode = mode;
+                // only set snap features, when mode is set and not delete
+                // because delete does not need snapping
+                if(!!mode && mode != 'delete') {
+                    this.updateSnap(this.getFeaturesInExtent());
+                } else {
+                    this.updateSnap();
+                }
                 if(mode == 'draw') {
                     this.draw.setActive(true, this.drawType);
                     this.modify.setActive(false, cancelled);
@@ -1423,7 +1498,8 @@
                         this.featureStyles[fid] = {
                             default: defaultStyle,
                             label: null,
-                            style: null
+                            style: null,
+                            charts: null
                         };
                         newFeature.setStyle(this.featureStyles[fid].default);
                         let source = entLayer.getSource();
@@ -1896,6 +1972,9 @@
             },
             layerStyles: function(newStyles, oldStyles) {
                 this.applyStyles();
+            },
+            layerCharts: function(newCharts, oldCharts) {
+                this.applyCharts();
             },
             zoomTo: function(newZoomLayerId, oldZoomLayerId) {
                 if(!newZoomLayerId) return;

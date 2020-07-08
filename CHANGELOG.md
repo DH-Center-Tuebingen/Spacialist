@@ -1,6 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 0.7.7 (Unreleased)
+### Added
+- Caching attribute data in GIS layer styles
+- Chart overlays to GIS layer styling
+- Display multiple attributes in GIS view as labels
+### Fixed
+- Unnecessary initializing snapping to features on the map (snapping is now initialized when editing mode is activated and onyl for the current visible part of the map)
+- Drag & Drop in entity tree
+- Timezone of date filter
+- Proper error messages for incomplete data in time period and epoch datatypes
+- Display entity name in GIS layer labeling instead of ID
+
 ## 0.7.6
 ### Added
 - Caching map styles to speed-up map performance

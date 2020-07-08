@@ -99,11 +99,12 @@ class EntityController extends Controller {
             switch($value->attribute->datatype) {
                 case 'entity':
                     $value->name = Entity::find($value->entity_val)->name;
+                    $value->value = Entity::find($value->entity_val)->name;
                     break;
                 default:
+                    $value->value = $value->getValue();
                     break;
             }
-            $value->value = $value->getValue();
             $data[$value->entity_id] = $value;
         }
 
@@ -404,10 +405,19 @@ class EntityController extends Controller {
                 case 'table':
                     // check for invalid time spans
                     if($attr->datatype == 'epoch' || $attr->datatype == 'timeperiod') {
-                        $sl = strtoupper($value['startLabel']);
-                        $el = strtoupper($value['endLabel']);
+                        $sl = isset($value['startLabel']) ? strtoupper($value['startLabel']) : null;
+                        $el = isset($value['endLabel']) ? strtoupper($value['endLabel']) : null;
                         $s = $value['start'];
                         $e = $value['end'];
+                        if(
+                            (isset($s) && !isset($sl))
+                            ||
+                            (isset($e) && !isset($el))
+                        ) {
+                            return response()->json([
+                                'error' => __('You have to specify if your date is BC or AD.')
+                            ], 422);
+                        }
                         if(
                             ($sl == 'AD' && $el == 'BC')
                             ||
