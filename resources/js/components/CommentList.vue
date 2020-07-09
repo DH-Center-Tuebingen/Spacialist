@@ -86,7 +86,7 @@
             </comment-list>
         </div>
         <div class="text-center mt-2" v-if="showHideButton && comments.length > 0">
-            <button type="button" class="btn btn-outline-secondary btn-sm" @click.prevent="hideComments = !hideComments">
+            <a href="#" @click.prevent="hideComments = !hideComments">
                 <i class="fas fa-fw fa-comments"></i>
                 <span v-if="hideComments">
                     {{ $t('global.comments.show') }}
@@ -94,7 +94,7 @@
                 <span v-else>
                     {{ $t('global.comments.hide') }}
                 </span>
-            </button>
+            </a>
         </div>
         <p v-else-if="comments.length == 0" class="alert alert-info m-0 mt-2">
             {{ $t('global.comments.empty_list') }}

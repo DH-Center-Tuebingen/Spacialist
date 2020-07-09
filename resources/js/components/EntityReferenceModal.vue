@@ -1,5 +1,5 @@
 <template>
-    <modal name="entity-references-modal" width="50%" height="80%" :scrollable="true" :draggable="true" :resizable="true" @closed="routeBack">
+    <modal name="entity-references-modal" width="50%" height="80%" :scrollable="true" :draggable="true" :resizable="true" @closed="routeBack" @opened="initModal">
         <div class="modal-content h-100">
             <div class="modal-header">
                 <h5 class="modal-title">{{ $t('main.entity.references.title') }}</h5>
@@ -43,8 +43,13 @@
                     </span>
                 </div>
                 <form role="form" @submit.prevent="onUpdateCertainty">
-                    <div class="form-group">
+                    <div class="form-group d-flex">
                         <textarea class="form-control" v-model="certainty_description" id="comment-content" ref="comCnt" :placeholder="$t('main.entity.references.certaintyc')"></textarea>
+                        <div class="ml-2 mt-auto">
+                            <button type="button" class="btn btn-outline-secondary" id="emoji-picker">
+                                😀
+                            </button>
+                        </div>
                     </div>
                     <div class="text-center">
                         <button type="submit" class="btn btn-outline-success">
@@ -160,6 +165,7 @@
 
 <script>
     import { EventBus } from '../event-bus.js';
+    import EmojiButton from '@joeattardi/emoji-button';
 
     export default {
         props: {
@@ -254,7 +260,7 @@
                         this.comments.push(addedComment);
                         this.refs.value.comments_count = this.comments.length;
                     }
-                    this.certainty_description = null;
+                    this.certainty_description = '';
                     this.initialCertaintyValue = this.refs.value.certainty;
                     const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
                     this.$showToast(
@@ -334,6 +340,20 @@
                     } else {
                         this.refs.value.comments_count = this.comments.length;
                     }
+                });
+            },
+            initModal() {
+                this.initEmojiPicker();
+            },
+            initEmojiPicker() {
+                const emojiButton = document.getElementById('emoji-picker');
+
+                this.picker.on('emoji', emoji => {
+                    this.certainty_description += emoji;
+                });
+
+                emojiButton.addEventListener('click', _ => {
+                    this.picker.togglePicker(emojiButton);
                 });
             },
             getCertaintyClass(value, prefix = 'bg') {
@@ -448,7 +468,7 @@
                     description: ''
                 },
                 initialCertaintyValue: null,
-                certainty_description: null,
+                certainty_description: '',
                 matchingBibliography: this.bibliography.slice(),
                 comments: [],
                 replyTo: {
@@ -457,7 +477,12 @@
                         name: null,
                         nickname: null
                     }
-                }
+                },
+                picker: new EmojiButton({
+                    autoHide: false,
+                    position: 'bottom-end',
+                    zIndex: 1021
+                }),
             }
         },
         computed: {
