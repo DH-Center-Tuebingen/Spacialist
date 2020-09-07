@@ -241,6 +241,14 @@ const de = {
                 hidden: 'keine Attribute ausgeblendet | ein Attribut ausgeblendet | {cnt} Attribute ausgeblendet',
                 iconclass: {
                     doesnt_exist: 'Diese Iconclass existiert nicht'
+                },
+                table: {
+                    chart: {
+                        number_sets: 'Die letzten {cnt} Datensätze',
+                        include_in: 'Verwenden',
+                        use_difference: 'Differenz verwenden',
+                        use_as_label: 'Als Beschriftung verwenden'
+                    }
                 }
             }
         },

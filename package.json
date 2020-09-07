@@ -50,6 +50,7 @@
         "@mapbox/togeojson": "^0.16.0",
         "@retorquere/bibtex-parser": "^3.2.5",
         "bootstrap": "^4.5.0",
+        "chart.js": "^2.9.3",
         "cornerstone-core": "^2.3.0",
         "cornerstone-tools": "^4.19.1",
         "cornerstone-wado-image-loader": "^3.1.2",
