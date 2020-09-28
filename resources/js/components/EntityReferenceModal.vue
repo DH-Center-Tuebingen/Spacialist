@@ -491,5 +491,12 @@
                 return !this.newItem.bibliography.id || this.newItem.description.length == 0;
             }
         },
+        watch: {
+            'refs.value.certainty': function(newVal, oldVal) {
+                if(!oldVal && newVal) {
+                    this.initialCertaintyValue = newVal;
+                }
+            }
+        }
     }
 </script>
