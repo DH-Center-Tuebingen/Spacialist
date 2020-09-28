@@ -45,10 +45,10 @@ class AddCommentTable extends Migration
             $comment->commentable_id = $v->id;
             $comment->commentable_type = 'attribute_values';
             $comment->content = $v->certainty_description;
-            $comment->metadata = json_encode([
+            $comment->metadata = [
                 'certainty_from' => null,
                 'certainty_to' => $v->certainty
-            ]);
+            ];
             $comment->save();
         }
 
