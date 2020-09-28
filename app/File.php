@@ -414,6 +414,15 @@ class File extends Model
         return $file;
     }
 
+    public static function uploadAvatar($file, $user) {
+        Storage::delete($user->avatar);
+        $filename = $user->id . "." . $file->getClientOriginalExtension();
+        return $file->storeAs(
+            'avatars',
+            $filename
+        );
+    }
+
     public function setContent($fileObject) {
         $filehandle = fopen($fileObject->getRealPath(), 'r');
         Storage::put(

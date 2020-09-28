@@ -100,7 +100,8 @@
                     </li>
                     <li class="nav-item dropdown" v-if="loggedIn">
                         <a href="#" class="nav-link dropdown-toggle" id="user-dropdown" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
-                            <i class="fas fa-fw fa-user"></i> {{ $auth.user().name }}
+                            <user-avatar :user="$auth.user()" :size="20" style="vertical-align: middle;"></user-avatar>
+                            {{ $auth.user().name }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdown">
                             <router-link :to="{name: 'userprofile'}" class="dropdown-item">
