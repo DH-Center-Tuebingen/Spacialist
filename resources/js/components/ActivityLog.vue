@@ -37,8 +37,8 @@
                 <tbody>
                     <tr v-for="act in sortedActivity" :key="act.id">
                         <td v-if="!hideUser">{{ act.causer.name }}</td>
-                        <td>
-                            <span v-if="actionIcons == 'only'" v-html="getIcon(act.description)">
+                        <td :class="actionIcons == 'only' ? 'text-center align-middle' : ''">
+                            <span v-if="actionIcons == 'only'" v-html="getIcon(act.description)" data-toggle="popover" :data-content="act.description" data-trigger="hover" data-placement="right">
                             </span>
                             <span v-else-if="actionIcons == 'both'" v-html="getIcon(act.description, true)">
                             </span>
@@ -48,7 +48,7 @@
                         </td>
                         <td v-html="getName(act)"></td>
                         <td>
-                            {{ act.properties.attributes.updated_at | date('DD.MM.YYYY HH:mm', true, true) }}
+                            {{ act.updated_at | date('DD.MM.YYYY HH:mm:ss', true, true) }}
                         </td>
                         <td>
                             {{ act.properties }}
@@ -117,20 +117,44 @@
             fetchData($state) {
                 if(this.disableFetching) return;
                 this.$emit('fetch-data');
+                this.$nextTick(_ => {
+                    $('[data-toggle="popover"]').popover()
+                });
             },
             getName(a) {
                 let name = '';
-                if(a.subject) {
-                    name =  a.subject.name;
-                } else if(a.properties.attributes.name) {
-                    name = a.properties.attributes.name;
-                } else {
-                    name = `<span class="font-italic">Deleted Model</span>`;
+                switch(a.subject_type) {
+                    case 'App\\Entity':
+                        name =  `<i class="fas fa-fw fa-monument text-primary"></i>`;
+                        break;
+                    case 'App\\File':
+                        name =  `<i class="fas fa-fw fa-file text-primary"></i>`;
+                        break;
+                    case 'App\\Geodata':
+                        name =  `<i class="fas fa-fw fa-map-marker-alt text-primary"></i>`;
+                        break;
+                    default:
+                        name = '';
+                        break;
                 }
-                let type = a.subject_type;
-                type = type.substring(type.lastIndexOf('\\') + 1);
-                let id = a.subject_id;
-                name += ` (${type} #${id})`;
+                name += ' ';
+                if(a.subject) {
+                    switch(a.subject_type) {
+                        case 'App\\Geodata':
+                            name += `Geodata #${a.subject.id}`;
+                            break;
+                        default:
+                            name +=  a.subject.name;
+                            break;
+                    }
+                } else if(a.properties.attributes.name) {
+                    name += a.properties.attributes.name;
+                } else {
+                    let type = a.subject_type;
+                    type = type.substring(type.lastIndexOf('\\') + 1);
+                    let id = a.subject_id;
+                    name += `<span class="font-italic" data-toggle="popover" data-content="${type} #${id}" data-trigger="hover" data-placement="bottom">Deleted Element</span>`;
+                }
 
                 return name;
             },

@@ -7,6 +7,7 @@
             <div class="flex-grow-1 overflow-hidden">
                 <activity-log
                     class="h-100 overflow-hidden"
+                    action-icons="only"
                     :activity="filteredActivity"
                     :disable-fetching="fetchingDisabled"
                     :hide-user="false"

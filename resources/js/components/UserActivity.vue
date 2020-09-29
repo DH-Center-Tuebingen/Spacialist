@@ -1,14 +1,20 @@
 <template>
-    <div>
-        <h3>
-            {{ $tc('main.activity.title_user', 2) }}
-        </h3>
-        <activity-log
-            :activity="userActivity"
-            :hide-user="true"
-            :show-filter="true"
-            @filter-updated="handleFilterChange">
-        </activity-log>
+    <div class="row d-flex flex-row overflow-hidden h-100" v-can="'view_users'">
+        <div class="col-md-12 h-100 d-flex flex-column">
+            <h3>
+                {{ $tc('main.activity.title_user', 2) }}
+            </h3>
+            <div class="flex-grow-1 overflow-hidden">
+                <activity-log
+                    class="h-100 overflow-hidden"
+                    action-icons="only"
+                    :activity="userActivity"
+                    :hide-user="true"
+                    :show-filter="true"
+                    @filter-updated="handleFilterChange">
+                </activity-log>
+            </div>
+        </div>
     </div>
 </template>
 
