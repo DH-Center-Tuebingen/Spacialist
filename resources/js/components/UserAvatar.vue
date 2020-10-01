@@ -1,6 +1,6 @@
 <template>
     <span style="display: inline-flex;">
-        <img v-if="user.avatar" :src="user.avatar_url" alt="user avatar" :width="`${size}px`" :height="`${size}px`" :class="styles" />
+        <img v-if="user.avatar" :src="user.avatar_url" alt="user avatar" :width="`${size}px`" :height="`${size}px`" :class="styles" class="object-fit-cover" />
         <div v-else :style="initialsStyles.container" :class="styles" class="d-flex justify-content-center align-items-center">
             <span :style="initialsStyles.text">
                 {{ initials }}
