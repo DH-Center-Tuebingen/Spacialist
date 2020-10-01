@@ -48,7 +48,7 @@
                 </span>
                 -
                 <i class="fas fa-fw fa-user-edit"></i>
-                <a href="#" @click.prevent="$showUserInfo(selectedEntity.user)" class="font-weight-medium">
+                <a href="#" @click.prevent="$showUserInfo(selectedEntity.user)" class="font-weight-medium text-dark">
                     {{ selectedEntity.user.name }}
                     <user-avatar :user="selectedEntity.user" :size="20" style="vertical-align: middle;"></user-avatar>
                 </a>
