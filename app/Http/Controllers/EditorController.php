@@ -246,7 +246,7 @@ class EditorController extends Controller {
             ], 403);
         }
         $this->validate($request, [
-            'concept_url' => 'required|url|exists:th_concept',
+            'concept_url' => 'required|exists:th_concept',
             'is_root' => 'required|boolean_string',
             'geomtype' => 'required|geometry'
         ]);
