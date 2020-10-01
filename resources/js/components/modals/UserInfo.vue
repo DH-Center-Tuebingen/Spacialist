@@ -13,12 +13,12 @@
         <div class="modal-body">
             <div class="text-center">
                 <user-avatar :user="user" :size="128"></user-avatar>
-                <h6 class="font-weight-normal text-muted mb-0 mt-2">
-                    {{ user.nickname }}
-                </h6>
-                <h3>
+                <h3 class="mb-0 mt-2">
                     {{ user.name }}
                 </h3>
+                <h6 class="font-weight-normal text-muted">
+                    {{ user.nickname }}
+                </h6>
                 <dl class="row">
                     <dt class="col-md-6">
                         {{ $t('global.user.member_since') }}
