@@ -19,7 +19,7 @@ class UsersTableSeeder extends Seeder
                 'name' => 'Admin',
                 'nickname' => 'admin',
                 'email' => 'admin@localhost',
-                'phonenumber' => '+49 1234 12345',
+                'phonenumber' => null,
                 'password' => '$2y$10$GTwOUwcsqgqL/J/0dxxkIenBLR3Pna9ZfIa7sVyPkJgQDwqLU0wqa',
                 'remember_token' => NULL,
                 'created_at' => '2017-12-20 09:47:36',

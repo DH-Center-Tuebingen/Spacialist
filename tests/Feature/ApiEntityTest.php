@@ -69,7 +69,7 @@ class ApiEntityTest extends TestCase
                 'name' => "Admin",
                 'nickname' => "admin",
                 'email' => "admin@localhost",
-                'phonenumber' => "+49 1234 12345",
+                'phonenumber' => null,
                 'created_at' => "2017-12-20 09:47:36",
                 'updated_at' => "2017-12-20 09:47:36",
                 'avatar' => null,
