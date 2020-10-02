@@ -31,7 +31,7 @@ class ActivityController extends Controller
         }
 
         try {
-            $actUser = $user->id == $id ? $user : User::firstOrFail($id);
+            $actUser = $user->id == $id ? $user : User::findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This user does not exist')
@@ -61,7 +61,7 @@ class ActivityController extends Controller
         $this->validate($request, [
             'users' => 'array',
             'timespan' => 'array',
-            'model' => 'text',
+            'model' => 'string',
         ]);
 
         $query = Activity::with(['causer', 'subject'])
