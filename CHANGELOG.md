@@ -1,7 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.7.7 (Unreleased)
+## 0.7.8 (Unreleased)
+### Added
+- Show info after file upload is finished
+
+## 0.7.7
 ### Added
 - Caching attribute data in GIS layer styles
 - Chart overlays to GIS layer styling

@@ -196,6 +196,19 @@
                     </div>
             </file-upload>
             <div v-show="!uploadFiles.length" class="mt-2">
+                <div class="alert alert-info alert-dismissible fade show" v-if="successfulFileUpload" role="alert">
+                    <h5>
+                        {{
+                            $tc('plugins.files.upload.finish.title', successfulFileUpload.files + successfulFileUpload.errors, {files: successfulFileUpload.files + successfulFileUpload.errors})
+                        }}
+                    </h5>
+                    {{
+                        $tc('plugins.files.upload.finish.msg', successfulFileUpload.errors, {files: successfulFileUpload.errors})
+                    }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 <form role="form">
                     <div class="form-group row">
                         <label class="col-form-label col-md-3" for="upload-property-copyright">
@@ -1064,6 +1077,9 @@
                     this.getNextFiles(id);
                 }
             },
+            closeSuccessfulFileUploadInfo() {
+                Vue.set(this, 'successfulFileUpload', null);
+            },
             isAction(id) {
                 return this.selectedTopAction == id;
             },
@@ -1071,6 +1087,9 @@
                 this.$refs.upload.remove(file);
             },
             inputFile(newFile, oldFile) {
+                if(newFile && oldFile && newFile.active !== oldFile.active) {
+                    Vue.set(this, 'successfulFileUpload', null);
+                }
                 // Wait for response
                 if(newFile && oldFile && newFile.success && !oldFile.success) {
                     this.filesUploaded++;
@@ -1084,11 +1103,15 @@
                         this.$refs.upload.active = true
                     }
                 }
-                if(this.filesUploaded + this.filesErrored == this.uploadFiles.length) {
+                if(this.uploadFiles.length > 0 && this.filesUploaded + this.filesErrored == this.uploadFiles.length) {
                     if(this.filesUploaded > 0) {
                         this.onFilesUploaded(this.unlinkedFiles);
                         this.onFilesUploaded(this.allFiles);
                     }
+                    Vue.set(this, 'successfulFileUpload', {
+                        files: this.filesUploaded,
+                        errors: this.filesErrored,
+                    });
                     this.filesUploaded = 0;
                     this.filesErrored = 0;
                     this.uploadFiles = [];
@@ -1439,6 +1462,7 @@
                     date: ''
                 },
                 selectedTopAction: 'unlinkedFiles',
+                successfulFileUpload: null,
                 uploadFiles: [],
                 toUpload: {
                     tags: [],
