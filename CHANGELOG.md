@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Show info after file upload is finished
 - Make links in lists accessible
+### Fixed
+- Position of long entity names in link tab (file viewer)
+- Error when parts of Exif data is not available
 
 ## 0.7.7
 ### Added

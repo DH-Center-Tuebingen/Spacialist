@@ -503,9 +503,10 @@
                             <div class="d-flex flex-column h-100 mx-4">
                                 <div class="my-3 col p-0 scroll-y-auto">
                                     <ul class="list-group mx-0" v-if="selectedFile.entities && selectedFile.entities.length">
-                                        <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.entities">
-                                            <a href="#" @click.prevent="routeToEntity(link)">
-                                                <i class="fas fa-fw fa-monument"></i> {{ link.name }}
+                                        <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.entities" :key="link.id">
+                                            <a href="#" @click.prevent="routeToEntity(link)" class="text-left">
+                                                <i class="fas fa-fw fa-monument"></i>
+                                                <span>{{ link.name }}</span>
                                             </a>
                                             <a href="#" class="text-body" @click.prevent="requestUnlinkFile(selectedFile, link)">
                                                 <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
@@ -548,7 +549,7 @@
                                             {{ selectedFile.exif.Model }}
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <i class="far fa-fw fa-circle"></i>
                                         </td>
@@ -556,20 +557,20 @@
                                             {{ selectedFile.exif.Exif.FNumber }}
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <i class="fas fa-fw fa-circle"></i>
                                         </td>
                                         <td>
                                             <span>
-                                                {{ selectedFile.exif.Exif.FocalLength }} <span v-if="selectedFile.exif.MakMakerNotes">({{    selectedFile.exif.MakerNotes.LensModel }})</span>
+                                                {{ selectedFile.exif.Exif.FocalLength }} <span v-if="selectedFile.exif.MakMakerNotes">({{ selectedFile.exif.MakerNotes.LensModel }})</span>
                                             </span>
                                             <span v-if="selectedFile.exif.MakerNotes" style="display: block;font-size: 90%;color: gray;">
                                                 {{     selectedFile.exif.MakerNotes.LensType }}
                                             </span>
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <i class="fas fa-fw fa-stopwatch"></i>
                                         </td>
@@ -577,7 +578,7 @@
                                             {{ selectedFile.exif.Exif.ExposureTime }}
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <i class="fas fa-fw fa-plus"></i>
                                         </td>
@@ -585,7 +586,7 @@
                                             {{ selectedFile.exif.Exif.ISOSpeedRatings }}
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <!-- EXIF.Flash is hex, trailing 0 means no flash -->
                                             <i class="fas fa-fw fa-bolt"></i>
@@ -594,7 +595,7 @@
                                             {{ selectedFile.exif.Exif.Flash }}
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <i class="fas fa-fw fa-clock"></i>
                                         </td>
@@ -1377,6 +1378,7 @@
             showFileModal(file) {
                 this.selectedFile.editing = false;
                 this.selectedFile = { ...this.selectedFile, ...file };
+                console.log(this.selectedFile);
                 switch(file.category) {
                     case 'image':
                         this.fileCategoryComponent = 'file-image';
