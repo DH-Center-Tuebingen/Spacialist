@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## 0.7.8 (Unreleased)
 ### Added
 - Show info after file upload is finished
+- Make links in lists accessible
 
 ## 0.7.7
 ### Added
