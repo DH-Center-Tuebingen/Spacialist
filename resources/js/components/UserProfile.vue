@@ -40,9 +40,6 @@
                         </label>
                         <input type="text" class="form-control" id="profile-user-info-nickname" v-model="localUser.nickname" />
                     </div>
-                    <button type="submit" class="btn btn-outline-success">
-                        {{ $t('global.save') }}
-                    </button>
                 </div>
                 <div class="col-6">
                     <h4>
@@ -58,8 +55,19 @@
                         <label class="font-weight-bold" for="profile-user-contact-phonenumber">
                             <i class="fas fa-fw fa-mobile-alt"></i> {{ $t('global.phonenumber') }}:
                         </label>
-                        <input type="tel" class="form-control" id="profile-user-contact-phonenumber" v-model="localUser.phonenumber" />
+                        <input type="tel" class="form-control" id="profile-user-contact-phonenumber" v-model="localUser.metadata.phonenumber" />
                     </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold" for="profile-user-contact-orcid">
+                            <i class="fab fa-fw fa-orcid"></i> {{ $t('global.orcid') }}:
+                        </label>
+                        <input type="text" class="form-control" id="profile-user-contact-orcid" v-model="localUser.metadata.orcid" />
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-outline-success w-100">
+                        {{ $t('global.save') }}
+                    </button>
                 </div>
             </form>
         </div>
@@ -81,13 +89,36 @@
                 if(this.localUser.email !== '' && this.localUser.email != this.user.email) {
                     data.email = this.localUser.email;
                 }
-                if(this.localUser.phonenumber !== '' && this.localUser.phonenumber != this.user.phonenumber) {
-                    data.phonenumber = this.localUser.phonenumber;
+                if(this.localUser.metadata.phonenumber != this.user.metadata.phonenumber) {
+                    data.phonenumber = this.localUser.metadata.phonenumber;
+                }
+                if(this.localUser.metadata.orcid != this.user.metadata.orcid) {
+                    data.orcid = this.localUser.metadata.orcid;
                 }
 
                 this.$http.patch(`user/${this.user.id}`, data).then(response => {
                     this.updateUserObjects(response.data);
                 });
+            },
+            validateOrcid(oid) {
+                if(oid === '') {
+                    return false;
+                }
+                if(/^\d{15}[0-9Xx]$/.test(oid)) {
+                    //
+                } else if(/^\d{4}-\d{4}-\d{4}-\d{3}[0-9Xx]$/.test(oid)) {
+                    oid = oid.replaceAll('-', '');
+                } else {
+                    return false;
+                }
+                let tot = 0;
+                for(let i=0; i<oid.length-1; i++) {
+                    let val = Number.parseInt(oid[i]);
+                    tot = (tot+val) * 2;
+                }
+                let chk = (12 - (tot % 11)) % 11;
+                if(chk == 10) chk = 'X';
+                return oid[oid.length-1].toUpperCase() == chk;
             },
             deleteAvatar() {
                 this.$http.delete(`user/${this.user.id}/avatar`).then(response => {
@@ -102,12 +133,11 @@
                     ...this.$auth.user(),
                     ...data
                 });
-                this.localUser = {
-                    ...this.$auth.user()
-                };
-                this.avatarUser = {
-                    ...this.$auth.user()
-                };
+                this.$auth.user(
+                    this.appliedMetadata(this.$auth.user())
+                );
+                this.localUser = this.appliedMetadata(this.$auth.user());
+                this.avatarUser = this.appliedMetadata(this.$auth.user());
             },
             uploadFile(file, component) {
                 let formData = new FormData();
@@ -128,22 +158,22 @@
                     }
                 }
             },
+            appliedMetadata(u) {
+                const nu = _cloneDeep(u)
+                return u.metadata ? nu : {...nu, ...{metadata: {}}};
+            }
         },
         data() {
             return {
-                localUser: {
-                    ...this.$auth.user()
-                },
-                avatarUser: {
-                    ...this.$auth.user()
-                },
+                localUser: this.appliedMetadata(this.$auth.user()),
+                avatarUser: this.appliedMetadata(this.$auth.user()),
                 fileQueue: [],
             }
         },
         computed: {
             user() {
                 return this.$auth.user();
-            }
+            },
         }
     }
 </script>

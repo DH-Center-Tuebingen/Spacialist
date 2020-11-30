@@ -5,6 +5,7 @@ import {
     faGithub,
     faHtml5,
     faLaravel,
+    faOrcid,
     faVuejs
 } from '@fortawesome/free-brands-svg-icons';
 import {
@@ -129,9 +130,11 @@ import {
     faUnlink,
     faUnlockAlt,
     faUser,
+    faUserCheck,
     faUserCog,
     faUserEdit,
     faUsers,
+    faUserTimes,
     faVolumeMute,
     faVolumeUp
 } from '@fortawesome/free-solid-svg-icons';
@@ -250,6 +253,7 @@ library.add(
     faMicrochip,
     faMobileAlt,
     faMonument,
+    faOrcid,
     faPalette,
     faPaperPlane,
     faPause,
@@ -296,8 +300,10 @@ library.add(
     faUnlink,
     faUnlockAlt,
     faUser,
+    faUserCheck,
     faUserCog,
     faUserEdit,
+    faUserTimes,
     faUsers,
     faVolumeMute,
     faVolumeUp
@@ -329,6 +335,7 @@ require('popper.js');
 require('bootstrap');
 window.Vue = require('vue');
 window._clone = require('lodash/clone');
+window._cloneDeep = require('lodash/cloneDeep');
 window._orderBy = require('lodash/orderBy');
 window._debounce = require('lodash/debounce');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');

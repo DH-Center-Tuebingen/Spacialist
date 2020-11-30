@@ -2,6 +2,8 @@ const de = {
     global: {
         save: 'Speichern',
         delete: 'Löschen',
+        deactivate: 'Deaktivieren',
+        reactivate: 'Reaktivieren',
         remove: 'Entfernen',
         cancel: 'Abbrechen',
         close: 'Schließen',
@@ -20,6 +22,11 @@ const de = {
         'delete-name': {
             title: '{name} löschen',
             desc: 'Willst du {name} wirklich löschen?'
+        },
+        'deactivate-name': {
+            title: '{name} deaktivieren',
+            desc: 'Willst du {name} wirklich deaktivieren?',
+            info: 'Gewisse Einträge können nur/erst deaktiviert werden, da es sonst zu unvorhergesehenem Datenverlust kommen kann.'
         },
         'edit-name': {
             title: '{name} editieren'
@@ -138,12 +145,15 @@ const de = {
         phonenumber: 'Telefonnummer',
         password: 'Passwort',
         'remember-me': 'Eingeloggt bleiben',
+        'orcid': 'ORCID',
         description: 'Beschreibung',
         roles: 'Rollen',
         permissions: 'Berechtigungen',
         'added-at': 'Hinzugefügt',
         'created-at': 'Erstellt',
         'updated-at': 'Aktualisert',
+        'deleted-at': 'Gelöscht',
+        'deactivated-at': 'Deaktiviert',
         options: 'Optionen',
         type: 'Typ',
         'root-attribute': 'Eltern-Attribut',
@@ -252,6 +262,9 @@ const de = {
         },
         user: {
             'add-button': 'Neuen Benutzer hinzufügen',
+            active_users: 'Aktive Benutzer',
+            deactivated_users: 'Deaktivierte Benutzer',
+            empty_list: 'Benutzerliste ist leer',
             toasts: {
                 updated: {
                     title: 'Benutzer aktualisiert',

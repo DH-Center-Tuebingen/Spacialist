@@ -45,11 +45,13 @@ class UserController extends Controller
                 'error' => __('You do not have the permission to view users')
             ], 403);
         }
-        $users = User::with('roles')->orderBy('id')->get();
+        $users = User::withoutTrashed()->with('roles')->orderBy('id')->get();
+        $delUsers = User::onlyTrashed()->with('roles')->orderBy('id')->get();
         $roles = Role::orderBy('id')->get();
 
         return response()->json([
             'users' => $users,
+            'deleted_users' => $delUsers,
             'roles' => $roles
         ]);
     }
@@ -190,7 +192,8 @@ class UserController extends Controller
             'email' => 'email',
             'name' => 'string|max:255',
             'nickname' => 'alpha_dash|max:255|unique:users,nickname',
-            'phonenumber' => 'string|max:255',
+            'phonenumber' => 'nullable|string|max:255',
+            'orcid' => 'nullable|orcid',
         ]);
 
         if(!$this->hasInput($request)) {
@@ -238,14 +241,37 @@ class UserController extends Controller
             $user->save();
         }
         if($request->has('phonenumber')) {
-            $user->phonenumber = $request->get('phonenumber');
-            $user->save();
+            $user->setMetadata(['phonenumber' => $request->get('phonenumber')]);
+        }
+        if($request->has('orcid')) {
+            $user->setMetadata(['orcid' => $request->get('orcid')]);
         }
 
         // return user without roles relation
         $user->unsetRelation('roles');
 
         return response()->json($user);
+    }
+
+    public function restoreUser($id)
+    {
+        $user = auth()->user();
+        if (!$user->can('delete_users')) {
+            return response()->json([
+                'error' => __('You do not have the permission to delete users')
+            ], 403);
+        }
+
+        try {
+            $delUser = User::onlyTrashed()->findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This user does not exist')
+            ], 400);
+        }
+
+        $delUser->restore();
+        return response()->json(null, 204);
     }
 
     public function patchRole(Request $request, $id) {
@@ -313,7 +339,7 @@ class UserController extends Controller
         }
 
         $delUser->delete();
-        return response()->json(null, 204);
+        return response()->json($delUser, 200);
     }
 
     public function deleteRole($id) {

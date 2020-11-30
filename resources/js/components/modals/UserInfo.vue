@@ -27,6 +27,10 @@
                         <span id="user-member-since" data-toggle="tooltip" :title="user.created_at" data-trigger="hover" data-placement="bottom">
                             {{ user.created_at | date('DD.MM.YYYY', true, true) }}
                         </span>
+                        <br/>
+                        <span v-if="isDeactivated" class="small text-muted">
+                            <span class="font-weight-bold">deactivated</span> since {{ user.deleted_at | date('DD.MM.YYYY', true, true) }}
+                        </span>
                     </dd>
                     <dt class="col-md-6">
                         {{ $t('global.email') }}
@@ -36,12 +40,20 @@
                             {{ user.email }}
                         </a>
                     </dd>
-                    <dt class="col-md-6">
+                    <dt class="col-md-6" v-if="user.metadata.phonenumber">
                         {{ $t('global.phonenumber') }}
                     </dt>
-                    <dd class="col-md-6">
-                        <a :href="`tel:${user.phonenumber}`">
-                            {{ user.phonenumber }}
+                    <dd class="col-md-6" v-if="user.metadata.phonenumber">
+                        <a :href="`tel:${user.metadata.phonenumber}`">
+                            {{ user.metadata.phonenumber }}
+                        </a>
+                    </dd>
+                    <dt class="col-md-6" v-if="user.metadata.orcid">
+                        {{ $t('global.orcid') }}
+                    </dt>
+                    <dd class="col-md-6" v-if="user.metadata.orcid">
+                        <a :href="`https://orcid.org/${user.metadata.orcid}`" target="_blank">
+                            {{ user.metadata.orcid }}
                         </a>
                     </dd>
                 </dl>
@@ -76,5 +88,10 @@
             return {
             }
         },
+        computed: {
+            isDeactivated() {
+                return !!this.user.deleted_at;
+            }
+        }
     }
 </script>

@@ -2,6 +2,8 @@ const en = {
     global: {
         save: 'Save',
         delete: 'Delete',
+        deactivate: 'Deactivate',
+        reactivate: 'Reactivate',
         remove: 'Remove',
         cancel: 'Cancel',
         close: 'Close',
@@ -20,6 +22,11 @@ const en = {
         'delete-name': {
             title: 'Delete {name}',
             desc: 'Do you really want to delete {name}?'
+        },
+        'deactivate-name': {
+            title: 'Deactivate {name}',
+            desc: 'Do you really want to deactivate {name}?',
+            info: 'Certain entries can not be deleted or have to be deactivated first. Otherwise deleting these entries could lead to data loss.'
         },
         'edit-name': {
             title: 'Edit {name}'
@@ -138,12 +145,15 @@ const en = {
         phonenumber: 'Phone number',
         password: 'Password',
         'remember-me': 'Remember me',
+        'orcid': 'ORCID',
         description: 'Description',
         roles: 'Roles',
         permissions: 'Permissions',
         'added-at': 'Added',
         'created-at': 'Created',
         'updated-at': 'Updated',
+        'deleted-at': 'Deleted',
+        'deactivated-at': 'Deactivated',
         options: 'Options',
         type: 'Type',
         'root-attribute': 'Parent-Attribute',
@@ -252,6 +262,9 @@ const en = {
         },
         user: {
             'add-button': 'Add new User',
+            active_users: 'Active Users',
+            deactivated_users: 'Deactivated Users',
+            empty_list: 'User-list is empty',
             toasts: {
                 updated: {
                     title: 'User updated',

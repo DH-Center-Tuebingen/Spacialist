@@ -31,7 +31,8 @@ class AddUserProfile extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->text('avatar')->nullable();
-            $table->text('phonenumber')->nullable();
+            $table->jsonb('metadata')->nullable();
+            $table->softDeletes();
         });
 
         foreach($this->withLasteditor as $le) {
@@ -72,7 +73,8 @@ class AddUserProfile extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('avatar');
-            $table->dropColumn('phonenumber');
+            $table->dropColumn('metadata');
+            $table->dropSoftDeletes();
         });
 
         foreach($this->withLasteditor as $le) {
