@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Support to extend all data with a comment section
 ### Changed
+- Switch from momentjs to dayjs for dates
 - Replaced certainty description with new comment section
 
 ## 0.7.4
