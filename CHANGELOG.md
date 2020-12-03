@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 ## 0.8 - Helgö (Unreleased)
+### Added
+### Fixed
+### Changed
+- Switch from momentjs to dayjs for dates
 
 ## 0.7.4
 ### Added
