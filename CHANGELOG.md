@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - User profile to allow users to edit their information
   - Support for phone numbers and avatars
+### Fixed
+### Changed
+- Switch from momentjs to dayjs for dates
 
 ## 0.7.4
 ### Added

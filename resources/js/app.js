@@ -164,7 +164,7 @@ const DataModel = () => import(/* webpackChunkName: "group-bib" */ './components
 const DataModelDetailView = () => import(/* webpackChunkName: "group-bib" */ './components/DataModelDetailView.vue')
 
 import VueUploadComponent from 'vue-upload-component';
-import moment from 'moment';
+import * as dayjs from 'dayjs';
 import DatePicker from 'vue2-datepicker';
 import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
@@ -678,25 +678,25 @@ Vue.component('error-modal', ErrorModal);
 // Filter
 Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm', useLocale = false, isDateString) {
     if(value) {
-        let mom;
+        let d;
         if(isDateString) {
-            mom = moment(value);
+            d = dayjs(value);
         } else {
-            mom = moment.unix(Number(value));
+            d = dayjs.unix(value);
         }
         if(!useLocale) {
-            mom = mom.utc();
+            d = d.utc();
         }
-        return mom.format(format);
+        return d.format(format);
     }
 });
 Vue.filter('datestring', function(value, useLocale = true) {
     if(value) {
-        let mom = moment.unix(Number(value));
+        const d = dayjs.unix(value);
         if(useLocale) {
-            return mom.toLocaleString();
+            return d.toLocaleString();
         }
-        return mom.utc().toString();
+        return d.utc().toString();
     }
 });
 Vue.filter('numPlus', function(value, length = 2) {
