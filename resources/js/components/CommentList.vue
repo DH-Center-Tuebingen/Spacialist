@@ -22,8 +22,8 @@
                             </span>
                             &bull;
                         </template>
-                        <span class="text-muted font-weight-light">
-                            {{ comment.updated_at }}
+                        <span class="text-muted font-weight-light" :title="comment.updated_at | datestring">
+                            {{ comment.updated_at | ago }}
                         </span>
                         <span class="dropdown">
                             <span :id="`edit-comment-dropdown-${comment.id}`" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

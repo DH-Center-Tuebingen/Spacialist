@@ -11,6 +11,7 @@ class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use HasRoles;
+    use Notifiable;
     // use Authenticatable;
 
     protected $guard_name = 'web';

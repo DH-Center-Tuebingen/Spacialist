@@ -56,24 +56,33 @@ Vue.prototype.$can = function(permissionString, oneOf) {
     }
 }
 
+Vue.prototype.$isLoggedIn = function() {
+    return this.$auth.check();
+};
+
+Vue.prototype.$userNotifications = function() {
+    return this.$isLoggedIn() ? this.$auth.user().notifications : [];
+};
+
 Vue.prototype.$updateLanguage = function() {
-    if(Vue.prototype.$auth.check()) {
+    if(this.$isLoggedIn()) {
         Vue.i18n.locale = this.$getPreference('prefs.gui-language');
     }
 };
 
 Vue.prototype.$userId = function() {
-    if(Vue.prototype.$auth.check()) {
-        return Vue.prototype.$auth.user().id;
+    if(this.$isLoggedIn()) {
+        return this.$auth.user().id;
     } else {
         return -1;
     }
 };
 
 Vue.prototype.$getUser = function(value, attr = 'id') {
-    if(Vue.prototype.$auth.check()) {
-        const lValue = value.toLowerCase();
-        return this.$root.$data.users.find(u => u[attr].toLowerCase() == lValue);
+    if(this.$isLoggedIn()) {
+        const isNum = !isNaN(value);
+        const lValue = isNum ? value : value.toLowerCase();
+        return this.$root.$data.users.find(u => isNum ? (u[attr] == lValue) : (u[attr].toLowerCase() == lValue));
     } else {
         return null;
     }

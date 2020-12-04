@@ -20,6 +20,7 @@ import {
     faAngleRight,
     faAngleUp,
     faBan,
+    faBell,
     faBinoculars,
     faBolt,
     faBook,
@@ -155,6 +156,7 @@ import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
 import Preferences from './components/Preferences.vue';
 import UserPreferences from './components/UserPreferences.vue';
+import UserNotifications from './components/UserNotifications.vue';
 const DataModel = () => import(/* webpackChunkName: "group-bib" */ './components/DataModel.vue')
 const DataModelDetailView = () => import(/* webpackChunkName: "group-bib" */ './components/DataModelDetailView.vue')
 
@@ -184,6 +186,7 @@ library.add(
     faAngleRight,
     faAngleUp,
     faBan,
+    faBell,
     faBinoculars,
     faBolt,
     faBook,
@@ -330,6 +333,11 @@ window._orderBy = require('lodash/orderBy');
 window._debounce = require('lodash/debounce');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
 require('./globals.js');
+
+let relativeTime = require('dayjs/plugin/relativeTime');
+let utc = require('dayjs/plugin/utc')
+dayjs.extend(relativeTime);
+dayjs.extend(utc);
 
 // Create Axios instance for external (API) calls
 Vue.prototype.$externalHttp = Axios.create({
@@ -543,6 +551,14 @@ const router = new VueRouter({
                 auth: true
             }
         },
+        {
+            path: '/notifications/:id',
+            name: 'notifications',
+            component: UserNotifications,
+            meta: {
+                auth: true
+            }
+        },
     ]
 });
 // Workaround to load plugin pages, whose routes
@@ -658,27 +674,32 @@ Vue.component('about-dialog', AboutDialog);
 Vue.component('error-modal', ErrorModal);
 
 // Filter
-Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm', useLocale = false, isDateString) {
+Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm') {
     if(value) {
         let d;
-        if(isDateString) {
-            d = dayjs(value);
+        if(isNaN(value)) {
+            d = dayjs.utc(value);
         } else {
-            d = dayjs.unix(value);
-        }
-        if(!useLocale) {
-            d = d.utc();
+            d = dayjs.utc(value*1000);
         }
         return d.format(format);
     }
 });
-Vue.filter('datestring', function(value, useLocale = true) {
+Vue.filter('datestring', function(value) {
     if(value) {
-        const d = dayjs.unix(value);
-        if(useLocale) {
-            return d.toLocaleString();
+        const d = isNaN(value) ? dayjs.utc(value) : dayjs.utc(value*1000);
+        return d.toDate().toString();
+    }
+});
+Vue.filter('ago', function(value) {
+    if(value) {
+        let d;
+        if(isNaN(value)) {
+            d = dayjs.utc(value);
+        } else {
+            d = dayjs.utc(value*1000);
         }
-        return d.utc().toString();
+        return d.fromNow();
     }
 });
 Vue.filter('numPlus', function(value, length = 2) {

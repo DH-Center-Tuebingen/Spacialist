@@ -114,6 +114,14 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');
 });
 
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/notification')->group(function() {
+    Route::patch('/read/{id}', 'NotificationController@markNotificationAsRead');
+    Route::patch('/read/all', 'NotificationController@markAllNotificationAsRead');
+
+    Route::delete('/{id}', 'NotificationController@deleteNotification');
+    Route::delete('/', 'NotificationController@deleteNotifications');
+});
+
 // PREFERENCES
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/preference')->group(function() {
     Route::get('', 'PreferenceController@getPreferences');

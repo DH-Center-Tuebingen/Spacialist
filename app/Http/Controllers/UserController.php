@@ -27,7 +27,7 @@ class UserController extends Controller
     }
 
     public function getUser(Request $request) {
-        $user = User::find(auth()->user()->id);
+        $user = User::with('notifications')->find(auth()->user()->id);
         $user->setPermissions();
 
         return response()->json([

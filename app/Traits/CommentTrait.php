@@ -3,6 +3,9 @@
 namespace App\Traits;
 
 use App\Comment;
+use App\Notifications\CommentPosted;
+use App\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 trait CommentTrait
@@ -23,6 +26,22 @@ trait CommentTrait
             $comment->save();
         } else {
             $this->comments()->save($comment);
+        }
+
+        $oldComments = Comment::where('commentable_id', $comment->commentable_id)
+            ->where('commentable_type', $comment->commentable_type)
+            ->whereHas('author', function(Builder $query) use($user) {
+                $query->where('id', '<>', $user->id);
+                // $query->whereNull('deleted_at');
+            })
+            ->select('user_id')
+            ->groupBy('user_id')
+            ->get();
+        
+        foreach($oldComments as $c) {
+            $notifUser = User::find($c->user_id);
+
+            $notifUser->notify(new CommentPosted($comment));
         }
 
         $comment->load('author');
