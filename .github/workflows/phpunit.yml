@@ -1,0 +1,57 @@
+name: PhpUnit
+
+on: ["push", "pull_request"]
+
+jobs:
+  laravel-tests:
+
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['7.3', '7.4', '8.0']
+        pg-gis-combo: ['9.6-2.5-alpine', '9.6-3.0-alpine', '12-2.5-alpine', '12-3.0-alpine', '13-3.0-alpine']
+        databases: ['pgsql']
+    
+    name: phpunit-php${{matrix.php-versions}}-${{matrix.databases}}-postgis${{matrix.pg-gis-combo}}
+    
+    services:
+      postgres:
+        image: postgis/postgis:${{matrix.pg-gis-combo}}
+        ports:
+          - 5432:5432/tcp
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_DB: spacialist_tests
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install required packages
+      run: |
+        sudo add-apt-repository ppa:ubuntugis/ppa
+        sudo apt update
+        sudo apt -y install gdal-bin
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.travis', '.env');"
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+    - name: Generate key
+      run: |
+        php artisan key:generate
+        php artisan jwt:secret
+        php artisan migrate
+        php artisan db:seed --class=DemoSeeder
+    - name: Directory Permissions
+      run: chmod -R 777 storage bootstrap/cache
+    - name: Setup Log Directory
+      run: mkdir -p build/logs
+    - name: Execute tests (Unit and Feature tests) via PHPUnit
+      run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+    - uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./build/logs/clover.xml
+        name: spacialist-php${{matrix.php-versions}}-${{matrix.databases}}-postgis${{matrix.pg-gis-combo}}
+        verbose: true

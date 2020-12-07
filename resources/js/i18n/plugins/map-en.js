@@ -152,7 +152,30 @@ const en = {
                         apply: 'Apply Labels'
                     },
                     diagrams: {
-                        title: 'Diagrams'
+                        title: 'Diagrams',
+                        apply: 'Show diagrams',
+                        missing_sql_data: 'You have to fetch data for an sql attribute first.',
+                        fetch_sql_data: 'Fetch SQL-Data',
+                        data: {
+                            title: 'Data',
+                            order: 'Values',
+                            order_row: 'Row (with specified columns)',
+                            order_columns: 'One column',
+                            columns: 'Columns',
+                            min_n_values: 'Minimum value per dataset',
+                            last_n_elements: 'Maximum of values shown',
+                        },
+                        properties: {
+                            title: 'Properties',
+                            radius: 'Radius/Size',
+                            type: 'Type of diagram',
+                            type_pie: 'Pie',
+                            type_pie3d: 'Pie 3D',
+                            type_donut: 'Donut',
+                            type_bar: 'Bar',
+                            stroke_color: 'Stroke color',
+                            stroke_width: 'Stroke width',
+                        },
                     }
                 },
                 menu: {

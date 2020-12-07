@@ -31,6 +31,7 @@ import {
     faCaretDown,
     faCaretUp,
     faChartBar,
+    faChartPie,
     faCheck,
     faCheckCircle,
     faCircle,
@@ -141,6 +142,10 @@ import {
 import VModal from 'vue-js-modal';
 import Axios from 'axios';
 import VueRouter from 'vue-router';
+import auth from '@websanova/vue-auth';
+import authBearer from '@websanova/vue-auth/drivers/auth/bearer.js';
+import authHttp from './queued-axios-1.x-driver.js';
+import authRouter  from '@websanova/vue-auth/drivers/router/vue-router.2.x.js';
 
 import VueI18n from 'vue-i18n';
 import en from './i18n/en';
@@ -199,6 +204,7 @@ library.add(
     faCaretDown,
     faCaretUp,
     faChartBar,
+    faChartPie,
     faCheck,
     faCheckCircle,
     faCircle,
@@ -618,10 +624,10 @@ const i18n = new VueI18n({
 });
 Vue.i18n = i18n;
 
-Vue.use(require('@websanova/vue-auth'), {
-   auth: require('@websanova/vue-auth/drivers/auth/bearer.js'),
-   http: require('./queued-axios-1.x-driver.js'),
-   router: require('@websanova/vue-auth/drivers/router/vue-router.2.x.js'),
+Vue.use(auth, {
+   auth: authBearer,
+   http: authHttp,
+   router: authRouter,
    forbiddenRedirect: {
        name: 'home'
    },
@@ -741,26 +747,47 @@ Vue.filter('time', function(value, withHours) {
 Vue.filter('length', function(value, precision = 2, isArea = false) {
     if(!value) return value;
 
-    const units = isArea ? ['㎟', '㎠', '㎡', '㎢'] : ['mm', 'cm', 'm', 'km'];
     const length = parseFloat(value);
 
-    let unitIndex;
     if(!isFinite(value) || isNaN(length)) {
-        unitIndex = 0;
-    } else {
-        if(length < 10) {
-            unitIndex = 0;
-        } else if(length < 1000) {
-            unitIndex = 1;
-        } else if(length < 1000000) {
-            unitIndex = 2;
+        return length;
+    }
+    let unit;
+    let factor;
+    if(isArea) {
+        if(length < 0.00001) {
+            unit = 'mm²';
+            factor = 100000;
+        } else if(length < 0.01) {
+            unit = 'cm²';
+            factor = 10000;
+        } else if(length < 100) {
+            unit = 'm²';
+            factor = 1;
+        } else if(length < 100000) {
+            unit = 'ha';
+            factor = 0.0001;
         } else {
-            unitIndex = 3;
+            unit = 'km²';
+            factor = 0.000001;
+        }
+    } else {
+        if(length < 0.01) {
+            unit = 'mm';
+            factor = 1000;
+        } else if(length < 1) {
+            unit = 'cm';
+            factor = 100;
+        } else if(length < 1000) {
+            unit = 'm';
+            factor = 1;
+        } else {
+            unit = 'km';
+            factor = 0.001;
         }
     }
 
-    const unit = units[unitIndex];
-    const sizeInUnit = length / Math.pow(1000, unitIndex);
+    const sizeInUnit = length * factor;
     return sizeInUnit.toFixed(precision) +  ' ' + unit;
 });
 Vue.filter('bytes', function(value, precision = 2) {
@@ -837,7 +864,7 @@ const app = new Vue({
                 // Check if user is logged in and set preferred language
                 // instead of browser default
                 if(!app.$auth.ready()) {
-                    app.$auth.ready(_ => {
+                    app.$auth.load().then(_ => {
                         app.$updateLanguage();
                     });
                 } else {

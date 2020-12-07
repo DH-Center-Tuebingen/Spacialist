@@ -9,6 +9,7 @@ use App\EntityAttribute;
 use App\EntityType;
 use App\EntityTypeRelation;
 use App\ThConcept;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -55,7 +56,7 @@ class EntityController extends Controller {
         return response()->json($entity);
     }
 
-    public function getDataForEntityType($ctid, $aid) {
+    public function getDataForEntityType(Request $request, $ctid, $aid) {
         $user = auth()->user();
         if(!$user->can('view_concepts')) {
             return response()->json([
@@ -76,9 +77,20 @@ class EntityController extends Controller {
                 'error' => __('This attribute does not exist')
             ], 400);
         }
-        $entities = Entity::where('entity_type_id', $ctid)->get();
+        $constraints = $request->query();
+        $entities = Entity::where('entity_type_id', $ctid);
+        foreach($constraints as $relatiion => $cons) {
+            if($cons == 'has') {
+                $entities->whereHas($relatiion);
+            } else if($cons == 'hasnot') {
+                $entities->whereDoesntHave($relatiion);
+            }
+        }
+        $entities = $entities->get();
         $entityIds = $entities->pluck('id')->toArray();
-        $values = AttributeValue::with(['attribute'])
+        $values = AttributeValue::whereHas('attribute', function(Builder $q) {
+                $q->where('datatype', '!=', 'sql');
+            })
             ->whereIn('entity_id', $entityIds)
             ->where('attribute_id', $aid)
             ->get();
@@ -87,12 +99,63 @@ class EntityController extends Controller {
             switch($value->attribute->datatype) {
                 case 'entity':
                     $value->name = Entity::find($value->entity_val)->name;
+                    $value->value = Entity::find($value->entity_val)->name;
                     break;
                 default:
+                    $value->value = $value->getValue();
                     break;
             }
-            $value->value = $value->getValue();
             $data[$value->entity_id] = $value;
+        }
+
+        $sqls = EntityAttribute::whereHas('attribute', function(Builder $q) {
+                $q->where('datatype', 'sql');
+            })
+            ->where('entity_type_id', $ctid)
+            ->where('attribute_id', $aid)
+            ->get();
+
+        foreach($sqls as $sql) {
+            // if entity_id is referenced several times
+            // add an incrementing counter, so the
+            // references are unique (required by PDO)
+            $cnt = substr_count($sql->attribute->text, ':entity_id');
+            if($cnt > 1) {
+                $i = 0;
+                $text = preg_replace_callback('/:entity_id/', function($matches) use (&$i) {
+                    return $matches[0].'_'.$i++;
+                }, $sql->attribute->text);
+            } else {
+                $text = $sql->attribute->text;
+            }
+            foreach($entityIds as $eid) {
+                $safes = [];
+                if($cnt > 1) {
+                    for($i=0; $i<$cnt; $i++) {
+                        $safes[':entity_id_'.$i] = $eid;
+                    }
+                } else {
+                    $safes = [
+                        ':entity_id' => $eid
+                    ];
+                }
+                $sqlValue = \DB::select($text, $safes);
+                // Check if only one result exists
+                if(count($sqlValue) === 1) {
+                    // Get all column indices (keys) using the first row
+                    $valueKeys = array_keys(get_object_vars($sqlValue[0]));
+                    // Check if also only one key/column exists
+                    if(count($valueKeys) === 1) {
+                        // If only one row and one column exist,
+                        // return plain value instead of array
+                        $firstKey = $valueKeys[0];
+                        $sqlValue = $sqlValue[0]->{$firstKey};
+                    }
+                }
+                $data[$eid] = [
+                    'value' => $sqlValue
+                ];
+            }
         }
 
         return response()->json($data);
@@ -120,12 +183,16 @@ class EntityController extends Controller {
                     'error' => __('This attribute does not exist')
                 ], 400);
             }
-            $attributes = AttributeValue::with(['attribute'])
+            $attributes = AttributeValue::whereHas('attribute', function(Builder $q) {
+                    $q->where('datatype', '!=', 'sql');
+                })
                 ->where('entity_id', $id)
                 ->where('attribute_id', $aid)
                 ->get();
         } else {
-            $attributes = AttributeValue::with(['attribute'])
+            $attributes = AttributeValue::whereHas('attribute', function(Builder $q) {
+                    $q->where('datatype', '!=', 'sql');
+                })
                 ->where('entity_id', $id)
                 ->get();
         }
@@ -147,15 +214,20 @@ class EntityController extends Controller {
             $data[$a->attribute_id] = $a;
         }
 
-        $sqls = EntityAttribute::join('attributes', 'attributes.id', '=', 'attribute_id')
-            ->where('entity_type_id', $entity->entity_type_id)
-            ->where('datatype', 'sql')
-            ->get();
+        $sqls = EntityAttribute::whereHas('attribute', function(Builder $q) {
+                $q->where('datatype', 'sql');
+            })
+            ->where('entity_type_id', $entity->entity_type_id);
+        if(isset($aid)) {
+            $sqls->where('attribute_id', $aid);
+        }
+        $sqls = $sqls->get();
+
         foreach($sqls as $sql) {
             // if entity_id is referenced several times
             // add an incrementing counter, so the
             // references are unique (required by PDO)
-            $cnt = substr_count($sql->text, ':entity_id');
+            $cnt = substr_count($sql->attribute->text, ':entity_id');
             if($cnt > 1) {
                 $safes = [];
                 for($i=0; $i<$cnt; $i++) {
@@ -164,14 +236,13 @@ class EntityController extends Controller {
                 $i = 0;
                 $text = preg_replace_callback('/:entity_id/', function($matches) use (&$i) {
                     return $matches[0].'_'.$i++;
-                }, $sql->text);
+                }, $sql->attribute->text);
             } else {
-                $text = $sql->text;
+                $text = $sql->attribute->text;
                 $safes = [
                     ':entity_id' => $id
                 ];
             }
-            $raw = \DB::raw($text);
             $sqlValue = \DB::select($text, $safes);
             // Check if only one result exists
             if(count($sqlValue) === 1) {
@@ -271,9 +342,7 @@ class EntityController extends Controller {
                         ['attribute_id', '=', $aid]
                     ])->first();
                     $attrval->delete();
-                    // also break outer foreach, no further action required
-                    // for deleted attribute values
-                    break 2;
+                    break;
                 case 'add':
                     $value = $patch['value'];
                     $attrval = new AttributeValue();
@@ -292,6 +361,10 @@ class EntityController extends Controller {
                         'error' => __('Unknown operation')
                     ], 400);
             }
+
+            // no further action required for deleted attribute values, continue with next patch
+            if($op == 'remove') continue;
+
             switch($attr->datatype) {
                 // for primitive types: just save them to the db
                 case 'stringf':
@@ -332,10 +405,19 @@ class EntityController extends Controller {
                 case 'table':
                     // check for invalid time spans
                     if($attr->datatype == 'epoch' || $attr->datatype == 'timeperiod') {
-                        $sl = strtoupper($value['startLabel']);
-                        $el = strtoupper($value['endLabel']);
+                        $sl = isset($value['startLabel']) ? strtoupper($value['startLabel']) : null;
+                        $el = isset($value['endLabel']) ? strtoupper($value['endLabel']) : null;
                         $s = $value['start'];
                         $e = $value['end'];
+                        if(
+                            (isset($s) && !isset($sl))
+                            ||
+                            (isset($e) && !isset($el))
+                        ) {
+                            return response()->json([
+                                'error' => __('You have to specify if your date is BC or AD.')
+                            ], 422);
+                        }
                         if(
                             ($sl == 'AD' && $el == 'BC')
                             ||

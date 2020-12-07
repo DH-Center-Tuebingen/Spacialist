@@ -544,8 +544,6 @@ class File extends Model
                     $newFolder->uncompressedSize = 0;
                     $newFolder->modificationTime = 0;
                     $newFolder->isCompressed = false;
-                    $newFolder->filename = $currentFolderString;
-                    $newFolder->mtime = 0;
                     $newFolder->cleanFilename = $pf;
                     $currentFolder->children[] = $newFolder;
                     $index = count($currentFolder->children) - 1;

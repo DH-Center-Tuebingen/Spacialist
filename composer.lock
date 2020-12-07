@@ -67,16 +67,16 @@
         },
         {
             "name": "caouecs/laravel-lang",
-            "version": "4.0.11",
+            "version": "5.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/caouecs/lang.git",
-                "reference": "134e1cbf9be14d97fc7937d7df784eae2d4bfa3c"
+                "reference": "96d7868069de7823a680710cc09d51fed24a5dbd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/caouecs/lang/zipball/134e1cbf9be14d97fc7937d7df784eae2d4bfa3c",
-                "reference": "134e1cbf9be14d97fc7937d7df784eae2d4bfa3c",
+                "url": "https://api.github.com/repos/caouecs/lang/zipball/96d7868069de7823a680710cc09d51fed24a5dbd",
+                "reference": "96d7868069de7823a680710cc09d51fed24a5dbd",
                 "shasum": ""
             },
             "require": {
@@ -107,10 +107,10 @@
                 "lpm"
             ],
             "support": {
-                "source": "https://github.com/caouecs/lang/tree/4.0.11"
+                "source": "https://github.com/caouecs/lang/tree/5.0.0"
             },
             "abandoned": "https://github.com/Laravel-Lang/lang",
-            "time": "2020-03-17T15:24:26+00:00"
+            "time": "2020-03-17T15:25:41+00:00"
         },
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -6056,16 +6056,16 @@
         },
         {
             "name": "wapmorgan/unified-archive",
-            "version": "0.1.3",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wapmorgan/UnifiedArchive.git",
-                "reference": "748303c5387c3fe211112ccc61ae79109e8ccc0b"
+                "reference": "7d3623fba223f690da42d3d6b18335eaa926f743"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wapmorgan/UnifiedArchive/zipball/748303c5387c3fe211112ccc61ae79109e8ccc0b",
-                "reference": "748303c5387c3fe211112ccc61ae79109e8ccc0b",
+                "url": "https://api.github.com/repos/wapmorgan/UnifiedArchive/zipball/7d3623fba223f690da42d3d6b18335eaa926f743",
+                "reference": "7d3623fba223f690da42d3d6b18335eaa926f743",
                 "shasum": ""
             },
             "require": {
@@ -6147,9 +6147,9 @@
             ],
             "support": {
                 "issues": "https://github.com/wapmorgan/UnifiedArchive/issues",
-                "source": "https://github.com/wapmorgan/UnifiedArchive/tree/0.1.x"
+                "source": "https://github.com/wapmorgan/UnifiedArchive/tree/1.0.1"
             },
-            "time": "2020-01-13T00:24:26+00:00"
+            "time": "2020-11-28T13:04:06+00:00"
         },
         {
             "name": "zendframework/zend-escaper",

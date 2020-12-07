@@ -187,12 +187,29 @@
                         options.attribute_id = this.selectedAttribute.id;
                     }
                 }
-                if(this.onUpdate) {
-                    this.onUpdate(this.layer, {
-                        type: 'styling',
-                        data: options
-                    });
+
+                if(this.cachedData[this.cacheKey]) {
+                    options.data = this.cachedData[this.cacheKey];
+                    if(this.onUpdate) {
+                        this.onUpdate(this.layer, {
+                            type: 'styling',
+                            data: options
+                        });
+                    }
+                } else {
+                    $httpQueue.add(() => $http.get(`entity/entity_type/${this.layer.entity_type_id}/data/${this.selectedAttribute.attribute_id}`).then(response => {
+                        this.cachedData[this.cacheKey] = response.data;
+                        options.data = this.cachedData[this.cacheKey];
+
+                        if(this.onUpdate) {
+                            this.onUpdate(this.layer, {
+                                type: 'styling',
+                                data: options
+                            });
+                        }
+                    }));
                 }
+
                 let name;
                 if(this.layer.entity_type) {
                     name = this.$translateConcept(this.layer.entity_type.thesaurus_url)
@@ -220,6 +237,7 @@
         },
         data() {
             return {
+                cachedData: {},
                 initFinished: false,
                 styles: [
                     {
@@ -281,6 +299,9 @@
             }
         },
         computed: {
+            cacheKey() {
+                return `${this.layer.id}_${this.selectedAttribute.attribute_id}`;
+            },
             attributeList() {
                 switch(this.selectedStyle.id) {
                     case 'categorized':

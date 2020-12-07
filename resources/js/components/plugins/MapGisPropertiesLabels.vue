@@ -24,11 +24,11 @@
                                 track-by="id"
                                 v-model="selectedAttribute"
                                 :allowEmpty="true"
-                                :closeOnSelect="true"
+                                :closeOnSelect="false"
                                 :customLabel="translateLabel"
                                 :disabled="useEntityName"
-                                :hideSelected="false"
-                                :multiple="false"
+                                :hideSelected="true"
+                                :multiple="true"
                                 :options="attributes"
                                 :placeholder="$t('global.select.placehoder')"
                                 :select-label="$t('global.select.select')"
@@ -361,21 +361,57 @@
                     }
                     let callback;
                     if(this.selectedAttribute && this.isEntityLayer) {
-                        const id = this.layer.entity_type_id;
-                        const aid = this.selectedAttribute.attribute_id;
-                        $httpQueue.add(() => $http.get(`entity/entity_type/${id}/data/${aid}`).then(response => {
+                        if(this.cachedData[this.cacheKey]) {
                             options.getText = feature => {
                                 const eid = feature.get('entity').id;
-                                const data = response.data[eid];
-                                return data ? data.value : '';
+                                const data = this.cachedData[this.cacheKey][eid];
+                                return data || '';
                             };
+
                             if(this.onUpdate) {
                                 this.onUpdate(this.layer, {
                                     type: 'labeling',
                                     data: options
                                 });
                             }
-                        }));
+                        } else {
+                            const id = this.layer.entity_type_id;
+                            (async _ => {
+                                for(let i=0; i<this.selectedAttribute.length; i++) {
+                                    const aid = this.selectedAttribute[i].attribute_id;
+                                    await $httpQueue.add(() => $http.get(`entity/entity_type/${id}/data/${aid}?geodata=has`).then(response => {
+                                        if(!this.cachedData[this.cacheKey]) {
+                                            let data = {};
+                                            for(let k in response.data) {
+                                                data[k] = response.data[k].value;
+                                            }
+                                            this.cachedData[this.cacheKey] = data;
+                                        } else {
+                                            for(let k in response.data) {
+                                                if(!this.cachedData[this.cacheKey][k]) {
+                                                    this.cachedData[this.cacheKey][k] = response.data[k].value;
+                                                } else {
+                                                    this.cachedData[this.cacheKey][k] += `, ${response.data[k].value}`;
+                                                }
+                                            }
+                                        }
+                                    }));
+                                }
+
+                                options.getText = feature => {
+                                    const eid = feature.get('entity').id;
+                                    const data = this.cachedData[this.cacheKey][eid];
+                                    return data || '';
+                                };
+
+                                if(this.onUpdate) {
+                                    this.onUpdate(this.layer, {
+                                        type: 'labeling',
+                                        data: options
+                                    });
+                                }
+                            })();
+                        }
                     } else if(this.useEntityName) {
                         options.getText = feature => {
                             return feature.get('entity').name;
@@ -425,6 +461,7 @@
         },
         data() {
             return {
+                cachedData: {},
                 useEntityName: false,
                 selectedAttribute: null,
                 label: 'Text',
@@ -559,6 +596,14 @@
                     ],
                     placement: {}
                 }
+            }
+        },
+        computed: {
+            cacheKey() {
+                const ids = this.selectedAttribute.reduce((acc, curr) => {
+                    return acc += `_${curr.attribute_id}`;
+                }, '')
+                return `${this.layer.id}_${ids}`;
             }
         }
     }

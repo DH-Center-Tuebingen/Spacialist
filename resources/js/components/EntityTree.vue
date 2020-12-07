@@ -481,28 +481,36 @@
                 //TODO check if it works with tree-vue-component
                 const item = dropData.sourceData;
                 const target = dropData.targetData;
-                const vm = this;
-                const dragEntityType = vm.$getEntityType(item.entity_type_id);
+                const dragEntityType = this.$getEntityType(item.entity_type_id);
 
                 if(target.parentIds.indexOf(item.id) != -1 ||
                    (target.state.dropPosition == DropPosition.inside && target.id == item.root_entity_id)) {
                     return false;
                 }
 
+                let realTarget;
+                if(this.droppedToRootLevel(target, dropData.targetPath)) {
+                    realTarget = null;
+                } else if(target.state.dropPosition == DropPosition.inside) {
+                    realTarget = target;
+                } else {
+                    realTarget = treeUtility.getNodeFromPath(this.tree, dropData.targetPath.slice(0, -1));
+                }
+
                 // If currently dragged element is not allowed as root
                 // and dragged on element is a root element (no parent)
                 // do not allow drop
-                if(!dragEntityType.is_root && dropData.targetPath.length == 1) {
+                if(!dragEntityType.is_root && !realTarget) {
                     return false;
                 }
 
                 // Check if currently dragged entity type is allowed
                 // as subtype of current drop target
                 let index;
-                if(dropData.targetPath.length == 1) {
-                    index = Object.values(vm.$getEntityTypes()).findIndex(et => et.is_root && et.id == dragEntityType.id);
+                if(!realTarget) {
+                    index = Object.values(this.$getEntityTypes()).findIndex(et => et.is_root && et.id == dragEntityType.id);
                 } else {
-                    index = vm.$getEntityType(target.entity_type_id).sub_entity_types.findIndex(et => et.id == dragEntityType.id);
+                    index = this.$getEntityType(realTarget.entity_type_id).sub_entity_types.findIndex(et => et.id == dragEntityType.id);
                 }
                 if(index == -1) {
                     return false;
@@ -510,6 +518,9 @@
 
                 // In any other cases allow drop
                 return true;
+            },
+            droppedToRootLevel(tgt, tgtPath) {
+                return tgt.state.dropPosition != DropPosition.inside && tgtPath.length == 1;
             },
             onSearchMultiSelect(items) {
                 this.resetHighlighting();
