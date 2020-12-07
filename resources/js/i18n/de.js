@@ -85,8 +85,10 @@ const de = {
             logout: 'Ausloggen',
             info_title: 'Benutzerinformationen',
             member_since: 'Mitglied seit',
+            deactivated_since: '<span class="font-weight-bold">Deaktiviert</span> seit {dt}',
             contact: 'Kontakt',
             avatar: 'Avatar',
+            invalid_orcid: 'Die eigegebene ORCID ist ungültig',
         },
         select: {
             placehoder: 'Option auswählen',

@@ -85,8 +85,10 @@ const en = {
             logout: 'Logout',
             info_title: 'User Information',
             member_since: 'Member since',
+            deactivated_since: '<span class="font-weight-bold">deactivated</span> since {dt}',
             contact: 'Contact',
             avatar: 'Avatar',
+            invalid_orcid: 'This ORCID is invalid',
         },
         select: {
             placehoder: 'Select option',

@@ -347,6 +347,9 @@ window._debounce = require('lodash/debounce');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
 require('./globals.js');
 
+let utc = require('dayjs/plugin/utc')
+dayjs.extend(utc);
+
 // Create Axios instance for external (API) calls
 Vue.prototype.$externalHttp = Axios.create({
   headers: {

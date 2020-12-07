@@ -1,9 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-3">
-            <h4>
-                {{ $t('global.user.avatar') }}
-            </h4>
+        <div class="col-3 mt-2 border-right">
             <file-upload
                 accept="image/*"
                 class="w-100"
@@ -61,7 +58,10 @@
                         <label class="font-weight-bold" for="profile-user-contact-orcid">
                             <i class="fab fa-fw fa-orcid"></i> {{ $t('global.orcid') }}:
                         </label>
-                        <input type="text" class="form-control" id="profile-user-contact-orcid" v-model="localUser.metadata.orcid" />
+                        <input type="text" class="form-control" :class="{'is-invalid': invalidOrcid}" id="profile-user-contact-orcid" v-model="localUser.metadata.orcid" />
+                        <div v-if="invalidOrcid" class="invalid-feedback">
+                            {{ $t('global.user.invalid_orcid') }}
+                        </div>
                     </div>
                 </div>
                 <div class="col-12">
@@ -92,9 +92,16 @@
                 if(this.localUser.metadata.phonenumber != this.user.metadata.phonenumber) {
                     data.phonenumber = this.localUser.metadata.phonenumber;
                 }
-                if(this.localUser.metadata.orcid != this.user.metadata.orcid) {
+                if(this.localUser.metadata.orcid != this.user.metadata.orcid && (!this.localUser.metadata.orcid || this.validateOrcid(this.localUser.metadata.orcid))) {
                     data.orcid = this.localUser.metadata.orcid;
+                    this.invalidOrcid = false;
+                } else if(this.localUser.metadata.orcid && !this.validateOrcid(this.localUser.metadata.orcid)) {
+                    this.invalidOrcid = true;
+                    return;
                 }
+
+                // No changes, no update
+                if(Object.keys(data).length === 0) return;
 
                 this.$http.patch(`user/${this.user.id}`, data).then(response => {
                     this.updateUserObjects(response.data);
@@ -168,11 +175,12 @@
                 localUser: this.appliedMetadata(this.$auth.user()),
                 avatarUser: this.appliedMetadata(this.$auth.user()),
                 fileQueue: [],
+                invalidOrcid: false,
             }
         },
         computed: {
             user() {
-                return this.$auth.user();
+                return this.appliedMetadata(this.$auth.user());
             },
         }
     }

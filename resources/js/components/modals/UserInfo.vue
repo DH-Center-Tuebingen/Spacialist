@@ -24,12 +24,11 @@
                         {{ $t('global.user.member_since') }}
                     </dt>
                     <dd class="col-md-6">
-                        <span id="user-member-since" data-toggle="tooltip" :title="user.created_at" data-trigger="hover" data-placement="bottom">
+                        <span id="user-member-since" :title="user.created_at">
                             {{ user.created_at | date('DD.MM.YYYY', true, true) }}
                         </span>
                         <br/>
-                        <span v-if="isDeactivated" class="small text-muted">
-                            <span class="font-weight-bold">deactivated</span> since {{ user.deleted_at | date('DD.MM.YYYY', true, true) }}
+                        <span v-if="isDeactivated" class="small text-muted bg-warning rounded px-2 py-1" :title="user.deleted_at" v-html="$t('global.user.deactivated_since', {dt: parsedDate(user.deleted_at)})">
                         </span>
                     </dd>
                     <dt class="col-md-6">
@@ -40,18 +39,18 @@
                             {{ user.email }}
                         </a>
                     </dd>
-                    <dt class="col-md-6" v-if="user.metadata.phonenumber">
+                    <dt class="col-md-6" v-if="hasPhone">
                         {{ $t('global.phonenumber') }}
                     </dt>
-                    <dd class="col-md-6" v-if="user.metadata.phonenumber">
+                    <dd class="col-md-6" v-if="hasPhone">
                         <a :href="`tel:${user.metadata.phonenumber}`">
                             {{ user.metadata.phonenumber }}
                         </a>
                     </dd>
-                    <dt class="col-md-6" v-if="user.metadata.orcid">
+                    <dt class="col-md-6" v-if="hasOrcid">
                         {{ $t('global.orcid') }}
                     </dt>
-                    <dd class="col-md-6" v-if="user.metadata.orcid">
+                    <dd class="col-md-6" v-if="hasOrcid">
                         <a :href="`https://orcid.org/${user.metadata.orcid}`" target="_blank">
                             {{ user.metadata.orcid }}
                         </a>
@@ -83,6 +82,9 @@
             });
         },
         methods: {
+            parsedDate(d) {
+                return Vue.filter('date')(d, 'DD.MM.YYYY', true, true);
+            }
         },
         data() {
             return {
@@ -91,6 +93,15 @@
         computed: {
             isDeactivated() {
                 return !!this.user.deleted_at;
+            },
+            hasMetadata() {
+                return !!this.user.metadata;
+            },
+            hasPhone() {
+                return this.hasMetadata && !!this.user.metadata.phonenumber;
+            },
+            hasOrcid() {
+                return this.hasMetadata && !!this.user.metadata.orcid;
             }
         }
     }

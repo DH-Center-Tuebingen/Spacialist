@@ -43,12 +43,12 @@
                 }}
             </div>
             <div>
+                <i class="fas fa-fw fa-user-edit"></i>
                 <span>
                     {{ (selectedEntity.updated_at || selectedEntity.created_at) | date(undefined, true, true) }}
                 </span>
                 -
-                <i class="fas fa-fw fa-user-edit"></i>
-                <a href="#" @click.prevent="$showUserInfo(selectedEntity.user)" class="font-weight-medium text-dark">
+                <a href="#" @click.prevent="$showUserInfo(selectedEntity.user)" class="font-weight-medium">
                     {{ selectedEntity.user.name }}
                     <user-avatar :user="selectedEntity.user" :size="20" style="vertical-align: middle;"></user-avatar>
                 </a>
