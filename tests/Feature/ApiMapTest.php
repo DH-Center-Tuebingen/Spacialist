@@ -394,9 +394,9 @@ class ApiMapTest extends TestCase
         $header = $rows[0];
         $data = str_getcsv($rows[1]);
         $this->assertEquals('X,Y,Z,id,color,lasteditor,created_at,updated_at', $header);
-        $this->assertEquals(3493381.810734, round(floatval($data[0]), 6));
-        $this->assertEquals(5378579.860542, round(floatval($data[1]), 6));
-        $this->assertEquals(-52.268126, round(floatval($data[2]), 6));
+        $this->assertEqualsWithDelta(3493381.810734, round(floatval($data[0]), 6), 0.001);
+        $this->assertEqualsWithDelta(5378579.860542, round(floatval($data[1]), 6), 0.001);
+        $this->assertEqualsWithDelta(-52.268126, round(floatval($data[2]), 6), 0.001);
         $this->assertEquals('6', $data[3]);
         $this->assertEquals('', $data[4]);
         $this->assertEquals('Admin', $data[5]);
