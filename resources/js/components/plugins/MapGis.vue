@@ -42,6 +42,7 @@
                 :layers="mergedLayers"
                 :layer-labels="labels"
                 :layer-styles="styles"
+                :layer-charts="charts"
                 :zoom-to="zoomLayerId">
             </ol-map>
         </div>
@@ -166,6 +167,14 @@
                         }
                         Vue.set(this, 'styles', {...this.tmpStyles});
                         break;
+                    case 'charts':
+                        if(!Object.keys(options.data).length) {
+                            delete this.tmpCharts[layer.id];
+                        } else {
+                            this.tmpCharts[layer.id] = options.data;
+                        }
+                        Vue.set(this, 'charts', {...this.tmpCharts});
+                        break;
                 }
             },
             addLayerToSelection(layer) {
@@ -188,6 +197,7 @@
                 Vue.delete(this.layerGeometries, layer.id);
                 delete this.tmpLabels[layer.id];
                 delete this.tmpStyles[layer.id];
+                delete this.tmpCharts[layer.id];
             },
             getProperties(geodata) {
                 return {
@@ -217,6 +227,8 @@
                 tmpLabels: {},
                 styles: {},
                 tmpStyles: {},
+                charts: {},
+                tmpCharts: {},
                 zoomLayerId: 0,
                 importModalId: 'map-gis-import-modal',
                 propertiesModalId: 'map-gis-properties-modal',
