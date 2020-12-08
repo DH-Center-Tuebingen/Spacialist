@@ -43,7 +43,7 @@ class Bibliography extends Model
         'school',
         'series',
         'citekey',
-        'lasteditor'
+        'user_id'
     ];
 
     protected $searchable = [
@@ -115,7 +115,7 @@ class Bibliography extends Model
         }
 
         $this->citekey = self::computeCitationKey($this->toArray());
-        $this->lasteditor = $user->name;
+        $this->user_id = $user->id;
         $this->save();
     }
 
@@ -153,6 +153,10 @@ class Bibliography extends Model
             $key = $initalKey . $suffixes[$i++];
         }
         return $key;
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function entities() {

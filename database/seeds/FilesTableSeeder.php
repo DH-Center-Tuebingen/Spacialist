@@ -12,6 +12,7 @@ class FilesTableSeeder extends Seeder
      */
     public function run()
     {
+        $user = \App\User::orderBy('id')->first();
         \DB::table('files')->insert(array (
             0 =>
             array (
@@ -24,7 +25,7 @@ class FilesTableSeeder extends Seeder
                 'copyright' => NULL,
                 'description' => NULL,
                 'mime_type' => 'text/plain',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'created_at' => '2019-03-08 13:13:11',
                 'updated_at' => '2019-03-08 13:13:11',
             ),
@@ -39,7 +40,7 @@ class FilesTableSeeder extends Seeder
                 'copyright' => NULL,
                 'description' => NULL,
                 'mime_type' => 'text/plain',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'created_at' => '2019-03-08 13:13:11',
                 'updated_at' => '2019-03-08 13:13:11',
             ),
@@ -54,7 +55,7 @@ class FilesTableSeeder extends Seeder
                 'copyright' => NULL,
                 'description' => NULL,
                 'mime_type' => 'text/plain',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'created_at' => '2019-03-08 13:13:11',
                 'updated_at' => '2019-03-08 13:13:11',
             ),
@@ -69,7 +70,7 @@ class FilesTableSeeder extends Seeder
                 'copyright' => NULL,
                 'description' => NULL,
                 'mime_type' => 'image/png',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'created_at' => '2019-03-08 13:13:11',
                 'updated_at' => '2019-03-08 13:13:11',
             ),
@@ -84,7 +85,7 @@ class FilesTableSeeder extends Seeder
                 'copyright' => 'Vinzenz Rosenkranz (CC BY-NC-SA 2.0)',
                 'description' => 'Edinburgh Castle',
                 'mime_type' => 'image/jpeg',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'created_at' => '2019-03-08 13:13:11',
                 'updated_at' => '2019-03-08 13:13:12',
             ),
@@ -99,7 +100,7 @@ class FilesTableSeeder extends Seeder
                 'copyright' => NULL,
                 'description' => NULL,
                 'mime_type' => 'application/zip',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'created_at' => '2019-03-08 13:13:10',
                 'updated_at' => '2019-03-08 13:13:10',
             ),
@@ -114,7 +115,7 @@ class FilesTableSeeder extends Seeder
                 'copyright' => NULL,
                 'description' => NULL,
                 'mime_type' => 'application/octet-stream',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'created_at' => '2019-03-08 13:13:11',
                 'updated_at' => '2019-03-08 13:13:11',
             ),

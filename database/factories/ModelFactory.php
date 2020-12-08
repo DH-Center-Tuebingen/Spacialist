@@ -47,10 +47,14 @@ $factory->define(App\User::class, function (Faker $faker) {
 });
 
 $factory->define(App\ThConcept::class, function(Faker $faker) {
+    $user = App\User::inRandomOrder()->first();
+    if(!isset($user)){
+        $user = factory(App\User::class)->create();
+    }
     return [
         'concept_url' => $faker->unique()->url,
         'concept_scheme' => '',
-        'lasteditor' => $faker->name,
+        'user_id' => $user->id,
     ];
 });
 
@@ -71,11 +75,15 @@ $factory->define(App\ThBroader::class, function(Faker $faker) {
 
 $factory->define(App\ThConceptLabel::class, function(Faker $faker) {
     $language = App\ThLanguage::first();
+    $user = App\User::inRandomOrder()->first();
+    if(!isset($user)){
+        $user = factory(App\User::class)->create();
+    }
     if(!isset($language)){
         $de = new App\ThLanguage;
-        $de->lasteditor     = 'postgres';
-        $de->display_name   = 'Deutsch';
-        $de->short_name     = 'de';
+        $de->user_id = $user->id;
+        $de->display_name = 'Deutsch';
+        $de->short_name = 'de';
         $de->save();
         $language = $de;
     }
@@ -90,7 +98,7 @@ $factory->define(App\ThConceptLabel::class, function(Faker $faker) {
         'language_id' => $language->id,
         'label' => $faker->word,
         'concept_label_type' => 1,
-        'lasteditor' => $faker->name
+        'user_id' => $user->id
     ];
 });
 

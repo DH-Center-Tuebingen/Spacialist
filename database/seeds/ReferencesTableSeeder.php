@@ -12,6 +12,7 @@ class ReferencesTableSeeder extends Seeder
      */
     public function run()
     {
+        $user = \App\User::orderBy('id')->first();
         \DB::table('references')->insert(array (
             0 =>
             array (
@@ -20,7 +21,7 @@ class ReferencesTableSeeder extends Seeder
                 'attribute_id' => 15,
                 'bibliography_id' => 1318,
                 'description' => 'See Page 10',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'created_at' => '2019-03-08 13:36:36',
                 'updated_at' => '2019-03-08 13:36:36',
             ),
@@ -31,7 +32,7 @@ class ReferencesTableSeeder extends Seeder
                 'attribute_id' => 15,
                 'bibliography_id' => 1319,
                 'description' => 'Picture on left side of page 12',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'created_at' => '2019-03-08 13:36:48',
                 'updated_at' => '2019-03-08 13:36:48',
             ),
@@ -42,7 +43,7 @@ class ReferencesTableSeeder extends Seeder
                 'attribute_id' => 13,
                 'bibliography_id' => 1323,
                 'description' => 'Page 10ff is interesting',
-                'lasteditor' => 'Admin',
+                'user_id' => $user->id,
                 'created_at' => '2019-03-08 13:37:09',
                 'updated_at' => '2019-03-08 13:37:09',
             ),

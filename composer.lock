@@ -4,27 +4,27 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "db01e38c1aa7eb50e472d2c65e7dc5eb",
+    "content-hash": "545a0b2d0a7d0696a213c45e62b148eb",
     "packages": [
         {
             "name": "bosnadev/database",
-            "version": "0.21",
+            "version": "0.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bosnadev/database.git",
-                "reference": "e14ddb0044d360a9e8696a0c307adc9b0995fe79"
+                "reference": "bc45d6d93be3029a5d9735e090a58f4e4a380abf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bosnadev/database/zipball/e14ddb0044d360a9e8696a0c307adc9b0995fe79",
-                "reference": "e14ddb0044d360a9e8696a0c307adc9b0995fe79",
+                "url": "https://api.github.com/repos/bosnadev/database/zipball/bc45d6d93be3029a5d9735e090a58f4e4a380abf",
+                "reference": "bc45d6d93be3029a5d9735e090a58f4e4a380abf",
                 "shasum": ""
             },
             "require": {
                 "doctrine/dbal": "^2.5",
-                "illuminate/database": "^5.0|^6.0|^7.0|^8.0",
+                "illuminate/database": "^5.0|^6.0|^7.0",
                 "php": ">=5.5",
-                "ramsey/uuid": "^3.0|^4.0"
+                "ramsey/uuid": "^3.0"
             },
             "require-dev": {
                 "codeclimate/php-test-reporter": "^0.3.2",
@@ -61,9 +61,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bosnadev/database/issues",
-                "source": "https://github.com/bosnadev/database/tree/0.21"
+                "source": "https://github.com/bosnadev/database/tree/master"
             },
-            "time": "2020-10-22T09:08:19+00:00"
+            "time": "2020-03-11T13:24:09+00:00"
         },
         {
             "name": "caouecs/laravel-lang",
@@ -2015,27 +2015,27 @@
         },
         {
             "name": "mstaack/laravel-postgis",
-            "version": "5.2",
+            "version": "5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mstaack/laravel-postgis.git",
-                "reference": "1e9b896d71c2f71bcdd49fc86da30ec31c1857b7"
+                "reference": "a3bb4825245df4997b170a3e01b593909a95db7c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mstaack/laravel-postgis/zipball/1e9b896d71c2f71bcdd49fc86da30ec31c1857b7",
-                "reference": "1e9b896d71c2f71bcdd49fc86da30ec31c1857b7",
+                "url": "https://api.github.com/repos/mstaack/laravel-postgis/zipball/a3bb4825245df4997b170a3e01b593909a95db7c",
+                "reference": "a3bb4825245df4997b170a3e01b593909a95db7c",
                 "shasum": ""
             },
             "require": {
-                "bosnadev/database": "^0.21",
+                "bosnadev/database": "0.20.*",
                 "geo-io/wkb-parser": "^1.0",
-                "illuminate/database": "^6.0|^7.0|^8.0",
+                "illuminate/database": "^6.0|^7.0",
                 "jmikola/geojson": "^1.0",
                 "php": ">=7.1"
             },
             "require-dev": {
-                "illuminate/pagination": "^6.0|^7.0|^8.0",
+                "illuminate/pagination": "^6.0|^7.0",
                 "mockery/mockery": "^1.3",
                 "phpunit/phpunit": "^8.5"
             },
@@ -2073,9 +2073,9 @@
             "description": "Postgis extensions for laravel. Aims to make it easy to work with geometries from laravel models",
             "support": {
                 "issues": "https://github.com/mstaack/laravel-postgis/issues",
-                "source": "https://github.com/mstaack/laravel-postgis/tree/5.2"
+                "source": "https://github.com/mstaack/laravel-postgis/tree/master"
             },
-            "time": "2020-10-22T12:00:14+00:00"
+            "time": "2020-03-11T14:32:16+00:00"
         },
         {
             "name": "myclabs/php-enum",
