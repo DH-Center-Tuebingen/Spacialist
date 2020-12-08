@@ -12,11 +12,12 @@ class ThConceptLabelTableSeeder extends Seeder
      */
     public function run()
     {
+        $user = \App\User::orderBy('id')->first();
         \DB::table('th_concept_label')->insert(array (
             0 =>
             array (
                 'id' => 1,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Fundstelle',
                 'concept_id' => 1,
                 'language_id' => 1,
@@ -27,7 +28,7 @@ class ThConceptLabelTableSeeder extends Seeder
             1 =>
             array (
                 'id' => 2,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Befund',
                 'concept_id' => 2,
                 'language_id' => 1,
@@ -38,7 +39,7 @@ class ThConceptLabelTableSeeder extends Seeder
             2 =>
             array (
                 'id' => 3,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Fundobjekt',
                 'concept_id' => 3,
                 'language_id' => 1,
@@ -49,7 +50,7 @@ class ThConceptLabelTableSeeder extends Seeder
             3 =>
             array (
                 'id' => 9,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Keramik',
                 'concept_id' => 9,
                 'language_id' => 1,
@@ -60,7 +61,7 @@ class ThConceptLabelTableSeeder extends Seeder
             4 =>
             array (
                 'id' => 10,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Stein',
                 'concept_id' => 10,
                 'language_id' => 1,
@@ -71,7 +72,7 @@ class ThConceptLabelTableSeeder extends Seeder
             5 =>
             array (
                 'id' => 11,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Gefäßtyp',
                 'concept_id' => 11,
                 'language_id' => 1,
@@ -82,7 +83,7 @@ class ThConceptLabelTableSeeder extends Seeder
             6 =>
             array (
                 'id' => 12,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Art Fundobjekt',
                 'concept_id' => 12,
                 'language_id' => 1,
@@ -93,7 +94,7 @@ class ThConceptLabelTableSeeder extends Seeder
             7 =>
             array (
                 'id' => 13,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Site',
                 'concept_id' => 1,
                 'language_id' => 2,
@@ -104,7 +105,7 @@ class ThConceptLabelTableSeeder extends Seeder
             8 =>
             array (
                 'id' => 14,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Feature',
                 'concept_id' => 2,
                 'language_id' => 2,
@@ -115,7 +116,7 @@ class ThConceptLabelTableSeeder extends Seeder
             9 =>
             array (
                 'id' => 15,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Find',
                 'concept_id' => 3,
                 'language_id' => 2,
@@ -126,7 +127,7 @@ class ThConceptLabelTableSeeder extends Seeder
             10 =>
             array (
                 'id' => 16,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Pottery',
                 'concept_id' => 9,
                 'language_id' => 2,
@@ -137,7 +138,7 @@ class ThConceptLabelTableSeeder extends Seeder
             11 =>
             array (
                 'id' => 17,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Stone',
                 'concept_id' => 10,
                 'language_id' => 2,
@@ -148,7 +149,7 @@ class ThConceptLabelTableSeeder extends Seeder
             12 =>
             array (
                 'id' => 19,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Eigenschaften',
                 'concept_id' => 13,
                 'language_id' => 1,
@@ -159,7 +160,7 @@ class ThConceptLabelTableSeeder extends Seeder
             13 =>
             array (
                 'id' => 22,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Erhaltung',
                 'concept_id' => 16,
                 'language_id' => 1,
@@ -170,7 +171,7 @@ class ThConceptLabelTableSeeder extends Seeder
             14 =>
             array (
                 'id' => 21,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Formen',
                 'concept_id' => 15,
                 'language_id' => 1,
@@ -181,7 +182,7 @@ class ThConceptLabelTableSeeder extends Seeder
             15 =>
             array (
                 'id' => 23,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Farbe',
                 'concept_id' => 17,
                 'language_id' => 1,
@@ -192,7 +193,7 @@ class ThConceptLabelTableSeeder extends Seeder
             16 =>
             array (
                 'id' => 24,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'rot',
                 'concept_id' => 18,
                 'language_id' => 1,
@@ -203,7 +204,7 @@ class ThConceptLabelTableSeeder extends Seeder
             17 =>
             array (
                 'id' => 25,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'blau',
                 'concept_id' => 19,
                 'language_id' => 1,
@@ -214,7 +215,7 @@ class ThConceptLabelTableSeeder extends Seeder
             18 =>
             array (
                 'id' => 26,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'grün',
                 'concept_id' => 20,
                 'language_id' => 1,
@@ -225,7 +226,7 @@ class ThConceptLabelTableSeeder extends Seeder
             19 =>
             array (
                 'id' => 29,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Gefäßformen',
                 'concept_id' => 23,
                 'language_id' => 1,
@@ -236,7 +237,7 @@ class ThConceptLabelTableSeeder extends Seeder
             20 =>
             array (
                 'id' => 31,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Offene Gefäßform',
                 'concept_id' => 25,
                 'language_id' => 1,
@@ -247,7 +248,7 @@ class ThConceptLabelTableSeeder extends Seeder
             21 =>
             array (
                 'id' => 32,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Geschlossene Gefäßform',
                 'concept_id' => 26,
                 'language_id' => 1,
@@ -258,7 +259,7 @@ class ThConceptLabelTableSeeder extends Seeder
             22 =>
             array (
                 'id' => 33,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Befundform im Profil',
                 'concept_id' => 27,
                 'language_id' => 1,
@@ -269,7 +270,7 @@ class ThConceptLabelTableSeeder extends Seeder
             23 =>
             array (
                 'id' => 30,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Befundformen',
                 'concept_id' => 24,
                 'language_id' => 1,
@@ -280,7 +281,7 @@ class ThConceptLabelTableSeeder extends Seeder
             24 =>
             array (
                 'id' => 34,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Befundform im Planum',
                 'concept_id' => 28,
                 'language_id' => 1,
@@ -291,7 +292,7 @@ class ThConceptLabelTableSeeder extends Seeder
             25 =>
             array (
                 'id' => 35,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Dokumentation und Administration',
                 'concept_id' => 29,
                 'language_id' => 1,
@@ -302,7 +303,7 @@ class ThConceptLabelTableSeeder extends Seeder
             26 =>
             array (
                 'id' => 36,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Aktion',
                 'concept_id' => 30,
                 'language_id' => 1,
@@ -313,7 +314,7 @@ class ThConceptLabelTableSeeder extends Seeder
             27 =>
             array (
                 'id' => 37,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Zeichnung angefertigt',
                 'concept_id' => 31,
                 'language_id' => 1,
@@ -324,7 +325,7 @@ class ThConceptLabelTableSeeder extends Seeder
             28 =>
             array (
                 'id' => 38,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Verzierung',
                 'concept_id' => 32,
                 'language_id' => 1,
@@ -335,7 +336,7 @@ class ThConceptLabelTableSeeder extends Seeder
             29 =>
             array (
                 'id' => 39,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Gefäßposition',
                 'concept_id' => 33,
                 'language_id' => 1,
@@ -346,7 +347,7 @@ class ThConceptLabelTableSeeder extends Seeder
             30 =>
             array (
                 'id' => 40,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Verzierungselement',
                 'concept_id' => 34,
                 'language_id' => 1,
@@ -357,7 +358,7 @@ class ThConceptLabelTableSeeder extends Seeder
             31 =>
             array (
                 'id' => 41,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Rand',
                 'concept_id' => 35,
                 'language_id' => 1,
@@ -368,7 +369,7 @@ class ThConceptLabelTableSeeder extends Seeder
             32 =>
             array (
                 'id' => 42,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Hals',
                 'concept_id' => 36,
                 'language_id' => 1,
@@ -379,7 +380,7 @@ class ThConceptLabelTableSeeder extends Seeder
             33 =>
             array (
                 'id' => 43,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Schulter',
                 'concept_id' => 37,
                 'language_id' => 1,
@@ -390,7 +391,7 @@ class ThConceptLabelTableSeeder extends Seeder
             34 =>
             array (
                 'id' => 44,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Bauch',
                 'concept_id' => 38,
                 'language_id' => 1,
@@ -401,7 +402,7 @@ class ThConceptLabelTableSeeder extends Seeder
             35 =>
             array (
                 'id' => 45,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Boden',
                 'concept_id' => 39,
                 'language_id' => 1,
@@ -412,7 +413,7 @@ class ThConceptLabelTableSeeder extends Seeder
             36 =>
             array (
                 'id' => 46,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Riefung',
                 'concept_id' => 40,
                 'language_id' => 1,
@@ -423,7 +424,7 @@ class ThConceptLabelTableSeeder extends Seeder
             37 =>
             array (
                 'id' => 47,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Kammeindruck',
                 'concept_id' => 41,
                 'language_id' => 1,
@@ -434,7 +435,7 @@ class ThConceptLabelTableSeeder extends Seeder
             38 =>
             array (
                 'id' => 48,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Notizen',
                 'concept_id' => 42,
                 'language_id' => 1,
@@ -445,7 +446,7 @@ class ThConceptLabelTableSeeder extends Seeder
             39 =>
             array (
                 'id' => 49,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Abmessungen',
                 'concept_id' => 43,
                 'language_id' => 1,
@@ -456,7 +457,7 @@ class ThConceptLabelTableSeeder extends Seeder
             40 =>
             array (
                 'id' => 50,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Datum',
                 'concept_id' => 44,
                 'language_id' => 1,
@@ -467,7 +468,7 @@ class ThConceptLabelTableSeeder extends Seeder
             41 =>
             array (
                 'id' => 51,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Eigenschaften der Keramik',
                 'concept_id' => 45,
                 'language_id' => 1,
@@ -478,7 +479,7 @@ class ThConceptLabelTableSeeder extends Seeder
             42 =>
             array (
                 'id' => 52,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Wandungsdicke',
                 'concept_id' => 46,
                 'language_id' => 1,
@@ -489,7 +490,7 @@ class ThConceptLabelTableSeeder extends Seeder
             43 =>
             array (
                 'id' => 53,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Gewicht',
                 'concept_id' => 47,
                 'language_id' => 1,
@@ -500,7 +501,7 @@ class ThConceptLabelTableSeeder extends Seeder
             44 =>
             array (
                 'id' => 54,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Fundstellentyp',
                 'concept_id' => 48,
                 'language_id' => 1,
@@ -511,7 +512,7 @@ class ThConceptLabelTableSeeder extends Seeder
             45 =>
             array (
                 'id' => 55,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Befundtyp',
                 'concept_id' => 49,
                 'language_id' => 1,
@@ -522,7 +523,7 @@ class ThConceptLabelTableSeeder extends Seeder
             46 =>
             array (
                 'id' => 56,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Siedlung',
                 'concept_id' => 50,
                 'language_id' => 1,
@@ -533,7 +534,7 @@ class ThConceptLabelTableSeeder extends Seeder
             47 =>
             array (
                 'id' => 57,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Höhle',
                 'concept_id' => 51,
                 'language_id' => 1,
@@ -544,7 +545,7 @@ class ThConceptLabelTableSeeder extends Seeder
             48 =>
             array (
                 'id' => 58,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Grube',
                 'concept_id' => 52,
                 'language_id' => 1,
@@ -555,7 +556,7 @@ class ThConceptLabelTableSeeder extends Seeder
             49 =>
             array (
                 'id' => 59,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Graben',
                 'concept_id' => 53,
                 'language_id' => 1,
@@ -566,7 +567,7 @@ class ThConceptLabelTableSeeder extends Seeder
             50 =>
             array (
                 'id' => 60,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Schicht',
                 'concept_id' => 54,
                 'language_id' => 1,
@@ -577,7 +578,7 @@ class ThConceptLabelTableSeeder extends Seeder
             51 =>
             array (
                 'id' => 61,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Alternativer Name',
                 'concept_id' => 55,
                 'language_id' => 1,
@@ -588,7 +589,7 @@ class ThConceptLabelTableSeeder extends Seeder
             52 =>
             array (
                 'id' => 62,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
             'label' => 'Koordintaten (WKT)',
                 'concept_id' => 56,
                 'language_id' => 1,
@@ -599,7 +600,7 @@ class ThConceptLabelTableSeeder extends Seeder
             53 =>
             array (
                 'id' => 63,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Chronologie',
                 'concept_id' => 57,
                 'language_id' => 1,
@@ -610,7 +611,7 @@ class ThConceptLabelTableSeeder extends Seeder
             54 =>
             array (
                 'id' => 64,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Phasen',
                 'concept_id' => 58,
                 'language_id' => 1,
@@ -621,7 +622,7 @@ class ThConceptLabelTableSeeder extends Seeder
             55 =>
             array (
                 'id' => 65,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Steinzeit',
                 'concept_id' => 59,
                 'language_id' => 1,
@@ -632,7 +633,7 @@ class ThConceptLabelTableSeeder extends Seeder
             56 =>
             array (
                 'id' => 66,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Bronzezeit',
                 'concept_id' => 60,
                 'language_id' => 1,
@@ -643,7 +644,7 @@ class ThConceptLabelTableSeeder extends Seeder
             57 =>
             array (
                 'id' => 67,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Eisenzeit',
                 'concept_id' => 61,
                 'language_id' => 1,
@@ -654,7 +655,7 @@ class ThConceptLabelTableSeeder extends Seeder
             58 =>
             array (
                 'id' => 68,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Lagerstätte',
                 'concept_id' => 62,
                 'language_id' => 1,
@@ -665,7 +666,7 @@ class ThConceptLabelTableSeeder extends Seeder
             59 =>
             array (
                 'id' => 69,
-                'lasteditor' => 'postgres',
+                'user_id' => $user->id,
                 'label' => 'Aufbewahrung',
                 'concept_id' => 63,
                 'language_id' => 1,

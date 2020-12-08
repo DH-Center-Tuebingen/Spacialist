@@ -16,7 +16,7 @@ class ThConcept extends Model
     protected $fillable = [
         'concept_url',
         'concept_scheme',
-        'lasteditor',
+        'user_id',
     ];
 
     public static function getMap($lang = 'en') {
@@ -73,6 +73,10 @@ class ThConcept extends Model
             ";
         }
         return DB::select($query);
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function labels() {

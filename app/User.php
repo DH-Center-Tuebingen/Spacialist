@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Traits\SoftDeletesWithTrashed;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -12,6 +13,7 @@ class User extends Authenticatable implements JWTSubject
     use Notifiable;
     use HasRoles;
     use Notifiable;
+    use SoftDeletesWithTrashed;
     // use Authenticatable;
 
     protected $guard_name = 'web';
@@ -23,6 +25,14 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $fillable = [
         'name', 'nickname', 'email', 'password',
+    ];
+
+    protected $appends = [
+        'avatar_url',
+    ];
+
+    protected $casts = [
+        'metadata' => 'array',
     ];
 
     /**
@@ -52,6 +62,20 @@ class User extends Authenticatable implements JWTSubject
             }
         }
         $this->permissions = $permissions;
+    }
+
+    public function setMetadata($data) {
+        if(!isset($this->metadata)) {
+            $this->metadata = $data;
+        } else {
+            $this->metadata = array_replace($this->metadata, $data);
+        }
+        $this->save();
+    }
+
+    public function getAvatarUrlAttribute() {
+
+        return isset($this->avatar) ? sp_get_public_url($this->avatar) : null;
     }
 
     public function preferences() {

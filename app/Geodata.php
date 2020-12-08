@@ -46,7 +46,7 @@ class Geodata extends Model
         $parsedWkt = self::parseWkt($wkt);
         if(!isset($parsedWkt)) return;
         $this->geom = $parsedWkt;
-        $this->lasteditor = $user->name;
+        $this->user_id = $user->id;
         $this->save();
     }
 
@@ -72,7 +72,7 @@ class Geodata extends Model
             if(!isset($parsedWkt)) continue;
             $geodata = new self();
             $geodata->geom = $parsedWkt;
-            $geodata->lasteditor = $user->name;
+            $geodata->user_id = $user->id;
             $geodata->save();
 
             // if name column and entity type is specified, create new entity
@@ -104,6 +104,10 @@ class Geodata extends Model
         } catch(UnknownWKTTypeException $e) {
             return null;
         }
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function entity() {

@@ -103,15 +103,18 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::get('/role', 'UserController@getRoles');
 
     Route::post('/user', 'UserController@addUser');
+    Route::post('/user/{id}/avatar', 'UserController@addAvatar')->where('id', '[0-9]+');
     Route::post('/user/reset/password', 'Auth\\ForgotPasswordController@sendResetLinkEmail');
     Route::post('/role', 'UserController@addRole');
     Route::post('/auth/logout', 'UserController@logout');
 
     Route::patch('/user/{id}', 'UserController@patchUser');
+    Route::patch('/user/restore/{id}', 'UserController@restoreUser');
     Route::patch('/role/{id}', 'UserController@patchRole');
 
     Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');
     Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');
+    Route::delete('/user/{id}/avatar', 'UserController@deleteAvatar')->where('id', '[0-9]+');
 });
 
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/notification')->group(function() {

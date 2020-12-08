@@ -29,7 +29,7 @@ class AttributeValue extends Model
         'str_val',
         'thesaurus_val',
         'certainty',
-        'lasteditor',
+        'user_id',
     ];
 
     // TODO always hide *_val in favor of (computed) value?
@@ -77,6 +77,10 @@ class AttributeValue extends Model
             $this->{$k} = $v;
         }
         $this->save();
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function entity() {

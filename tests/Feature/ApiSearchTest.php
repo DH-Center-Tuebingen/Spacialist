@@ -38,7 +38,7 @@ class ApiSearchTest extends TestCase
                 'root_entity_id',
                 'geodata_id',
                 'rank',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at',
                 'relevance',
@@ -82,7 +82,7 @@ class ApiSearchTest extends TestCase
                 'id',
                 'geom',
                 'color',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at',
                 'relevance',
@@ -99,7 +99,7 @@ class ApiSearchTest extends TestCase
                     ]
                 ],
                 'color' => null,
-                'lasteditor' => 'Admin',
+                'user_id' => 1,
                 'relevance' => 10,
                 'group' => 'geodata'
             ]
@@ -119,7 +119,7 @@ class ApiSearchTest extends TestCase
             'title' => 'Testing API',
             'author' => 'API (Inv.) Tester',
             'note' => 'Test Inv. Match Entity Name',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
             'year' => 2009
         ];
         $fields['citekey'] = Bibliography::computeCitationKey($fields);
@@ -164,7 +164,7 @@ class ApiSearchTest extends TestCase
                 'organization',
                 'school',
                 'series',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at',
                 'relevance',
@@ -179,7 +179,7 @@ class ApiSearchTest extends TestCase
                 'author' => 'API (Inv.) Tester',
                 'year' => '2009',
                 'note' => 'Test Inv. Match Entity Name',
-                'lasteditor' => 'Admin',
+                'user_id' => 1,
                 'relevance' => 15,
                 'group' => 'bibliography'
             ]
@@ -202,7 +202,7 @@ class ApiSearchTest extends TestCase
             'created' => $now,
             'description' => 'describes the test file',
             'mime_type' => 'image/jpg',
-            'lasteditor' => 'Admin'
+            'user_id' => 1
         ];
         Storage::fake('public');
         UploadedFile::fake()->image('test_inv.jpg');
@@ -230,7 +230,7 @@ class ApiSearchTest extends TestCase
                 'copyright',
                 'description',
                 'mime_type',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at',
                 'relevance',
@@ -252,7 +252,7 @@ class ApiSearchTest extends TestCase
                 'copyright' => null,
                 'description' => 'describes the test file',
                 'mime_type' => 'image/jpg',
-                'lasteditor' => 'Admin',
+                'user_id' => 1,
                 'relevance' => 10,
                 'group' => 'files',
                 'created_unix' => $nowTs,
@@ -278,7 +278,7 @@ class ApiSearchTest extends TestCase
             'created' => $now,
             'description' => 'describes the test file',
             'mime_type' => 'image/jpg',
-            'lasteditor' => 'Admin'
+            'user_id' => 1
         ];
         Storage::fake('public');
         UploadedFile::fake()->image('test_inv.jpg');
@@ -295,7 +295,7 @@ class ApiSearchTest extends TestCase
             'title' => 'Testing API',
             'author' => 'API (Inv.) Tester',
             'note' => 'Test Inv. Match Entity Name',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
             'year' => 2009
         ];
         $fields['citekey'] = Bibliography::computeCitationKey($fields);
@@ -336,7 +336,7 @@ class ApiSearchTest extends TestCase
             'copyright' => null,
             'description' => 'describes the test file',
             'mime_type' => 'image/jpg',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
             'relevance' => 10,
             'group' => 'files',
             'created_unix' => $nowTs,
@@ -350,7 +350,7 @@ class ApiSearchTest extends TestCase
             'author' => 'API (Inv.) Tester',
             'year' => '2009',
             'note' => 'Test Inv. Match Entity Name',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
             'relevance' => 15,
             'group' => 'bibliography'
         ]);
@@ -386,7 +386,7 @@ class ApiSearchTest extends TestCase
                 'root_entity_id',
                 'geodata_id',
                 'rank',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at',
                 'ancestors'
@@ -420,7 +420,7 @@ class ApiSearchTest extends TestCase
                 'concept_url',
                 'concept_scheme',
                 'is_top_concept',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at',
                 'labels'
@@ -520,7 +520,7 @@ class ApiSearchTest extends TestCase
                 'concept_url',
                 'concept_scheme',
                 'is_top_concept',
-                'lasteditor',
+                'user_id',
                 'broader_id',
                 'narrower_id',
                 'created_at',

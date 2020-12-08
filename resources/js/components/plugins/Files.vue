@@ -961,7 +961,7 @@
                 vm.$http.patch(`/file/${id}/property`, data).then(function(response) {
                     const filedata = response.data;
                     let file = vm[vm.selectedTopAction].files.find(f => f.id == id);
-                    const keys = ['name', 'url', 'thumb', 'thumb_url', 'modified', 'modified_unix', 'lasteditor'];
+                    const keys = ['name', 'url', 'thumb', 'thumb_url', 'modified', 'modified_unix', 'user_id'];
                     for(let i=0; i<keys.length; i++) {
                         const k = keys[i];
                         file[k] = filedata[k];

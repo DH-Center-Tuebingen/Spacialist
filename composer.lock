@@ -4,27 +4,27 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0aa9096fd60b15cb83bec7b27dd91dd6",
+    "content-hash": "545a0b2d0a7d0696a213c45e62b148eb",
     "packages": [
         {
             "name": "bosnadev/database",
-            "version": "0.21",
+            "version": "0.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bosnadev/database.git",
-                "reference": "e14ddb0044d360a9e8696a0c307adc9b0995fe79"
+                "reference": "bc45d6d93be3029a5d9735e090a58f4e4a380abf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bosnadev/database/zipball/e14ddb0044d360a9e8696a0c307adc9b0995fe79",
-                "reference": "e14ddb0044d360a9e8696a0c307adc9b0995fe79",
+                "url": "https://api.github.com/repos/bosnadev/database/zipball/bc45d6d93be3029a5d9735e090a58f4e4a380abf",
+                "reference": "bc45d6d93be3029a5d9735e090a58f4e4a380abf",
                 "shasum": ""
             },
             "require": {
                 "doctrine/dbal": "^2.5",
-                "illuminate/database": "^5.0|^6.0|^7.0|^8.0",
+                "illuminate/database": "^5.0|^6.0|^7.0",
                 "php": ">=5.5",
-                "ramsey/uuid": "^3.0|^4.0"
+                "ramsey/uuid": "^3.0"
             },
             "require-dev": {
                 "codeclimate/php-test-reporter": "^0.3.2",
@@ -61,22 +61,22 @@
             ],
             "support": {
                 "issues": "https://github.com/bosnadev/database/issues",
-                "source": "https://github.com/bosnadev/database/tree/0.21"
+                "source": "https://github.com/bosnadev/database/tree/master"
             },
-            "time": "2020-10-22T09:08:19+00:00"
+            "time": "2020-03-11T13:24:09+00:00"
         },
         {
             "name": "caouecs/laravel-lang",
-            "version": "4.0.11",
+            "version": "5.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/caouecs/lang.git",
-                "reference": "134e1cbf9be14d97fc7937d7df784eae2d4bfa3c"
+                "reference": "96d7868069de7823a680710cc09d51fed24a5dbd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/caouecs/lang/zipball/134e1cbf9be14d97fc7937d7df784eae2d4bfa3c",
-                "reference": "134e1cbf9be14d97fc7937d7df784eae2d4bfa3c",
+                "url": "https://api.github.com/repos/caouecs/lang/zipball/96d7868069de7823a680710cc09d51fed24a5dbd",
+                "reference": "96d7868069de7823a680710cc09d51fed24a5dbd",
                 "shasum": ""
             },
             "require": {
@@ -107,10 +107,10 @@
                 "lpm"
             ],
             "support": {
-                "source": "https://github.com/caouecs/lang/tree/4.0.11"
+                "source": "https://github.com/caouecs/lang/tree/5.0.0"
             },
             "abandoned": "https://github.com/Laravel-Lang/lang",
-            "time": "2020-03-17T15:24:26+00:00"
+            "time": "2020-03-17T15:25:41+00:00"
         },
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -1077,16 +1077,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v6.20.5",
+            "version": "v6.20.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "1ba4354b0263a7f97d1de1323aab21f73b38dc4d"
+                "reference": "e0b93cf3ef527fca52e3f83fee50c629feab4da3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/1ba4354b0263a7f97d1de1323aab21f73b38dc4d",
-                "reference": "1ba4354b0263a7f97d1de1323aab21f73b38dc4d",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/e0b93cf3ef527fca52e3f83fee50c629feab4da3",
+                "reference": "e0b93cf3ef527fca52e3f83fee50c629feab4da3",
                 "shasum": ""
             },
             "require": {
@@ -1226,7 +1226,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2020-11-24T16:12:27+00:00"
+            "time": "2020-12-01T15:01:00+00:00"
         },
         {
             "name": "laravel/tinker",
@@ -2015,27 +2015,27 @@
         },
         {
             "name": "mstaack/laravel-postgis",
-            "version": "5.2",
+            "version": "5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mstaack/laravel-postgis.git",
-                "reference": "1e9b896d71c2f71bcdd49fc86da30ec31c1857b7"
+                "reference": "a3bb4825245df4997b170a3e01b593909a95db7c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mstaack/laravel-postgis/zipball/1e9b896d71c2f71bcdd49fc86da30ec31c1857b7",
-                "reference": "1e9b896d71c2f71bcdd49fc86da30ec31c1857b7",
+                "url": "https://api.github.com/repos/mstaack/laravel-postgis/zipball/a3bb4825245df4997b170a3e01b593909a95db7c",
+                "reference": "a3bb4825245df4997b170a3e01b593909a95db7c",
                 "shasum": ""
             },
             "require": {
-                "bosnadev/database": "^0.21",
+                "bosnadev/database": "0.20.*",
                 "geo-io/wkb-parser": "^1.0",
-                "illuminate/database": "^6.0|^7.0|^8.0",
+                "illuminate/database": "^6.0|^7.0",
                 "jmikola/geojson": "^1.0",
                 "php": ">=7.1"
             },
             "require-dev": {
-                "illuminate/pagination": "^6.0|^7.0|^8.0",
+                "illuminate/pagination": "^6.0|^7.0",
                 "mockery/mockery": "^1.3",
                 "phpunit/phpunit": "^8.5"
             },
@@ -2073,9 +2073,9 @@
             "description": "Postgis extensions for laravel. Aims to make it easy to work with geometries from laravel models",
             "support": {
                 "issues": "https://github.com/mstaack/laravel-postgis/issues",
-                "source": "https://github.com/mstaack/laravel-postgis/tree/5.2"
+                "source": "https://github.com/mstaack/laravel-postgis/tree/master"
             },
-            "time": "2020-10-22T12:00:14+00:00"
+            "time": "2020-03-11T14:32:16+00:00"
         },
         {
             "name": "myclabs/php-enum",
@@ -2349,16 +2349,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v4.10.2",
+            "version": "v4.10.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "658f1be311a230e0907f5dfe0213742aff0596de"
+                "reference": "dbe56d23de8fcb157bbc0cfb3ad7c7de0cfb0984"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/658f1be311a230e0907f5dfe0213742aff0596de",
-                "reference": "658f1be311a230e0907f5dfe0213742aff0596de",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/dbe56d23de8fcb157bbc0cfb3ad7c7de0cfb0984",
+                "reference": "dbe56d23de8fcb157bbc0cfb3ad7c7de0cfb0984",
                 "shasum": ""
             },
             "require": {
@@ -2399,9 +2399,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v4.10.2"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v4.10.3"
             },
-            "time": "2020-09-26T10:30:38+00:00"
+            "time": "2020-12-03T17:45:45+00:00"
         },
         {
             "name": "opis/closure",
@@ -6056,16 +6056,16 @@
         },
         {
             "name": "wapmorgan/unified-archive",
-            "version": "0.1.3",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wapmorgan/UnifiedArchive.git",
-                "reference": "748303c5387c3fe211112ccc61ae79109e8ccc0b"
+                "reference": "7d3623fba223f690da42d3d6b18335eaa926f743"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wapmorgan/UnifiedArchive/zipball/748303c5387c3fe211112ccc61ae79109e8ccc0b",
-                "reference": "748303c5387c3fe211112ccc61ae79109e8ccc0b",
+                "url": "https://api.github.com/repos/wapmorgan/UnifiedArchive/zipball/7d3623fba223f690da42d3d6b18335eaa926f743",
+                "reference": "7d3623fba223f690da42d3d6b18335eaa926f743",
                 "shasum": ""
             },
             "require": {
@@ -6147,9 +6147,9 @@
             ],
             "support": {
                 "issues": "https://github.com/wapmorgan/UnifiedArchive/issues",
-                "source": "https://github.com/wapmorgan/UnifiedArchive/tree/0.1.x"
+                "source": "https://github.com/wapmorgan/UnifiedArchive/tree/1.0.1"
             },
-            "time": "2020-01-13T00:24:26+00:00"
+            "time": "2020-11-28T13:04:06+00:00"
         },
         {
             "name": "zendframework/zend-escaper",

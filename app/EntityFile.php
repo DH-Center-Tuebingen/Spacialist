@@ -22,6 +22,10 @@ class EntityFile extends Model
     protected $fillable = [
         'file_id',
         'entity_id',
-        'lasteditor',
+        'user_id',
     ];
+
+    public function user() {
+        return $this->belongsTo('App\User');
+    }
 }

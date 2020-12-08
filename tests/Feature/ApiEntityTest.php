@@ -36,7 +36,7 @@ class ApiEntityTest extends TestCase
                 'root_entity_id',
                 'geodata_id',
                 'rank',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at',
                 'parentIds',
@@ -64,7 +64,19 @@ class ApiEntityTest extends TestCase
             'root_entity_id' => null,
             'geodata_id' => 2,
             'rank' => 1,
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
+            'user' => [
+                'id' => 1,
+                'name' => "Admin",
+                'nickname' => "admin",
+                'email' => "admin@localhost",
+                'created_at' => "2017-12-20 09:47:36",
+                'updated_at' => "2017-12-20 09:47:36",
+                'deleted_at' => null,
+                'avatar' => null,
+                'avatar_url' => null,
+                'metadata' => null,
+            ],
             'created_at' => '2017-12-20 17:10:34',
             'updated_at' => '2017-12-31 16:10:56',
             'parentIds' => [1],
@@ -124,7 +136,7 @@ class ApiEntityTest extends TestCase
                 'entity_id',
                 'attribute_id',
                 'value',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at'
             ]
@@ -159,7 +171,7 @@ class ApiEntityTest extends TestCase
                 'entity_id',
                 'attribute_id',
                 'value',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at'
             ]
@@ -209,7 +221,7 @@ class ApiEntityTest extends TestCase
                 'entity_id',
                 'attribute_id',
                 'value',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at'
             ]
@@ -279,7 +291,7 @@ class ApiEntityTest extends TestCase
                     'attribute_id',
                     'bibliography_id',
                     'description',
-                    'lasteditor',
+                    'user_id',
                     'created_at',
                     'updated_at',
                     'bibliography'
@@ -294,7 +306,7 @@ class ApiEntityTest extends TestCase
                     'attribute_id' => 15,
                     'bibliography_id' => 1318,
                     'description' => 'See Page 10',
-                    'lasteditor' => 'Admin',
+                    'user_id' => 1,
                     'created_at' => '2019-03-08 13:36:36',
                     'updated_at' => '2019-03-08 13:36:36',
                     'bibliography' => [
@@ -307,7 +319,7 @@ class ApiEntityTest extends TestCase
                     'attribute_id' => 15,
                     'bibliography_id' => 1319,
                     'description' => 'Picture on left side of page 12',
-                    'lasteditor' => 'Admin',
+                    'user_id' => 1,
                     'created_at' => '2019-03-08 13:36:48',
                     'updated_at' => '2019-03-08 13:36:48',
                     'bibliography' => [
@@ -322,7 +334,7 @@ class ApiEntityTest extends TestCase
                     'attribute_id' => 13,
                     'bibliography_id' => 1323,
                     'description' => 'Page 10ff is interesting',
-                    'lasteditor' => 'Admin',
+                    'user_id' => 1,
                     'created_at' => '2019-03-08 13:37:09',
                     'updated_at' => '2019-03-08 13:37:09',
                     'bibliography' => [
@@ -354,7 +366,7 @@ class ApiEntityTest extends TestCase
                 'root_entity_id',
                 'geodata_id',
                 'rank',
-                'lasteditor',
+                'user_id',
                 'created_at',
                 'updated_at',
                 'parentIds'
@@ -402,7 +414,7 @@ class ApiEntityTest extends TestCase
             'root_entity_id',
             'geodata_id',
             'rank',
-            'lasteditor',
+            'user_id',
             'created_at',
             'updated_at',
             'parentIds'
@@ -444,7 +456,7 @@ class ApiEntityTest extends TestCase
             'root_entity_id',
             'geodata_id',
             'rank',
-            'lasteditor',
+            'user_id',
             'created_at',
             'updated_at',
             'parentIds'
@@ -485,7 +497,7 @@ class ApiEntityTest extends TestCase
             'attribute_id',
             'bibliography_id',
             'description',
-            'lasteditor',
+            'user_id',
             'created_at',
             'updated_at',
             'bibliography',
@@ -495,7 +507,7 @@ class ApiEntityTest extends TestCase
             'attribute_id' => 14,
             'bibliography_id' => 1337,
             'description' => 'This is a simple test',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
             'bibliography' => [
                 'id' => 1337,
                 'type' => 'article',
@@ -569,7 +581,7 @@ class ApiEntityTest extends TestCase
             'root_entity_id',
             'geodata_id',
             'rank',
-            'lasteditor',
+            'user_id',
             'created_at',
             'updated_at',
             'parentIds'
@@ -938,7 +950,7 @@ class ApiEntityTest extends TestCase
             'attribute_id',
             'bibliography_id',
             'description',
-            'lasteditor',
+            'user_id',
             'created_at',
             'updated_at',
         ]);
@@ -947,7 +959,7 @@ class ApiEntityTest extends TestCase
             'attribute_id' => 15,
             'bibliography_id' => 1319,
             'description' => 'Page 12 was wrong, it is Page 15!',
-            'lasteditor' => 'Admin',
+            'user_id' => 1,
         ]);
     }
 

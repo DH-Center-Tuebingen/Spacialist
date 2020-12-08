@@ -2,6 +2,8 @@ const de = {
     global: {
         save: 'Speichern',
         delete: 'Löschen',
+        deactivate: 'Deaktivieren',
+        reactivate: 'Reaktivieren',
         remove: 'Entfernen',
         cancel: 'Abbrechen',
         close: 'Schließen',
@@ -21,6 +23,11 @@ const de = {
         'delete-name': {
             title: '{name} löschen',
             desc: 'Willst du {name} wirklich löschen?'
+        },
+        'deactivate-name': {
+            title: '{name} deaktivieren',
+            desc: 'Willst du {name} wirklich deaktivieren?',
+            info: 'Gewisse Einträge können nur/erst deaktiviert werden, da es sonst zu unvorhergesehenem Datenverlust kommen kann.'
         },
         'edit-name': {
             title: '{name} editieren'
@@ -75,7 +82,14 @@ const de = {
         },
         user: {
             settings: 'Einstellungen',
-            logout: 'Ausloggen'
+            profile: 'Profil',
+            logout: 'Ausloggen',
+            info_title: 'Benutzerinformationen',
+            member_since: 'Mitglied seit',
+            deactivated_since: '<span class="font-weight-bold">Deaktiviert</span> seit {dt}',
+            contact: 'Kontakt',
+            avatar: 'Avatar',
+            invalid_orcid: 'Die eigegebene ORCID ist ungültig',
         },
         select: {
             placehoder: 'Option auswählen',
@@ -131,14 +145,18 @@ const de = {
         'display-name': 'Anzeigename',
         email: 'E-Mail-Adresse',
         email_or_nick: 'E-Mail-Adresse oder Name',
+        phonenumber: 'Telefonnummer',
         password: 'Passwort',
         'remember-me': 'Eingeloggt bleiben',
+        'orcid': 'ORCID',
         description: 'Beschreibung',
         roles: 'Rollen',
         permissions: 'Berechtigungen',
         'added-at': 'Hinzugefügt',
         'created-at': 'Erstellt',
         'updated-at': 'Aktualisert',
+        'deleted-at': 'Gelöscht',
+        'deactivated-at': 'Deaktiviert',
         options: 'Optionen',
         reply_to: 'Antworten',
         replying_to: 'Antwort an {name}',
@@ -256,6 +274,9 @@ const de = {
         },
         user: {
             'add-button': 'Neuen Benutzer hinzufügen',
+            active_users: 'Aktive Benutzer',
+            deactivated_users: 'Deaktivierte Benutzer',
+            empty_list: 'Benutzerliste ist leer',
             toasts: {
                 updated: {
                     title: 'Benutzer aktualisiert',

@@ -15,10 +15,14 @@ class ThConceptLabel extends Model
     protected $fillable = [
         'concept_id',
         'language_id',
-        'lasteditor',
+        'user_id',
         'label',
         'concept_label_type',
     ];
+
+    public function user() {
+        return $this->belongsTo('App\User');
+    }
 
     public function concept() {
         return $this->belongsTo('App\ThConcept', 'concept_id');

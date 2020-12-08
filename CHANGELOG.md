@@ -4,9 +4,37 @@ All notable changes to this project will be documented in this file.
 ## 0.8 - Helgö (Unreleased)
 ### Added
 - Support to extend all data with a comment section
+- User profile to allow users to edit their information
+  - Support for phone numbers and avatars
+### Fixed
 ### Changed
 - Switch from momentjs to dayjs for dates
 - Replaced certainty description with new comment section
+
+## 0.7.7 (Unreleased)
+### Added
+- Caching attribute data in GIS layer styles
+- Chart overlays to GIS layer styling
+- Display multiple attributes in GIS view as labels
+### Fixed
+- Unnecessary initializing snapping to features on the map (snapping is now initialized when editing mode is activated and onyl for the current visible part of the map)
+- Drag & Drop in entity tree
+- Timezone of date filter
+- Proper error messages for incomplete data in time period and epoch datatypes
+- Display entity name in GIS layer labeling instead of ID
+
+## 0.7.6
+### Added
+- Caching map styles to speed-up map performance
+### Fixed
+- Unnecessary loading of data of all entities in gis view, even if they don't have any geo object linked
+- Selection of sql attributes as label in gis view
+- Loading speed of linked geo objects on map
+
+## 0.7.5
+### Fixed
+- Some attribute changes not saved, when one was a delete operation
+- Area/Length computation in map popups
 
 ## 0.7.4
 ### Added
