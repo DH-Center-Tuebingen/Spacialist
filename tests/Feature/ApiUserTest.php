@@ -386,7 +386,8 @@ class ApiUserTest extends TestCase
                 'email' => 'test@test.com',
                 'name' => 'Admin Updated',
                 'nickname' => 'admin1',
-                'phonenumber' => '+43 123 1234'
+                'phonenumber' => '+43 123 1234',
+                'orcid' => '0000-0002-1694-233X'
             ]);
 
         $user = User::find(1);
@@ -405,6 +406,7 @@ class ApiUserTest extends TestCase
             'avatar_url' => null,
             'metadata' => [
                 'phonenumber' => '+43 123 1234',
+                'orcid' => '0000-0002-1694-233X',
             ],
         ]);
 
@@ -412,8 +414,94 @@ class ApiUserTest extends TestCase
         $this->assertEquals('admin1', $user->nickname);
         $this->assertEquals('test@test.com', $user->email);
         $this->assertEquals('+43 123 1234', $user->metadata['phonenumber']);
+        $this->assertEquals('0000-0002-1694-233X', $user->metadata['orcid']);
         $this->assertNull($user->avatar);
         $this->assertNull($user->avatar_url);
+    }
+
+    /**
+     * Test patching a users existing metadata.
+     *
+     * @return void
+     */
+    public function testPatchUserOrcidEndpoint()
+    {
+        $user = User::find(1);
+        $this->assertNull($user->metadata);
+        $user->metadata = [
+            'orcid' => '0000-0002-1694-233X',
+        ];
+        $user->save();
+        
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+            ->patch('/api/v1/user/1', [
+                'orcid' => '0000-0001-5109-3700'
+            ]);
+
+        $response->assertStatus(200);
+        $user = User::find(1);
+        $this->assertNotNull($user->metadata);
+        $this->assertEquals('0000-0001-5109-3700', $user->metadata['orcid']);
+
+    }
+
+    /**
+     * Test patching user with wrong orcid
+     *
+     * @return void
+     */
+    public function testPatchUserWrongOrcidEndpoint()
+    {
+        $user = User::find(1);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->json('patch', '/api/v1/user/1', [
+                'orcid' => '0000-0002-1694-2338'
+            ]);
+
+        $response->assertStatus(422);
+    }
+
+    /**
+     * Test patching user with wrong orcid
+     *
+     * @return void
+     */
+    public function testPatchUserAnotherWrongOrcidEndpoint()
+    {
+        $user = User::find(1);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->json('patch', '/api/v1/user/1', [
+                'orcid' => '0000-0002-1694233X'
+            ]);
+
+        $response->assertStatus(422);
+    }
+
+    /**
+     * Test patching user with wrong orcid
+     *
+     * @return void
+     */
+    public function testPatchUserAnotherSecondWrongOrcidEndpoint()
+    {
+        $user = User::find(1);
+
+        $response = $this->withHeaders([
+                'Authorization' => "Bearer $this->token"
+            ])
+            ->json('patch', '/api/v1/user/1', [
+                'orcid' => '0000-0002-1694-23aX'
+            ]);
+
+        $response->assertStatus(422);
     }
 
     /**
@@ -488,7 +576,7 @@ class ApiUserTest extends TestCase
     }
 
     /**
-     * Test deleting user (id=1).
+     * Test deleting and restoring a user (id=1).
      *
      * @return void
      */
@@ -513,6 +601,22 @@ class ApiUserTest extends TestCase
         $this->assertEquals(1, $cnt);
         $cnt = User::withoutTrashed()->count();
         $this->assertEquals(0, $cnt);
+        $user = User::find(1);
+        $this->assertNotNull($user->deleted_at);
+
+
+        // Test restore
+        $this->refreshToken($response);
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+            ->patch('/api/v1/user/restore/1');
+
+        $user = User::find(1);
+        $this->assertNull($user->deleted_at);
+
+        $response->assertStatus(204);
     }
 
     /**
@@ -651,6 +755,7 @@ class ApiUserTest extends TestCase
             ['url' => '/role', 'error' => 'You do not have the permission to add roles', 'verb' => 'post'],
             ['url' => '/user/1', 'error' => 'You do not have the permission to set user roles', 'verb' => 'patch'],
             ['url' => '/role/1', 'error' => 'You do not have the permission to set role permissions', 'verb' => 'patch'],
+            ['url' => '/user/restore/1', 'error' => 'You do not have the permission to delete users', 'verb' => 'patch'],
             ['url' => '/user/1', 'error' => 'You do not have the permission to delete users', 'verb' => 'delete'],
             ['url' => '/role/1', 'error' => 'You do not have the permission to delete roles', 'verb' => 'delete'],
             ['url' => '/user/1/avatar', 'error' => 'You do not have the permission to delete users', 'verb' => 'delete'],
@@ -681,6 +786,7 @@ class ApiUserTest extends TestCase
         $calls = [
             ['url' => '/user/99', 'error' => 'This user does not exist', 'verb' => 'patch'],
             ['url' => '/role/99', 'error' => 'This role does not exist', 'verb' => 'patch'],
+            ['url' => '/user/restore/99', 'error' => 'This user does not exist', 'verb' => 'patch'],
         ];
 
         foreach($calls as $c) {
