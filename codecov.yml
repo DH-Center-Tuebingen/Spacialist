@@ -1,5 +1,7 @@
 codecov:
   require_ci_to_pass: yes
+  notify:
+    wait_for_ci: yes
 
 coverage:
   status:
@@ -7,5 +9,7 @@ coverage:
       default:
         target: auto
         threshold: 0.5%
+        base: auto
+        if_ci_failed: error
 
 comment: false

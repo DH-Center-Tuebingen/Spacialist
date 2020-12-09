@@ -1,10 +1,8 @@
 <p>
-    <a href='https://coveralls.io/github/eScienceCenter/Spacialist?branch=0.7-giza'>
-        <img src='https://coveralls.io/repos/github/eScienceCenter/Spacialist/badge.svg?branch=0.7-giza' alt='Coverage Status' />
+    <a href="https://codecov.io/gh/eScienceCenter/Spacialist">
+        <img src="https://codecov.io/gh/eScienceCenter/Spacialist/branch/master/graph/badge.svg?token=4VVZQDJXSM"/>
     </a>
-    <a href='https://travis-ci.com/eScienceCenter/Spacialist'>
-        <img src='https://travis-ci.com/eScienceCenter/Spacialist.svg?branch=0.7-giza' alt='Build Status' />
-    </a>
+    <img src="https://github.com/eScienceCenter/Spacialist/workflows/PhpUnit/badge.svg"/>
     <a href='https://david-dm.org/eScienceCenter/Spacialist'>
         <img src='https://david-dm.org/eScienceCenter/Spacialist.svg' alt='Dependency Status' />
     </a>
