@@ -64,7 +64,7 @@
                 return !!this.notf.read_at;
             },
             sender() {
-                return this.$getUser(this.notf.data.user_id);
+                return this.$getUserBy(this.notf.data.user_id);
             }
         }
     }

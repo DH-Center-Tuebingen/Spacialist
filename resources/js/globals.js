@@ -1,5 +1,3 @@
-import UserInfoModal from './components/modals/UserInfo.vue';
-
 // Validators
 Vue.prototype.$validateObject = function(value) {
     // concepts is valid if it is either an object
@@ -72,6 +70,14 @@ Vue.prototype.$updateLanguage = function() {
     }
 };
 
+Vue.prototype.$getUser = function() {
+    if(this.$isLoggedIn()) {
+        return this.$auth.user();
+    } else {
+        return {};
+    }
+}
+
 Vue.prototype.$userId = function() {
     if(this.$isLoggedIn()) {
         return this.$auth.user().id;
@@ -80,7 +86,7 @@ Vue.prototype.$userId = function() {
     }
 };
 
-Vue.prototype.$getUser = function(value, attr = 'id') {
+Vue.prototype.$getUserBy = function(value, attr = 'id') {
     if(this.$isLoggedIn()) {
         const isNum = !isNaN(value);
         const lValue = isNum ? value : value.toLowerCase();
@@ -241,10 +247,8 @@ Vue.prototype.$getEntityColors = function(id, alpha = 0.5) {
 }
 
 Vue.prototype.$showUserInfo = function(user) {
-    this.$modal.show(UserInfoModal, {
+    this.$modal.show('user-info-modal', {
         user: user,
-    }, {
-        height: 'auto'
     });
 }
 

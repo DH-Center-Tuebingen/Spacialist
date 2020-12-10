@@ -195,6 +195,7 @@
             <video id="rtc-sharing-container" class="video-js d-none"></video>
             <about-dialog></about-dialog>
             <error-modal></error-modal>
+            <user-info-modal></user-info-modal>
         </div>
         <notifications group="spacialist" position="bottom left" class="m-2" />
     </div>
@@ -357,9 +358,7 @@
                 return this.notifications.filter(n => !n.read_at);
             },
             authUser() {
-                const user = this.$getUser();
-
-                return user || {};
+                return this.$getUser();
             }
         }
     }

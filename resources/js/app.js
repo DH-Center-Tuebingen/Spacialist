@@ -683,6 +683,7 @@ import EntityReferenceModal from './components/EntityReferenceModal.vue';
 import DiscardChangesModal from './components/DiscardChangesModal.vue';
 import AboutDialog from './components/About.vue';
 import ErrorModal from './components/Error.vue';
+import UserInfoModal from './components/modals/UserInfo.vue';
 
 Vue.component('global-search', GlobalSearch);
 Vue.component('entity-search', EntitySearch);
@@ -702,6 +703,7 @@ Vue.component('entity-reference-modal', EntityReferenceModal);
 Vue.component('discard-changes-modal', DiscardChangesModal);
 Vue.component('about-dialog', AboutDialog);
 Vue.component('error-modal', ErrorModal);
+Vue.component('user-info-modal', UserInfoModal);
 
 // Filter
 Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm') {
@@ -875,7 +877,7 @@ Vue.filter('mentionify', function(value) {
     for(let i=0; i<mentions.length; i++) {
         const elem = mentions[i];
         const m = elem.substring(1);
-        const user = app.$getUser(m, 'nickname');
+        const user = app.$getUserBy(m, 'nickname');
         const replRegex = new RegExp(elem, 'g');
         let name = m;
         let tpl = unknownTemplate;
