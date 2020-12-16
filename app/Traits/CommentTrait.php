@@ -14,7 +14,7 @@ trait CommentTrait
         $this->withCount[] = 'comments';
     }
 
-    public function addComment($data, $user = null, $notify = true, $resourceMetadata) {
+    public function addComment($data, $user = null, $notify = true, $resourceMetadata = []) {
         if(!isset($user)) $user = auth()->user();
         $comment = new Comment();
         $comment->user_id = $user->id;

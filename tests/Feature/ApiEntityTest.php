@@ -80,7 +80,8 @@ class ApiEntityTest extends TestCase
             'created_at' => '2017-12-20 17:10:34',
             'updated_at' => '2017-12-31 16:10:56',
             'parentIds' => [1],
-            'parentNames' => ['Site A']
+            'parentNames' => ['Site A'],
+            'comments_count' => 0
         ]);
     }
 
@@ -775,14 +776,16 @@ class ApiEntityTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
             ])
-            ->patch('/api/v1/comment', [
+            ->post('/api/v1/comment', [
                 'content' => 'This is a test',
                 'resource_type' => 'attribute_value',
                 'resource_id' => $attrValue->id
                 ]);
                 
         $response->assertStatus(201);
-        $attrValue->comments();
+        $attrValue = AttributeValue::where('entity_id', 8)
+            ->where('attribute_id', 5)
+            ->first();
         $this->assertEquals(1, $attrValue->comments_count);
         $this->assertEquals(8, $attrValue->comments[0]->commentable->entity_id);
         $this->assertEquals(37, $attrValue->comments[0]->commentable->certainty);
@@ -816,21 +819,21 @@ class ApiEntityTest extends TestCase
             'Authorization' => "Bearer $this->token"
         ])
             ->patch('/api/v1/entity/8/attribute/5', [
-                'certainty' => 37,
-                'metadata' => [
-                    'certainty_from' => 100,
-                    'certainty_to' => 37
-                ]
+                'certainty' => 37
             ]);
     
         $this->refreshToken($response);
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])
-            ->patch('/api/v1/comment', [
+            ->post('/api/v1/comment', [
                 'content' => 'This is a test',
                 'resource_type' => 'attribute_value',
-                'resource_id' => $attrValue->id
+                'resource_id' => $attrValue->id,
+                'metadata' => [
+                    'certainty_from' => 100,
+                    'certainty_to' => 37
+                ]
             ]);
 
         $response->assertStatus(201);
@@ -1152,7 +1155,7 @@ class ApiEntityTest extends TestCase
             ['url' => '/1/rank', 'error' => 'You do not have the permission to modify an entity', 'verb' => 'patch'],
             ['url' => '/1', 'error' => 'You do not have the permission to delete an entity', 'verb' => 'delete'],
 
-            ['url' => '/8?r=attribute_value&aid=5', 'error' => 'You do not have the permission to get comments', 'verb' => 'get', 'scope' => 'comment'],
+            ['url' => '/resource/8?r=attribute_value&aid=5', 'error' => 'You do not have the permission to get comments', 'verb' => 'get', 'scope' => 'comment'],
             ['url' => '/1/reply', 'error' => 'You do not have the permission to get comments', 'verb' =>'get', 'scope' => 'comment'],
             ['url' => '/1', 'error' => 'You do not have the permission to edit a comment', 'verb' => 'patch', 'data' => [
                 'content' => 'test'
@@ -1217,7 +1220,7 @@ class ApiEntityTest extends TestCase
                 ]
             ],
 
-            ['url' => '/99?r=attribute_value&aid=99', 'error' => 'This attribute value does not exist', 'verb' => 'get', 'scope' => 'comment'],
+            ['url' => '/resource/99?r=attribute_value&aid=99', 'error' => 'This attribute value does not exist', 'verb' => 'get', 'scope' => 'comment'],
             ['url' => '/99/reply', 'error' => 'This comment does not exist', 'verb' => 'get', 'scope' => 'comment'],
             ['url' => '/99', 'error' => 'This comment does not exist', 'verb' => 'patch', 'data' => [
                 'content' => 'test'

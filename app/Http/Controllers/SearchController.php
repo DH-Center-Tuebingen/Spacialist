@@ -40,7 +40,7 @@ class SearchController extends Controller {
                 return $m;
             });
         } else if(Str::startsWith($q, self::$shebangPrefix['entities'])) {
-            $matches = Entity::search(Str::after($q, self::$shebangPrefix['entities']))->get();
+            $matches = Entity::withCount([])->search(Str::after($q, self::$shebangPrefix['entities']))->get();
             $matches->map(function($m) {
                 $m->group = 'entities';
                 return $m;
@@ -66,7 +66,7 @@ class SearchController extends Controller {
                 $f->setFileInfo();
                 return $f;
             });
-            $entities = Entity::search($q)->get();
+            $entities = Entity::withCount([])->search($q)->get();
             $entities->map(function($e) {
                 $e->group = 'entities';
                 return $e;
@@ -99,7 +99,7 @@ class SearchController extends Controller {
             ], 403);
         }
         $q = $request->query('q');
-        $matches = Entity::where('name', 'ilike', '%'.$q.'%')
+        $matches = Entity::withCount([])->where('name', 'ilike', '%'.$q.'%')
             ->orderBy('name')
             ->get();
         $matches->each->append(['ancestors']);
