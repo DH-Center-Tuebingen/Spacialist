@@ -762,7 +762,6 @@ class ApiEntityTest extends TestCase
         ])
             ->patch('/api/v1/entity/8/attribute/5', [
                 'certainty' => 37,
-                'content' => 'This is a test'
             ]);
 
         $response->assertStatus(201);
@@ -771,6 +770,19 @@ class ApiEntityTest extends TestCase
             ->where('attribute_id', 5)
             ->first();
         $this->assertEquals(37, $attrValue->certainty);
+
+        $this->refreshToken($response);
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+            ])
+            ->patch('/api/v1/comment', [
+                'content' => 'This is a test',
+                'resource_type' => 'attribute_value',
+                'resource_id' => $attrValue->id
+                ]);
+                
+        $response->assertStatus(201);
+        $attrValue->comments();
         $this->assertEquals(1, $attrValue->comments_count);
         $this->assertEquals(8, $attrValue->comments[0]->commentable->entity_id);
         $this->assertEquals(37, $attrValue->comments[0]->commentable->certainty);
@@ -805,12 +817,24 @@ class ApiEntityTest extends TestCase
         ])
             ->patch('/api/v1/entity/8/attribute/5', [
                 'certainty' => 37,
-                'content' => 'This is a test',
                 'metadata' => [
                     'certainty_from' => 100,
                     'certainty_to' => 37
                 ]
             ]);
+    
+        $this->refreshToken($response);
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+            ->patch('/api/v1/comment', [
+                'content' => 'This is a test',
+                'resource_type' => 'attribute_value',
+                'resource_id' => $attrValue->id
+            ]);
+
+        $response->assertStatus(201);
+        $attrValue->comments();
 
         $this->refreshToken($response);
 
@@ -829,7 +853,7 @@ class ApiEntityTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])
-            ->get('/api/v1/entity/8/comment/5');
+            ->get('/api/v1/comment/resource/8?r=attribute_value&aid=5');
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
@@ -844,7 +868,7 @@ class ApiEntityTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])
-            ->get("/api/v1/entity/comment/$id/reply");
+            ->get("/api/v1/comment/$id/reply");
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
@@ -981,11 +1005,11 @@ class ApiEntityTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])
-            ->patch('/api/v1/entity/comment/' . $comment->id, [
+            ->patch('/api/v1/comment/' . $comment->id, [
                 'content' => 'updated text',
             ]);
 
-        $response->assertStatus(204);
+        $response->assertStatus(200);
 
         $updComment = Comment::find($comment->id);
         $this->assertEquals('updated text', $updComment->content);
@@ -1094,11 +1118,13 @@ class ApiEntityTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])
-            ->delete('/api/v1/entity/8/attribute/5/comment/' . $comment->id);
+            ->delete('/api/v1/comment/' . $comment->id);
 
         $response->assertStatus(204);
 
         $cnt = Comment::count();
+        $this->assertEquals(1, $cnt);
+        $cnt = Comment::withoutTrashed()->count();
         $this->assertEquals(0, $cnt);
     }
 
@@ -1126,12 +1152,12 @@ class ApiEntityTest extends TestCase
             ['url' => '/1/rank', 'error' => 'You do not have the permission to modify an entity', 'verb' => 'patch'],
             ['url' => '/1', 'error' => 'You do not have the permission to delete an entity', 'verb' => 'delete'],
 
-            ['url' => '/8/comment/5', 'error' => 'You do not have the permission to get comments', 'verb' => 'get'],
-            ['url' => '/comment/1/reply', 'error' => 'You do not have the permission to get comments', 'verb' => 'get'],
-            ['url' => '/comment/1', 'error' => 'You do not have the permission to edit a comment', 'verb' => 'patch', 'data' => [
+            ['url' => '/8?r=attribute_value&aid=5', 'error' => 'You do not have the permission to get comments', 'verb' => 'get', 'scope' => 'comment'],
+            ['url' => '/1/reply', 'error' => 'You do not have the permission to get comments', 'verb' =>'get', 'scope' => 'comment'],
+            ['url' => '/1', 'error' => 'You do not have the permission to edit a comment', 'verb' => 'patch', 'data' => [
                 'content' => 'test'
-            ]],
-            ['url' => '/99/attribute/99/comment/99', 'error' => 'You do not have the permission to delete a comment', 'verb' => 'delete'],
+            ], 'scope' => 'comment'],
+            ['url' => '/99', 'error' => 'You do not have the permission to delete a comment', 'verb' =>'delete', 'scope' => 'comment'],
 
 
             ['url' => '/99/reference', 'error' => 'You do not have the permission to view references', 'verb' => 'get'],
@@ -1141,10 +1167,12 @@ class ApiEntityTest extends TestCase
         ];
 
         foreach($calls as $c) {
+            $url = isset($c['scope']) ? '/api/v1/'.$c['scope'] : '/api/v1/entity';
+            $url .= $c['url'];
             $response = $this->withHeaders([
                     'Authorization' => "Bearer $this->token"
                 ])
-                ->json($c['verb'], '/api/v1/entity' . $c['url']);
+                ->json($c['verb'], $url);
 
             $response->assertStatus(403);
             $response->assertExactJson([
@@ -1180,9 +1208,6 @@ class ApiEntityTest extends TestCase
             ['url' => '/99/attributes', 'error' => 'This entity does not exist', 'verb' => 'patch'],
             ['url' => '/99/attribute/13', 'error' => 'This entity does not exist', 'verb' => 'patch'],
             ['url' => '/1/attribute/99', 'error' => 'This attribute does not exist', 'verb' => 'patch'],
-            ['url' => '/1/attribute/15', 'error' => 'You must set at least a different certainty value or comment content', 'verb' => 'patch', 'data' => [
-                'certainty' => 100
-            ]],
             ['url' => '/99/name', 'error' => 'This entity does not exist', 'verb' => 'patch', 'data' => [
                     'name' => 'Test'
                 ]
@@ -1192,13 +1217,12 @@ class ApiEntityTest extends TestCase
                 ]
             ],
 
-            ['url' => '/99/comment/99', 'error' => 'This attribute value does not exist', 'verb' => 'get'],
-            ['url' => '/comment/99/reply', 'error' => 'This comment does not exist', 'verb' => 'get'],
-            ['url' => '/comment/1', 'error' => 'This comment does not exist', 'verb' => 'patch', 'data' => [
+            ['url' => '/99?r=attribute_value&aid=99', 'error' => 'This attribute value does not exist', 'verb' => 'get', 'scope' => 'comment'],
+            ['url' => '/99/reply', 'error' => 'This comment does not exist', 'verb' => 'get', 'scope' => 'comment'],
+            ['url' => '/99', 'error' => 'This comment does not exist', 'verb' => 'patch', 'data' => [
                 'content' => 'test'
-            ]],
-            ['url' => '/99/attribute/99/comment/1', 'error' => 'This attribute value does not exist', 'verb' => 'delete'],
-            ['url' => '/8/attribute/5/comment/1', 'error' => 'This comment does not exist', 'verb' => 'delete'],
+            ], 'scope' => 'comment'],
+            ['url' => '/99', 'error' => 'This comment does not exist', 'verb' => 'delete', 'scope' => 'comment'],
 
             ['url' => '/99/reference', 'error' => 'This entity does not exist', 'verb' => 'get'],
             ['url' => '/99/reference/99', 'error' => 'This entity does not exist', 'verb' => 'post'],
@@ -1213,10 +1237,12 @@ class ApiEntityTest extends TestCase
         ];
         foreach($calls as $c) {
             $data = array_key_exists('data', $c) ? array_merge($dummyData, $c['data']) : $dummyData;
+            $url = isset($c['scope']) ? '/api/v1/' . $c['scope'] : '/api/v1/entity';
+            $url .= $c['url'];
             $response = $this->withHeaders([
                     'Authorization' => "Bearer $this->token"
                 ])
-                ->json($c['verb'], '/api/v1/entity' . $c['url'], $data);
+                ->json($c['verb'], $url, $data);
 
             $response->assertStatus(400);
             $response->assertExactJson([

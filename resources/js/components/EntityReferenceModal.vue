@@ -1,5 +1,5 @@
 <template>
-    <modal name="entity-references-modal" width="50%" height="80%" :scrollable="true" :draggable="true" :resizable="true" @closed="routeBack" @opened="initModal">
+    <modal name="entity-references-modal" width="50%" height="80%" :scrollable="true" :draggable="true" :resizable="true" @closed="routeBack">
         <div class="modal-content h-100">
             <div class="modal-header">
                 <h5 class="modal-title">{{ $t('main.entity.references.title') }}</h5>
@@ -18,6 +18,7 @@
                     </div>
                 </div>
                 <comment-list
+                    :avatar="48"
                     :comments="comments"
                     @edited="editComment"
                     @on-delete="deleteComment"
@@ -46,9 +47,7 @@
                     <div class="form-group d-flex">
                         <textarea class="form-control" v-model="certainty_description" id="comment-content" ref="comCnt" :placeholder="$t('main.entity.references.certaintyc')"></textarea>
                         <div class="ml-2 mt-auto">
-                            <button type="button" class="btn btn-outline-secondary" id="emoji-picker">
-                                😀
-                            </button>
+                            <emoji-picker @selected="addEmoji"></emoji-picker>
                         </div>
                     </div>
                     <div class="text-center">
@@ -60,7 +59,7 @@
                 <h4 class="mt-3">{{ $t('main.entity.references.bibliography.title') }}</h4>
                 <table class="table table-hover">
                     <tbody>
-                        <tr class="d-flex flex-row" v-for="reference in refs.refs">
+                        <tr class="d-flex flex-row" v-for="reference in refs.refs" :key="reference.id">
                             <td class="text-left py-2 col px-0 pl-1">
                                 <div class="d-flex flex-column">
                                     <h6>{{ reference.bibliography.title }}</h6>
@@ -165,7 +164,6 @@
 
 <script>
     import { EventBus } from '../event-bus.js';
-    import EmojiButton from '@joeattardi/emoji-button';
 
     export default {
         props: {
@@ -184,8 +182,8 @@
             });
         },
         beforeRouteUpdate(to, from, next) {
-            vm.init();
-            next();
+            this.init().then(_ => next());
+            // next();
         },
         beforeRouteLeave(to, from, next) {
             this.$modal.hide('entity-references-modal');
@@ -199,13 +197,13 @@
                 const curr = this.$route;
                 this.entityId = curr.params.id;
                 this.attributeId = curr.params.aid;
-                $http.get(`entity/${this.entityId}/comment/${this.attributeId}`).then(response => {
-                    this.comments.length = 0;
-                    this.comments = response.data;
-                }).catch( e => {
-                }).finally(() => {
-                    this.$modal.show('entity-references-modal');
-                })
+                return $httpQueue.add(() => $http.get(`/comment/resource/${this.entityId}?r=attribute_value&aid=${this.attributeId}`).then(response => {
+                        this.comments.length = 0;
+                        this.comments = response.data;
+                    }).catch( e => {
+                    }).finally(() => {
+                        this.$modal.show('entity-references-modal');
+                }));
             },
             setCertainty(event) {
                 const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
@@ -235,43 +233,54 @@
                 }
                 let data = {
                     certainty: this.refs.value.certainty,
-                    content: this.certainty_description,
                 };
-                // only add metadata if certainty has changed
-                // (as it's the only part of metadata)
-                if(this.initialCertaintyValue != this.refs.value.certainty) {
-                    data.metadata = {
-                        certainty_from: this.initialCertaintyValue,
-                        certainty_to: this.refs.value.certainty
-                    };
-                }
-                if(this.replyTo.comment_id) {
-                    data.reply_to = this.replyTo.comment_id;
-                }
                 $httpQueue.add(() => $http.patch(`/entity/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
-                    const addedComment = response.data.comment;
-                    if(this.replyTo.comment_id) {
-                        let comment = this.comments.find(c => c.id == this.replyTo.comment_id);
-                        if(comment.replies) {
-                            comment.replies.push(addedComment);
+                    let metadata = null;
+                    let replyToId = null;
+                    // only add metadata if certainty has changed
+                    // (as it's the only part of metadata)
+                    if(this.initialCertaintyValue != this.refs.value.certainty) {
+                        metadata = {
+                            certainty_from: this.initialCertaintyValue,
+                            certainty_to: this.refs.value.certainty
+                        };
+                        if(!this.certainty_description) {
+                            metadata.is_empty = true;
                         }
-                        comment.replies_count++;
-                        this.cancelReplyTo();
-                    } else {
-                        this.comments.push(addedComment);
-                        this.refs.value.comments_count = this.comments.length;
                     }
-                    this.certainty_description = '';
-                    this.initialCertaintyValue = this.refs.value.certainty;
-                    const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
-                    this.$showToast(
-                        this.$t('main.entity.references.toasts.updated-certainty.title'),
-                        this.$t('main.entity.references.toasts.updated-certainty.msg', {
-                            name: attributeName,
-                            i: this.refs.value.certainty
-                        }),
-                        'success'
-                    );
+                    if(this.replyTo.comment_id) {
+                        replyToId = this.replyTo.comment_id;
+                    }
+                    const resource = {
+                        id: response.data.id,
+                        type: 'attribute_value'
+
+                    };
+                    this.$postComment(this.certainty_description, resource, replyToId, metadata, comment => {
+                        const addedComment = comment;
+                        if(replyToId) {
+                            let comment = this.comments.find(c => c.id == replyToId);
+                            if(comment.replies) {
+                                comment.replies.push(addedComment);
+                            }
+                            comment.replies_count++;
+                            this.cancelReplyTo();
+                        } else {
+                            this.comments.push(addedComment);
+                            this.refs.value.comments_count = this.comments.length;
+                        }
+                        this.certainty_description = '';
+                        this.initialCertaintyValue = this.refs.value.certainty;
+                        const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
+                        this.$showToast(
+                            this.$t('main.entity.references.toasts.updated-certainty.title'),
+                            this.$t('main.entity.references.toasts.updated-certainty.msg', {
+                                name: attributeName,
+                                i: this.refs.value.certainty
+                            }),
+                            'success'
+                        );
+                    });
                 }));
             },
             getComment(list, id) {
@@ -286,7 +295,7 @@
             },
             loadReplies(event) {
                 const cid = event.comment_id;
-                $http.get(`entity/comment/${cid}/reply`).then(response => {
+                $http.get(`/comment/${cid}/reply`).then(response => {
                     let comment = this.getComment(this.comments, cid);
                     if(comment) {
                         if(!comment.replies) {
@@ -301,10 +310,11 @@
                 const data = {
                     content: event.content
                 };
-                $http.patch(`entity/comment/${cid}`, data).then(response => {
+                $http.patch(`/comment/${cid}`, data).then(response => {
                     let comment = this.getComment(this.comments, cid);
                     if(comment) {
                         comment.content = event.content;
+                        comment.updated_at = response.data.updated_at;
                     }
                 });
             },
@@ -322,11 +332,9 @@
                 this.replyTo.author.nickname = null;
             },
             deleteComment(event) {
-                const eid = this.entityId;
-                const aid = this.attributeId;
                 const cid = event.comment_id;
                 const parent_id = event.reply_to;
-                $http.delete(`entity/${eid}/attribute/${aid}/comment/${cid}`).then(response => {
+                $http.delete(`/comment/${cid}`).then(response => {
                     let siblings, parent;
                     if(parent_id) {
                         parent = this.getComment(this.comments, parent_id);
@@ -334,28 +342,13 @@
                     } else {
                         siblings = this.comments;
                     }
-                    const idx = siblings.findIndex(s => s.id == cid);
-                    siblings.splice(idx, 1);
-                    if(parent) {
-                        parent.replies_count--;
-                    } else {
-                        this.refs.value.comments_count = this.comments.length;
-                    }
+                    const comment = siblings.find(s => s.id == cid);
+                    comment.deleted_at = Date();
+                    
                 });
             },
-            initModal() {
-                this.initEmojiPicker();
-            },
-            initEmojiPicker() {
-                const emojiButton = document.getElementById('emoji-picker');
-
-                this.picker.on('emoji', emoji => {
-                    this.certainty_description += emoji;
-                });
-
-                emojiButton.addEventListener('click', _ => {
-                    this.picker.togglePicker(emojiButton);
-                });
+            addEmoji(event) {
+                this.certainty_description += event.emoji;
             },
             getCertaintyClass(value, prefix = 'bg') {
                 let classes = {};
@@ -479,11 +472,6 @@
                         nickname: null
                     }
                 },
-                picker: new EmojiButton({
-                    autoHide: false,
-                    position: 'bottom-end',
-                    zIndex: 1021
-                }),
             }
         },
         computed: {

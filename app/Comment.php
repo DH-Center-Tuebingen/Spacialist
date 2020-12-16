@@ -2,10 +2,12 @@
 
 namespace App;
 
+use App\Traits\SoftDeletesWithTrashed;
 use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
+    use SoftDeletesWithTrashed;
     /**
      * The attributes that are assignable.
      *
@@ -33,6 +35,14 @@ class Comment extends Model
         'content' => 'nullable|string',
         'metadata' => 'nullable|array',
         'reply_to' => 'nullable|integer|exists:comments,id'
+    ];
+
+    const postKeys = [
+        'content' => 'nullable|string',
+        'metadata' => 'nullable|array',
+        'reply_to' => 'nullable|integer|exists:comments,id',
+        'resource_id' => 'required|integer',
+        'resource_type' => 'required|string',
     ];
 
     const patchKeys = [

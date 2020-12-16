@@ -2,12 +2,14 @@
 
 namespace App;
 
+use App\Traits\CommentTrait;
 use Illuminate\Database\Eloquent\Model;
 use Nicolaslopezj\Searchable\SearchableTrait;
 
 class Entity extends Model
 {
     use SearchableTrait;
+    use CommentTrait;
 
     /**
      * The attributes that are assignable.

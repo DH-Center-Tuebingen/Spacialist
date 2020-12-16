@@ -41,66 +41,33 @@
                                 {{ unreadNotifications.length }}
                             </span>
                         </a>
-                        <div class="dropdown-menu row dropdown-menu-right bg-dark text-light py-1" aria-labelledby="notifications-navbar" style="min-width: 30rem;">
+                        <div class="dropdown-menu dropdown-menu-right stays-open row bg-dark text-light py-1" aria-labelledby="notifications-navbar" style="min-width: 30rem;">
                             <div class="col-12 d-flex flex-row justify-content-between pb-1">
-                                <span>Notifications ({{ notifications.length }})</span>
+                                <span>
+                                    {{ $t('global.notifications.count', {cnt: notifications.length}) }}
+                                </span>
                                 <a href="#" class="text-light" @click.prevent.stop="markAllNotificationsAsRead()">
-                                    Mark all as read
+                                    {{ $t('global.notifications.mark_all_as_read') }}
                                 </a>
                             </div>
                             <div class="col-12 bg-light text-dark px-0">
-                                <div class="d-flex flex-row py-2 px-3 bg-light" :class="{'bg-light-dark': !(idx % 2), 'bg-light': (idx % 2)}" v-for="(n, idx) in notifications" :key="n.id">
-                                    <div class="mr-5" :class="{'opacity-50': !!n.read_at}">
-                                        <span>
-                                            {{ n.data.user_id }}
-                                        </span>
-                                    </div>
-                                    <div class="d-flex flex-column small flex-grow-1">
-                                        <div class="d-flex flex-row justify-content-between">
-                                            <span class="font-weight-bold text-primary">
-                                                <template v-if="n.type == 'App\\Notifications\\CommentPosted'">
-                                                    New Comment/Reply
-                                                </template>
-                                                <template v-else>
-                                                    New Notification
-                                                </template>
-                                            </span>
-                                            <div class="d-flex flex-row">
-                                                <div v-if="n.data.persistent">
-                                                    <span class="badge badge-warning mr-2">
-                                                        persistent
-                                                    </span>
-                                                </div>
-                                                <a href="#" class="text-muted" @click.prevent.stop="markNotificationAsRead(n.id)" v-if="!n.read_at">
-                                                    <i class="fas fa-xs fa-check"></i>
-                                                </a>
-                                                <a v-if="!n.data.persistent" href="#" class="text-muted ml-2" @click.prevent.stop="deleteNotification(n.id)">
-                                                    <i class="fas fa-xs fa-times"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="text-muted" :class="{'opacity-50': !!n.read_at}">
-                                            <div v-if="n.type == 'App\\Notifications\\CommentPosted'">
-                                                {{ n.data.user_id }} commented on ...
-                                            </div>
-                                            <div>
-                                                {{ n.data.content | truncate(100) }}
-                                            </div>
-                                        </div>
-                                        <div class="text-info" :class="{'opacity-50': !!n.read_at}">
-                                            <span data-toggle="tooltip" :title="n.created_at | datestring">
-                                                {{ n.created_at | ago }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <notification-body
+                                    v-for="(n, idx) in notifications"
+                                    :key="n.id"
+                                    :avatar="32"
+                                    :notf="n"
+                                    :odd="!!(idx % 2)"
+                                    :small-text="true"
+                                    @read="markNotificationAsRead"
+                                    @delete="deleteNotification">
+                                </notification-body>
                                 <p class="py-2 px-3 mb-0 bg-light text-dark" v-if="!notifications.length">
-                                    No Notifications
+                                    {{ $t('global.notifications.empty_list') }}
                                 </p>
                             </div>
                             <div class="text-center pt-1">
                                 <router-link :to="{name: 'notifications', params: { id: $auth.user().id }}" class="text-light">
-                                    View All
+                                    {{ $t('global.notifications.view_all') }}
                                 </router-link>
                             </div>
                         </div>
@@ -279,40 +246,14 @@
                 if(!this.rtc.player) return;
                 this.rtc.player.record().stop();
             },
-            markNotificationAsRead(id) {
-                // return $httpQueue.add(() => $http.patch(`notification/read/${id}`, data).then(response => {
-                    const notifs = this.$auth.user().notifications;
-                    for(let i=0; i<notifs.length; i++) {
-                        if(notifs[i].id == id) {
-                            notifs[i].read_at = Date();
-                            break;
-                        }
-                    }
-                // }));
+            markNotificationAsRead(event) {
+                this.$markAsRead(event.id);
             },
             markAllNotificationsAsRead() {
-                // return $httpQueue.add(() => $http.patch(`notification/read/all`, data).then(response => {
-                    const notifs = this.$auth.user().notifications;
-                    for(let i=0; i<notifs.length; i++) {
-                        notifs[i].read_at = Date();
-                    }
-                // }));
+                this.$markAllAsRead();
             },
-            deleteNotification(id) {
-                // return $httpQueue.add(() => $http.delete(`notification/${id}`, data).then(response => {
-                    const notifs = this.$auth.user().notifications;
-                    for(let i=0; i<notifs.length; i++) {
-                        if(notifs[i].id == id) {
-                            notifs.splice(i, 1);
-                            break;
-                        }
-                    }
-                // }));
-            },
-            deleteNotifications() {
-                // return $httpQueue.add(() => $http.delete(`notification/`, data).then(response => {
-                    this.$auth.user().notifications = [];
-                // }));
+            deleteNotification(event) {
+                this.$deleteNotification(event.id);
             },
             logout() {
                 this.$auth.logout({
@@ -348,7 +289,7 @@
             }
         },
         computed: {
-            loggedIn: function() {
+            loggedIn() {
                 return this.$isLoggedIn();
             },
             notifications() {
@@ -359,6 +300,19 @@
             },
             authUser() {
                 return this.$getUser();
+            }
+        },
+        watch: {
+            // prevent notification dropdown from close on click
+            loggedIn(newVal, oldVal) {
+                if(newVal && !oldVal) {
+                    this.$nextTick(_ => {
+                        $('.dropdown-menu.stays-open').on("click.bs.dropdown", function (e) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        });
+                    })
+                }
             }
         }
     }

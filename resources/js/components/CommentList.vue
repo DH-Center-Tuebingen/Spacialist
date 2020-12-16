@@ -1,9 +1,9 @@
 <template>
     <div>
-        <div v-for="comment in comments" :key="comment.id" class="mt-3 d-flex" v-if="!hideComments && comments.length > 0">
+        <div v-for="comment in comments" :key="comment.id" class="mt-2 d-flex" v-if="!hideComments && comments.length > 0">
             <slot name="avatar" :user="comment.author">
                 <a href="#" @click.prevent="$showUserInfo(comment.author)">
-                    <user-avatar :user="comment.author" :size="64"></user-avatar>
+                    <user-avatar :user="comment.author" :size="avatar"></user-avatar>
                 </a>
             </slot>
             <div class="ml-3 flex-grow-1">
@@ -33,7 +33,7 @@
                             <span class="text-muted font-weight-light" :title="comment.updated_at | datestring">
                                 {{ comment.updated_at | ago }}
                             </span>
-                            <span class="dropdown">
+                            <span class="dropdown" v-if="!comment.deleted_at">
                                 <span :id="`edit-comment-dropdown-${comment.id}`" class="clickable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fas fa-fw fa-ellipsis-h"></i>
                                 </span>
@@ -51,24 +51,33 @@
                             </span>
                         </div>
                     </div>
-                    <slot name="body-editing" :comment="comment" :content="editing.content" v-if="editing.id == comment.id">
-                        <div class="card-body p-3">
-                            <textarea class="form-control" v-model="editing.content"></textarea>
-                            <div class="mt-1 d-flex flex-row justify-content-end">
-                                <button type="button" class="btn btn-success btn-sm mr-2" :disabled="editing.content == comment.content" @click="emitEdited(comment, editing.content)">
-                                    <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
-                                </button>
-                                <button type="button" class="btn btn-danger btn-sm" @click="disableEditing()">
-                                    <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
-                                </button>
+                    <div v-if="!isEmpty(comment)">
+                        <slot name="body-editing" :comment="comment" :content="editing.content" v-if="!isDeleted(comment) && editing.id == comment.id">
+                            <div class="card-body px-3 py-2">
+                                <textarea class="form-control" v-model="editing.content"></textarea>
+                                <div class="mt-1 d-flex flex-row justify-content-end">
+                                    <button type="button" class="btn btn-success btn-sm mr-2" :disabled="editing.content == comment.content" @click="emitEdited(comment, editing.content)">
+                                        <i class="fas fa-fw fa-save"></i> {{ $t('global.save') }}
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" @click="disableEditing()">
+                                        <i class="fas fa-fw fa-times"></i> {{ $t('global.cancel') }}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </slot>
-                    <slot name="body" :comment="comment" v-else>
-                        <div class="card-body p-3" v-if="comment.content">
-                            <p class="card-text" v-html="$options.filters.mentionify(comment.content)"></p>
-                        </div>
-                    </slot>
+                        </slot>
+                        <slot name="body" :comment="comment" v-else-if="!isDeleted(comment)">
+                            <div class="card-body px-3 py-2" v-if="comment.content">
+                                <p class="card-text" v-html="$options.filters.mentionify(comment.content)"></p>
+                            </div>
+                        </slot>
+                        <slot name="body-deleted" :comment="comment" v-else>
+                            <div class="card-body bg-warning px-3 py-2" style="opacity: 0.75;">
+                                <p class="card-text font-italic">
+                                    {{ $t('global.comments.deleted_info') }}
+                                </p>
+                            </div>
+                        </slot>
+                    </div>
                 </div>
                 <div v-if="comment.replies_count > 0" class="d-flex flex-row justify-content-end">
                     <a href="#" class="small text-body" @click.prevent="toggleReplies(comment)">
@@ -117,6 +126,11 @@
                 required: true,
                 type: Array
             },
+            avatar: {
+                required: false,
+                type: Number,
+                default: 32
+            },
             showHideButton: {
                 required: false,
                 type: Boolean,
@@ -126,6 +140,12 @@
         mounted() {
         },
         methods: {
+            isDeleted(comment) {
+                return !!comment.deleted_at;
+            },
+            isEmpty(comment) {
+                return comment.metadata && comment.metadata.is_empty;
+            },
             enableEditing(comment) {
                 if(this.editing.id) {
                     this.editing.content = null;

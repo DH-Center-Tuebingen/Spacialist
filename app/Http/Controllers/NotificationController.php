@@ -23,17 +23,10 @@ class NotificationController extends Controller
     {
         $user = auth()->user();
 
-        try {
-            $notif = Notification::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        $notif = $user->notifications->where('id', $id)->first();
+        if(!isset($notif)) {
             return response()->json([
                 'error' => __('This notification does not exist')
-            ], 400);
-        }
-
-        if (count($user->notifications()->where('id', $id)->all()) === 0) {
-            return response()->json([
-                'error' => __('This notification does not exist for this user')
             ], 400);
         }
 
@@ -41,10 +34,15 @@ class NotificationController extends Controller
         return response()->json(null, 204);
     }
 
-    public function markAllNotificationsAsRead()
+    public function markAllNotificationsAsRead(Request $request)
     {
         $user = auth()->user();
-        $user->unreadNotifications->markAsRead();
+        $this->validate($request, [
+            'ids' => 'required|array',
+            'ids.*' => 'exists:notifications,id',
+        ]);
+        $user->
+        unreadNotifications->whereIn('id', $request->input('ids'))->markAsRead();
         return response()->json(null, 204);
     }
 
@@ -56,15 +54,8 @@ class NotificationController extends Controller
     {
         $user = auth()->user();
 
-        try {
-            $notif = Notification::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'error' => __('This notification does not exist')
-            ], 400);
-        }
-
-        if(count($user->notifications()->where('id', $id)->all()) === 0) {
+        $notif = $user->notifications->where('id', $id)->first();
+        if(!isset($notif)) {
             return response()->json([
                 'error' => __('This notification does not exist for this user')
             ], 400);
@@ -74,10 +65,17 @@ class NotificationController extends Controller
         return response()->json(null, 204);
     }
 
-    public function deleteNotifications()
+    public function deleteNotifications(Request $request)
     {
         $user = auth()->user();
-        $user->notifications()->delete();
+        $this->validate($request, [
+            'ids' => 'required|array',
+            'ids.*' => 'exists:notifications,id',
+        ]);
+        $notifications = $user->notifications->whereIn('id', $request->input('ids'));
+        foreach($notifications as $n) {
+            $n->delete();
+        }
         return response()->json(null, 204);
     }
 

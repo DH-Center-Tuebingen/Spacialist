@@ -14,7 +14,7 @@ trait CommentTrait
         $this->withCount[] = 'comments';
     }
 
-    public function addComment($data, $user = null) {
+    public function addComment($data, $user = null, $notify = true, $resourceMetadata) {
         if(!isset($user)) $user = auth()->user();
         $comment = new Comment();
         $comment->user_id = $user->id;
@@ -28,20 +28,22 @@ trait CommentTrait
             $this->comments()->save($comment);
         }
 
-        $oldComments = Comment::where('commentable_id', $comment->commentable_id)
-            ->where('commentable_type', $comment->commentable_type)
-            ->whereHas('author', function(Builder $query) use($user) {
-                $query->where('id', '<>', $user->id);
-                // $query->whereNull('deleted_at');
-            })
-            ->select('user_id')
-            ->groupBy('user_id')
-            ->get();
-        
-        foreach($oldComments as $c) {
-            $notifUser = User::find($c->user_id);
-
-            $notifUser->notify(new CommentPosted($comment));
+        if($notify) {
+            $oldComments = Comment::where('commentable_id', $comment->commentable_id)
+                ->where('commentable_type', $comment->commentable_type)
+                ->whereHas('author', function(Builder $query) use($user) {
+                    $query->where('id', '<>', $user->id);
+                    $query->whereNull('deleted_at');
+                })
+                ->select('user_id')
+                ->groupBy('user_id')
+                ->get();
+            
+            foreach($oldComments as $c) {
+                $notifUser = User::find($c->user_id);
+    
+                $notifUser->notify(new CommentPosted($comment, [], $resourceMetadata));
+            }
         }
 
         $comment->load('author');
@@ -64,6 +66,6 @@ trait CommentTrait
     }
 
     public function comments() {
-        return $this->morphMany('App\Comment', 'commentable');
+        return $this->morphMany('App\Comment', 'commentable')->orderBy('id');
     }
 }

@@ -677,6 +677,8 @@ import OlMap from './components/OlMap.vue';
 import ColorGradient from './components/Gradient.vue';
 import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
 import CommentList from './components/CommentList.vue';
+import NotificationBody from './components/NotificationBody.vue';
+import EmojiPicker from './components/EmojiPicker.vue';
 
 // Page Components
 import EntityReferenceModal from './components/EntityReferenceModal.vue';
@@ -699,6 +701,8 @@ Vue.component('ol-map', OlMap);
 Vue.component('color-gradient', ColorGradient);
 Vue.component('entity-breadcrumbs', EntityBreadcrumbs);
 Vue.component('comment-list', CommentList);
+Vue.component('notification-body', NotificationBody);
+Vue.component('emoji-picker', EmojiPicker);
 Vue.component('entity-reference-modal', EntityReferenceModal);
 Vue.component('discard-changes-modal', DiscardChangesModal);
 Vue.component('about-dialog', AboutDialog);

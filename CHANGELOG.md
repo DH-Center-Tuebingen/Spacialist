@@ -3,7 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## 0.8 - Helgö (Unreleased)
 ### Added
-- Support to extend all data with a comment section
+- Support to extend all data with a comment section. Currently:
+  - Attributes
+  - Entities
+- Notification-Panel
+  - Get a notification when a new comment is posted (and the notified user has already commented on this resource)
 - User profile to allow users to edit their information
   - Support for phone numbers and avatars
 ### Fixed

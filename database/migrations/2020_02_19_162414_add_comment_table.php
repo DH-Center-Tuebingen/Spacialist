@@ -3,7 +3,7 @@
 use App\AttributeValue;
 use App\Comment;
 use App\User;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -26,6 +26,7 @@ class AddCommentTable extends Migration
             $table->text('content')->nullable();
             $table->jsonb('metadata')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('reply_to')->references('id')->on('comments')->onDelete('cascade');

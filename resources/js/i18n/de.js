@@ -177,11 +177,44 @@ const de = {
         'has-tags': 'Hat keine Schlagworte | Hat ein Schlagwort | Hat {cnt} Schlagworte',
         'from-subentity': 'Gehört zu einer Sub-Entität',
         comments: {
+            deleted_info: 'Kommentar gelöscht',
             empty_list: 'Bisher keine Kommentare hinzugefügt.',
             hide: 'Kommentare ausblenden',
             show: 'Kommentare anzeigen',
+            submit: 'Kommtentar abschicken',
+            text_placeholder: 'Kommentar eingeben',
             hide_reply: '<span class="font-weight-bold">Eine</span> Antwort ausblenden | <span class="font-weight-bold">{cnt}</span> Antworten ausblenden',
-            show_reply: '<span class="font-weight-bold">Eine</span> Antwort anzeigen | <span class="font-weight-bold">{cnt}</span> Antworten anzeigen'
+            show_reply: '<span class="font-weight-bold">Eine</span> Antwort anzeigen | <span class="font-weight-bold">{cnt}</span> Antworten anzeigen',
+            fetching: 'Lade Kommentare&hellip;',
+            fetching_failed: 'Laden der Kommentare fehlgeschlagen!',
+            retry_failed: 'Wiederholen',
+        },
+        notifications: {
+            title: 'Benachrichtigungen',
+            count: 'Benachrichtigungen ({cnt})',
+            mark_all_as_read: 'Alle als gelesen markieren',
+            delete_all: 'Alle löschen',
+            empty_list: 'Keine Benachrichtigungen',
+            view_all: 'Alle anzeigen',
+            tab_all: 'Alle',
+            tab_unread: 'Ungelesen',
+            tab_read: 'Gelesen',
+            tab_system: 'System-Benachrichtigungen',
+            tab_default_empty_list: 'Du bist auf dem neusten Stand. Keine Benachrichtigungen!',
+            tab_unread_empty_list: 'Du bist auf dem neusten Stand. Keine neuen Benachrichtigungen!',
+            tab_system_empty_list: 'Keine System-Benachrichtigungen. Du musst nichts unternehmen!',
+            body: {
+                title: 'Neue Benachrichtigung',
+                type: {
+                    system: 'System-Nachricht'
+                },
+                user_left_comment_on: 'hat bei <span class="font-weight-bold">{name}</span> einen Kommentar hinterlassen.',
+                reply: 'Antworten',
+                mention_info: 'Schreibe deine Antwort. Verwende @nickname um andere Nutzer zu erwähnen.',
+                reply_sent: 'Antwort abgeschickt',
+                reply_to_user: '<span class="font-weight-bold">{name}</span> antworten',
+                reply_to_chat: 'Als Kommentar antworten',
+            }
         }
     },
     main: {
@@ -214,6 +247,10 @@ const de = {
                         type: 'Entitätstyp - Absteigend'
                     }
                 }
+            },
+            tabs: {
+                attributes: 'Attribute',
+                comments: 'Kommentare',
             },
             modals: {
                 add: {
