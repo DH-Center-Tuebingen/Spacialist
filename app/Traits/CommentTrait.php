@@ -50,21 +50,6 @@ trait CommentTrait
         return $comment;
     }
 
-    public function removeComment($cid, $callback = null) {
-        try {
-            $comment = Comment::findOrFail($cid);
-        } catch(ModelNotFoundException $e) {
-            return false;
-        }
-
-        if(isset($callback)) {
-            $callback($comment);
-        }
-
-        $comment->delete();
-        return true;
-    }
-
     public function comments() {
         return $this->morphMany('App\Comment', 'commentable')->orderBy('id');
     }

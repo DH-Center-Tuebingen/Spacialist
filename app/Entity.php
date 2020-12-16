@@ -4,11 +4,9 @@ namespace App;
 
 use App\Traits\CommentTrait;
 use Illuminate\Database\Eloquent\Model;
-use Nicolaslopezj\Searchable\SearchableTrait;
 
 class Entity extends Model
 {
-    use SearchableTrait;
     use CommentTrait;
 
     /**
@@ -31,15 +29,6 @@ class Entity extends Model
 
     protected $with = [
         'user',
-    ];
-
-    protected $searchable = [
-        'columns' => [
-            'entities.name' => 10,
-        ],
-        'joins' => [
-
-        ],
     ];
 
     const rules = [

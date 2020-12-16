@@ -844,8 +844,10 @@ class ApiEntityTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])
-            ->patch('/api/v1/entity/8/attribute/5', [
+            ->post('/api/v1/comment', [
                 'content' => 'This is a response to test',
+                'resource_type' => 'attribute_value',
+                'resource_id' => $attrValue->id,
                 'reply_to' => $attrValue->comments[0]->id
             ]);
 
@@ -884,9 +886,6 @@ class ApiEntityTest extends TestCase
             ->first();
         $this->assertEquals(1, count($attrValue->comments[0]->replies));
         $this->assertEquals('This is a response to test', $attrValue->comments[0]->replies[0]->content);
-
-        $this->assertTrue($attrValue->removeComment($attrValue->comments[0]->id));
-        $this->assertFalse($attrValue->removeComment($attrValue->comments[0]->id));
     }
 
     /**

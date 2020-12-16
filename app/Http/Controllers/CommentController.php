@@ -175,7 +175,7 @@ class CommentController extends Controller {
             ], 403);
         }
         try {
-            $comment = Comment::findOrFail($id);
+            $comment = Comment::withoutTrashed()->findOrFail($id);
         } catch(ModelNotFoundException $e) {
             return response()->json([
                 'error' => __('This comment does not exist')
