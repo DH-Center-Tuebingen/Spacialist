@@ -9,6 +9,10 @@ class EntityFile extends Model
 {
     use LogsActivity;
 
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $ignoreChangedAttributes = ['user_id'];
+
     protected $table = 'entity_files';
 
     public $timestamps = false; // disable updated_at and created_at in ->save()
@@ -25,10 +29,10 @@ class EntityFile extends Model
     protected $fillable = [
         'file_id',
         'entity_id',
-        'lasteditor',
+        'user_id',
     ];
 
-    protected static $logOnlyDirty = true;
-    protected static $logFillable = true;
-    protected static $ignoreChangedAttributes = ['lasteditor'];
+    public function user() {
+        return $this->belongsTo('App\User');
+    }
 }

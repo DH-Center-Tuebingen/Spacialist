@@ -2,6 +2,8 @@ const en = {
     global: {
         save: 'Save',
         delete: 'Delete',
+        deactivate: 'Deactivate',
+        reactivate: 'Reactivate',
         remove: 'Remove',
         cancel: 'Cancel',
         close: 'Close',
@@ -20,6 +22,11 @@ const en = {
         'delete-name': {
             title: 'Delete {name}',
             desc: 'Do you really want to delete {name}?'
+        },
+        'deactivate-name': {
+            title: 'Deactivate {name}',
+            desc: 'Do you really want to deactivate {name}?',
+            info: 'Certain entries can not be deleted or have to be deactivated first. Otherwise deleting these entries could lead to data loss.'
         },
         'edit-name': {
             title: 'Edit {name}'
@@ -74,7 +81,14 @@ const en = {
         },
         user: {
             settings: 'Preferences',
-            logout: 'Logout'
+            profile: 'Profile',
+            logout: 'Logout',
+            info_title: 'User Information',
+            member_since: 'Member since',
+            deactivated_since: '<span class="font-weight-bold">deactivated</span> since {dt}',
+            contact: 'Contact',
+            avatar: 'Avatar',
+            invalid_orcid: 'This ORCID is invalid',
         },
         select: {
             placehoder: 'Select option',
@@ -135,8 +149,10 @@ const en = {
         'display-name': 'Displayname',
         email: 'E-Mail Address',
         email_or_nick: 'E-Mail Address or Nickname',
+        phonenumber: 'Phone number',
         password: 'Password',
         'remember-me': 'Remember me',
+        'orcid': 'ORCID',
         description: 'Description',
         roles: 'Roles',
         permissions: 'Permissions',
@@ -144,6 +160,7 @@ const en = {
         created_at: 'Created',
         updated_at: 'Updated',
         timestamp: 'Timestamp',
+        deactivated_at: 'Deactivated',
         options: 'Options',
         type: 'Type',
         'root-attribute': 'Parent-Attribute',
@@ -252,6 +269,9 @@ const en = {
         },
         user: {
             'add-button': 'Add new User',
+            active_users: 'Active Users',
+            deactivated_users: 'Deactivated Users',
+            empty_list: 'User-list is empty',
             toasts: {
                 updated: {
                     title: 'User updated',

@@ -1,3 +1,5 @@
+import UserInfoModal from './components/modals/UserInfo.vue';
+
 // Validators
 Vue.prototype.$validateObject = function(value) {
     // concepts is valid if it is either an object
@@ -218,6 +220,14 @@ Vue.prototype.$getEntityColors = function(id, alpha = 0.5) {
         color: textColor,
         backgroundColor: color
     };
+}
+
+Vue.prototype.$showUserInfo = function(user) {
+    this.$modal.show(UserInfoModal, {
+        user: user,
+    }, {
+        height: 'auto'
+    });
 }
 
 Vue.prototype.$hasPreference = function(prefKey, prop) {

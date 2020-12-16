@@ -103,11 +103,15 @@
                     </li>
                     <li class="nav-item dropdown" v-if="loggedIn">
                         <a href="#" class="nav-link dropdown-toggle" id="user-dropdown" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
-                            <i class="fas fa-fw fa-user"></i> {{ $auth.user().name }}
+                            <user-avatar :user="authUser" :size="20" style="vertical-align: middle;"></user-avatar>
+                            {{ authUser.name }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdown">
-                            <router-link :to="{name: 'userpreferences', params: { id: $auth.user().id }}" class="dropdown-item">
-                                <i class="fas fa-fw fa-cog"></i> {{ $t('global.user.settings') }}
+                            <router-link :to="{name: 'userprofile'}" class="dropdown-item">
+                                <i class="fas fa-fw fa-id-badge"></i> {{ $t('global.user.profile') }}
+                            </router-link>
+                            <router-link :to="{name: 'userpreferences', params: { id: authUser.id }}" class="dropdown-item">
+                                <i class="fas fa-fw fa-user-cog"></i> {{ $t('global.user.settings') }}
                             </router-link>
                             <router-link :to="{name: 'useractivity', params: { id: $auth.user().id }}" class="dropdown-item">
                                 <i class="fas fa-fw fa-user-clock"></i> {{ $t('global.activity') }}
@@ -243,8 +247,13 @@
             }
         },
         computed: {
-            loggedIn: function() {
+            loggedIn() {
                 return this.$auth.check();
+            },
+            authUser() {
+                if(!this.loggedIn) return {};
+
+                return this.$auth.user() ? this.$auth.user() : {};
             }
         }
     }

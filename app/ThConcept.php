@@ -20,13 +20,13 @@ class ThConcept extends Model
         'concept_url',
         'concept_scheme',
         'is_top_concept',
-        'lasteditor',
+        'user_id',
     ];
 
     protected static $logOnlyDirty = true;
     protected static $logFillable = true;
     protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['lasteditor'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
     public static function getMap($lang = 'en') {
         $concepts = \DB::select(\DB::raw("
@@ -82,6 +82,10 @@ class ThConcept extends Model
             ";
         }
         return DB::select($query);
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function labels() {

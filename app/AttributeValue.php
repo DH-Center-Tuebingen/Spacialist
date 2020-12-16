@@ -30,7 +30,7 @@ class AttributeValue extends Model
         'thesaurus_val',
         'certainty',
         'certainty_description',
-        'lasteditor',
+        'user_id',
     ];
 
     // TODO always hide *_val in favor of (computed) value?
@@ -52,7 +52,7 @@ class AttributeValue extends Model
     protected static $logOnlyDirty = true;
     protected static $logFillable = true;
     protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['lasteditor'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
     const patchRules = [
         'certainty' => 'integer|between:0,100',
@@ -84,6 +84,10 @@ class AttributeValue extends Model
             $this->{$k} = $v;
         }
         $this->save();
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function entity() {

@@ -43,4 +43,15 @@ class ThLanguageTest extends TestCase
             ],
         ], $l->labels->toArray());
     }
+
+    /**
+     * Test get last editor of first language
+     *
+     * @return void
+     */
+    public function testGetLanguageLasteditor()
+    {
+        $lang = ThLanguage::first();
+        $this->assertEquals(1, $lang->user->id);
+    }
 }

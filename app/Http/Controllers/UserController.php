@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\File;
 use App\Permission;
 use App\Role;
 use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
@@ -43,11 +45,13 @@ class UserController extends Controller
                 'error' => __('You do not have the permission to view users')
             ], 403);
         }
-        $users = User::with('roles')->orderBy('id')->get();
+        $users = User::withoutTrashed()->with('roles')->orderBy('id')->get();
+        $delUsers = User::onlyTrashed()->with('roles')->orderBy('id')->get();
         $roles = Role::orderBy('id')->get();
 
         return response()->json([
             'users' => $users,
+            'deleted_users' => $delUsers,
             'roles' => $roles
         ]);
     }
@@ -124,6 +128,31 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+    public function addAvatar(Request $request, $id) {
+        $user = auth()->user();
+        $this->validate($request, [
+            'file' => 'required|file',
+        ]);
+
+        try {
+            $user = User::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This user does not exist')
+            ], 400);
+        }
+
+        $file = $request->file('file');
+        $path = File::uploadAvatar($file, $user);
+        $user->avatar = $path;
+        $user->save();
+
+        // return user without roles relation
+        $user->unsetRelation('roles');
+
+        return response()->json($user);
+    }
+
     public function addRole(Request $request) {
         $user = auth()->user();
         if(!$user->can('add_edit_role')) {
@@ -160,7 +189,11 @@ class UserController extends Controller
         }
         $this->validate($request, [
             'roles' => 'array',
-            'email' => 'email'
+            'email' => 'email',
+            'name' => 'string|max:255',
+            'nickname' => 'alpha_dash|max:255|unique:users,nickname',
+            'phonenumber' => 'nullable|string|max:255',
+            'orcid' => 'nullable|orcid',
         ]);
 
         if(!$this->hasInput($request)) {
@@ -199,11 +232,46 @@ class UserController extends Controller
             $user->email = Str::lower($request->get('email'));
             $user->save();
         }
+        if($request->has('name')) {
+            $user->name = $request->get('name');
+            $user->save();
+        }
+        if($request->has('nickname')) {
+            $user->nickname = Str::lower($request->get('nickname'));
+            $user->save();
+        }
+        if($request->has('phonenumber')) {
+            $user->setMetadata(['phonenumber' => $request->get('phonenumber')]);
+        }
+        if($request->has('orcid')) {
+            $user->setMetadata(['orcid' => $request->get('orcid')]);
+        }
 
         // return user without roles relation
         $user->unsetRelation('roles');
 
         return response()->json($user);
+    }
+
+    public function restoreUser($id)
+    {
+        $user = auth()->user();
+        if (!$user->can('delete_users')) {
+            return response()->json([
+                'error' => __('You do not have the permission to delete users')
+            ], 403);
+        }
+
+        try {
+            $delUser = User::onlyTrashed()->findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This user does not exist')
+            ], 400);
+        }
+
+        $delUser->restore();
+        return response()->json(null, 204);
     }
 
     public function patchRole(Request $request, $id) {
@@ -271,7 +339,7 @@ class UserController extends Controller
         }
 
         $delUser->delete();
-        return response()->json(null, 204);
+        return response()->json($delUser, 200);
     }
 
     public function deleteRole($id) {
@@ -291,6 +359,28 @@ class UserController extends Controller
         }
 
         $delRole->delete();
+        return response()->json(null, 204);
+    }
+
+    public function deleteAvatar($id) {
+        $user = auth()->user();
+        if(!$user->can('delete_users')) {
+            return response()->json([
+                'error' => __('You do not have the permission to delete users')
+            ], 403);
+        }
+
+        try {
+            $user = User::findOrFail($id);
+        } catch(ModelNotFoundException $e) {
+            return response()->json([
+                'error' => __('This user does not exist')
+            ], 400);
+        }
+
+        Storage::delete($user->avatar);
+        $user->avatar = null;
+        $user->save();
         return response()->json(null, 204);
     }
 

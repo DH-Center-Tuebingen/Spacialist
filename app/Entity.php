@@ -20,7 +20,7 @@ class Entity extends Model
         'entity_type_id',
         'root_entity_id',
         'name',
-        'lasteditor',
+        'user_id',
         'geodata_id',
         'rank',
     ];
@@ -28,6 +28,10 @@ class Entity extends Model
     protected $appends = [
         'parentIds',
         'parentNames',
+    ];
+
+    protected $with = [
+        'user',
     ];
 
     protected $searchable = [
@@ -42,7 +46,7 @@ class Entity extends Model
     protected static $logOnlyDirty = true;
     protected static $logFillable = true;
     protected static $logAttributes = ['id'];
-    protected static $ignoreChangedAttributes = ['lasteditor'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
     const rules = [
         'name'              => 'required|string',
@@ -95,7 +99,7 @@ class Entity extends Model
             $entity->{$key} = $value;
         }
         $entity->entity_type_id = $entityTypeId;
-        $entity->lasteditor = $user->name;
+        $entity->user_id = $user->id;
         $entity->save();
 
         // TODO workaround to get all (optional, not part of request) attributes
@@ -124,7 +128,7 @@ class Entity extends Model
                 }
             }
 
-            self::addSerial($entity->id, $s->id, $s->text, $nextValue, $user->name);
+            self::addSerial($entity->id, $s->id, $s->text, $nextValue, $user->id);
         }
 
         $entity->children_count = 0;
@@ -151,7 +155,7 @@ class Entity extends Model
         $hasParent = isset($parent);
         $oldRank = $entity->rank;
         $entity->rank = $rank;
-        $entity->lasteditor = $user->name;
+        $entity->user_id = $user->id;
 
         $query;
         if(isset($entity->root_entity_id)) {
@@ -184,12 +188,12 @@ class Entity extends Model
         $entity->save();
     }
 
-    public static function addSerial($eid, $aid, $text, $ctr, $username) {
+    public static function addSerial($eid, $aid, $text, $ctr, $uid) {
         $av = new AttributeValue();
         $av->entity_id = $eid;
         $av->attribute_id = $aid;
         $av->str_val = sprintf($text, $ctr);
-        $av->lasteditor = $username;
+        $av->user_id = $uid;
         $av->save();
     }
 
@@ -209,12 +213,16 @@ class Entity extends Model
         return $this->belongsTo('App\Entity', 'root_entity_id');
     }
 
+    public function user() {
+        return $this->belongsTo('App\User');
+    }
+
     public function bibliographies() {
         return $this->belongsToMany('App\Bibliography', 'references', 'entity_id', 'bibliography_id')->withPivot('description', 'attribute_id')->orderBy('references.attribute_id')->orderBy('references.bibliography_id');
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'certainty_description', 'lasteditor', 'thesaurus_val', 'json_val', 'geography_val')->orderBy('attribute_values.attribute_id');
+        return $this->belongsToMany('App\Attribute', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'certainty_description', 'user_id', 'thesaurus_val', 'json_val', 'geography_val')->orderBy('attribute_values.attribute_id');
     }
 
     public function files() {
@@ -222,7 +230,7 @@ class Entity extends Model
     }
 
     private function parents() {
-        $ancestors = $this->where('id', '=', $this->id)->get();
+        $ancestors = collect([$this]);
 
         while ($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
                 $parent = $this->where('id', '=', $ancestors->last()->root_entity_id)->get();
@@ -242,17 +250,9 @@ class Entity extends Model
         return $this->parents()['names'];
     }
 
-    private function ancestors() {
-        $ancestors = $this->where('id', '=', $this->root_entity_id)->get();
-
-        while ($ancestors->last() && $ancestors->last()->root_entity_id !== null) {
-                $parent = $this->where('id', '=', $ancestors->last()->root_entity_id)->get();
-                $ancestors = $ancestors->merge($parent);
-            }
-        return $ancestors->reverse()->pluck('name')->all();
-    }
-
     public function getAncestorsAttribute() {
-        return $this->ancestors();
+        $parents = array_reverse($this->parents()['names']);
+        array_pop($parents);
+        return $parents;
     }
 }

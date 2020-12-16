@@ -32,7 +32,7 @@ class Attribute extends Model
     }
 
     public function entities() {
-        return $this->belongsToMany('App\Entity', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'certainty_description', 'lasteditor', 'thesaurus_val', 'json_val', 'geography_val');
+        return $this->belongsToMany('App\Entity', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'certainty_description', 'user_id', 'thesaurus_val', 'json_val', 'geography_val');
     }
 
     public function entity_types() {
