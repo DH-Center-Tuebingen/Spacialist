@@ -4,12 +4,9 @@ namespace App;
 
 use App\UserPreference;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class Preference extends Model
-{
-    use LogsActivity;
-    
+{    
     /**
      * The attributes that are assignable.
      *
