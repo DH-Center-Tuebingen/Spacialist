@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - User profile to allow users to edit their information
   - Support for phone numbers and avatars
+- Activity Log (Logging changes to all models (Entities, Files, ...))
 ### Fixed
 ### Changed
 - Switch from momentjs to dayjs for dates

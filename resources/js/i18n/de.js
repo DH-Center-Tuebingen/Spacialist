@@ -129,7 +129,6 @@ const de = {
         action: 'Aktion',
         users: 'Benutzer',
         timespan: '@:global.attributes.timeperiod',
-        element_class: 'Elementklasse',
         visible: 'Sichtbar',
         invisible: 'Unsichtbar',
         opacity: 'Deckkraft',
@@ -304,9 +303,15 @@ const de = {
             title: '@:global.activity',
             title_project: 'Projekt-Aktivität | Projekt-Aktivitäten',
             title_user: 'Deine Aktivität | Deine Aktivitäten',
+            nr_of_entries: 'Keine Einträge | 1 Eintrag | {cnt} Einträge',
             no_results: 'Keine Ergebnisse gefunden.',
-            data: 'Daten',
-            apply_filter: 'Filter anwenden'
+            rawdata: 'Rohdaten',
+            apply_filter: 'Filter anwenden',
+            search_in_raw_data: 'In Rohdaten suchen',
+            hide_filter_panel: 'Filter verstecken',
+            toggle_raw_data: 'Anzeige der Rohdaten umschalten',
+            toggle_pretty_print: 'Darstellung umschalten',
+            fetch_next_entries: 'Weitere Einträge laden',
         },
         datamodel: {
             toasts: {

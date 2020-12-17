@@ -3,12 +3,16 @@
         <activity-log-filter
             v-if="showFilter"
             :hide-user="hideUser"
+            :hidden-panel="true"
             @filter-updated="onFilterUpdated">
         </activity-log-filter>
         <div class="table-responsive h-100 mt-3" v-if="sortedActivity.length > 0">
             <table class="table table-striped table-hover">
                 <thead class="thead-light sticky-top">
                     <tr>
+                        <th>
+                            #
+                        </th>
                         <th v-if="!hideUser">
                             <a href="#" @click.prevent="sortBy('user')">
                                 {{ $tc('global.users') }}
@@ -20,22 +24,18 @@
                             </a>
                         </th>
                         <th>
-                            <a href="#" @click.prevent="sortBy('model')">
-                                {{ $t('global.element_class') }}
-                            </a>
-                        </th>
-                        <th>
                             <a href="#" @click.prevent="sortBy('time')">
                                 {{ $t('global.timestamp') }}
                             </a>
                         </th>
                         <th>
-                            {{ $t('main.activity.data') }}
+                            {{ $t('main.activity.rawdata') }}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="act in sortedActivity" :key="act.id">
+                    <tr v-for="(act, i) in sortedActivity" :key="act.id">
+                        <td class="font-weight-bold">{{ i + 1 }}</td>
                         <td v-if="!hideUser">{{ act.causer.name }}</td>
                         <td :class="actionIcons == 'only' ? 'text-center align-middle' : ''">
                             <span v-if="actionIcons == 'only'" v-html="getIcon(act.description)" data-toggle="popover" :data-content="act.description" data-trigger="hover" data-placement="right">
@@ -46,18 +46,27 @@
                                 {{ act.description }}
                             </span>
                         </td>
-                        <td v-html="getName(act)"></td>
                         <td>
                             {{ act.updated_at | date('DD.MM.YYYY HH:mm:ss', true, true) }}
                         </td>
-                        <td>
-                            {{ act.properties }}
+                        <td style="width: 99%;">
+                            <button type="button" class="btn btn-primary btn-sm" @click="toggleDataShown(i)">
+                                <i class="fas fa-fw fa-database"></i>
+                                {{ $t('main.activity.toggle_raw_data') }}
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm ml-2" v-show="dataShown[i]" @click="togglePrettyPrint(i, act.properties)">
+                                <i class="fas fa-fw fa-indent"></i>
+                                {{ $t('main.activity.toggle_pretty_print') }}
+                            </button>
+                            <div v-show="dataShown[i]" class="mt-2">
+                                <pre class="mb-0 small rounded" v-highlightjs="dataStrings[i]"><code class="text-prewrap word-break-all"></code></pre>
+                            </div>
                         </td>
                     </tr>
                     <tr>
                         <td :colspan="hideUser ? '4' : '5'" v-if="!disableFetching">
                             <button type="button" class="btn btn-outline-secondary btn-sm" @click="fetchData()">
-                                Load next items
+                                {{ $t('main.activity.fetch_next_entries') }}
                             </button>
                         </td>
                     </tr>
@@ -121,42 +130,23 @@
                     $('[data-toggle="popover"]').popover()
                 });
             },
-            getName(a) {
-                let name = '';
-                switch(a.subject_type) {
-                    case 'App\\Entity':
-                        name =  `<i class="fas fa-fw fa-monument text-primary"></i>`;
-                        break;
-                    case 'App\\File':
-                        name =  `<i class="fas fa-fw fa-file text-primary"></i>`;
-                        break;
-                    case 'App\\Geodata':
-                        name =  `<i class="fas fa-fw fa-map-marker-alt text-primary"></i>`;
-                        break;
-                    default:
-                        name = '';
-                        break;
-                }
-                name += ' ';
-                if(a.subject) {
-                    switch(a.subject_type) {
-                        case 'App\\Geodata':
-                            name += `Geodata #${a.subject.id}`;
-                            break;
-                        default:
-                            name +=  a.subject.name;
-                            break;
-                    }
-                } else if(a.properties.attributes.name) {
-                    name += a.properties.attributes.name;
+            toggleDataShown(i) {
+                Vue.set(this.dataShown, i, !this.dataShown[i]);
+                Vue.set(this.dataIsPretty, i, false);
+                this.setDataString(i, this.sortedActivity[i].properties);
+            },
+            togglePrettyPrint(i, data) {
+                Vue.set(this.dataIsPretty, i, !this.dataIsPretty[i]);
+                this.setDataString(i, data);
+            },
+            setDataString(i, data) {
+                let str;
+                if(this.dataIsPretty[i]) {
+                    str = JSON.stringify(data, null, 4);
                 } else {
-                    let type = a.subject_type;
-                    type = type.substring(type.lastIndexOf('\\') + 1);
-                    let id = a.subject_id;
-                    name += `<span class="font-italic" data-toggle="popover" data-content="${type} #${id}" data-trigger="hover" data-placement="bottom">Deleted Element</span>`;
+                    str = JSON.stringify(data);
                 }
-
-                return name;
+                Vue.set(this.dataStrings, i, str);
             },
             getIcon(desc, withText) {
                 const addon = !!withText ? ` ${desc}` : '';
@@ -192,7 +182,10 @@
             return {
                 sortOn: 'time',
                 desc: false,
-                isFetching: false
+                isFetching: false,
+                dataShown: [],
+                dataIsPretty: [],
+                dataStrings: [],
             }
         },
         computed: {
@@ -216,7 +209,7 @@
                     default:
                         return [this.sortOn, 'id'];
                 }
-            }
+            },
         }
     }
 </script>

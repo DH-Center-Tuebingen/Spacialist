@@ -3,6 +3,11 @@
         <div class="col-md-12 h-100 d-flex flex-column">
             <h3>
                 {{ $tc('main.activity.title_project', 2) }}
+                <span class="badge badge-secondary">
+                    {{ $tc('main.activity.nr_of_entries', pagination.total, {
+                        cnt: pagination.total
+                    }) }}
+                </span>
             </h3>
             <div class="flex-grow-1 overflow-hidden">
                 <activity-log
@@ -27,7 +32,7 @@
         },
         methods: {
             init() {
-                // TODO fetch supported models
+                this.filterActivity();
             },
             handleFilterChange(e) {
                 this.filter = e.filters;
@@ -56,7 +61,9 @@
         data() {
             return {
                 filteredActivity: [],
-                pagination: {},
+                pagination: {
+                    total: 0,
+                },
                 filter: {},
                 isFetching: false
             }
@@ -65,7 +72,7 @@
             filteredData() {
                 let data = {};
                 const f = this.filter;
-                if(f.users.length > 0) {
+                if(f.users && f.users.length > 0) {
                     data.users = f.users.map(u => u.id);
                 }
                 if(f.from || f.to) {
@@ -81,8 +88,8 @@
                         data.timespan.to = f.to;
                     }
                 }
-                if(f.model) {
-                    data.model = f.model.id;
+                if(f.data_text) {
+                    data.text = f.data_text;
                 }
                 return data;
             },

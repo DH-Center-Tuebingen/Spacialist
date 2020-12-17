@@ -140,7 +140,9 @@ import {
     faUsers,
     faUserTimes,
     faVolumeMute,
-    faVolumeUp
+    faVolumeUp,
+    faDatabase,
+    faIndent
 } from '@fortawesome/free-solid-svg-icons';
 import VModal from 'vue-js-modal';
 import Axios from 'axios';
@@ -181,6 +183,8 @@ import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
 import VueScrollTo from 'vue-scrollto';
 import InfiniteLoading from 'vue-infinite-loading';
+import VueHighlightJS from 'vue-highlightjs';
+import 'highlight.js/styles/atom-one-dark.css';
 
 import { EventBus } from './event-bus.js';
 
@@ -222,6 +226,7 @@ library.add(
     faCopy,
     faCopyright,
     faCubes,
+    faDatabase,
     faDotCircle,
     faDownload,
     faDrawPolygon,
@@ -252,6 +257,7 @@ library.add(
     faFolder,
     faGlobeAfrica,
     faIdBadge,
+    faIndent,
     faInfoCircle,
     faLayerGroup,
     faLightbulb,
@@ -387,6 +393,7 @@ Vue.use(Notifications);
 Vue.use(DatePicker);
 Vue.use(VueScrollTo);
 Vue.use(InfiniteLoading);
+Vue.use(VueHighlightJS);
 
 const router = new VueRouter({
     scrollBehavior(to, from, savedPosition) {

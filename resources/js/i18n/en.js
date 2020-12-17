@@ -129,7 +129,6 @@ const en = {
         action: 'Action',
         users: 'User | Users',
         timespan: 'Time span',
-        element_class: 'Element class',
         visible: 'Visible',
         invisible: 'Invisible',
         opacity: 'Opacity',
@@ -304,9 +303,15 @@ const en = {
             title: '@:global.activity',
             title_project: 'Project Activity | Project Activities',
             title_user: 'Your Activity | Your Activities',
+            nr_of_entries: 'No Entries | 1 Entry | {cnt} Entries',
             no_results: 'No results found.',
             data: 'Data',
-            apply_filter: 'Apply filter'
+            apply_filter: 'Apply filter',
+            search_in_raw_data: 'Search in raw data',
+            hide_filter_panel: 'Hide filter',
+            toggle_raw_data: 'Toggle Raw Data',
+            toggle_pretty_print: 'Toggle Pretty Print',
+            fetch_next_entries: 'Fetch next entries',
         },
         datamodel: {
             toasts: {

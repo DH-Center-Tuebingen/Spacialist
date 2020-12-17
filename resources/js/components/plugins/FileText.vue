@@ -65,10 +65,6 @@
 
 <script>
     import VueMarkdown from 'vue-markdown';
-    import VueHighlightJS from 'vue-highlightjs';
-    import 'highlight.js/styles/atom-one-dark.css';
-
-    Vue.use(VueHighlightJS);
 
     export default {
         components: {

@@ -51,7 +51,10 @@
                             <a v-show="rtc.isRecording" class="dropdown-item" href="#" @click.prevent="stopRecording">
                                 <i class="fas fa-fw fa-stop"></i> {{ $t('global.tools.record.stop') }}
                             </a>
-                            <template v-if="$hasPreference('prefs.load-extensions', 'data-analysis')">
+                            <router-link :to="{name: 'globalactivity'}" class="dropdown-item">
+                                <i class="fas fa-fw fa-clock"></i> {{ $t('global.activity') }}
+                            </router-link>
+                            <template v-if="$hasPreference('prefs.load-extensions', 'data-analysis') || $hasPreference('prefs.link-to-thesaurex')">
                                 <div class="dropdown-divider"></div>
                                 <h6 class="dropdown-header">
                                     {{ $t('global.tools.external') }} <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
@@ -82,9 +85,6 @@
                             </router-link>
                             <router-link :to="{name: 'roles'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-shield-alt"></i> {{ $t('global.settings.roles') }}
-                            </router-link>
-                            <router-link :to="{name: 'globalactivity'}" class="dropdown-item">
-                                <i class="fas fa-fw fa-clock"></i> {{ $t('global.activity') }}
                             </router-link>
                             <router-link :to="{name: 'dme'}" class="dropdown-item">
                                 <i class="fas fa-fw fa-sitemap"></i> {{ $t('global.settings.datamodel') }}

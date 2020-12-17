@@ -44,10 +44,6 @@ class ActivityController extends Controller
         return response()->json($actUser->actions);
     }
 
-    public function getLoggableModels() {
-        return response()->json(sp_loggable_models());
-    }
-
     // POST
 
     public function getFiltered(Request $request, $page = 1) {
@@ -61,7 +57,7 @@ class ActivityController extends Controller
         $this->validate($request, [
             'users' => 'array',
             'timespan' => 'array',
-            'model' => 'string',
+            'text' => 'string',
         ]);
 
         $query = Activity::with(['causer', 'subject'])
@@ -79,8 +75,15 @@ class ActivityController extends Controller
                 $query->whereDate('updated_at', '<=', $ts['to']);
             }
         }
-        if($request->has('model')) {
-            $query->where('subject_type', $request->input('model'));
+        if($request->has('text')) {
+            $text = $request->input('text');
+            $words = explode(' ', $text);
+            foreach($words as $w) {
+                $query->where(function($q) use($w) {
+                    $q->whereRaw("properties->>'attributes' ilike '%$w%'")
+                        ->orWhereRaw("properties->>'old' ilike '%$w%'");
+                });
+            }
         }
 
         return response()->json($query->paginate());

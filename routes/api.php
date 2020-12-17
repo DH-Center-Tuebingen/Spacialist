@@ -139,7 +139,6 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/activity')->group(function() {
     Route::get('', 'ActivityController@getAll');
     Route::get('/{id}', 'ActivityController@getByUser')->where('id', '[0-9]+');
-    Route::get('/loggable', 'ActivityController@getLoggableModels');
 
     Route::post('', 'ActivityController@getFiltered');
 });

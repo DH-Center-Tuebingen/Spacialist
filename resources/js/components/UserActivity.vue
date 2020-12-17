@@ -3,6 +3,11 @@
         <div class="col-md-12 h-100 d-flex flex-column">
             <h3>
                 {{ $tc('main.activity.title_user', 2) }}
+                <span class="badge badge-secondary">
+                    {{ $tc('main.activity.nr_of_entries', pagination.total, {
+                        cnt: pagination.total
+                    }) }}
+                </span>
             </h3>
             <div class="flex-grow-1 overflow-hidden">
                 <activity-log
@@ -25,12 +30,7 @@
         },
         methods: {
             init() {
-                $http.post(`activity`, this.getFilteredData({})).then(response => {
-                    this.userActivity.length = 0;
-                    this.userActivity = response.data.data;
-                    this.pagination = response.data;
-                    delete this.pagination.data;
-                });
+                this.filterActivity({});
             },
             handleFilterChange(e) {
                 this.filterActivity(e.filters);
@@ -60,8 +60,8 @@
                         data.timespan.to = f.to;
                     }
                 }
-                if(f.model) {
-                    data.model = f.model.id;
+                if(f.data_text) {
+                    data.text = f.data_text;
                 }
                 return data;
             }
@@ -69,6 +69,9 @@
         data() {
             return {
                 userActivity: [],
+                pagination: {
+                    total: 0,
+                },
             }
         },
     }
