@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['7.3', '7.4', '8.0']
+        php-versions: ['7.3', '7.4']
         pg-gis-combo: ['9.6-2.5-alpine', '9.6-3.0-alpine', '12-2.5-alpine', '12-3.0-alpine', '13-3.0-alpine']
         databases: ['pgsql']
     
@@ -28,6 +28,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{matrix.php-versions}}
     - name: Install required packages
       run: |
         sudo add-apt-repository ppa:ubuntugis/ppa
