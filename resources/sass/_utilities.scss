@@ -30,12 +30,24 @@
     max-height: 300px !important;
 }
 
+.align-middle {
+    vertical-align: middle;
+}
+
+.text-nowrap {
+    white-space: nowrap;
+}
+
 .text-prewrap {
     white-space: pre-wrap;
 }
 
 .text-line {
     white-space: pre-line;
+}
+
+.word-break-all {
+    word-break: break-all;
 }
 
 .flex-grow-1 {
@@ -73,10 +85,6 @@
 
 .clickable {
     cursor: pointer;
-}
-
-.word-break-all {
-    word-break: break-all;
 }
 
 .scroll-x-hidden {

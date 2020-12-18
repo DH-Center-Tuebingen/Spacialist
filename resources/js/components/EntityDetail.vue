@@ -50,7 +50,7 @@
                 -
                 <a href="#" @click.prevent="$showUserInfo(selectedEntity.user)" class="font-weight-medium">
                     {{ selectedEntity.user.name }}
-                    <user-avatar :user="selectedEntity.user" :size="20" style="vertical-align: middle;"></user-avatar>
+                    <user-avatar :user="selectedEntity.user" :size="20" class="align-middle"></user-avatar>
                 </a>
             </div>
         </div>

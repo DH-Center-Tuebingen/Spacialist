@@ -35,8 +35,15 @@
                 </thead>
                 <tbody>
                     <tr v-for="(act, i) in sortedActivity" :key="act.id">
-                        <td class="font-weight-bold">{{ i + 1 }}</td>
-                        <td v-if="!hideUser">{{ act.causer.name }}</td>
+                        <td class="font-weight-bold">
+                            {{ i + 1 }}
+                            </td>
+                        <td v-if="!hideUser">
+                            <a href="#" @click.prevent="$showUserInfo(act.causer)" class="text-nowrap">
+                                <user-avatar :user="act.causer" :size="20"></user-avatar>
+                                <span class="align-middle">{{ act.causer.name }}</span>
+                            </a>
+                        </td>
                         <td :class="actionIcons == 'only' ? 'text-center align-middle' : ''">
                             <span v-if="actionIcons == 'only'" v-html="getIcon(act.description)" data-toggle="popover" :data-content="act.description" data-trigger="hover" data-placement="right">
                             </span>
