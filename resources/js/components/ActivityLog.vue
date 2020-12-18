@@ -1,6 +1,7 @@
 <template>
     <div class="d-flex flex-column">
         <activity-log-filter
+            class="row"
             v-if="showFilter"
             :hide-user="hideUser"
             :hidden-panel="true"
@@ -44,7 +45,7 @@
                                 <span class="align-middle">{{ act.causer.name }}</span>
                             </a>
                         </td>
-                        <td :class="actionIcons == 'only' ? 'text-center align-middle' : ''">
+                        <td :class="actionIcons == 'only' ? 'text-center' : ''">
                             <span v-if="actionIcons == 'only'" v-html="getIcon(act.description)" data-toggle="popover" :data-content="act.description" data-trigger="hover" data-placement="right">
                             </span>
                             <span v-else-if="actionIcons == 'both'" v-html="getIcon(act.description, true)">
