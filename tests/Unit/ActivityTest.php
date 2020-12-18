@@ -21,7 +21,6 @@ class ActivityTest extends TestCase
         ['id' => "App\\File", 'label' => 'File'],
         ['id' => "App\\FileTag", 'label' => 'FileTag'],
         ['id' => "App\\Geodata", 'label' => 'Geodata'],
-        ['id' => "App\\Preference", 'label' => 'Preference'],
         ['id' => "App\\Reference", 'label' => 'Reference'],
         ['id' => "App\\Role", 'label' => 'Role'],
         ['id' => "App\\ThBroader", 'label' => 'ThBroader'],
@@ -29,7 +28,6 @@ class ActivityTest extends TestCase
         ['id' => "App\\ThConceptLabel", 'label' => 'ThConceptLabel'],
         ['id' => "App\\ThLanguage", 'label' => 'ThLanguage'],
         ['id' => "App\\User", 'label' => 'User'],
-        ['id' => "App\\UserPreference", 'label' => 'UserPreference'],
     ];
 
     /**

@@ -138,18 +138,31 @@ class ApiActivityTest extends TestCase
         $content = json_decode($response->getContent());
         $this->assertEquals(5, count($content->data));
 
-        // With entity only
+        // With single text search string
         $this->refreshToken($response);
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
         ])
         ->post('/api/v1/activity', [
-            'model' => 'App\\Entity'
+            'text' => 'tEst'
         ]);
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
-        $this->assertEquals(3, count($content->data));
+        $this->assertEquals(4, count($content->data));
+
+        // With multiple text search strings
+        $this->refreshToken($response);
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->token"
+        ])
+        ->post('/api/v1/activity', [
+            'text' => 'unit entity'
+        ]);
+
+        $response->assertStatus(200);
+        $content = json_decode($response->getContent());
+        $this->assertEquals(2, count($content->data));
 
         // With file only
         $this->refreshToken($response);
@@ -157,14 +170,14 @@ class ApiActivityTest extends TestCase
             'Authorization' => "Bearer $this->token"
         ])
         ->post('/api/v1/activity', [
-            'model' => 'App\\File'
+            'text' => 'Entity FooBar'
         ]);
 
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
         $this->assertEquals(0, count($content->data));
 
-        // With user id=2 only
+        // With user id=2 and id=3
         $this->refreshToken($response);
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
@@ -202,42 +215,6 @@ class ApiActivityTest extends TestCase
         $response->assertStatus(200);
         $content = json_decode($response->getContent());
         $this->assertEquals(5, count($content->data));
-    }
-
-    /**
-     * Test getting all loggable models.
-     *
-     * @return void
-     */
-    public function testGetLoggableModelsEndpoint()
-    {
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
-        ->get('/api/v1/activity/loggable');
-        $response->assertJson([
-            ['id' => "App\\Attribute", 'label' => 'Attribute'],
-            ['id' => "App\\AttributeValue", 'label' => 'AttributeValue'],
-            ['id' => "App\\AvailableLayer", 'label' => 'AvailableLayer'],
-            ['id' => "App\\Bibliography", 'label' => 'Bibliography'],
-            ['id' => "App\\Entity", 'label' => 'Entity'],
-            ['id' => "App\\EntityAttribute", 'label' => 'EntityAttribute'],
-            ['id' => "App\\EntityFile", 'label' => 'EntityFile'],
-            ['id' => "App\\EntityType", 'label' => 'EntityType'],
-            ['id' => "App\\EntityTypeRelation", 'label' => 'EntityTypeRelation'],
-            ['id' => "App\\File", 'label' => 'File'],
-            ['id' => "App\\FileTag", 'label' => 'FileTag'],
-            ['id' => "App\\Geodata", 'label' => 'Geodata'],
-            ['id' => "App\\Preference", 'label' => 'Preference'],
-            ['id' => "App\\Reference", 'label' => 'Reference'],
-            ['id' => "App\\Role", 'label' => 'Role'],
-            ['id' => "App\\ThBroader", 'label' => 'ThBroader'],
-            ['id' => "App\\ThConcept", 'label' => 'ThConcept'],
-            ['id' => "App\\ThConceptLabel", 'label' => 'ThConceptLabel'],
-            ['id' => "App\\ThLanguage", 'label' => 'ThLanguage'],
-            ['id' => "App\\User", 'label' => 'User'],
-            ['id' => "App\\UserPreference", 'label' => 'UserPreference'],
-        ]);
     }
 
     // Testing exceptions and permissions
@@ -321,17 +298,6 @@ class ApiActivityTest extends TestCase
         ])
             ->post('/api/v1/activity', [
                 'timespan' => '2017-12-20 09:30:00'
-            ]);
-
-        $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
-
-        $this->refreshToken($response);
-
-        $response = $this->withHeaders([
-            'Authorization' => "Bearer $this->token"
-        ])
-            ->post('/api/v1/activity', [
-                'model' => 1
             ]);
 
         $this->assertEquals('The given data was invalid.', $response->exception->getMessage());
