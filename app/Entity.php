@@ -4,10 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Nicolaslopezj\Searchable\SearchableTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Entity extends Model
 {
     use SearchableTrait;
+    use LogsActivity;
 
     /**
      * The attributes that are assignable.
@@ -20,6 +22,7 @@ class Entity extends Model
         'name',
         'user_id',
         'geodata_id',
+        'rank',
     ];
 
     protected $appends = [
@@ -39,6 +42,11 @@ class Entity extends Model
 
         ],
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
     const rules = [
         'name'              => 'required|string',

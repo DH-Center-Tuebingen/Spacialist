@@ -6,13 +6,22 @@ use App\UserPreference;
 use Illuminate\Database\Eloquent\Model;
 
 class Preference extends Model
-{
+{    
     /**
      * The attributes that are assignable.
      *
      * @var array
      */
     protected $fillable = [
+    ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = [
+        'id',
+        'label',
+        'default_value',
+        'allow_override'
     ];
 
     public static function getPreferences() {

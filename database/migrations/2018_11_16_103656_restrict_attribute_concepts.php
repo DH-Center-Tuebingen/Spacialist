@@ -13,9 +13,13 @@ class RestrictAttributeConcepts extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         Schema::table('attributes', function (Blueprint $table) {
             $table->boolean('recursive')->nullable()->default(true);
         });
+
+        activity()->enableLogging();
     }
 
     /**
@@ -25,8 +29,12 @@ class RestrictAttributeConcepts extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::table('attributes', function (Blueprint $table) {
             $table->dropColumn('recursive');
         });
+
+        activity()->enableLogging();
     }
 }

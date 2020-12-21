@@ -76,11 +76,12 @@ class ApiTest extends TestCase
 
         $response->assertStatus(200);
         // returns array with 'preferences', 'concepts' and 'entityTypes'
-        $response->assertJsonCount(3);
+        $response->assertJsonCount(4);
         $response->assertJsonStructure([
             'preferences',
             'concepts',
             'entityTypes',
+            'users',
         ]);
     }
 

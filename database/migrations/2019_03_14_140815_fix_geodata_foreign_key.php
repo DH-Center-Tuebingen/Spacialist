@@ -13,11 +13,15 @@ class FixGeodataForeignKey extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         Schema::table('entities', function (Blueprint $table) {
             $table->dropForeign('entities_geodata_id_foreign');
 
             $table->foreign('geodata_id')->references('id')->on('geodata')->onDelete('set null');
         });
+
+        activity()->enableLogging();
     }
 
     /**
@@ -27,10 +31,14 @@ class FixGeodataForeignKey extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::table('entities', function (Blueprint $table) {
             $table->dropForeign('entities_geodata_id_foreign');
 
             $table->foreign('geodata_id')->references('id')->on('geodata');
         });
+
+        activity()->enableLogging();
     }
 }

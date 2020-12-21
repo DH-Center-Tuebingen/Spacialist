@@ -5,10 +5,12 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Nicolaslopezj\Searchable\SearchableTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Bibliography extends Model
 {
     use SearchableTrait;
+    use LogsActivity;
 
     protected $table = 'bibliography';
     /**
@@ -76,6 +78,11 @@ class Bibliography extends Model
             'citekey' => 5
         ]
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
     const patchRules = [
         'author'    => 'string',

@@ -19,10 +19,12 @@ use lsolesen\pel\PelDataWindowOffsetException;
 use lsolesen\pel\PelJpegInvalidMarkerException;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 use Nicolaslopezj\Searchable\SearchableTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class File extends Model
 {
     use SearchableTrait;
+    use LogsActivity;
 
     protected $table = 'files';
     /**
@@ -33,11 +35,12 @@ class File extends Model
     protected $fillable = [
         'name',
         'modified',
-        'cameraname',
         'created',
+        'cameraname',
         'thumb',
         'copyright',
         'description',
+        'mime_type',
         'user_id',
     ];
 
@@ -54,6 +57,11 @@ class File extends Model
             'copyright' => 1,
         ],
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
 
     private const THUMB_SUFFIX = "_thumb";

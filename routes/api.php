@@ -135,6 +135,14 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::delete('/{id}', 'BibliographyController@deleteItem')->where('id', '[0-9]+');
 });
 
+// ACTIVITY LOG
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/activity')->group(function() {
+    Route::get('', 'ActivityController@getAll');
+    Route::get('/{id}', 'ActivityController@getByUser')->where('id', '[0-9]+');
+
+    Route::post('', 'ActivityController@getFiltered');
+});
+
 // EXTENSIONS
 
 // FILE

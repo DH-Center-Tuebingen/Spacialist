@@ -79,6 +79,8 @@ import {
     faLink,
     faList,
     faLongArrowAltDown,
+    faLongArrowAltLeft,
+    faLongArrowAltRight,
     faLongArrowAltUp,
     faMagic,
     faMapMarkedAlt,
@@ -131,13 +133,16 @@ import {
     faUnlink,
     faUnlockAlt,
     faUser,
+    faUserClock,
     faUserCheck,
     faUserCog,
     faUserEdit,
     faUsers,
     faUserTimes,
     faVolumeMute,
-    faVolumeUp
+    faVolumeUp,
+    faDatabase,
+    faIndent
 } from '@fortawesome/free-solid-svg-icons';
 import VModal from 'vue-js-modal';
 import Axios from 'axios';
@@ -164,6 +169,8 @@ import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
 import Preferences from './components/Preferences.vue';
 import UserPreferences from './components/UserPreferences.vue';
+import UserActivity from './components/UserActivity.vue';
+import GlobalActivity from './components/GlobalActivity.vue';
 import UserProfile from './components/UserProfile.vue';
 const DataModel = () => import(/* webpackChunkName: "group-bib" */ './components/DataModel.vue')
 const DataModelDetailView = () => import(/* webpackChunkName: "group-bib" */ './components/DataModelDetailView.vue')
@@ -175,6 +182,9 @@ import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
 import VueScrollTo from 'vue-scrollto';
+import InfiniteLoading from 'vue-infinite-loading';
+import VueHighlightJS from 'vue-highlightjs';
+import 'highlight.js/styles/atom-one-dark.css';
 
 import { EventBus } from './event-bus.js';
 
@@ -216,6 +226,7 @@ library.add(
     faCopy,
     faCopyright,
     faCubes,
+    faDatabase,
     faDotCircle,
     faDownload,
     faDrawPolygon,
@@ -246,12 +257,15 @@ library.add(
     faFolder,
     faGlobeAfrica,
     faIdBadge,
+    faIndent,
     faInfoCircle,
     faLayerGroup,
     faLightbulb,
     faLink,
     faList,
     faLongArrowAltDown,
+    faLongArrowAltLeft,
+    faLongArrowAltRight,
     faLongArrowAltUp,
     faMagic,
     faMapMarkedAlt,
@@ -306,6 +320,7 @@ library.add(
     faUnlink,
     faUnlockAlt,
     faUser,
+    faUserClock,
     faUserCheck,
     faUserCog,
     faUserEdit,
@@ -377,6 +392,8 @@ Vue.use(VeeValidate);
 Vue.use(Notifications);
 Vue.use(DatePicker);
 Vue.use(VueScrollTo);
+Vue.use(InfiniteLoading);
+Vue.use(VueHighlightJS);
 
 const router = new VueRouter({
     scrollBehavior(to, from, savedPosition) {
@@ -532,6 +549,14 @@ const router = new VueRouter({
             }
         },
         {
+            path: '/activity/g',
+            name: 'globalactivity',
+            component: GlobalActivity,
+            meta: {
+                auth: true
+            }
+        },
+        {
             path: '/editor/dm',
             name: 'dme',
             component: DataModel,
@@ -558,6 +583,14 @@ const router = new VueRouter({
             path: '/preferences/u/:id',
             name: 'userpreferences',
             component: UserPreferences,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/activity/u',
+            name: 'useractivity',
+            component: UserActivity,
             meta: {
                 auth: true
             }
@@ -652,6 +685,8 @@ import AttributeSearch from './components/AttributeSearch.vue';
 import CsvTable from './components/CsvTable.vue';
 
 // Reusable Components
+import ActivityLog from './components/ActivityLog.vue';
+import ActivityLogFilter from './components/ActivityLogFilter.vue';
 import UserAvatar from './components/UserAvatar.vue';
 import Attributes from './components/AttributeList.vue';
 import EntityTree from './components/EntityTree.vue';
@@ -672,6 +707,8 @@ Vue.component('entity-type-search', EntityTypeSearch);
 Vue.component('label-search', LabelSearch);
 Vue.component('attribute-search', AttributeSearch);
 Vue.component('csv-table', CsvTable);
+Vue.component('activity-log', ActivityLog);
+Vue.component('activity-log-filter', ActivityLogFilter);
 Vue.component('user-avatar', UserAvatar);
 Vue.component('attributes', Attributes);
 Vue.component('entity-tree', EntityTree);
@@ -864,6 +901,7 @@ const app = new Vue({
                 this.preferences = response.data.preferences;
                 this.concepts = response.data.concepts;
                 this.entityTypes = response.data.entityTypes;
+                this.users = response.data.users;
                 // Check if user is logged in and set preferred language
                 // instead of browser default
                 if(!app.$auth.ready()) {
@@ -899,6 +937,7 @@ const app = new Vue({
             preferences: {},
             concepts: {},
             entityTypes: {},
+            users: [],
             plugins: {},
             onInit: null
         }

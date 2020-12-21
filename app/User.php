@@ -6,12 +6,16 @@ use App\Traits\SoftDeletesWithTrashed;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Spatie\Activitylog\Traits\CausesActivity;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use HasRoles;
+    use CausesActivity;
+    use LogsActivity;
     use SoftDeletesWithTrashed;
     // use Authenticatable;
 
@@ -42,6 +46,11 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['password'];
 
     public function getLanguage() {
         $langObj = Preference::getUserPreference($this->id, 'prefs.gui-language');

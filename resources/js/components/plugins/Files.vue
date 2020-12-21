@@ -1124,13 +1124,15 @@
                 arr.fetchingFiles = false;
                 arr.pagination = {};
             },
-            getNextFiles(fileType, filters) {
+            getNextFiles(fileType, filters, scrollState) {
                 if(fileType == 'linkedFiles' && !this.selectedEntity.id) {
+                    if(scrollState) scrollState.error();
                     return;
                 }
                 let arr = this[fileType];
                 arr.fetchingFiles = true;
                 if(arr.pagination.current_page && arr.pagination.current_page == arr.pagination.last_page) {
+                    if(scrollState) scrollState.complete();
                     return;
                 }
                 let url = arr.apiPrefix;
@@ -1140,9 +1142,9 @@
                 } else {
                     url += arr.pagination.next_page_url;
                 }
-                return this.getPage(url, arr, filters);
+                return this.getPage(url, arr, filters, scrollState);
             },
-            getPage(pageUrl, filesObj, filters) {
+            getPage(pageUrl, filesObj, filters, scrollState) {
                 let data = {};
                 if(filters) {
                     data.filters = filters;
@@ -1155,6 +1157,7 @@
                     delete resp.data;
                     Vue.set(filesObj, 'pagination', resp);
                     filesObj.fetchingFiles = false;
+                    if(scrollState) scrollState.loaded();
                     this.updateFileState(filesObj);
                 }));
             },
@@ -1422,6 +1425,13 @@
                     });
                 }
             },
+            chunkWrapper(type, $state) {
+                if(!this.isAction(type)) {
+                    $state.complete();
+                    return;
+                };
+                return this.getNextFiles(type, this.getFilters(type), $state);
+            },
             translateLabel(element, prop) {
                 return this.$translateLabel(element, prop);
             }
@@ -1455,10 +1465,7 @@
                     apiPrefix: '',
                     apiUrl: '/file/linked',
                     apiPageParam: 'page',
-                    loadChunk: () => {
-                        if(!this.isAction('linkedFiles')) return;
-                        return this.getNextFiles('linkedFiles', this.getFilters('linkedFiles'));
-                    }
+                    loadChunk: ($state) => this.chunkWrapper('linkedFiles', $state)
                 },
                 unlinkedFiles: {
                     files: [],
@@ -1468,10 +1475,7 @@
                     apiPrefix: '',
                     apiUrl: '/file/unlinked',
                     apiPageParam: 'page',
-                    loadChunk: () => {
-                        if(!this.isAction('unlinkedFiles')) return;
-                        return this.getNextFiles('unlinkedFiles', this.getFilters('unlinkedFiles'));
-                    }
+                    loadChunk: ($state) => this.chunkWrapper('unlinkedFiles', $state)
                 },
                 allFiles: {
                     files: [],
@@ -1481,10 +1485,7 @@
                     apiPrefix: '',
                     apiUrl: '/file',
                     apiPageParam: 'page',
-                    loadChunk: () => {
-                        if(!this.isAction('allFiles')) return;
-                        return this.getNextFiles('allFiles', this.getFilters('allFiles'));
-                    }
+                    loadChunk: ($state) => this.chunkWrapper('allFiles', $state)
                 },
                 editingProperty: {
                     key: '',

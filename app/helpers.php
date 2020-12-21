@@ -2,8 +2,38 @@
 
 use App\Bibliography;
 use App\ThConcept;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+
+if(!function_exists('sp_loggable_models')) {
+    function sp_loggable_models() {
+        $loggableModels = [];
+        $listing = scandir(__DIR__);
+        foreach($listing as $entry) {
+            if(!Str::endsWith($entry, '.php')) continue;
+            if(substr($entry, 0, 1) !== Str::ucfirst(substr($entry, 0, 1))) continue;
+
+            $className = str_replace('.php', '', $entry);
+
+            $traits = class_uses("App\\$className");
+            if($traits === false) continue;
+
+            if(
+                isset($traits['Spatie\\Activitylog\\Traits\\LogsActivity'])
+                &&
+                $traits['Spatie\\Activitylog\\Traits\\LogsActivity'] === 'Spatie\\Activitylog\\Traits\\LogsActivity'
+            ) {
+                $loggableModels[] = [
+                    'id' => "App\\$className",
+                    'label' => $className
+                ];
+            }
+        }
+
+        return $loggableModels;
+    }
+}
 
 if(!function_exists('sp_parse_boolean')) {
     function sp_parse_boolean($str) {

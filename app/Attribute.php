@@ -3,9 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Attribute extends Model
 {
+    use LogsActivity;
     /**
      * The attributes that are assignable.
      *
@@ -15,7 +17,15 @@ class Attribute extends Model
         'thesaurus_url',
         'thesaurus_root_url',
         'datatype',
+        'text',
+        'parent_id',
+        'recursive',
+        'root_attribute_id',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
 
     public function children() {
         return $this->hasMany('App\Attribute', 'parent_id');

@@ -13,12 +13,15 @@ class AddThesaurusRootId extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         Schema::table('attributes', function (Blueprint $table) {
             $table->integer('root_attribute_id')->nullable();
             
             $table->foreign('root_attribute_id')->references('id')->on('attributes')->onDelete('cascade');
         });
 
+        activity()->enableLogging();
     }
 
     /**
@@ -28,8 +31,12 @@ class AddThesaurusRootId extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::table('attributes', function (Blueprint $table) {
             $table->dropColumn('root_attribute_id');
         });
+
+        activity()->enableLogging();
     }
 }
