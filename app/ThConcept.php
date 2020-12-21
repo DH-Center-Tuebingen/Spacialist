@@ -4,9 +4,12 @@ namespace App;
 
 use \DB;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class ThConcept extends Model
 {
+    use LogsActivity;
+
     protected $table = 'th_concept';
     /**
      * The attributes that are assignable.
@@ -16,8 +19,14 @@ class ThConcept extends Model
     protected $fillable = [
         'concept_url',
         'concept_scheme',
+        'is_top_concept',
         'user_id',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
     public static function getMap($lang = 'en') {
         $concepts = \DB::select(\DB::raw("

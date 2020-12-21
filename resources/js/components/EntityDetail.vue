@@ -50,7 +50,7 @@
                 -
                 <a href="#" @click.prevent="$showUserInfo(selectedEntity.user)" class="font-weight-medium">
                     {{ selectedEntity.user.name }}
-                    <user-avatar :user="selectedEntity.user" :size="20" style="vertical-align: middle;"></user-avatar>
+                    <user-avatar :user="selectedEntity.user" :size="20" class="align-middle"></user-avatar>
                 </a>
             </div>
         </div>
@@ -371,7 +371,11 @@
                             entity_id: entity.id,
                             value: name
                         });
-                        entity.name = name;
+                        const d = response.data;
+                        entity.name = d.name;
+                        entity.user_id = d.user_id;
+                        entity.updated_at = d.updated_at;
+                        entity.user = d.user;
                         this.cancelUpdateEntityName();
                     }));
                 }

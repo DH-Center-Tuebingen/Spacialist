@@ -3,19 +3,19 @@
 }
 
 .top-0 {
-    top: 0;
+    top: 0px;
 }
 
 .bottom-0 {
-    bottom: 0;
+    bottom: 0px;
 }
 
 .left-0 {
-    left: 0;
+    left: 0px;
 }
 
 .right-0 {
-    right: 0;
+    right: 0px;
 }
 
 .h-32p {
@@ -30,6 +30,14 @@
     max-height: 300px !important;
 }
 
+.align-middle {
+    vertical-align: middle;
+}
+
+.text-nowrap {
+    white-space: nowrap;
+}
+
 .text-prewrap {
     white-space: pre-wrap;
 }
@@ -38,8 +46,13 @@
     white-space: pre-line;
 }
 
+.word-break-all {
+    word-break: break-all;
+}
+
 .flex-grow-1 {
     flex-grow: 1;
+    flex-basis: 0;
 }
 
 .reorder-handle, .grab-handle {
@@ -96,10 +109,6 @@
 
 .clickable {
     cursor: pointer;
-}
-
-.word-break-all {
-    word-break: break-all;
 }
 
 .scroll-x-hidden {

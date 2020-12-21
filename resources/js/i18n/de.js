@@ -126,6 +126,10 @@ const de = {
             iconclass: 'Iconclass'
         },
         active: 'Aktiviert',
+        activity: 'Aktivitäten',
+        action: 'Aktion',
+        users: 'Benutzer',
+        timespan: '@:global.attributes.timeperiod',
         visible: 'Sichtbar',
         invisible: 'Unsichtbar',
         opacity: 'Deckkraft',
@@ -152,11 +156,11 @@ const de = {
         description: 'Beschreibung',
         roles: 'Rollen',
         permissions: 'Berechtigungen',
-        'added-at': 'Hinzugefügt',
-        'created-at': 'Erstellt',
-        'updated-at': 'Aktualisert',
-        'deleted-at': 'Gelöscht',
-        'deactivated-at': 'Deaktiviert',
+        added_at: 'Hinzugefügt',
+        created_at: 'Erstellt',
+        updated_at: 'Aktualisert',
+        deactivated_at: 'Deaktiviert',
+        timestamp: 'Zeitstempel',
         options: 'Optionen',
         reply_to: 'Antworten',
         replying_to: 'Antwort an {name}',
@@ -219,7 +223,7 @@ const de = {
     },
     main: {
         entity: {
-            title: 'Entitäten',
+            title: 'Entität | Entitäten',
             count: 'Keine Top-Level Entitäten | Eine Top-Level Entität | {cnt} Top-Level Entitäten',
             toasts: {
                 updated: {
@@ -341,6 +345,20 @@ const de = {
                 }
             },
             'add-permission-placeholder': 'Berechtigungen hinzufügen'
+        },
+        activity: {
+            title: '@:global.activity',
+            title_project: 'Projekt-Aktivität | Projekt-Aktivitäten',
+            title_user: 'Deine Aktivität | Deine Aktivitäten',
+            nr_of_entries: 'Keine Einträge | 1 Eintrag | {cnt} Einträge',
+            no_results: 'Keine Ergebnisse gefunden.',
+            rawdata: 'Rohdaten',
+            apply_filter: 'Filter anwenden',
+            search_in_raw_data: 'In Rohdaten suchen',
+            hide_filter_panel: 'Filter verstecken',
+            toggle_raw_data: 'Anzeige der Rohdaten umschalten',
+            toggle_pretty_print: 'Darstellung umschalten',
+            fetch_next_entries: 'Weitere Einträge laden',
         },
         datamodel: {
             toasts: {

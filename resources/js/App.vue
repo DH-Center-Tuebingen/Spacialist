@@ -89,7 +89,10 @@
                             <a v-show="rtc.isRecording" class="dropdown-item" href="#" @click.prevent="stopRecording">
                                 <i class="fas fa-fw fa-stop"></i> {{ $t('global.tools.record.stop') }}
                             </a>
-                            <template v-if="$hasPreference('prefs.load-extensions', 'data-analysis')">
+                            <router-link :to="{name: 'globalactivity'}" class="dropdown-item">
+                                <i class="fas fa-fw fa-clock"></i> {{ $t('global.activity') }}
+                            </router-link>
+                            <template v-if="$hasPreference('prefs.load-extensions', 'data-analysis') || $hasPreference('prefs.link-to-thesaurex')">
                                 <div class="dropdown-divider"></div>
                                 <h6 class="dropdown-header">
                                     {{ $t('global.tools.external') }} <sup class="fas fa-fw fa-sm fa-fw fa-external-link-alt"></sup>
@@ -138,7 +141,7 @@
                     </li>
                     <li class="nav-item dropdown" v-if="loggedIn">
                         <a href="#" class="nav-link dropdown-toggle" id="user-dropdown" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
-                            <user-avatar :user="authUser" :size="20" style="vertical-align: middle;"></user-avatar>
+                            <user-avatar :user="authUser" :size="20" class="align-middle"></user-avatar>
                             {{ authUser.name }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdown">
@@ -147,6 +150,9 @@
                             </router-link>
                             <router-link :to="{name: 'userpreferences', params: { id: authUser.id }}" class="dropdown-item">
                                 <i class="fas fa-fw fa-user-cog"></i> {{ $t('global.user.settings') }}
+                            </router-link>
+                            <router-link :to="{name: 'useractivity', params: { id: $auth.user().id }}" class="dropdown-item">
+                                <i class="fas fa-fw fa-user-clock"></i> {{ $t('global.activity') }}
                             </router-link>
                             <a class="dropdown-item" href="#"
                                 @click="logout">

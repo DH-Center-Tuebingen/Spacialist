@@ -7,11 +7,13 @@ use MStaack\LaravelPostgis\Geometries\Geometry;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use MStaack\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Nicolaslopezj\Searchable\SearchableTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Geodata extends Model
 {
     use PostgisTrait;
     use SearchableTrait;
+    use LogsActivity;
 
     protected $table = 'geodata';
     /**
@@ -21,6 +23,8 @@ class Geodata extends Model
      */
     protected $fillable = [
         'color',
+        'geom',
+        'user_id',
     ];
 
     protected $postgisFields = [
@@ -32,6 +36,11 @@ class Geodata extends Model
             'ST_AsText(geom)' => 10,
         ]
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
     protected static $availableGeometryTypes = [
         'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon'

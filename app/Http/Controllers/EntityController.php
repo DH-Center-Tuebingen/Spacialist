@@ -517,9 +517,13 @@ class EntityController extends Controller {
         }
 
         $entity->name = $request->get('name');
-        $entity->save();
+        $entity->user_id = $user->id;
 
-        return response()->json(null, 204);
+        $entity->save();
+        
+        $entity->load('user');
+
+        return response()->json($entity);
     }
 
     public function moveEntity(Request $request, $id) {

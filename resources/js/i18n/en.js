@@ -126,6 +126,10 @@ const en = {
             iconclass: 'Iconclass'
         },
         active: 'Active',
+        activity: 'Activity',
+        action: 'Action',
+        users: 'User | Users',
+        timespan: 'Time span',
         visible: 'Visible',
         invisible: 'Invisible',
         opacity: 'Opacity',
@@ -152,11 +156,11 @@ const en = {
         description: 'Description',
         roles: 'Roles',
         permissions: 'Permissions',
-        'added-at': 'Added',
-        'created-at': 'Created',
-        'updated-at': 'Updated',
-        'deleted-at': 'Deleted',
-        'deactivated-at': 'Deactivated',
+        added_at: 'Added',
+        created_at: 'Created',
+        updated_at: 'Updated',
+        timestamp: 'Timestamp',
+        deactivated_at: 'Deactivated',
         options: 'Options',
         reply_to: 'Reply',
         replying_to: 'In reply to {name}',
@@ -219,7 +223,7 @@ const en = {
     },
     main: {
         entity: {
-            title: 'Entities',
+            title: 'Entity | Entities',
             count: 'No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities',
             toasts: {
                 updated: {
@@ -341,6 +345,20 @@ const en = {
                 }
             },
             'add-permission-placeholder': 'Add permissions'
+        },
+        activity: {
+            title: '@:global.activity',
+            title_project: 'Project Activity | Project Activities',
+            title_user: 'Your Activity | Your Activities',
+            nr_of_entries: 'No Entries | 1 Entry | {cnt} Entries',
+            no_results: 'No results found.',
+            rawdata: 'Raw Data',
+            apply_filter: 'Apply filter',
+            search_in_raw_data: 'Search in raw data',
+            hide_filter_panel: 'Hide filter',
+            toggle_raw_data: 'Toggle Raw Data',
+            toggle_pretty_print: 'Toggle Pretty Print',
+            fetch_next_entries: 'Fetch next entries',
         },
         datamodel: {
             toasts: {

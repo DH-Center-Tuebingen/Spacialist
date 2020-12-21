@@ -905,7 +905,19 @@ class ApiEntityTest extends TestCase
             'name' => 'Site A_renamed'
         ]);
 
-        $response->assertStatus(204);
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'id',
+            'name',
+            'entity_type_id',
+            'root_entity_id',
+            'geodata_id',
+            'rank',
+            'user_id',
+            'created_at',
+            'updated_at',
+            'user',
+        ]);
 
         $entity = Entity::find(1);
         $this->assertEquals('Site A_renamed', $entity->name);
