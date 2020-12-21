@@ -305,7 +305,7 @@ const en = {
             title_user: 'Your Activity | Your Activities',
             nr_of_entries: 'No Entries | 1 Entry | {cnt} Entries',
             no_results: 'No results found.',
-            data: 'Data',
+            rawdata: 'Raw Data',
             apply_filter: 'Apply filter',
             search_in_raw_data: 'Search in raw data',
             hide_filter_panel: 'Hide filter',
