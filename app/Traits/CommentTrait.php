@@ -46,7 +46,7 @@ trait CommentTrait
             }
         }
 
-        $comment->load('author');
+        $comment = Comment::find($comment->id);
         return $comment;
     }
 
