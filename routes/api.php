@@ -27,7 +27,7 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     });
 });
 
-// CONTEXT
+// ENTITY
 Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/entity')->group(function() {
     Route::get('/top', 'EntityController@getTopEntities');
     Route::get('/{id}', 'EntityController@getEntity')->where('id', '[0-9]+');
@@ -111,6 +111,28 @@ Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v
     Route::delete('/user/{id}', 'UserController@deleteUser')->where('id', '[0-9]+');
     Route::delete('/role/{id}', 'UserController@deleteRole')->where('id', '[0-9]+');
     Route::delete('/user/{id}/avatar', 'UserController@deleteAvatar')->where('id', '[0-9]+');
+});
+
+// COMMENTS
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/comment')->group(function () {
+    Route::get('/resource/{id}', 'CommentController@getComments')->where('id', '[0-9]+');
+    Route::get('/{id}/reply', 'CommentController@getCommentReplies')->where('id', '[0-9]+');
+
+    Route::post('/', 'CommentController@addComment');
+
+    Route::patch('/{id}', 'CommentController@patchComment')->where('id', '[0-9]+');
+
+    Route::delete('/{id}', 'CommentController@deleteComment')->where('id', '[0-9]+');
+});
+
+// NOTIFICATIONS
+Route::middleware(['before' => 'jwt.auth', 'after' => 'jwt.refresh'])->prefix('v1/notification')->group(function() {
+    Route::patch('/read/{id}', 'NotificationController@markNotificationAsRead');
+    Route::patch('/read', 'NotificationController@markAllNotificationsAsRead');
+
+    Route::delete('/{id}', 'NotificationController@deleteNotification');
+    // have to use patch, because delete does not support parameters
+    Route::patch('/', 'NotificationController@deleteNotifications');
 });
 
 // PREFERENCES

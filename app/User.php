@@ -14,6 +14,7 @@ class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use HasRoles;
+    use Notifiable;
     use CausesActivity;
     use LogsActivity;
     use SoftDeletesWithTrashed;

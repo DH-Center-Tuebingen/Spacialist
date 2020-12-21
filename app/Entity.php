@@ -2,12 +2,14 @@
 
 namespace App;
 
+use App\Traits\CommentTrait;
 use Illuminate\Database\Eloquent\Model;
 use Nicolaslopezj\Searchable\SearchableTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Entity extends Model
 {
+    use CommentTrait;
     use SearchableTrait;
     use LogsActivity;
 
@@ -222,7 +224,7 @@ class Entity extends Model
     }
 
     public function attributes() {
-        return $this->belongsToMany('App\Attribute', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'certainty_description', 'user_id', 'thesaurus_val', 'json_val', 'geography_val')->orderBy('attribute_values.attribute_id');
+        return $this->belongsToMany('App\Attribute', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'user_id', 'thesaurus_val', 'json_val', 'geography_val')->orderBy('attribute_values.attribute_id');
     }
 
     public function files() {

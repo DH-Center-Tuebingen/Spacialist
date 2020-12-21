@@ -7,12 +7,10 @@ use App\AttributeValue;
 use App\Entity;
 use App\EntityAttribute;
 use App\EntityType;
-use App\EntityTypeRelation;
 use App\ThConcept;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class EntityController extends Controller {
     /**
@@ -310,7 +308,6 @@ class EntityController extends Controller {
                 'error' => $res['msg']
             ], $res['code']);
         }
-
     }
 
     // PATCH
@@ -484,11 +481,20 @@ class EntityController extends Controller {
         ], [
             'user_id' => $user->id
         ]);
+        // When attribute value already exists and nothing changed
+        // (same certainty)
+        if(
+            !$attrValue->wasRecentlyCreated
+            &&
+            ($request->has('certainty') && $request->get('certainty') == $attrValue->certainty)
+        ) {
+            return response()->json($attrValue);
+        }
         $attrValue->user_id = $user->id;
         $values = $request->only(array_keys(AttributeValue::patchRules));
         $attrValue->patch($values);
 
-        return response()->json(null, 204);
+        return response()->json($attrValue, 201);
     }
 
     public function patchName($id, Request $request) {

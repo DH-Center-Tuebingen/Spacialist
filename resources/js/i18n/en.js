@@ -9,6 +9,7 @@ const en = {
         close: 'Close',
         add: 'Add',
         edit: 'Edit',
+        edited: 'edited',
         duplicate: 'Duplicate',
         resort: 'Re-sort',
         update: 'Update',
@@ -161,6 +162,8 @@ const en = {
         timestamp: 'Timestamp',
         deactivated_at: 'Deactivated',
         options: 'Options',
+        reply_to: 'Reply',
+        replying_to: 'In reply to {name}',
         type: 'Type',
         'root-attribute': 'Parent-Attribute',
         'root-attribute-toggle': 'Use value of an existing attribute as Parent-Element',
@@ -176,7 +179,47 @@ const en = {
         tag: 'Tag | Tags',
         set: 'Set',
         'has-tags': 'Has no tags | Has one tag | Has {cnt} tags',
-        'from-subentity': 'Is from Sub-Entity'
+        'from-subentity': 'Is from Sub-Entity',
+        comments: {
+            deleted_info: 'Comment deleted',
+            empty_list: 'No comments yet.',
+            hide: 'Hide comments',
+            show: 'Show comments',
+            submit: 'Submit Comment',
+            text_placeholder: 'Enter a comment',
+            hide_reply: 'Hide <span class="font-weight-bold">one</span> reply | Hide <span class="font-weight-bold">{cnt}</span> replies',
+            show_reply: 'Show <span class="font-weight-bold">one</span> reply | Show <span class="font-weight-bold">{cnt}</span> replies',
+            fetching: 'Fetching comments&hellip;',
+            fetching_failed: 'Fetching comments failed!',
+            retry_failed: 'Retry',
+        },
+        notifications: {
+            title: 'Notifications',
+            count: 'Notifications ({cnt})',
+            mark_all_as_read: 'Mark all as read',
+            delete_all: 'Delete all',
+            empty_list: 'No notifications',
+            view_all: 'View all',
+            tab_all: 'All',
+            tab_unread: 'Unread',
+            tab_read: 'Read',
+            tab_system: 'System Notifications',
+            tab_default_empty_list: 'You are up-to-date. No notifications for you!',
+            tab_unread_empty_list: 'You are up-to-date. No new notifications for you!',
+            tab_system_empty_list: 'No system notifications. No action to take for you!',
+            body: {
+                title: 'New Notification',
+                type: {
+                    system: 'system-message'
+                },
+                user_left_comment_on: 'left a comment on <span class="font-weight-bold">{name}</span>.',
+                reply: 'Reply',
+                mention_info: 'Write your reply. Use @nickname to mention other users.',
+                reply_sent: 'Reply sent',
+                reply_to_user: 'Reply to <span class="font-weight-bold">{name}</span>',
+                reply_to_chat: 'Reply to comment section',
+            }
+        }
     },
     main: {
         entity: {
@@ -208,6 +251,10 @@ const en = {
                         type: 'Entity-Type - Descending'
                     }
                 }
+            },
+            tabs: {
+                attributes: 'Attributes',
+                comments: 'Comments',
             },
             modals: {
                 add: {
@@ -248,7 +295,7 @@ const en = {
                 toasts: {
                     'updated-certainty': {
                         title: 'Certainty updated',
-                        msg: 'Certainty of {name} successfully set to {i}% ({desc}).'
+                        msg: 'Certainty of {name} successfully set to {i}%.'
                     }
                 }
             },

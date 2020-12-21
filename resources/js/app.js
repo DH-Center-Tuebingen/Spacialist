@@ -21,6 +21,7 @@ import {
     faAngleRight,
     faAngleUp,
     faBan,
+    faBell,
     faBinoculars,
     faBolt,
     faBook,
@@ -40,6 +41,7 @@ import {
     faCog,
     faCogs,
     faComment,
+    faComments,
     faCopy,
     faCopyright,
     faCubes,
@@ -97,6 +99,7 @@ import {
     faPrint,
     faQuestion,
     faRedoAlt,
+    faReply,
     faRoad,
     faRuler,
     faRulerCombined,
@@ -169,6 +172,7 @@ import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
 import Preferences from './components/Preferences.vue';
 import UserPreferences from './components/UserPreferences.vue';
+import UserNotifications from './components/UserNotifications.vue';
 import UserActivity from './components/UserActivity.vue';
 import GlobalActivity from './components/GlobalActivity.vue';
 import UserProfile from './components/UserProfile.vue';
@@ -204,6 +208,7 @@ library.add(
     faAngleRight,
     faAngleUp,
     faBan,
+    faBell,
     faBinoculars,
     faBolt,
     faBook,
@@ -223,6 +228,7 @@ library.add(
     faCog,
     faCogs,
     faComment,
+    faComments,
     faCopy,
     faCopyright,
     faCubes,
@@ -284,6 +290,7 @@ library.add(
     faQuestion,
     faQuestionCircle,
     faRedoAlt,
+    faReply,
     faRoad,
     faRuler,
     faRulerCombined,
@@ -362,7 +369,9 @@ window._debounce = require('lodash/debounce');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
 require('./globals.js');
 
+let relativeTime = require('dayjs/plugin/relativeTime');
 let utc = require('dayjs/plugin/utc')
+dayjs.extend(relativeTime);
 dayjs.extend(utc);
 
 // Create Axios instance for external (API) calls
@@ -588,6 +597,14 @@ const router = new VueRouter({
             }
         },
         {
+            path: '/notifications/:id',
+            name: 'notifications',
+            component: UserNotifications,
+            meta: {
+                auth: true
+            }
+        },
+        {
             path: '/activity/u',
             name: 'useractivity',
             component: UserActivity,
@@ -694,12 +711,16 @@ import EntityTypes from './components/EntityTypeList.vue';
 import OlMap from './components/OlMap.vue';
 import ColorGradient from './components/Gradient.vue';
 import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
+import CommentList from './components/CommentList.vue';
+import NotificationBody from './components/NotificationBody.vue';
+import EmojiPicker from './components/EmojiPicker.vue';
 
 // Page Components
 import EntityReferenceModal from './components/EntityReferenceModal.vue';
 import DiscardChangesModal from './components/DiscardChangesModal.vue';
 import AboutDialog from './components/About.vue';
 import ErrorModal from './components/Error.vue';
+import UserInfoModal from './components/modals/UserInfo.vue';
 
 Vue.component('global-search', GlobalSearch);
 Vue.component('entity-search', EntitySearch);
@@ -716,33 +737,42 @@ Vue.component('entity-types', EntityTypes);
 Vue.component('ol-map', OlMap);
 Vue.component('color-gradient', ColorGradient);
 Vue.component('entity-breadcrumbs', EntityBreadcrumbs);
+Vue.component('comment-list', CommentList);
+Vue.component('notification-body', NotificationBody);
+Vue.component('emoji-picker', EmojiPicker);
 Vue.component('entity-reference-modal', EntityReferenceModal);
 Vue.component('discard-changes-modal', DiscardChangesModal);
 Vue.component('about-dialog', AboutDialog);
 Vue.component('error-modal', ErrorModal);
+Vue.component('user-info-modal', UserInfoModal);
 
 // Filter
-Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm', useLocale = false, isDateString) {
+Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm') {
     if(value) {
         let d;
-        if(isDateString) {
-            d = dayjs(value);
+        if(isNaN(value)) {
+            d = dayjs.utc(value);
         } else {
-            d = dayjs.unix(value);
-        }
-        if(!useLocale) {
-            d = d.utc();
+            d = dayjs.utc(value*1000);
         }
         return d.format(format);
     }
 });
-Vue.filter('datestring', function(value, useLocale = true) {
+Vue.filter('datestring', function(value) {
     if(value) {
-        const d = dayjs.unix(value);
-        if(useLocale) {
-            return d.toLocaleString();
+        const d = isNaN(value) ? dayjs.utc(value) : dayjs.utc(value*1000);
+        return d.toDate().toString();
+    }
+});
+Vue.filter('ago', function(value) {
+    if(value) {
+        let d;
+        if(isNaN(value)) {
+            d = dayjs.utc(value);
+        } else {
+            d = dayjs.utc(value*1000);
         }
-        return d.utc().toString();
+        return d.fromNow();
     }
 });
 Vue.filter('numPlus', function(value, length = 2) {
@@ -876,6 +906,29 @@ Vue.filter('bibtexify', function(value, type) {
     }
     rendered += "</code></pre>";
     return rendered;
+});
+Vue.filter('mentionify', function(value) {
+    const template = `<span class="badge badge-primary">@{name}</span>`;
+    const unknownTemplate = `<span class="font-weight-bold">@{name}</span>`;
+    const mentionRegex = /@(\w|\d)+/gi;
+    let mentions = value.match(mentionRegex);
+    if(!mentions) return value;
+    mentions = mentions.filter((m, i) => mentions.indexOf(m) === i);
+    let newValue = value;
+    for(let i=0; i<mentions.length; i++) {
+        const elem = mentions[i];
+        const m = elem.substring(1);
+        const user = app.$getUserBy(m, 'nickname');
+        const replRegex = new RegExp(elem, 'g');
+        let name = m;
+        let tpl = unknownTemplate;
+        if(user) {
+            name = user.name;
+            tpl = template;
+        }
+        newValue = newValue.replace(replRegex, tpl.replace('{name}', name));
+    }
+    return newValue;
 });
 
 const app = new Vue({

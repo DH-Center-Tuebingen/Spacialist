@@ -47,6 +47,7 @@
         "yarn": "^1.22.4"
     },
     "dependencies": {
+        "@joeattardi/emoji-button": "^3.1.1",
         "@mapbox/togeojson": "^0.16.0",
         "@retorquere/bibtex-parser": "^3.2.1",
         "bootstrap": "^4.5.0",

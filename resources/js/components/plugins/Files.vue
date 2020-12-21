@@ -386,7 +386,7 @@
                                             {{ $t('plugins.files.modal.detail.metadata.created') }}
                                         </td>
                                         <td class="text-right text-muted">
-                                            {{selectedFile.created_unix|date(undefined, true)}}
+                                            {{selectedFile.created_unix|date}}
                                         </td>
                                     </tr>
                                     <tr>
@@ -394,7 +394,7 @@
                                             {{ $t('plugins.files.modal.detail.metadata.lastmodified') }}
                                         </td>
                                         <td class="text-right text-muted">
-                                            {{selectedFile.modified_unix|date(undefined, true)}}
+                                            {{selectedFile.modified_unix|date}}
                                         </td>
                                     </tr>
                                     <tr>

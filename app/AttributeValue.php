@@ -4,11 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
+use App\Traits\CommentTrait;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class AttributeValue extends Model
 {
     use PostgisTrait;
+    use CommentTrait;
     use LogsActivity;
 
     protected $table = 'attribute_values';
@@ -29,7 +31,6 @@ class AttributeValue extends Model
         'str_val',
         'thesaurus_val',
         'certainty',
-        'certainty_description',
         'user_id',
     ];
 
@@ -56,7 +57,6 @@ class AttributeValue extends Model
 
     const patchRules = [
         'certainty' => 'integer|between:0,100',
-        'certainty_description' => 'string|nullable'
     ];
 
     public function getValue() {

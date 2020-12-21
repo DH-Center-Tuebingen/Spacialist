@@ -83,6 +83,30 @@
     overflow: visible !important;
 }
 
+.bg-light-dark {
+    background-color: lighten($text-color, 50%);
+}
+
+.opacity-0 {
+    opacity: 0;
+}
+
+.opacity-25 {
+    opacity: 0.25;
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.opacity-75 {
+    opacity: 0.75;
+}
+
+.opacity-1 {
+    opacity: 1;
+}
+
 .clickable {
     cursor: pointer;
 }
@@ -113,4 +137,9 @@
 
 .object-fit-cover {
     object-fit: cover;
+}
+
+
+.resize-none {
+    resize: none;
 }

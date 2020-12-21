@@ -35,6 +35,44 @@
                         </router-link>
                     </li>
                     <li class="nav-item dropdown" v-if="loggedIn">
+                        <a href="#" class="nav-link" id="notifications-navbar" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-fw fa-bell"></i>
+                            <span class="badge badge-danger align-text-bottom" v-if="unreadNotifications.length">
+                                {{ unreadNotifications.length }}
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right stays-open row bg-dark text-light py-1" aria-labelledby="notifications-navbar" style="min-width: 30rem;">
+                            <div class="col-12 d-flex flex-row justify-content-between pb-1">
+                                <span>
+                                    {{ $t('global.notifications.count', {cnt: notifications.length}) }}
+                                </span>
+                                <a href="#" class="text-light" @click.prevent.stop="markAllNotificationsAsRead()">
+                                    {{ $t('global.notifications.mark_all_as_read') }}
+                                </a>
+                            </div>
+                            <div class="col-12 bg-light text-dark px-0">
+                                <notification-body
+                                    v-for="(n, idx) in notifications"
+                                    :key="n.id"
+                                    :avatar="32"
+                                    :notf="n"
+                                    :odd="!!(idx % 2)"
+                                    :small-text="true"
+                                    @read="markNotificationAsRead"
+                                    @delete="deleteNotification">
+                                </notification-body>
+                                <p class="py-2 px-3 mb-0 bg-light text-dark" v-if="!notifications.length">
+                                    {{ $t('global.notifications.empty_list') }}
+                                </p>
+                            </div>
+                            <div class="text-center pt-1">
+                                <router-link :to="{name: 'notifications', params: { id: $auth.user().id }}" class="text-light">
+                                    {{ $t('global.notifications.view_all') }}
+                                </router-link>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown" v-if="loggedIn">
                         <a href="#" class="nav-link dropdown-toggle" id="tools-navbar" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
                             <i class="fas fa-fw fa-cogs"></i> {{ $t('global.tools.title') }}
                         </a>
@@ -130,6 +168,7 @@
             <video id="rtc-sharing-container" class="video-js d-none"></video>
             <about-dialog></about-dialog>
             <error-modal></error-modal>
+            <user-info-modal></user-info-modal>
         </div>
         <notifications group="spacialist" position="bottom left" class="m-2" />
     </div>
@@ -213,6 +252,15 @@
                 if(!this.rtc.player) return;
                 this.rtc.player.record().stop();
             },
+            markNotificationAsRead(event) {
+                this.$markAsRead(event.id);
+            },
+            markAllNotificationsAsRead() {
+                this.$markAllAsRead();
+            },
+            deleteNotification(event) {
+                this.$deleteNotification(event.id);
+            },
             logout() {
                 this.$auth.logout({
                     makeRequest: true,
@@ -248,12 +296,29 @@
         },
         computed: {
             loggedIn() {
-                return this.$auth.check();
+                return this.$isLoggedIn();
+            },
+            notifications() {
+                return this.$userNotifications();
+            },
+            unreadNotifications() {
+                return this.notifications.filter(n => !n.read_at);
             },
             authUser() {
-                if(!this.loggedIn) return {};
-
-                return this.$auth.user() ? this.$auth.user() : {};
+                return this.$getUser();
+            }
+        },
+        watch: {
+            // prevent notification dropdown from close on click
+            loggedIn(newVal, oldVal) {
+                if(newVal && !oldVal) {
+                    this.$nextTick(_ => {
+                        $('.dropdown-menu.stays-open').on("click.bs.dropdown", function (e) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        });
+                    })
+                }
             }
         }
     }

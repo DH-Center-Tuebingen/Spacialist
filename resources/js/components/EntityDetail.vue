@@ -54,18 +54,83 @@
                 </a>
             </div>
         </div>
-        <form id="entity-attribute-form" name="entity-attribute-form" class="col pl-0 pr-0 overflow-hidden" @submit.prevent="saveEntity(selectedEntity)">
-            <attributes class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
-                :attributes="selectedEntity.attributes"
-                :dependencies="selectedEntity.dependencies"
-                :disable-drag="true"
-                :on-metadata="showMetadata"
-                :metadata-addon="hasReferenceGroup"
-                :selections="selectedEntity.selections"
-                :values="selectedEntity.data"
-                @attr-dep-change="updateDependencyCounter">
-            </attributes>
-        </form>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="active-entity-attributes-tab" href="#" @click.prevent="setEntityView('attributes')">
+                    {{ $t('main.entity.tabs.attributes') }}
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="active-entity-comments-tab" href="#" @click.prevent="setEntityView('comments')">
+                    {{ $t('main.entity.tabs.comments') }}
+                    <span class="badge badge-primary">{{ selectedEntity.comments_count }}</span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content col pl-0 pr-0 overflow-hidden" id="myTabContent">
+            <div class="tab-pane fade h-100 show active" id="active-entity-attributes-panel" role="tabpanel">
+                <form id="entity-attribute-form" name="entity-attribute-form" class="h-100" @submit.prevent="saveEntity(selectedEntity)">
+                    <attributes class="pt-2 h-100 scroll-y-auto scroll-x-hidden" v-if="hasData" v-can="'view_concept_props'"
+                        :attributes="selectedEntity.attributes"
+                        :dependencies="selectedEntity.dependencies"
+                        :disable-drag="true"
+                        :on-metadata="showMetadata"
+                        :metadata-addon="hasReferenceGroup"
+                        :selections="selectedEntity.selections"
+                        :values="selectedEntity.data"
+                        @attr-dep-change="updateDependencyCounter">
+                    </attributes>
+                </form>
+            </div>
+            <div class="tab-pane fade h-100 d-flex flex-column" id="active-entity-comments-panel" role="tabpanel">
+                <div class="mb-auto scroll-y-auto" v-if="selectedEntity.comments">
+                    <div v-if="commentsFetching" class="mt-2">
+                        <p class="alert alert-info mb-0" v-html="$t('global.comments.fetching')">
+                        </p>
+                    </div>
+                    <div v-else-if="commentFetchFailed" class="mt-2">
+                        <p class="alert alert-danger mb-0">
+                            {{ $t('global.comments.fetching_failed') }}
+                            <button type="button" class="d-block mt-2 btn btn-xs btn-outline-success" @click="fetchComments">
+                                <i class="fas fa-fw fa-sync"></i>
+                                {{ $t('global.comments.retry_failed') }}
+                            </button>
+                        </p>
+                    </div>
+                    <comment-list
+                        v-else
+                        :avatar="48"
+                        :comments="selectedEntity.comments"
+                        @edited="editComment"
+                        @on-delete="deleteComment"
+                        @reply-to="addReplyTo"
+                        @load-replies="loadReplies">
+                    </comment-list>
+                </div>
+                <hr />
+                <div v-if="replyTo.comment_id > 0" class="mb-1">
+                    <span class="badge badge-info">
+                        {{ $t('global.replying_to', {name: replyTo.author.name}) }}
+                        <a href="#" @click.prevent="cancelReplyTo" class="text-white">
+                            <i class="fas fa-fw fa-times"></i>
+                        </a>
+                    </span>
+                </div>
+                <form role="form" class="mt-2" @submit.prevent="postComment">
+                    <div class="form-group d-flex">
+                        <textarea class="form-control" v-model="comment" id="comment-content" ref="comCnt" :placeholder="$t('global.comments.text_placeholder')"></textarea>
+                        <div class="ml-2 mt-auto">
+                            <emoji-picker @selected="addEmoji"></emoji-picker>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="fas fa-fw fa-save"></i> {{ $t('global.comments.submit') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <router-view
             v-can="'view_concept_props'"
@@ -84,6 +149,7 @@
         },
         beforeRouteUpdate(to, from, next) {
             if(to.params.id != from.params.id) {
+                this.reset();
                 this.getEntityData(this.selectedEntity).then(r => {
                     next();
                 });
@@ -113,7 +179,19 @@
         mounted() {},
         methods: {
             init(entity) {},
+            reset() {
+                this.commentLoadingState = 'not';
+                this.comment = '';
+                this.replyTo = {
+                    comment_id: null,
+                    author: {
+                        name: null,
+                        nickname: null
+                    }
+                };
+            },
             getEntityData(entity) {
+                this.setEntityView(this.$route.query.view);
                 this.dataLoaded = false;
                 if(!this.$can('view_concept_props')) {
                     Vue.set(this.selectedEntity, 'data', {});
@@ -121,8 +199,12 @@
                     Vue.set(this.selectedEntity, 'selections', {});
                     Vue.set(this.selectedEntity, 'dependencies', []);
                     Vue.set(this.selectedEntity, 'references', []);
+                    Vue.set(this.selectedEntity, 'comments', []);
                     Vue.set(this, 'dataLoaded', true);
                     return new Promise(r => r(null));
+                }
+                if(!this.selectedEntity.comments || this.selectedEntity.comments_count === 0) {
+                    Vue.set(this.selectedEntity, 'comments', []);
                 }
                 const cid = entity.id;
                 const ctid = entity.entity_type_id;
@@ -244,6 +326,30 @@
                     entity: entity
                 });
             },
+            setEntityView(tab) {
+                let newTab, oldTab, newPanel, oldPanel;
+                if(tab === 'comments') {
+                    this.$router.push({query: {view: 'comments'}});
+                    newTab = document.getElementById('active-entity-comments-tab');
+                    newPanel = document.getElementById('active-entity-comments-panel');
+                    oldTab = document.getElementById('active-entity-attributes-tab');
+                    oldPanel = document.getElementById('active-entity-attributes-panel');
+                    if(!this.commentsFetched) {
+                        this.fetchComments();
+                    }
+                } else {
+                    this.$router.push({query: {view: 'attributes'}});
+                    newTab = document.getElementById('active-entity-attributes-tab');
+                    newPanel = document.getElementById('active-entity-attributes-panel');
+                    oldTab = document.getElementById('active-entity-comments-tab');
+                    oldPanel = document.getElementById('active-entity-comments-panel');
+                }
+
+                oldTab.classList.remove('active');
+                newTab.classList.add('active');
+                oldPanel.classList.remove('show', 'active');
+                newPanel.classList.add('show', 'active');
+            },
             onEntityHeaderHover(hoverState) {
                 this.entityHeaderHovered = hoverState;
             },
@@ -277,6 +383,112 @@
             cancelUpdateEntityName() {
                 Vue.set(this.selectedEntity, 'editing', false);
                 this.newEntityName = '';
+            },
+            fetchComments() {
+                this.commentLoadingState = 'fetching';
+                $httpQueue.add(() => $http.get(`/comment/resource/${this.selectedEntity.id}?r=entity`).then(response => {
+                    this.selectedEntity.comments = response.data;
+                    this.commentLoadingState = 'fetched';
+                })).catch(error => {
+                    this.commentLoadingState = 'failed';
+                });
+            },
+            getComment(list, id) {
+                if(!list || list.length == 0) return;
+                for(let i=0; i<list.length; i++) {
+                    if(list[i].id == id) {
+                        return list[i];
+                    }
+                    const gotIt = this.getComment(list[i].replies, id);
+                    if(gotIt) return gotIt;
+                }
+            },
+            loadReplies(event) {
+                const cid = event.comment_id;
+                $http.get(`/comment/${cid}/reply`).then(response => {
+                    let comment = this.getComment(this.selectedEntity.comments, cid);
+                    if(comment) {
+                        if(!comment.replies) {
+                            Vue.set(comment, 'replies', []);
+                        }
+                        comment.replies = response.data;
+                    }
+                });
+            },
+            editComment(event) {
+                const cid = event.comment_id;
+                const data = {
+                    content: event.content
+                };
+                $http.patch(`/comment/${cid}`, data).then(response => {
+                    let comment = this.getComment(this.selectedEntity.comments, cid);
+                    if(comment) {
+                        comment.content = event.content;
+                        comment.updated_at = response.data.updated_at;
+                    }
+                });
+            },
+            addReplyTo(event) {
+                if(!event.comment) return;
+                const comment = event.comment;
+                this.replyTo.comment_id = comment.id;
+                this.replyTo.author.name = comment.author.name;
+                this.replyTo.author.nickname = comment.author.nickname;
+                this.$refs.comCnt.focus();
+            },
+            cancelReplyTo() {
+                this.replyTo.comment_id = null;
+                this.replyTo.author.name = null;
+                this.replyTo.author.nickname = null;
+            },
+            deleteComment(event) {
+                const cid = event.comment_id;
+                const parent_id = event.reply_to;
+                $http.delete(`/comment/${cid}`).then(response => {
+                    let siblings, parent;
+                    if(parent_id) {
+                        parent = this.getComment(this.selectedEntity.comments, parent_id);
+                        siblings = parent.replies;
+                    } else {
+                        siblings = this.selectedEntity.comments;
+                    }
+                    const comment = siblings.find(s => s.id == cid);
+                    comment.deleted_at = Date();
+                });
+            },
+            postComment() {
+                if(!this.comment) return;
+
+                let replyToId = null;
+                if(this.replyTo.comment_id) {
+                    replyToId = this.replyTo.comment_id;
+                }
+                const resource = {
+                    id: this.selectedEntity.id,
+                    type: 'entity'
+
+                };
+                this.$postComment(this.comment, resource, replyToId, null, comment => {
+                    const addedComment = comment;
+                    if(replyToId) {
+                        let comment = this.selectedEntity.comments.find(c => c.id == replyToId);
+                        if(comment.replies) {
+                            comment.replies.push(addedComment);
+                        }
+                        comment.replies_count++;
+                        this.cancelReplyTo();
+                    } else {
+                        if(!this.selectedEntity.comments) {
+                            this.selectedEntity.comments = [];
+                        }
+                        this.selectedEntity.comments.push(addedComment);
+                        this.selectedEntity.comments_count++;
+                    }
+                    this.comment = '';
+                });
+            },
+            addEmoji(event) {
+                this.comment += event.emoji;
             },
             getCleanValue(entry, attributes) {
                 if(!entry) return;
@@ -387,7 +599,16 @@
                 dataLoaded: false,
                 dependencyInfoHovered: false,
                 hiddenAttributes: 0,
-                referenceAttribute: null
+                referenceAttribute: null,
+                commentLoadingState: 'not',
+                comment: '',
+                replyTo: {
+                    comment_id: null,
+                    author: {
+                        name: null,
+                        nickname: null
+                    }
+                },
             }
         },
         computed: {
@@ -412,6 +633,7 @@
                     value: {},
                     attribute: {}
                 };
+                if(!this.selectedEntity.attributes) return data;
                 if(this.referenceAttribute) {
                     const attribute = this.selectedEntity.attributes.find(a => a.id == this.referenceAttribute);
                     if(!attribute) return data;
@@ -420,7 +642,16 @@
                     data.attribute = attribute;
                 }
                 return data;
-            }
+            },
+            commentsFetching() {
+                return this.commentLoadingState === 'fetching';
+            },
+            commentsFetched() {
+                return this.commentLoadingState === 'fetched';
+            },
+            commentFetchFailed() {
+                return this.commentLoadingState === 'failed';
+            },
         },
         watch: {
             isFormDirty(newDirty, oldDirty) {

@@ -33,7 +33,7 @@
                         <span :class="getCertaintyClass(localValues[attribute.id].certainty)">
                             <i class="fas fa-fw fa-exclamation"></i>
                         </span>
-                        <span v-if="localValues[attribute.id].certainty_description">
+                        <span v-if="localValues[attribute.id].comments_count > 0">
                             <i class="fas fa-fw fa-comment"></i>
                         </span>
                         <span v-if="metadataAddon(attribute.thesaurus_url)">
