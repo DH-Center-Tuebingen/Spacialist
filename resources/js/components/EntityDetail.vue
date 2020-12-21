@@ -265,7 +265,11 @@
                             entity_id: entity.id,
                             value: name
                         });
-                        entity.name = name;
+                        const d = response.data;
+                        entity.name = d.name;
+                        entity.user_id = d.user_id;
+                        entity.updated_at = d.updated_at;
+                        entity.user = d.user;
                         this.cancelUpdateEntityName();
                     }));
                 }
