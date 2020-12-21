@@ -13,10 +13,12 @@
                 <activity-log
                     class="h-100 overflow-hidden"
                     action-icons="only"
-                    :activity="userActivity"
+                    :activity="filteredActivity"
+                    :disable-fetching="fetchingDisabled"
                     :hide-user="true"
                     :show-filter="true"
-                    @filter-updated="handleFilterChange">
+                    @filter-updated="handleFilterChange"
+                    @fetch-data="handleDataFetching">
                 </activity-log>
             </div>
         </div>
@@ -24,28 +26,14 @@
 </template>
 
 <script>
+    import ActivityMixin from './ActivityMixin.vue';
+
     export default {
-        mounted() {
-            this.init();
-        },
-        methods: {
-            init() {
-                this.filterActivity({});
-            },
-            handleFilterChange(e) {
-                this.filterActivity(e.filters);
-            },
-            filterActivity(filter, pageUrl) {
-                pageUrl = pageUrl ? pageUrl : 'activity';
-                $http.post(pageUrl, this.getFilteredData(filter)).then(response => {
-                    this.userActivity.length = 0;
-                    this.userActivity = response.data.data;
-                    this.pagination = response.data;
-                    delete this.pagination.data;
-                });
-            },
-            getFilteredData(f) {
+        extends: ActivityMixin,
+        computed: {
+            filteredData() {
                 let data = {};
+                const f = this.filter;
                 data.users = [this.$auth.user().id];
                 if(f.from || f.to) {
                     data.timespan = {};
@@ -64,15 +52,7 @@
                     data.text = f.data_text;
                 }
                 return data;
-            }
-        },
-        data() {
-            return {
-                userActivity: [],
-                pagination: {
-                    total: 0,
-                },
-            }
-        },
+            },
+        }
     }
 </script>
