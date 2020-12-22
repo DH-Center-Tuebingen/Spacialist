@@ -1,10 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.7.8 (Unreleased)
+## 0.7.8
 ### Added
 - Show info after file upload is finished
 - Make links in lists accessible
+- Chart visualization to table attribute
 ### Fixed
 - Position of long entity names in link tab (file viewer)
 - Error when parts of Exif data is not available
