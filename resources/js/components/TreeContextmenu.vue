@@ -1,5 +1,5 @@
 <template>
-    <ul class="v-context">
+    <ul class="v-context v-context-static">
         <li>
             <a href="#" class="disabled" @click.stop.prevent @dblclick.stop.prevent>
                 {{ data.data.name }}

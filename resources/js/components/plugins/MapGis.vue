@@ -72,7 +72,7 @@
 <script>
     import MapGisImportModal from './MapGisImportModal.vue';
     import MapGisPropertiesModal from './MapGisPropertiesModal.vue';
-    import { VueContext } from 'vue-context';
+    import VueContext from 'vue-context';
 
     export default {
         components: {

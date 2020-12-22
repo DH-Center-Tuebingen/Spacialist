@@ -236,7 +236,7 @@
 
 <script>
     import infiniteScroll from 'vue-infinite-scroll';
-    import { VueContext } from 'vue-context';
+    import VueContext from 'vue-context';
 
     export default {
         components: {

@@ -106,9 +106,11 @@
             },
             skipBack() {
                 this.wavesurfer.skipBackward();
+                this.wavesurfer.play();
             },
             skipFor() {
                 this.wavesurfer.skipForward();
+                this.wavesurfer.play();
             },
             setVolume() {
                 this.wavesurfer.setVolume(this.currentVolume);

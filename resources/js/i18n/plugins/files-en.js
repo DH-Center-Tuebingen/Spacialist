@@ -57,7 +57,11 @@ const en = {
             upload: {
                 title: 'Drop Zone',
                 desc: 'Drop Files here or click on the box..',
-                error: 'Error while uploading your file.'
+                error: 'Error while uploading your file.',
+                finish: {
+                    title: 'Upload of {files} file finished | Upload of {files} files finished',
+                    msg: 'No errors | One file not uploaded | {files} files not uploaded'
+                }
             },
             modal: {
                 detail: {
