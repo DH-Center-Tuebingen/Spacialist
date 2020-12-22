@@ -22,8 +22,8 @@
             </div>
         </div>
         <ol class="mt-2" v-if="expanded && entries.length">
-            <li v-for="(l, i) in entries">
-                {{ l }}
+            <li v-for="(l, i) in entries" :key="i">
+                <span v-html="urlify(l)"></span>
                 <a href="#" class="text-danger" @click="removeListEntry(i)">
                     <i class="fas fa-fw fa-trash"></i>
                 </a>
@@ -81,6 +81,12 @@
             toggleList() {
                 this.expanded = !this.expanded;
             },
+            urlify(text) {
+                var urlRegex =/(\b(https?):\/\/[-A-Z0-9+#&=?@%_.]*[-A-Z0-9+#&=?@%_\/])/ig;
+                return text.replace(urlRegex, url => {
+                    return `<a href="${url}" target="_blank">${url}</a>`;
+                });
+            }
         },
         data () {
             return {

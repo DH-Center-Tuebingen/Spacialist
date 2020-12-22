@@ -196,6 +196,19 @@
                     </div>
             </file-upload>
             <div v-show="!uploadFiles.length" class="mt-2">
+                <div class="alert alert-info alert-dismissible fade show" v-if="successfulFileUpload" role="alert">
+                    <h5>
+                        {{
+                            $tc('plugins.files.upload.finish.title', successfulFileUpload.files + successfulFileUpload.errors, {files: successfulFileUpload.files + successfulFileUpload.errors})
+                        }}
+                    </h5>
+                    {{
+                        $tc('plugins.files.upload.finish.msg', successfulFileUpload.errors, {files: successfulFileUpload.errors})
+                    }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 <form role="form">
                     <div class="form-group row">
                         <label class="col-form-label col-md-3" for="upload-property-copyright">
@@ -490,9 +503,10 @@
                             <div class="d-flex flex-column h-100 mx-4">
                                 <div class="my-3 col p-0 scroll-y-auto">
                                     <ul class="list-group mx-0" v-if="selectedFile.entities && selectedFile.entities.length">
-                                        <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.entities">
-                                            <a href="#" @click.prevent="routeToEntity(link)">
-                                                <i class="fas fa-fw fa-monument"></i> {{ link.name }}
+                                        <li class="list-group-item d-flex justify-content-between" v-for="link in selectedFile.entities" :key="link.id">
+                                            <a href="#" @click.prevent="routeToEntity(link)" class="text-left">
+                                                <i class="fas fa-fw fa-monument"></i>
+                                                <span>{{ link.name }}</span>
                                             </a>
                                             <a href="#" class="text-body" @click.prevent="requestUnlinkFile(selectedFile, link)">
                                                 <i class="fas fa-fw fa-xs fa-times" style="vertical-align: 0;"></i>
@@ -535,7 +549,7 @@
                                             {{ selectedFile.exif.Model }}
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <i class="far fa-fw fa-circle"></i>
                                         </td>
@@ -543,20 +557,20 @@
                                             {{ selectedFile.exif.Exif.FNumber }}
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <i class="fas fa-fw fa-circle"></i>
                                         </td>
                                         <td>
                                             <span>
-                                                {{ selectedFile.exif.Exif.FocalLength }} <span v-if="selectedFile.exif.MakMakerNotes">({{    selectedFile.exif.MakerNotes.LensModel }})</span>
+                                                {{ selectedFile.exif.Exif.FocalLength }} <span v-if="selectedFile.exif.MakMakerNotes">({{ selectedFile.exif.MakerNotes.LensModel }})</span>
                                             </span>
                                             <span v-if="selectedFile.exif.MakerNotes" style="display: block;font-size: 90%;color: gray;">
                                                 {{     selectedFile.exif.MakerNotes.LensType }}
                                             </span>
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <i class="fas fa-fw fa-stopwatch"></i>
                                         </td>
@@ -564,7 +578,7 @@
                                             {{ selectedFile.exif.Exif.ExposureTime }}
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <i class="fas fa-fw fa-plus"></i>
                                         </td>
@@ -572,7 +586,7 @@
                                             {{ selectedFile.exif.Exif.ISOSpeedRatings }}
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <!-- EXIF.Flash is hex, trailing 0 means no flash -->
                                             <i class="fas fa-fw fa-bolt"></i>
@@ -581,7 +595,7 @@
                                             {{ selectedFile.exif.Exif.Flash }}
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr v-if="selectedFile.exif.Exif">
                                         <td>
                                             <i class="fas fa-fw fa-clock"></i>
                                         </td>
@@ -1064,6 +1078,9 @@
                     this.getNextFiles(id);
                 }
             },
+            closeSuccessfulFileUploadInfo() {
+                Vue.set(this, 'successfulFileUpload', null);
+            },
             isAction(id) {
                 return this.selectedTopAction == id;
             },
@@ -1071,6 +1088,9 @@
                 this.$refs.upload.remove(file);
             },
             inputFile(newFile, oldFile) {
+                if(newFile && oldFile && newFile.active !== oldFile.active) {
+                    Vue.set(this, 'successfulFileUpload', null);
+                }
                 // Wait for response
                 if(newFile && oldFile && newFile.success && !oldFile.success) {
                     this.filesUploaded++;
@@ -1084,11 +1104,15 @@
                         this.$refs.upload.active = true
                     }
                 }
-                if(this.filesUploaded + this.filesErrored == this.uploadFiles.length) {
+                if(this.uploadFiles.length > 0 && this.filesUploaded + this.filesErrored == this.uploadFiles.length) {
                     if(this.filesUploaded > 0) {
                         this.onFilesUploaded(this.unlinkedFiles);
                         this.onFilesUploaded(this.allFiles);
                     }
+                    Vue.set(this, 'successfulFileUpload', {
+                        files: this.filesUploaded,
+                        errors: this.filesErrored,
+                    });
                     this.filesUploaded = 0;
                     this.filesErrored = 0;
                     this.uploadFiles = [];
@@ -1357,6 +1381,7 @@
             showFileModal(file) {
                 this.selectedFile.editing = false;
                 this.selectedFile = { ...this.selectedFile, ...file };
+                console.log(this.selectedFile);
                 switch(file.category) {
                     case 'image':
                         this.fileCategoryComponent = 'file-image';
@@ -1449,6 +1474,7 @@
                     date: ''
                 },
                 selectedTopAction: 'unlinkedFiles',
+                successfulFileUpload: null,
                 uploadFiles: [],
                 toUpload: {
                     tags: [],

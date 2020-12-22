@@ -16,7 +16,16 @@ All notable changes to this project will be documented in this file.
 - Switch from momentjs to dayjs for dates
 - Replaced certainty description with new comment section
 
-## 0.7.7 (Unreleased)
+## 0.7.8
+### Added
+- Show info after file upload is finished
+- Make links in lists accessible
+- Chart visualization to table attribute
+### Fixed
+- Position of long entity names in link tab (file viewer)
+- Error when parts of Exif data is not available
+
+## 0.7.7
 ### Added
 - Caching attribute data in GIS layer styles
 - Chart overlays to GIS layer styling

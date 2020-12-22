@@ -57,7 +57,11 @@ const de = {
             upload: {
                 title: 'Drop Zone',
                 desc: 'Dateien hierherziehen oder auf die Box klicken.',
-                error: 'Fehler beim Hochladen der Datei.'
+                error: 'Fehler beim Hochladen der Datei.',
+                finish: {
+                    title: 'Dateiupload von {files} Datei abgeschlossen | Dateiupload von {files} Dateien abgeschlossen',
+                    msg: 'Es sind keine Fehler aufgetreten | Es ist bei einer Datei ein Fehler augetreten. | Es sind bei {files} Dateien  Fehler aufgetreten'
+                }
             },
             modal: {
                 detail: {

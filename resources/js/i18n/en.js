@@ -310,6 +310,14 @@ const en = {
                 hidden: 'no attributes hidden | one attribute hidden | {cnt} attributes hidden',
                 iconclass: {
                     doesnt_exist: 'This iconclass does not exist'
+                },
+                table: {
+                    chart: {
+                        number_sets: 'Last {cnt} data sets',
+                        include_in: 'Use in chart',
+                        use_difference: 'Use difference',
+                        use_as_label: 'Use as label'
+                    }
                 }
             }
         },
