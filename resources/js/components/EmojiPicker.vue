@@ -5,7 +5,7 @@
 </template>
 
 <script>
-    import EmojiButton from '@joeattardi/emoji-button';
+    import { EmojiButton } from '@joeattardi/emoji-button';
 
     export default {
         mounted() {
@@ -13,7 +13,7 @@
 
             this.picker.on('emoji', emoji => {
                 this.$emit('selected', {
-                    emoji: emoji
+                    emoji: emoji.emoji
                 });
             });
 

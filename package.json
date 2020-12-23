@@ -47,7 +47,7 @@
         "yarn": "^1.22.10"
     },
     "dependencies": {
-        "@joeattardi/emoji-button": "^3.1.1",
+        "@joeattardi/emoji-button": "^4.6.0",
         "@mapbox/togeojson": "^0.16.0",
         "@retorquere/bibtex-parser": "^3.2.29",
         "bootstrap": "^4.5.3",
@@ -90,7 +90,7 @@
         "vue-scrollto": "^2.20.0",
         "vue-typeahead": "^2.3.2",
         "vue-upload-component": "^2.8.22",
-        "vue2-datepicker": "^3.4.1",
+        "vue2-datepicker": "^3.8.1",
         "vuedraggable": "^2.24.3",
         "wavesurfer.js": "^4.3.0",
         "wkx": "^0.5.0"
