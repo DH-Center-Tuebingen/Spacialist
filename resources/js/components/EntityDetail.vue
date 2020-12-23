@@ -191,7 +191,6 @@
                 };
             },
             getEntityData(entity) {
-                this.setEntityView(this.$route.query.view);
                 this.dataLoaded = false;
                 if(!this.$can('view_concept_props')) {
                     Vue.set(this.selectedEntity, 'data', {});
@@ -258,6 +257,7 @@
                     const aid = this.$route.params.aid;
                     this.setReferenceAttribute(aid);
                     Vue.set(this, 'dataLoaded', true);
+                    this.setEntityView();
                 }));
             },
             saveEntity(entity) {
@@ -329,7 +329,6 @@
             setEntityView(tab) {
                 let newTab, oldTab, newPanel, oldPanel;
                 if(tab === 'comments') {
-                    this.$router.push({query: {view: 'comments'}});
                     newTab = document.getElementById('active-entity-comments-tab');
                     newPanel = document.getElementById('active-entity-comments-panel');
                     oldTab = document.getElementById('active-entity-attributes-tab');
@@ -338,7 +337,6 @@
                         this.fetchComments();
                     }
                 } else {
-                    this.$router.push({query: {view: 'attributes'}});
                     newTab = document.getElementById('active-entity-attributes-tab');
                     newPanel = document.getElementById('active-entity-attributes-panel');
                     oldTab = document.getElementById('active-entity-comments-tab');
