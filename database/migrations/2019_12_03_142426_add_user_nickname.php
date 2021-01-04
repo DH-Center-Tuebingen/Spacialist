@@ -16,6 +16,8 @@ class AddUserNickname extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         $users = User::all();
         Schema::table('users', function (Blueprint $table) {
             $table->text('nickname')->nullable();
@@ -29,6 +31,8 @@ class AddUserNickname extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->text('nickname')->nullable(false)->change();
         });
+
+        activity()->enableLogging();
     }
 
     /**
@@ -38,8 +42,12 @@ class AddUserNickname extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('nickname');
         });
+
+        activity()->enableLogging();
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use App\ThConcept;
+use App\ThConceptLabel;
 
 class ThConceptTest extends TestCase
 {
@@ -29,5 +30,18 @@ class ThConceptTest extends TestCase
         $this->assertEquals(1, $concept->files->count());
         $this->assertEquals(5, $concept->files[0]->id);
         $this->assertEquals('test_img_edin.jpg', $concept->files[0]->name);
+    }
+
+    /**
+     * Test get last editor of first thesaurus concept
+     *
+     * @return void
+     */
+    public function testGetThConceptLasteditor()
+    {
+        $concept = ThConcept::first();
+        $this->assertEquals(1, $concept->user->id);
+        $label = ThConceptLabel::first();
+        $this->assertEquals(1, $label->user->id);
     }
 }

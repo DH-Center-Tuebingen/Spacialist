@@ -23,4 +23,15 @@ class ReferenceTest extends TestCase
         $this->assertEquals(13, $ref->attribute->id);
         $this->assertEquals(1323, $ref->bibliography->id);
     }
+
+    /**
+     * Test get last editor of first reference entry
+     *
+     * @return void
+     */
+    public function testGetReferenceEntryLasteditor()
+    {
+        $ref = Reference::first();
+        $this->assertEquals(1, $ref->user->id);
+    }
 }

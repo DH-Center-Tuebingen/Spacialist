@@ -3,19 +3,19 @@
 }
 
 .top-0 {
-    top: 0;
+    top: 0px;
 }
 
 .bottom-0 {
-    bottom: 0;
+    bottom: 0px;
 }
 
 .left-0 {
-    left: 0;
+    left: 0px;
 }
 
 .right-0 {
-    right: 0;
+    right: 0px;
 }
 
 .h-32p {
@@ -30,6 +30,14 @@
     max-height: 300px !important;
 }
 
+.align-middle {
+    vertical-align: middle;
+}
+
+.text-nowrap {
+    white-space: nowrap;
+}
+
 .text-prewrap {
     white-space: pre-wrap;
 }
@@ -38,8 +46,13 @@
     white-space: pre-line;
 }
 
+.word-break-all {
+    word-break: break-all;
+}
+
 .flex-grow-1 {
     flex-grow: 1;
+    flex-basis: 0;
 }
 
 .reorder-handle, .grab-handle {
@@ -70,12 +83,32 @@
     overflow: visible !important;
 }
 
-.clickable {
-    cursor: pointer;
+.bg-light-dark {
+    background-color: lighten($text-color, 50%);
 }
 
-.word-break-all {
-    word-break: break-all;
+.opacity-0 {
+    opacity: 0;
+}
+
+.opacity-25 {
+    opacity: 0.25;
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.opacity-75 {
+    opacity: 0.75;
+}
+
+.opacity-1 {
+    opacity: 1;
+}
+
+.clickable {
+    cursor: pointer;
 }
 
 .scroll-x-hidden {
@@ -104,4 +137,9 @@
 
 .object-fit-cover {
     object-fit: cover;
+}
+
+
+.resize-none {
+    resize: none;
 }

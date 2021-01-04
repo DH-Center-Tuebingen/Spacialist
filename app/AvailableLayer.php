@@ -4,9 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class AvailableLayer extends Model
 {
+    use LogsActivity;
+
     protected $table = 'available_layers';
     /**
      * The attributes that are assignable.
@@ -17,9 +20,24 @@ class AvailableLayer extends Model
         'name',
         'url',
         'type',
+        'subdomains',
+        'attribution',
+        'opacity',
+        'layers',
+        'styles',
+        'format',
+        'version',
         'visible',
         'is_overlay',
+        'api_key',
+        'layer_type',
+        'position',
+        'color',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
 
     const patchRules = [
         'name' => 'string',

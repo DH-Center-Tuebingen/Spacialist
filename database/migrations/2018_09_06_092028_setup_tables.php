@@ -65,6 +65,8 @@ class SetupTables extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         // Check if a previous version exists
         if($this->isFromScratch()) {
             echo "No previous version of Spacialist found. Migrating from scratch...\n";
@@ -73,6 +75,8 @@ class SetupTables extends Migration
             echo "Spacialist version found. Migrating to latest version...\n";
             $this->migrateFromPreviousVersion();
         }
+
+        activity()->enableLogging();
     }
 
     /**
@@ -82,12 +86,16 @@ class SetupTables extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         // Check if a previous version exists
         if($this->isFromScratch()) {
             $this->rollbackToScratch();
         } else {
             $this->rollbackToPreviousVersion();
         }
+
+        activity()->enableLogging();
     }
 
     private function isFromScratch() {

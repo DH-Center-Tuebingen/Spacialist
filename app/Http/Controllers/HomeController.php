@@ -54,10 +54,13 @@ class HomeController extends Controller
             ->get();
         $entityTypeMap = $entityTypes->getDictionary();
 
+        $users = User::all();
+
         return response()->json([
             'preferences' => $preferenceValues,
             'concepts' => $concepts,
-            'entityTypes' => $entityTypeMap
+            'entityTypes' => $entityTypeMap,
+            'users' => $users
         ]);
     }
 

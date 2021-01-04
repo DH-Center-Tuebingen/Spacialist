@@ -18,6 +18,8 @@ class CreatePermissionTables extends Migration
      */
     public function up()
     {
+        activity()->disableLogging();
+
         $old_roles = \DB::table('roles')->get();
         $old_perms = \DB::table('permissions')->get();
         $old_role_perms = \DB::table('permission_role')->get();
@@ -126,6 +128,8 @@ class CreatePermissionTables extends Migration
         app('cache')
             ->store(config('permission.cache.store') != 'default' ? config('permission.cache.store') : null)
             ->forget(config('permission.cache.key'));
+
+        activity()->enableLogging();
     }
 
     /**
@@ -135,6 +139,8 @@ class CreatePermissionTables extends Migration
      */
     public function down()
     {
+        activity()->disableLogging();
+
         $tableNames = config('permission.table_names');
 
         Schema::drop($tableNames['role_has_permissions']);
@@ -142,6 +148,8 @@ class CreatePermissionTables extends Migration
         Schema::drop($tableNames['model_has_permissions']);
         Schema::drop($tableNames['roles']);
         Schema::drop($tableNames['permissions']);
+
+        activity()->enableLogging();
     }
 
     private function createRoleForAllGuards($role) {

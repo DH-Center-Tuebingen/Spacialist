@@ -56,9 +56,166 @@ Vue.prototype.$can = function(permissionString, oneOf) {
     }
 }
 
+Vue.prototype.$isLoggedIn = function() {
+    return this.$auth.check();
+};
+
+Vue.prototype.$simpleResourceType = function(resource) {
+    switch(resource) {
+        case 'App\\Entity':
+            return 'entity';
+        case 'App\\Attribute':
+            return 'attribute';
+        case 'App\\AttributeValue':
+        case 'attribute_values':
+            return 'attribute_value';
+        default:
+            return resource;
+    }
+};
+
+Vue.prototype.$getNotificationSourceLink = function(notification) {
+    const query = this.$route.query;
+    switch(this.$simpleResourceType(notification.data.resource.type)) {
+        case 'entity':
+            return {
+                name: 'entitydetail',
+                params: {
+                    id: notification.data.resource.id
+                },
+                query: {
+                    ...query,
+                    view: 'comments',
+                }
+            }
+        case 'attribute_value':
+            return {
+                name: 'entityrefs',
+                params: {
+                    id: notification.data.resource.meta.entity_id,
+                    aid: notification.data.resource.meta.attribute_id,
+                },
+                query: query
+            }
+        default:
+            return null;
+    }
+};
+
+Vue.prototype.$postComment = function(content, resource, replyToId = null, metadata = null, onFinish = null) {
+    let data = {
+        content: content,
+        resource_id: resource.id,
+        resource_type: this.$simpleResourceType(resource.type),
+    };
+    if(replyToId) {
+        data.reply_to = replyToId;
+    }
+    if(metadata) {
+        data.metadata = metadata;
+    }
+    $httpQueue.add(() => $http.post(`/comment`, data).then(response => {
+        if(onFinish) {
+            onFinish(response.data);
+        }
+    }));
+};
+
+Vue.prototype.$userNotifications = function() {
+    return this.$isLoggedIn() ? this.$auth.user().notifications : [];
+};
+
+Vue.prototype.$markAsRead = function(id, from = this.$userNotifications()) {
+    const elem = from.find(elem => elem.id === id)
+    if(elem) {
+        return $httpQueue.add(() => $http.patch(`notification/read/${id}`).then(response => {
+            elem.read_at = Date();
+        }));
+    }
+}
+
+Vue.prototype.$markAllAsRead = function(ids = null, from = this.$userNotifications()) {
+    if(!ids) {
+        ids = from.map(elem => elem.id);
+    }
+    const data = {
+        ids: ids
+    };
+    return $httpQueue.add(() => $http.patch(`notification/read/`, data).then(response => {
+        let idsC = _clone(ids);
+        from.forEach(elem => {
+            const idx = idsC.findIndex(id => id === elem.id);
+            if(idx > -1) {
+                elem.read_at = Date();
+                idsC.splice(idx, 1);
+            }
+        });
+    }));
+}
+
+Vue.prototype.$deleteNotification = function(id, from = this.$userNotifications()) {
+    return $httpQueue.add(() => $http.delete(`notification/${id}`).then(response => {
+        const idx = from.findIndex(elem => elem.id === id);
+        if(idx > -1) {
+            from.splice(idx, 1);
+        }
+    }));
+}
+
+Vue.prototype.$deleteAllNotifications = function(ids = null, from = this.$userNotifications()) {
+    if(!ids) {
+        ids = from.map(elem => elem.id);
+    }
+    const data = {
+        ids: ids
+    };
+    return $httpQueue.add(() => $http.patch(`notification/`, data).then(response => {
+        ids.forEach(id => {
+            const idx = from.findIndex(elem => elem.id === id);
+            if(idx > -1) {
+                from.splice(idx, 1);
+            }
+        });
+    }));
+}
+
 Vue.prototype.$updateLanguage = function() {
-    if(Vue.prototype.$auth.check()) {
+    if(this.$isLoggedIn()) {
         Vue.i18n.locale = this.$getPreference('prefs.gui-language');
+    }
+};
+
+Vue.prototype.$getUser = function() {
+    if(this.$isLoggedIn()) {
+        return this.$auth.user();
+    } else {
+        return {};
+    }
+}
+
+Vue.prototype.$userId = function() {
+    if(this.$isLoggedIn()) {
+        return this.$auth.user().id;
+    } else {
+        return -1;
+    }
+};
+
+Vue.prototype.$getUserBy = function(value, attr = 'id') {
+    if(this.$isLoggedIn()) {
+        const isNum = !isNaN(value);
+        const lValue = isNum ? value : value.toLowerCase();
+        return this.$root.$data.users.find(u => isNum ? (u[attr] == lValue) : (u[attr].toLowerCase() == lValue));
+    } else {
+        return null;
+    }
+};
+
+Vue.prototype.$getUsers = function() {
+    if(Vue.prototype.$auth.check()) {
+        return this.$root.$data.users;
+    } else {
+        return [];
     }
 };
 
@@ -210,6 +367,12 @@ Vue.prototype.$getEntityColors = function(id, alpha = 0.5) {
         color: textColor,
         backgroundColor: color
     };
+}
+
+Vue.prototype.$showUserInfo = function(user) {
+    this.$modal.show('user-info-modal', {
+        user: user,
+    });
 }
 
 Vue.prototype.$hasPreference = function(prefKey, prop) {

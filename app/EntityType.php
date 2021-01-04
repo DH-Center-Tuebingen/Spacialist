@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class EntityType extends Model
 {
+    use LogsActivity;
+
     protected $table = 'entity_types';
     /**
      * The attributes that are assignable.
@@ -14,8 +17,12 @@ class EntityType extends Model
      */
     protected $fillable = [
         'thesaurus_url',
-        'type',
+        'is_root',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
 
     public function setRelationInfo($isRoot = false, $subTypes = []) {
         $this->is_root = $isRoot;

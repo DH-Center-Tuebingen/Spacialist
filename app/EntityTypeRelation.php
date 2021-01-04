@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class EntityTypeRelation extends Model
 {
+    use LogsActivity;
+
     /**
      * The attributes that are assignable.
      *
@@ -15,6 +18,10 @@ class EntityTypeRelation extends Model
         'parent_id',
         'child_id'
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
 
     // TODO relations
 }

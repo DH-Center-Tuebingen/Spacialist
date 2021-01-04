@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Preference;
 use App\ThConcept;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
@@ -17,6 +18,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Relation::morphMap([
+            'attribute_values' => 'App\AttributeValue'
+        ]);
+        
         View::composer('*', function($view) {
             $preferences = Preference::all();
             $preferenceValues = [];
@@ -36,6 +41,22 @@ class AppServiceProvider extends ServiceProvider
         });
         Validator::extend('between_float', function ($attribute, $value, $parameters, $validator) {
             return $value >= $parameters[0] && $value <= $parameters[1];
+        });
+        Validator::extend('orcid', function ($attribute, $value, $parameters, $validator) {
+            if(preg_match('/^\d{4}-\d{4}-\d{4}-\d{3}[0-9Xx]$/', $value, $matches) !== 1 && preg_match('/^\d{15}[0-9Xx]$/', $value, $matches) !== 1) {
+                return false;
+            }
+            $strippedValue = str_replace('-', '', $value);
+
+            $total = 0;
+            for($i=0; $i<strlen($strippedValue)-1; $i++) {
+                $val = intval($strippedValue[$i]);
+                $total = ($total + $val) * 2;
+            }
+            $chk = (12 - ($total % 11)) % 11;
+            if($chk == 10) $chk = 'X';
+
+            return strtoupper(substr($strippedValue, -1)) == $chk;
         });
         // Geometry can be either one of the supported simple features
         // (*Point, *LineString and *Polygon)

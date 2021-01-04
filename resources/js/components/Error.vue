@@ -40,7 +40,7 @@
                 </dl>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary"     @click="hideErrorModal">
+                <button type="button" class="btn btn-outline-secondary" @click="hideErrorModal">
                     Close
                 </button>
             </div>

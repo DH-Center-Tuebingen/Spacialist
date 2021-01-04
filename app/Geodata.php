@@ -7,11 +7,13 @@ use MStaack\LaravelPostgis\Geometries\Geometry;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
 use MStaack\LaravelPostgis\Exceptions\UnknownWKTTypeException;
 use Nicolaslopezj\Searchable\SearchableTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Geodata extends Model
 {
     use PostgisTrait;
     use SearchableTrait;
+    use LogsActivity;
 
     protected $table = 'geodata';
     /**
@@ -21,6 +23,8 @@ class Geodata extends Model
      */
     protected $fillable = [
         'color',
+        'geom',
+        'user_id',
     ];
 
     protected $postgisFields = [
@@ -32,6 +36,11 @@ class Geodata extends Model
             'ST_AsText(geom)' => 10,
         ]
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
     protected static $availableGeometryTypes = [
         'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon'
@@ -46,7 +55,7 @@ class Geodata extends Model
         $parsedWkt = self::parseWkt($wkt);
         if(!isset($parsedWkt)) return;
         $this->geom = $parsedWkt;
-        $this->lasteditor = $user->name;
+        $this->user_id = $user->id;
         $this->save();
     }
 
@@ -72,7 +81,7 @@ class Geodata extends Model
             if(!isset($parsedWkt)) continue;
             $geodata = new self();
             $geodata->geom = $parsedWkt;
-            $geodata->lasteditor = $user->name;
+            $geodata->user_id = $user->id;
             $geodata->save();
 
             // if name column and entity type is specified, create new entity
@@ -104,6 +113,10 @@ class Geodata extends Model
         } catch(UnknownWKTTypeException $e) {
             return null;
         }
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function entity() {

@@ -33,7 +33,7 @@ class BibliographyController extends Controller
                     case 'created_at':
                     case 'updated_at':
                     case 'citekey':
-                    case 'lasteditor':
+                    case 'user_id':
                         break;
                     default:
                         $content .= '    '.$k.': {'.$a.'}';
@@ -116,7 +116,7 @@ class BibliographyController extends Controller
             } else {
                 $ckey = $entry['citation-key'];
             }
-            $insArray['lasteditor'] = $user->name;
+            $insArray['user_id'] = $user->id;
             $bibliography = Bibliography::updateOrCreate(
                 ['citekey' => $ckey],
                 $insArray

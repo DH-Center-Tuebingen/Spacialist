@@ -2,15 +2,22 @@
 
 namespace App;
 
+use App\Traits\SoftDeletesWithTrashed;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Spatie\Activitylog\Traits\CausesActivity;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use HasRoles;
+    use Notifiable;
+    use CausesActivity;
+    use LogsActivity;
+    use SoftDeletesWithTrashed;
     // use Authenticatable;
 
     protected $guard_name = 'web';
@@ -24,6 +31,14 @@ class User extends Authenticatable implements JWTSubject
         'name', 'nickname', 'email', 'password',
     ];
 
+    protected $appends = [
+        'avatar_url',
+    ];
+
+    protected $casts = [
+        'metadata' => 'array',
+    ];
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -32,6 +47,11 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['password'];
 
     public function getLanguage() {
         $langObj = Preference::getUserPreference($this->id, 'prefs.gui-language');
@@ -51,6 +71,20 @@ class User extends Authenticatable implements JWTSubject
             }
         }
         $this->permissions = $permissions;
+    }
+
+    public function setMetadata($data) {
+        if(!isset($this->metadata)) {
+            $this->metadata = $data;
+        } else {
+            $this->metadata = array_replace($this->metadata, $data);
+        }
+        $this->save();
+    }
+
+    public function getAvatarUrlAttribute() {
+
+        return isset($this->avatar) ? sp_get_public_url($this->avatar) : null;
     }
 
     public function preferences() {

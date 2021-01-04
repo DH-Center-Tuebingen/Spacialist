@@ -5,6 +5,7 @@ import {
     faGithub,
     faHtml5,
     faLaravel,
+    faOrcid,
     faVuejs
 } from '@fortawesome/free-brands-svg-icons';
 import {
@@ -20,6 +21,7 @@ import {
     faAngleRight,
     faAngleUp,
     faBan,
+    faBell,
     faBinoculars,
     faBolt,
     faBook,
@@ -39,6 +41,7 @@ import {
     faCog,
     faCogs,
     faComment,
+    faComments,
     faCopy,
     faCopyright,
     faCubes,
@@ -71,17 +74,21 @@ import {
     faFileWord,
     faFolder,
     faGlobeAfrica,
+    faIdBadge,
     faInfoCircle,
     faLayerGroup,
     faLightbulb,
     faLink,
     faList,
     faLongArrowAltDown,
+    faLongArrowAltLeft,
+    faLongArrowAltRight,
     faLongArrowAltUp,
     faMagic,
     faMapMarkedAlt,
     faMapMarkerAlt,
     faMicrochip,
+    faMobileAlt,
     faMonument,
     faPalette,
     faPaperPlane,
@@ -92,6 +99,7 @@ import {
     faPrint,
     faQuestion,
     faRedoAlt,
+    faReply,
     faRoad,
     faRuler,
     faRulerCombined,
@@ -128,10 +136,16 @@ import {
     faUnlink,
     faUnlockAlt,
     faUser,
+    faUserClock,
+    faUserCheck,
+    faUserCog,
     faUserEdit,
     faUsers,
+    faUserTimes,
     faVolumeMute,
-    faVolumeUp
+    faVolumeUp,
+    faDatabase,
+    faIndent
 } from '@fortawesome/free-solid-svg-icons';
 import VModal from 'vue-js-modal';
 import Axios from 'axios';
@@ -158,16 +172,23 @@ import Users from './components/Users.vue';
 import Roles from './components/Roles.vue';
 import Preferences from './components/Preferences.vue';
 import UserPreferences from './components/UserPreferences.vue';
+import UserNotifications from './components/UserNotifications.vue';
+import UserActivity from './components/UserActivity.vue';
+import GlobalActivity from './components/GlobalActivity.vue';
+import UserProfile from './components/UserProfile.vue';
 const DataModel = () => import(/* webpackChunkName: "group-bib" */ './components/DataModel.vue')
 const DataModelDetailView = () => import(/* webpackChunkName: "group-bib" */ './components/DataModelDetailView.vue')
 
 import VueUploadComponent from 'vue-upload-component';
-import moment from 'moment';
-import VCalendar from 'v-calendar';
+import * as dayjs from 'dayjs';
+import DatePicker from 'vue2-datepicker';
 import VeeValidate from 'vee-validate';
 import Notifications from 'vue-notification';
 import SpacialistPluginSystem from './plugin.js';
 import VueScrollTo from 'vue-scrollto';
+import InfiniteLoading from 'vue-infinite-loading';
+import VueHighlightJS from 'vue-highlightjs';
+import 'highlight.js/styles/atom-one-dark.css';
 
 import { EventBus } from './event-bus.js';
 
@@ -187,6 +208,7 @@ library.add(
     faAngleRight,
     faAngleUp,
     faBan,
+    faBell,
     faBinoculars,
     faBolt,
     faBook,
@@ -206,9 +228,11 @@ library.add(
     faCog,
     faCogs,
     faComment,
+    faComments,
     faCopy,
     faCopyright,
     faCubes,
+    faDatabase,
     faDotCircle,
     faDownload,
     faDrawPolygon,
@@ -238,18 +262,24 @@ library.add(
     faFileWord,
     faFolder,
     faGlobeAfrica,
+    faIdBadge,
+    faIndent,
     faInfoCircle,
     faLayerGroup,
     faLightbulb,
     faLink,
     faList,
     faLongArrowAltDown,
+    faLongArrowAltLeft,
+    faLongArrowAltRight,
     faLongArrowAltUp,
     faMagic,
     faMapMarkedAlt,
     faMapMarkerAlt,
     faMicrochip,
+    faMobileAlt,
     faMonument,
+    faOrcid,
     faPalette,
     faPaperPlane,
     faPause,
@@ -260,6 +290,7 @@ library.add(
     faQuestion,
     faQuestionCircle,
     faRedoAlt,
+    faReply,
     faRoad,
     faRuler,
     faRulerCombined,
@@ -296,7 +327,11 @@ library.add(
     faUnlink,
     faUnlockAlt,
     faUser,
+    faUserClock,
+    faUserCheck,
+    faUserCog,
     faUserEdit,
+    faUserTimes,
     faUsers,
     faVolumeMute,
     faVolumeUp
@@ -328,10 +363,16 @@ require('popper.js');
 require('bootstrap');
 window.Vue = require('vue');
 window._clone = require('lodash/clone');
+window._cloneDeep = require('lodash/cloneDeep');
 window._orderBy = require('lodash/orderBy');
 window._debounce = require('lodash/debounce');
 $ = jQuery  = window.$ = window.jQuery = require('jquery');
 require('./globals.js');
+
+let relativeTime = require('dayjs/plugin/relativeTime');
+let utc = require('dayjs/plugin/utc')
+dayjs.extend(relativeTime);
+dayjs.extend(utc);
 
 // Create Axios instance for external (API) calls
 Vue.prototype.$externalHttp = Axios.create({
@@ -358,11 +399,10 @@ Vue.use(VueI18n);
 Vue.use(VModal, {dynamic: true});
 Vue.use(VeeValidate);
 Vue.use(Notifications);
-Vue.use(VCalendar, {
-    firstDayOfWeek: 2,
-    popoverVisibility: 'focus'
-});
+Vue.use(DatePicker);
 Vue.use(VueScrollTo);
+Vue.use(InfiniteLoading);
+Vue.use(VueHighlightJS);
 
 const router = new VueRouter({
     scrollBehavior(to, from, savedPosition) {
@@ -518,6 +558,14 @@ const router = new VueRouter({
             }
         },
         {
+            path: '/activity/g',
+            name: 'globalactivity',
+            component: GlobalActivity,
+            meta: {
+                auth: true
+            }
+        },
+        {
             path: '/editor/dm',
             name: 'dme',
             component: DataModel,
@@ -544,6 +592,30 @@ const router = new VueRouter({
             path: '/preferences/u/:id',
             name: 'userpreferences',
             component: UserPreferences,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/notifications/:id',
+            name: 'notifications',
+            component: UserNotifications,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/activity/u',
+            name: 'useractivity',
+            component: UserActivity,
+            meta: {
+                auth: true
+            }
+        },
+        {
+            path: '/profile',
+            name: 'userprofile',
+            component: UserProfile,
             meta: {
                 auth: true
             }
@@ -630,18 +702,25 @@ import AttributeSearch from './components/AttributeSearch.vue';
 import CsvTable from './components/CsvTable.vue';
 
 // Reusable Components
+import ActivityLog from './components/ActivityLog.vue';
+import ActivityLogFilter from './components/ActivityLogFilter.vue';
+import UserAvatar from './components/UserAvatar.vue';
 import Attributes from './components/AttributeList.vue';
 import EntityTree from './components/EntityTree.vue';
 import EntityTypes from './components/EntityTypeList.vue';
 import OlMap from './components/OlMap.vue';
 import ColorGradient from './components/Gradient.vue';
 import EntityBreadcrumbs from './components/EntityBreadcrumbs.vue';
+import CommentList from './components/CommentList.vue';
+import NotificationBody from './components/NotificationBody.vue';
+import EmojiPicker from './components/EmojiPicker.vue';
 
 // Page Components
 import EntityReferenceModal from './components/EntityReferenceModal.vue';
 import DiscardChangesModal from './components/DiscardChangesModal.vue';
 import AboutDialog from './components/About.vue';
 import ErrorModal from './components/Error.vue';
+import UserInfoModal from './components/modals/UserInfo.vue';
 
 Vue.component('global-search', GlobalSearch);
 Vue.component('entity-search', EntitySearch);
@@ -649,43 +728,51 @@ Vue.component('entity-type-search', EntityTypeSearch);
 Vue.component('label-search', LabelSearch);
 Vue.component('attribute-search', AttributeSearch);
 Vue.component('csv-table', CsvTable);
+Vue.component('activity-log', ActivityLog);
+Vue.component('activity-log-filter', ActivityLogFilter);
+Vue.component('user-avatar', UserAvatar);
 Vue.component('attributes', Attributes);
 Vue.component('entity-tree', EntityTree);
 Vue.component('entity-types', EntityTypes);
 Vue.component('ol-map', OlMap);
 Vue.component('color-gradient', ColorGradient);
 Vue.component('entity-breadcrumbs', EntityBreadcrumbs);
+Vue.component('comment-list', CommentList);
+Vue.component('notification-body', NotificationBody);
+Vue.component('emoji-picker', EmojiPicker);
 Vue.component('entity-reference-modal', EntityReferenceModal);
 Vue.component('discard-changes-modal', DiscardChangesModal);
 Vue.component('about-dialog', AboutDialog);
 Vue.component('error-modal', ErrorModal);
+Vue.component('user-info-modal', UserInfoModal);
 
 // Filter
-Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm', useLocale = false, isDateString) {
+Vue.filter('date', function(value, format = 'DD.MM.YYYY HH:mm') {
     if(value) {
-        let mom;
-        // assume input date is in utc
-        if(isDateString) {
-            mom = moment.utc(value);
+        let d;
+        if(isNaN(value)) {
+            d = dayjs.utc(value);
         } else {
-            // utc methonds needs timestamp in ms
-            mom = moment.utc(Number(value)*1000);
+            d = dayjs.utc(value*1000);
         }
-        // set currently used timezone
-        if(!!useLocale) {
-            const d = new Date();
-            mom.utcOffset(-d.getTimezoneOffset());
-        }
-        return mom.format(format);
+        return d.format(format);
     }
 });
-Vue.filter('datestring', function(value, useLocale = true) {
+Vue.filter('datestring', function(value) {
     if(value) {
-        let mom = moment.unix(Number(value));
-        if(useLocale) {
-            return mom.toLocaleString();
+        const d = isNaN(value) ? dayjs.utc(value) : dayjs.utc(value*1000);
+        return d.toDate().toString();
+    }
+});
+Vue.filter('ago', function(value) {
+    if(value) {
+        let d;
+        if(isNaN(value)) {
+            d = dayjs.utc(value);
+        } else {
+            d = dayjs.utc(value*1000);
         }
-        return mom.utc().toString();
+        return d.fromNow();
     }
 });
 Vue.filter('numPlus', function(value, length = 2) {
@@ -820,6 +907,29 @@ Vue.filter('bibtexify', function(value, type) {
     rendered += "</code></pre>";
     return rendered;
 });
+Vue.filter('mentionify', function(value) {
+    const template = `<span class="badge badge-primary">@{name}</span>`;
+    const unknownTemplate = `<span class="font-weight-bold">@{name}</span>`;
+    const mentionRegex = /@(\w|\d)+/gi;
+    let mentions = value.match(mentionRegex);
+    if(!mentions) return value;
+    mentions = mentions.filter((m, i) => mentions.indexOf(m) === i);
+    let newValue = value;
+    for(let i=0; i<mentions.length; i++) {
+        const elem = mentions[i];
+        const m = elem.substring(1);
+        const user = app.$getUserBy(m, 'nickname');
+        const replRegex = new RegExp(elem, 'g');
+        let name = m;
+        let tpl = unknownTemplate;
+        if(user) {
+            name = user.name;
+            tpl = template;
+        }
+        newValue = newValue.replace(replRegex, tpl.replace('{name}', name));
+    }
+    return newValue;
+});
 
 const app = new Vue({
     el: '#app',
@@ -844,6 +954,7 @@ const app = new Vue({
                 this.preferences = response.data.preferences;
                 this.concepts = response.data.concepts;
                 this.entityTypes = response.data.entityTypes;
+                this.users = response.data.users;
                 // Check if user is logged in and set preferred language
                 // instead of browser default
                 if(!app.$auth.ready()) {
@@ -879,6 +990,7 @@ const app = new Vue({
             preferences: {},
             concepts: {},
             entityTypes: {},
+            users: [],
             plugins: {},
             onInit: null
         }

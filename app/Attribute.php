@@ -3,9 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Attribute extends Model
 {
+    use LogsActivity;
     /**
      * The attributes that are assignable.
      *
@@ -15,14 +17,22 @@ class Attribute extends Model
         'thesaurus_url',
         'thesaurus_root_url',
         'datatype',
+        'text',
+        'parent_id',
+        'recursive',
+        'root_attribute_id',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
 
     public function children() {
         return $this->hasMany('App\Attribute', 'parent_id');
     }
 
     public function entities() {
-        return $this->belongsToMany('App\Entity', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'certainty_description', 'lasteditor', 'thesaurus_val', 'json_val', 'geography_val');
+        return $this->belongsToMany('App\Entity', 'attribute_values')->withPivot('entity_val', 'str_val', 'int_val', 'dbl_val', 'dt_val', 'certainty', 'user_id', 'thesaurus_val', 'json_val', 'geography_val');
     }
 
     public function entity_types() {

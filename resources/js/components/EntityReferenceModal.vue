@@ -10,16 +10,45 @@
             <div class="modal-body col col-md-8 offset-md-2 scroll-y-auto">
                 <h4>{{ $t('main.entity.references.certainty') }}</h4>
                 <div class="progress" @click="setCertainty">
-                    <div class="progress-bar" role="progressbar" :class="{'bg-danger': refs.value.certainty <= 25, 'bg-warning': refs.value.certainty <= 50, 'bg-info': refs.value.certainty <= 75, 'bg-success': refs.value.certainty > 75}" :aria-valuenow="refs.value.certainty" aria-valuemin="0" aria-valuemax="100" :style="{width: refs.value.certainty+'%'}">
+                    <div class="progress-bar" role="progressbar" :class="getCertaintyClass(refs.value.certainty)" :aria-valuenow="refs.value.certainty" aria-valuemin="0" aria-valuemax="100" :style="{width: refs.value.certainty+'%'}">
                         <span class="sr-only">
                             {{ refs.value.certainty }}% certainty
                         </span>
                         {{ refs.value.certainty }}%
                     </div>
                 </div>
-                <form role="form" class="mt-2" @submit.prevent="onUpdateCertainty">
-                    <div class="form-group">
-                        <textarea class="form-control" v-model="refs.value.certainty_description" :placeholder="$t('main.entity.references.certaintyc')"></textarea>
+                <comment-list
+                    :avatar="48"
+                    :comments="comments"
+                    @edited="editComment"
+                    @on-delete="deleteComment"
+                    @reply-to="addReplyTo"
+                    @load-replies="loadReplies">
+                    <template v-slot:metadata="data">
+                        <span class="badge" :class="getCertaintyClass(data.comment.metadata.certainty_from, 'badge')">
+                            {{ data.comment.metadata.certainty_from || '???' }}
+                        </span>
+                        &rarr;
+                        <span class="badge" :class="getCertaintyClass(data.comment.metadata.certainty_to, 'badge')">
+                            {{ data.comment.metadata.certainty_to || '???' }}
+                        </span>
+                    </template>
+                </comment-list>
+                <hr />
+                <div v-if="replyTo.comment_id > 0" class="mb-1">
+                    <span class="badge badge-info">
+                        {{ $t('global.replying_to', {name: replyTo.author.name}) }}
+                        <a href="#" @click.prevent="cancelReplyTo" class="text-white">
+                            <i class="fas fa-fw fa-times"></i>
+                        </a>
+                    </span>
+                </div>
+                <form role="form" @submit.prevent="onUpdateCertainty">
+                    <div class="form-group d-flex">
+                        <textarea class="form-control" v-model="certainty_description" id="comment-content" ref="comCnt" :placeholder="$t('main.entity.references.certaintyc')"></textarea>
+                        <div class="ml-2 mt-auto">
+                            <emoji-picker @selected="addEmoji"></emoji-picker>
+                        </div>
                     </div>
                     <div class="text-center">
                         <button type="submit" class="btn btn-outline-success">
@@ -30,7 +59,7 @@
                 <h4 class="mt-3">{{ $t('main.entity.references.bibliography.title') }}</h4>
                 <table class="table table-hover">
                     <tbody>
-                        <tr class="d-flex flex-row" v-for="reference in refs.refs">
+                        <tr class="d-flex flex-row" v-for="reference in refs.refs" :key="reference.id">
                             <td class="text-left py-2 col px-0 pl-1">
                                 <div class="d-flex flex-column">
                                     <h6>{{ reference.bibliography.title }}</h6>
@@ -153,8 +182,8 @@
             });
         },
         beforeRouteUpdate(to, from, next) {
-            vm.init();
-            next();
+            this.init().then(_ => next());
+            // next();
         },
         beforeRouteLeave(to, from, next) {
             this.$modal.hide('entity-references-modal');
@@ -162,15 +191,19 @@
         },
         methods: {
             init() {
-                if(!this.refs.value.certainty) {
-                    Vue.set(this.refs.value, 'certainty', 100);
+                if(this.refs.value.certainty) {
+                    this.initialCertaintyValue = this.refs.value.certainty;
                 }
-                this.initialCertainty.value = this.refs.value.certainty;
-                this.initialCertainty.description = this.refs.value.certainty_description;
                 const curr = this.$route;
                 this.entityId = curr.params.id;
                 this.attributeId = curr.params.aid;
-                this.$modal.show('entity-references-modal');
+                return $httpQueue.add(() => $http.get(`/comment/resource/${this.entityId}?r=attribute_value&aid=${this.attributeId}`).then(response => {
+                        this.comments.length = 0;
+                        this.comments = response.data;
+                    }).catch( e => {
+                    }).finally(() => {
+                        this.$modal.show('entity-references-modal');
+                }));
             },
             setCertainty(event) {
                 const maxSize = event.target.parentElement.scrollWidth; // progress bar width in px
@@ -191,24 +224,146 @@
             },
             onUpdateCertainty() {
                 if(!this.$can('duplicate_edit_concepts')) return;
-                const data = {
+                if(
+                    this.refs.value.certainty == this.initialCertaintyValue
+                    &&
+                    !this.certainty_description
+                ) {
+                    return;
+                }
+                let data = {
                     certainty: this.refs.value.certainty,
-                    certainty_description: this.refs.value.certainty_description
                 };
                 $httpQueue.add(() => $http.patch(`/entity/${this.entityId}/attribute/${this.attributeId}`, data).then(response => {
-                    this.initialCertainty.value = this.refs.value.certainty;
-                    this.initialCertainty.description = this.refs.value.certainty_description;
-                    const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
-                    this.$showToast(
-                        this.$t('main.entity.references.toasts.updated-certainty.title'),
-                        this.$t('main.entity.references.toasts.updated-certainty.msg', {
-                            name: attributeName,
-                            i: this.refs.value.certainty,
-                            desc: this.refs.value.certainty_description
-                        }),
-                        'success'
-                    );
+                    let metadata = null;
+                    let replyToId = null;
+                    // only add metadata if certainty has changed
+                    // (as it's the only part of metadata)
+                    if(this.initialCertaintyValue != this.refs.value.certainty) {
+                        metadata = {
+                            certainty_from: this.initialCertaintyValue,
+                            certainty_to: this.refs.value.certainty
+                        };
+                        if(!this.certainty_description) {
+                            metadata.is_empty = true;
+                        }
+                    }
+                    if(this.replyTo.comment_id) {
+                        replyToId = this.replyTo.comment_id;
+                    }
+                    const resource = {
+                        id: response.data.id,
+                        type: 'attribute_value'
+
+                    };
+                    this.$postComment(this.certainty_description, resource, replyToId, metadata, comment => {
+                        const addedComment = comment;
+                        if(replyToId) {
+                            let comment = this.comments.find(c => c.id == replyToId);
+                            if(comment.replies) {
+                                comment.replies.push(addedComment);
+                            }
+                            comment.replies_count++;
+                            this.cancelReplyTo();
+                        } else {
+                            this.comments.push(addedComment);
+                            this.refs.value.comments_count = this.comments.length;
+                        }
+                        this.certainty_description = '';
+                        this.initialCertaintyValue = this.refs.value.certainty;
+                        const attributeName = this.$translateConcept(this.refs.attribute.thesaurus_url);
+                        this.$showToast(
+                            this.$t('main.entity.references.toasts.updated-certainty.title'),
+                            this.$t('main.entity.references.toasts.updated-certainty.msg', {
+                                name: attributeName,
+                                i: this.refs.value.certainty
+                            }),
+                            'success'
+                        );
+                    });
                 }));
+            },
+            getComment(list, id) {
+                if(!list || list.length == 0) return;
+                for(let i=0; i<list.length; i++) {
+                    if(list[i].id == id) {
+                        return list[i];
+                    }
+                    const gotIt = this.getComment(list[i].replies, id);
+                    if(gotIt) return gotIt;
+                }
+            },
+            loadReplies(event) {
+                const cid = event.comment_id;
+                $http.get(`/comment/${cid}/reply`).then(response => {
+                    let comment = this.getComment(this.comments, cid);
+                    if(comment) {
+                        if(!comment.replies) {
+                            Vue.set(comment, 'replies', []);
+                        }
+                        comment.replies = response.data;
+                    }
+                });
+            },
+            editComment(event) {
+                const cid = event.comment_id;
+                const data = {
+                    content: event.content
+                };
+                $http.patch(`/comment/${cid}`, data).then(response => {
+                    let comment = this.getComment(this.comments, cid);
+                    if(comment) {
+                        comment.content = event.content;
+                        comment.updated_at = response.data.updated_at;
+                    }
+                });
+            },
+            addReplyTo(event) {
+                if(!event.comment) return;
+                const comment = event.comment;
+                this.replyTo.comment_id = comment.id;
+                this.replyTo.author.name = comment.author.name;
+                this.replyTo.author.nickname = comment.author.nickname;
+                this.$refs.comCnt.focus();
+            },
+            cancelReplyTo() {
+                this.replyTo.comment_id = null;
+                this.replyTo.author.name = null;
+                this.replyTo.author.nickname = null;
+            },
+            deleteComment(event) {
+                const cid = event.comment_id;
+                const parent_id = event.reply_to;
+                $http.delete(`/comment/${cid}`).then(response => {
+                    let siblings, parent;
+                    if(parent_id) {
+                        parent = this.getComment(this.comments, parent_id);
+                        siblings = parent.replies;
+                    } else {
+                        siblings = this.comments;
+                    }
+                    const comment = siblings.find(s => s.id == cid);
+                    comment.deleted_at = Date();
+                    
+                });
+            },
+            addEmoji(event) {
+                this.certainty_description += event.emoji;
+            },
+            getCertaintyClass(value, prefix = 'bg') {
+                let classes = {};
+
+                if(value <= 25) {
+                    classes[`${prefix}-danger`] = true;
+                } else if(value <= 50) {
+                    classes[`${prefix}-warning`] = true;
+                } else if(value <= 75) {
+                    classes[`${prefix}-info`] = true;
+                } else {
+                    classes[`${prefix}-success`] = true;
+                }
+
+                return classes;
             },
             onBibliographySearchChanged(query) {
                 if(!!query && query.length) {
@@ -286,8 +441,7 @@
                 this.$modal.hide('entity-references-modal');
             },
             routeBack() {
-                this.refs.value.certainty = this.initialCertainty.value;
-                this.refs.value.certainty_description = this.initialCertainty.description;
+                this.refs.value.certainty = this.initialCertaintyValue;
                 const curr = this.$route;
                 this.$router.push({
                     name: 'entitydetail',
@@ -307,16 +461,29 @@
                     bibliography: {},
                     description: ''
                 },
-                initialCertainty: {
-                    value: 100,
-                    description: ''
+                initialCertaintyValue: null,
+                certainty_description: '',
+                matchingBibliography: this.bibliography.slice(),
+                comments: [],
+                replyTo: {
+                    comment_id: null,
+                    author: {
+                        name: null,
+                        nickname: null
+                    }
                 },
-                matchingBibliography: this.bibliography.slice()
             }
         },
         computed: {
             addReferenceDisabled() {
                 return !this.newItem.bibliography.id || this.newItem.description.length == 0;
+            }
+        },
+        watch: {
+            'refs.value.certainty': function(newVal, oldVal) {
+                if(!oldVal && newVal) {
+                    this.initialCertaintyValue = newVal;
+                }
             }
         }
     }

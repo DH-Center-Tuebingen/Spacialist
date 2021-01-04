@@ -39,7 +39,7 @@ class BibliographyTest extends TestCase
         ]);
 
         $user = new \stdClass;
-        $user->name = 'Test User';
+        $user->id = 1;
 
         $ranges = array_merge([''], range('a', 'z'), range('A', 'Z'));
         foreach($ranges as $letter) {
@@ -47,7 +47,7 @@ class BibliographyTest extends TestCase
             $b->title = 'Title';
             $b->type = 'article';
             $b->citekey = 'No:1999'.$letter;
-            $b->lasteditor = 'Test User';
+            $b->user_id = 1;
             $b->save();
         }
 
@@ -58,5 +58,16 @@ class BibliographyTest extends TestCase
         $this->assertEquals($bib->id, $newBib->id);
         $this->assertEquals('No Title', $newBib->title);
         $this->assertEquals('No:1999aa', $newBib->citekey);
+    }
+
+    /**
+     * Test get last editor of first bibliography entry
+     *
+     * @return void
+     */
+    public function testGetBibliographyEntryLasteditor()
+    {
+        $entry = Bibliography::first();
+        $this->assertEquals(1, $entry->user->id);
     }
 }

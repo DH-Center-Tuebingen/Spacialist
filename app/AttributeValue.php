@@ -4,10 +4,14 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use MStaack\LaravelPostgis\Eloquent\PostgisTrait;
+use App\Traits\CommentTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class AttributeValue extends Model
 {
     use PostgisTrait;
+    use CommentTrait;
+    use LogsActivity;
 
     protected $table = 'attribute_values';
     /**
@@ -27,8 +31,7 @@ class AttributeValue extends Model
         'str_val',
         'thesaurus_val',
         'certainty',
-        'certainty_description',
-        'lasteditor',
+        'user_id',
     ];
 
     // TODO always hide *_val in favor of (computed) value?
@@ -47,9 +50,13 @@ class AttributeValue extends Model
         'geography_val',
     ];
 
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['user_id'];
+
     const patchRules = [
         'certainty' => 'integer|between:0,100',
-        'certainty_description' => 'string|nullable'
     ];
 
     public function getValue() {
@@ -77,6 +84,10 @@ class AttributeValue extends Model
             $this->{$k} = $v;
         }
         $this->save();
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function entity() {

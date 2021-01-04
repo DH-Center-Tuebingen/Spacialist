@@ -7,12 +7,10 @@ use App\AttributeValue;
 use App\Entity;
 use App\EntityAttribute;
 use App\EntityType;
-use App\EntityTypeRelation;
 use App\ThConcept;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class EntityController extends Controller {
     /**
@@ -310,7 +308,6 @@ class EntityController extends Controller {
                 'error' => $res['msg']
             ], $res['code']);
         }
-
     }
 
     // PATCH
@@ -436,18 +433,20 @@ class EntityController extends Controller {
                     $attrval->entity_val = $value;
                     break;
             }
-            $attrval->lasteditor = $user->name;
+            $attrval->user_id = $user->id;
             $attrval->save();
         }
 
-        // Save model if lasteditor changed
+        // Save model if last editor changed
         // Only update timestamps otherwise
-        $entity->lasteditor = $user->name;
+        $entity->user_id = $user->id;
         if($entity->isDirty()) {
             $entity->save();
         } else {
             $entity->touch();
         }
+
+        $entity->load('user');
 
         return response()->json($entity);
     }
@@ -480,13 +479,22 @@ class EntityController extends Controller {
             'entity_id' => $id,
             'attribute_id' => $aid,
         ], [
-            'lasteditor' => $user->name
+            'user_id' => $user->id
         ]);
-        $attrValue->lasteditor = $user->name;
+        // When attribute value already exists and nothing changed
+        // (same certainty)
+        if(
+            !$attrValue->wasRecentlyCreated
+            &&
+            ($request->has('certainty') && $request->get('certainty') == $attrValue->certainty)
+        ) {
+            return response()->json($attrValue);
+        }
+        $attrValue->user_id = $user->id;
         $values = $request->only(array_keys(AttributeValue::patchRules));
         $attrValue->patch($values);
 
-        return response()->json(null, 204);
+        return response()->json($attrValue, 201);
     }
 
     public function patchName($id, Request $request) {
@@ -509,9 +517,13 @@ class EntityController extends Controller {
         }
 
         $entity->name = $request->get('name');
-        $entity->save();
+        $entity->user_id = $user->id;
 
-        return response()->json(null, 204);
+        $entity->save();
+        
+        $entity->load('user');
+
+        return response()->json($entity);
     }
 
     public function moveEntity(Request $request, $id) {

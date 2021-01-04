@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Reference extends Model
 {
+    use LogsActivity;
+
     protected $table = 'references';
     /**
      * The attributes that are assignable.
@@ -17,8 +20,13 @@ class Reference extends Model
         'attribute_id',
         'bibliography_id',
         'description',
-        'lasteditor',
+        'user_id',
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
     const rules = [
         'bibliography_id' => 'required|integer|exists:bibliography,id',
@@ -34,7 +42,7 @@ class Reference extends Model
         foreach($values as $k => $v) {
             $reference->{$k} = $v;
         }
-        $reference->lasteditor = $user->name;
+        $reference->user_id = $user->id;
         $reference->save();
 
         return self::with('bibliography')->find($reference->id);
@@ -45,6 +53,10 @@ class Reference extends Model
             $this->{$k} = $v;
         }
         $this->save();
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function entity() {

@@ -2,11 +2,14 @@ const en = {
     global: {
         save: 'Save',
         delete: 'Delete',
+        deactivate: 'Deactivate',
+        reactivate: 'Reactivate',
         remove: 'Remove',
         cancel: 'Cancel',
         close: 'Close',
         add: 'Add',
         edit: 'Edit',
+        edited: 'edited',
         duplicate: 'Duplicate',
         resort: 'Re-sort',
         update: 'Update',
@@ -20,6 +23,11 @@ const en = {
         'delete-name': {
             title: 'Delete {name}',
             desc: 'Do you really want to delete {name}?'
+        },
+        'deactivate-name': {
+            title: 'Deactivate {name}',
+            desc: 'Do you really want to deactivate {name}?',
+            info: 'Certain entries can not be deleted or have to be deactivated first. Otherwise deleting these entries could lead to data loss.'
         },
         'edit-name': {
             title: 'Edit {name}'
@@ -74,7 +82,14 @@ const en = {
         },
         user: {
             settings: 'Preferences',
-            logout: 'Logout'
+            profile: 'Profile',
+            logout: 'Logout',
+            info_title: 'User Information',
+            member_since: 'Member since',
+            deactivated_since: '<span class="font-weight-bold">deactivated</span> since {dt}',
+            contact: 'Contact',
+            avatar: 'Avatar',
+            invalid_orcid: 'This ORCID is invalid',
         },
         select: {
             placehoder: 'Select option',
@@ -111,6 +126,10 @@ const en = {
             iconclass: 'Iconclass'
         },
         active: 'Active',
+        activity: 'Activity',
+        action: 'Action',
+        users: 'User | Users',
+        timespan: 'Time span',
         visible: 'Visible',
         invisible: 'Invisible',
         opacity: 'Opacity',
@@ -130,15 +149,21 @@ const en = {
         'display-name': 'Displayname',
         email: 'E-Mail Address',
         email_or_nick: 'E-Mail Address or Nickname',
+        phonenumber: 'Phone number',
         password: 'Password',
         'remember-me': 'Remember me',
+        'orcid': 'ORCID',
         description: 'Description',
         roles: 'Roles',
         permissions: 'Permissions',
-        'added-at': 'Added',
-        'created-at': 'Created',
-        'updated-at': 'Updated',
+        added_at: 'Added',
+        created_at: 'Created',
+        updated_at: 'Updated',
+        timestamp: 'Timestamp',
+        deactivated_at: 'Deactivated',
         options: 'Options',
+        reply_to: 'Reply',
+        replying_to: 'In reply to {name}',
         type: 'Type',
         'root-attribute': 'Parent-Attribute',
         'root-attribute-toggle': 'Use value of an existing attribute as Parent-Element',
@@ -154,11 +179,51 @@ const en = {
         tag: 'Tag | Tags',
         set: 'Set',
         'has-tags': 'Has no tags | Has one tag | Has {cnt} tags',
-        'from-subentity': 'Is from Sub-Entity'
+        'from-subentity': 'Is from Sub-Entity',
+        comments: {
+            deleted_info: 'Comment deleted',
+            empty_list: 'No comments yet.',
+            hide: 'Hide comments',
+            show: 'Show comments',
+            submit: 'Submit Comment',
+            text_placeholder: 'Enter a comment',
+            hide_reply: 'Hide <span class="font-weight-bold">one</span> reply | Hide <span class="font-weight-bold">{cnt}</span> replies',
+            show_reply: 'Show <span class="font-weight-bold">one</span> reply | Show <span class="font-weight-bold">{cnt}</span> replies',
+            fetching: 'Fetching comments&hellip;',
+            fetching_failed: 'Fetching comments failed!',
+            retry_failed: 'Retry',
+        },
+        notifications: {
+            title: 'Notifications',
+            count: 'Notifications ({cnt})',
+            mark_all_as_read: 'Mark all as read',
+            delete_all: 'Delete all',
+            empty_list: 'No notifications',
+            view_all: 'View all',
+            tab_all: 'All',
+            tab_unread: 'Unread',
+            tab_read: 'Read',
+            tab_system: 'System Notifications',
+            tab_default_empty_list: 'You are up-to-date. No notifications for you!',
+            tab_unread_empty_list: 'You are up-to-date. No new notifications for you!',
+            tab_system_empty_list: 'No system notifications. No action to take for you!',
+            body: {
+                title: 'New Notification',
+                type: {
+                    system: 'system-message'
+                },
+                user_left_comment_on: 'left a comment on <span class="font-weight-bold">{name}</span>.',
+                reply: 'Reply',
+                mention_info: 'Write your reply. Use @nickname to mention other users.',
+                reply_sent: 'Reply sent',
+                reply_to_user: 'Reply to <span class="font-weight-bold">{name}</span>',
+                reply_to_chat: 'Reply to comment section',
+            }
+        }
     },
     main: {
         entity: {
-            title: 'Entities',
+            title: 'Entity | Entities',
             count: 'No Top-Level-Entities | One Top-Level-Entity | {cnt} Top-Level-Entities',
             toasts: {
                 updated: {
@@ -186,6 +251,10 @@ const en = {
                         type: 'Entity-Type - Descending'
                     }
                 }
+            },
+            tabs: {
+                attributes: 'Attributes',
+                comments: 'Comments',
             },
             modals: {
                 add: {
@@ -226,7 +295,7 @@ const en = {
                 toasts: {
                     'updated-certainty': {
                         title: 'Certainty updated',
-                        msg: 'Certainty of {name} successfully set to {i}% ({desc}).'
+                        msg: 'Certainty of {name} successfully set to {i}%.'
                     }
                 }
             },
@@ -254,6 +323,9 @@ const en = {
         },
         user: {
             'add-button': 'Add new User',
+            active_users: 'Active Users',
+            deactivated_users: 'Deactivated Users',
+            empty_list: 'User-list is empty',
             toasts: {
                 updated: {
                     title: 'User updated',
@@ -281,6 +353,20 @@ const en = {
                 }
             },
             'add-permission-placeholder': 'Add permissions'
+        },
+        activity: {
+            title: '@:global.activity',
+            title_project: 'Project Activity | Project Activities',
+            title_user: 'Your Activity | Your Activities',
+            nr_of_entries: 'No Entries | 1 Entry | {cnt} Entries',
+            no_results: 'No results found.',
+            rawdata: 'Raw Data',
+            apply_filter: 'Apply filter',
+            search_in_raw_data: 'Search in raw data',
+            hide_filter_panel: 'Hide filter',
+            toggle_raw_data: 'Toggle Raw Data',
+            toggle_pretty_print: 'Toggle Pretty Print',
+            fetch_next_entries: 'Fetch next entries',
         },
         datamodel: {
             toasts: {

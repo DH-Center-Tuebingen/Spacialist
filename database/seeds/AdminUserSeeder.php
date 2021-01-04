@@ -24,7 +24,7 @@ class AdminUserSeeder extends Seeder
             $admin->save();
         }
 
-        $adminRole = Role::where('name', '=', 'admin')->first();
+        $adminRole = Role::where('name', 'admin')->first();
         $admin->assignRole($adminRole);
     }
 }

@@ -19,10 +19,12 @@ use lsolesen\pel\PelDataWindowOffsetException;
 use lsolesen\pel\PelJpegInvalidMarkerException;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 use Nicolaslopezj\Searchable\SearchableTrait;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class File extends Model
 {
     use SearchableTrait;
+    use LogsActivity;
 
     protected $table = 'files';
     /**
@@ -33,12 +35,13 @@ class File extends Model
     protected $fillable = [
         'name',
         'modified',
-        'cameraname',
         'created',
+        'cameraname',
         'thumb',
         'copyright',
         'description',
-        'lasteditor',
+        'mime_type',
+        'user_id',
     ];
 
     protected $appends = [
@@ -54,6 +57,11 @@ class File extends Model
             'copyright' => 1,
         ],
     ];
+
+    protected static $logOnlyDirty = true;
+    protected static $logFillable = true;
+    protected static $logAttributes = ['id'];
+    protected static $ignoreChangedAttributes = ['user_id'];
 
 
     private const THUMB_SUFFIX = "_thumb";
@@ -294,7 +302,7 @@ class File extends Model
 
         $file = new File();
         $file->modified = $lastModified;
-        $file->lasteditor = $user->name;
+        $file->user_id = $user->id;
         $file->mime_type = $mimeType;
         $file->name = $filename;
         $file->created = $lastModified;
@@ -414,6 +422,15 @@ class File extends Model
         return $file;
     }
 
+    public static function uploadAvatar($file, $user) {
+        Storage::delete($user->avatar);
+        $filename = $user->id . "." . $file->getClientOriginalExtension();
+        return $file->storeAs(
+            'avatars',
+            $filename
+        );
+    }
+
     public function setContent($fileObject) {
         $filehandle = fopen($fileObject->getRealPath(), 'r');
         Storage::put(
@@ -448,7 +465,7 @@ class File extends Model
         $link = new EntityFile();
         $link->file_id = $this->id;
         $link->entity_id = $eid;
-        $link->lasteditor = $user->name;
+        $link->user_id = $user->id;
         $link->save();
     }
 
@@ -713,6 +730,10 @@ class File extends Model
 
     public function getExifAttribute() {
         return $this->getExifData();
+    }
+
+    public function user() {
+        return $this->belongsTo('App\User');
     }
 
     public function entities() {
