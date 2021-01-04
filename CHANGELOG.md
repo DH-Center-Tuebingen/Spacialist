@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 0.8 - Helgö (Unreleased)
+## 0.8 - Helgö
 ### Added
 - Support to extend all data with a comment section. Currently:
   - Attributes
