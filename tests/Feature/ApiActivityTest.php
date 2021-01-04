@@ -72,6 +72,8 @@ class ApiActivityTest extends TestCase
         ->delete('/api/v1/entity/'.$entity->id);
 
         $actCnt = Activity::count();
+        print_r($actCnt);
+        print_r(Activity::all());
         $this->assertEquals(5, $actCnt);
 
         $this->refreshToken($response);
