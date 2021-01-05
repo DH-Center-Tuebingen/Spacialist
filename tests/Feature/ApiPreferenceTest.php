@@ -253,7 +253,7 @@ class ApiPreferenceTest extends TestCase
         ->get('/api/v1/preference/' . $user->id);
 
         $response->assertStatus(403);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'error' => 'You are not allowed to access preferences of another user'
         ]);
     }
@@ -271,7 +271,7 @@ class ApiPreferenceTest extends TestCase
         ->get('/api/v1/preference/99');
 
         $response->assertStatus(400);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'error' => 'This user does not exist'
         ]);
     }
@@ -365,7 +365,7 @@ class ApiPreferenceTest extends TestCase
                 ->json($c['verb'], '/api/v1/preference' . $c['url']);
 
             $response->assertStatus(403);
-            $response->assertExactJson([
+            $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
 
@@ -392,7 +392,7 @@ class ApiPreferenceTest extends TestCase
                 ]);
 
             $response->assertStatus(400);
-            $response->assertExactJson([
+            $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
 

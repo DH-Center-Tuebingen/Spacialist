@@ -195,7 +195,7 @@ class ApiMapTest extends TestCase
                 ]
             )
         );
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'id' => 5,
             'name' => '',
             'url' => '',
@@ -316,7 +316,7 @@ class ApiMapTest extends TestCase
             'srtext',
             'proj4text',
         ]);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'srid' => 4826,
             'auth_name' => 'EPSG',
             'auth_srid' => 4826,
@@ -448,7 +448,7 @@ class ApiMapTest extends TestCase
             'srtext',
             'proj4text',
         ]);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'srid' => 4826,
             'auth_name' => 'EPSG',
             'auth_srid' => 4826,
@@ -679,7 +679,7 @@ class ApiMapTest extends TestCase
                 ->json($c['verb'], '/api/v1/map' . $c['url']);
 
             $response->assertStatus(403);
-            $response->assertExactJson([
+            $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
 
@@ -721,7 +721,7 @@ class ApiMapTest extends TestCase
                 ]);
 
             $response->assertStatus(400);
-            $response->assertExactJson([
+            $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
 

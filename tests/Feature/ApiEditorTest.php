@@ -30,7 +30,7 @@ class ApiEditorTest extends TestCase
             ->get('/api/v1/editor/dm/entity_type/occurrence_count/5');
 
         $response->assertStatus(200);
-        $response->assertExactJson([3]);
+        $response->assertSimilarJson([3]);
     }
 
     /**
@@ -46,7 +46,7 @@ class ApiEditorTest extends TestCase
             ->get('/api/v1/editor/dm/attribute/occurrence_count/9');
 
         $response->assertStatus(200);
-        $response->assertExactJson([4]);
+        $response->assertSimilarJson([4]);
     }
 
     /**
@@ -62,7 +62,7 @@ class ApiEditorTest extends TestCase
             ->get('/api/v1/editor/dm/attribute/occurrence_count/9/5');
 
         $response->assertStatus(200);
-        $response->assertExactJson([3]);
+        $response->assertSimilarJson([3]);
     }
 
     /**
@@ -88,7 +88,7 @@ class ApiEditorTest extends TestCase
                 'updated_at'
             ]
         ]);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             [
                 'id' => 3,
                 'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911',
@@ -175,7 +175,7 @@ class ApiEditorTest extends TestCase
                 'datatype'
             ]
         ]);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             [
                 'datatype' => 'string'
             ],
@@ -376,7 +376,7 @@ class ApiEditorTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJsonCount(6);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'Point',
             'LineString',
             'Polygon',
@@ -418,7 +418,7 @@ class ApiEditorTest extends TestCase
             'created_at',
             'updated_at'
         ]);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'id' => $entityType->id,
             'thesaurus_url' => $concept->concept_url,
             'is_root' => true,
@@ -486,7 +486,7 @@ class ApiEditorTest extends TestCase
             'recursive',
             'root_attribute_id'
         ]);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'id' => $attribute->id,
             'thesaurus_url' => $concept->concept_url,
             'datatype' => 'string-sc',
@@ -970,7 +970,7 @@ class ApiEditorTest extends TestCase
                 ->json($c['verb'], '/api/v1/editor' . $c['url']);
 
             $response->assertStatus(403);
-            $response->assertExactJson([
+            $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
 
@@ -1010,7 +1010,7 @@ class ApiEditorTest extends TestCase
                 ]);
 
             $response->assertStatus(400);
-            $response->assertExactJson([
+            $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
 

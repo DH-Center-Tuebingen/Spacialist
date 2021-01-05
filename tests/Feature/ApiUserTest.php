@@ -131,7 +131,7 @@ class ApiUserTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJsonCount(1);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'status' => 'success'
         ]);
         $this->refreshToken($response);
@@ -194,7 +194,7 @@ class ApiUserTest extends TestCase
             ]);
 
         $response->assertStatus(400);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'error' => 'Invalid Credentials'
         ]);
     }
@@ -292,7 +292,7 @@ class ApiUserTest extends TestCase
             ]);
 
         $response->assertStatus(400);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'error' => 'This user does not exist'
         ]);
     }
@@ -394,7 +394,7 @@ class ApiUserTest extends TestCase
         $this->assertTrue(!$user->hasRole('admin'));
         $this->assertTrue($user->hasRole('guest'));
         $response->assertStatus(200);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'id' => 1,
             'name' => 'Admin Updated',
             'nickname' => 'admin1',
@@ -637,7 +637,7 @@ class ApiUserTest extends TestCase
         $this->assertEquals(1, $cnt);
 
         $response->assertStatus(400);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'error' => 'This user does not exist'
         ]);
     }
@@ -680,7 +680,7 @@ class ApiUserTest extends TestCase
         $this->assertEquals(2, $cnt);
 
         $response->assertStatus(400);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'error' => 'This role does not exist'
         ]);
     }
@@ -732,7 +732,7 @@ class ApiUserTest extends TestCase
             ->delete('/api/v1/user/99/avatar');
 
         $response->assertStatus(400);
-        $response->assertExactJson([
+        $response->assertSimilarJson([
             'error' => 'This user does not exist'
         ]);
     }
@@ -768,7 +768,7 @@ class ApiUserTest extends TestCase
                 ->json($c['verb'], '/api/v1' . $c['url']);
 
             $response->assertStatus(403);
-            $response->assertExactJson([
+            $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
 
@@ -798,7 +798,7 @@ class ApiUserTest extends TestCase
                 ]);
 
             $response->assertStatus(400);
-            $response->assertExactJson([
+            $response->assertSimilarJson([
                 'error' => $c['error']
             ]);
 
