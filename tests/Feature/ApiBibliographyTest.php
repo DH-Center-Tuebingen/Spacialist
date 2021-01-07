@@ -252,7 +252,7 @@ class ApiBibliographyTest extends TestCase
         $this->assertTrue($response->headers->get('content-type') == 'application/x-bibtex');
         $this->assertTrue($response->headers->get('content-disposition') == 'attachment; filename=export.bib');
         $content = $this->getStreamedContent($response);
-        $this->assertContains("@article{Ph:0000,\n    title: {Test Article}\n    author: {PhpUnit}\n    pages: {10-15}\n}\n\n", $content);
+        $this->assertStringContainsString("@article{Ph:0000,\n    title: {Test Article}\n    author: {PhpUnit}\n    pages: {10-15}\n}\n\n", $content);
 
         $this->refreshToken($response);
         $bib = Bibliography::latest()->first();

@@ -93,15 +93,15 @@ class ApiEditorTest extends TestCase
                 'id' => 3,
                 'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911',
                 'is_root' => true,
-                'created_at' => '2017-12-20 10:03:06',
-                'updated_at' => '2017-12-20 10:03:06'
+                'created_at' => '2017-12-20T10:03:06.000000Z',
+                'updated_at' => '2017-12-20T10:03:06.000000Z'
             ],
             [
                 'id' => 7,
                 'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/lagerstatte#20171220165727',
                 'is_root' => true,
-                'created_at' => '2017-12-20 16:57:41',
-                'updated_at' => '2017-12-20 16:57:41'
+                'created_at' => '2017-12-20T16:57:41.000000Z',
+                'updated_at' => '2017-12-20T16:57:41.000000Z'
             ]
         ]);
     }
@@ -142,8 +142,8 @@ class ApiEditorTest extends TestCase
             'text' => null,
             'thesaurus_root_url' => null,
             'parent_id' => null,
-            'created_at' => '2017-12-20 10:56:32',
-            'updated_at' => '2017-12-20 10:56:32',
+            'created_at' => '2017-12-20T10:56:32.000000Z',
+            'updated_at' => '2017-12-20T10:56:32.000000Z',
             'recursive' => true,
             'root_attribute_id' => null,
             'columns' => []
@@ -261,8 +261,8 @@ class ApiEditorTest extends TestCase
             'id' => 3,
             'thesaurus_url' => 'https://spacialist.escience.uni-tuebingen.de/<user-project>/fundstelle#20171220094911',
             'is_root' => true,
-            'created_at' => '2017-12-20 10:03:06',
-            'updated_at' => '2017-12-20 10:03:06'
+            'created_at' => '2017-12-20T10:03:06.000000Z',
+            'updated_at' => '2017-12-20T10:03:06.000000Z'
         ]);
 
         $content = json_decode($response->getContent());
@@ -422,8 +422,8 @@ class ApiEditorTest extends TestCase
             'id' => $entityType->id,
             'thesaurus_url' => $concept->concept_url,
             'is_root' => true,
-            'created_at' => "$entityType->created_at",
-            'updated_at' => "$entityType->updated_at"
+            'created_at' => $entityType->created_at->toJSON(),
+            'updated_at' => $entityType->updated_at->toJSON()
         ]);
 
         $this->assertEquals($entityType->id, $entityTypeLayer->entity_type_id);
@@ -493,8 +493,8 @@ class ApiEditorTest extends TestCase
             'text' => null,
             'thesaurus_root_url' => $concept->concept_url,
             'parent_id' => null,
-            'created_at' => "$attribute->created_at",
-            'updated_at' => "$attribute->updated_at",
+            'created_at' => $attribute->created_at->toJSON(),
+            'updated_at' => $attribute->updated_at->toJSON(),
             'recursive' => false,
             'root_attribute_id' => null
         ]);
@@ -632,8 +632,8 @@ class ApiEditorTest extends TestCase
             'id' => $newEntityType->id,
             'thesaurus_url' => $entityType->thesaurus_url,
             'is_root' => $entityType->is_root,
-            'created_at' => "$newEntityType->created_at",
-            'updated_at' => "$newEntityType->updated_at"
+            'created_at' => $newEntityType->created_at->toJSON(),
+            'updated_at' => $newEntityType->updated_at->toJSON()
         ]);
 
         $content = json_decode($response->getContent());

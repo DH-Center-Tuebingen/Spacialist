@@ -245,7 +245,7 @@ class ApiPreferenceTest extends TestCase
      */
     public function testOtherUserPreferenceEndpoint()
     {
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
 
         $response = $this->withHeaders([
             'Authorization' => "Bearer $this->token"
@@ -286,7 +286,7 @@ class ApiPreferenceTest extends TestCase
         $cnt = UserPreference::count();
         $this->assertEquals($cnt, 0);
 
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $fields = [
             'pref_id' => 1,
             'user_id' => $user->id,

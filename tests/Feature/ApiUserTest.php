@@ -38,8 +38,8 @@ class ApiUserTest extends TestCase
                 'name' => 'Admin',
                 'nickname' => 'admin',
                 'email' => 'admin@localhost',
-                'created_at' => '2017-12-20 09:47:36',
-                'updated_at' => '2017-12-20 09:47:36',
+                'created_at' => '2017-12-20T09:47:36.000000Z',
+                'updated_at' => '2017-12-20T09:47:36.000000Z',
                 'permissions' => []
             ]
         ]);
@@ -56,7 +56,7 @@ class ApiUserTest extends TestCase
      */
     public function testGetUsersEndpoint()
     {
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
 
         $response = $this->withHeaders([
                 'Authorization' => "Bearer $this->token"
@@ -234,8 +234,8 @@ class ApiUserTest extends TestCase
             'email' => 'test@test.com',
             'name' => 'Test User',
             'nickname' => 'tuser',
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at
+            'created_at' => $user->created_at->toJSON(),
+            'updated_at' => $user->updated_at->toJSON()
         ]);
     }
 
@@ -331,8 +331,8 @@ class ApiUserTest extends TestCase
             'name' => 'test_role',
             'display_name' => 'Test Role',
             'description' => null,
-            'created_at' => $role->created_at,
-            'updated_at' => $role->updated_at
+            'created_at' => $role->created_at->toJSON(),
+            'updated_at' => $role->updated_at->toJSON()
         ]);
     }
 
@@ -399,8 +399,8 @@ class ApiUserTest extends TestCase
             'name' => 'Admin Updated',
             'nickname' => 'admin1',
             'email' => 'test@test.com',
-            'created_at' => '2017-12-20 09:47:36',
-            'updated_at' => "$user->updated_at",
+            'created_at' => '2017-12-20T09:47:36.000000Z',
+            'updated_at' => $user->updated_at->toJSON(),
             'deleted_at' => null,
             'avatar' => null,
             'avatar_url' => null,
@@ -555,8 +555,8 @@ class ApiUserTest extends TestCase
             'name' => 'admin',
             'display_name' => 'NOT Admin',
             'description' => 'No longer a Admin User',
-            'created_at' => '2017-12-20 09:47:35',
-            'updated_at' => "$role->updated_at"
+            'created_at' => '2017-12-20T09:47:35.000000Z',
+            'updated_at' => $role->updated_at->toJSON()
         ]);
     }
 

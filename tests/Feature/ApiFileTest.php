@@ -98,8 +98,8 @@ class ApiFileTest extends TestCase
             'description' => null,
             'mime_type' => 'image/png',
             'user_id' => 1,
-            'created_at' => '2019-03-08 13:13:11',
-            'updated_at' => '2019-03-08 13:13:11',
+            'created_at' => '2019-03-08T13:13:11.000000Z',
+            'updated_at' => '2019-03-08T13:13:11.000000Z',
             'url' => "/storage/spacialist_screenshot.png",
             'thumb_url' => "/storage/spacialist_screenshot_thumb.jpg",
             'category' => 'image',
@@ -165,8 +165,8 @@ class ApiFileTest extends TestCase
             'description' => 'Edinburgh Castle',
             'mime_type' => 'image/jpeg',
             'user_id' => 1,
-            'created_at' => '2019-03-08 13:13:11',
-            'updated_at' => '2019-03-08 13:13:12',
+            'created_at' => '2019-03-08T13:13:11.000000Z',
+            'updated_at' => '2019-03-08T13:13:12.000000Z',
             'url' => "/storage/test_img_edin.jpg",
             'thumb_url' => "/storage/test_img_edin_thumb.jpg",
             'category' => 'image',
@@ -279,7 +279,7 @@ class ApiFileTest extends TestCase
             ->get('/api/v1/file/7/as_html');
 
         $response->assertStatus(200);
-        $this->assertContains(
+        $this->assertStringContainsString(
             'A test .docx file created in LibreOffice!',
             $response->getContent()
         );
@@ -339,8 +339,8 @@ class ApiFileTest extends TestCase
                 'description' => null,
                 'mime_type' => 'text/plain',
                 'user_id' => 1,
-                'created_at' => '2019-03-08 13:13:11',
-                'updated_at' => '2019-03-08 13:13:11',
+                'created_at' => '2019-03-08T13:13:11.000000Z',
+                'updated_at' => '2019-03-08T13:13:11.000000Z',
                 'category' => 'text',
                 'size' => Storage::size('text1.txt'),
                 'exif' => null,
@@ -546,8 +546,8 @@ class ApiFileTest extends TestCase
             'description' => $desc,
             'mime_type' => 'image/png',
             'user_id' => 1,
-            'created_at' => "$uplFile->created_at",
-            'updated_at' => "$uplFile->updated_at",
+            'created_at' => $uplFile->created_at->toJSON(),
+            'updated_at' => $uplFile->updated_at->toJSON(),
             'category' => 'image'
         ]);
 
